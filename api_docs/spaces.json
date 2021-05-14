@@ -1211,7 +1211,7 @@
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 202
+                  "lineNumber": 204
                 }
               },
               {
@@ -1363,14 +1363,14 @@
                 "plugin": "security",
                 "link": {
                   "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts",
-                  "lineNumber": 784
+                  "lineNumber": 1000
                 }
               },
               {
                 "plugin": "security",
                 "link": {
                   "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts",
-                  "lineNumber": 811
+                  "lineNumber": 1027
                 }
               },
               {
@@ -2017,7 +2017,7 @@
               "plugin": "securitySolution",
               "link": {
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 202
+                "lineNumber": 204
               }
             },
             {

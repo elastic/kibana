@@ -719,11 +719,11 @@
         "label": "RuleRegistryPluginConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { write: Readonly<{} & { enabled: boolean; }>; }>; }"
+          "{ readonly enabled: boolean; readonly write: Readonly<{} & { enabled: boolean; }>; readonly index: string; }"
         ],
         "source": {
           "path": "x-pack/plugins/rule_registry/server/index.ts",
-          "lineNumber": 28
+          "lineNumber": 29
         },
         "deprecated": false,
         "initialIsOpen": false

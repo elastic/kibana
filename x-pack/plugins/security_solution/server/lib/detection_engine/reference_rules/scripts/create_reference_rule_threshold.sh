@@ -16,7 +16,9 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
   "params":{
      "indexPatterns": ["*"],
      "customQuery": "*:*",
-     "thresholdFields": ["source.ip", "destination.ip"]
+     "thresholdFields": ["source.ip", "destination.ip"],
+     "thresholdValue": 50,
+     "thresholdCardinality": []
    },
    "consumer":"alerts",
    "alertTypeId":"siem.thresholdRule",

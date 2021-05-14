@@ -317,7 +317,7 @@
               "{ authc: ",
               "AuthenticationServiceSetup",
               "; sessionTimeout: ",
-              "ISessionTimeout",
+              "SessionTimeout",
               "; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
               "SecurityLicenseFeatures",
               "; features$: ",
@@ -582,13 +582,807 @@
             "description": [],
             "signature": [
               "() => ",
-              "CasesClient"
+              {
+                "pluginId": "cases",
+                "scope": "server",
+                "docId": "kibCasesPluginApi",
+                "section": "def-server.CasesClient",
+                "text": "CasesClient"
+              }
             ],
             "source": {
               "path": "x-pack/plugins/cases/server/types.ts",
               "lineNumber": 13
             },
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-server.CasesClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "CasesClient",
+        "description": [
+          "\nThis represents the interface that other plugins can access."
+        ],
+        "source": {
+          "path": "x-pack/plugins/cases/server/client/types.ts",
+          "lineNumber": 102
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.addComment",
+            "type": "Function",
+            "tags": [],
+            "label": "addComment",
+            "description": [],
+            "signature": [
+              "(args: ",
+              "CasesClientAddComment",
+              ") => Promise<{ description: string; status: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.CaseStatuses",
+                "text": "CaseStatuses"
+              },
+              "; tags: string[]; title: string; type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.CaseType",
+                "text": "CaseType"
+              },
+              "; connector: ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              },
+              ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/server/client/types.ts",
+              "lineNumber": 103
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.CasesClient.addComment.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "CasesClientAddComment"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/client/types.ts",
+                  "lineNumber": 103
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(theCase: { type?: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.CaseType",
+                "text": "CaseType"
+              },
+              " | undefined; } & { description: string; tags: string[]; title: string; connector: ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              },
+              ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              },
+              ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              },
+              ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/server/client/types.ts",
+              "lineNumber": 104
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.CasesClient.create.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "theCase",
+                "description": [],
+                "signature": [
+                  "{ type?: ",
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.CaseType",
+                    "text": "CaseType"
+                  },
+                  " | undefined; } & { description: string; tags: string[]; title: string; connector: ({ id: string; name: string; } & { type: ",
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.ConnectorTypes",
+                    "text": "ConnectorTypes"
+                  },
+                  ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.ConnectorTypes",
+                    "text": "ConnectorTypes"
+                  },
+                  ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.ConnectorTypes",
+                    "text": "ConnectorTypes"
+                  },
+                  ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.ConnectorTypes",
+                    "text": "ConnectorTypes"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/client/types.ts",
+                  "lineNumber": 104
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(args: ",
+              "CasesClientGet",
+              ") => Promise<{ description: string; status: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.CaseStatuses",
+                "text": "CaseStatuses"
+              },
+              "; tags: string[]; title: string; type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.CaseType",
+                "text": "CaseType"
+              },
+              "; connector: ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              },
+              ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/server/client/types.ts",
+              "lineNumber": 105
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.CasesClient.get.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "CasesClientGet"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/client/types.ts",
+                  "lineNumber": 105
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.getAlerts",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlerts",
+            "description": [],
+            "signature": [
+              "(args: ",
+              "CasesClientGetAlerts",
+              ") => Promise<",
+              "CasesClientGetAlertsResponse",
+              ">"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/server/client/types.ts",
+              "lineNumber": 106
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.CasesClient.getAlerts.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "CasesClientGetAlerts"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/client/types.ts",
+                  "lineNumber": 106
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.getFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getFields",
+            "description": [],
+            "signature": [
+              "(args: ",
+              "ConfigureFields",
+              ") => Promise<{ defaultMappings: { action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]; fields: { id: string; name: string; required: boolean; type: \"text\" | \"textarea\"; }[]; }>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/server/client/types.ts",
+              "lineNumber": 107
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.CasesClient.getFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "ConfigureFields"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/client/types.ts",
+                  "lineNumber": 107
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.getMappings",
+            "type": "Function",
+            "tags": [],
+            "label": "getMappings",
+            "description": [],
+            "signature": [
+              "(args: ",
+              "MappingsClient",
+              ") => Promise<{ action_type: \"append\" | \"overwrite\" | \"nothing\"; source: \"description\" | \"title\" | \"comments\"; target: string; }[]>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/server/client/types.ts",
+              "lineNumber": 108
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.CasesClient.getMappings.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "MappingsClient"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/client/types.ts",
+                  "lineNumber": 108
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.getUserActions",
+            "type": "Function",
+            "tags": [],
+            "label": "getUserActions",
+            "description": [],
+            "signature": [
+              "(args: ",
+              "CasesClientGetUserActions",
+              ") => Promise<({ action_field: (\"status\" | \"description\" | \"title\" | \"comment\" | \"tags\" | \"settings\" | \"connector\" | \"pushed\" | \"sub_case\")[]; action: \"add\" | \"delete\" | \"create\" | \"update\" | \"push-to-service\"; action_at: string; action_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; new_value: string | null; old_value: string | null; } & { action_id: string; case_id: string; comment_id: string | null; } & { sub_case_id?: string | undefined; })[]>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/server/client/types.ts",
+              "lineNumber": 109
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.CasesClient.getUserActions.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "CasesClientGetUserActions"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/client/types.ts",
+                  "lineNumber": 109
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.push",
+            "type": "Function",
+            "tags": [],
+            "label": "push",
+            "description": [],
+            "signature": [
+              "(args: ",
+              "CasesClientPush",
+              ") => Promise<{ description: string; status: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.CaseStatuses",
+                "text": "CaseStatuses"
+              },
+              "; tags: string[]; title: string; type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.CaseType",
+                "text": "CaseType"
+              },
+              "; connector: ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              },
+              ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/server/client/types.ts",
+              "lineNumber": 110
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.CasesClient.push.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "CasesClientPush"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/client/types.ts",
+                  "lineNumber": 110
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "(args: { cases: ({ description?: string | undefined; status?: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.CaseStatuses",
+                "text": "CaseStatuses"
+              },
+              " | undefined; tags?: string[] | undefined; title?: string | undefined; type?: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.CaseType",
+                "text": "CaseType"
+              },
+              " | undefined; connector?: ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              },
+              ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              },
+              ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+              {
+                "pluginId": "cases",
+                "scope": "common",
+                "docId": "kibCasesPluginApi",
+                "section": "def-common.ConnectorTypes",
+                "text": "ConnectorTypes"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/server/client/types.ts",
+              "lineNumber": 111
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.CasesClient.update.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "{ cases: ({ description?: string | undefined; status?: ",
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.CaseStatuses",
+                    "text": "CaseStatuses"
+                  },
+                  " | undefined; tags?: string[] | undefined; title?: string | undefined; type?: ",
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.CaseType",
+                    "text": "CaseType"
+                  },
+                  " | undefined; connector?: ({ id: string; name: string; } & { type: ",
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.ConnectorTypes",
+                    "text": "ConnectorTypes"
+                  },
+                  ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.ConnectorTypes",
+                    "text": "ConnectorTypes"
+                  },
+                  ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
+                  {
+                    "pluginId": "cases",
+                    "scope": "common",
+                    "docId": "kibCasesPluginApi",
+                    "section": "def-common.ConnectorTypes",
+                    "text": "ConnectorTypes"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/client/types.ts",
+                  "lineNumber": 111
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.updateAlertsStatus",
+            "type": "Function",
+            "tags": [],
+            "label": "updateAlertsStatus",
+            "description": [],
+            "signature": [
+              "(args: ",
+              "CasesClientUpdateAlertsStatus",
+              ") => Promise<void>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/server/client/types.ts",
+              "lineNumber": 112
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.CasesClient.updateAlertsStatus.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "CasesClientUpdateAlertsStatus"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/client/types.ts",
+                  "lineNumber": 112
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.getCaseIdsByAlertId",
+            "type": "Function",
+            "tags": [],
+            "label": "getCaseIdsByAlertId",
+            "description": [],
+            "signature": [
+              "(args: ",
+              "CasesClientGetCasesByAlert",
+              ") => Promise<string[]>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/server/client/types.ts",
+              "lineNumber": 113
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.CasesClient.getCaseIdsByAlertId.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "CasesClientGetCasesByAlert"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/client/types.ts",
+                  "lineNumber": 113
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-server.PluginStartContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginStartContract",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/cases/server/index.ts",
+          "lineNumber": 29
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.PluginStartContract.getCasesClientWithRequestAndContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getCasesClientWithRequestAndContext",
+            "description": [],
+            "signature": [
+              "(context: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
+              ", request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => ",
+              {
+                "pluginId": "cases",
+                "scope": "server",
+                "docId": "kibCasesPluginApi",
+                "section": "def-server.CasesClient",
+                "text": "CasesClient"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/server/index.ts",
+              "lineNumber": 30
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.PluginStartContract.getCasesClientWithRequestAndContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.RequestHandlerContext",
+                    "text": "RequestHandlerContext"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/index.ts",
+                  "lineNumber": 31
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "cases",
+                "id": "def-server.PluginStartContract.getCasesClientWithRequestAndContext.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/cases/server/index.ts",
+                  "lineNumber": 32
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -786,7 +1580,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 35
+          "lineNumber": 36
         },
         "deprecated": false,
         "children": [
@@ -802,7 +1596,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             },
             "deprecated": false,
             "isRequired": true
@@ -819,7 +1613,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             },
             "deprecated": false,
             "isRequired": true
@@ -840,7 +1634,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 31
+          "lineNumber": 32
         },
         "deprecated": false,
         "children": [
@@ -856,7 +1650,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 31
+              "lineNumber": 32
             },
             "deprecated": false,
             "isRequired": true
@@ -877,7 +1671,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 19
+          "lineNumber": 20
         },
         "deprecated": false,
         "children": [
@@ -893,7 +1687,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 19
+              "lineNumber": 20
             },
             "deprecated": false,
             "isRequired": true
@@ -914,7 +1708,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 47
+          "lineNumber": 48
         },
         "deprecated": false,
         "children": [
@@ -930,7 +1724,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             },
             "deprecated": false,
             "isRequired": true
@@ -947,7 +1741,44 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 47
+              "lineNumber": 48
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.getCasesFromAlertsUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getCasesFromAlertsUrl",
+        "description": [],
+        "signature": [
+          "(alertId: string) => string"
+        ],
+        "source": {
+          "path": "x-pack/plugins/cases/common/api/helpers.ts",
+          "lineNumber": 52
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.getCasesFromAlertsUrl.$1",
+            "type": "string",
+            "tags": [],
+            "label": "alertId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/common/api/helpers.ts",
+              "lineNumber": 52
             },
             "deprecated": false,
             "isRequired": true
@@ -968,7 +1799,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 39
+          "lineNumber": 40
         },
         "deprecated": false,
         "children": [
@@ -984,7 +1815,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
             "deprecated": false,
             "isRequired": true
@@ -1005,7 +1836,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 27
+          "lineNumber": 28
         },
         "deprecated": false,
         "children": [
@@ -1021,7 +1852,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "deprecated": false,
             "isRequired": true
@@ -1038,7 +1869,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "deprecated": false,
             "isRequired": true
@@ -1059,7 +1890,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 23
+          "lineNumber": 24
         },
         "deprecated": false,
         "children": [
@@ -1075,7 +1906,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 23
+              "lineNumber": 24
             },
             "deprecated": false,
             "isRequired": true
@@ -1096,7 +1927,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 43
+          "lineNumber": 44
         },
         "deprecated": false,
         "children": [
@@ -1112,7 +1943,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 43
+              "lineNumber": 44
             },
             "deprecated": false,
             "isRequired": true
@@ -1129,7 +1960,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 43
+              "lineNumber": 44
             },
             "deprecated": false,
             "isRequired": true

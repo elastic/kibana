@@ -15,23 +15,23 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { columns } from '../../configurations/security_solution_detections/columns';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
-  // {
-  //   meta: {
-  //     alias: null,
-  //     negate: false,
-  //     disabled: false,
-  //     type: 'phrase',
-  //     key: 'signal.status',
-  //     params: {
-  //       query: status,
-  //     },
-  //   },
-  //   query: {
-  //     term: {
-  //       'signal.status': status,
-  //     },
-  //   },
-  // },
+  {
+    meta: {
+      alias: null,
+      negate: false,
+      disabled: false,
+      type: 'phrase',
+      key: 'signal.status',
+      params: {
+        query: status,
+      },
+    },
+    query: {
+      term: {
+        'signal.status': status,
+      },
+    },
+  },
 ];
 
 export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
@@ -61,18 +61,18 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
   showBuildingBlockAlerts
     ? []
     : [
-        // {
-        //   meta: {
-        //     alias: null,
-        //     negate: true,
-        //     disabled: false,
-        //     type: 'exists',
-        //     key: 'signal.rule.building_block_type',
-        //     value: 'exists',
-        //   },
-        //   // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-        //   exists: { field: 'signal.rule.building_block_type' },
-        // },
+        {
+          meta: {
+            alias: null,
+            negate: true,
+            disabled: false,
+            type: 'exists',
+            key: 'signal.rule.building_block_type',
+            value: 'exists',
+          },
+          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
+          exists: { field: 'signal.rule.building_block_type' },
+        },
       ];
 
 export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): Filter[] =>
@@ -127,6 +127,46 @@ export const requiredFieldsForActions = [
 ];
 
 // TODO: Once we are past experimental phase this code should be removed
+export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => [
+  {
+    meta: {
+      alias: null,
+      negate: false,
+      disabled: false,
+      type: 'phrase',
+      key: 'kibana.rac.alert.status',
+      params: {
+        query: status,
+      },
+    },
+    query: {
+      term: {
+        'kibana.rac.alert.status': status,
+      },
+    },
+  },
+];
+
+export const buildShowBuildingBlockFilterRuleRegistry = (
+  showBuildingBlockAlerts: boolean
+): Filter[] =>
+  showBuildingBlockAlerts
+    ? []
+    : [
+        {
+          meta: {
+            alias: null,
+            negate: true,
+            disabled: false,
+            type: 'exists',
+            key: 'kibana.rac.rule.building_block_type',
+            value: 'exists',
+          },
+          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
+          exists: { field: 'kibana.rac.rule.building_block_type' },
+        },
+      ];
+
 export const requiredFieldsForActionsRuleRegistry = [
   'alert.id',
   '@timestamp',

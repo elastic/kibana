@@ -3264,7 +3264,7 @@
         "label": "rangeQuery",
         "description": [],
         "signature": [
-          "(start: number, end: number, field: string) => ",
+          "(start: number | undefined, end: number | undefined, field: string) => ",
           "QueryContainer",
           "[]"
         ],
@@ -3282,14 +3282,14 @@
             "label": "start",
             "description": [],
             "signature": [
-              "number"
+              "number | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
               "lineNumber": 11
             },
             "deprecated": false,
-            "isRequired": true
+            "isRequired": false
           },
           {
             "parentPluginId": "observability",
@@ -3299,14 +3299,14 @@
             "label": "end",
             "description": [],
             "signature": [
-              "number"
+              "number | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
               "lineNumber": 11
             },
             "deprecated": false,
-            "isRequired": true
+            "isRequired": false
           },
           {
             "parentPluginId": "observability",
@@ -3580,7 +3580,7 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "TEndpoint extends \"GET /api/observability/rules/alerts/top\" | \"GET /api/observability/rules/alerts/dynamic_index_pattern\" ? ({ \"GET /api/observability/rules/alerts/top\": ServerRoute<\"GET /api/observability/rules/alerts/top\", t.TypeC<{ query: t.IntersectionC<[t.TypeC<{ start: t.Type<number, string, unknown>; end: t.Type<number, string, unknown>; }>, t.PartialC<{ kuery: t.StringC; size: t.Type<number, unknown, unknown>; }>]>; }>, ObservabilityRouteHandlerResources, Partial<Record<never, unknown[]>>[], ObservabilityRouteCreateOptions>; } & { \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ServerRoute<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", undefined, ObservabilityRouteHandlerResources, { title: string; timeFieldName: string; fields: ",
+          "TEndpoint extends \"GET /api/observability/rules/alerts/top\" | \"GET /api/observability/rules/alerts/dynamic_index_pattern\" ? ({ \"GET /api/observability/rules/alerts/top\": ServerRoute<\"GET /api/observability/rules/alerts/top\", t.TypeC<{ query: t.IntersectionC<[t.TypeC<{ start: t.Type<number, string, unknown>; end: t.Type<number, string, unknown>; }>, t.PartialC<{ kuery: t.StringC; size: t.Type<number, unknown, unknown>; }>]>; }>, ObservabilityRouteHandlerResources, any[], ObservabilityRouteCreateOptions>; } & { \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ServerRoute<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", undefined, ObservabilityRouteHandlerResources, { title: string; timeFieldName: string; fields: ",
           "IndexPatternFieldDescriptor",
           "[]; }, ObservabilityRouteCreateOptions>; })[TEndpoint] extends ServerRoute<any, any, any, infer TReturnType, Record<string, any>> ? TReturnType : never : never"
         ],

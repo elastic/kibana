@@ -675,7 +675,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-          "lineNumber": 34
+          "lineNumber": 36
         },
         "deprecated": false,
         "children": [
@@ -693,7 +693,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-              "lineNumber": 34
+              "lineNumber": 36
             },
             "deprecated": false,
             "isRequired": true
@@ -718,7 +718,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-          "lineNumber": 48
+          "lineNumber": 50
         },
         "deprecated": false,
         "children": [
@@ -736,7 +736,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-              "lineNumber": 48
+              "lineNumber": 50
             },
             "deprecated": false,
             "isRequired": true
@@ -3429,7 +3429,9 @@
             "label": "onChange",
             "description": [],
             "signature": [
-              "(value: string) => void"
+              "(value: string, event: ",
+              "editor",
+              ".IModelContentChangedEvent) => void"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
@@ -3588,6 +3590,23 @@
         "source": {
           "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
           "lineNumber": 64
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.CodeEditorProps",
+        "type": "Type",
+        "tags": [],
+        "label": "CodeEditorProps",
+        "description": [],
+        "signature": [
+          "Props"
+        ],
+        "source": {
+          "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
+          "lineNumber": 29
         },
         "deprecated": false,
         "initialIsOpen": false

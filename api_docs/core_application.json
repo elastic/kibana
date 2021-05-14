@@ -1707,7 +1707,7 @@
                 "plugin": "lens",
                 "link": {
                   "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
-                  "lineNumber": 75
+                  "lineNumber": 71
                 }
               },
               {
@@ -1728,7 +1728,7 @@
                 "plugin": "maps",
                 "link": {
                   "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx",
-                  "lineNumber": 60
+                  "lineNumber": 59
                 }
               },
               {
@@ -1812,7 +1812,7 @@
                 "plugin": "maps",
                 "link": {
                   "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts",
-                  "lineNumber": 14
+                  "lineNumber": 13
                 }
               }
             ]

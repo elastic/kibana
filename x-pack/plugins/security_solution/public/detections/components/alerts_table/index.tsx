@@ -31,6 +31,7 @@ import {
   alertsDefaultModel,
   buildAlertStatusFilter,
   alertsDefaultModelRuleRegistry,
+  buildAlertStatusFilterRuleRegistry,
 } from './default_config';
 import { FILTER_OPEN, AlertsTableFilterGroup } from './alerts_filter_group';
 import { AlertsUtilityBar } from './alerts_utility_bar';
@@ -240,7 +241,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       refetchQuery: inputsModel.Refetch,
       { status, selectedStatus }: UpdateAlertsStatusProps
     ) => {
-      const currentStatusFilter = buildAlertStatusFilter(status);
+      // TODO: Once we are past experimental phase this code should be removed
+      const currentStatusFilter = ruleRegistryEnabled
+        ? buildAlertStatusFilterRuleRegistry(status)
+        : buildAlertStatusFilter(status);
+
       await updateAlertStatusAction({
         query: showClearSelectionAction
           ? getGlobalQuery(currentStatusFilter)?.filterQuery
@@ -262,6 +267,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       showClearSelectionAction,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,
+      ruleRegistryEnabled,
     ]
   );
 
@@ -305,12 +311,17 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const defaultFiltersMemo = useMemo(() => {
+    // TODO: Once we are past experimental phase this code should be removed
+    const alertStatusFilter = ruleRegistryEnabled
+      ? buildAlertStatusFilterRuleRegistry(filterGroup)
+      : buildAlertStatusFilter(filterGroup);
+
     if (isEmpty(defaultFilters)) {
-      return buildAlertStatusFilter(filterGroup);
+      return alertStatusFilter;
     } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
-      return [...defaultFilters, ...buildAlertStatusFilter(filterGroup)];
+      return [...defaultFilters, ...alertStatusFilter];
     }
-  }, [defaultFilters, filterGroup]);
+  }, [defaultFilters, filterGroup, ruleRegistryEnabled]);
   const { filterManager } = useKibana().services.data.query;
 
   // TODO: Once we are past experimental phase this code should be removed

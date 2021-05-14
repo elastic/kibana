@@ -16,11 +16,11 @@ import {
 import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { AlertType } from '../../../common/alert_types';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+
+// copied from elasticsearch_fieldnames.ts to limit page load bundle size
+const SERVICE_ENVIRONMENT = 'service.environment';
+const SERVICE_NAME = 'service.name';
+const TRANSACTION_TYPE = 'transaction.type';
 
 const format = ({
   pathname,

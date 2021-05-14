@@ -939,7 +939,7 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/public/plugin.tsx",
-                "lineNumber": 89
+                "lineNumber": 82
               }
             },
             {
@@ -2618,7 +2618,7 @@
               "plugin": "fleet",
               "link": {
                 "path": "x-pack/plugins/fleet/server/plugin.ts",
-                "lineNumber": 211
+                "lineNumber": 213
               }
             },
             {

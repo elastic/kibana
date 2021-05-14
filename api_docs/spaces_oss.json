@@ -221,7 +221,7 @@
             "tags": [],
             "label": "changeSpacesHandler",
             "description": [
-              "\nOptional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object. If\nthis is not defined, a default handler will be used that calls `/api/spaces/_share_saved_object_add` and/or\n`/api/spaces/_share_saved_object_remove` and displays toast(s) indicating what occurred."
+              "\nOptional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object. If\nthis is not defined, a default handler will be used that calls `/api/spaces/_update_objects_spaces` and displays a toast indicating\nwhat occurred."
             ],
             "signature": [
               "((spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>) | undefined"

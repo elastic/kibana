@@ -248,7 +248,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       REFERENCE_RULE_ALERT_TYPE_ID,
       REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
     ];
-    const ruleTypes = [SIGNALS_ID, NOTIFICATIONS_ID, ...referenceRuleTypes];
+    const ruleTypes = [
+      SIGNALS_ID,
+      NOTIFICATIONS_ID,
+      ...(experimentalFeatures.ruleRegistryEnabled ? referenceRuleTypes : []),
+    ];
 
     plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
