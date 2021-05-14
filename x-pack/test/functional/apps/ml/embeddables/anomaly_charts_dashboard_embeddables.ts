@@ -57,7 +57,6 @@ const testDataList = [
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  const testSubject = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
 
   describe('anomaly charts', function () {
