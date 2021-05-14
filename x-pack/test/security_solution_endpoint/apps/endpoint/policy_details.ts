@@ -285,7 +285,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
@@ -294,7 +294,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
-                    supported: true,
                   },
                 },
                 antivirus_registration: {
