@@ -78,9 +78,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
     },
 
     async assertAnomalyChartsSeverityThresholdControlExists() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await testSubjects.existOrFail(`mlAnomalySeverityThresholdControls`);
-      });
+      await testSubjects.existOrFail(`mlAnomalySeverityThresholdControls`);
     },
 
     async assertNoMatchingAnomaliesMessageExists() {
