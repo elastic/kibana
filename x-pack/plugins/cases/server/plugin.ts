@@ -52,7 +52,7 @@ export interface PluginsStart {
 /**
  * Cases server exposed contract for interacting with cases entities.
  */
-export interface PluginsStartContract {
+export interface PluginStartContract {
   /**
    * Returns a client which can be used to interact with the cases backend entities.
    *
@@ -116,7 +116,7 @@ export class CasePlugin {
     }
   }
 
-  public start(core: CoreStart, plugins: PluginsStart): PluginsStartContract {
+  public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {
     this.log.debug(`Starting Case Workflow`);
 
     this.clientFactory.initialize({

@@ -9,6 +9,7 @@ import moment from 'moment';
 import { RequestHandler } from 'src/core/server';
 import uuid from 'uuid';
 import { TypeOf } from '@kbn/config-schema';
+import { CommentType } from '../../../../../cases/common';
 import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
@@ -19,6 +20,7 @@ import {
 } from '../../../types';
 import { getAgentIDsForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
+import { APP_ID } from '../../../../common/constants';
 
 export const userCanIsolate = (roles: readonly string[] | undefined): boolean => {
   // only superusers can write to the fleet index (or look up endpoint data to convert endp ID to agent ID)
@@ -104,6 +106,21 @@ export const isolationRequestHandler = function (
     }
     agentIDs = [...new Set(agentIDs)]; // dedupe
 
+    // convert any alert IDs into cases
+    let caseIDs: string[] = req.body.case_ids?.slice() || [];
+    if (req.body.alert_ids && req.body.alert_ids.length > 0) {
+      const newIDs: string[][] = await Promise.all(
+        req.body.alert_ids.map(async (a: string) =>
+          (await endpointContext.service.getCasesClient(req)).cases.getCaseIDsByAlertID({
+            alertID: a,
+            options: { owner: APP_ID },
+          })
+        )
+      );
+      caseIDs = caseIDs.concat(...newIDs);
+    }
+    caseIDs = [...new Set(caseIDs)];
+
     // create an Action ID and dispatch it to ES & Fleet Server
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     const actionID = uuid.v4();
@@ -140,6 +157,30 @@ export const isolationRequestHandler = function (
         },
       });
     }
+
+    const commentLines: string[] = [];
+
+    commentLines.push(`${isolate ? 'I' : 'Uni'}solate action was sent to the following Agents:`);
+    // lines of markdown links, inside a code block
+
+    commentLines.push(
+      `${agentIDs.map((a) => `- [${a}](/app/fleet#/fleet/agents/${a})`).join('\n')}`
+    );
+    if (req.body.comment) {
+      commentLines.push(`\n\nWith Comment:\n> ${req.body.comment}`);
+    }
+
+    caseIDs.forEach(async (caseId) => {
+      (await endpointContext.service.getCasesClient(req)).attachments.add({
+        caseId,
+        comment: {
+          comment: commentLines.join('\n'),
+          type: CommentType.user,
+          owner: APP_ID,
+        },
+      });
+    });
+
     return res.ok({
       body: {
         action: actionID,

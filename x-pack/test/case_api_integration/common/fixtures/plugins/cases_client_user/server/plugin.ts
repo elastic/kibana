@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
 import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
-import { PluginsStartContract as CasesPluginStart } from '../../../../../../../plugins/cases/server';
+import { PluginStartContract as CasesPluginStart } from '../../../../../../../plugins/cases/server';
 import { CasesPatchRequest } from '../../../../../../../plugins/cases/common';
 
 export interface FixtureSetupDeps {
