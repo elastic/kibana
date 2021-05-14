@@ -54,11 +54,6 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   currentIndexPattern: IndexPattern;
 }
 
-// TODO: this is another logic instance we want to generalize
-/**
- * This component shows a debounced input for the label of a dimension. It will update on root state changes
- * if no debounced changes are in flight because the user is currently typing into the input.
- */
 const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
   const { inputValue, handleInputChange, initialValue } = useDebouncedValue({ onChange, value });
 
@@ -496,41 +491,32 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {!currentFieldIsInvalid && (
         <div className="lnsIndexPatternDimensionEditor__section">
           {!incompleteInfo && selectedColumn && (
-            <EuiFormRow
-              label={i18n.translate('xpack.lens.indexPattern.columnLabel', {
-                defaultMessage: 'Display name',
-                description: 'Display name of a column of data',
-              })}
-              display="columnCompressed"
-              fullWidth
-            >
-              <LabelInput
-                value={selectedColumn.label}
-                onChange={(value) => {
-                  setState(
-                    mergeLayer({
-                      state,
-                      layerId,
-                      newLayer: {
-                        columns: {
-                          ...state.layers[layerId].columns,
-                          [columnId]: {
-                            ...selectedColumn,
-                            label: value,
-                            customLabel:
-                              operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
-                                selectedColumn,
-                                state.indexPatterns[state.layers[layerId].indexPatternId],
-                                state.layers[layerId].columns
-                              ) !== value,
-                          },
+            <LabelInput
+              value={selectedColumn.label}
+              onChange={(value) => {
+                setState(
+                  mergeLayer({
+                    state,
+                    layerId,
+                    newLayer: {
+                      columns: {
+                        ...state.layers[layerId].columns,
+                        [columnId]: {
+                          ...selectedColumn,
+                          label: value,
+                          customLabel:
+                            operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
+                              selectedColumn,
+                              state.indexPatterns[state.layers[layerId].indexPatternId],
+                              state.layers[layerId].columns
+                            ) !== value,
                         },
                       },
-                    })
-                  );
-                }}
-              />
-            </EuiFormRow>
+                    },
+                  })
+                );
+              }}
+            />
           )}
 
           {!incompleteInfo && !hideGrouping && (

@@ -9,8 +9,8 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import _ from 'lodash';
 
 /**
- * This component shows a debounced input. It will update on root state changes
- * if no debounced changes are in flight because the user is currently typing into the input.
+ * Debounces value changes and updates inputValue on root state changes if no debounced changes
+ * are in flight because the user is currently modifying the value.
  */
 
 export const useDebouncedValue = <T>({
