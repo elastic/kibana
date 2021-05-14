@@ -16,6 +16,7 @@ import { Document } from '../persistence';
 import { DOC_TYPE } from '../../common';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
+import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import {
   SavedObjectSaveModal,
   checkForDuplicateTitle,
@@ -46,6 +47,9 @@ import { LensAttributeService } from '../lens_attribute_service';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { EmbeddableStateTransfer } from '../../../../../src/plugins/embeddable/public';
 import moment from 'moment';
+import { Provider } from 'react-redux';
+
+import { makeConfigureStore, getPreloadedState } from '../state_management/index';
 
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
@@ -58,6 +62,15 @@ jest.mock('../../../../../src/plugins/saved_objects/public', () => {
     SavedObjectSaveModal,
     SavedObjectSaveModalOrigin,
     checkForDuplicateTitle: jest.fn(),
+  };
+});
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
   };
 });
 
@@ -252,27 +265,40 @@ describe('Lens App', () => {
     };
   }
 
-  function mountWith({
-    props: incomingProps,
-    services: incomingServices,
-  }: {
-    props?: jest.Mocked<LensAppProps>;
-    services?: jest.Mocked<LensAppServices>;
-  }) {
+  function mountWith(
+    {
+      props: incomingProps,
+      services: incomingServices,
+    }: {
+      props?: jest.Mocked<LensAppProps>;
+      services?: jest.Mocked<LensAppServices>;
+    },
+    initialContext: VisualizeFieldContext | undefined = undefined
+  ) {
     const props = incomingProps ?? makeDefaultProps();
     const services = incomingServices ?? makeDefaultServices();
+
+    const lensStore = makeConfigureStore(
+      getPreloadedState({ data: services.data, initialContext, isLinkedToOriginatingApp: false }),
+      {
+        data: services.data,
+      }
+    );
+
     const wrappingComponent: React.FC<{
       children: React.ReactNode;
     }> = ({ children }) => {
       return (
         <I18nProvider>
-          <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+          <KibanaContextProvider services={services}>
+            <Provider store={lensStore}>{children}</Provider>
+          </KibanaContextProvider>
         </I18nProvider>
       );
     };
     const frame = props.editorFrame as ReturnType<typeof createMockFrame>;
     const component = mount(<App {...props} />, { wrappingComponent });
-    return { component, frame, props, services };
+    return { component, frame, props, services, lensStore };
   }
 
   beforeEach(() => {
@@ -333,12 +359,7 @@ describe('Lens App', () => {
     `);
   });
 
-  it('clears app filters on load', () => {
-    const { services } = mountWith({});
-    expect(services.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([]);
-  });
-
-  it('passes global filters to frame', async () => {
+  it('updates global filters with store state', async () => {
     const services = makeDefaultServices();
     const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
     const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
@@ -349,9 +370,15 @@ describe('Lens App', () => {
     services.data.query.filterManager.getGlobalFilters = jest.fn().mockImplementation(() => {
       return [pinnedFilter];
     });
-    const { component, frame } = mountWith({ services });
+    const { component, lensStore, frame } = mountWith({ services });
 
     component.update();
+    expect(lensStore.getState()).toEqual({
+      app: expect.objectContaining({
+        query: { query: '', language: 'kuery' },
+        filters: [pinnedFilter],
+      }),
+    });
     expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
       expect.objectContaining({
         dateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
@@ -360,6 +387,7 @@ describe('Lens App', () => {
       }),
       {}
     );
+
     expect(services.data.query.filterManager.getFilters).not.toHaveBeenCalled();
   });
 
@@ -479,6 +507,7 @@ describe('Lens App', () => {
         }),
         {}
       );
+
       expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           doc: expect.objectContaining({
@@ -1110,25 +1139,35 @@ describe('Lens App', () => {
     });
 
     it('updates the filters when the user changes them', () => {
-      const { component, frame, services } = mountWith({});
+      const { component, services, lensStore } = mountWith({});
       const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
       const field = ({ name: 'myfield' } as unknown) as IFieldType;
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
+          filters: [],
+        }),
+      });
       act(() =>
         services.data.query.filterManager.setFilters([
           esFilters.buildExistsFilter(field, indexPattern),
         ])
       );
       component.update();
-      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
-        expect.objectContaining({
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
           filters: [esFilters.buildExistsFilter(field, indexPattern)],
         }),
-        {}
-      );
+      });
     });
 
     it('updates the searchSessionId when the user changes query or time in the search bar', () => {
-      const { component, frame, services } = mountWith({});
+      const { component, services, lensStore } = mountWith({});
+
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
+          searchSessionId: `sessionId-1`,
+        }),
+      });
       act(() =>
         component.find(TopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
@@ -1136,13 +1175,12 @@ describe('Lens App', () => {
         })
       );
       component.update();
-      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
-        expect.objectContaining({
-          searchSessionId: `sessionId-1`,
-        }),
-        {}
-      );
 
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
+          searchSessionId: `sessionId-2`,
+        }),
+      });
       // trigger again, this time changing just the query
       act(() =>
         component.find(TopNavMenu).prop('onQuerySubmit')!({
@@ -1151,13 +1189,11 @@ describe('Lens App', () => {
         })
       );
       component.update();
-      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
-        expect.objectContaining({
-          searchSessionId: `sessionId-2`,
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
+          searchSessionId: `sessionId-3`,
         }),
-        {}
-      );
-
+      });
       const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
       const field = ({ name: 'myfield' } as unknown) as IFieldType;
       act(() =>
@@ -1166,12 +1202,11 @@ describe('Lens App', () => {
         ])
       );
       component.update();
-      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
-        expect.objectContaining({
-          searchSessionId: `sessionId-3`,
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
+          searchSessionId: `sessionId-4`,
         }),
-        {}
-      );
+      });
     });
   });
 

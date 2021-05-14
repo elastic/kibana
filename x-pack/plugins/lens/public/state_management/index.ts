@@ -7,9 +7,12 @@
 
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
 import logger from 'redux-logger';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
+import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { appSlice } from './app_slice';
 import { customMiddleware } from './custom_middleware';
+
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 export * from './types';
 
 export const reducer = {
@@ -25,33 +28,68 @@ export const {
   navigateAway,
 } = appSlice.actions;
 
-export const makeConfigureStore = (preloadedState, { data }) =>
-  configureStore({
+export const getPreloadedState = ({
+  data,
+  initialContext = undefined,
+  isLinkedToOriginatingApp = false,
+}: {
+  data: DataPublicPluginStart;
+  initialContext: VisualizeFieldContext | undefined;
+  isLinkedToOriginatingApp: boolean;
+}) => {
+  return {
+    app: {
+      query: data.query.queryString.getQuery(),
+      // Do not use app-specific filters from previous app,
+      // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
+      filters: !initialContext
+        ? data.query.filterManager.getGlobalFilters()
+        : data.query.filterManager.getFilters(),
+      searchSessionId: data.search.session.start(),
+
+      indexPatternsForTopNav: [],
+      isSaveable: false,
+      isAppLoading: false,
+      isLinkedToOriginatingApp,
+    },
+  };
+};
+
+type PreloadedState = ReturnType<typeof getPreloadedState>;
+
+export const makeConfigureStore = (
+  preloadedState: PreloadedState,
+  { data }: { data: DataPublicPluginStart }
+) => {
+  const middleware = [
+    ...getDefaultMiddleware({
+      serializableCheck: {
+        ignoredPaths: [
+          'app.indexPatternsForTopNav',
+          'payload.indexPatternsForTopNav',
+          'app.indexPatterns',
+          'payload.indexPatterns',
+          'app.filters',
+        ],
+        ignoredActions: ['app/setState'],
+      },
+    }),
+    customMiddleware(data),
+  ];
+  if (process.env.NODE_ENV === 'development') middleware.push(logger);
+
+  return configureStore({
     reducer,
-    middleware: [
-      ...getDefaultMiddleware({
-        serializableCheck: {
-          ignoredPaths: [
-            'app.indexPatternsForTopNav',
-            'payload.indexPatternsForTopNav',
-            'app.indexPatterns',
-            'payload.indexPatterns',
-            'app.filters',
-          ],
-          ignoredActions: ['app/setState'],
-        },
-      }),
-      logger,
-      customMiddleware(data),
-    ],
+    middleware,
     preloadedState,
   });
+};
 
-// export type LensRootStore = ReturnType<typeof lensStore.getState>;
+export type LensRootStore = ReturnType<typeof makeConfigureStore>;
 // export type LensDispatch = typeof lensStore.dispatch;
 
-// export const useLensDispatch = () => useDispatch<LensDispatch>();
-// export const useLensSelector: TypedUseSelectorHook<LensRootStore> = useSelector;
+export type LensDispatch = ReturnType<typeof makeConfigureStore>['dispatch'];
+export type LensGetState = ReturnType<typeof makeConfigureStore>['getState'];
 
-export const useLensDispatch = () => useDispatch();
-export const useLensSelector = useSelector;
+export const useLensDispatch = () => useDispatch<LensDispatch>();
+export const useLensSelector: TypedUseSelectorHook<LensRootStore> = useSelector;

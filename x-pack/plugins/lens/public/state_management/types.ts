@@ -11,21 +11,20 @@ import { Document } from '../persistence';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 
 export interface LensAppState {
-  isAppLoading: boolean;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
 
   // index patterns used to determine which filters are available in the top nav.
   indexPatternsForTopNav: IndexPattern[];
-
   // Determines whether the lens editor shows the 'save and return' button, and the originating app breadcrumb.
   isLinkedToOriginatingApp?: boolean;
+  isSaveable: boolean;
+  activeData?: TableInspectorAdapter;
 
+  isAppLoading: boolean;
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
-  isSaveable: boolean;
-  activeData?: TableInspectorAdapter;
   searchSessionId: string;
 }
 
@@ -35,3 +34,9 @@ export type DispatchSetState = (
   payload: Partial<LensAppState>;
   type: string;
 };
+
+export interface State {
+  app: LensAppState;
+}
+
+export type GetState = () => State;
