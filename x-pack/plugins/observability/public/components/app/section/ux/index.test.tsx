@@ -7,7 +7,6 @@
 
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
-import { createObservabilityRuleRegistryMock } from '../../../../rules/observability_rule_registry_mock';
 import { HasDataContextValue } from '../../../../context/has_data_context';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import * as hasDataHook from '../../../../hooks/use_has_data';
@@ -16,6 +15,7 @@ import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { render } from '../../../../utils/test_helper';
 import { UXSection } from './';
 import { response } from './mock_data/ux.mock';
+import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -55,7 +55,7 @@ describe('UXSection', () => {
           },
         },
       } as unknown) as ObservabilityPublicPluginsStart,
-      observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
     }));
   });
   it('renders with core web vitals', () => {

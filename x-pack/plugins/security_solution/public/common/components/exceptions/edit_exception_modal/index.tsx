@@ -342,27 +342,26 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                   <EuiSpacer />
                 </>
               )}
-              <ExceptionBuilder.ExceptionBuilderComponent
-                allowLargeValueLists={
-                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type)
-                }
-                httpService={http}
-                autocompleteService={data.autocomplete}
-                exceptionListItems={[exceptionItem]}
-                listType={exceptionListType}
-                listId={exceptionItem.list_id}
-                listNamespaceType={exceptionItem.namespace_type}
-                listTypeSpecificIndexPatternFilter={filterIndexPatterns}
-                ruleName={ruleName}
-                isOrDisabled
-                isAndDisabled={false}
-                osTypes={exceptionItem.os_types}
-                isNestedDisabled={false}
-                data-test-subj="edit-exception-modal-builder"
-                id-aria="edit-exception-modal-builder"
-                onChange={handleBuilderOnChange}
-                indexPatterns={indexPatterns}
-              />
+              {ExceptionBuilder.getExceptionBuilderComponentLazy({
+                allowLargeValueLists:
+                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
+                httpService: http,
+                autocompleteService: data.autocomplete,
+                exceptionListItems: [exceptionItem],
+                listType: exceptionListType,
+                listId: exceptionItem.list_id,
+                listNamespaceType: exceptionItem.namespace_type,
+                listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+                ruleName,
+                isOrDisabled: true,
+                isAndDisabled: false,
+                osTypes: exceptionItem.os_types,
+                isNestedDisabled: false,
+                dataTestSubj: 'edit-exception-modal-builder',
+                idAria: 'edit-exception-modal-builder',
+                onChange: handleBuilderOnChange,
+                indexPatterns,
+              })}
 
               <EuiSpacer />
 
