@@ -38,11 +38,10 @@ export const CustomStops = ({
   reverse,
   ['data-test-prefix']: dataTestPrefix,
 }: CustomStopsProps) => {
-  const shouldEnableDelete = colorStops.length > 2;
-
   const [localColorStops, setLocalColorStops] = useState<Array<{ color: string; stop: string }>>(
     colorStops.map(({ color, stop }) => ({ color, stop: String(stop) }))
   );
+  const shouldEnableDelete = localColorStops.length > 2;
 
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
 
