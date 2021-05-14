@@ -137,6 +137,7 @@ describe('Case Configuration API', () => {
           ...DEFAULT_QUERY_PARAMS,
           reporters: [],
           tags: [],
+          owner: [SECURITY_SOLUTION_OWNER],
         },
         signal: abortCtrl.signal,
       });
@@ -163,6 +164,7 @@ describe('Case Configuration API', () => {
           tags: ['"coke"', '"pepsi"'],
           search: 'hello',
           status: CaseStatuses.open,
+          owner: [SECURITY_SOLUTION_OWNER],
         },
         signal: abortCtrl.signal,
       });
@@ -191,6 +193,7 @@ describe('Case Configuration API', () => {
           tags: ['"("', '"\\"double\\""'],
           search: 'hello',
           status: CaseStatuses.open,
+          owner: [SECURITY_SOLUTION_OWNER],
         },
         signal: abortCtrl.signal,
       });

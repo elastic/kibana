@@ -74,7 +74,6 @@ describe('RecentCases', () => {
     );
     expect(useGetCasesMock).toBeCalledWith({
       initialQueryParams: { perPage: 2 },
-      initialFilterOptions: { owner: [SECURITY_SOLUTION_OWNER] },
     });
   });
 
