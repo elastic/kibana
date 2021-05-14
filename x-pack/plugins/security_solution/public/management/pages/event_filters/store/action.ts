@@ -22,6 +22,18 @@ export type EventFiltersListPageDataExistsChanged = Action<'eventFiltersListPage
   payload: EventFiltersListPageState['listPage']['dataExist'];
 };
 
+export type EventFilterForDeletion = Action<'eventFilterForDeletion'> & {
+  payload: ExceptionListItemSchema;
+};
+
+export type EventFilterDeletionReset = Action<'eventFilterDeletionReset'>;
+
+export type EventFilterDeleteSubmit = Action<'eventFilterDeleteSubmit'>;
+
+export type EventFilterDeleteStatusChanged = Action<'eventFilterDeleteStatusChanged'> & {
+  payload: EventFiltersListPageState['listPage']['deletion']['status'];
+};
+
 export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
   payload: {
     entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema;
@@ -65,4 +77,8 @@ export type EventFiltersPageAction =
   | EventFiltersCreateStart
   | EventFiltersCreateSuccess
   | EventFiltersCreateError
-  | EventFiltersFormStateChanged;
+  | EventFiltersFormStateChanged
+  | EventFilterForDeletion
+  | EventFilterDeletionReset
+  | EventFilterDeleteSubmit
+  | EventFilterDeleteStatusChanged;

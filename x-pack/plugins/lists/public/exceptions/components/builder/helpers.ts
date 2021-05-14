@@ -7,7 +7,8 @@
 
 import uuid from 'uuid';
 import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
-import { OsTypeArray, validate } from '@kbn/securitysolution-io-ts-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
