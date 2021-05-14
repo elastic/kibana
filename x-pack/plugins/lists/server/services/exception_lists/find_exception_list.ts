@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { NamespaceTypeArray } from '@kbn/securitysolution-io-ts-utils';
+import { NamespaceTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { SavedObjectType } from '../../../common/types';
 import {
