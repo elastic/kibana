@@ -85,67 +85,35 @@ When passing both a `pageHeader` configuration and `isEmptyState`, the component
 
 ![Screenshot of demo custom empty state code with a page header. Shows the Kibana navigation bars, a level 1 heading "Dashboards", and a centered empty state with the a level 2 heading "No data", body text "You have no data. Would you like some of ours?", and a button that says "Get sample data".](../assets/kibana_header_and_empty_state.png)
 
-## Solution navigation
+## `solutionNav`
 
-To add left side navigation for your solution, simply pass in your navigation component to `pageSideBar`. We recommend using [**EuiSideNav**](https://elastic.github.io/eui/#/navigation/side-nav).
+To add left side navigation for your solution, we recommend passing [**EuiSideNav**](https://elastic.github.io/eui/#/navigation/side-nav) props to the `solutionNav` prop. The template component will then handle the mobile views and add the solution nav embellishments. On top of the EUI props, you'll need to pass your solution `name` and an optional `icon`.
+
+If you need to custom side bar content, you will need to pass you own navigation component to `pageSideBar`. We still recommend using [**EuiSideNav**](https://elastic.github.io/eui/#/navigation/side-nav).
 
 When using `EuiSideNav`, root level items should not be linked but provide section labelling only.
 
 ```tsx
 <KibanaPageLayout
-  pageSideBar={
-    <EuiSideNav
-      mobileTitle="Management menu"
-      toggleOpenOnMobile={toggleOpenOnMobile}
-      isOpenOnMobile={isSideNavOpenOnMobile}
-      items={[
-        {
-          name: 'Root item',
-          items: [
-            { name: 'Navigation item' },
-            { name: 'Navigation item' },
-          ]
-        }
-      ]}
-    />
-  }
->
-  {...}
-</KibanaPageLayout>
-```
-
-
-![Screenshot of Stack Management empty state code with solution nav, root level items highlighted.](../assets/kibana_template_solution_nav.png)
-
-
-Kibana has particular patterns for displaying solution navigation through the `pageSideBar` prop. When passing in content via `pageSideBar`, we also encourage passing more information about your `solution`. This `solution` object requires the `name` of your solution and optionally allows passing an `icon` to showcase the logo. It also extends [**EuiTitle**](https://elastic.github.io/eui/#/display/title) for passing any other common props.
-
-```tsx
-<KibanaPageLayout
-  solution={{
+  solutionNav={{
     name: 'Management',
     icon: 'managementApp',
-    id: 'stack-management-nav-header',
+    items: [
+      {
+        name: 'Root item',
+        items: [
+          { name: 'Navigation item', href: '#' },
+          { name: 'Navigation item', href: '#' },
+        ]
+      }
+    ]
   }}
-  pageSideBar={
-    <EuiSideNav
-      mobileTitle="Management menu"
-      toggleOpenOnMobile={toggleOpenOnMobile}
-      isOpenOnMobile={isSideNavOpenOnMobile}
-      items={[
-        {
-          name: 'Root item',
-          items: [
-            { name: 'Navigation item' },
-            { name: 'Navigation item' },
-          ]
-        }
-      ]}
-    />
-  }
 >
   {...}
 </KibanaPageLayout>
 ```
 
-![Screenshot of Stack Management empty state code with solution nav title highlighted.](../assets/kibana_template_solution_nav_title.png)
+
+![Screenshot of Stack Management empty state with a provided solution navigation.](../assets/kibana_template_solution_nav.png)
+
+![Screenshots of Stack Management page in mobile view. One with the menu closed, one with it open.](../assets/kibana_template_solution_nav_mobile.png)
