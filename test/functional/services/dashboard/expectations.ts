@@ -16,7 +16,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['dashboard', 'visualize', 'visChart']);
+  const PageObjects = getPageObjects(['dashboard', 'visualize', 'visChart', 'tagCloud']);
   const findTimeout = 2500;
 
   return new (class DashboardExpect {
@@ -156,8 +156,9 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       const tagCloudVisualizations = await testSubjects.findAll('tagCloudVisualization');
       const matches = await Promise.all(
         tagCloudVisualizations.map(async (tagCloud) => {
+          const tagCloudData = await PageObjects.tagCloud.getTextTagByElement(tagCloud);
           for (let i = 0; i < values.length; i++) {
-            const valueExists = await testSubjects.descendantExists(values[i], tagCloud);
+            const valueExists = tagCloudData.includes(values[i]);
             if (!valueExists) {
               return false;
             }

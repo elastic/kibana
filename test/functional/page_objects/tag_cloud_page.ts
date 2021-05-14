@@ -20,6 +20,12 @@ export function TagCloudPageProvider({ getService, getPageObjects }: FtrProvider
       await header.waitUntilLoadingHasFinished();
     }
 
+    public async getTextTagByElement(webElement: WebElementWrapper) {
+      await visChart.waitForVisualization();
+      const elements = await webElement.findAllByCssSelector('text');
+      return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
+    }
+
     public async getTextTag() {
       await visChart.waitForVisualization();
       const elements = await find.allByCssSelector('text');

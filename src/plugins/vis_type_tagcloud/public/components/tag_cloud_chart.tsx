@@ -130,7 +130,7 @@ export const TagCloudChart = ({
   return (
     <EuiResizeObserver onResize={updateChart}>
       {(resizeRef) => (
-        <div className="tgcChart__wrapper" ref={resizeRef}>
+        <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
           <Chart size="100%">
             <Settings onElementClick={(d) => {}} onRenderChange={onRenderChange} />
             <Wordcloud
