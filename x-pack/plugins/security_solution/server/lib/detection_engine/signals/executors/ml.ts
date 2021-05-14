@@ -122,6 +122,7 @@ export const mlExecutor = async ({
     buildRuleMessage,
     bulkCreate,
   });
+  console.log('finished bulk create ml signals');
   // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
   const shardFailures =
     (filteredAnomalyResults._shards as typeof filteredAnomalyResults._shards & {

@@ -9,7 +9,7 @@ import { identity } from 'lodash';
 import { SortResults } from '@elastic/elasticsearch/api/types';
 import { Logger } from '@kbn/logging';
 import { singleSearchAfter } from './single_search_after';
-import { filterDuplicateRules } from './single_bulk_create';
+import { filterDuplicateRules, filterDuplicateSignals } from './single_bulk_create';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
 import {
@@ -26,6 +26,7 @@ import {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
   SignalSearchResponse,
+  WrapHits,
   WrappedSignalHit,
 } from './types';
 import { buildBulkBody } from './build_bulk_body';
@@ -48,6 +49,7 @@ export const searchAfterAndBulkCreate = async ({
   buildRuleMessage,
   enrichment = identity,
   bulkCreate,
+  wrapSignals,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = ruleSO.attributes.params;
   let toReturn = createSearchAfterReturnType();
@@ -158,14 +160,7 @@ export const searchAfterAndBulkCreate = async ({
             );
           }
           const enrichedEvents = await enrichment(filteredEvents);
-          const wrappedDocs = filterAndWrapDocuments({
-            enrichedEvents,
-            buildRuleMessage,
-            id,
-            logger,
-            signalsIndex,
-            ruleSO,
-          });
+          const wrappedDocs = wrapSignals(enrichedEvents.hits.hits);
 
           const {
             bulkCreateDuration: bulkDuration,
@@ -213,6 +208,29 @@ export const searchAfterAndBulkCreate = async ({
   logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignalsCount}`));
   toReturn.totalToFromTuples = tuplesToBeLogged;
   return toReturn;
+};
+
+export const buildWrappedSignalsFactory = ({
+  ruleSO,
+  signalsIndex,
+}: {
+  ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
+  signalsIndex: string;
+}): WrapHits => (events) => {
+  const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
+    {
+      _index: signalsIndex,
+      _id: generateId(
+        doc._index,
+        doc._id,
+        doc._version ? doc._version.toString() : '',
+        ruleSO.attributes.params.ruleId ?? ''
+      ),
+      _source: buildBulkBody(ruleSO, doc),
+    },
+  ]);
+
+  return filterDuplicateSignals(ruleSO.id, wrappedDocs);
 };
 
 export const filterAndWrapDocuments = ({

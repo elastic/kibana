@@ -89,7 +89,7 @@ export const bulkCreateMlSignals = async (
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
   const buildRuleMessage = params.buildRuleMessage;
-
+  console.log('wrapping documents');
   const wrappedDocs = filterAndWrapDocuments({
     enrichedEvents: ecsResults,
     buildRuleMessage,
@@ -98,6 +98,7 @@ export const bulkCreateMlSignals = async (
     signalsIndex: params.signalsIndex,
     ruleSO: params.ruleSO,
   });
-
+  console.log(JSON.stringify(wrappedDocs));
+  console.log('bulk creating ml signals');
   return params.bulkCreate(wrappedDocs);
 };

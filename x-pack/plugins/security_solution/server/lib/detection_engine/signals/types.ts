@@ -257,6 +257,8 @@ export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<Signa
 
 export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCreateResponse<T>>;
 
+export type WrapHits = (hits: Array<estypes.Hit<{ '@timestamp': string }>>) => Array<BaseHit<{ '@timestamp': string }>>;
+
 export interface SearchAfterAndBulkCreateParams {
   tuples: Array<{
     to: moment.Moment;
@@ -277,6 +279,7 @@ export interface SearchAfterAndBulkCreateParams {
   buildRuleMessage: BuildRuleMessage;
   enrichment?: SignalsEnrichment;
   bulkCreate: BulkCreate;
+  wrapSignals: WrapHits;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -286,7 +289,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
-  createdSignals: SignalHit[];
+  createdSignals: unknown[];
   errors: string[];
   totalToFromTuples?: Array<{
     to: Moment | undefined;

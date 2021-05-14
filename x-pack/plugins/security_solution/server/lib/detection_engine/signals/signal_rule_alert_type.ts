@@ -73,6 +73,7 @@ import {
 import { RefreshTypes } from '../types';
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { GenericBulkCreateResponse } from './single_bulk_create';
+import { buildWrappedSignalsFactory } from './search_after_bulk_create';
 
 export const signalRulesAlertType = ({
   logger,
@@ -234,6 +235,8 @@ export const signalRulesAlertType = ({
           refresh
         );
 
+        const wrapSignals = buildWrappedSignalsFactory({ ruleSO: savedObject, signalsIndex: params.outputIndex });
+
         if (isMlRule(type)) {
           const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
           result = await mlExecutor({
@@ -275,6 +278,7 @@ export const signalRulesAlertType = ({
             eventsTelemetry,
             buildRuleMessage,
             bulkCreate,
+            wrapSignals,
           });
         } else if (isQueryRule(type)) {
           const queryRuleSO = validateQueryRuleTypes(savedObject);
@@ -290,6 +294,7 @@ export const signalRulesAlertType = ({
             eventsTelemetry,
             buildRuleMessage,
             bulkCreate,
+            wrapSignals,
           });
         } else if (isEqlRule(type)) {
           const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);

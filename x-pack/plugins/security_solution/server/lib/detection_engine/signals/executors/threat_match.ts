@@ -15,7 +15,7 @@ import {
 import { ListClient } from '../../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleRangeTuple, AlertAttributes, BulkCreate } from '../types';
+import { RuleRangeTuple, AlertAttributes, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
@@ -33,6 +33,7 @@ export const threatMatchExecutor = async ({
   eventsTelemetry,
   buildRuleMessage,
   bulkCreate,
+  wrapSignals,
 }: {
   rule: SavedObject<AlertAttributes<ThreatRuleParams>>;
   tuples: RuleRangeTuple[];
@@ -45,6 +46,7 @@ export const threatMatchExecutor = async ({
   eventsTelemetry: TelemetryEventsSender | undefined;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
+  wrapSignals: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
   const inputIndex = await getInputIndex(services, version, ruleParams.index);
@@ -75,5 +77,6 @@ export const threatMatchExecutor = async ({
     concurrentSearches: ruleParams.concurrentSearches ?? 1,
     itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
     bulkCreate,
+    wrapSignals,
   });
 };

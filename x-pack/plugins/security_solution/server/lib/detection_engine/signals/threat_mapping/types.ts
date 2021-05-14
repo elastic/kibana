@@ -35,6 +35,7 @@ import {
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SignalsEnrichment,
+  WrapHits,
 } from '../types';
 import { ThreatRuleParams } from '../../schemas/rule_schemas';
 
@@ -67,6 +68,7 @@ export interface CreateThreatSignalsOptions {
   concurrentSearches: ConcurrentSearches;
   itemsPerSearch: ItemsPerSearch;
   bulkCreate: BulkCreate;
+  wrapSignals: WrapHits;
 }
 
 export interface CreateThreatSignalOptions {
@@ -92,6 +94,7 @@ export interface CreateThreatSignalOptions {
   currentThreatList: ThreatListItem[];
   currentResult: SearchAfterAndBulkCreateReturnType;
   bulkCreate: BulkCreate;
+  wrapSignals: WrapHits;
 }
 
 export interface BuildThreatMappingFilterOptions {

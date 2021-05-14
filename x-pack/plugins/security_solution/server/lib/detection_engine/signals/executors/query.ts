@@ -17,7 +17,7 @@ import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { AlertAttributes, RuleRangeTuple, BulkCreate, SignalHit } from '../types';
+import { AlertAttributes, RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { QueryRuleParams, SavedQueryRuleParams } from '../../schemas/rule_schemas';
@@ -34,6 +34,7 @@ export const queryExecutor = async ({
   eventsTelemetry,
   buildRuleMessage,
   bulkCreate,
+  wrapSignals,
 }: {
   rule: SavedObject<AlertAttributes<QueryRuleParams | SavedQueryRuleParams>>;
   tuples: RuleRangeTuple[];
@@ -46,6 +47,7 @@ export const queryExecutor = async ({
   eventsTelemetry: TelemetryEventsSender | undefined;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
+  wrapSignals: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
   const inputIndex = await getInputIndex(services, version, ruleParams.index);
@@ -75,5 +77,6 @@ export const queryExecutor = async ({
     pageSize: searchAfterSize,
     buildRuleMessage,
     bulkCreate,
+    wrapSignals,
   });
 };
