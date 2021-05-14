@@ -692,7 +692,7 @@ export interface IFieldSubType {
 
 // Warning: (ae-missing-release-tag) "IFieldType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface IFieldType {
     // (undocumented)
     aggregatable?: boolean;
