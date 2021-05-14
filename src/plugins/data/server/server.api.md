@@ -702,7 +702,6 @@ export interface IFieldType {
     customLabel?: string;
     // (undocumented)
     displayName?: string;
-    // (undocumented)
     esTypes?: string[];
     // (undocumented)
     filterable?: boolean;
@@ -722,7 +721,6 @@ export interface IFieldType {
     searchable?: boolean;
     // (undocumented)
     sortable?: boolean;
-    // (undocumented)
     subType?: IFieldSubType;
     // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
     //
@@ -730,7 +728,6 @@ export interface IFieldType {
     toSpec?: (options?: {
         getFormatterForField?: IndexPattern['getFormatterForField'];
     }) => FieldSpec;
-    // (undocumented)
     type: string;
     // (undocumented)
     visualizable?: boolean;

@@ -4,6 +4,8 @@
 
 ## IFieldType.subType property
 
+expresses the structure of multi and nested fields
+
 <b>Signature:</b>
 
 ```typescript

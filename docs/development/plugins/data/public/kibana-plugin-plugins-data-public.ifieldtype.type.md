@@ -4,6 +4,8 @@
 
 ## IFieldType.type property
 
+kibana/javascript type - string, number, etc
+
 <b>Signature:</b>
 
 ```typescript

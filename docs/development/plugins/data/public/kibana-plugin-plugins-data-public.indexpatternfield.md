@@ -25,7 +25,7 @@ export declare class IndexPatternField implements IFieldType
 |  [count](./kibana-plugin-plugins-data-public.indexpatternfield.count.md) |  | <code>number</code> | Count is used for field popularity |
 |  [customLabel](./kibana-plugin-plugins-data-public.indexpatternfield.customlabel.md) |  | <code>string &#124; undefined</code> |  |
 |  [displayName](./kibana-plugin-plugins-data-public.indexpatternfield.displayname.md) |  | <code>string</code> |  |
-|  [esTypes](./kibana-plugin-plugins-data-public.indexpatternfield.estypes.md) |  | <code>string[] &#124; undefined</code> |  |
+|  [esTypes](./kibana-plugin-plugins-data-public.indexpatternfield.estypes.md) |  | <code>string[] &#124; undefined</code> | elasticsearch types. Multiple ES types may or may not conflict depending upon their kibana equivalents |
 |  [filterable](./kibana-plugin-plugins-data-public.indexpatternfield.filterable.md) |  | <code>boolean</code> |  |
 |  [isMapped](./kibana-plugin-plugins-data-public.indexpatternfield.ismapped.md) |  | <code>boolean &#124; undefined</code> | Is the field part of the index mapping? |
 |  [lang](./kibana-plugin-plugins-data-public.indexpatternfield.lang.md) |  | <code>string &#124; undefined</code> | Script field language |
@@ -37,8 +37,8 @@ export declare class IndexPatternField implements IFieldType
 |  [searchable](./kibana-plugin-plugins-data-public.indexpatternfield.searchable.md) |  | <code>boolean</code> |  |
 |  [sortable](./kibana-plugin-plugins-data-public.indexpatternfield.sortable.md) |  | <code>boolean</code> |  |
 |  [spec](./kibana-plugin-plugins-data-public.indexpatternfield.spec.md) |  | <code>FieldSpec</code> |  |
-|  [subType](./kibana-plugin-plugins-data-public.indexpatternfield.subtype.md) |  | <code>import(&quot;../types&quot;).IFieldSubType &#124; undefined</code> |  |
-|  [type](./kibana-plugin-plugins-data-public.indexpatternfield.type.md) |  | <code>string</code> |  |
+|  [subType](./kibana-plugin-plugins-data-public.indexpatternfield.subtype.md) |  | <code>import(&quot;../types&quot;).IFieldSubType &#124; undefined</code> | expresses the structure of multi and nested fields |
+|  [type](./kibana-plugin-plugins-data-public.indexpatternfield.type.md) |  | <code>string</code> | kibana/javascript type - string, number, etc |
 |  [visualizable](./kibana-plugin-plugins-data-public.indexpatternfield.visualizable.md) |  | <code>boolean</code> |  |
 
 ## Methods

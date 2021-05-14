@@ -4,6 +4,8 @@
 
 ## IndexPatternField.esTypes property
 
+elasticsearch types. Multiple ES types may or may not conflict depending upon their kibana equivalents
+
 <b>Signature:</b>
 
 ```typescript

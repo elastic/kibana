@@ -18,7 +18,7 @@ export interface IFieldType
 |  [count](./kibana-plugin-plugins-data-public.ifieldtype.count.md) | <code>number</code> |  |
 |  [customLabel](./kibana-plugin-plugins-data-public.ifieldtype.customlabel.md) | <code>string</code> |  |
 |  [displayName](./kibana-plugin-plugins-data-public.ifieldtype.displayname.md) | <code>string</code> |  |
-|  [esTypes](./kibana-plugin-plugins-data-public.ifieldtype.estypes.md) | <code>string[]</code> |  |
+|  [esTypes](./kibana-plugin-plugins-data-public.ifieldtype.estypes.md) | <code>string[]</code> | elasticsearch types. Multiple ES types may or may not conflict depending upon their kibana equivalents |
 |  [filterable](./kibana-plugin-plugins-data-public.ifieldtype.filterable.md) | <code>boolean</code> |  |
 |  [format](./kibana-plugin-plugins-data-public.ifieldtype.format.md) | <code>any</code> |  |
 |  [lang](./kibana-plugin-plugins-data-public.ifieldtype.lang.md) | <code>string</code> |  |
@@ -28,8 +28,8 @@ export interface IFieldType
 |  [scripted](./kibana-plugin-plugins-data-public.ifieldtype.scripted.md) | <code>boolean</code> |  |
 |  [searchable](./kibana-plugin-plugins-data-public.ifieldtype.searchable.md) | <code>boolean</code> |  |
 |  [sortable](./kibana-plugin-plugins-data-public.ifieldtype.sortable.md) | <code>boolean</code> |  |
-|  [subType](./kibana-plugin-plugins-data-public.ifieldtype.subtype.md) | <code>IFieldSubType</code> |  |
+|  [subType](./kibana-plugin-plugins-data-public.ifieldtype.subtype.md) | <code>IFieldSubType</code> | expresses the structure of multi and nested fields |
 |  [toSpec](./kibana-plugin-plugins-data-public.ifieldtype.tospec.md) | <code>(options?: {</code><br/><code>        getFormatterForField?: IndexPattern['getFormatterForField'];</code><br/><code>    }) =&gt; FieldSpec</code> |  |
-|  [type](./kibana-plugin-plugins-data-public.ifieldtype.type.md) | <code>string</code> |  |
+|  [type](./kibana-plugin-plugins-data-public.ifieldtype.type.md) | <code>string</code> | kibana/javascript type - string, number, etc |
 |  [visualizable](./kibana-plugin-plugins-data-public.ifieldtype.visualizable.md) | <code>boolean</code> |  |
 

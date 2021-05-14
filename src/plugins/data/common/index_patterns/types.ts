@@ -18,6 +18,9 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 export interface RuntimeField {
+  /**
+   * also used as a IndexPatternField's ES type
+   */
   type: RuntimeType;
   script?: {
     source: string;
@@ -200,12 +203,21 @@ export interface FieldSpec {
   conflictDescriptions?: Record<string, string[]>;
   format?: SerializedFieldFormat;
   name: string;
+  /**
+   * kibana/javascript type - string, number, etc
+   */
   type: string;
+  /**
+   * elasticsearch types. Multiple ES types may or may not conflict depending upon their kibana equivalents
+   */
   esTypes?: string[];
   scripted?: boolean;
   searchable: boolean;
   aggregatable: boolean;
   readFromDocValues?: boolean;
+  /**
+   * expresses the structure of multi and nested fields
+   */
   subType?: IFieldSubType;
   indexed?: boolean;
   customLabel?: string;
