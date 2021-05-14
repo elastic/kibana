@@ -14,20 +14,22 @@ import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
 import { FilterMode as RecentCasesFilterMode } from './types';
 import { useCurrentUser } from '../../common/lib/kibana';
+import { Owner } from '../../types';
+import { OwnerProvider } from '../owner_context';
 
-export interface RecentCasesProps {
+export interface RecentCasesProps extends Owner {
   allCasesNavigation: CasesNavigation;
   caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   createCaseNavigation: CasesNavigation;
   maxCasesToShow: number;
 }
 
-const RecentCases = ({
+const RecentCasesComponent = ({
   allCasesNavigation,
   caseDetailsNavigation,
   createCaseNavigation,
   maxCasesToShow,
-}: RecentCasesProps) => {
+}: Omit<RecentCasesProps, 'owner'>) => {
   const currentUser = useCurrentUser();
   const [recentCasesFilterBy, setRecentCasesFilterBy] = useState<RecentCasesFilterMode>(
     'recentlyCreated'
@@ -86,6 +88,14 @@ const RecentCases = ({
     </>
   );
 };
+
+export const RecentCases: React.FC<RecentCasesProps> = React.memo((props) => {
+  return (
+    <OwnerProvider owner={props.owner}>
+      <RecentCasesComponent {...props} />
+    </OwnerProvider>
+  );
+});
 
 // eslint-disable-next-line import/no-default-export
 export { RecentCases as default };

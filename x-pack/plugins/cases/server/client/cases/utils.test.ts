@@ -29,6 +29,7 @@ import {
   transformFields,
 } from './utils';
 import { flattenCaseSavedObject } from '../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
 
 const formatComment = {
   commentId: commentObj.id,
@@ -701,7 +702,7 @@ describe('utils', () => {
             action_id: '9b91d8f0-6647-11eb-a291-51bf6b175a53',
             case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
             comment_id: null,
-            owner: 'securitySolution',
+            owner: SECURITY_SOLUTION_OWNER,
           },
         ]);
 
