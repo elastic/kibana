@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { filter } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, map as mapOptional, getOrElse, isSome } from 'fp-ts/lib/Option';
 
 import uuid from 'uuid';
 import { pick } from 'lodash';
-import { merge, Subscription } from 'rxjs';
+import { merge, Subject } from 'rxjs';
 import { Logger } from '../../../../src/core/server';
 import { asOk, either, map, mapErr, promiseResult, isErr } from './lib/result_type';
 import {
@@ -55,7 +55,7 @@ export interface TaskSchedulingOpts {
   taskManagerId: string;
 }
 
-interface RunNowResult {
+export interface RunNowResult {
   id: ConcreteTaskInstance['id'];
   state?: ConcreteTaskInstance['state'];
 }
@@ -110,7 +110,7 @@ export class TaskScheduling {
   public async runNow(taskId: string): Promise<RunNowResult> {
     return new Promise(async (resolve, reject) => {
       this.awaitTaskRunResult(taskId)
-        .promise // don't expose state on runNow
+        // don't expose state on runNow
         .then(({ id }) => resolve({ id }))
         .catch(reject);
       this.taskPollingLifecycle.attemptToRun(taskId);
@@ -133,18 +133,12 @@ export class TaskScheduling {
       taskInstance: task,
     });
     return new Promise(async (resolve, reject) => {
-      let ephemeralTaskLifecycleResult = null;
-      const {
-        promise: awaitTaskRunPromise,
-        subscription: awaitTaskRunSubscription,
-      } = this.awaitTaskRunResult(id);
-      awaitTaskRunPromise
+      const { cancel, resolveOnCancel } = cancellablePromise();
+      this.awaitTaskRunResult(id, resolveOnCancel)
         .then((arg: RunNowResult) => {
-          ephemeralTaskLifecycleResult = 1;
           resolve(arg);
         })
         .catch((err: Error) => {
-          ephemeralTaskLifecycleResult = 0;
           reject(err);
         });
       const attemptToRunResult = this.ephemeralTaskLifecycle.attemptToRun({
@@ -156,8 +150,13 @@ export class TaskScheduling {
         ...modifiedTask,
       });
       if (isErr(attemptToRunResult)) {
-        awaitTaskRunSubscription.unsubscribe();
-        reject(new EphemeralTaskRejectedDueToCapacityError('', task));
+        cancel();
+        reject(
+          new EphemeralTaskRejectedDueToCapacityError(
+            `Ephemeral Task of type ${task.taskType} was rejected`,
+            task
+          )
+        );
       }
     });
   }
@@ -182,15 +181,13 @@ export class TaskScheduling {
     }
   }
 
-  private awaitTaskRunResult(
-    taskId: string
-  ): { promise: Promise<RunNowResult>; subscription: Subscription } {
-    // TODO: CHRIS
-    // I don't love this pattern but working for now to illustrate desired behavior for PoC
-    let subscription: Subscription;
-    const promise = new Promise((resolve, reject) => {
+  private awaitTaskRunResult(taskId: string, cancel?: Promise<void>): Promise<RunNowResult> {
+    return new Promise((resolve, reject) => {
       // listen for all events related to the current task
-      subscription = merge(this.taskPollingLifecycle.events, this.ephemeralTaskLifecycle.events)
+      const subscription = merge(
+        this.taskPollingLifecycle.events,
+        this.ephemeralTaskLifecycle.events
+      )
         .pipe(filter(({ id }: TaskLifecycleEvent) => id === taskId))
         .subscribe((taskEvent: TaskLifecycleEvent) => {
           if (isTaskClaimEvent(taskEvent)) {
@@ -244,10 +241,11 @@ export class TaskScheduling {
             );
           }
         });
-    });
 
-    // @ts-ignore
-    return { promise, subscription };
+      if (cancel) {
+        cancel.then(() => subscription.unsubscribe());
+      }
+    });
   }
 
   private async identifyTaskFailureReason(taskId: string, error: Option<ConcreteTaskInstance>) {
@@ -281,3 +279,14 @@ export class TaskScheduling {
     );
   }
 }
+
+const cancellablePromise = () => {
+  const boolStream = new Subject<boolean>();
+  return {
+    cancel: () => boolStream.next(true),
+    resolveOnCancel: boolStream
+      .pipe(take(1))
+      .toPromise()
+      .then(() => {}),
+  };
+};

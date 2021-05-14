@@ -34,6 +34,7 @@ describe('Alerting Plugin', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 10,
       });
       plugin = new AlertingPlugin(context);
 
@@ -119,6 +120,7 @@ describe('Alerting Plugin', () => {
             interval: '5m',
             removalDelay: '1h',
           },
+          maxEphemeralActionsPerAlert: 10,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -158,6 +160,7 @@ describe('Alerting Plugin', () => {
             interval: '5m',
             removalDelay: '1h',
           },
+          maxEphemeralActionsPerAlert: 10,
         });
         const plugin = new AlertingPlugin(context);
 

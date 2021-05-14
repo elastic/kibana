@@ -18,7 +18,7 @@ import {
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { IValidatedEvent } from '../../../../../plugins/event_log/server';
-import { DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE } from '../../../../../plugins/task_manager/server/config';
+import { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from '../../../../../plugins/alerting/server/config';
 
 // eslint-disable-next-line import/no-default-export
 export default function createNotifyWhenTests({ getService }: FtrProviderContext) {
@@ -43,7 +43,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
     it('should execute all requests, when some will be ephemeral and some not', async () => {
       const nonEphemeralTasks = 3;
       const actionPromises = [];
-      for (let i = 0; i < DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE + nonEphemeralTasks; i++) {
+      for (let i = 0; i < DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT + nonEphemeralTasks; i++) {
         actionPromises.push(
           supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -113,12 +113,12 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
 
       const executeActionsEvents = getEventsByAction(events, 'execute');
       expect(executeActionsEvents.length).equal(
-        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE
+        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT
       );
 
       const searchResult = await esTestIndexTool.search('action:test.index-record');
       expect(searchResult.hits.total.value).equal(
-        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE
+        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT
       );
     });
 
@@ -219,7 +219,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
     it('should ensure ephemeral actions are scheduled before non-ephemeral ones', async () => {
       const nonEphemeralTasks = 3;
       const actionPromises = [];
-      for (let i = 0; i < DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE + nonEphemeralTasks; i++) {
+      for (let i = 0; i < DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT + nonEphemeralTasks; i++) {
         actionPromises.push(
           supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -278,7 +278,10 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           id: createdAlert.id,
           provider: 'alerting',
           actions: new Map([
-            ['execute-action', { gte: DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE + nonEphemeralTasks }],
+            [
+              'execute-action',
+              { gte: DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT + nonEphemeralTasks },
+            ],
           ]),
         });
       });
@@ -297,7 +300,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
         indexInEventLog++;
       }
 
-      for (let i = 0; i < DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE; i++) {
+      for (let i = 0; i < DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT; i++) {
         expect(indexPairs[i].actionIndex).equal(indexPairs[i].indexInEventLog);
       }
     });

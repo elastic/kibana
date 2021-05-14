@@ -16,10 +16,11 @@ import {
   KibanaRequest,
   SavedObjectReference,
   IBasePath,
+  SavedObject,
 } from '../../../../../src/core/server';
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
-import { RunContext } from '../../../task_manager/server';
+import { ConcreteTaskInstance, RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { ActionTypeDisabledError } from './errors';
 import {
@@ -27,6 +28,8 @@ import {
   ActionTypeRegistryContract,
   SpaceIdToNamespaceFunction,
   ActionTypeExecutorResult,
+  ActionTaskExecutorParams,
+  isPersistedActionTask,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { asSavedObjectExecutionSource } from './action_execution_source';
@@ -73,36 +76,24 @@ export class TaskRunnerFactory {
 
     return {
       async run() {
-        const { actionTaskParamsId, taskParams, ...rest } = taskInstance.params as Record<
-          string,
-          string | Record<string, string>
-        >;
-        const spaceId =
-          taskInstance.params.spaceId ?? (taskParams as Record<string, string>)?.spaceId;
-        const namespace = spaceIdToNamespace(spaceId as string);
+        const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
+        const { spaceId } = actionTaskExecutorParams;
 
-        let params = rest;
-        let actionId = taskParams ? (taskParams as Record<string, string>).actionId : undefined;
-        let apiKey = taskParams ? (taskParams as Record<string, string>).apiKey : undefined;
-        let references: SavedObjectReference[] = [];
-        if (!taskParams) {
-          const taskParamsSO = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
-            ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-            actionTaskParamsId as string,
-            { namespace }
-          );
-          params = taskParamsSO.attributes.params;
-          actionId = taskParamsSO.attributes.actionId;
-          apiKey = taskParamsSO.attributes.apiKey;
-          references = taskParamsSO.references;
-        }
+        const {
+          attributes: { actionId, params, apiKey },
+          references,
+        } = await getActionTaskParams(
+          actionTaskExecutorParams,
+          encryptedSavedObjectsClient,
+          spaceIdToNamespace
+        );
 
         const requestHeaders: Record<string, string> = {};
         if (apiKey) {
           requestHeaders.authorization = `ApiKey ${apiKey}`;
         }
 
-        const path = addSpaceIdToPath('/', spaceId as string);
+        const path = addSpaceIdToPath('/', spaceId);
 
         // Since we're using API keys and accessing elasticsearch can only be done
         // via a request, we're faking one with the proper authorization headers.
@@ -127,7 +118,7 @@ export class TaskRunnerFactory {
           executorResult = await actionExecutor.execute({
             params,
             actionId: actionId as string,
-            isEphemeral: Boolean(taskParams),
+            isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request: fakeRequest,
             ...getSourceFromReferences(references),
           });
@@ -150,7 +141,7 @@ export class TaskRunnerFactory {
         }
 
         // Cleanup action_task_params object now that we're done with it
-        if (!taskParams) {
+        if (isPersistedActionTask(actionTaskExecutorParams)) {
           try {
             // If the request has reached this far we can assume the user is allowed to run clean up
             // We would idealy secure every operation but in order to support clean up of legacy alerts
@@ -158,17 +149,35 @@ export class TaskRunnerFactory {
             // Once support for legacy alert RBAC is dropped, this can be secured
             await getUnsecuredSavedObjectsClient(fakeRequest).delete(
               ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-              actionTaskParamsId as string
+              actionTaskExecutorParams.actionTaskParamsId
             );
           } catch (e) {
             // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
             logger.error(
-              `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskParamsId}"]: ${e.message}`
+              `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`
             );
           }
         }
       },
     };
+  }
+}
+
+async function getActionTaskParams(
+  executorParams: ActionTaskExecutorParams,
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
+  spaceIdToNamespace: SpaceIdToNamespaceFunction
+): Promise<Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>> {
+  const { spaceId } = executorParams;
+  const namespace = spaceIdToNamespace(spaceId);
+  if (isPersistedActionTask(executorParams)) {
+    return encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      executorParams.actionTaskParamsId,
+      { namespace }
+    );
+  } else {
+    return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
   }
 }
 

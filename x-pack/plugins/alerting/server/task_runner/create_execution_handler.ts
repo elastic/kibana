@@ -53,7 +53,7 @@ export interface CreateExecutionHandlerOptions<
   request: KibanaRequest;
   alertParams: AlertTypeParams;
   supportsEphemeralTasks: boolean;
-  ephemeralTasksPerCycle: number;
+  maxEphemeralActionsPerAlert: Promise<number>;
 }
 
 interface ExecutionHandlerOptions<ActionGroupIds extends string> {
@@ -90,7 +90,7 @@ export function createExecutionHandler<
   request,
   alertParams,
   supportsEphemeralTasks,
-  ephemeralTasksPerCycle,
+  maxEphemeralActionsPerAlert,
 }: CreateExecutionHandlerOptions<
   Params,
   State,
@@ -150,8 +150,8 @@ export function createExecutionHandler<
 
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
-    let actionsQueued = 0;
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
+    let ephemeralActionsToSchedule = await maxEphemeralActionsPerAlert;
     for (const action of actions) {
       if (
         !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
@@ -164,20 +164,18 @@ export function createExecutionHandler<
 
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
-
-      if (supportsEphemeralTasks && actionsQueued++ < ephemeralTasksPerCycle) {
+      if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
+        ephemeralActionsToSchedule--;
         actionsClient
-          .executeEphemeralTask({
-            taskType: `actions:${action.actionTypeId}`,
-            params: {
-              ...action.params,
-              taskParams: {
-                spaceId,
-                actionId: action.id,
-                apiKey,
-              },
-            },
-            state: {},
+          .ephemeralEnqueuedExecution({
+            id: action.id,
+            params: action.params,
+            spaceId,
+            apiKey: apiKey ?? null,
+            source: asSavedObjectExecutionSource({
+              id: alertId,
+              type: 'alert',
+            }),
           })
           .catch((err) => {
             if (isEphemeralTaskRejectedDueToCapacityError(err)) {

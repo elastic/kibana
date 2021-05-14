@@ -12,7 +12,6 @@ export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
-export const DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE = 10;
 
 // Monitoring Constants
 // ===================
@@ -111,9 +110,6 @@ export const configSchema = schema.object(
       }),
     }),
     ephemeral_tasks: schema.object({
-      max_per_cycle: schema.number({
-        defaultValue: DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE,
-      }),
       enabled: schema.boolean({ defaultValue: true }),
     }),
   },

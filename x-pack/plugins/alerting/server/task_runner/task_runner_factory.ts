@@ -42,7 +42,7 @@ export interface TaskRunnerContext {
   alertTypeRegistry: AlertTypeRegistry;
   kibanaBaseUrl: string | undefined;
   supportsEphemeralTasks: boolean;
-  ephemeralTasksPerCycle: number;
+  maxEphemeralActionsPerAlert: Promise<number>;
 }
 
 export class TaskRunnerFactory {

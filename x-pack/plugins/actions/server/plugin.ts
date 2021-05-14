@@ -24,11 +24,7 @@ import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '../../encrypted_saved_objects/server';
-import {
-  EphemeralTask,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '../../task_manager/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -42,7 +38,10 @@ import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
-import { createExecutionEnqueuerFunction } from './create_execute_function';
+import {
+  createExecutionEnqueuerFunction,
+  createEphemeralExecutionEnqueuerFunction,
+} from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
 import {
@@ -154,7 +153,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly kibanaIndexConfig: { kibana: { index: string } };
-  private ephemeralRunNow?: (task: EphemeralTask, options?: Record<string, unknown>) => void;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get('actions');
@@ -302,8 +300,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       getUnsecuredSavedObjectsClient,
     } = this;
 
-    this.ephemeralRunNow = plugins.taskManager.ephemeralRunNow;
-
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
@@ -339,7 +335,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           await getAuthorizationModeBySource(unsecuredSavedObjectsClient, authorizationContext)
         ),
         actionExecutor: actionExecutor!,
-        ephemeralRunNow: this.ephemeralRunNow!,
+        ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          actionTypeRegistry: actionTypeRegistry!,
+          isESOCanEncrypt: isESOCanEncrypt!,
+          preconfiguredActions,
+        }),
         executionEnqueuer: createExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
@@ -477,7 +478,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionExecutor,
       instantiateAuthorization,
       security,
-      ephemeralRunNow,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -501,7 +501,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             request,
             authorization: instantiateAuthorization(request),
             actionExecutor: actionExecutor!,
-            ephemeralRunNow: ephemeralRunNow!,
+            ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
+              taskManager,
+              actionTypeRegistry: actionTypeRegistry!,
+              isESOCanEncrypt: isESOCanEncrypt!,
+              preconfiguredActions,
+            }),
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,

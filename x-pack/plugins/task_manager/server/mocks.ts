@@ -26,6 +26,7 @@ const createStartMock = () => {
     ephemeralRunNow: jest.fn(),
     ensureScheduled: jest.fn(),
     removeIfExists: jest.fn(),
+    supportsEphemeralTasks: jest.fn(),
   };
   return mock;
 };

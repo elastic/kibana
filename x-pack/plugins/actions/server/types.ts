@@ -16,6 +16,7 @@ import {
   SavedObjectAttributes,
   ElasticsearchClient,
   RequestHandlerContext,
+  SavedObjectReference,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
 export { ActionTypeExecutorResult } from '../common';
@@ -133,9 +134,24 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   apiKey?: string;
 }
 
-export interface ActionTaskExecutorParams {
+interface PersistedActionTaskExecutorParams {
   spaceId: string;
   actionTaskParamsId: string;
+}
+interface EphemeralActionTaskExecutorParams {
+  spaceId: string;
+  taskParams: ActionTaskParams;
+  references?: SavedObjectReference[];
+}
+
+export type ActionTaskExecutorParams =
+  | PersistedActionTaskExecutorParams
+  | EphemeralActionTaskExecutorParams;
+
+export function isPersistedActionTask(
+  actionTask: ActionTaskExecutorParams
+): actionTask is PersistedActionTaskExecutorParams {
+  return typeof (actionTask as PersistedActionTaskExecutorParams).actionTaskParamsId === 'string';
 }
 
 export interface ProxySettings {

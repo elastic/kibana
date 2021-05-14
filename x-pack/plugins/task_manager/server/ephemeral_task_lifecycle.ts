@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
 import { Result, asErr, asOk } from './lib/result_type';
 import { TaskManagerConfig } from './config';
 
-import { isTaskRunEvent } from './task_events';
+import { isTaskRunEvent, TaskEventType } from './task_events';
 import { Middleware } from './lib/middleware';
 import { EphemeralTaskInstance } from './task';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -45,6 +45,7 @@ export class EphemeralTaskLifecycle {
   private logger: Logger;
   private config: TaskManagerConfig;
   private middleware: Middleware;
+  private lifecycleSubscription: Subscription = Subscription.EMPTY;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -66,57 +67,59 @@ export class EphemeralTaskLifecycle {
     this.lifecycleEvent = lifecycleEvent;
     this.config = config;
 
-    this.lifecycleEvent
-      .pipe(
-        filter(
-          // we want to know when the queue has ephemeral task run requests
-          (e) =>
-            this.ephemeralTaskQueue.size > 0 &&
-            isTaskRunEvent(e) &&
-            // and when a polling cycle has just completed,
-            // (e.type === TaskEventType.TASK_POLLING_CYCLE ||
-            //   // or the "load" in the TaskPool has changed (meaning a task has just completed)
-            //   (e.type === TaskEventType.TASK_MANAGER_STAT && e.id === 'load')) &&
-            this.getCapacity() > 0
+    if (this.config.ephemeral_tasks.enabled) {
+      this.lifecycleSubscription = this.lifecycleEvent
+        .pipe(
+          filter(
+            (e) =>
+              // we want to know when the queue has ephemeral task run requests
+              this.ephemeralTaskQueue.size > 0 &&
+              // and when a polling cycle has just completed or a task has just been ran
+              (e.type === TaskEventType.TASK_POLLING_CYCLE || isTaskRunEvent(e)) &&
+              this.getCapacity() > 0
+          )
         )
-      )
-      .subscribe(async (e) => {
-        let overallCapacity = this.getCapacity();
-        const capacityByType = new Map<string, number>();
-        const queue = [...this.ephemeralTaskQueue].filter((ephemeralTask) => {
-          if (overallCapacity > 0) {
-            if (!capacityByType.has(ephemeralTask.taskType)) {
-              capacityByType.set(ephemeralTask.taskType, this.getCapacity(ephemeralTask.taskType));
-            }
-            if (capacityByType.get(ephemeralTask.taskType)! > 0) {
-              overallCapacity--;
-              capacityByType.set(
-                ephemeralTask.taskType,
-                capacityByType.get(ephemeralTask.taskType)! - 1
-              );
-              return true;
-            }
-          }
-        });
-        const runQueue = this.config.ephemeral_tasks.enabled
-          ? queue.slice(0, this.config.ephemeral_tasks.max_per_cycle)
-          : queue;
-        this.pool
-          .run(
-            runQueue.map((taskToRun) => {
+        .subscribe(async (e) => {
+          let overallCapacity = this.getCapacity();
+          const capacityByType = new Map<string, number>();
+          const tasksWithinCapacity = [...this.ephemeralTaskQueue]
+            .filter((ephemeralTask) => {
+              if (overallCapacity > 0) {
+                if (!capacityByType.has(ephemeralTask.taskType)) {
+                  capacityByType.set(
+                    ephemeralTask.taskType,
+                    this.getCapacity(ephemeralTask.taskType)
+                  );
+                }
+                if (capacityByType.get(ephemeralTask.taskType)! > 0) {
+                  overallCapacity--;
+                  capacityByType.set(
+                    ephemeralTask.taskType,
+                    capacityByType.get(ephemeralTask.taskType)! - 1
+                  );
+                  return true;
+                }
+              }
+            })
+            .map((taskToRun) => {
               this.ephemeralTaskQueue.delete(taskToRun);
               return this.createTaskRunnerForTask(taskToRun);
-            })
-          )
-          .then((successTaskPoolRunResult) => {
-            this.logger.debug(
-              `Successful ephemeral task lifecycle resulted in: ${successTaskPoolRunResult}`
-            );
-          })
-          .catch((error) => {
-            this.logger.debug(`Failed ephemeral task lifecycle resulted in: ${error}`);
-          });
-      });
+            });
+
+          if (tasksWithinCapacity.length) {
+            this.pool
+              .run(tasksWithinCapacity)
+              .then((successTaskPoolRunResult) => {
+                this.logger.debug(
+                  `Successful ephemeral task lifecycle resulted in: ${successTaskPoolRunResult}`
+                );
+              })
+              .catch((error) => {
+                this.logger.debug(`Failed ephemeral task lifecycle resulted in: ${error}`);
+              });
+          }
+        });
+    }
   }
 
   public get events(): Observable<TaskLifecycleEvent> {
@@ -140,6 +143,9 @@ export class EphemeralTaskLifecycle {
   };
 
   public attemptToRun(task: EphemeralTaskInstanceRequest) {
+    if (this.lifecycleSubscription.closed) {
+      return asErr(task);
+    }
     return pushIntoSet(this.ephemeralTaskQueue, this.config.request_capacity, task);
   }
 
@@ -166,10 +172,10 @@ export class EphemeralTaskLifecycle {
  * @param maxCapacity How many values are we allowed to push into the set
  * @param value A value T to push into the set if it is there
  */
-function pushIntoSet<T>(set: Set<T>, maxCapacity: number, value: T): Result<Set<T>, Set<T>> {
+function pushIntoSet<T>(set: Set<T>, maxCapacity: number, value: T): Result<T, T> {
   if (set.size >= maxCapacity) {
-    return asErr(set);
+    return asErr(value);
   }
   set.add(value);
-  return asOk(set);
+  return asOk(value);
 }

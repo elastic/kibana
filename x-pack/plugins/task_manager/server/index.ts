@@ -27,6 +27,7 @@ export {
   throwUnrecoverableError,
   isEphemeralTaskRejectedDueToCapacityError,
 } from './task_running';
+export { RunNowResult } from './task_scheduling';
 
 export {
   TaskManagerPlugin as TaskManager,
