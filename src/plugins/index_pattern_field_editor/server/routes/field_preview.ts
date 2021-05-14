@@ -60,13 +60,13 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
 
         const fieldValue = (response.body.result as any[]) as HttpResponsePayload;
 
-        return res.ok({ body: fieldValue });
+        return res.ok({ body: { values: fieldValue } });
       } catch (error) {
         // Assume invalid painless script was submitted
         // Return 200 with error object
         const handleCustomError = () => {
           return res.ok({
-            body: error.body,
+            body: { values: [], ...error.body },
           });
         };
 

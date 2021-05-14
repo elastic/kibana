@@ -7,25 +7,32 @@
  */
 
 import React, { createContext, useContext, FunctionComponent, useMemo } from 'react';
-
+import { NotificationsStart } from 'src/core/public';
+import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
 import { ApiService } from '../lib';
 
 interface Context {
-  apiService: ApiService;
+  indexPattern: IndexPattern;
+  services: {
+    search: DataPublicPluginStart['search'];
+    api: ApiService;
+    notifications: NotificationsStart;
+  };
 }
 
 const fieldEditorContext = createContext<Context | undefined>(undefined);
 
-export interface Props {
-  apiService: ApiService;
-}
-
-export const FieldEditorProvider: FunctionComponent<Props> = ({ apiService, children }) => {
+export const FieldEditorProvider: FunctionComponent<Context> = ({
+  services,
+  indexPattern,
+  children,
+}) => {
   const ctx = useMemo<Context>(
     () => ({
-      apiService,
+      indexPattern,
+      services,
     }),
-    [apiService]
+    [indexPattern, services]
   );
 
   return <fieldEditorContext.Provider value={ctx}>{children}</fieldEditorContext.Provider>;
@@ -40,3 +47,5 @@ export const useFieldEditorContext = (): Context => {
 
   return ctx;
 };
+
+export const useFieldEditorServices = () => useFieldEditorContext().services;

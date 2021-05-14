@@ -60,12 +60,15 @@ const getScriptExceptionError = (error: Error): Error | null => {
   return scriptExceptionError;
 };
 
-const parseEsError = (error?: Error): RuntimeFieldPainlessError | null => {
+export const parseEsError = (
+  error?: Error,
+  isScriptError = false
+): RuntimeFieldPainlessError | null => {
   if (error === undefined) {
     return null;
   }
 
-  const scriptError = getScriptExceptionError(error.caused_by);
+  const scriptError = isScriptError ? error : getScriptExceptionError(error.caused_by);
 
   if (scriptError === null) {
     return null;

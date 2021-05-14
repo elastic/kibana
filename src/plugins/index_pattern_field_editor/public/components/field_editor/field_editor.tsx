@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -16,7 +16,6 @@ import {
   EuiComboBoxOptionOption,
   EuiCode,
   EuiCallOut,
-  EuiButton,
 } from '@elastic/eui';
 import type { CoreStart } from 'src/core/public';
 
@@ -32,7 +31,7 @@ import {
   DataPublicPluginStart,
 } from '../../shared_imports';
 import { Field, InternalFieldType, PluginStart } from '../../types';
-import { useFieldEditorContext } from '../field_editor_context';
+import { useFieldPreviewContext } from '../field_preview_context';
 
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 import { schema } from './form_schema';
@@ -175,14 +174,6 @@ const formSerializer = (field: FieldFormInternal): Field => {
   };
 };
 
-const mockDataPreview = {
-  index: 'kibana_sample_data_logs',
-  script: { source: "emit(doc['referer'].value)" },
-  document: {
-    referer: ['Value to be returned by the script'],
-  },
-};
-
 const FieldEditorComponent = ({
   field,
   onChange,
@@ -194,9 +185,7 @@ const FieldEditorComponent = ({
   syntaxError,
   ctx: { fieldTypeToProcess, namesNotAllowed, existingConcreteFields },
 }: Props) => {
-  const {
-    apiService: { useFieldPreview },
-  } = useFieldEditorContext();
+  const { fields, error, updateParams: updatePreviewParams } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
     schema,
@@ -208,20 +197,13 @@ const FieldEditorComponent = ({
 
   const [{ type }] = useFormData<FieldFormInternal>({ form });
 
-  const [script, setScript] = useState<{ source: string } | null>(null);
-  const { data } = useFieldPreview({
-    index: mockDataPreview.index,
-    document: mockDataPreview.document,
-    context: 'keyword_field',
-    script,
-  });
-
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const i18nTexts = geti18nTexts();
 
-  const previewField = useCallback(() => {
-    setScript(mockDataPreview.script);
-  }, []);
+  const [{ name: updatedName, type: updatedType, script: updatedScript }] = useFormData({ form });
+  const nameHasChanged = Boolean(field?.name) && field?.name !== updatedName;
+  const typeHasChanged =
+    Boolean(field?.type) && field?.type !== (updatedType && updatedType[0].value);
 
   useEffect(() => {
     if (onChange) {
@@ -237,26 +219,23 @@ const FieldEditorComponent = ({
 
   useEffect(() => {
     // TODO: remove console.log
-    if (data?.error) {
-      console.log('Preview error', data.error); // eslint-disable-line no-console
+    if (error) {
+      console.log('Preview error', error); // eslint-disable-line no-console
     } else {
-      console.log('Field preview:', data?.[0]); // eslint-disable-line no-console
+      console.log('Field preview:', JSON.stringify(fields[0], null, 4)); // eslint-disable-line no-console
     }
-  }, [data]);
+  }, [fields, error]);
 
-  const [{ name: updatedName, type: updatedType }] = useFormData({ form });
-  const nameHasChanged = Boolean(field?.name) && field?.name !== updatedName;
-  const typeHasChanged =
-    Boolean(field?.type) && field?.type !== (updatedType && updatedType[0].value);
+  useEffect(() => {
+    updatePreviewParams({
+      name: updatedName,
+      type: updatedType?.[0].value,
+      script: Boolean(updatedScript?.source.trim()) ? updatedScript : null,
+    });
+  }, [updatedName, updatedType, updatedScript, updatePreviewParams]);
 
   return (
     <Form form={form} className="indexPatternFieldEditor__form">
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton onClick={previewField}>Preview field</EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
       <EuiFlexGroup>
         {/* Name */}
         <EuiFlexItem>

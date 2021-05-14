@@ -24,6 +24,7 @@ import { deserializeField, getRuntimeFieldValidator, ApiService } from '../lib';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 import { FieldEditorProvider } from './field_editor_context';
+import { FieldPreviewProvider } from './field_preview_context';
 
 export interface FieldEditorContext {
   indexPattern: IndexPattern;
@@ -171,6 +172,15 @@ export const FieldEditorFlyoutContentContainer = ({
     indexPattern,
   ]);
 
+  const services = useMemo(
+    () => ({
+      api: apiService,
+      search,
+      notifications,
+    }),
+    [apiService, search, notifications]
+  );
+
   const loadEditor = useCallback(async () => {
     const { FieldEditor } = await import('./field_editor');
 
@@ -183,21 +193,23 @@ export const FieldEditorFlyoutContentContainer = ({
   }, [loadEditor]);
 
   return (
-    <FieldEditorProvider apiService={apiService}>
-      <FieldEditorFlyoutContent
-        onSave={saveField}
-        onCancel={onCancel}
-        docLinks={docLinks}
-        field={fieldToEdit}
-        FieldEditor={Editor}
-        fieldFormatEditors={fieldFormatEditors}
-        fieldFormats={fieldFormats}
-        uiSettings={uiSettings}
-        indexPattern={indexPattern}
-        fieldTypeToProcess={fieldTypeToProcess}
-        runtimeFieldValidator={validateRuntimeField}
-        isSavingField={isSaving}
-      />
+    <FieldEditorProvider indexPattern={indexPattern} services={services}>
+      <FieldPreviewProvider>
+        <FieldEditorFlyoutContent
+          onSave={saveField}
+          onCancel={onCancel}
+          docLinks={docLinks}
+          field={fieldToEdit}
+          FieldEditor={Editor}
+          fieldFormatEditors={fieldFormatEditors}
+          fieldFormats={fieldFormats}
+          uiSettings={uiSettings}
+          indexPattern={indexPattern}
+          fieldTypeToProcess={fieldTypeToProcess}
+          runtimeFieldValidator={validateRuntimeField}
+          isSavingField={isSaving}
+        />
+      </FieldPreviewProvider>
     </FieldEditorProvider>
   );
 };
