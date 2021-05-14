@@ -74,19 +74,11 @@
       "label": "ApmPluginSetup",
       "description": [],
       "signature": [
-        "{ ruleRegistry: ",
-        {
-          "pluginId": "observability",
-          "scope": "public",
-          "docId": "kibObservabilityPluginApi",
-          "section": "def-public.FormatterRuleRegistry",
-          "text": "FormatterRuleRegistry"
-        },
-        "<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { 'kibana.observability.evaluation.value': { type: \"scaled_float\"; scaling_factor: number; }; 'kibana.observability.evaluation.threshold': { type: \"scaled_float\"; scaling_factor: number; }; 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { readonly 'service.environment': { readonly type: \"keyword\"; }; readonly 'transaction.type': { readonly type: \"keyword\"; }; readonly 'processor.event': { readonly type: \"keyword\"; }; }>; }"
+        "{}"
       ],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 48
+        "lineNumber": 45
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -104,7 +96,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 51
+        "lineNumber": 47
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -152,7 +144,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/apm/server/plugin.ts",
-          "lineNumber": 50
+          "lineNumber": 55
         },
         "deprecated": false,
         "children": [
@@ -168,7 +160,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 60
+              "lineNumber": 65
             },
             "deprecated": false,
             "children": [
@@ -191,7 +183,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 60
+                  "lineNumber": 65
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -219,7 +211,7 @@
               "APMPluginStartDependencies",
               ", unknown>, plugins: Pick<",
               "APMPluginSetupDependencies",
-              ", \"data\" | \"security\" | \"home\" | \"features\" | \"ml\" | \"actions\" | \"usageCollection\" | \"cloud\" | \"observability\" | \"apmOss\" | \"licensing\" | \"spaces\" | \"taskManager\" | \"alerting\">) => { config$: ",
+              ", \"data\" | \"security\" | \"home\" | \"features\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">) => { config$: ",
               "Observable",
               "<{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'apm_oss.indexPattern': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.maxServiceEnvironments': number; 'xpack.apm.maxServiceSelection': number; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
               "SearchAggregatedTransactionSetting",
@@ -241,13 +233,11 @@
               "InferSearchResponseOf",
               "<TypeOfProcessorEvent<",
               "ValuesType",
-              "<TParams[\"apm\"][\"events\"]>>, ESSearchRequestOf<TParams>, {}>>; }>; ruleRegistry: ",
-              "RuleRegistry",
-              "<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { 'kibana.observability.evaluation.value': { type: \"scaled_float\"; scaling_factor: number; }; 'kibana.observability.evaluation.threshold': { type: \"scaled_float\"; scaling_factor: number; }; 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { readonly 'service.environment': { readonly type: \"keyword\"; }; readonly 'transaction.type': { readonly type: \"keyword\"; }; readonly 'processor.event': { readonly type: \"keyword\"; }; }>; }"
+              "<TParams[\"apm\"][\"events\"]>>, ESSearchRequestOf<TParams>, {}>>; }>; }"
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 64
+              "lineNumber": 69
             },
             "deprecated": false,
             "children": [
@@ -272,7 +262,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 65
+                  "lineNumber": 70
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -287,11 +277,11 @@
                 "signature": [
                   "Pick<",
                   "APMPluginSetupDependencies",
-                  ", \"data\" | \"security\" | \"home\" | \"features\" | \"ml\" | \"actions\" | \"usageCollection\" | \"cloud\" | \"observability\" | \"apmOss\" | \"licensing\" | \"spaces\" | \"taskManager\" | \"alerting\">"
+                  ", \"data\" | \"security\" | \"home\" | \"features\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"ruleRegistry\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">"
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 66
+                  "lineNumber": 71
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -319,7 +309,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 200
+              "lineNumber": 269
             },
             "deprecated": false,
             "children": [
@@ -341,7 +331,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 200
+                  "lineNumber": 269
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -361,7 +351,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 219
+              "lineNumber": 288
             },
             "deprecated": false,
             "children": [],
@@ -608,6 +598,30 @@
                 "section": "def-server.PluginStartContract",
                 "text": "PluginStartContract"
               },
+              ">; }; apmOss: { setup: ",
+              {
+                "pluginId": "apmOss",
+                "scope": "server",
+                "docId": "kibApmOssPluginApi",
+                "section": "def-server.APMOSSPluginSetup",
+                "text": "APMOSSPluginSetup"
+              },
+              "; start: () => Promise<undefined>; }; licensing: { setup: ",
+              {
+                "pluginId": "licensing",
+                "scope": "server",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-server.LicensingPluginSetup",
+                "text": "LicensingPluginSetup"
+              },
+              "; start: () => Promise<",
+              {
+                "pluginId": "licensing",
+                "scope": "server",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-server.LicensingPluginStart",
+                "text": "LicensingPluginStart"
+              },
               ">; }; observability: { setup: { getScopedAnnotationsClient: (requestContext: ",
               {
                 "pluginId": "core",
@@ -638,33 +652,9 @@
               "GetResponse",
               "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
               "DeleteResponse",
-              ">; } | undefined>; ruleRegistry: ",
-              "RuleRegistry",
-              "<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { 'kibana.observability.evaluation.value': { type: \"scaled_float\"; scaling_factor: number; }; 'kibana.observability.evaluation.threshold': { type: \"scaled_float\"; scaling_factor: number; }; 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>; }; start: () => Promise<undefined>; }; apmOss: { setup: ",
-              {
-                "pluginId": "apmOss",
-                "scope": "server",
-                "docId": "kibApmOssPluginApi",
-                "section": "def-server.APMOSSPluginSetup",
-                "text": "APMOSSPluginSetup"
-              },
-              "; start: () => Promise<undefined>; }; licensing: { setup: ",
-              {
-                "pluginId": "licensing",
-                "scope": "server",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-server.LicensingPluginSetup",
-                "text": "LicensingPluginSetup"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "licensing",
-                "scope": "server",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-server.LicensingPluginStart",
-                "text": "LicensingPluginStart"
-              },
-              ">; }; security?: { setup: ",
+              ">; } | undefined>; }; start: () => Promise<undefined>; }; ruleRegistry: { setup: ",
+              "RuleDataPluginService",
+              "; start: () => Promise<void>; }; security?: { setup: ",
               {
                 "pluginId": "security",
                 "scope": "server",
@@ -722,14 +712,6 @@
                 "section": "def-server.UsageCollectionSetup",
                 "text": "UsageCollectionSetup"
               },
-              "; start: () => Promise<undefined>; } | undefined; cloud?: { setup: ",
-              {
-                "pluginId": "cloud",
-                "scope": "server",
-                "docId": "kibCloudPluginApi",
-                "section": "def-server.CloudSetup",
-                "text": "CloudSetup"
-              },
               "; start: () => Promise<undefined>; } | undefined; spaces?: { setup: ",
               {
                 "pluginId": "spaces",
@@ -746,7 +728,15 @@
                 "section": "def-server.SpacesPluginStart",
                 "text": "SpacesPluginStart"
               },
-              ">; } | undefined; taskManager?: { setup: ",
+              ">; } | undefined; cloud?: { setup: ",
+              {
+                "pluginId": "cloud",
+                "scope": "server",
+                "docId": "kibCloudPluginApi",
+                "section": "def-server.CloudSetup",
+                "text": "CloudSetup"
+              },
+              "; start: () => Promise<undefined>; } | undefined; taskManager?: { setup: ",
               {
                 "pluginId": "taskManager",
                 "scope": "server",
@@ -788,14 +778,19 @@
           },
           {
             "parentPluginId": "apm",
-            "id": "def-server.APMRouteHandlerResources.apmRuleRegistry",
+            "id": "def-server.APMRouteHandlerResources.ruleDataClient",
             "type": "Object",
             "tags": [],
-            "label": "apmRuleRegistry",
+            "label": "ruleDataClient",
             "description": [],
             "signature": [
-              "RuleRegistry",
-              "<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { 'kibana.observability.evaluation.value': { type: \"scaled_float\"; scaling_factor: number; }; 'kibana.observability.evaluation.threshold': { type: \"scaled_float\"; scaling_factor: number; }; 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { readonly 'service.environment': { readonly type: \"keyword\"; }; readonly 'transaction.type': { readonly type: \"keyword\"; }; readonly 'processor.event': { readonly type: \"keyword\"; }; }>"
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.RuleDataClient",
+                "text": "RuleDataClient"
+              }
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
@@ -1518,7 +1513,7 @@
           "TypeC",
           "<{ filterNames: ",
           "Type",
-          "<(\"host\" | \"location\" | \"browser\" | \"device\" | \"os\" | \"serviceName\" | \"agentName\" | \"containerId\" | \"podName\" | \"transactionResult\" | \"serviceVersion\" | \"transactionUrl\")[], string, unknown>; }>, ",
+          "<(\"host\" | \"location\" | \"browser\" | \"serviceName\" | \"agentName\" | \"containerId\" | \"podName\" | \"transactionResult\" | \"serviceVersion\" | \"transactionUrl\" | \"device\" | \"os\")[], string, unknown>; }>, ",
           "TypeC",
           "<{ uiFilters: ",
           "StringC",
@@ -1538,7 +1533,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { localUiFilters: { options: any[]; name: \"host\" | \"location\" | \"browser\" | \"device\" | \"os\" | \"serviceName\" | \"agentName\" | \"containerId\" | \"podName\" | \"transactionResult\" | \"serviceVersion\" | \"transactionUrl\"; title: string; fieldName: string; }[]; }, ",
+          ", { localUiFilters: { options: any[]; name: \"host\" | \"location\" | \"browser\" | \"serviceName\" | \"agentName\" | \"containerId\" | \"podName\" | \"transactionResult\" | \"serviceVersion\" | \"transactionUrl\" | \"device\" | \"os\"; title: string; fieldName: string; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/service-map\": ",
           "ServerRoute",
@@ -2346,7 +2341,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { alerts: never; }, ",
+          ", { alerts: any[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /api/apm/traces/{traceId}\": ",
           "ServerRoute",
@@ -3628,7 +3623,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/apm/server/types.ts",
-        "lineNumber": 47
+        "lineNumber": 51
       },
       "deprecated": false,
       "children": [
@@ -3647,7 +3642,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/apm/server/types.ts",
-            "lineNumber": 48
+            "lineNumber": 52
           },
           "deprecated": false
         },
@@ -3665,7 +3660,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/apm/server/types.ts",
-            "lineNumber": 49
+            "lineNumber": 53
           },
           "deprecated": false,
           "returnComment": [],
@@ -3699,7 +3694,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/apm/server/types.ts",
-            "lineNumber": 50
+            "lineNumber": 54
           },
           "deprecated": false,
           "returnComment": [],
@@ -3726,7 +3721,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/apm/server/types.ts",
-                "lineNumber": 50
+                "lineNumber": 54
               },
               "deprecated": false
             }

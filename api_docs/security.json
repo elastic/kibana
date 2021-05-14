@@ -513,7 +513,7 @@
         "{ authc: ",
         "AuthenticationServiceSetup",
         "; sessionTimeout: ",
-        "ISessionTimeout",
+        "SessionTimeout",
         "; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
         "SecurityLicenseFeatures",
         "; features$: ",
@@ -524,7 +524,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 171
+        "lineNumber": 164
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -546,7 +546,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 172
+        "lineNumber": 165
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -1570,6 +1570,31 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "security",
+        "id": "def-server.AuthorizationServiceSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "AuthorizationServiceSetup",
+        "description": [],
+        "signature": [
+          "{ mode: ",
+          "AuthorizationMode",
+          "; actions: ",
+          "Actions",
+          "; checkPrivilegesDynamicallyWithRequest: ",
+          "CheckPrivilegesDynamicallyWithRequest",
+          "; checkPrivilegesWithRequest: ",
+          "CheckPrivilegesWithRequest",
+          "; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security/server/index.ts",
+          "lineNumber": 30
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "security",
         "id": "def-server.ROUTE_TAG_CAN_REDIRECT",

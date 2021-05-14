@@ -9398,6 +9398,20 @@
                 }
               },
               {
+                "plugin": "lists",
+                "link": {
+                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
+                  "lineNumber": 31
+                }
+              },
+              {
+                "plugin": "lists",
+                "link": {
+                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
+                  "lineNumber": 35
+                }
+              },
+              {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/framework/kibana_framework_adapter.ts",
@@ -9423,20 +9437,6 @@
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.ts",
                   "lineNumber": 39
-                }
-              },
-              {
-                "plugin": "lists",
-                "link": {
-                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
-                  "lineNumber": 31
-                }
-              },
-              {
-                "plugin": "lists",
-                "link": {
-                  "path": "x-pack/plugins/lists/server/routes/read_privileges_route.ts",
-                  "lineNumber": 35
                 }
               },
               {
@@ -10314,7 +10314,7 @@
             "plugin": "fleet",
             "link": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 15
+              "lineNumber": 14
             }
           },
           {
@@ -10335,7 +10335,7 @@
             "plugin": "fleet",
             "link": {
               "path": "x-pack/plugins/fleet/target/types/server/plugin.d.ts",
-              "lineNumber": 83
+              "lineNumber": 84
             }
           }
         ],
@@ -15951,27 +15951,6 @@
         "removeBy": "7.16",
         "references": [
           {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 447
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 466
-            }
-          },
-          {
             "plugin": "lists",
             "link": {
               "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
@@ -15990,6 +15969,27 @@
             "link": {
               "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
               "lineNumber": 31
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
+              "lineNumber": 10
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
+              "lineNumber": 447
+            }
+          },
+          {
+            "plugin": "securitySolution",
+            "link": {
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
+              "lineNumber": 466
             }
           },
           {
@@ -22535,7 +22535,7 @@
         "label": "EcsEventCategory",
         "description": [],
         "signature": [
-          "\"host\" | \"database\" | \"package\" | \"session\" | \"file\" | \"network\" | \"process\" | \"registry\" | \"web\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
+          "\"host\" | \"database\" | \"package\" | \"session\" | \"registry\" | \"network\" | \"web\" | \"file\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
         ],
         "source": {
           "path": "node_modules/@kbn/logging/target/ecs/event.d.ts",

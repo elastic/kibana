@@ -4360,7 +4360,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/server/plugin.ts",
-          "lineNumber": 91
+          "lineNumber": 90
         },
         "deprecated": false,
         "children": [
@@ -4382,7 +4382,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 92
+              "lineNumber": 91
             },
             "deprecated": false
           },
@@ -4405,7 +4405,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 93
+              "lineNumber": 92
             },
             "deprecated": false
           },
@@ -4428,7 +4428,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 94
+              "lineNumber": 93
             },
             "deprecated": false
           },
@@ -4450,7 +4450,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 95
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -4473,7 +4473,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 96
+              "lineNumber": 95
             },
             "deprecated": false
           },
@@ -4496,7 +4496,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 97
+              "lineNumber": 96
             },
             "deprecated": false
           }
@@ -4713,7 +4713,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
-          "lineNumber": 650
+          "lineNumber": 651
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -5322,7 +5322,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/index.ts",
-          "lineNumber": 44
+          "lineNumber": 35
         },
         "deprecated": false,
         "returnComment": [],
@@ -5339,7 +5339,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/index.ts",
-              "lineNumber": 44
+              "lineNumber": 35
             },
             "deprecated": false
           }
@@ -7835,7 +7835,7 @@
             "label": "agents",
             "description": [],
             "signature": [
-              "{ enabled: boolean; tlsCheckDisabled: boolean; pollingRequestTimeout: number; maxConcurrentConnections: number; kibana: { host?: string | string[] | undefined; ca_sha256?: string | undefined; }; elasticsearch: { host?: string | undefined; ca_sha256?: string | undefined; }; fleet_server?: { hosts?: string[] | undefined; } | undefined; agentPolicyRolloutRateLimitIntervalMs: number; agentPolicyRolloutRateLimitRequestPerInterval: number; }"
+              "{ enabled: boolean; elasticsearch: { host?: string | undefined; ca_sha256?: string | undefined; }; fleet_server?: { hosts?: string[] | undefined; } | undefined; }"
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/index.ts",
@@ -7862,7 +7862,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/index.ts",
-              "lineNumber": 35
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -7886,7 +7886,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/index.ts",
-              "lineNumber": 36
+              "lineNumber": 27
             },
             "deprecated": false
           }
@@ -13121,7 +13121,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"security\" | \"monitoring\" | \"cloud\" | \"network\" | \"kubernetes\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"languages\" | \"message_queue\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | undefined)[] | undefined"
+              "(\"custom\" | \"security\" | \"monitoring\" | \"cloud\" | \"kubernetes\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"languages\" | \"message_queue\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | undefined)[] | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
@@ -17458,7 +17458,7 @@
         "label": "PackageSpecCategory",
         "description": [],
         "signature": [
-          "\"custom\" | \"security\" | \"monitoring\" | \"cloud\" | \"network\" | \"kubernetes\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"languages\" | \"message_queue\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\""
+          "\"custom\" | \"security\" | \"monitoring\" | \"cloud\" | \"kubernetes\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"languages\" | \"message_queue\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\""
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
@@ -18025,7 +18025,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/index.ts",
-          "lineNumber": 49
+          "lineNumber": 40
         },
         "deprecated": false,
         "initialIsOpen": false

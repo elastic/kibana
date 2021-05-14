@@ -8389,45 +8389,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/lib/cidr_mask.ts",
-          "lineNumber": 17
+          "lineNumber": 12
         },
         "deprecated": false,
         "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.CidrMask.initialAddress",
-            "type": "Object",
-            "tags": [],
-            "label": "initialAddress",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.Ipv4Address",
-                "text": "Ipv4Address"
-              }
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/buckets/lib/cidr_mask.ts",
-              "lineNumber": 18
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.CidrMask.prefixLength",
-            "type": "number",
-            "tags": [],
-            "label": "prefixLength",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/aggs/buckets/lib/cidr_mask.ts",
-              "lineNumber": 19
-            },
-            "deprecated": false
-          },
           {
             "parentPluginId": "data",
             "id": "def-common.CidrMask.Unnamed",
@@ -8440,7 +8405,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/lib/cidr_mask.ts",
-              "lineNumber": 21
+              "lineNumber": 16
             },
             "deprecated": false,
             "children": [
@@ -8449,14 +8414,14 @@
                 "id": "def-common.CidrMask.Unnamed.$1",
                 "type": "string",
                 "tags": [],
-                "label": "mask",
+                "label": "cidr",
                 "description": [],
                 "signature": [
                   "string"
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/buckets/lib/cidr_mask.ts",
-                  "lineNumber": 21
+                  "lineNumber": 16
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8476,7 +8441,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/lib/cidr_mask.ts",
-              "lineNumber": 33
+              "lineNumber": 55
             },
             "deprecated": false,
             "children": [],
@@ -8494,7 +8459,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/lib/cidr_mask.ts",
-              "lineNumber": 44
+              "lineNumber": 62
             },
             "deprecated": false,
             "children": [],
@@ -8888,20 +8853,20 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.Ipv4Address",
+        "id": "def-common.IpAddress",
         "type": "Class",
         "tags": [],
-        "label": "Ipv4Address",
+        "label": "IpAddress",
         "description": [],
         "source": {
-          "path": "src/plugins/data/common/search/aggs/utils/ipv4_address.ts",
-          "lineNumber": 22
+          "path": "src/plugins/data/common/search/aggs/utils/ip_address.ts",
+          "lineNumber": 15
         },
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.Ipv4Address.Unnamed",
+            "id": "def-common.IpAddress.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -8910,24 +8875,24 @@
               "any"
             ],
             "source": {
-              "path": "src/plugins/data/common/search/aggs/utils/ipv4_address.ts",
-              "lineNumber": 25
+              "path": "src/plugins/data/common/search/aggs/utils/ip_address.ts",
+              "lineNumber": 18
             },
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.Ipv4Address.Unnamed.$1",
+                "id": "def-common.IpAddress.Unnamed.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "ipAddress",
                 "description": [],
                 "signature": [
-                  "React.ReactText"
+                  "string | number | number[]"
                 ],
                 "source": {
-                  "path": "src/plugins/data/common/search/aggs/utils/ipv4_address.ts",
-                  "lineNumber": 25
+                  "path": "src/plugins/data/common/search/aggs/utils/ip_address.ts",
+                  "lineNumber": 18
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8937,7 +8902,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.Ipv4Address.toString",
+            "id": "def-common.IpAddress.toString",
             "type": "Function",
             "tags": [],
             "label": "toString",
@@ -8946,8 +8911,8 @@
               "() => string"
             ],
             "source": {
-              "path": "src/plugins/data/common/search/aggs/utils/ipv4_address.ts",
-              "lineNumber": 50
+              "path": "src/plugins/data/common/search/aggs/utils/ip_address.ts",
+              "lineNumber": 28
             },
             "deprecated": false,
             "children": [],
@@ -8955,17 +8920,17 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.Ipv4Address.valueOf",
+            "id": "def-common.IpAddress.valueOf",
             "type": "Function",
             "tags": [],
             "label": "valueOf",
             "description": [],
             "signature": [
-              "() => number"
+              "() => number | bigint"
             ],
             "source": {
-              "path": "src/plugins/data/common/search/aggs/utils/ipv4_address.ts",
-              "lineNumber": 60
+              "path": "src/plugins/data/common/search/aggs/utils/ip_address.ts",
+              "lineNumber": 36
             },
             "deprecated": false,
             "children": [],

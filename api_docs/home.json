@@ -971,7 +971,7 @@
               "plugin": "apm",
               "link": {
                 "path": "x-pack/plugins/apm/public/plugin.ts",
-                "lineNumber": 86
+                "lineNumber": 82
               }
             }
           ]

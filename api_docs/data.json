@@ -10870,7 +10870,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/public/actions/filters/create_filters_from_value_click.ts",
-                  "lineNumber": 120
+                  "lineNumber": 121
                 },
                 "deprecated": false
               }
@@ -20494,10 +20494,10 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-public.search.aggs.Ipv4Address",
+                "id": "def-public.search.aggs.IpAddress",
                 "type": "Object",
                 "tags": [],
-                "label": "Ipv4Address",
+                "label": "IpAddress",
                 "description": [],
                 "signature": [
                   "typeof ",
@@ -20505,8 +20505,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.Ipv4Address",
-                    "text": "Ipv4Address"
+                    "section": "def-common.IpAddress",
+                    "text": "IpAddress"
                   }
                 ],
                 "source": {
@@ -32939,10 +32939,10 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-server.search.aggs.Ipv4Address",
+                "id": "def-server.search.aggs.IpAddress",
                 "type": "Object",
                 "tags": [],
-                "label": "Ipv4Address",
+                "label": "IpAddress",
                 "description": [],
                 "signature": [
                   "typeof ",
@@ -32950,8 +32950,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.Ipv4Address",
-                    "text": "Ipv4Address"
+                    "section": "def-common.IpAddress",
+                    "text": "IpAddress"
                   }
                 ],
                 "source": {
