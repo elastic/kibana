@@ -6,9 +6,11 @@
  */
 
 import uuid from 'uuid';
+import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
-import { addIdToItem, removeIdFromItem, validate } from '../../../../common/shared_imports';
 import {
   CreateExceptionListItemSchema,
   EntriesArray,
@@ -37,7 +39,6 @@ import {
   isOperator,
 } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
-import { OsTypeArray } from '../../../../common/schemas';
 
 import {
   BuilderEntry,

@@ -21,7 +21,7 @@ import { createMockConfig, requestContextMock } from '../lib/detection_engine/ro
 import { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContextServiceStartContract } from '../endpoint/mocks';
 import { licenseMock } from '../../../licensing/common/licensing.mock';
-import { LicenseService } from '../../common/license/license';
+import { LicenseService } from '../../common/license';
 import { Subject } from 'rxjs';
 import { ILicense } from '../../../licensing/common/types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';

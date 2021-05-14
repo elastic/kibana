@@ -79,6 +79,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
   const eventType = getEventType(ecsData);
 
+  const isEventContextMenuEnabled = useMemo(
+    () => isEventFilteringEnabled && !!ecsData.event?.kind && ecsData.event?.kind[0] === 'event',
+    [ecsData.event?.kind, isEventFilteringEnabled]
+  );
+
   return (
     <>
       {showCheckboxes && (
@@ -161,7 +166,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
-          disabled={eventType !== 'signal' && (!isEventFilteringEnabled || eventType !== 'raw')}
+          disabled={eventType !== 'signal' && !isEventContextMenuEnabled}
           refetch={refetch}
           onRuleChange={onRuleChange}
         />

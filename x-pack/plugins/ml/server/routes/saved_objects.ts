@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
@@ -13,8 +12,8 @@ import {
   jobsAndSpaces,
   jobsAndCurrentSpace,
   syncJobObjects,
-  jobTypeSchema,
   canDeleteJobSchema,
+  jobTypeSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 
@@ -308,7 +307,7 @@ export function savedObjectsRoutes(
     {
       path: '/api/ml/saved_objects/can_delete_job/{jobType}',
       validate: {
-        params: schema.object({ jobType: jobTypeSchema }),
+        params: jobTypeSchema,
         body: canDeleteJobSchema,
       },
       options: {
