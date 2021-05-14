@@ -15,6 +15,7 @@ export default function upgradeAssistantFunctionalTests({
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
   const log = getService('log');
+  const security = getService('security');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
