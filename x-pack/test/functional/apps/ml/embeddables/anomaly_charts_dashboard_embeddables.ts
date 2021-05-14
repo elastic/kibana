@@ -60,7 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubject = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
 
-  describe('anomaly charts', function () {
+  // eslint-disable-next-line ban/ban
+  describe.only('anomaly charts', function () {
     this.tags(['mlqa']);
 
     before(async () => {
