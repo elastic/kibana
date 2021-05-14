@@ -7,11 +7,14 @@
 
 import { CompleteTimeline, timeline } from './timeline';
 
-export interface TestCase {
+export interface TestCase extends TestCaseWithoutTimeline {
+  timeline: CompleteTimeline;
+}
+
+export interface TestCaseWithoutTimeline {
   name: string;
   tags: string[];
   description: string;
-  timeline: CompleteTimeline;
   reporter: string;
   owner: string;
 }

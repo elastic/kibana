@@ -13,7 +13,7 @@ import { SecurityPageName } from '../../app/types';
 import { getCaseUrl } from '../../common/components/link_to';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { useGetUserSavedObjectPermissions, useKibana } from '../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
@@ -24,7 +24,7 @@ import { APP_ID } from '../../../common/constants';
 const ConfigureCasesPageComponent: React.FC = () => {
   const { cases } = useKibana().services;
   const history = useHistory();
-  const userPermissions = useGetUserSavedObjectPermissions();
+  const userPermissions = useGetUserCasesPermissions();
   const search = useGetUrlSearch(navTabs.case);
 
   const backOptions = useMemo(

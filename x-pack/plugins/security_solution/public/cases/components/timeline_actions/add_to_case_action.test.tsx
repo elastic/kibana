@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { EuiGlobalToastList } from '@elastic/eui';
 
-import { useKibana, useGetUserSavedObjectPermissions } from '../../../common/lib/kibana';
+import { useKibana, useGetUserCasesPermissions } from '../../../common/lib/kibana';
 import { useStateToaster } from '../../../common/components/toasters';
 import { TestProviders } from '../../../common/mock';
 import { AddToCaseAction } from './add_to_case_action';
@@ -62,7 +62,7 @@ describe('AddToCaseAction', () => {
       getAllCasesSelectorModal: mockAllCasesModal.mockImplementation(() => <>{'test'}</>),
     };
     (useStateToaster as jest.Mock).mockReturnValue([jest.fn(), mockDispatchToaster]);
-    (useGetUserSavedObjectPermissions as jest.Mock).mockReturnValue({
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
       crud: true,
       read: true,
     });
@@ -201,7 +201,7 @@ describe('AddToCaseAction', () => {
   });
 
   it('disabled when user does not have crud permissions', () => {
-    (useGetUserSavedObjectPermissions as jest.Mock).mockReturnValue({
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
       crud: false,
       read: true,
     });

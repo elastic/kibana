@@ -237,7 +237,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                     all: [...caseSavedObjects],
                     read: [],
                   },
-                  ui: ['crud-case'], // uiCapabilities.siem.crud-case
+                  // using variables with underscores here otherwise when we retrieve them from the kibana
+                  // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
+                  ui: ['crud_cases', 'read_cases'], // uiCapabilities.siem.crud_cases
                   cases: {
                     all: [APP_ID],
                   },
@@ -250,7 +252,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                     all: [],
                     read: [...caseSavedObjects],
                   },
-                  ui: ['read-case'], // uiCapabilities.siem.read-case
+                  // using variables with underscores here otherwise when we retrieve them from the kibana
+                  // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
+                  ui: ['read_cases'], // uiCapabilities.siem.read_cases
                   cases: {
                     read: [APP_ID],
                   },
