@@ -15,8 +15,9 @@ import { EngineDetails } from '../engine/types';
 import { EnginesAPIResponse } from '../engines/types';
 
 export interface SourceEnginesLogicValues {
-  addSourceEnginesModalOpen: boolean;
   dataLoading: boolean;
+  modalLoading: boolean;
+  isModalOpen: boolean;
   indexedEngines: EngineDetails[];
   indexedEngineNames: string[];
   sourceEngines: EngineDetails[];
@@ -83,7 +84,6 @@ const ADD_SOURCE_ENGINES_SUCCESS_MESSAGE = (sourceEngineNames: string[]) =>
 
 interface SourceEnginesLogicActions {
   addSourceEngines: (sourceEngineNames: string[]) => { sourceEngineNames: string[] };
-  closeAddSourceEnginesModal: () => void;
   fetchIndexedEngines: () => void;
   fetchSourceEngines: () => void;
   onSourceEngineRemove: (sourceEngineNameToRemove: string) => { sourceEngineNameToRemove: string };
@@ -93,9 +93,10 @@ interface SourceEnginesLogicActions {
   onSourceEnginesFetch: (
     sourceEngines: SourceEnginesLogicValues['sourceEngines']
   ) => { sourceEngines: SourceEnginesLogicValues['sourceEngines'] };
-  openAddSourceEnginesModal: () => void;
   removeSourceEngine: (sourceEngineName: string) => { sourceEngineName: string };
   setIndexedEngines: (indexedEngines: EngineDetails[]) => { indexedEngines: EngineDetails[] };
+  openModal: () => void;
+  closeModal: () => void;
   onAddEnginesSelection: (
     selectedEngineNamesToAdd: string[]
   ) => { selectedEngineNamesToAdd: string[] };
@@ -107,15 +108,15 @@ export const SourceEnginesLogic = kea<
   path: ['enterprise_search', 'app_search', 'source_engines_logic'],
   actions: () => ({
     addSourceEngines: (sourceEngineNames) => ({ sourceEngineNames }),
-    closeAddSourceEnginesModal: true,
     fetchIndexedEngines: true,
     fetchSourceEngines: true,
     onSourceEngineRemove: (sourceEngineNameToRemove) => ({ sourceEngineNameToRemove }),
     onSourceEnginesAdd: (sourceEnginesToAdd) => ({ sourceEnginesToAdd }),
     onSourceEnginesFetch: (sourceEngines) => ({ sourceEngines }),
-    openAddSourceEnginesModal: true,
     removeSourceEngine: (sourceEngineName) => ({ sourceEngineName }),
     setIndexedEngines: (indexedEngines) => ({ indexedEngines }),
+    openModal: true,
+    closeModal: true,
     onAddEnginesSelection: (selectedEngineNamesToAdd) => ({ selectedEngineNamesToAdd }),
   }),
   reducers: () => ({
@@ -125,11 +126,18 @@ export const SourceEnginesLogic = kea<
         onSourceEnginesFetch: () => false,
       },
     ],
-    addSourceEnginesModalOpen: [
+    modalLoading: [
       false,
       {
-        openAddSourceEnginesModal: () => true,
-        closeAddSourceEnginesModal: () => false,
+        addSourceEngines: () => true,
+        closeModal: () => false,
+      },
+    ],
+    isModalOpen: [
+      false,
+      {
+        openModal: () => true,
+        closeModal: () => false,
       },
     ],
     indexedEngines: [
@@ -141,7 +149,7 @@ export const SourceEnginesLogic = kea<
     selectedEngineNamesToAdd: [
       [],
       {
-        closeAddSourceEnginesModal: () => [],
+        closeModal: () => [],
         onAddEnginesSelection: (_, { selectedEngineNamesToAdd }) => selectedEngineNamesToAdd,
       },
     ],
@@ -196,7 +204,7 @@ export const SourceEnginesLogic = kea<
       } catch (e) {
         flashAPIErrors(e);
       } finally {
-        actions.closeAddSourceEnginesModal();
+        actions.closeModal();
       }
     },
     fetchSourceEngines: () => {

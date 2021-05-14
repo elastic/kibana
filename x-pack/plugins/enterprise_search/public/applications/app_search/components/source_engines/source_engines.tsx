@@ -36,7 +36,7 @@ export const SourceEngines: React.FC = () => {
     myRole: { canManageMetaEngineSourceEngines },
   } = useValues(AppLogic);
   const { fetchIndexedEngines, fetchSourceEngines } = useActions(SourceEnginesLogic);
-  const { addSourceEnginesModalOpen, dataLoading } = useValues(SourceEnginesLogic);
+  const { dataLoading, isModalOpen } = useValues(SourceEnginesLogic);
 
   useEffect(() => {
     fetchIndexedEngines();
@@ -55,7 +55,7 @@ export const SourceEngines: React.FC = () => {
       <FlashMessages />
       <EuiPageContent hasBorder>
         <SourceEnginesTable />
-        {addSourceEnginesModalOpen && <AddSourceEnginesModal />}
+        {isModalOpen && <AddSourceEnginesModal />}
       </EuiPageContent>
     </>
   );

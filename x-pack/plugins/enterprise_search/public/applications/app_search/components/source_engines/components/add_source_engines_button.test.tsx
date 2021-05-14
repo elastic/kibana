@@ -17,7 +17,7 @@ import { AddSourceEnginesButton } from './add_source_engines_button';
 
 const MOCK_ACTIONS = {
   // SourceEnginesLogic
-  openAddSourceEnginesModal: jest.fn(),
+  openModal: jest.fn(),
 };
 
 describe('AddSourceEnginesButton', () => {
@@ -32,6 +32,6 @@ describe('AddSourceEnginesButton', () => {
 
     button.simulate('click');
 
-    expect(MOCK_ACTIONS.openAddSourceEnginesModal).toHaveBeenCalled();
+    expect(MOCK_ACTIONS.openModal).toHaveBeenCalled();
   });
 });

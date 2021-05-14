@@ -29,8 +29,9 @@ jest.mock('../engines', () => ({
 }));
 
 const DEFAULT_VALUES = {
-  addSourceEnginesModalOpen: false,
   dataLoading: true,
+  modalLoading: false,
+  isModalOpen: false,
   indexedEngines: [],
   indexedEngineNames: [],
   sourceEngines: [],
@@ -57,24 +58,31 @@ describe('SourceEnginesLogic', () => {
   });
 
   describe('actions', () => {
-    describe('closeAddSourceEnginesModal closes the modal', () => {
-      mount({
-        addSourceEnginesModalOpen: true,
+    describe('closeModal', () => {
+      it('sets isModalOpen and modalLoading to false', () => {
+        mount({
+          isModalOpen: true,
+          modalLoading: true,
+        });
+
+        SourceEnginesLogic.actions.closeModal();
+
+        expect(SourceEnginesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isModalOpen: false,
+          modalLoading: false,
+        });
       });
-
-      SourceEnginesLogic.actions.closeAddSourceEnginesModal();
-
-      expect(SourceEnginesLogic.values.addSourceEnginesModalOpen).toEqual(false);
     });
 
-    describe('openAddSourceEnginesModal opens the modal', () => {
+    describe('openModal opens the modal', () => {
       mount({
-        addSourceEnginesModalOpen: false,
+        isModalOpen: false,
       });
 
-      SourceEnginesLogic.actions.openAddSourceEnginesModal();
+      SourceEnginesLogic.actions.openModal();
 
-      expect(SourceEnginesLogic.values.addSourceEnginesModalOpen).toEqual(true);
+      expect(SourceEnginesLogic.values.isModalOpen).toEqual(true);
     });
 
     describe('onAddEnginesSelection sets the selected engines', () => {
@@ -322,6 +330,17 @@ describe('SourceEnginesLogic', () => {
     });
 
     describe('addSourceEngines', () => {
+      it('sets modalLoading to true', () => {
+        mount({ modalLoading: false });
+
+        SourceEnginesLogic.actions.addSourceEngines([]);
+
+        expect(SourceEnginesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          modalLoading: true,
+        });
+      });
+
       describe('happy path', () => {
         it('calls the bulkCreateLocoMocoEngineSourceEnginesPath endpoint then onSourceEnginesAdd', async () => {
           mount({
@@ -376,13 +395,13 @@ describe('SourceEnginesLogic', () => {
         });
 
         it('closes the modal', async () => {
-          jest.spyOn(SourceEnginesLogic.actions, 'closeAddSourceEnginesModal');
+          jest.spyOn(SourceEnginesLogic.actions, 'closeModal');
           http.post.mockReturnValueOnce(Promise.resolve());
 
           SourceEnginesLogic.actions.addSourceEngines([]);
           await nextTick();
 
-          expect(SourceEnginesLogic.actions.closeAddSourceEnginesModal).toHaveBeenCalled();
+          expect(SourceEnginesLogic.actions.closeModal).toHaveBeenCalled();
         });
       });
 
@@ -398,13 +417,13 @@ describe('SourceEnginesLogic', () => {
         });
 
         it('closes the modal', async () => {
-          jest.spyOn(SourceEnginesLogic.actions, 'closeAddSourceEnginesModal');
+          jest.spyOn(SourceEnginesLogic.actions, 'closeModal');
           http.post.mockReturnValueOnce(Promise.reject());
 
           SourceEnginesLogic.actions.addSourceEngines([]);
           await nextTick();
 
-          expect(SourceEnginesLogic.actions.closeAddSourceEnginesModal).toHaveBeenCalled();
+          expect(SourceEnginesLogic.actions.closeModal).toHaveBeenCalled();
         });
       });
     });

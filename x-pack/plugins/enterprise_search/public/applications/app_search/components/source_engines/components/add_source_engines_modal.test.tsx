@@ -19,12 +19,13 @@ const MOCK_VALUES = {
   // SouceEnginesLogic
   selectableEngineNames: ['source-engine-1', 'source-engine-2', 'source-engine-3'],
   selectedEngineNamesToAdd: ['source-engine-2'],
+  modalLoading: false,
 };
 
 const MOCK_ACTIONS = {
   // SourceEnginesLogic
   addSourceEngines: jest.fn(),
-  closeAddSourceEnginesModal: jest.fn(),
+  closeModal: jest.fn(),
   onAddEnginesSelection: jest.fn(),
 };
 
@@ -41,7 +42,7 @@ describe('AddSourceEnginesModal', () => {
   it('calls closeAddSourceEnginesModal when the modal is closed', () => {
     wrapper.find(EuiModal).simulate('close');
 
-    expect(MOCK_ACTIONS.closeAddSourceEnginesModal).toHaveBeenCalled();
+    expect(MOCK_ACTIONS.closeModal).toHaveBeenCalled();
   });
 
   describe('combo box', () => {
@@ -65,10 +66,10 @@ describe('AddSourceEnginesModal', () => {
   });
 
   describe('cancel button', () => {
-    it('calls closeAddSourceEnginesModal when clicked', () => {
+    it('calls closeModal when clicked', () => {
       wrapper.find(EuiButtonEmpty).simulate('click');
 
-      expect(MOCK_ACTIONS.closeAddSourceEnginesModal).toHaveBeenCalled();
+      expect(MOCK_ACTIONS.closeModal).toHaveBeenCalled();
     });
   });
 
@@ -81,6 +82,16 @@ describe('AddSourceEnginesModal', () => {
       wrapper = shallow(<AddSourceEnginesModal />);
 
       expect(wrapper.find(EuiButton).prop('disabled')).toEqual(true);
+    });
+
+    it('passes modalLoading state', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        modalLoading: true,
+      });
+      wrapper = shallow(<AddSourceEnginesModal />);
+
+      expect(wrapper.find(EuiButton).prop('isLoading')).toEqual(true);
     });
 
     it('calls addSourceEngines when clicked', () => {

@@ -35,9 +35,8 @@ const MOCK_VALUES = {
     canManageMetaEngineSourceEngines: true,
   },
   // SourceEnginesLogic
-  addSourceEnginesModalOpen: false,
   dataLoading: false,
-  indexedEngines: [],
+  isModalOpen: false,
   selectedEngineNamesToAdd: [],
   sourceEngines: [],
 };
@@ -75,7 +74,7 @@ describe('SourceEngines', () => {
     it('shows the add source engines modal', () => {
       setMockValues({
         ...MOCK_VALUES,
-        addSourceEnginesModalOpen: true,
+        isModalOpen: true,
       });
       const wrapper = shallow(<SourceEngines />);
 

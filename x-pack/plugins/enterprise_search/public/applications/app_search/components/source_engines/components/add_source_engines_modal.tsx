@@ -28,13 +28,13 @@ import { CANCEL_BUTTON_LABEL, SAVE_BUTTON_LABEL } from '../../../../shared/const
 import { SourceEnginesLogic } from '../source_engines_logic';
 
 export const AddSourceEnginesModal: React.FC = () => {
-  const { addSourceEngines, closeAddSourceEnginesModal, onAddEnginesSelection } = useActions(
+  const { addSourceEngines, closeModal, onAddEnginesSelection } = useActions(SourceEnginesLogic);
+  const { selectableEngineNames, selectedEngineNamesToAdd, modalLoading } = useValues(
     SourceEnginesLogic
   );
-  const { selectableEngineNames, selectedEngineNamesToAdd } = useValues(SourceEnginesLogic);
 
   return (
-    <EuiModal onClose={closeAddSourceEnginesModal}>
+    <EuiModal onClose={closeModal}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate(
@@ -62,9 +62,10 @@ export const AddSourceEnginesModal: React.FC = () => {
         />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeAddSourceEnginesModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={closeModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
         <EuiButton
           disabled={selectedEngineNamesToAdd.length === 0}
+          isLoading={modalLoading}
           onClick={() => addSourceEngines(selectedEngineNamesToAdd)}
           fill
         >

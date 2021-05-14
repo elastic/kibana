@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { SourceEnginesLogic } from '../source_engines_logic';
 
 export const AddSourceEnginesButton: React.FC = () => {
-  const { openAddSourceEnginesModal } = useActions(SourceEnginesLogic);
+  const { openModal } = useActions(SourceEnginesLogic);
 
   const BUTTON_LABEL = i18n.translate(
     'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesButtonLabel',
@@ -26,7 +26,7 @@ export const AddSourceEnginesButton: React.FC = () => {
   );
 
   return (
-    <EuiButton color="secondary" fill onClick={openAddSourceEnginesModal}>
+    <EuiButton color="secondary" fill onClick={openModal}>
       {BUTTON_LABEL}
     </EuiButton>
   );
