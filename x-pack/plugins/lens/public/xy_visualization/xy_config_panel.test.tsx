@@ -16,7 +16,6 @@ import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_service/mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
-import { Datatable } from 'src/plugins/expressions/public';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
@@ -166,9 +165,33 @@ describe('XY Config panels', () => {
     it('should pass in information about current data bounds', () => {
       const state = testState();
       frame.activeData = {
-        first: ({
+        first: {
+          type: 'datatable',
           rows: [{ bar: -5 }, { bar: 50 }],
-        } as unknown) as Datatable,
+          columns: [
+            {
+              id: 'baz',
+              meta: {
+                type: 'number',
+              },
+              name: 'baz',
+            },
+            {
+              id: 'foo',
+              meta: {
+                type: 'number',
+              },
+              name: 'foo',
+            },
+            {
+              id: 'bar',
+              meta: {
+                type: 'number',
+              },
+              name: 'bar',
+            },
+          ],
+        },
       };
       const component = shallow(
         <XyToolbar
