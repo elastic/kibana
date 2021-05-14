@@ -21,16 +21,9 @@ import { PalettePicker } from './palette_picker';
 
 import './palette_configuration.scss';
 
-import { CustomStops } from '../../shared_components/coloring/color_stops';
-import {
-  defaultParams,
-  CUSTOM_PALETTE,
-  DEFAULT_COLOR_STEPS,
-} from '../../shared_components/coloring/constants';
-import {
-  CustomPaletteParams,
-  RequiredPaletteParamTypes,
-} from '../../shared_components/coloring/types';
+import { CustomStops } from './color_stops';
+import { defaultPaletteParams, CUSTOM_PALETTE, DEFAULT_COLOR_STEPS } from './constants';
+import { CustomPaletteParams, RequiredPaletteParamTypes } from './types';
 import {
   getColorStops,
   getPaletteStops,
@@ -40,7 +33,7 @@ import {
   remapStopsByNewInterval,
   getSwitchToCustomParams,
   reversePalette,
-} from '../../shared_components/coloring/utils';
+} from './utils';
 const idPrefix = htmlIdGenerator()();
 
 /**
@@ -71,7 +64,7 @@ export function CustomizablePalette({
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds: { min: number; max: number };
 }) {
-  const rangeType = activePalette.params?.rangeType ?? defaultParams.rangeType;
+  const rangeType = activePalette.params?.rangeType ?? defaultPaletteParams.rangeType;
   const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
   const colorStopsToShow = getColorStops(
@@ -172,7 +165,7 @@ export function CustomizablePalette({
                 'data-test-subj': 'continuity-none',
               },
             ]}
-            valueOfSelected={activePalette.params?.continuity || defaultParams.continuity}
+            valueOfSelected={activePalette.params?.continuity || defaultPaletteParams.continuity}
             onChange={(continuity: Required<CustomPaletteParams>['continuity']) =>
               setPalette(
                 mergePaletteParams(activePalette, {

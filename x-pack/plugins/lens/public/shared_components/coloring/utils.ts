@@ -11,7 +11,7 @@ import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps/theme';
 import { isColorDark } from '@elastic/eui';
 import {
   CUSTOM_PALETTE,
-  defaultParams,
+  defaultPaletteParams,
   DEFAULT_COLOR_STEPS,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
@@ -130,10 +130,10 @@ export function getPaletteStops(
   }
   // generate a palette from predefined ones and customize the domain
   const colorStopsFromPredefined = palettes
-    .get(prevPalette || activePaletteParams?.name || defaultParams.name)
-    .getCategoricalColors(defaultParams.steps, otherParams);
+    .get(prevPalette || activePaletteParams?.name || defaultPaletteParams.name)
+    .getCategoricalColors(defaultPaletteParams.steps, otherParams);
 
-  const newStopsMin = mapFromMinValue ? minValue : interval / defaultParams.steps;
+  const newStopsMin = mapFromMinValue ? minValue : interval / defaultPaletteParams.steps;
 
   const stops = remapStopsByNewInterval(
     colorStopsFromPredefined.map((color, index) => ({ color, stop: index })),

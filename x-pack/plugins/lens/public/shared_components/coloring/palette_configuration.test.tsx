@@ -11,8 +11,8 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { ReactWrapper } from 'enzyme';
-import { CustomPaletteParams } from '../../shared_components/coloring/types';
-import { applyPaletteParams } from '../../shared_components/coloring/utils';
+import { CustomPaletteParams } from './types';
+import { applyPaletteParams } from './utils';
 import { CustomizablePalette } from './palette_configuration';
 
 describe('palette utilities', () => {

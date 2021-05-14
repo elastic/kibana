@@ -15,7 +15,7 @@ export const DEFAULT_MIN_STOP = 0;
 export const DEFAULT_MAX_STOP = 100;
 export const DEFAULT_COLOR_STEPS = 5;
 export const DEFAULT_COLOR = '#6092C0'; // Same as EUI ColorStops default for new stops
-export const defaultParams: RequiredPaletteParamTypes = {
+export const defaultPaletteParams: RequiredPaletteParamTypes = {
   name: DEFAULT_PALETTE_NAME,
   reverse: false,
   rangeType: 'percent',

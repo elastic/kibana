@@ -12,7 +12,7 @@ import {
   CUSTOM_PALETTE,
   DEFAULT_COLOR_STEPS,
   FIXED_PROGRESSION,
-  defaultParams,
+  defaultPaletteParams,
 } from '../../shared_components/coloring/constants';
 import { CustomPaletteParams } from '../../shared_components/coloring/types';
 import { remapStopsByNewInterval } from '../../shared_components/coloring/utils';
@@ -62,6 +62,8 @@ function getCustomPaletteConfig(
   };
 }
 
+// Note: this is a special palette picker different from the one in the root shared folder
+// ideally these should be merged together, but as for now this holds some custom logic hard to remove
 export function PalettePicker({
   palettes,
   activePalette,
@@ -108,7 +110,7 @@ export function PalettePicker({
           name: newPalette,
         });
       }}
-      valueOfSelected={activePalette?.name || defaultParams.name}
+      valueOfSelected={activePalette?.name || defaultPaletteParams.name}
       selectionDisplay="palette"
       {...rest}
     />

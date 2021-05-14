@@ -10,3 +10,4 @@ export { ToolbarPopoverProps, ToolbarPopover } from './toolbar_popover';
 export { LegendSettingsPopover } from './legend_settings_popover';
 export { PalettePicker } from './palette_picker';
 export { TooltipWrapper } from './tooltip_wrapper';
+export * from './coloring';
