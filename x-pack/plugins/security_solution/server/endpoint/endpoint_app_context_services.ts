@@ -200,17 +200,13 @@ export class EndpointAppContextService {
     return this.license;
   }
 
-  public getCasesClient(
+  public async getCasesClient(
     req: KibanaRequest,
     context: SecuritySolutionRequestHandlerContext
-  ): CasesClient {
+  ): Promise<CasesClient> {
     if (!this.cases) {
       throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
     }
-    return this.cases.getCasesClient(
-      context.core.elasticsearch.client.asCurrentUser,
-      this.getScopedSavedObjectsClient(req),
-      this.security?.authc.getCurrentUser(req)
-    );
+    return this.cases.getCasesClientWithRequestAndContext(context, req);
   }
 }

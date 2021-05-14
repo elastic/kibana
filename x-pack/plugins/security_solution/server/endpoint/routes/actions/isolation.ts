@@ -109,8 +109,10 @@ export const isolationRequestHandler = function (
     let caseIDs: string[] = req.body.case_ids?.slice() || [];
     if (req.body.alert_ids && req.body.alert_ids.length > 0) {
       const newIDs: string[][] = await Promise.all(
-        req.body.alert_ids.map((a: string) =>
-          endpointContext.service.getCasesClient(req, context).getCaseIdsByAlertId({ alertId: a })
+        req.body.alert_ids.map(async (a: string) =>
+          (await endpointContext.service.getCasesClient(req, context)).getCaseIdsByAlertId({
+            alertId: a,
+          })
         )
       );
       caseIDs = caseIDs.concat(...newIDs);
@@ -166,8 +168,8 @@ export const isolationRequestHandler = function (
       commentLines.push(`\n\nWith Comment:\n> ${req.body.comment}`);
     }
 
-    caseIDs.forEach((caseId) => {
-      endpointContext.service.getCasesClient(req, context).addComment({
+    caseIDs.forEach(async (caseId) => {
+      (await endpointContext.service.getCasesClient(req, context)).addComment({
         caseId,
         comment: {
           comment: commentLines.join('\n'),
