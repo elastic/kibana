@@ -18,8 +18,11 @@ export interface SourceEnginesLogicValues {
   addSourceEnginesModalOpen: boolean;
   dataLoading: boolean;
   indexedEngines: EngineDetails[];
-  selectedEngineNamesToAdd: string[];
+  indexedEngineNames: string[];
   sourceEngines: EngineDetails[];
+  sourceEngineNames: string[];
+  selectableEngineNames: string[];
+  selectedEngineNamesToAdd: string[];
 }
 
 // TODO Test this seperately from fetchSourceEngines/fetchIndexedEngines
@@ -93,7 +96,7 @@ interface SourceEnginesLogicActions {
   openAddSourceEnginesModal: () => void;
   removeSourceEngine: (sourceEngineName: string) => { sourceEngineName: string };
   setIndexedEngines: (indexedEngines: EngineDetails[]) => { indexedEngines: EngineDetails[] };
-  setSelectedEngineNamesToAdd: (
+  onAddEnginesSelection: (
     selectedEngineNamesToAdd: string[]
   ) => { selectedEngineNamesToAdd: string[] };
 }
@@ -113,7 +116,7 @@ export const SourceEnginesLogic = kea<
     openAddSourceEnginesModal: true,
     removeSourceEngine: (sourceEngineName) => ({ sourceEngineName }),
     setIndexedEngines: (indexedEngines) => ({ indexedEngines }),
-    setSelectedEngineNamesToAdd: (selectedEngineNamesToAdd) => ({ selectedEngineNamesToAdd }),
+    onAddEnginesSelection: (selectedEngineNamesToAdd) => ({ selectedEngineNamesToAdd }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -139,7 +142,7 @@ export const SourceEnginesLogic = kea<
       [],
       {
         closeAddSourceEnginesModal: () => [],
-        setSelectedEngineNamesToAdd: (_, { selectedEngineNamesToAdd }) => selectedEngineNamesToAdd,
+        onAddEnginesSelection: (_, { selectedEngineNamesToAdd }) => selectedEngineNamesToAdd,
       },
     ],
     sourceEngines: [
@@ -155,6 +158,21 @@ export const SourceEnginesLogic = kea<
       },
     ],
   }),
+  selectors: {
+    indexedEngineNames: [
+      (selectors) => [selectors.indexedEngines],
+      (indexedEngines) => indexedEngines.map((engine: EngineDetails) => engine.name),
+    ],
+    sourceEngineNames: [
+      (selectors) => [selectors.sourceEngines],
+      (sourceEngines) => sourceEngines.map((engine: EngineDetails) => engine.name),
+    ],
+    selectableEngineNames: [
+      (selectors) => [selectors.indexedEngineNames, selectors.sourceEngineNames],
+      (indexedEngineNames, sourceEngineNames) =>
+        indexedEngineNames.filter((engineName: string) => !sourceEngineNames.includes(engineName)),
+    ],
+  },
   listeners: ({ actions, values }) => ({
     addSourceEngines: async ({ sourceEngineNames }) => {
       const { http } = HttpLogic.values;

@@ -32,8 +32,11 @@ const DEFAULT_VALUES = {
   addSourceEnginesModalOpen: false,
   dataLoading: true,
   indexedEngines: [],
-  selectedEngineNamesToAdd: [],
+  indexedEngineNames: [],
   sourceEngines: [],
+  sourceEngineNames: [],
+  selectedEngineNamesToAdd: [],
+  selectableEngineNames: [],
 };
 
 describe('SourceEnginesLogic', () => {
@@ -51,12 +54,6 @@ describe('SourceEnginesLogic', () => {
 
   it('initializes with default values', () => {
     expect(SourceEnginesLogic.values).toEqual(DEFAULT_VALUES);
-  });
-
-  describe('selectors', () => {
-    describe('sourceEnginesDictionary', () => {
-      it('should be derived from source engines', () => {});
-    });
   });
 
   describe('actions', () => {
@@ -80,11 +77,8 @@ describe('SourceEnginesLogic', () => {
       expect(SourceEnginesLogic.values.addSourceEnginesModalOpen).toEqual(true);
     });
 
-    describe('setSelectedEngineNamesToAdd sets the selected engines', () => {
-      SourceEnginesLogic.actions.setSelectedEngineNamesToAdd([
-        'source-engine-1',
-        'source-engine-2',
-      ]);
+    describe('onAddEnginesSelection sets the selected engines', () => {
+      SourceEnginesLogic.actions.onAddEnginesSelection(['source-engine-1', 'source-engine-2']);
 
       expect(SourceEnginesLogic.values.selectedEngineNamesToAdd).toEqual([
         'source-engine-1',
@@ -465,6 +459,39 @@ describe('SourceEnginesLogic', () => {
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('selectors', () => {
+    describe('indexedEngineNames', () => {
+      it('returns a flat array of `indexedEngine.name`s', () => {
+        mount({
+          indexedEngines: [{ name: 'a' }, { name: 'b' }, { name: 'c' }],
+        });
+
+        expect(SourceEnginesLogic.values.indexedEngineNames).toEqual(['a', 'b', 'c']);
+      });
+    });
+
+    describe('sourceEngineNames', () => {
+      it('returns a flat array of `sourceEngine.name`s', () => {
+        mount({
+          sourceEngines: [{ name: 'd' }, { name: 'e' }],
+        });
+
+        expect(SourceEnginesLogic.values.sourceEngineNames).toEqual(['d', 'e']);
+      });
+    });
+
+    describe('selectableEngineNames', () => {
+      it('returns a flat list of indexedEngineNames that are not already in sourceEngineNames', () => {
+        mount({
+          indexedEngines: [{ name: 'a' }, { name: 'b' }, { name: 'c' }],
+          sourceEngines: [{ name: 'a' }, { name: 'b' }],
+        });
+
+        expect(SourceEnginesLogic.values.selectableEngineNames).toEqual(['c']);
       });
     });
   });

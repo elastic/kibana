@@ -17,20 +17,15 @@ import { AddSourceEnginesModal } from './add_source_engines_modal';
 
 const MOCK_VALUES = {
   // SouceEnginesLogic
-  indexedEngines: [
-    { name: 'source-engine-1' },
-    { name: 'source-engine-2' },
-    { name: 'source-engine-3' },
-  ],
+  selectableEngineNames: ['source-engine-1', 'source-engine-2', 'source-engine-3'],
   selectedEngineNamesToAdd: ['source-engine-2'],
-  sourceEngines: [{ name: 'source-engine-1' }],
 };
 
 const MOCK_ACTIONS = {
   // SourceEnginesLogic
   addSourceEngines: jest.fn(),
   closeAddSourceEnginesModal: jest.fn(),
-  setSelectedEngineNamesToAdd: jest.fn(),
+  onAddEnginesSelection: jest.fn(),
 };
 
 describe('AddSourceEnginesModal', () => {
@@ -52,6 +47,7 @@ describe('AddSourceEnginesModal', () => {
   describe('combo box', () => {
     it('has the proper options and selected options', () => {
       expect(wrapper.find(EuiComboBox).prop('options')).toEqual([
+        { label: 'source-engine-1' },
         { label: 'source-engine-2' },
         { label: 'source-engine-3' },
       ]);
@@ -64,7 +60,7 @@ describe('AddSourceEnginesModal', () => {
     it('calls setSelectedEngineNamesToAdd when changed', () => {
       wrapper.find(EuiComboBox).simulate('change', [{ label: 'source-engine-3' }]);
 
-      expect(MOCK_ACTIONS.setSelectedEngineNamesToAdd).toHaveBeenCalledWith(['source-engine-3']);
+      expect(MOCK_ACTIONS.onAddEnginesSelection).toHaveBeenCalledWith(['source-engine-3']);
     });
   });
 

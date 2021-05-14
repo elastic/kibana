@@ -28,15 +28,10 @@ import { CANCEL_BUTTON_LABEL, SAVE_BUTTON_LABEL } from '../../../../shared/const
 import { SourceEnginesLogic } from '../source_engines_logic';
 
 export const AddSourceEnginesModal: React.FC = () => {
-  const { addSourceEngines, closeAddSourceEnginesModal, setSelectedEngineNamesToAdd } = useActions(
+  const { addSourceEngines, closeAddSourceEnginesModal, onAddEnginesSelection } = useActions(
     SourceEnginesLogic
   );
-  const { indexedEngines, selectedEngineNamesToAdd, sourceEngines } = useValues(SourceEnginesLogic);
-
-  const sourceEngineNames = sourceEngines.map((sourceEngine) => sourceEngine.name);
-  const selectableEngineNames = indexedEngines
-    .map((engine) => engine.name)
-    .filter((engineName) => !sourceEngineNames.includes(engineName));
+  const { selectableEngineNames, selectedEngineNamesToAdd } = useValues(SourceEnginesLogic);
 
   return (
     <EuiModal onClose={closeAddSourceEnginesModal}>
@@ -59,7 +54,7 @@ export const AddSourceEnginesModal: React.FC = () => {
         <EuiComboBox
           options={selectableEngineNames.map((engineName) => ({ label: engineName }))}
           selectedOptions={selectedEngineNamesToAdd.map((engineName) => ({ label: engineName }))}
-          onChange={(options) => setSelectedEngineNamesToAdd(options.map((option) => option.label))}
+          onChange={(options) => onAddEnginesSelection(options.map((option) => option.label))}
           placeholder={i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesModal.placeholder',
             { defaultMessage: 'Select engine(s)' }
