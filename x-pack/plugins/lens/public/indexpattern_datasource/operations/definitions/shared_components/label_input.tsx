@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { EuiFieldText, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDebouncedValue } from '../../../../shared_components';
 
 export const LabelInput = ({
   value,
@@ -27,13 +27,20 @@ export const LabelInput = ({
   dataTestSubj?: string;
   compressed?: boolean;
 }) => {
-  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
+  const [inputValue, setInputValue] = useState(value);
+
+  useDebounce(() => onChange(inputValue), 256, [inputValue]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = String(e.target.value);
+    setInputValue(val);
+  };
 
   return (
     <EuiFieldText
       data-test-subj={dataTestSubj || 'lens-labelInput'}
       value={inputValue}
-      onChange={(e) => handleInputChange(e.target.value)}
+      onChange={handleInputChange}
       fullWidth
       placeholder={placeholder || ''}
       inputRef={(node) => {
