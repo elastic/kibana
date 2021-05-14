@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
-import { OperatorOption } from '../autocomplete/types';
-import {
-  CreateExceptionListItemSchema,
+import type {
   Entry,
   EntryExists,
   EntryMatch,
   EntryMatchAny,
   EntryMatchWildcard,
   EntryNested,
-  ExceptionListItemSchema,
-  OperatorEnum,
-  OperatorTypeEnum,
-} from '../../../../common';
+  ListOperatorEnum as OperatorEnum,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import type { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../../../../common';
+import { IFieldType } from '../../../../../../../src/plugins/data/common';
+import { OperatorOption } from '../autocomplete/types';
 
 export interface FormattedBuilderEntry {
   id: string;
