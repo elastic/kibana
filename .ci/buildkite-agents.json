@@ -1,15 +1,15 @@
 {
   "gcp": {
-    "project": "elastic-kibana-ci",
+    "project": "elastic-kibana-184716",
     "zones": ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"],
-    "serviceAccount": "elastic-buildkite-agent@elastic-kibana-ci.iam.gserviceaccount.com",
+    "serviceAccount": "elastic-buildkite-agent@elastic-kibana-184716.iam.gserviceaccount.com",
     "agents": [
       {
         "queue": "default",
         "name": "kibana-buildkite",
         "overprovision": 0,
         "minimumAgents": 1,
-        "maximumAgents": 200,
+        "maximumAgents": 1500,
         "gracefulStopAfterMins": 360,
         "hardStopAfterMins": 540,
         "idleTimeoutMins": 60,
@@ -162,7 +162,7 @@
       {
         "queue": "packer",
         "name": "kibana-packer",
-        "serviceAccount": "buildkite-packer-agent@elastic-kibana-ci.iam.gserviceaccount.com",
+        "serviceAccount": "buildkite-packer-agent@elastic-kibana-184716.iam.gserviceaccount.com",
         "overprovision": 0,
         "minimumAgents": 0,
         "maximumAgents": 10,
