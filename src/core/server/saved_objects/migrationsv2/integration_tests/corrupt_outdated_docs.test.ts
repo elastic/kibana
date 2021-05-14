@@ -83,7 +83,9 @@ describe('migration v2 with corrupt saved object documents', () => {
       mappings: { properties: {} },
       namespaceType: 'agnostic',
       migrations: {
-        '7.14.0': (doc) => doc,
+        '7.14.0': (doc) => {
+          throw new Error('nope!');
+        },
       },
     });
     coreSetup.savedObjects.registerType({
@@ -92,7 +94,9 @@ describe('migration v2 with corrupt saved object documents', () => {
       mappings: { properties: {} },
       namespaceType: 'agnostic',
       migrations: {
-        '7.14.0': (doc) => doc,
+        '7.14.0': (doc) => {
+          throw new Error('nope!');
+        },
       },
     });
     coreSetup.savedObjects.registerType({
@@ -101,7 +105,9 @@ describe('migration v2 with corrupt saved object documents', () => {
       mappings: { properties: {} },
       namespaceType: 'agnostic',
       migrations: {
-        '7.14.0': (doc) => doc,
+        '7.14.0': (doc) => {
+          throw new Error('nope');
+        },
       },
     });
     try {
