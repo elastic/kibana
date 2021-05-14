@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntryMatchAny } from '@kbn/securitysolution-io-ts-utils';
+import { EntryMatchAny } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getEntryMatchExcludeMock, getEntryMatchMock } from '../schemas/types/entry_match.mock';
 import {
