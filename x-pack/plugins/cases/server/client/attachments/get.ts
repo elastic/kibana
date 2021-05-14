@@ -38,24 +38,53 @@ import {
 import { Operations } from '../../authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 
+/**
+ * Parameters for finding attachments of a case
+ */
 export interface FindArgs {
+  /**
+   * The case ID for finding associated attachments
+   */
   caseID: string;
+  /**
+   * Optional parameters for filtering the returned attachments
+   */
   queryParams?: FindQueryParams;
 }
 
+/**
+ * Parameters for retrieving all attachments of a case
+ */
 export interface GetAllArgs {
+  /**
+   * The case ID to retrieve all attachments for
+   */
   caseID: string;
+  /**
+   * Optionally include the attachments associated with a sub case
+   */
   includeSubCaseComments?: boolean;
+  /**
+   * If included the case ID will be ignored and the attachments will be retrieved from the specified ID of the sub case
+   */
   subCaseID?: string;
 }
 
 export interface GetArgs {
+  /**
+   * The ID of the case to retrieve an attachment from
+   */
   caseID: string;
+  /**
+   * The ID of the attachment to retrieve
+   */
   attachmentID: string;
 }
 
 /**
  * Retrieves the attachments for a case entity. This support pagination.
+ *
+ * @ignore
  */
 export async function find(
   { caseID, queryParams }: FindArgs,
@@ -146,6 +175,8 @@ export async function find(
 
 /**
  * Retrieves a single attachment by its ID.
+ *
+ * @ignore
  */
 export async function get(
   { attachmentID, caseID }: GetArgs,
@@ -186,6 +217,8 @@ export async function get(
 /**
  * Retrieves all the attachments for a case. The `includeSubCaseComments` can be used to include the sub case comments for
  * collections. If the entity is a sub case, pass in the subCaseID.
+ *
+ * @ignore
  */
 export async function getAll(
   { caseID, includeSubCaseComments, subCaseID }: GetAllArgs,

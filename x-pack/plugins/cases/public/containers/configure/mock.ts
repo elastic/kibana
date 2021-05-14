@@ -11,6 +11,7 @@ import {
   CasesConfigureResponse,
   CasesConfigureRequest,
   ConnectorTypes,
+  SECURITY_SOLUTION_OWNER,
 } from '../../../common';
 import { CaseConfigure, CaseConnectorMapping } from './types';
 
@@ -130,7 +131,7 @@ export const caseConfigurationResposeMock: CasesConfigureResponse = {
   mappings: [],
   updated_at: '2020-04-06T14:03:18.657Z',
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
-  owner: 'securitySolution',
+  owner: SECURITY_SOLUTION_OWNER,
   version: 'WzHJ12',
 };
 
@@ -141,7 +142,7 @@ export const caseConfigurationMock: CasesConfigureRequest = {
     type: ConnectorTypes.jira,
     fields: null,
   },
-  owner: 'securitySolution',
+  owner: SECURITY_SOLUTION_OWNER,
   closure_type: 'close-by-user',
 };
 
@@ -161,5 +162,5 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
-  owner: 'securitySolution',
+  owner: SECURITY_SOLUTION_OWNER,
 };

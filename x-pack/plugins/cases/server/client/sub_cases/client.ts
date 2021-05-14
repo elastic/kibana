@@ -15,7 +15,6 @@ import {
   SubCasesFindResponse,
   SubCasesFindResponseRt,
   SubCasesPatchRequest,
-  SubCasesResponse,
 } from '../../../common/api';
 import { CasesClientArgs, CasesClientInternal } from '..';
 import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common';
@@ -25,29 +24,58 @@ import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { constructQueryOptions } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { update } from './update';
+import { ISubCaseResponse, ISubCasesFindResponse, ISubCasesResponse } from '../typedoc_interfaces';
 
 interface FindArgs {
+  /**
+   * The case ID for finding associated sub cases
+   */
   caseID: string;
+  /**
+   * Options for filtering the returned sub cases
+   */
   queryParams: SubCasesFindRequest;
 }
 
 interface GetArgs {
+  /**
+   * A flag to include the attachments with the results
+   */
   includeComments: boolean;
+  /**
+   * The ID of the sub case to retrieve
+   */
   id: string;
 }
 
 /**
  * The API routes for interacting with sub cases.
+ *
+ * @public
  */
 export interface SubCasesClient {
+  /**
+   * Deletes the specified entities and their attachments.
+   */
   delete(ids: string[]): Promise<void>;
-  find(findArgs: FindArgs): Promise<SubCasesFindResponse>;
-  get(getArgs: GetArgs): Promise<SubCaseResponse>;
-  update(subCases: SubCasesPatchRequest): Promise<SubCasesResponse>;
+  /**
+   * Retrieves the sub cases matching the search criteria.
+   */
+  find(findArgs: FindArgs): Promise<ISubCasesFindResponse>;
+  /**
+   * Retrieves a single sub case.
+   */
+  get(getArgs: GetArgs): Promise<ISubCaseResponse>;
+  /**
+   * Updates the specified sub cases to the new values included in the request.
+   */
+  update(subCases: SubCasesPatchRequest): Promise<ISubCasesResponse>;
 }
 
 /**
  * Creates a client for handling the different exposed API routes for interacting with sub cases.
+ *
+ * @ignore
  */
 export function createSubCasesClient(
   clientArgs: CasesClientArgs,

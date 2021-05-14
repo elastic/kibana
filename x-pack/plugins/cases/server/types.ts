@@ -6,7 +6,6 @@
  */
 
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
-import type { ActionsApiRequestHandlerContext } from '../../actions/server';
 import {
   ActionTypeConfig,
   ActionTypeSecrets,
@@ -25,7 +24,6 @@ export interface CaseRequestContext {
  */
 export interface CasesRequestHandlerContext extends RequestHandlerContext {
   cases: CaseRequestContext;
-  actions: ActionsApiRequestHandlerContext;
 }
 
 /**

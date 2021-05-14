@@ -111,8 +111,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
               id: rule?.id != null ? rule.id[0] : null,
               name: rule?.name != null ? rule.name[0] : null,
             },
-            // TODO: refactor
-            owner: 'securitySolution',
+            owner: APP_ID,
           },
           updateCase,
         });
@@ -238,7 +237,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
               id: rule?.id != null ? rule.id[0] : null,
               name: rule?.name != null ? rule.name[0] : null,
             },
-            owner: 'securitySolution',
+            owner: APP_ID,
           },
           createCaseNavigation: {
             href: formatUrl(getCreateCaseUrl()),
@@ -248,6 +247,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           onRowClick: onCaseClicked,
           updateCase: onCaseSuccess,
           userCanCrud: userPermissions?.crud ?? false,
+          owner: [APP_ID],
         })}
     </>
   );

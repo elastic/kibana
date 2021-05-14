@@ -37,6 +37,8 @@ import { CasesClientArgs } from '..';
 
 /**
  * Creates a new case.
+ *
+ * @ignore
  */
 export const create = async (
   data: CasePostRequest,

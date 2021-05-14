@@ -12,6 +12,7 @@ import * as i18n from './translations';
 import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
 import { ConnectorTypes } from '../../../common';
 import { useToasts } from '../../common/lib/kibana';
+import { useOwnerContext } from '../../components/owner_context/use_owner_context';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
   closureType: CaseConfigure['closureType'];
@@ -155,6 +156,7 @@ export const initialState: State = {
 };
 
 export const useCaseConfigure = (): ReturnUseCaseConfigure => {
+  const owner = useOwnerContext();
   const [state, dispatch] = useReducer(configureCasesReducer, initialState);
   const toasts = useToasts();
   const setCurrentConfiguration = useCallback((configuration: ConnectorConfiguration) => {
@@ -213,7 +215,6 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     });
   }, []);
 
-  // TODO: refactor
   const setID = useCallback((id: string) => {
     dispatch({
       payload: id,
@@ -234,7 +235,10 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
       abortCtrlRefetchRef.current = new AbortController();
 
       setLoading(true);
-      const res = await getCaseConfigure({ signal: abortCtrlRefetchRef.current.signal });
+      const res = await getCaseConfigure({
+        signal: abortCtrlRefetchRef.current.signal,
+        owner,
+      });
 
       if (!isCancelledRefetchRef.current) {
         if (res != null) {
@@ -295,8 +299,8 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
         const res =
           state.version.length === 0
             ? await postCaseConfigure(
-                // TODO: use constant after https://github.com/elastic/kibana/pull/97646 is being merged
-                { ...connectorObj, owner: 'securitySolution' },
+                // The first owner will be used for case creation
+                { ...connectorObj, owner: owner[0] },
                 abortCtrlPersistRef.current.signal
               )
             : await patchCaseConfigure(
@@ -347,17 +351,17 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
       }
     },
     [
-      setClosureType,
-      setConnector,
-      setCurrentConfiguration,
-      setMappings,
       setPersistLoading,
+      state.version,
+      state.id,
+      state.currentConfiguration.connector,
+      owner,
+      setConnector,
+      setClosureType,
       setVersion,
       setID,
-      state.currentConfiguration.connector,
-      state.version,
-      // TODO: do we need this?
-      state.id,
+      setMappings,
+      setCurrentConfiguration,
       toasts,
     ]
   );

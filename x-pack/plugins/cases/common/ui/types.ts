@@ -130,7 +130,7 @@ export interface ElasticUser {
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
-  filterOptions?: FilterOptions;
+  filterOptions?: FilterOptions & { owner: string[] };
 }
 
 export interface ApiProps {

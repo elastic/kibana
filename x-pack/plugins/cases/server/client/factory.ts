@@ -16,12 +16,12 @@ import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import { GetSpaceFn } from '../authorization/types';
 import {
-  AlertServiceContract,
   CaseConfigureService,
   CaseService,
   CaseUserActionService,
   ConnectorMappingsService,
   AttachmentService,
+  AlertService,
 } from '../services';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
@@ -29,12 +29,6 @@ import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
 
 interface CasesClientFactoryArgs {
-  caseConfigureService: CaseConfigureService;
-  caseService: CaseService;
-  connectorMappingsService: ConnectorMappingsService;
-  userActionService: CaseUserActionService;
-  alertsService: AlertServiceContract;
-  attachmentService: AttachmentService;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
   getSpace: GetSpaceFn;
@@ -71,20 +65,12 @@ export class CasesClientFactory {
     scopedClusterClient,
     savedObjectsService,
   }: {
-    // TODO: make these required when the case connector can get a request and savedObjectsService
-    request?: KibanaRequest;
-    savedObjectsService?: SavedObjectsServiceStart;
+    request: KibanaRequest;
+    savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
   }): Promise<CasesClient> {
     if (!this.isInitialized || !this.options) {
       throw new Error('CasesClientFactory must be initialized before calling create');
-    }
-
-    // TODO: remove this
-    if (!request || !savedObjectsService) {
-      throw new Error(
-        'CasesClientFactory must be initialized with a request and saved object service'
-      );
     }
 
     const auditLogger = this.options.securityPluginSetup?.audit.asScoped(request);
@@ -97,21 +83,22 @@ export class CasesClientFactory {
       auditLogger: new AuthorizationAuditLogger(auditLogger),
     });
 
-    const userInfo = this.options.caseService.getUser({ request });
+    const caseService = new CaseService(this.logger, this.options?.securityPluginStart?.authc);
+    const userInfo = caseService.getUser({ request });
 
     return createCasesClient({
-      alertsService: this.options.alertsService,
+      alertsService: new AlertService(),
       scopedClusterClient,
       savedObjectsClient: savedObjectsService.getScopedClient(request, {
         includedHiddenTypes: SAVED_OBJECT_TYPES,
       }),
       // We only want these fields from the userInfo object
       user: { username: userInfo.username, email: userInfo.email, full_name: userInfo.full_name },
-      caseService: this.options.caseService,
-      caseConfigureService: this.options.caseConfigureService,
-      connectorMappingsService: this.options.connectorMappingsService,
-      userActionService: this.options.userActionService,
-      attachmentService: this.options.attachmentService,
+      caseService,
+      caseConfigureService: new CaseConfigureService(this.logger),
+      connectorMappingsService: new ConnectorMappingsService(this.logger),
+      userActionService: new CaseUserActionService(this.logger),
+      attachmentService: new AttachmentService(this.logger),
       logger: this.logger,
       authorization: auth,
       auditLogger,

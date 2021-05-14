@@ -5,30 +5,57 @@
  * 2.0.
  */
 
-import {
-  AllCommentsResponse,
-  CaseResponse,
-  CommentResponse,
-  CommentsResponse,
-} from '../../../common/api';
+import { CommentResponse } from '../../../common/api';
 
 import { CasesClientInternal } from '../client_internal';
+import { IAllCommentsResponse, ICaseResponse, ICommentsResponse } from '../typedoc_interfaces';
 import { CasesClientArgs } from '../types';
 import { AddArgs, addComment } from './add';
 import { DeleteAllArgs, deleteAll, DeleteArgs, deleteComment } from './delete';
 import { find, FindArgs, get, getAll, GetAllArgs, GetArgs } from './get';
 import { update, UpdateArgs } from './update';
 
+/**
+ * API for interacting with the attachments to a case.
+ */
 export interface AttachmentsSubClient {
-  add(params: AddArgs): Promise<CaseResponse>;
+  /**
+   * Adds an attachment to a case.
+   */
+  add(params: AddArgs): Promise<ICaseResponse>;
+  /**
+   * Deletes all attachments associated with a single case.
+   */
   deleteAll(deleteAllArgs: DeleteAllArgs): Promise<void>;
+  /**
+   * Deletes a single attachment for a specific case.
+   */
   delete(deleteArgs: DeleteArgs): Promise<void>;
-  find(findArgs: FindArgs): Promise<CommentsResponse>;
-  getAll(getAllArgs: GetAllArgs): Promise<AllCommentsResponse>;
+  /**
+   * Retrieves all comments matching the search criteria.
+   */
+  find(findArgs: FindArgs): Promise<ICommentsResponse>;
+  /**
+   * Gets all attachments for a single case.
+   */
+  getAll(getAllArgs: GetAllArgs): Promise<IAllCommentsResponse>;
+  /**
+   * Retrieves a single attachment for a case.
+   */
   get(getArgs: GetArgs): Promise<CommentResponse>;
-  update(updateArgs: UpdateArgs): Promise<CaseResponse>;
+  /**
+   * Updates a specific attachment.
+   *
+   * The request must include all fields for the attachment. Even the fields that are not changing.
+   */
+  update(updateArgs: UpdateArgs): Promise<ICaseResponse>;
 }
 
+/**
+ * Creates an API object for interacting with attachments.
+ *
+ * @ignore
+ */
 export const createAttachmentsSubClient = (
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal

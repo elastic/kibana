@@ -17,7 +17,7 @@ import { RouteDeps } from '../types';
 import { escapeHatch, wrapError } from '../utils';
 import { SUB_CASES_URL } from '../../../../common/constants';
 
-export function initFindSubCasesApi({ caseService, router, logger }: RouteDeps) {
+export function initFindSubCasesApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: `${SUB_CASES_URL}/_find`,

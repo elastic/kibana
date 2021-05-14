@@ -38,6 +38,7 @@ import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
+
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
     $isShow
@@ -79,6 +80,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     userCanCrud,
   }) => {
     const { actionLicense } = useGetActionLicense();
+
     const {
       data,
       dispatchUpdateCaseProperty,

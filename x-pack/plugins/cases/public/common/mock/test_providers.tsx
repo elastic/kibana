@@ -10,6 +10,8 @@ import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { OwnerProvider } from '../../components/owner_context';
 import {
   createKibanaContextProviderMock,
   createStartServicesMock,
@@ -29,7 +31,9 @@ const MockKibanaContextProvider = createKibanaContextProviderMock();
 const TestProvidersComponent: React.FC<Props> = ({ children }) => (
   <I18nProvider>
     <MockKibanaContextProvider>
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>{children}</ThemeProvider>
+      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+        <OwnerProvider owner={[SECURITY_SOLUTION_OWNER]}>{children}</OwnerProvider>
+      </ThemeProvider>
     </MockKibanaContextProvider>
   </I18nProvider>
 );

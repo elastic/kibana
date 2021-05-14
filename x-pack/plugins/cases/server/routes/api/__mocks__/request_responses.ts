@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasePostRequest, ConnectorTypes } from '../../../../common/api';
+import { SECURITY_SOLUTION_OWNER, CasePostRequest, ConnectorTypes } from '../../../../common';
 
 export const newCase: CasePostRequest = {
   title: 'My new case',
@@ -20,5 +20,5 @@ export const newCase: CasePostRequest = {
   settings: {
     syncAlerts: true,
   },
-  owner: 'securitySolution',
+  owner: SECURITY_SOLUTION_OWNER,
 };

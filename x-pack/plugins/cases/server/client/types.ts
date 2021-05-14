@@ -20,6 +20,9 @@ import {
 } from '../services';
 import { ActionsClient } from '../../../actions/server';
 
+/**
+ * Parameters for initializing a cases client
+ */
 export interface CasesClientArgs {
   readonly scopedClusterClient: ElasticsearchClient;
   readonly caseConfigureService: CaseConfigureService;

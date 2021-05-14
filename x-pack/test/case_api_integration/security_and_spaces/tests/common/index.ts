@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Common', function () {
+    loadTestFile(require.resolve('./client/update_alert_status'));
     loadTestFile(require.resolve('./comments/delete_comment'));
     loadTestFile(require.resolve('./comments/find_comments'));
     loadTestFile(require.resolve('./comments/get_comment'));

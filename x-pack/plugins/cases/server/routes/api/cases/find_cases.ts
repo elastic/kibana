@@ -10,7 +10,7 @@ import { wrapError, escapeHatch } from '../utils';
 import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
 
-export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
+export function initFindCasesApi({ router, logger }: RouteDeps) {
   router.get(
     {
       path: `${CASES_URL}/_find`,

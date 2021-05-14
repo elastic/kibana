@@ -43,6 +43,7 @@ import { Ecs } from '../../../common';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { CasesNavigation } from '../links';
+import { OwnerProvider } from '../owner_context';
 
 const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
 export interface CaseViewComponentProps {
@@ -450,6 +451,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   tags={caseData.tags}
                   onSubmit={onSubmitTags}
                   isLoading={isLoading && updateKey === 'tags'}
+                  owner={[caseData.owner]}
                 />
                 <EditConnector
                   caseFields={caseData.connector.fields}
@@ -509,22 +511,24 @@ export const CaseView = React.memo(
     return (
       data && (
         <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-          <CaseComponent
-            allCasesNavigation={allCasesNavigation}
-            caseData={data}
-            caseDetailsNavigation={caseDetailsNavigation}
-            caseId={caseId}
-            configureCasesNavigation={configureCasesNavigation}
-            getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-            fetchCase={fetchCase}
-            onComponentInitialized={onComponentInitialized}
-            ruleDetailsNavigation={ruleDetailsNavigation}
-            showAlertDetails={showAlertDetails}
-            subCaseId={subCaseId}
-            updateCase={updateCase}
-            useFetchAlertData={useFetchAlertData}
-            userCanCrud={userCanCrud}
-          />
+          <OwnerProvider owner={[data.owner]}>
+            <CaseComponent
+              allCasesNavigation={allCasesNavigation}
+              caseData={data}
+              caseDetailsNavigation={caseDetailsNavigation}
+              caseId={caseId}
+              configureCasesNavigation={configureCasesNavigation}
+              getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+              fetchCase={fetchCase}
+              onComponentInitialized={onComponentInitialized}
+              ruleDetailsNavigation={ruleDetailsNavigation}
+              showAlertDetails={showAlertDetails}
+              subCaseId={subCaseId}
+              updateCase={updateCase}
+              useFetchAlertData={useFetchAlertData}
+              userCanCrud={userCanCrud}
+            />
+          </OwnerProvider>
         </CasesTimelineIntegrationProvider>
       )
     );

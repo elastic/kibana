@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
+import { SECURITY_SOLUTION_OWNER } from '../../common';
 import {
   AssociationType,
   CaseResponse,
@@ -587,7 +588,7 @@ describe('common utils', () => {
         full_name: 'Elastic',
         username: 'elastic',
         associationType: AssociationType.case,
-        owner: 'securitySolution',
+        owner: SECURITY_SOLUTION_OWNER,
       };
 
       const res = transformNewComment(comment);
@@ -616,7 +617,7 @@ describe('common utils', () => {
         comment: 'A comment',
         type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
-        owner: 'securitySolution',
+        owner: SECURITY_SOLUTION_OWNER,
         associationType: AssociationType.case,
       };
 
@@ -650,7 +651,7 @@ describe('common utils', () => {
         email: null,
         full_name: null,
         username: null,
-        owner: 'securitySolution',
+        owner: SECURITY_SOLUTION_OWNER,
         associationType: AssociationType.case,
       };
 
@@ -684,7 +685,7 @@ describe('common utils', () => {
           createCommentFindResponse([
             {
               ids: ['1'],
-              comments: [{ comment: '', type: CommentType.user, owner: 'securitySolution' }],
+              comments: [{ comment: '', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER }],
             },
           ]).saved_objects[0]
         )
@@ -706,7 +707,7 @@ describe('common utils', () => {
                     id: 'rule-id-1',
                     name: 'rule-name-1',
                   },
-                  owner: 'securitySolution',
+                  owner: SECURITY_SOLUTION_OWNER,
                 },
               ],
             },
@@ -730,7 +731,7 @@ describe('common utils', () => {
                     id: 'rule-id-1',
                     name: 'rule-name-1',
                   },
-                  owner: 'securitySolution',
+                  owner: SECURITY_SOLUTION_OWNER,
                 },
               ],
             },
@@ -751,7 +752,7 @@ describe('common utils', () => {
                 {
                   alertId: ['a', 'b'],
                   index: '',
-                  owner: 'securitySolution',
+                  owner: SECURITY_SOLUTION_OWNER,
                   type: CommentType.alert,
                   rule: {
                     id: 'rule-id-1',
@@ -760,7 +761,7 @@ describe('common utils', () => {
                 },
                 {
                   comment: '',
-                  owner: 'securitySolution',
+                  owner: SECURITY_SOLUTION_OWNER,
                   type: CommentType.user,
                 },
               ],
@@ -780,7 +781,7 @@ describe('common utils', () => {
               ids: ['1'],
               comments: [
                 {
-                  owner: 'securitySolution',
+                  owner: SECURITY_SOLUTION_OWNER,
                   alertId: ['a', 'b'],
                   index: '',
                   type: CommentType.alert,
@@ -795,7 +796,7 @@ describe('common utils', () => {
               ids: ['2'],
               comments: [
                 {
-                  owner: 'securitySolution',
+                  owner: SECURITY_SOLUTION_OWNER,
                   comment: '',
                   type: CommentType.user,
                 },
@@ -819,7 +820,7 @@ describe('common utils', () => {
               ids: ['1', '2'],
               comments: [
                 {
-                  owner: 'securitySolution',
+                  owner: SECURITY_SOLUTION_OWNER,
                   alertId: ['a', 'b'],
                   index: '',
                   type: CommentType.alert,
@@ -851,7 +852,7 @@ describe('common utils', () => {
               ids: ['1', '2'],
               comments: [
                 {
-                  owner: 'securitySolution',
+                  owner: SECURITY_SOLUTION_OWNER,
                   alertId: ['a', 'b'],
                   index: '',
                   type: CommentType.alert,

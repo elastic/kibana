@@ -14,7 +14,7 @@ import { useStateToaster } from '../../../common/components/toasters';
 import { TestProviders } from '../../../common/mock';
 import { AddToCaseAction } from './add_to_case_action';
 import { basicCase } from '../../../../../cases/public/containers/mock';
-import { Case } from '../../../../../cases/common';
+import { Case, SECURITY_SOLUTION_OWNER } from '../../../../../cases/common';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to', () => {
@@ -116,7 +116,7 @@ describe('AddToCaseAction', () => {
       alertId: 'test-id',
       index: 'test-index',
       rule: { id: 'rule-id', name: 'rule-name' },
-      owner: 'securitySolution',
+      owner: SECURITY_SOLUTION_OWNER,
     });
   });
 
@@ -143,7 +143,7 @@ describe('AddToCaseAction', () => {
         id: 'rule-id',
         name: null,
       },
-      owner: 'securitySolution',
+      owner: SECURITY_SOLUTION_OWNER,
     });
   });
 

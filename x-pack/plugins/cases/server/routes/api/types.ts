@@ -7,23 +7,10 @@
 
 import type { Logger } from 'kibana/server';
 
-import type {
-  CaseConfigureService,
-  CaseService,
-  CaseUserActionService,
-  ConnectorMappingsService,
-  AttachmentService,
-} from '../../services';
-
 import type { CasesRouter } from '../../types';
 
 export interface RouteDeps {
-  caseConfigureService: CaseConfigureService;
-  caseService: CaseService;
-  connectorMappingsService: ConnectorMappingsService;
   router: CasesRouter;
-  userActionService: CaseUserActionService;
-  attachmentService: AttachmentService;
   logger: Logger;
 }
 
