@@ -33,24 +33,26 @@ const getChartHeight = (data: WaterfallData): number => {
 
 const Tooltip = (tooltipInfo: TooltipInfo) => {
   const { data, renderTooltipItem, sidebarItems } = useWaterfallContext();
-  const sidebarItem = sidebarItems?.find((item) => item.index === tooltipInfo.header?.value);
-  const relevantItems = data.filter((item) => {
-    return (
-      item.x === tooltipInfo.header?.value && item.config.showTooltip && item.config.tooltipProps
-    );
-  });
-  return relevantItems.length ? (
-    <WaterfallChartTooltip>
-      <EuiFlexGroup direction="column" gutterSize="none">
-        {sidebarItem && <EuiText>{sidebarItem.url}</EuiText>}
-        {relevantItems.map((item, index) => {
-          return (
-            <EuiFlexItem key={index}>{renderTooltipItem(item.config.tooltipProps)}</EuiFlexItem>
-          );
-        })}
-      </EuiFlexGroup>
-    </WaterfallChartTooltip>
-  ) : null;
+  return useMemo(() => {
+    const sidebarItem = sidebarItems?.find((item) => item.index === tooltipInfo.header?.value);
+    const relevantItems = data.filter((item) => {
+      return (
+        item.x === tooltipInfo.header?.value && item.config.showTooltip && item.config.tooltipProps
+      );
+    });
+    return relevantItems.length ? (
+      <WaterfallChartTooltip>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {sidebarItem && <EuiText>{`${sidebarItem.offsetIndex} ${sidebarItem.url}`}</EuiText>}
+          {relevantItems.map((item, index) => {
+            return (
+              <EuiFlexItem key={index}>{renderTooltipItem(item.config.tooltipProps)}</EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+      </WaterfallChartTooltip>
+    ) : null;
+  }, [data, renderTooltipItem, sidebarItems, tooltipInfo.header?.value]);
 };
 
 interface Props {
