@@ -221,7 +221,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: [SIGNALS_ID, NOTIFICATIONS_ID],
-      cases: ['securitySolution'],
+      cases: [APP_ID],
       subFeatures: [
         {
           name: 'Cases',
@@ -239,7 +239,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                   },
                   ui: ['crud-case'], // uiCapabilities.siem.crud-case
                   cases: {
-                    all: ['securitySolution'],
+                    all: [APP_ID],
                   },
                 },
                 {
@@ -252,7 +252,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                   },
                   ui: ['read-case'], // uiCapabilities.siem.read-case
                   cases: {
-                    read: ['securitySolution'],
+                    read: [APP_ID],
                   },
                 },
               ],
@@ -263,7 +263,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       privileges: {
         all: {
           cases: {
-            all: ['securitySolution'],
+            all: [APP_ID],
           },
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
@@ -282,7 +282,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         read: {
           cases: {
-            read: ['securitySolution'],
+            read: [APP_ID],
           },
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
