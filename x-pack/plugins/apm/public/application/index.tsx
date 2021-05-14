@@ -13,6 +13,7 @@ import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import 'react-vis/dist/style.css';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
 import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import { ConfigSchema } from '../';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
@@ -30,11 +31,7 @@ import {
 import { LicenseProvider } from '../context/license/license_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import {
-  ApmPluginSetupDeps,
-  ApmPluginStartDeps,
-  ApmRuleRegistry,
-} from '../plugin';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
@@ -112,14 +109,14 @@ export const renderApp = ({
   appMountParameters,
   config,
   pluginsStart,
-  apmRuleRegistry,
+  observabilityRuleTypeRegistry,
 }: {
   coreStart: CoreStart;
   pluginsSetup: ApmPluginSetupDeps;
   appMountParameters: AppMountParameters;
   config: ConfigSchema;
   pluginsStart: ApmPluginStartDeps;
-  apmRuleRegistry: ApmRuleRegistry;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) => {
   const { element } = appMountParameters;
   const apmPluginContextValue = {
@@ -127,7 +124,7 @@ export const renderApp = ({
     config,
     core: coreStart,
     plugins: pluginsSetup,
-    apmRuleRegistry,
+    observabilityRuleTypeRegistry,
   };
 
   // render APM feedback link in global help menu

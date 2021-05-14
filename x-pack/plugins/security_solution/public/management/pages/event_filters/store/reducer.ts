@@ -14,7 +14,10 @@ import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
 import { MANAGEMENT_ROUTING_EVENT_FILTERS_PATH } from '../../../common/constants';
 import { extractEventFiltetrsPageLocation } from '../../../common/routing';
-import { isUninitialisedResourceState } from '../../../state/async_resource_state';
+import {
+  isLoadedResourceState,
+  isUninitialisedResourceState,
+} from '../../../state/async_resource_state';
 
 import {
   EventFiltersInitForm,
@@ -22,14 +25,16 @@ import {
   EventFiltersFormStateChanged,
   EventFiltersCreateSuccess,
   EventFiltersUpdateSuccess,
-  EventFiltersListPageStateChanged,
   EventFiltersListPageDataChanged,
   EventFiltersListPageDataExistsChanged,
+  EventFilterForDeletion,
+  EventFilterDeletionReset,
+  EventFilterDeleteStatusChanged,
 } from './action';
 
-import { EventFiltersListPageState } from '../state';
 import { initialEventFiltersPageState } from './builders';
 import { getListPageIsActive } from './selector';
+import { EventFiltersListPageState } from '../types';
 
 type StateReducer = ImmutableReducer<EventFiltersListPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -44,17 +49,6 @@ const isEventFiltersPageLocation = (location: Immutable<AppLocation>) => {
       exact: true,
     }) !== null
   );
-};
-
-// FIXME:PT might not need this. maybe delete
-const handleEventFiltersListPageChanges: CaseReducer<EventFiltersListPageStateChanged> = (
-  state,
-  action
-) => {
-  return {
-    ...state,
-    listPage: action.payload,
-  };
 };
 
 const handleEventFiltersListPageDataChanges: CaseReducer<EventFiltersListPageDataChanged> = (
@@ -185,6 +179,46 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   }
 };
 
+const handleEventFilterForDeletion: CaseReducer<EventFilterForDeletion> = (state, action) => {
+  return {
+    ...state,
+    listPage: {
+      ...state.listPage,
+      deletion: {
+        ...state.listPage.deletion,
+        item: action.payload,
+      },
+    },
+  };
+};
+
+const handleEventFilterDeletionReset: CaseReducer<EventFilterDeletionReset> = (state) => {
+  return {
+    ...state,
+    listPage: {
+      ...state.listPage,
+      deletion: initialEventFiltersPageState().listPage.deletion,
+    },
+  };
+};
+
+const handleEventFilterDeleteStatusChanges: CaseReducer<EventFilterDeleteStatusChanged> = (
+  state,
+  action
+) => {
+  return {
+    ...state,
+    listPage: {
+      ...state.listPage,
+      forceRefresh: isLoadedResourceState(action.payload) ? true : state.listPage.forceRefresh,
+      deletion: {
+        ...state.listPage.deletion,
+        status: action.payload,
+      },
+    },
+  };
+};
+
 export const eventFiltersPageReducer: StateReducer = (
   state = initialEventFiltersPageState(),
   action
@@ -207,12 +241,16 @@ export const eventFiltersPageReducer: StateReducer = (
   // actions only handled if we're on the List Page
   if (getListPageIsActive(state)) {
     switch (action.type) {
-      case 'eventFiltersListPageStateChanged':
-        return handleEventFiltersListPageChanges(state, action);
       case 'eventFiltersListPageDataChanged':
         return handleEventFiltersListPageDataChanges(state, action);
       case 'eventFiltersListPageDataExistsChanged':
         return handleEventFiltersListPageDataExistChanges(state, action);
+      case 'eventFilterForDeletion':
+        return handleEventFilterForDeletion(state, action);
+      case 'eventFilterDeletionReset':
+        return handleEventFilterDeletionReset(state, action);
+      case 'eventFilterDeleteStatusChanged':
+        return handleEventFilterDeleteStatusChanges(state, action);
     }
   }
 

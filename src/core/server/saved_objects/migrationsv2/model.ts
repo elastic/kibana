@@ -18,6 +18,12 @@ import { SavedObjectsMigrationVersion } from '../types';
 import { disableUnknownTypeMappingFields } from '../migrations/core/migration_context';
 import { excludeUnusedTypesQuery, TransformErrorObjects } from '../migrations/core';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import {
+  createInitialProgress,
+  incrementProcessedProgress,
+  logProgress,
+  setProgressTotal,
+} from './progress';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -509,6 +515,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // placeholders to collect document transform problems
         corruptDocumentIds: [],
         transformErrors: [],
+        progress: createInitialProgress(),
       };
     } else {
       throwBadResponse(stateP, res);
@@ -517,12 +524,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // we carry through any failures we've seen with transforming documents on state
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      const progress = setProgressTotal(stateP.progress, res.right.totalHits);
+      const logs = logProgress(stateP.logs, progress);
       if (res.right.outdatedDocuments.length > 0) {
         return {
           ...stateP,
           controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX',
           outdatedDocuments: res.right.outdatedDocuments,
           lastHitSortValue: res.right.lastHitSortValue,
+          progress,
+          logs,
         };
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
@@ -542,6 +553,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           return {
             ...stateP,
             controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
+            logs,
           };
         }
       }
@@ -566,12 +578,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // collecting issues along the way rather than failing
     // REINDEX_SOURCE_TO_TEMP_INDEX handles the document transforms
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+
+    // Increment the processed documents, no matter what the results are.
+    // Otherwise the progress might look off when there are errors.
+    const progress = incrementProcessedProgress(stateP.progress, stateP.outdatedDocuments.length);
+
     if (Either.isRight(res)) {
       if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
         return {
           ...stateP,
           controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK', // handles the actual bulk indexing into temp index
           transformedDocs: [...res.right.processedDocs],
+          progress,
         };
       } else {
         // we don't have any transform issues with the current batch of outdated docs but
@@ -581,6 +599,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
+          progress,
         };
       }
     } else {
@@ -592,6 +611,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
           corruptDocumentIds: [...stateP.corruptDocumentIds, ...left.corruptDocumentIds],
           transformErrors: [...stateP.transformErrors, ...left.transformErrors],
+          progress,
         };
       } else {
         // should never happen
@@ -676,6 +696,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
         pitId: res.right.pitId,
         lastHitSortValue: undefined,
+        progress: createInitialProgress(),
         hasTransformedDocs: false,
         corruptDocumentIds: [],
         transformErrors: [],
@@ -687,11 +708,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       if (res.right.outdatedDocuments.length > 0) {
+        const progress = setProgressTotal(stateP.progress, res.right.totalHits);
+        const logs = logProgress(stateP.logs, progress);
+
         return {
           ...stateP,
           controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
           outdatedDocuments: res.right.outdatedDocuments,
           lastHitSortValue: res.right.lastHitSortValue,
+          progress,
+          logs,
         };
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
@@ -720,6 +746,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+
+    // Increment the processed documents, no matter what the results are.
+    // Otherwise the progress might look off when there are errors.
+    const progress = incrementProcessedProgress(stateP.progress, stateP.outdatedDocuments.length);
+
     if (Either.isRight(res)) {
       // we haven't seen corrupt documents or any transformation errors thus far in the migration
       // index the migrated docs
@@ -729,6 +760,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
           transformedDocs: [...res.right.processedDocs],
           hasTransformedDocs: true,
+          progress,
         };
       } else {
         // We have seen corrupt documents and/or transformation errors
@@ -736,6 +768,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+          progress,
         };
       }
     } else {
@@ -747,6 +780,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           corruptDocumentIds: [...stateP.corruptDocumentIds, ...res.left.corruptDocumentIds],
           transformErrors: [...stateP.transformErrors, ...res.left.transformErrors],
           hasTransformedDocs: false,
+          progress,
         };
       } else {
         throwBadResponse(stateP, res as never);

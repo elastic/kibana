@@ -100,8 +100,9 @@ export const getRulesStatusByIds = async ({
     },
   });
 
-export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> =>
-  Promise.resolve(savedRuleMock);
+export const fetchRuleById = jest.fn(
+  async ({ id, signal }: FetchRuleProps): Promise<Rule> => savedRuleMock
+);
 
 export const fetchRules = async ({
   filterOptions = {

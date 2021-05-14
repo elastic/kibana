@@ -29,7 +29,7 @@ export async function runElasticsearch({
   const ssl = config.get('esTestCluster.ssl');
   const license = config.get('esTestCluster.license');
   const esArgs = config.get('esTestCluster.serverArgs');
-  const esEnvVars = config.get('esTestCluster.serverEnvVars');
+  const esJavaOpts = config.get('esTestCluster.esJavaOpts');
   const isSecurityEnabled = esArgs.includes('xpack.security.enabled=true');
 
   const cluster = createTestEsCluster({
@@ -43,7 +43,7 @@ export async function runElasticsearch({
     esFrom: esFrom || config.get('esTestCluster.from'),
     dataArchive: config.get('esTestCluster.dataArchive'),
     esArgs,
-    esEnvVars,
+    esJavaOpts,
     ssl,
   });
 

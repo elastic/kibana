@@ -45,6 +45,7 @@ import { createInitialState, model } from './model';
 import { ResponseType } from './next';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../migrations/core';
+import { createInitialProgress } from './progress';
 
 describe('migrations v2 model', () => {
   const baseState: BaseState = {
@@ -793,6 +794,8 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_READ');
         expect(newState.sourceIndexPitId).toBe('pit_id');
         expect(newState.lastHitSortValue).toBe(undefined);
+        expect(newState.progress.processed).toBe(undefined);
+        expect(newState.progress.total).toBe(undefined);
       });
     });
 
@@ -808,6 +811,7 @@ describe('migrations v2 model', () => {
         lastHitSortValue: undefined,
         corruptDocumentIds: [],
         transformErrors: [],
+        progress: createInitialProgress(),
       };
 
       it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_INDEX if the index has outdated documents to reindex', () => {
@@ -816,21 +820,34 @@ describe('migrations v2 model', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
           outdatedDocuments,
           lastHitSortValue,
+          totalHits: 1,
         });
         const newState = model(state, res) as ReindexSourceToTempIndex;
         expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_INDEX');
         expect(newState.outdatedDocuments).toBe(outdatedDocuments);
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
+        expect(newState.progress.processed).toBe(undefined);
+        expect(newState.progress.total).toBe(1);
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "info",
+              "message": "Starting to process 1 documents.",
+            },
+          ]
+        `);
       });
 
       it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if no outdated documents to reindex', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
           outdatedDocuments: [],
           lastHitSortValue: undefined,
+          totalHits: undefined,
         });
         const newState = model(state, res) as ReindexSourceToTempClosePit;
         expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT');
         expect(newState.sourceIndexPitId).toBe('pit_id');
+        expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
 
       it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if no outdated documents to reindex and transform failures seen with previous outdated documents', () => {
@@ -842,12 +859,14 @@ describe('migrations v2 model', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
           outdatedDocuments: [],
           lastHitSortValue: undefined,
+          totalHits: undefined,
         });
         const newState = model(testState, res) as FatalState;
         expect(newState.controlState).toBe('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
           `"Migrations failed. Reason: Corrupt saved object documents: a:b. To allow migrations to proceed, please delete these documents."`
         );
+        expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
     });
 
@@ -882,6 +901,7 @@ describe('migrations v2 model', () => {
         lastHitSortValue: undefined,
         corruptDocumentIds: [],
         transformErrors: [],
+        progress: { processed: undefined, total: 1 },
       };
       const processedDocs = [
         {
@@ -894,8 +914,28 @@ describe('migrations v2 model', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right({
           processedDocs,
         });
-        const newState = model(state, res);
+        const newState = model(state, res) as ReindexSourceToTempIndexBulk;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_INDEX_BULK');
+        expect(newState.progress.processed).toBe(0); // Result of `(undefined ?? 0) + corruptDocumentsId.length`
+      });
+
+      it('increments the progress.processed counter', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right({
+          processedDocs,
+        });
+
+        const testState = {
+          ...state,
+          outdatedDocuments: [{ _id: '1', _source: { type: 'vis' } }],
+          progress: {
+            processed: 1,
+            total: 1,
+          },
+        };
+
+        const newState = model(testState, res) as ReindexSourceToTempIndexBulk;
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_INDEX_BULK');
+        expect(newState.progress.processed).toBe(2);
       });
 
       it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded but we have carried through previous failures', () => {
@@ -911,6 +951,7 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
         expect(newState.corruptDocumentIds.length).toEqual(1);
         expect(newState.transformErrors.length).toEqual(0);
+        expect(newState.progress.processed).toBe(0);
       });
 
       it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_READ when response is left documents_transform_failed', () => {
@@ -943,6 +984,7 @@ describe('migrations v2 model', () => {
         sourceIndexPitId: 'pit_id',
         targetIndex: '.kibana_7.11.0_001',
         lastHitSortValue: undefined,
+        progress: createInitialProgress(),
       };
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.right(
@@ -1043,6 +1085,7 @@ describe('migrations v2 model', () => {
         hasTransformedDocs: false,
         corruptDocumentIds: [],
         transformErrors: [],
+        progress: createInitialProgress(),
       };
 
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM if found documents to transform', () => {
@@ -1051,21 +1094,65 @@ describe('migrations v2 model', () => {
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
           outdatedDocuments,
           lastHitSortValue,
+          totalHits: 10,
         });
         const newState = model(state, res) as OutdatedDocumentsTransform;
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
         expect(newState.outdatedDocuments).toBe(outdatedDocuments);
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
+        expect(newState.progress.processed).toBe(undefined);
+        expect(newState.progress.total).toBe(10);
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "info",
+              "message": "Starting to process 10 documents.",
+            },
+          ]
+        `);
+      });
+
+      it('keeps the previous progress.total if not obtained in the result', () => {
+        const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+        const lastHitSortValue = [123456];
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
+          outdatedDocuments,
+          lastHitSortValue,
+          totalHits: undefined,
+        });
+        const testState = {
+          ...state,
+          progress: {
+            processed: 5,
+            total: 10,
+          },
+        };
+        const newState = model(testState, res) as OutdatedDocumentsTransform;
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
+        expect(newState.outdatedDocuments).toBe(outdatedDocuments);
+        expect(newState.lastHitSortValue).toBe(lastHitSortValue);
+        expect(newState.progress.processed).toBe(5);
+        expect(newState.progress.total).toBe(10);
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "info",
+              "message": "Processed 5 documents out of 10.",
+            },
+          ]
+        `);
       });
 
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT if no outdated documents to transform', () => {
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
           outdatedDocuments: [],
           lastHitSortValue: undefined,
+          totalHits: undefined,
         });
         const newState = model(state, res) as OutdatedDocumentsSearchClosePit;
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT');
         expect(newState.pitId).toBe('pit_id');
+        expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
 
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL if no outdated documents to transform and we have failed document migrations', () => {
@@ -1085,6 +1172,7 @@ describe('migrations v2 model', () => {
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
           outdatedDocuments: [],
           lastHitSortValue: undefined,
+          totalHits: undefined,
         });
         const transformErrorsState: OutdatedDocumentsSearchRead = {
           ...state,
@@ -1097,6 +1185,7 @@ describe('migrations v2 model', () => {
         expect(newState.reason.includes('Corrupt saved object documents: ')).toBe(true);
         expect(newState.reason.includes('Transformation errors: ')).toBe(true);
         expect(newState.reason.includes('randomvis: 7.12.0')).toBe(true);
+        expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
     });
 
@@ -1163,6 +1252,7 @@ describe('migrations v2 model', () => {
         pitId: 'pit_id',
         lastHitSortValue: [3, 4],
         hasTransformedDocs: false,
+        progress: createInitialProgress(),
       };
       describe('OUTDATED_DOCUMENTS_TRANSFORM if action succeeds', () => {
         const processedDocs = [
@@ -1181,6 +1271,7 @@ describe('migrations v2 model', () => {
           expect(newState.transformedDocs).toEqual(processedDocs);
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
+          expect(newState.progress.processed).toBe(outdatedDocuments.length);
         });
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ if there are are existing documents that failed transformation', () => {
           const outdatedDocumentsTransformStateWithFailedDocuments: OutdatedDocumentsTransform = {
@@ -1197,6 +1288,7 @@ describe('migrations v2 model', () => {
           expect(newState.corruptDocumentIds).toEqual(corruptDocumentIds);
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
+          expect(newState.progress.processed).toBe(outdatedDocuments.length);
         });
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ if there are are existing documents that failed transformation because of transform errors', () => {
           const outdatedDocumentsTransformStateWithFailedDocuments: OutdatedDocumentsTransform = {
@@ -1214,6 +1306,7 @@ describe('migrations v2 model', () => {
           expect(newState.transformErrors.length).toEqual(1);
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
+          expect(newState.progress.processed).toBe(outdatedDocuments.length);
         });
       });
       describe('OUTDATED_DOCUMENTS_TRANSFORM if action fails', () => {
@@ -1229,6 +1322,7 @@ describe('migrations v2 model', () => {
           ) as OutdatedDocumentsSearchRead;
           expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_READ');
           expect(newState.corruptDocumentIds).toEqual(corruptDocumentIds);
+          expect(newState.progress.processed).toBe(outdatedDocuments.length);
         });
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ combines newly failed documents with those already on state if documents failed the transform', () => {
           const newFailedTransformDocumentIds = ['b:other', 'c:__'];
@@ -1251,6 +1345,7 @@ describe('migrations v2 model', () => {
             ...corruptDocumentIds,
             ...newFailedTransformDocumentIds,
           ]);
+          expect(newState.progress.processed).toBe(outdatedDocuments.length);
         });
       });
     });
@@ -1271,6 +1366,7 @@ describe('migrations v2 model', () => {
         pitId: 'pit_id',
         lastHitSortValue: [3, 4],
         hasTransformedDocs: false,
+        progress: createInitialProgress(),
       };
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX should throw a throwBadResponse error if action failed', () => {
         const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.left({
