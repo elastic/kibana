@@ -13,8 +13,6 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButton, EuiButtonEmpty, EuiComboBox, EuiModal } from '@elastic/eui';
 
-import { EngineDetails } from '../../engine/types';
-
 import { AddSourceEnginesModal } from './add_source_engines_modal';
 
 const MOCK_VALUES = {
@@ -23,9 +21,9 @@ const MOCK_VALUES = {
     { name: 'source-engine-1' },
     { name: 'source-engine-2' },
     { name: 'source-engine-3' },
-  ] as EngineDetails[],
+  ],
   selectedEngineNamesToAdd: ['source-engine-2'],
-  sourceEngines: [{ name: 'source-engine-1' }] as EngineDetails[],
+  sourceEngines: [{ name: 'source-engine-1' }],
 };
 
 const MOCK_ACTIONS = {
@@ -46,7 +44,6 @@ describe('AddSourceEnginesModal', () => {
   });
 
   it('calls closeAddSourceEnginesModal when the modal is closed', () => {
-    // expect(wrapper.find(EuiModal).prop('onClose')).toEqual(MOCK_ACTIONS.closeAddSourceEnginesModal);
     wrapper.find(EuiModal).simulate('close');
 
     expect(MOCK_ACTIONS.closeAddSourceEnginesModal).toHaveBeenCalled();
@@ -65,9 +62,9 @@ describe('AddSourceEnginesModal', () => {
     });
 
     it('calls setSelectedEngineNamesToAdd when changed', () => {
-      wrapper.find(EuiComboBox).simulate('change', []);
+      wrapper.find(EuiComboBox).simulate('change', [{ label: 'source-engine-3' }]);
 
-      expect(MOCK_ACTIONS.setSelectedEngineNamesToAdd).toHaveBeenCalled();
+      expect(MOCK_ACTIONS.setSelectedEngineNamesToAdd).toHaveBeenCalledWith(['source-engine-3']);
     });
   });
 
