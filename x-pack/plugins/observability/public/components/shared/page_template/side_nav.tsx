@@ -31,7 +31,6 @@ export function ObservabilitySideNav({
   const sections = useObservable(navigationSections$, []);
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
-
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
     () =>
       sections.map(({ label, entries }, sectionIndex) => ({
