@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 import { deflate } from 'zlib';
-import { Entry, EntryNested } from '@kbn/securitysolution-io-ts-utils';
+import { Entry, EntryNested } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { validate } from '../../../../common/validate';
 

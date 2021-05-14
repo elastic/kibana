@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NamespaceType } from '@kbn/securitysolution-io-ts-utils';
+import { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { SavedObjectsClientContract } from '../../../../../../src/core/server/';
 import { ListId } from '../../../common/schemas';
