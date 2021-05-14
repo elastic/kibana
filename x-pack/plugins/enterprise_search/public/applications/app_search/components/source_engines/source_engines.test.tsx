@@ -17,9 +17,7 @@ import { EuiPageHeader } from '@elastic/eui';
 
 import { Loading } from '../../../shared/loading';
 
-import { AddSourceEnginesButton } from './components/add_source_engines_button';
-import { AddSourceEnginesModal } from './components/add_source_engines_modal';
-import { SourceEnginesTable } from './components/source_engines_table';
+import { AddSourceEnginesButton, AddSourceEnginesModal, SourceEnginesTable } from './components';
 
 import { SourceEngines } from '.';
 

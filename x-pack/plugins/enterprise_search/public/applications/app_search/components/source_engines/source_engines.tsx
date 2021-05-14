@@ -19,9 +19,7 @@ import { Loading } from '../../../shared/loading';
 import { AppLogic } from '../../app_logic';
 import { getEngineBreadcrumbs } from '../engine';
 
-import { AddSourceEnginesButton } from './components/add_source_engines_button';
-import { AddSourceEnginesModal } from './components/add_source_engines_modal';
-import { SourceEnginesTable } from './components/source_engines_table';
+import { AddSourceEnginesButton, AddSourceEnginesModal, SourceEnginesTable } from './components';
 import { SourceEnginesLogic } from './source_engines_logic';
 
 const SOURCE_ENGINES_TITLE = i18n.translate(
