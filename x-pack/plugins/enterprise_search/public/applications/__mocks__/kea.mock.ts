@@ -85,6 +85,7 @@ export const setMockActions = (actions: object) => {
  * });
  */
 import { resetContext, LogicWrapper } from 'kea';
+import { merge } from 'lodash';
 
 type LogicFile = LogicWrapper<any>;
 
@@ -101,22 +102,79 @@ export class LogicMounter {
     if (!values || !Object.keys(values).length) {
       resetContext({});
     } else {
-      let { path, key } = this.logicFile.inputs[0];
-
-      // For keyed logic files, both key and path should be functions
-      if (this.logicFile._isKeaWithKey) {
-        key = key(props);
-        path = path(key);
-      }
-
-      // Generate the correct nested defaults obj based on the file path
-      // example path: ['x', 'y', 'z']
-      // example defaults: { x: { y: { z: values } } }
-      const defaults = path.reduceRight(
-        (value: object, name: string) => ({ [name]: value }),
-        values
-      );
+      const defaults: object = this.createDefaultValuesObject(values, props);
       resetContext({ defaults });
+    }
+  };
+
+  /**
+   * Based on the values passed into mount, turn them into properly nested objects that can
+   * be passed to kea's resetContext in order to set default values":
+   *
+   * ex.
+   *
+   * input:
+   *
+   * values: {
+   *   schema: { foo: "text" },
+   *   engineName: "engine1"
+   * }
+   *
+   * output:
+   *
+   * {
+   *   enterprise_search: {
+   *     app_search: {
+   *       schema_logic: {
+   *         schema: { foo: "text" }
+   *       },
+   *       engine_logic: {
+   *         engineName: "engine1"
+   *       }
+   *     }
+   *   }
+   * }
+   */
+  private createDefaultValuesObject = (values: object, props?: object) => {
+    let { path, key } = this.logicFile.inputs[0];
+
+    // For keyed logic files, both key and path should be functions
+    if (this.logicFile._isKeaWithKey) {
+      key = key(props);
+      path = path(key);
+    }
+
+    // TODO Deal with this if and when we get there.
+    if (this.logicFile.inputs[0].connect?.values.length > 2) {
+      throw Error(
+        "This connected logic has more than 2 values in 'connect', implement handler logic for this in kea.mock.ts"
+      );
+    }
+
+    // If a logic includes values from another logic via the "connect" property, we need to make sure they're nested
+    // correctly under the correct path.
+    //
+    // For example, if the current logic under test is SchemaLogic connects values from EngineLogic also, then we need
+    // to make sure that values from SchemaLogic get nested under enterprise_search.app_search.schema_logic, and values
+    // from EngineLogic get nested under enterprise_search.app_search.engine_logic
+    if (this.logicFile.inputs[0].connect?.values[0]) {
+      const connectedPath = this.logicFile.inputs[0].connect.values[0].inputs[0].path;
+      const connectedValueKeys = this.logicFile.inputs[0].connect.values[1];
+
+      const primaryValues: Record<string, object> = {};
+      const connectedValues: Record<string, object> = {};
+
+      Object.entries(values).forEach(([k, v]) => {
+        if (connectedValueKeys.includes(k)) {
+          connectedValues[k] = v;
+        } else {
+          primaryValues[k] = v;
+        }
+      });
+
+      return merge(createDefaults(path, values), createDefaults(connectedPath, connectedValues));
+    } else {
+      return createDefaults(path, values);
     }
   };
 
@@ -192,3 +250,10 @@ export class LogicMounter {
       : listeners; // handles simpler logic files that just define listeners: { ... }
   };
 }
+
+// Generate the correct nested defaults obj based on the file path
+// example path: ['x', 'y', 'z']
+// example defaults: { x: { y: { z: values } } }
+const createDefaults = (path: string[], values: object) => {
+  return path.reduceRight((value: object, name: string) => ({ [name]: value }), values);
+};

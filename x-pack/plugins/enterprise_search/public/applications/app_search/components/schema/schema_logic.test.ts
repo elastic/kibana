@@ -10,12 +10,12 @@ import { mockEngineActions } from '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { SchemaType, Schema } from '../../../shared/schema/types';
+import { SchemaType } from '../../../shared/schema/types';
 
 import { SchemaLogic } from './schema_logic';
 
 describe('SchemaLogic', () => {
-  const { mount } = new LogicMounter(SchemaLogic);
+  const { mount, expectAction } = new LogicMounter(SchemaLogic);
   const { http } = mockHttpValues;
   const { flashAPIErrors, flashSuccessToast, setErrorMessage } = mockFlashMessageHelpers;
 
@@ -49,16 +49,6 @@ describe('SchemaLogic', () => {
     isModalOpen: false,
   };
 
-  /*
-   * Unfortunately, we can't mount({ schema: ... }) & have to use an action to set schema
-   * because of the separate connected logic file - our LogicMounter test helper sets context
-   * for only the currently tested file
-   */
-  const mountAndSetSchema = ({ schema, ...values }: { schema: Schema; [key: string]: unknown }) => {
-    mount(values);
-    SchemaLogic.actions.setSchema(schema);
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -71,64 +61,63 @@ describe('SchemaLogic', () => {
   describe('actions', () => {
     describe('onSchemaLoad', () => {
       it('stores the API response in state and sets isUpdating & isModalOpen to false', () => {
-        mount({ isModalOpen: true });
-
-        SchemaLogic.actions.onSchemaLoad(MOCK_RESPONSE);
-
-        expect(SchemaLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          // SchemaBaseLogic
-          dataLoading: false,
-          schema: MOCK_RESPONSE.schema,
-          // SchemaLogic
-          isUpdating: false,
-          isModalOpen: false,
-          cachedSchema: MOCK_RESPONSE.schema,
-          hasSchema: true,
-          mostRecentIndexJob: MOCK_RESPONSE.mostRecentIndexJob,
-          unconfirmedFields: MOCK_RESPONSE.unconfirmedFields,
-          hasUnconfirmedFields: true,
-          hasNewUnsearchedFields: MOCK_RESPONSE.unsearchedUnconfirmedFields,
+        expectAction(() => {
+          SchemaLogic.actions.onSchemaLoad(MOCK_RESPONSE);
+        }).toChangeState({
+          from: { isModalOpen: true },
+          to: {
+            // SchemaBaseLogic
+            dataLoading: false,
+            schema: MOCK_RESPONSE.schema,
+            // SchemaLogic
+            isUpdating: false,
+            isModalOpen: false,
+            cachedSchema: MOCK_RESPONSE.schema,
+            hasSchema: true,
+            mostRecentIndexJob: MOCK_RESPONSE.mostRecentIndexJob,
+            unconfirmedFields: MOCK_RESPONSE.unconfirmedFields,
+            hasUnconfirmedFields: true,
+            hasNewUnsearchedFields: MOCK_RESPONSE.unsearchedUnconfirmedFields,
+          },
         });
       });
     });
 
     describe('onSchemaUpdateError', () => {
       it('sets isUpdating & isModalOpen to false', () => {
-        mount({ isUpdating: true, isModalOpen: true });
-
-        SchemaLogic.actions.onSchemaUpdateError();
-
-        expect(SchemaLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          isUpdating: false,
-          isModalOpen: false,
+        expectAction(() => {
+          SchemaLogic.actions.onSchemaUpdateError();
+        }).toChangeState({
+          from: {
+            isUpdating: true,
+            isModalOpen: true,
+          },
+          to: {
+            isUpdating: false,
+            isModalOpen: false,
+          },
         });
       });
     });
 
     describe('openModal', () => {
       it('sets isModalOpen to true', () => {
-        mount({ isModalOpen: false });
-
-        SchemaLogic.actions.openModal();
-
-        expect(SchemaLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          isModalOpen: true,
+        expectAction(() => {
+          SchemaLogic.actions.openModal();
+        }).toChangeState({
+          from: { isModalOpen: false },
+          to: { isModalOpen: true },
         });
       });
     });
 
     describe('closeModal', () => {
       it('sets isModalOpen to false', () => {
-        mount({ isModalOpen: true });
-
-        SchemaLogic.actions.closeModal();
-
-        expect(SchemaLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          isModalOpen: false,
+        expectAction(() => {
+          SchemaLogic.actions.closeModal();
+        }).toChangeState({
+          from: { isModalOpen: true },
+          to: { isModalOpen: false },
         });
       });
     });
@@ -137,19 +126,19 @@ describe('SchemaLogic', () => {
   describe('selectors', () => {
     describe('hasSchema', () => {
       it('returns true when the schema obj has items', () => {
-        mountAndSetSchema({ schema: { test: SchemaType.Text } });
+        mount({ schema: { test: SchemaType.Text } });
         expect(SchemaLogic.values.hasSchema).toEqual(true);
       });
 
       it('returns false when the schema obj is empty', () => {
-        mountAndSetSchema({ schema: {} });
+        mount({ schema: {} });
         expect(SchemaLogic.values.hasSchema).toEqual(false);
       });
     });
 
     describe('hasSchemaChanged', () => {
       it('returns true when the schema state is different from the cachedSchema state', () => {
-        mountAndSetSchema({
+        mount({
           schema: { test: SchemaType.Text },
           cachedSchema: { test: SchemaType.Number },
         });
@@ -158,11 +147,10 @@ describe('SchemaLogic', () => {
       });
 
       it('returns false when the stored schema is the same as cachedSchema', () => {
-        mountAndSetSchema({
+        mount({
           schema: { test: SchemaType.Text },
           cachedSchema: { test: SchemaType.Text },
         });
-
         expect(SchemaLogic.values.hasSchemaChanged).toEqual(false);
       });
     });
@@ -184,7 +172,7 @@ describe('SchemaLogic', () => {
     describe('addSchemaField', () => {
       describe('if the schema field already exists', () => {
         it('flashes an error and closes the modal', () => {
-          mountAndSetSchema({ schema: { existing_field: SchemaType.Text } });
+          mount({ schema: { existing_field: SchemaType.Text } });
           jest.spyOn(SchemaLogic.actions, 'closeModal');
 
           SchemaLogic.actions.addSchemaField('existing_field', SchemaType.Text);
@@ -214,7 +202,7 @@ describe('SchemaLogic', () => {
 
     describe('updateSchemaFieldType', () => {
       it("updates an existing schema key's field type value", async () => {
-        mountAndSetSchema({ schema: { existing_field: SchemaType.Text } });
+        mount({ schema: { existing_field: SchemaType.Text } });
         jest.spyOn(SchemaLogic.actions, 'setSchema');
 
         SchemaLogic.actions.updateSchemaFieldType('existing_field', SchemaType.Geolocation);
@@ -227,13 +215,11 @@ describe('SchemaLogic', () => {
 
     describe('updateSchema', () => {
       it('sets isUpdating to true', () => {
-        mount({ isUpdating: false });
-
-        SchemaLogic.actions.updateSchema();
-
-        expect(SchemaLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          isUpdating: true,
+        expectAction(() => {
+          SchemaLogic.actions.updateSchema();
+        }).toChangeState({
+          from: { isUpdating: false },
+          to: { isUpdating: true },
         });
       });
 
