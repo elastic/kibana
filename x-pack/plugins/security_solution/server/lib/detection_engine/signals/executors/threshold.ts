@@ -17,7 +17,6 @@ import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
-import { BuildRuleMessage } from '../rule_messages';
 import { RuleStatusService } from '../rule_status_service';
 import {
   bulkCreateThresholdSignals,
@@ -30,12 +29,14 @@ import {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
+  WrapHits,
 } from '../types';
 import {
   createSearchAfterReturnType,
   createSearchAfterReturnTypeFromResponse,
   mergeReturns,
 } from '../utils';
+import { BuildRuleMessage } from '../rule_messages';
 
 export const thresholdExecutor = async ({
   rule,
@@ -48,6 +49,7 @@ export const thresholdExecutor = async ({
   buildRuleMessage,
   startedAt,
   bulkCreate,
+  wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<ThresholdRuleParams>>;
   tuples: RuleRangeTuple[];
@@ -59,6 +61,7 @@ export const thresholdExecutor = async ({
   buildRuleMessage: BuildRuleMessage;
   startedAt: Date;
   bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   let result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
@@ -130,14 +133,13 @@ export const thresholdExecutor = async ({
       filter: esFilter,
       services,
       logger,
-      id: rule.id,
       inputIndexPattern: inputIndex,
       signalsIndex: ruleParams.outputIndex,
       startedAt,
       from: tuple.from.toDate(),
       thresholdSignalHistory,
-      buildRuleMessage,
       bulkCreate,
+      wrapHits,
     });
 
     result = mergeReturns([

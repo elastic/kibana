@@ -68,7 +68,7 @@ export interface CreateThreatSignalsOptions {
   concurrentSearches: ConcurrentSearches;
   itemsPerSearch: ItemsPerSearch;
   bulkCreate: BulkCreate;
-  wrapSignals: WrapHits;
+  wrapHits: WrapHits;
 }
 
 export interface CreateThreatSignalOptions {
@@ -94,7 +94,7 @@ export interface CreateThreatSignalOptions {
   currentThreatList: ThreatListItem[];
   currentResult: SearchAfterAndBulkCreateReturnType;
   bulkCreate: BulkCreate;
-  wrapSignals: WrapHits;
+  wrapHits: WrapHits;
 }
 
 export interface BuildThreatMappingFilterOptions {

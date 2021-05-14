@@ -41,7 +41,7 @@ export const createThreatSignals = async ({
   concurrentSearches,
   itemsPerSearch,
   bulkCreate,
-  wrapSignals,
+  wrapHits,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = ruleSO.attributes.params;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
@@ -125,7 +125,7 @@ export const createThreatSignals = async ({
           currentThreatList: slicedChunk,
           currentResult: results,
           bulkCreate,
-          wrapSignals,
+          wrapHits,
         })
     );
     const searchesPerformed = await Promise.all(concurrentSearchesPerformed);

@@ -33,7 +33,7 @@ export const threatMatchExecutor = async ({
   eventsTelemetry,
   buildRuleMessage,
   bulkCreate,
-  wrapSignals,
+  wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<ThreatRuleParams>>;
   tuples: RuleRangeTuple[];
@@ -46,7 +46,7 @@ export const threatMatchExecutor = async ({
   eventsTelemetry: TelemetryEventsSender | undefined;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
-  wrapSignals: WrapHits;
+  wrapHits: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
   const inputIndex = await getInputIndex(services, version, ruleParams.index);
@@ -77,6 +77,6 @@ export const threatMatchExecutor = async ({
     concurrentSearches: ruleParams.concurrentSearches ?? 1,
     itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
     bulkCreate,
-    wrapSignals,
+    wrapHits,
   });
 };

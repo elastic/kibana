@@ -22,7 +22,7 @@ import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
 import { BuildRuleMessage } from '../rule_messages';
 import { RuleStatusService } from '../rule_status_service';
-import { AlertAttributes, BulkCreate } from '../types';
+import { AlertAttributes, BulkCreate, WrapHits } from '../types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
 
 export const mlExecutor = async ({
@@ -35,6 +35,7 @@ export const mlExecutor = async ({
   logger,
   buildRuleMessage,
   bulkCreate,
+  wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<MachineLearningRuleParams>>;
   ml: SetupPlugins['ml'];
@@ -45,6 +46,7 @@ export const mlExecutor = async ({
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }) => {
   const result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
@@ -121,8 +123,8 @@ export const mlExecutor = async ({
     signalsIndex: ruleParams.outputIndex,
     buildRuleMessage,
     bulkCreate,
+    wrapHits,
   });
-  console.log('finished bulk create ml signals');
   // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
   const shardFailures =
     (filteredAnomalyResults._shards as typeof filteredAnomalyResults._shards & {

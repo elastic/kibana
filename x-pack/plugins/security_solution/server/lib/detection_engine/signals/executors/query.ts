@@ -34,7 +34,7 @@ export const queryExecutor = async ({
   eventsTelemetry,
   buildRuleMessage,
   bulkCreate,
-  wrapSignals,
+  wrapHits,
 }: {
   rule: SavedObject<AlertAttributes<QueryRuleParams | SavedQueryRuleParams>>;
   tuples: RuleRangeTuple[];
@@ -47,7 +47,7 @@ export const queryExecutor = async ({
   eventsTelemetry: TelemetryEventsSender | undefined;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
-  wrapSignals: WrapHits;
+  wrapHits: WrapHits;
 }) => {
   const ruleParams = rule.attributes.params;
   const inputIndex = await getInputIndex(services, version, ruleParams.index);
@@ -77,6 +77,6 @@ export const queryExecutor = async ({
     pageSize: searchAfterSize,
     buildRuleMessage,
     bulkCreate,
-    wrapSignals,
+    wrapHits,
   });
 };

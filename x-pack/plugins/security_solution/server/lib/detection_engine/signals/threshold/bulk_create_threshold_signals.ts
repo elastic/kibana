@@ -19,13 +19,12 @@ import {
 } from '../../../../../../alerting/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
-import { SingleBulkCreateResponse } from '../single_bulk_create';
+import { GenericBulkCreateResponse } from '../single_bulk_create';
 import {
   calculateThresholdSignalUuid,
   getThresholdAggregationParts,
   getThresholdTermsHash,
 } from '../utils';
-import { BuildRuleMessage } from '../rule_messages';
 import type {
   MultiAggBucket,
   SignalSource,
@@ -33,9 +32,9 @@ import type {
   ThresholdSignalHistory,
   AlertAttributes,
   BulkCreate,
+  WrapHits,
 } from '../types';
 import { ThresholdRuleParams } from '../../schemas/rule_schemas';
-import { filterAndWrapDocuments } from '../search_after_bulk_create';
 
 interface BulkCreateThresholdSignalsParams {
   someResult: SignalSearchResponse;
@@ -43,14 +42,13 @@ interface BulkCreateThresholdSignalsParams {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
   logger: Logger;
-  id: string;
   filter: unknown;
   signalsIndex: string;
   startedAt: Date;
   from: Date;
   thresholdSignalHistory: ThresholdSignalHistory;
-  buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }
 
 const getTransformedHits = (
@@ -239,7 +237,7 @@ export const transformThresholdResultsToEcs = (
 
 export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
-): Promise<SingleBulkCreateResponse> => {
+): Promise<GenericBulkCreateResponse<{}>> => {
   const ruleParams = params.ruleSO.attributes.params;
   const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(
@@ -254,16 +252,6 @@ export const bulkCreateThresholdSignals = async (
     ruleParams.timestampOverride,
     params.thresholdSignalHistory
   );
-  const buildRuleMessage = params.buildRuleMessage;
 
-  return params.bulkCreate(
-    filterAndWrapDocuments({
-      buildRuleMessage,
-      enrichedEvents: ecsResults,
-      id: params.id,
-      logger: params.logger,
-      ruleSO: params.ruleSO,
-      signalsIndex: params.signalsIndex,
-    })
-  );
+  return params.bulkCreate(params.wrapHits(ecsResults.hits.hits));
 };

@@ -14,12 +14,11 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
-import { SingleBulkCreateResponse } from './single_bulk_create';
+import { GenericBulkCreateResponse } from './single_bulk_create';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
-import { AlertAttributes, BulkCreate } from './types';
+import { AlertAttributes, BulkCreate, WrapHits } from './types';
 import { MachineLearningRuleParams } from '../schemas/rule_schemas';
-import { filterAndWrapDocuments } from './search_after_bulk_create';
 
 interface BulkCreateMlSignalsParams {
   someResult: AnomalyResults;
@@ -30,6 +29,7 @@ interface BulkCreateMlSignalsParams {
   signalsIndex: string;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }
 
 interface EcsAnomaly extends Anomaly {
@@ -85,20 +85,10 @@ const transformAnomalyResultsToEcs = (
 
 export const bulkCreateMlSignals = async (
   params: BulkCreateMlSignalsParams
-): Promise<SingleBulkCreateResponse> => {
+): Promise<GenericBulkCreateResponse<{}>> => {
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
-  const buildRuleMessage = params.buildRuleMessage;
-  console.log('wrapping documents');
-  const wrappedDocs = filterAndWrapDocuments({
-    enrichedEvents: ecsResults,
-    buildRuleMessage,
-    id: params.id,
-    logger: params.logger,
-    signalsIndex: params.signalsIndex,
-    ruleSO: params.ruleSO,
-  });
-  console.log(JSON.stringify(wrappedDocs));
-  console.log('bulk creating ml signals');
+
+  const wrappedDocs = params.wrapHits(ecsResults.hits.hits);
   return params.bulkCreate(wrappedDocs);
 };

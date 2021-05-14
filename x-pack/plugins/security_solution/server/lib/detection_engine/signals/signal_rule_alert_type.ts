@@ -32,7 +32,13 @@ import {
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import { AlertAttributes, SignalRuleAlertTypeDefinition } from './types';
+import {
+  AlertAttributes,
+  SearchAfterAndBulkCreateParams,
+  SignalRuleAlertTypeDefinition,
+  WrapHits,
+  WrappedSignalHit,
+} from './types';
 import {
   getListsClient,
   getExceptions,
@@ -44,6 +50,7 @@ import {
   isMachineLearningParams,
   makeFloatString,
   errorAggregator,
+  generateId,
 } from './utils';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import {
@@ -72,8 +79,8 @@ import {
 } from '../schemas/rule_schemas';
 import { RefreshTypes } from '../types';
 import { BaseHit } from '../../../../common/detection_engine/types';
-import { GenericBulkCreateResponse } from './single_bulk_create';
-import { buildWrappedSignalsFactory } from './search_after_bulk_create';
+import { filterDuplicateSignals, GenericBulkCreateResponse } from './single_bulk_create';
+import { buildBulkBody } from './build_bulk_body';
 
 export const signalRulesAlertType = ({
   logger,
@@ -235,7 +242,10 @@ export const signalRulesAlertType = ({
           refresh
         );
 
-        const wrapSignals = buildWrappedSignalsFactory({ ruleSO: savedObject, signalsIndex: params.outputIndex });
+        const wrapHits = buildWrappedSignalsFactory({
+          ruleSO: savedObject,
+          signalsIndex: params.outputIndex,
+        });
 
         if (isMlRule(type)) {
           const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
@@ -249,6 +259,7 @@ export const signalRulesAlertType = ({
             logger,
             buildRuleMessage,
             bulkCreate,
+            wrapHits,
           });
         } else if (isThresholdRule(type)) {
           const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
@@ -263,6 +274,7 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
             startedAt,
             bulkCreate,
+            wrapHits,
           });
         } else if (isThreatMatchRule(type)) {
           const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
@@ -278,7 +290,7 @@ export const signalRulesAlertType = ({
             eventsTelemetry,
             buildRuleMessage,
             bulkCreate,
-            wrapSignals,
+            wrapHits,
           });
         } else if (isQueryRule(type)) {
           const queryRuleSO = validateQueryRuleTypes(savedObject);
@@ -294,7 +306,7 @@ export const signalRulesAlertType = ({
             eventsTelemetry,
             buildRuleMessage,
             bulkCreate,
-            wrapSignals,
+            wrapHits,
           });
         } else if (isEqlRule(type)) {
           const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);
@@ -513,4 +525,27 @@ const bulkCreateFactory = (
       createdItems,
     };
   }
+};
+
+const buildWrappedSignalsFactory = ({
+  ruleSO,
+  signalsIndex,
+}: {
+  ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
+  signalsIndex: string;
+}): WrapHits => (events) => {
+  const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
+    {
+      _index: signalsIndex,
+      _id: generateId(
+        doc._index,
+        doc._id,
+        doc._version ? doc._version.toString() : '',
+        ruleSO.attributes.params.ruleId ?? ''
+      ),
+      _source: buildBulkBody(ruleSO, doc),
+    },
+  ]);
+
+  return filterDuplicateSignals(ruleSO.id, wrappedDocs);
 };
