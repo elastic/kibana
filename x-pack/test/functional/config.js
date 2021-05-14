@@ -154,7 +154,7 @@ export default async function ({ readConfigFile }) {
       uptime: {
         pathname: '/app/uptime',
       },
-      synthetics_integration: {
+      fleet: {
         pathname: '/app/fleet',
       },
       ml: {

@@ -139,6 +139,7 @@ export const TLSFields: React.FunctionComponent<{
               },
             }));
           }}
+          data-test-subj="syntheticsTLSVerificationMode"
         />
       </EuiFormRow>
       {fields[ConfigKeys.TLS_VERIFICATION_MODE].value === VerificationMode.NONE && (
@@ -229,6 +230,7 @@ export const TLSFields: React.FunctionComponent<{
               },
             }));
           }}
+          data-test-subj="syntheticsTLSCA"
         />
       </EuiFormRow>
       <EuiFormRow
@@ -271,6 +273,7 @@ export const TLSFields: React.FunctionComponent<{
               },
             }));
           }}
+          data-test-subj="syntheticsTLSCert"
         />
       </EuiFormRow>
       <EuiFormRow
@@ -313,6 +316,7 @@ export const TLSFields: React.FunctionComponent<{
               },
             }));
           }}
+          data-test-subj="syntheticsTLSCertKey"
         />
       </EuiFormRow>
       <EuiFormRow
@@ -345,6 +349,7 @@ export const TLSFields: React.FunctionComponent<{
               },
             }));
           }}
+          data-test-subj="syntheticsTLSCertKeyPassphrase"
         />
       </EuiFormRow>
     </EuiFormFieldset>

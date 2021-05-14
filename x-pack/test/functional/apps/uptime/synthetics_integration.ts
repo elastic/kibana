@@ -7,23 +7,26 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-// import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  let policyInfo: PolicyTestResourceInfo;
-  const defaultMonitorName = 'Sample Synthetics integration';
+  const monitorName = 'Sample Synthetics integration';
 
-  const { common, syntheticsIntegration } = getPageObjects(['common', 'syntheticsIntegration']);
+  const uptimePage = getPageObjects(['syntheticsIntegration']);
   const testSubjects = getService('testSubjects');
-  const { syntheticsPolicy: policyTestResources } = getService('uptime');
+  const uptimeService = getService('uptime');
 
-  describe('When on the Synthetics Integration Policy Details Page', function () {
+  describe('When on the Synthetics Integration Policy Create Page', function () {
     this.tags(['ciGroup6']);
+    const basicConfig = {
+      name: monitorName,
+      apmServiceName: 'Sample APM Service',
+      tags: 'sample tag',
+    };
 
     describe('displays custom UI', () => {
       before(async () => {
-        await syntheticsIntegration.navigateToPackagePage();
+        const version = await uptimeService.syntheticsPackage.getSyntheticsPackageVersion();
+        await uptimePage.syntheticsIntegration.navigateToPackagePage(version!);
       });
 
       it('should display policy view', async () => {
@@ -31,38 +34,46 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('prevent saving when integration name, url/host, or schedule is missing', async () => {
-        const saveButton = await syntheticsIntegration.findSaveButton();
+        const saveButton = await uptimePage.syntheticsIntegration.findSaveButton();
         await saveButton.click();
 
         await testSubjects.missingOrFail('packagePolicyCreateSuccessToast');
       });
     });
 
-    describe('save new policy', () => {
+    describe('create new policy', () => {
+      let version: string;
+      before(async () => {
+        await uptimeService.syntheticsPackage.deletePolicyByName('system-1');
+      });
+
       beforeEach(async () => {
-        // await policyTestResources.deletePolicyByName('system-1');
-        await syntheticsIntegration.navigateToPackagePage();
+        version = (await uptimeService.syntheticsPackage.getSyntheticsPackageVersion())!;
+        await uptimePage.syntheticsIntegration.navigateToPackagePage(version!);
+        await uptimeService.syntheticsPackage.deletePolicyByName(monitorName);
+      });
+
+      afterEach(async () => {
+        await uptimeService.syntheticsPackage.deletePolicyByName(monitorName);
       });
 
       it('allows saving when user enters a valid integration name and url/host', async () => {
-        // This test ensures that updates made to the Endpoint Policy are carried all the way through
+        // This test ensures that updates made to the Synthetics Policy are carried all the way through
         // to the generated Agent Policy that is dispatch down to the Elastic Agent.
-        const monitorName = `${defaultMonitorName}--http-simple`;
-        const policyNameField = await syntheticsIntegration.findPolicyNameField();
-        const policyUrlField = await syntheticsIntegration.findPolicyUrlField();
-        await policyNameField.clearValue();
-        await policyNameField.click();
-        await policyNameField.type(monitorName);
-        await policyUrlField.clearValue();
-        await policyUrlField.click();
-        await policyUrlField.type('http://elastic.co');
-        await syntheticsIntegration.confirmAndSave();
+        const config = {
+          ...basicConfig,
+          url: 'http://elastic.co',
+        };
+        await uptimePage.syntheticsIntegration.createBasicHTTPMonitorDetails(config);
+        await uptimePage.syntheticsIntegration.confirmAndSave();
 
         await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
 
-        const [agentPolicy] = await policyTestResources.getAgentPolicyList();
+        const [agentPolicy] = await uptimeService.syntheticsPackage.getAgentPolicyList();
         const agentPolicyId = agentPolicy.id;
-        const agentFullPolicy = await policyTestResources.getFullAgentPolicy(agentPolicyId);
+        const agentFullPolicy = await uptimeService.syntheticsPackage.getFullAgentPolicy(
+          agentPolicyId
+        );
 
         expect(agentFullPolicy.inputs).to.eql([
           {
@@ -73,7 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             meta: {
               package: {
                 name: 'synthetics',
-                version: '0.0.3',
+                version,
               },
             },
             name: monitorName,
@@ -85,7 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   dataset: 'http',
                   type: 'synthetics',
                 },
-                id: `${agentFullPolicy.inputs[0]?.streams[0]?.id}`,
+                id: `${agentFullPolicy.inputs[0]?.streams?.[0]?.id}`,
                 max_redirects: 0,
                 name: monitorName,
                 processors: [
@@ -96,36 +107,49 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                       },
                     },
                   },
+                  {
+                    add_fields: {
+                      fields: {
+                        'monitor.fleet_managed': true,
+                      },
+                      target: '',
+                    },
+                  },
                 ],
                 'response.include_body': 'on_error',
                 'response.include_headers': true,
                 schedule: '@every 3m',
                 timeout: '16s',
                 type: 'http',
-                urls: 'http://elastic.co',
+                urls: config.url,
+                'service.name': config.apmServiceName,
+                tags: [config.tags],
               },
             ],
             type: 'synthetics/http',
             use_output: 'default',
           },
         ]);
-
-        await policyTestResources.deletePolicyByName(monitorName);
       });
 
-      it('allows saving tcp monitor when user enters a valid integration name and host+port', async () => {
-        // This test ensures that updates made to the Endpoint Policy are carried all the way through
+      it('allows enabling tls with defaults', async () => {
+        // This test ensures that updates made to the Synthetics Policy are carried all the way through
         // to the generated Agent Policy that is dispatch down to the Elastic Agent.
-        const host = 'smtp.gmail.com:587';
-        const monitorName = `${defaultMonitorName}--tcp-simple`;
-        await syntheticsIntegration.createBasicTCPMonitorDetails(monitorName, host);
-        await syntheticsIntegration.confirmAndSave();
+        const config = {
+          ...basicConfig,
+          url: 'http://elastic.co',
+        };
+        await uptimePage.syntheticsIntegration.createBasicHTTPMonitorDetails(config);
+        await uptimePage.syntheticsIntegration.enableTLS();
+        await uptimePage.syntheticsIntegration.confirmAndSave();
 
         await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
 
-        const [agentPolicy] = await policyTestResources.getAgentPolicyList();
+        const [agentPolicy] = await uptimeService.syntheticsPackage.getAgentPolicyList();
         const agentPolicyId = agentPolicy.id;
-        const agentFullPolicy = await policyTestResources.getFullAgentPolicy(agentPolicyId);
+        const agentFullPolicy = await uptimeService.syntheticsPackage.getFullAgentPolicy(
+          agentPolicyId
+        );
 
         expect(agentFullPolicy.inputs).to.eql([
           {
@@ -136,7 +160,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             meta: {
               package: {
                 name: 'synthetics',
-                version: '0.0.3',
+                version,
               },
             },
             name: monitorName,
@@ -148,7 +172,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   dataset: 'http',
                   type: 'synthetics',
                 },
-                id: `${agentFullPolicy?.inputs[0]?.streams[0]?.id}`,
+                id: `${agentFullPolicy.inputs[0]?.streams?.[0]?.id}`,
                 max_redirects: 0,
                 name: monitorName,
                 processors: [
@@ -159,573 +183,458 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                       },
                     },
                   },
+                  {
+                    add_fields: {
+                      fields: {
+                        'monitor.fleet_managed': true,
+                      },
+                      target: '',
+                    },
+                  },
                 ],
                 'response.include_body': 'on_error',
                 'response.include_headers': true,
                 schedule: '@every 3m',
+                'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+                'ssl.verification_mode': 'full',
                 timeout: '16s',
                 type: 'http',
-                hosts: host,
+                urls: config.url,
+                'service.name': config.apmServiceName,
+                tags: [config.tags],
               },
             ],
             type: 'synthetics/http',
+            use_output: 'default',
+          },
+        ]);
+      });
+
+      it('allows configuring tls', async () => {
+        // This test ensures that updates made to the Synthetics Policy are carried all the way through
+        // to the generated Agent Policy that is dispatch down to the Elastic Agent.
+        const config = {
+          ...basicConfig,
+          url: 'http://elastic.co',
+        };
+        const tlsConfig = {
+          verificationMode: 'strict',
+          ca: 'ca',
+          cert: 'cert',
+          certKey: 'certKey',
+          certKeyPassphrase: 'certKeyPassphrase',
+        };
+        await uptimePage.syntheticsIntegration.createBasicHTTPMonitorDetails(config);
+        await uptimePage.syntheticsIntegration.configureTLSOptions(tlsConfig);
+        await uptimePage.syntheticsIntegration.confirmAndSave();
+
+        await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
+
+        const [agentPolicy] = await uptimeService.syntheticsPackage.getAgentPolicyList();
+        const agentPolicyId = agentPolicy.id;
+        const agentFullPolicy = await uptimeService.syntheticsPackage.getFullAgentPolicy(
+          agentPolicyId
+        );
+
+        expect(agentFullPolicy.inputs).to.eql([
+          {
+            data_stream: {
+              namespace: 'default',
+            },
+            id: agentFullPolicy.inputs[0].id,
+            meta: {
+              package: {
+                name: 'synthetics',
+                version,
+              },
+            },
+            name: monitorName,
+            revision: 1,
+            streams: [
+              {
+                'check.request.method': 'GET',
+                data_stream: {
+                  dataset: 'http',
+                  type: 'synthetics',
+                },
+                id: `${agentFullPolicy.inputs[0]?.streams?.[0]?.id}`,
+                max_redirects: 0,
+                name: monitorName,
+                processors: [
+                  {
+                    add_observer_metadata: {
+                      geo: {
+                        name: 'Fleet managed',
+                      },
+                    },
+                  },
+                  {
+                    add_fields: {
+                      fields: {
+                        'monitor.fleet_managed': true,
+                      },
+                      target: '',
+                    },
+                  },
+                ],
+                'response.include_body': 'on_error',
+                'response.include_headers': true,
+                schedule: '@every 3m',
+                'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+                'ssl.verification_mode': tlsConfig.verificationMode,
+                'ssl.certificate': tlsConfig.cert,
+                'ssl.certificate_authorities': tlsConfig.ca,
+                'ssl.key': tlsConfig.certKey,
+                'ssl.key_passphrase': tlsConfig.certKeyPassphrase,
+                timeout: '16s',
+                type: 'http',
+                urls: config.url,
+                'service.name': config.apmServiceName,
+                tags: [config.tags],
+              },
+            ],
+            type: 'synthetics/http',
+            use_output: 'default',
+          },
+        ]);
+      });
+
+      it('allows configuring http advanced options', async () => {
+        // This test ensures that updates made to the Synthetics Policy are carried all the way through
+        // to the generated Agent Policy that is dispatch down to the Elastic Agent.
+        const config = {
+          ...basicConfig,
+          url: 'http://elastic.co',
+        };
+        await uptimePage.syntheticsIntegration.createBasicHTTPMonitorDetails(config);
+        const advancedConfig = {
+          username: 'username',
+          password: 'password',
+          proxyUrl: 'proxyUrl',
+          requestMethod: 'POST',
+          responseStatusCheck: '204',
+          responseBodyCheckPositive: 'success',
+          responseBodyCheckNegative: 'failure',
+          requestHeaders: {
+            sampleRequestHeader1: 'sampleRequestKey1',
+            sampleRequestHeader2: 'sampleRequestKey2',
+          },
+          responseHeaders: {
+            sampleResponseHeader1: 'sampleResponseKey1',
+            sampleResponseHeader2: 'sampleResponseKey2',
+          },
+          requestBody: {
+            type: 'xml',
+            value: '<samplexml>samplexml',
+          },
+          indexResponseBody: false,
+          indexResponseHeaders: false,
+        };
+        await uptimePage.syntheticsIntegration.configureHTTPAdvancedOptions(advancedConfig);
+        await uptimePage.syntheticsIntegration.confirmAndSave();
+
+        await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
+
+        const [agentPolicy] = await uptimeService.syntheticsPackage.getAgentPolicyList();
+        const agentPolicyId = agentPolicy.id;
+        const agentFullPolicy = await uptimeService.syntheticsPackage.getFullAgentPolicy(
+          agentPolicyId
+        );
+
+        expect(agentFullPolicy.inputs).to.eql([
+          {
+            data_stream: {
+              namespace: 'default',
+            },
+            id: agentFullPolicy.inputs[0].id,
+            meta: {
+              package: {
+                name: 'synthetics',
+                version,
+              },
+            },
+            name: monitorName,
+            revision: 1,
+            streams: [
+              {
+                'check.request.method': advancedConfig.requestMethod,
+                'check.request.headers': {
+                  'Content-Type': 'application/xml',
+                  ...advancedConfig.requestHeaders,
+                },
+                'check.response.headers': advancedConfig.responseHeaders,
+                'check.response.status': [advancedConfig.responseStatusCheck],
+                'check.request.body': `${advancedConfig.requestBody.value}</samplexml>`, // code editor adds closing tag
+                'check.response.body.positive': [advancedConfig.responseBodyCheckPositive],
+                'check.response.body.negative': [advancedConfig.responseBodyCheckNegative],
+                data_stream: {
+                  dataset: 'http',
+                  type: 'synthetics',
+                },
+                id: `${agentFullPolicy.inputs[0]?.streams?.[0]?.id}`,
+                max_redirects: 0,
+                name: monitorName,
+                processors: [
+                  {
+                    add_observer_metadata: {
+                      geo: {
+                        name: 'Fleet managed',
+                      },
+                    },
+                  },
+                  {
+                    add_fields: {
+                      fields: {
+                        'monitor.fleet_managed': true,
+                      },
+                      target: '',
+                    },
+                  },
+                ],
+                'response.include_body': advancedConfig.indexResponseBody ? 'on_error' : 'never',
+                'response.include_headers': advancedConfig.indexResponseHeaders,
+                schedule: '@every 3m',
+                timeout: '16s',
+                type: 'http',
+                urls: config.url,
+                proxy_url: advancedConfig.proxyUrl,
+                username: advancedConfig.username,
+                password: advancedConfig.password,
+                'service.name': config.apmServiceName,
+                tags: [config.tags],
+              },
+            ],
+            type: 'synthetics/http',
+            use_output: 'default',
+          },
+        ]);
+      });
+
+      it('allows saving tcp monitor when user enters a valid integration name and host+port', async () => {
+        // This test ensures that updates made to the Synthetics Policy are carried all the way through
+        // to the generated Agent Policy that is dispatch down to the Elastic Agent.
+        const config = {
+          ...basicConfig,
+          host: 'smtp.gmail.com:587',
+        };
+        await uptimePage.syntheticsIntegration.createBasicTCPMonitorDetails(config);
+        await uptimePage.syntheticsIntegration.confirmAndSave();
+
+        await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
+
+        const [agentPolicy] = await uptimeService.syntheticsPackage.getAgentPolicyList();
+        const agentPolicyId = agentPolicy.id;
+        const agentFullPolicy = await uptimeService.syntheticsPackage.getFullAgentPolicy(
+          agentPolicyId
+        );
+
+        expect(agentFullPolicy.inputs).to.eql([
+          {
+            data_stream: {
+              namespace: 'default',
+            },
+            id: agentFullPolicy.inputs[0].id,
+            meta: {
+              package: {
+                name: 'synthetics',
+                version,
+              },
+            },
+            name: monitorName,
+            revision: 1,
+            streams: [
+              {
+                data_stream: {
+                  dataset: 'tcp',
+                  type: 'synthetics',
+                },
+                id: `${agentFullPolicy?.inputs[0]?.streams?.[0]?.id}`,
+                name: monitorName,
+                processors: [
+                  {
+                    add_observer_metadata: {
+                      geo: {
+                        name: 'Fleet managed',
+                      },
+                    },
+                  },
+                  {
+                    add_fields: {
+                      fields: {
+                        'monitor.fleet_managed': true,
+                      },
+                      target: '',
+                    },
+                  },
+                ],
+                proxy_use_local_resolver: false,
+                schedule: '@every 3m',
+                timeout: '16s',
+                type: 'tcp',
+                hosts: config.host,
+                tags: [config.tags],
+                'service.name': config.apmServiceName,
+              },
+            ],
+            type: 'synthetics/tcp',
+            use_output: 'default',
+          },
+        ]);
+      });
+
+      it('allows configuring tcp advanced options', async () => {
+        // This test ensures that updates made to the Synthetics Policy are carried all the way through
+        // to the generated Agent Policy that is dispatch down to the Elastic Agent.
+        const config = {
+          ...basicConfig,
+          host: 'smtp.gmail.com:587',
+        };
+        await uptimePage.syntheticsIntegration.createBasicTCPMonitorDetails(config);
+        const advancedConfig = {
+          proxyUrl: 'proxyUrl',
+          requestSendCheck: 'body',
+          responseReceiveCheck: 'success',
+          proxyUseLocalResolver: true,
+        };
+        await uptimePage.syntheticsIntegration.configureTCPAdvancedOptions(advancedConfig);
+        await uptimePage.syntheticsIntegration.confirmAndSave();
+
+        await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
+
+        const [agentPolicy] = await uptimeService.syntheticsPackage.getAgentPolicyList();
+        const agentPolicyId = agentPolicy.id;
+        const agentFullPolicy = await uptimeService.syntheticsPackage.getFullAgentPolicy(
+          agentPolicyId
+        );
+
+        expect(agentFullPolicy.inputs).to.eql([
+          {
+            data_stream: {
+              namespace: 'default',
+            },
+            id: agentFullPolicy.inputs[0].id,
+            meta: {
+              package: {
+                name: 'synthetics',
+                version,
+              },
+            },
+            name: monitorName,
+            revision: 1,
+            streams: [
+              {
+                data_stream: {
+                  dataset: 'tcp',
+                  type: 'synthetics',
+                },
+                id: `${agentFullPolicy.inputs[0]?.streams?.[0]?.id}`,
+                name: monitorName,
+                processors: [
+                  {
+                    add_observer_metadata: {
+                      geo: {
+                        name: 'Fleet managed',
+                      },
+                    },
+                  },
+                  {
+                    add_fields: {
+                      fields: {
+                        'monitor.fleet_managed': true,
+                      },
+                      target: '',
+                    },
+                  },
+                ],
+                schedule: '@every 3m',
+                timeout: '16s',
+                type: 'tcp',
+                hosts: config.host,
+                proxy_url: advancedConfig.proxyUrl,
+                proxy_use_local_resolver: advancedConfig.proxyUseLocalResolver,
+                'check.receive': advancedConfig.responseReceiveCheck,
+                'check.send': advancedConfig.requestSendCheck,
+                'service.name': config.apmServiceName,
+                tags: [config.tags],
+              },
+            ],
+            type: 'synthetics/tcp',
+            use_output: 'default',
+          },
+        ]);
+      });
+
+      it('allows saving icmp monitor when user enters a valid integration name and host', async () => {
+        // This test ensures that updates made to the Synthetics Policy are carried all the way through
+        // to the generated Agent Policy that is dispatch down to the Elastic Agent.
+        const config = {
+          ...basicConfig,
+          host: '1.1.1.1',
+        };
+        await uptimePage.syntheticsIntegration.createBasicICMPMonitorDetails(config);
+        await uptimePage.syntheticsIntegration.confirmAndSave();
+
+        await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
+
+        const [agentPolicy] = await uptimeService.syntheticsPackage.getAgentPolicyList();
+        const agentPolicyId = agentPolicy.id;
+        const agentFullPolicy = await uptimeService.syntheticsPackage.getFullAgentPolicy(
+          agentPolicyId
+        );
+
+        expect(agentFullPolicy.inputs).to.eql([
+          {
+            data_stream: {
+              namespace: 'default',
+            },
+            id: agentFullPolicy.inputs[0].id,
+            meta: {
+              package: {
+                name: 'synthetics',
+                version,
+              },
+            },
+            name: monitorName,
+            revision: 1,
+            streams: [
+              {
+                data_stream: {
+                  dataset: 'icmp',
+                  type: 'synthetics',
+                },
+                id: `${agentFullPolicy?.inputs[0]?.streams?.[0]?.id}`,
+                name: monitorName,
+                processors: [
+                  {
+                    add_observer_metadata: {
+                      geo: {
+                        name: 'Fleet managed',
+                      },
+                    },
+                  },
+                  {
+                    add_fields: {
+                      fields: {
+                        'monitor.fleet_managed': true,
+                      },
+                      target: '',
+                    },
+                  },
+                ],
+                schedule: '@every 3m',
+                timeout: '16s',
+                wait: '1s',
+                type: 'icmp',
+                hosts: config.host,
+                'service.name': config.apmServiceName,
+                tags: [config.tags],
+              },
+            ],
+            type: 'synthetics/icmp',
             use_output: 'default',
           },
         ]);
       });
     });
-
-    // describe('and the save button is clicked', () => {
-    //   let policyInfo: PolicyTestResourceInfo;
-
-    //   beforeEach(async () => {
-    //     policyInfo = await policyTestResources.createPolicy();
-    //     await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
-    //   });
-
-    //   afterEach(async () => {
-    //     if (policyInfo) {
-    //       await policyInfo.cleanup();
-    //     }
-    //   });
-
-    //   it('should display success toast on successful save', async () => {
-    //     await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-    //     await pageObjects.policy.confirmAndSave();
-
-    //     await testSubjects.existOrFail('policyDetailsSuccessMessage');
-    //     expect(await testSubjects.getVisibleText('policyDetailsSuccessMessage')).to.equal(
-    //       `Integration ${policyInfo.packagePolicy.name} has been updated.`
-    //     );
-    //   });
-    //   it('should persist update on the screen', async () => {
-    //     await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_process');
-    //     await pageObjects.policy.confirmAndSave();
-
-    //     await testSubjects.existOrFail('policyDetailsSuccessMessage');
-    //     await pageObjects.endpoint.navigateToEndpointList();
-    //     await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
-
-    //     expect(await (await testSubjects.find('policyWindowsEvent_process')).isSelected()).to.equal(
-    //       false
-    //     );
-    //   });
-    //   it('should have updated policy data in overall Agent Policy', async () => {
-    //     // This test ensures that updates made to the Endpoint Policy are carried all the way through
-    //     // to the generated Agent Policy that is dispatch down to the Elastic Agent.
-
-    //     await Promise.all([
-    //       pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_file'),
-    //       pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyLinuxEvent_file'),
-    //       pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyMacEvent_file'),
-    //     ]);
-
-    //     const advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
-    //     await advancedPolicyButton.click();
-
-    //     const advancedPolicyField = await pageObjects.policy.findAdvancedPolicyField();
-    //     await advancedPolicyField.clearValue();
-    //     await advancedPolicyField.click();
-    //     await advancedPolicyField.type('true');
-    //     await pageObjects.policy.confirmAndSave();
-
-    //     await testSubjects.existOrFail('policyDetailsSuccessMessage');
-
-    //     const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
-    //       policyInfo.agentPolicy.id
-    //     );
-
-    //     expect(agentFullPolicy.inputs).to.eql([
-    //       {
-    //         id: policyInfo.packagePolicy.id,
-    //         revision: 2,
-    //         data_stream: { namespace: 'default' },
-    //         name: 'Protect East Coast',
-    //         meta: {
-    //           package: {
-    //             name: 'endpoint',
-    //             version: policyInfo.packageInfo.version,
-    //           },
-    //         },
-    //         artifact_manifest: {
-    //           artifacts: {
-    //             'endpoint-exceptionlist-macos-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //             'endpoint-exceptionlist-windows-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //             'endpoint-trustlist-linux-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //             'endpoint-trustlist-macos-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //             'endpoint-trustlist-windows-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //           },
-    //           // The manifest version could have changed when the Policy was updated because the
-    //           // policy details page ensures that a save action applies the udpated policy on top
-    //           // of the latest Package Policy. So we just ignore the check against this value by
-    //           // forcing it to be the same as the value returned in the full agent policy.
-    //           manifest_version: agentFullPolicy.inputs[0].artifact_manifest.manifest_version,
-    //           schema_version: 'v1',
-    //         },
-    //         policy: {
-    //           linux: {
-    //             events: { file: false, network: true, process: true },
-    //             logging: { file: 'info' },
-    //             advanced: { agent: { connection_delay: 'true' } },
-    //           },
-    //           mac: {
-    //             events: { file: false, network: true, process: true },
-    //             logging: { file: 'info' },
-    //             malware: { mode: 'prevent' },
-    //             popup: {
-    //               malware: {
-    //                 enabled: true,
-    //                 message: 'Elastic Security {action} {filename}',
-    //               },
-    //             },
-    //           },
-    //           windows: {
-    //             events: {
-    //               dll_and_driver_load: true,
-    //               dns: true,
-    //               file: false,
-    //               network: true,
-    //               process: true,
-    //               registry: true,
-    //               security: true,
-    //             },
-    //             logging: { file: 'info' },
-    //             malware: { mode: 'prevent' },
-    //             ransomware: { mode: 'prevent' },
-    //             popup: {
-    //               malware: {
-    //                 enabled: true,
-    //                 message: 'Elastic Security {action} {filename}',
-    //               },
-    //               ransomware: {
-    //                 enabled: true,
-    //                 message: 'Elastic Security {action} {filename}',
-    //               },
-    //             },
-    //             antivirus_registration: {
-    //               enabled: false,
-    //             },
-    //           },
-    //         },
-    //         type: 'endpoint',
-    //         use_output: 'default',
-    //       },
-    //     ]);
-    //   });
-
-    //   it('should have cleared the advanced section when the user deletes the value', async () => {
-    //     const advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
-    //     await advancedPolicyButton.click();
-
-    //     const advancedPolicyField = await pageObjects.policy.findAdvancedPolicyField();
-    //     await advancedPolicyField.clearValue();
-    //     await advancedPolicyField.click();
-    //     await advancedPolicyField.type('true');
-    //     await pageObjects.policy.confirmAndSave();
-
-    //     await testSubjects.existOrFail('policyDetailsSuccessMessage');
-
-    //     const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
-    //       policyInfo.agentPolicy.id
-    //     );
-
-    //     expect(agentFullPolicy.inputs).to.eql([
-    //       {
-    //         id: policyInfo.packagePolicy.id,
-    //         revision: 2,
-    //         data_stream: { namespace: 'default' },
-    //         name: 'Protect East Coast',
-    //         meta: {
-    //           package: {
-    //             name: 'endpoint',
-    //             version: policyInfo.packageInfo.version,
-    //           },
-    //         },
-    //         artifact_manifest: {
-    //           artifacts: {
-    //             'endpoint-exceptionlist-macos-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //             'endpoint-exceptionlist-windows-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //             'endpoint-trustlist-linux-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //             'endpoint-trustlist-macos-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //             'endpoint-trustlist-windows-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //           },
-    //           // The manifest version could have changed when the Policy was updated because the
-    //           // policy details page ensures that a save action applies the udpated policy on top
-    //           // of the latest Package Policy. So we just ignore the check against this value by
-    //           // forcing it to be the same as the value returned in the full agent policy.
-    //           manifest_version: agentFullPolicy.inputs[0].artifact_manifest.manifest_version,
-    //           schema_version: 'v1',
-    //         },
-    //         policy: {
-    //           linux: {
-    //             events: { file: true, network: true, process: true },
-    //             logging: { file: 'info' },
-    //             advanced: { agent: { connection_delay: 'true' } },
-    //           },
-    //           mac: {
-    //             events: { file: true, network: true, process: true },
-    //             logging: { file: 'info' },
-    //             malware: { mode: 'prevent' },
-    //             popup: {
-    //               malware: {
-    //                 enabled: true,
-    //                 message: 'Elastic Security {action} {filename}',
-    //               },
-    //             },
-    //           },
-    //           windows: {
-    //             events: {
-    //               dll_and_driver_load: true,
-    //               dns: true,
-    //               file: true,
-    //               network: true,
-    //               process: true,
-    //               registry: true,
-    //               security: true,
-    //             },
-    //             logging: { file: 'info' },
-    //             malware: { mode: 'prevent' },
-    //             ransomware: { mode: 'prevent' },
-    //             popup: {
-    //               malware: {
-    //                 enabled: true,
-    //                 message: 'Elastic Security {action} {filename}',
-    //               },
-    //               ransomware: {
-    //                 enabled: true,
-    //                 message: 'Elastic Security {action} {filename}',
-    //               },
-    //             },
-    //             antivirus_registration: {
-    //               enabled: false,
-    //             },
-    //           },
-    //         },
-    //         type: 'endpoint',
-    //         use_output: 'default',
-    //       },
-    //     ]);
-
-    //     // Clear the value
-    //     await advancedPolicyField.click();
-    //     await advancedPolicyField.clearValueWithKeyboard();
-
-    //     // Make sure the toast button closes so the save button on the sticky footer is visible
-    //     await (await testSubjects.find('toastCloseButton')).click();
-    //     await testSubjects.waitForHidden('toastCloseButton');
-    //     await pageObjects.policy.confirmAndSave();
-
-    //     await testSubjects.existOrFail('policyDetailsSuccessMessage');
-
-    //     const agentFullPolicyUpdated = await policyTestResources.getFullAgentPolicy(
-    //       policyInfo.agentPolicy.id
-    //     );
-
-    //     expect(agentFullPolicyUpdated.inputs).to.eql([
-    //       {
-    //         id: policyInfo.packagePolicy.id,
-    //         revision: 3,
-    //         data_stream: { namespace: 'default' },
-    //         name: 'Protect East Coast',
-    //         meta: {
-    //           package: {
-    //             name: 'endpoint',
-    //             version: policyInfo.packageInfo.version,
-    //           },
-    //         },
-    //         artifact_manifest: {
-    //           artifacts: {
-    //             'endpoint-exceptionlist-macos-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //             'endpoint-exceptionlist-windows-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //             'endpoint-trustlist-linux-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //             'endpoint-trustlist-macos-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //             'endpoint-trustlist-windows-v1': {
-    //               compression_algorithm: 'zlib',
-    //               decoded_sha256:
-    //                 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //               decoded_size: 14,
-    //               encoded_sha256:
-    //                 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-    //               encoded_size: 22,
-    //               encryption_algorithm: 'none',
-    //               relative_url:
-    //                 '/api/fleet/artifacts/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-    //             },
-    //           },
-    //           // The manifest version could have changed when the Policy was updated because the
-    //           // policy details page ensures that a save action applies the udpated policy on top
-    //           // of the latest Package Policy. So we just ignore the check against this value by
-    //           // forcing it to be the same as the value returned in the full agent policy.
-    //           manifest_version: agentFullPolicy.inputs[0].artifact_manifest.manifest_version,
-    //           schema_version: 'v1',
-    //         },
-    //         policy: {
-    //           linux: {
-    //             events: { file: true, network: true, process: true },
-    //             logging: { file: 'info' },
-    //           },
-    //           mac: {
-    //             events: { file: true, network: true, process: true },
-    //             logging: { file: 'info' },
-    //             malware: { mode: 'prevent' },
-    //             popup: {
-    //               malware: {
-    //                 enabled: true,
-    //                 message: 'Elastic Security {action} {filename}',
-    //               },
-    //             },
-    //           },
-    //           windows: {
-    //             events: {
-    //               dll_and_driver_load: true,
-    //               dns: true,
-    //               file: true,
-    //               network: true,
-    //               process: true,
-    //               registry: true,
-    //               security: true,
-    //             },
-    //             logging: { file: 'info' },
-    //             malware: { mode: 'prevent' },
-    //             ransomware: { mode: 'prevent' },
-    //             popup: {
-    //               malware: {
-    //                 enabled: true,
-    //                 message: 'Elastic Security {action} {filename}',
-    //               },
-    //               ransomware: {
-    //                 enabled: true,
-    //                 message: 'Elastic Security {action} {filename}',
-    //               },
-    //             },
-    //             antivirus_registration: {
-    //               enabled: false,
-    //             },
-    //           },
-    //         },
-    //         type: 'endpoint',
-    //         use_output: 'default',
-    //       },
-    //     ]);
-    //   });
-    // });
-
-    // describe('when on Ingest Policy Edit Package Policy page', async () => {
-    //   let policyInfo: PolicyTestResourceInfo;
-    //   beforeEach(async () => {
-    //     // Create a policy and navigate to Ingest app
-    //     policyInfo = await policyTestResources.createPolicy();
-    //     await pageObjects.ingestManagerCreatePackagePolicy.navigateToAgentPolicyEditPackagePolicy(
-    //       policyInfo.agentPolicy.id,
-    //       policyInfo.packagePolicy.id
-    //     );
-    //   });
-    //   afterEach(async () => {
-    //     if (policyInfo) {
-    //       await policyInfo.cleanup();
-    //     }
-    //   });
-
-    //   it('should show the endpoint policy form', async () => {
-    //     await testSubjects.existOrFail('endpointIntegrationPolicyForm');
-    //   });
-
-    //   it('should allow updates to policy items', async () => {
-    //     const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
-    //     await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
-    //       winDnsEventingCheckbox
-    //     );
-    //     expect(await winDnsEventingCheckbox.isSelected()).to.be(true);
-    //     await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-    //     expect(await winDnsEventingCheckbox.isSelected()).to.be(false);
-    //   });
-
-    //   it('should preserve updates done from the Fleet form', async () => {
-    //     await pageObjects.ingestManagerCreatePackagePolicy.setPackagePolicyDescription(
-    //       'protect everything'
-    //     );
-
-    //     const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
-    //     await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
-    //       winDnsEventingCheckbox
-    //     );
-    //     await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-
-    //     expect(
-    //       await pageObjects.ingestManagerCreatePackagePolicy.getPackagePolicyDescriptionValue()
-    //     ).to.be('protect everything');
-    //   });
-
-    //   it('should include updated endpoint data when saved', async () => {
-    //     const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
-    //     await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
-    //       winDnsEventingCheckbox
-    //     );
-    //     await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-    //     const wasSelected = await winDnsEventingCheckbox.isSelected();
-    //     await (await pageObjects.ingestManagerCreatePackagePolicy.findSaveButton(true)).click();
-    //     await pageObjects.ingestManagerCreatePackagePolicy.waitForSaveSuccessNotification(true);
-
-    //     await pageObjects.ingestManagerCreatePackagePolicy.navigateToAgentPolicyEditPackagePolicy(
-    //       policyInfo.agentPolicy.id,
-    //       policyInfo.packagePolicy.id
-    //     );
-    //     expect(await testSubjects.isSelected('policyWindowsEvent_dns')).to.be(wasSelected);
-    //   });
-    // });
   });
 }

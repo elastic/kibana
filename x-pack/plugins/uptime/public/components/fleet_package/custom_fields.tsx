@@ -273,6 +273,7 @@ export const CustomFields = memo<Props>(
                       configKey: ConfigKeys.APM_SERVICE_NAME,
                     })
                   }
+                  data-test-subj="syntheticsAPMServiceName"
                 />
               </EuiFormRow>
               {isHTTP && (
@@ -369,6 +370,7 @@ export const CustomFields = memo<Props>(
                 <ComboBox
                   selectedOptions={fields[ConfigKeys.TAGS]}
                   onChange={(value) => handleInputChange({ value, configKey: ConfigKeys.TAGS })}
+                  data-test-subj="syntheticsTags"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -395,10 +397,12 @@ export const CustomFields = memo<Props>(
               id={'uptimeFleetIsTLSEnabled'}
               checked={isTLSEnabled}
               label={
-                <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.certificateSettings.enableSSLSettings.label"
-                  defaultMessage="Enable TLS configuration"
-                />
+                <span data-test-subj="syntheticsIsTLSEnabled">
+                  <FormattedMessage
+                    id="xpack.uptime.createPackagePolicy.stepConfigure.certificateSettings.enableSSLSettings.label"
+                    defaultMessage="Enable TLS configuration"
+                  />
+                </span>
               }
               onChange={(event) => setIsTLSEnabled(event.target.checked)}
             />
