@@ -12,12 +12,12 @@ import classNames from 'classnames';
 
 import { EuiAvatar, EuiAvatarProps } from '@elastic/eui';
 
-export type KibanaPageTemplateSolutionNavAvatar = EuiAvatarProps;
+export type KibanaPageTemplateSolutionNavAvatarProps = EuiAvatarProps;
 
 /**
  * Applies extra styling to a typical EuiAvatar
  */
-export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<KibanaPageTemplateSolutionNavAvatar> = ({
+export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<KibanaPageTemplateSolutionNavAvatarProps> = ({
   className,
   ...rest
 }) => {

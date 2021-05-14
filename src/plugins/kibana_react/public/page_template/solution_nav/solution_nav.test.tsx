@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { KibanaPageTemplateSolutionNav } from './solution_nav';
+import { KibanaPageTemplateSolutionNav, KibanaPageTemplateSolutionNavProps } from './solution_nav';
 
-const items: KibanaPageTemplateSolutionNav['items'] = [
+const items: KibanaPageTemplateSolutionNavProps['items'] = [
   {
     name: 'Ingest',
     id: '1',

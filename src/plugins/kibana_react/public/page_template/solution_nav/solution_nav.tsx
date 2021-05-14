@@ -12,23 +12,26 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiTitle, EuiSideNav, EuiSideNavProps, htmlIdGenerator } from '@elastic/eui';
 
-import { KibanaPageTemplateSolutionNavAvatar } from './solution_nav_avatar';
+import {
+  KibanaPageTemplateSolutionNavAvatar,
+  KibanaPageTemplateSolutionNavAvatarProps,
+} from './solution_nav_avatar';
 
-export type KibanaPageTemplateSolutionNav = EuiSideNavProps<{}> & {
+export type KibanaPageTemplateSolutionNavProps = EuiSideNavProps<{}> & {
   /**
    * Name of the solution, i.e. "Observability"
    */
-  name: KibanaPageTemplateSolutionNavAvatar['name'];
+  name: KibanaPageTemplateSolutionNavAvatarProps['name'];
   /**
    * Solution logo, i.e. "logoObservability"
    */
-  icon?: KibanaPageTemplateSolutionNavAvatar['iconType'];
+  icon?: KibanaPageTemplateSolutionNavAvatarProps['iconType'];
 };
 
 /**
  * A wrapper around EuiSideNav but also creates the appropriate title with optional solution logo
  */
-export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplateSolutionNav> = ({
+export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplateSolutionNavProps> = ({
   name,
   icon,
   items,
