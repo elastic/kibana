@@ -6,7 +6,7 @@
  */
 
 import './xy_config_panel.scss';
-import React, { useMemo, useState, memo } from 'react';
+import React, { useMemo, useState, memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType } from '@elastic/charts';
 import { debounce } from 'lodash';
@@ -29,7 +29,14 @@ import {
   FormatFactory,
   FramePublicAPI,
 } from '../types';
-import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
+import {
+  State,
+  SeriesType,
+  visualizationTypes,
+  YAxisMode,
+  AxesSettingsConfig,
+  AxisExtentConfig,
+} from './types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';
@@ -250,6 +257,15 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
   );
+  const setLeftExtent = useCallback(
+    (extent: AxisExtentConfig | undefined) => {
+      setState({
+        ...state,
+        yLeftExtent: extent,
+      });
+    },
+    [setState, state]
+  );
   const hasBarOrAreaOnRightAxis = Boolean(
     axisGroups
       .find((group) => group.groupId === 'left')
@@ -257,6 +273,15 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
         const seriesType = state.layers.find((l) => l.layerId === series.layer)?.seriesType;
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
+  );
+  const setRightExtent = useCallback(
+    (extent: AxisExtentConfig | undefined) => {
+      setState({
+        ...state,
+        yRightExtent: extent,
+      });
+    },
+    [setState, state]
   );
 
   return (
@@ -331,12 +356,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
               extent={state?.yLeftExtent || { mode: 'full' }}
-              setExtent={(extent) => {
-                setState({
-                  ...state,
-                  yLeftExtent: extent,
-                });
-              }}
+              setExtent={setLeftExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
               dataBounds={dataBounds.left}
             />
@@ -386,12 +406,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
               extent={state?.yRightExtent || { mode: 'full' }}
-              setExtent={(extent) => {
-                setState({
-                  ...state,
-                  yRightExtent: extent,
-                });
-              }}
+              setExtent={setRightExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}
               dataBounds={dataBounds.right}
             />

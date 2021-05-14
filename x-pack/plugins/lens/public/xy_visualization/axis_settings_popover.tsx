@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from './types';
-import { ToolbarPopover } from '../shared_components';
+import { ToolbarPopover, useDebouncedValue } from '../shared_components';
 import { isHorizontalChart } from './state_helpers';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
 import { EuiIconAxisLeft } from '../assets/axis_left';
@@ -91,7 +91,7 @@ export interface AxisSettingsPopoverProps {
   /**
    * set axis extent
    */
-  setExtent?: (extent: AxisExtentConfig) => void;
+  setExtent?: (extent: AxisExtentConfig | undefined) => void;
   hasBarOrAreaOnAxis: boolean;
   dataBounds?: { min: number; max: number };
 }
@@ -149,6 +149,7 @@ const popoverConfig = (
   }
 };
 
+const noop = () => {};
 const idPrefix = htmlIdGenerator()();
 export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverProps> = ({
   layers,
@@ -169,12 +170,17 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   hasBarOrAreaOnAxis,
   dataBounds,
 }) => {
-  const [title, setTitle] = useState<string | undefined>(axisTitle);
-
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
   const config = popoverConfig(axis, isHorizontal);
 
-  const [localExtent, setLocalExtent] = useState(extent);
+  const { inputValue: debouncedExtent, handleInputChange: setDebouncedExtent } = useDebouncedValue<
+    AxisExtentConfig | undefined
+  >({
+    value: extent,
+    onChange: setExtent || noop,
+  });
+
+  const [localExtent, setLocalExtent] = useState(debouncedExtent);
 
   const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrAreaOnAxis, localExtent);
 
@@ -185,16 +191,23 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
       !inclusiveZeroError &&
       !boundaryError &&
       localExtent &&
-      localExtent !== extent
+      localExtent !== debouncedExtent
     ) {
-      setExtent(localExtent);
+      setDebouncedExtent(localExtent);
     }
-  }, [localExtent, inclusiveZeroError, boundaryError, setExtent, extent]);
+  }, [
+    localExtent,
+    inclusiveZeroError,
+    boundaryError,
+    setDebouncedExtent,
+    debouncedExtent,
+    setExtent,
+  ]);
 
-  const onTitleChange = (value: string): void => {
-    setTitle(value);
-    updateTitleState(value);
-  };
+  const { inputValue: title, handleInputChange: onTitleChange } = useDebouncedValue<string>({
+    value: axisTitle || '',
+    onChange: updateTitleState,
+  });
   return (
     <ToolbarPopover
       title={config.popoverTitle}
@@ -431,7 +444,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                       }}
                       onBlur={() => {
                         if (localExtent.upperBound === undefined && dataBounds) {
-                          setExtent({
+                          setLocalExtent({
                             ...localExtent,
                             upperBound: dataBounds.max,
                           });
