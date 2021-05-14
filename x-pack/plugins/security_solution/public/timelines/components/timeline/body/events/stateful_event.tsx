@@ -23,7 +23,7 @@ import {
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { OnPinEvent, OnRowSelected } from '../../events';
+import { OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
 import { isEventBuildingBlockType, getEventType, isEvenEqlSequence } from '../helpers';
@@ -176,16 +176,6 @@ const StatefulEventComponent: React.FC<Props> = ({
     });
   }, [event]);
 
-  const onPinEvent: OnPinEvent = useCallback(
-    (eventId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId })),
-    [dispatch, timelineId]
-  );
-
-  const onUnPinEvent: OnPinEvent = useCallback(
-    (eventId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId })),
-    [dispatch, timelineId]
-  );
-
   const handleOnEventDetailPanelOpened = useCallback(() => {
     const eventId = event._id;
     const indexName = event._index!;
@@ -215,10 +205,10 @@ const StatefulEventComponent: React.FC<Props> = ({
     (noteId: string) => {
       dispatch(timelineActions.addNoteToEvent({ eventId: event._id, id: timelineId, noteId }));
       if (!isEventPinned) {
-        onPinEvent(event._id); // pin the event, because it has notes
+        dispatch(timelineActions.pinEvent({ id: timelineId, eventId: event._id }));
       }
     },
-    [dispatch, event, isEventPinned, onPinEvent, timelineId]
+    [dispatch, event, isEventPinned, timelineId]
   );
 
   const RowRendererContent = useMemo(
@@ -273,9 +263,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           loadingEventIds={loadingEventIds}
           notesCount={notes.length}
           onEventDetailsPanelOpened={handleOnEventDetailPanelOpened}
-          onPinEvent={onPinEvent}
           onRowSelected={onRowSelected}
-          onUnPinEvent={onUnPinEvent}
           refetch={refetch}
           renderCellValue={renderCellValue}
           onRuleChange={onRuleChange}

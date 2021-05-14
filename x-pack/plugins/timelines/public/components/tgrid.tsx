@@ -6,14 +6,12 @@
  */
 
 import React, { useCallback } from 'react';
-import { Provider, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { EuiButton } from '@elastic/eui';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { TimelineId } from '../store/t_grid/types';
 import * as actions from '../store/t_grid/actions';
 import { getReduxDeps } from '../store/t_grid';
 
-import { PLUGIN_NAME } from '../../common';
 import { TimelineProps } from '../types';
 
 export const TGrid = (props: TimelineProps) => {

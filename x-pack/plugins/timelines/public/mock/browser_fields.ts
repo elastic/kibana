@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-import { DocValueFields } from '../../../../common/search_strategy';
-import { BrowserFields } from '../../../../common/search_strategy/index_fields';
+import { DEFAULT_INDEX_PATTERN } from '../../../security_solution/common/constants';
+import { DocValueFields } from '../../../security_solution/common/search_strategy';
+import { BrowserFields } from '../../../security_solution/common/search_strategy/index_fields';
+
+// import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
+// import { DocValueFields } from '../../../../common/search_strategy';
+// import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 
 export const mocksSource = {
   indexFields: [

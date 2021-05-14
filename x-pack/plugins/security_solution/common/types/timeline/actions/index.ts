@@ -32,6 +32,7 @@ export interface ActionProps {
   isEventPinned?: boolean;
   isEventViewer?: boolean;
   rowIndex: number;
+  refetch?: () => void;
   onRuleChange?: () => void;
   showNotes: boolean;
   tabType?: TimelineTabs;

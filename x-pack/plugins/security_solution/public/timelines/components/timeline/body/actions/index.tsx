@@ -6,7 +6,9 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { noop } from 'lodash/fp';
 import {
   eventHasNotes,
   getEventType,
@@ -23,8 +25,8 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
-import { TimelineId, ActionProps } from '../../../../../../common/types/timeline';
-import { timelineSelectors } from '../../../../store/timeline';
+import { TimelineId, ActionProps, OnPinEvent } from '../../../../../../common/types/timeline';
+import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 
 const ActionsComponent: React.FC<ActionProps> = ({
@@ -40,9 +42,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   isEventViewer = false,
   loadingEventIds,
   onEventDetailsPanelOpened,
-  onPinEvent,
   onRowSelected,
-  onUnPinEvent,
   refetch,
   onRuleChange,
   showCheckboxes,
@@ -50,10 +50,21 @@ const ActionsComponent: React.FC<ActionProps> = ({
   timelineId,
   toggleShowNotes,
 }) => {
+  const dispatch = useDispatch();
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
   const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
+
+  const onPinEvent: OnPinEvent = useCallback(
+    (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
+    [dispatch, timelineId]
+  );
+
+  const onUnPinEvent: OnPinEvent = useCallback(
+    (evtId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId: evtId })),
+    [dispatch, timelineId]
+  );
 
   const handleSelectEvent = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) =>
@@ -66,7 +77,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const handlePinClicked = useCallback(
     () =>
       getPinOnClick({
-        allowUnpinning: !eventHasNotes(eventIdToNoteIds[eventId]),
+        allowUnpinning: eventIdToNoteIds ? !eventHasNotes(eventIdToNoteIds[eventId]) : true,
         eventId,
         onPinEvent,
         onUnPinEvent,
@@ -131,7 +142,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           />
         )}
 
-        {!isEventViewer && (
+        {!isEventViewer && toggleShowNotes && (
           <>
             <AddEventNoteAction
               ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
@@ -144,7 +155,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
               ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
               key="pin-event"
               onPinClicked={handlePinClicked}
-              noteIds={eventIdToNoteIds[eventId] || emptyNotes}
+              noteIds={eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes}
               eventIsPinned={isEventPinned}
               timelineType={timelineType}
             />
@@ -167,7 +178,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           ecsRowData={ecsData}
           timelineId={timelineId}
           disabled={eventType !== 'signal' && !isEventContextMenuEnabled}
-          refetch={refetch}
+          refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />
       </>
