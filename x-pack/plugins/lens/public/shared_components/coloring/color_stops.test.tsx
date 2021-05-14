@@ -28,7 +28,7 @@ describe('Color Stops component', () => {
   it('should display all the color stops passed', () => {
     const component = mount(<CustomStops {...props} />);
     expect(
-      component.find('input[data-test-subj^="lnsDatatable_dynamicColoring_stop_value_"]')
+      component.find('input[data-test-subj^="my-test_dynamicColoring_stop_value_"]')
     ).toHaveLength(3);
   });
 
@@ -38,7 +38,7 @@ describe('Color Stops component', () => {
     const component = mount(<CustomStops {...props} />);
     expect(
       component
-        .find('[data-test-subj="lnsDatatable_dynamicColoring_removeStop_0"]')
+        .find('[data-test-subj="my-test_dynamicColoring_removeStop_0"]')
         .first()
         .prop('isDisabled')
     ).toBe(true);
@@ -47,7 +47,7 @@ describe('Color Stops component', () => {
   it('should add a new stop with default color and reasonable distance from last one', () => {
     let component = mount(<CustomStops {...props} />);
     const addStopButton = component
-      .find('[data-test-subj="lnsDatatable_dynamicColoring_addStop"]')
+      .find('[data-test-subj="my-test_dynamicColoring_addStop"]')
       .first();
     act(() => {
       addStopButton.prop('onClick')!({} as React.MouseEvent);
@@ -55,28 +55,26 @@ describe('Color Stops component', () => {
     component = component.update();
 
     expect(
-      component.find('input[data-test-subj^="lnsDatatable_dynamicColoring_stop_value_"]')
+      component.find('input[data-test-subj^="my-test_dynamicColoring_stop_value_"]')
     ).toHaveLength(4);
     expect(
-      component
-        .find('input[data-test-subj="lnsDatatable_dynamicColoring_stop_value_3"]')
-        .prop('value')
+      component.find('input[data-test-subj="my-test_dynamicColoring_stop_value_3"]').prop('value')
     ).toBe('80'); // 60-40 + 60
     expect(
       component
         // workaround for https://github.com/elastic/eui/issues/4792
-        .find('[data-test-subj="lnsDatatable_dynamicColoring_stop_color_3"]')
+        .find('[data-test-subj="my-test_dynamicColoring_stop_color_3"]')
         .last() // pick the inner element
         .childAt(0)
         .prop('color')
-    ).toBe('#6092C0');
+    ).toBe('#ccc'); // pick previous color
   });
 
   it('should show color validation message when the color is not valid', () => {
     props.colorStops[0].color = '#ggg';
     const component = mount(<CustomStops {...props} />);
     const invalidRow = component
-      .find('[data-test-subj="lnsDatatable_dynamicColoring_stop_row_0"]')
+      .find('[data-test-subj="my-test_dynamicColoring_stop_row_0"]')
       .first();
     expect(invalidRow.prop('isInvalid')).toBe(true);
     expect(invalidRow.prop('error')).toBe('Color must provide a valid hex value');
@@ -85,7 +83,7 @@ describe('Color Stops component', () => {
   it('should sort stops value on whole component blur', () => {
     let component = mount(<CustomStops {...props} />);
     let firstStopValueInput = component
-      .find('[data-test-subj="lnsDatatable_dynamicColoring_stop_value_0"]')
+      .find('[data-test-subj="my-test_dynamicColoring_stop_value_0"]')
       .first();
     act(() => {
       firstStopValueInput.prop('onChange')!(({
@@ -97,7 +95,7 @@ describe('Color Stops component', () => {
 
     act(() => {
       component
-        .find('[data-test-subj="lnsDatatable_dynamicColoring_stop_row_0"]')
+        .find('[data-test-subj="my-test_dynamicColoring_stop_row_0"]')
         .first()
         .prop('onBlur')!({} as React.FocusEvent);
     });
@@ -105,13 +103,13 @@ describe('Color Stops component', () => {
 
     // retrieve again the input
     firstStopValueInput = component
-      .find('[data-test-subj="lnsDatatable_dynamicColoring_stop_value_0"]')
+      .find('[data-test-subj="my-test_dynamicColoring_stop_value_0"]')
       .first();
     expect(firstStopValueInput.prop('value')).toBe('40');
     // the previous one move at the bottom
     expect(
       component
-        .find('[data-test-subj="lnsDatatable_dynamicColoring_stop_value_2"]')
+        .find('[data-test-subj="my-test_dynamicColoring_stop_value_2"]')
         .first()
         .prop('value')
     ).toBe('90');

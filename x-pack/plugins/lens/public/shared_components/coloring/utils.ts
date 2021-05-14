@@ -281,7 +281,7 @@ export function getColorStops(
 }
 
 export function getContrastColor(color: string, isDarkTheme: boolean) {
-  const darkColor = isDarkTheme ? euiDarkVars.euiColorGhost : euiLightVars.euiColorInk;
-  const lightColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars.euiColorGhost;
+  const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars.euiColorInk;
+  const lightColor = isDarkTheme ? euiDarkVars.euiColorGhost : euiLightVars.euiColorGhost;
   return isColorDark(...chroma(color).rgb()) ? lightColor : darkColor;
 }

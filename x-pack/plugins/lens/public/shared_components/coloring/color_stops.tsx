@@ -195,7 +195,7 @@ export const CustomStops = ({
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="${dataTestPrefix}_dynamicColoring_addStop"
+            data-test-subj={`${dataTestPrefix}_dynamicColoring_addStop`}
             iconType="plusInCircle"
             color="primary"
             aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorStop', {
