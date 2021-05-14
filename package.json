@@ -129,7 +129,7 @@
     "@kbn/config": "link:bazel-bin/packages/kbn-config/npm_module",
     "@kbn/config-schema": "link:bazel-bin/packages/kbn-config-schema/npm_module",
     "@kbn/crypto": "link:bazel-bin/packages/kbn-crypto/npm_module",
-    "@kbn/i18n": "link:packages/kbn-i18n",
+    "@kbn/i18n": "link:bazel-bin/packages/kbn-i18n/npm_module",
     "@kbn/interpreter": "link:packages/kbn-interpreter",
     "@kbn/io-ts-utils": "link:packages/kbn-io-ts-utils",
     "@kbn/legacy-logging": "link:bazel-bin/packages/kbn-legacy-logging/npm_module",
