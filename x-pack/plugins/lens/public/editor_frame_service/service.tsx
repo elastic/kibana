@@ -42,7 +42,7 @@ export interface EditorFrameStartPlugins {
   embeddable?: EmbeddableStart;
   dashboard?: DashboardStart;
   expressions: ExpressionsStart;
-  uiActions?: UiActionsStart;
+  uiActions: UiActionsStart;
   charts: ChartsPluginSetup;
 }
 

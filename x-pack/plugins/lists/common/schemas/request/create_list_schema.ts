@@ -14,7 +14,7 @@ import {
   meta,
   name,
   type,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { deserializer, serializer } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
