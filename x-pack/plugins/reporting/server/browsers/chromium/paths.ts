@@ -41,7 +41,7 @@ export class ChromiumArchivePaths {
       archiveFilename: 'chromium-d163fd7-darwin_x64.zip',
       archiveChecksum: '19aa88bd59e2575816425bf72786c53f',
       binaryChecksum: 'dfcd6e007214175997663c50c8d871ea',
-      binaryRelativePath: 'headless_shell-darwin_x64',
+      binaryRelativePath: 'headless_shell-darwin_x64/headless_shell',
       location: 'custom',
     },
     {
