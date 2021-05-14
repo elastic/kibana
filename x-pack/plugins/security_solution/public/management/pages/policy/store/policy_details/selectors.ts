@@ -197,6 +197,8 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
       linux: {
         advanced: linux.advanced,
         events: linux.events,
+        malware: linux.malware,
+        popup: linux.popup,
       },
     };
   }

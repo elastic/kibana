@@ -878,6 +878,13 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
+    malware: ProtectionFields;
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
     logging: {
       file: string;
     };
@@ -902,7 +909,7 @@ export interface UIPolicyConfig {
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'events' | 'advanced'>;
+  linux: Pick<PolicyConfig['linux'], 'malware' | 'events' | 'advanced'>;
 }
 
 /** Policy:  Protection fields */

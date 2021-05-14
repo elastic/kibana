@@ -261,6 +261,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
                 advanced: { agent: { connection_delay: 'true' } },
+                malware: { mode: 'prevent' },
+                popup: {
+                  malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                },
               },
               mac: {
                 events: { file: false, network: true, process: true },
