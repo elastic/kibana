@@ -10,27 +10,16 @@ import './page_template.scss';
 import React, { FunctionComponent } from 'react';
 import classNames from 'classnames';
 
+import { EuiEmptyPrompt, EuiPageTemplate, EuiPageTemplateProps } from '@elastic/eui';
+
 import {
-  EuiAvatar,
-  EuiEmptyPrompt,
-  EuiPageTemplate,
-  EuiPageTemplateProps,
-  EuiTitle,
-  IconType,
-  EuiTitleProps,
-} from '@elastic/eui';
+  KibanaPageTemplateSolutionNav,
+  KibanaPageTemplateSolutionNavProps,
+} from './solution_nav/solution_nav';
 
-export interface KibanaPageTemplateSolution extends Omit<EuiTitleProps, 'children'> {
-  /**
-   * Name of the solution, i.e. "Observability"
-   */
-  name: string;
-  /**
-   * Solution logo, i.e. "logoObservability"
-   */
-  icon?: IconType;
-}
-
+/**
+ * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
+ */
 export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   /**
    * Changes the template type depending on other props provided.
@@ -40,9 +29,9 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
    */
   isEmptyState?: boolean;
   /**
-   * When adding `pageSideBar`, we encourage providing solution information to create a solution nav title
+   * Quick creation of EuiSideNav. Hooks up mobile instance too
    */
-  solution?: KibanaPageTemplateSolution;
+  solutionNav?: KibanaPageTemplateSolutionNavProps;
 };
 
 export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
@@ -54,7 +43,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   bottomBar,
   bottomBarProps,
   pageSideBar,
-  solution,
+  solutionNav,
   ...rest
 }) => {
   // Needed for differentiating between union types
@@ -67,28 +56,10 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   }
 
   /**
-   * Solution navigation requires a logo and solution name
+   * Create the solution nav component
    */
-  if (pageSideBar && solution) {
-    const { name, icon, ...solutionRest } = solution;
-    pageSideBar = (
-      <>
-        <EuiTitle size="xs" {...solutionRest} className="kbnPageTemplate__solutionNavTitle">
-          <h2>
-            {icon && (
-              <EuiAvatar
-                color="plain"
-                iconType={icon}
-                name={name}
-                className="kbnPageTemplate__solutionNavTitleIcon"
-              />
-            )}
-            <strong>{name}</strong>
-          </h2>
-        </EuiTitle>
-        {pageSideBar}
-      </>
-    );
+  if (solutionNav) {
+    pageSideBar = <KibanaPageTemplateSolutionNav {...solutionNav} />;
   }
 
   /**
