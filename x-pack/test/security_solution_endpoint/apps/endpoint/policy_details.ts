@@ -294,6 +294,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                    supported: true,
                   },
                 },
                 antivirus_registration: {
