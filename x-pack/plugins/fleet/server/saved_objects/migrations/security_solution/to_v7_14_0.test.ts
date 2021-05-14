@@ -9,10 +9,10 @@ import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kib
 
 import type { PackagePolicy } from '../../../../common';
 
-import { migratePackagePolicyToV7140 } from './to_v7_14_0';
+import { migrateEndpointPackagePolicyToV7140 } from './to_v7_14_0';
 
 describe('7.14.0 Endpoint Package Policy migration', () => {
-  const migration = migratePackagePolicyToV7140;
+  const migration = migrateEndpointPackagePolicyToV7140;
   it('adds linux malware option and notification customization when windows malware is disabled', () => {
     const doc = {
       id: 'mock-saved-object-id',
