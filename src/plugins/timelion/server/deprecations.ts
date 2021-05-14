@@ -30,7 +30,7 @@ export const showWarningMessageIfTimelionSheetWasFound = async (
   const count = await getTimelionSheetsCount(savedObjectsClient);
   if (count > 0) {
     logger.warn(
-      'Deprecated since 7.0, the Timelion app will be removed in the latest 7.x minor. To continue using your Timelion worksheets, migrate them to a dashboard. See https://www.elastic.co/guide/en/kibana/current/create-panels-with-timelion.html.'
+      'Deprecated since 7.0, the Timelion app will be removed in the last 7.x minor version. To continue using your Timelion worksheets, migrate them to a dashboard. See https://www.elastic.co/guide/en/kibana/current/create-panels-with-timelion.html.'
     );
   }
 };
