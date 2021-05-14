@@ -24,6 +24,13 @@ jest.mock('../context/waterfall_chart', () => ({
         },
       },
       {
+        x: 0,
+        config: {
+          url: 'https://www.elastic.co/with/missing/tooltip.props',
+          showTooltip: true,
+        },
+      },
+      {
         x: 1,
         config: {
           url: 'https://www.elastic.co/someresource.path',
@@ -36,7 +43,7 @@ jest.mock('../context/waterfall_chart', () => ({
       },
     ],
     renderTooltipItem: (props: any) => (
-      <div>
+      <div aria-label="tooltip item">
         <div>{props.colour}</div>
         <div>{props.value}</div>
       </div>
@@ -67,9 +74,11 @@ describe('SidebarTooltip', () => {
   });
 
   it(`doesn't render metric if tooltip props missing`, () => {
-    const { queryByText } = render(
+    const { getAllByLabelText, getByText } = render(
       <SidebarTooltip text="1. https://www.elastic.co" url="https://www.elastic.co" />
     );
-    expect(queryByText('test-val')).toBeNull();
+    const metricElements = getAllByLabelText('tooltip item');
+    expect(metricElements).toHaveLength(1);
+    expect(getByText('test-val')).toBeInTheDocument();
   });
 });
