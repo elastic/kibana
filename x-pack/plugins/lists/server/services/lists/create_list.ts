@@ -13,7 +13,7 @@ import {
   MetaOrUndefined,
   Name,
   Type,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { encodeHitVersion } from '../utils/encode_hit_version';
 import {

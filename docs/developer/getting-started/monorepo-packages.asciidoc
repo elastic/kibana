@@ -74,6 +74,7 @@ yarn kbn watch-bazel
 - @kbn/config-schema
 - @kbn/crypto
 - @kbn/dev-utils
+- @kbn/docs-utils
 - @kbn/es
 - @kbn/eslint-import-resolver-kibana
 - @kbn/eslint-plugin-eslint
@@ -81,11 +82,14 @@ yarn kbn watch-bazel
 - @kbn/legacy-logging
 - @kbn/logging
 - @kbn/securitysolution-constants
-- @kbn/securitysolution-utils
+- @kbn/securitysolution-es-utils
+- kbn/securitysolution-io-ts-alerting-types
+- kbn/securitysolution-io-ts-list-types
+- kbn/securitysolution-io-ts-types
 - @kbn/securitysolution-io-ts-utils
+- @kbn/securitysolution-utils
 - @kbn/std
 - @kbn/telemetry-utils
 - @kbn/tinymath
 - @kbn/utility-types
 - @kbn/utils
-

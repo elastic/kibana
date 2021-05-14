@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IdOrUndefined, NamespaceType } from '@kbn/securitysolution-io-ts-utils';
+import { IdOrUndefined, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   SavedObjectsClientContract,

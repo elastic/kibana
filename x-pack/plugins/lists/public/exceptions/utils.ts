@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash/fp';
-import { NamespaceType, NamespaceTypeArray } from '@kbn/securitysolution-io-ts-utils';
+import { NamespaceType, NamespaceTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
 import {
