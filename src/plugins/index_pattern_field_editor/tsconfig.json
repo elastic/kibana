@@ -8,6 +8,8 @@
     "declarationMap": true
   },
   "include": [
+    "../../../typings/**/*",
+    "__jest__/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
