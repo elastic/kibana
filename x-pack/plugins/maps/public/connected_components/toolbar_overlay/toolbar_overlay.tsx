@@ -20,25 +20,33 @@ export interface Props {
   geoFields: GeoFieldWithIndex[];
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
+  showFitToBoundsButton: boolean;
+  showTimesliderButton: boolean;
 }
 
 export function ToolbarOverlay(props: Props) {
-  function renderToolsControl() {
-    const { addFilters, geoFields, getFilterActions, getActionContext } = props;
-    if (!addFilters || !geoFields.length) {
-      return null;
-    }
-
-    return (
+  const toolsButton =
+    props.addFilters && props.geoFields.length ? (
       <EuiFlexItem>
         <ToolsControl
-          geoFields={geoFields}
-          getFilterActions={getFilterActions}
-          getActionContext={getActionContext}
+          geoFields={props.geoFields}
+          getFilterActions={props.getFilterActions}
+          getActionContext={props.getActionContext}
         />
       </EuiFlexItem>
-    );
-  }
+    ) : null;
+
+  const fitToBoundsButton = props.showFitToBoundsButton ? (
+    <EuiFlexItem>
+      <FitToData />
+    </EuiFlexItem>
+  ) : null;
+
+  const timesliderToogleButon = props.showTimesliderButton ? (
+    <EuiFlexItem>
+      <TimesliderToggleButton />
+    </EuiFlexItem>
+  ) : null;
 
   return (
     <EuiFlexGroup
@@ -52,15 +60,11 @@ export function ToolbarOverlay(props: Props) {
         <SetViewControl />
       </EuiFlexItem>
 
-      <EuiFlexItem>
-        <FitToData />
-      </EuiFlexItem>
+      {fitToBoundsButton}
 
-      {renderToolsControl()}
+      {toolsButton}
 
-      <EuiFlexItem>
-        <TimesliderToggleButton />
-      </EuiFlexItem>
+      {timesliderToogleButon}
     </EuiFlexGroup>
   );
 }

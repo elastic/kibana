@@ -27,7 +27,6 @@ interface State {
   min: number;
   range: number;
   timeslice: [number, number];
-  timesliceText: string;
   ticks: EuiRangeTick[];
 }
 
@@ -65,7 +64,6 @@ class KeyedTimeslider extends Component<Props, State> {
       range: interval,
       ticks: getTicks(min, max, interval),
       timeslice,
-      timesliceText: prettyPrintTimeslice(timeslice),
     };
   }
 
@@ -92,7 +90,6 @@ class KeyedTimeslider extends Component<Props, State> {
   _onChange = (value: [number, number]) => {
     this.setState({
       timeslice: value,
-      timesliceText: prettyPrintTimeslice(value),
     });
     this._propagateChange(value);
   };
@@ -136,7 +133,7 @@ class KeyedTimeslider extends Component<Props, State> {
           />
 
           <div className="mapTimeslider__timeWindow">
-            <EuiText size="s">{this.state.timesliceText}</EuiText>
+            <EuiText size="s">{prettyPrintTimeslice(this.state.timeslice)}</EuiText>
           </div>
 
           <div className="mapTimeslider__innerPanel">
