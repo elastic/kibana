@@ -108,7 +108,6 @@ export function createMockPaletteDefinition(): jest.Mocked<PaletteDefinition> {
     getCategoricalColors: jest.fn((_) => ['#ff0000', '#00ff00']),
     title: 'Mock Palette',
     id: 'default',
-    renderEditor: jest.fn(),
     toExpression: jest.fn(() => ({
       type: 'expression',
       chain: [

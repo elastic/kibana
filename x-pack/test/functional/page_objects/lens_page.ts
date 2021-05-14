@@ -753,9 +753,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async setColorStopValue(value: number | string) {
-      // const input = await find.byCssSelector('[data-test-subj="euiColorStopPopover"] input');
-      // await input.clearValue();
-      // await input.type(String(value), { charByChar: false });
       await testSubjects.setValue(
         'lnsDatatable_dynamicColoring_progression_custom_stops_value',
         String(value)

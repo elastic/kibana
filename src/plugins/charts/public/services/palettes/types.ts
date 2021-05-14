@@ -80,16 +80,6 @@ export interface PaletteDefinition<T = unknown> {
    */
   toExpression: (state?: T) => Ast;
   /**
-   * Renders the UI for editing the internal state of the palette.
-   * Not each palette has to feature an internal state, so this is an optional property.
-   * @param domElement The dom element to the render the editor UI into
-   * @param props Current state and state setter to issue updates
-   */
-  renderEditor?: (
-    domElement: Element,
-    props: { state?: T; setState: (updater: (oldState: T) => T) => void }
-  ) => void;
-  /**
    * Color a series according to the internal rules of the palette.
    * @param series The current series along with its ancestors.
    * @param state  The internal state of the palette
