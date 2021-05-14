@@ -35,7 +35,18 @@ export async function hasRumData({
         },
         aggs: {
           services: {
-            ...(start && end ? { filter: rangeQuery(start, end)[0] } : {}),
+            ...(start && end
+              ? { filter: rangeQuery(start, end)[0] }
+              : {
+                  // accounts for scenarios in which start and end are undefined
+                  filter: {
+                    range: {
+                      '@timestamp': {
+                        format: 'epoch_millis',
+                      },
+                    },
+                  },
+                }),
             aggs: {
               mostTraffic: {
                 terms: {
