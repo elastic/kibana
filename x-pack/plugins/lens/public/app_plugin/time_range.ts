@@ -13,6 +13,7 @@ import { useEffect, useMemo } from 'react';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { LensAppState } from './types';
 import { Document } from '../persistence';
+import { DispatchSetState } from '../state_management/types';
 
 function containsDynamicMath(dateMathString: string) {
   return dateMathString.includes('now');
@@ -25,13 +26,15 @@ const TIME_LAG_PERCENTAGE_LIMIT = 0.02;
  * if the fixed "now" parameter is diverging too much from the actual current time.
  * @param data data plugin contract to manage current now value, time range and session
  * @param lastKnownDoc Current state of the editor
- * @param setState state setter for Lens app state
+ * @param dispatchSetState state setter for Lens app state
  * @param searchSessionId current session id
  */
+
+// TODO: move to middleware when lastKnownDoc is in redux state
 export function useTimeRange(
   data: DataPublicPluginStart,
   lastKnownDoc: Document | undefined,
-  setState: React.Dispatch<React.SetStateAction<LensAppState>>,
+  dispatchSetState: DispatchSetState,
   searchSessionId: string
 ) {
   const timefilter = data.query.timefilter.timefilter;
@@ -73,12 +76,9 @@ export function useTimeRange(
 
     // if the lag is signifcant, start a new session to clear the cache
     if (nowDiff > timeRangeLength * TIME_LAG_PERCENTAGE_LIMIT) {
-      setState((s) => ({
-        ...s,
-        searchSessionId: data.search.session.start(),
-      }));
+      dispatchSetState({ searchSessionId: data.search.session.start() });
     }
-  }, [data.nowProvider, data.search.session, timefilter, lastKnownDoc, setState]);
+  }, [data.nowProvider, data.search.session, timefilter, lastKnownDoc, dispatchSetState]);
 
   return { resolvedDateRange, from, to };
 }

@@ -1,0 +1,89 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { delay, finalize, switchMap, tap } from 'rxjs/operators';
+import _, { debounce } from 'lodash';
+import { appSlice } from './app_slice';
+import { trackUiEvent } from '../lens_ui_telemetry';
+
+import { waitUntilNextSessionCompletes$ } from '../../../../../src/plugins/data/public';
+import { setState } from '.';
+
+export const customMiddleware = (data) => (store) => {
+  const unsubscribeFromExternalContext = subscribeToExternalContext(
+    data,
+    store.getState,
+    store.dispatch
+  );
+  return (next) => (action) => {
+    if (action.type === 'app/navigateAway') {
+      unsubscribeFromExternalContext();
+    }
+
+    next(action);
+  };
+};
+
+function subscribeToExternalContext(data, getState, dispatch) {
+  const { query: queryService, search } = data;
+  const { filterManager, timefilter } = queryService;
+  const { timefilter: timefilterService } = timefilter;
+
+  const dispatchFromExternal = (searchSessionId = search.session.start()) => {
+    const globalFilters = filterManager.getFilters();
+    const filters = _.isEqual(getState().app.filters, globalFilters)
+      ? null
+      : { filters: globalFilters };
+    dispatch(
+      setState({
+        searchSessionId,
+        ...filters,
+      })
+    );
+  };
+
+  const debounceDispatchFromExternal = debounce(dispatchFromExternal, 100);
+
+  const sessionSubscription = search.session
+    .getSession$()
+    // wait for a tick to filter/timerange subscribers the chance to update the session id in the state
+    .pipe(delay(0))
+    // then update if it didn't get updated yet
+    .subscribe((newSessionId: string) => {
+      if (newSessionId && getState().app.searchSessionId !== newSessionId) {
+        debounceDispatchFromExternal(newSessionId);
+      }
+    });
+
+  const filterSubscription = filterManager.getUpdates$().subscribe({
+    next: () => {
+      debounceDispatchFromExternal();
+      trackUiEvent('app_filters_updated');
+    },
+  });
+
+  const timeSubscription = timefilterService.getTimeUpdate$().subscribe({
+    next: debounceDispatchFromExternal,
+  });
+
+  const autoRefreshSubscription = timefilterService
+    .getAutoRefreshFetch$()
+    .pipe(
+      tap(debounceDispatchFromExternal),
+      switchMap((done) =>
+        // best way in lens to estimate that all panels are updated is to rely on search session service state
+        waitUntilNextSessionCompletes$(search.session).pipe(finalize(done))
+      )
+    )
+    .subscribe();
+  return () => {
+    filterSubscription.unsubscribe();
+    timeSubscription.unsubscribe();
+    autoRefreshSubscription.unsubscribe();
+    sessionSubscription.unsubscribe();
+  };
+}

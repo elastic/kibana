@@ -277,11 +277,11 @@ export const getXyVisualization = ({
   },
 
   removeDimension({ prevState, layerId, columnId }) {
-    const newLayer = prevState.layers.find((l) => l.layerId === layerId);
-    if (!newLayer) {
+    const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
+    if (!foundLayer) {
       return prevState;
     }
-
+    const newLayer = { ...foundLayer };
     if (newLayer.xAccessor === columnId) {
       delete newLayer.xAccessor;
     } else if (newLayer.splitAccessor === columnId) {
