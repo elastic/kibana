@@ -7,7 +7,7 @@
 
 import {
   isEndpointPolicyValidForLicense,
-  unsetPolicyFeaturesAboveLicenseLevel,
+  unsetPolicyFeaturesAccordingToLicenseLevel,
 } from './policy_config';
 import {
   DefaultMalwareMessage,
@@ -130,7 +130,7 @@ describe('policy_config and licenses', () => {
     });
   });
 
-  describe('unsetPolicyFeaturesAboveLicenseLevel', () => {
+  describe('unsetPolicyFeaturesAccordingToLicenseLevel', () => {
     it('does not change any malware fields with a Platinum license', () => {
       const policy = policyFactory();
       const popupMessage = 'WOOP WOOP';
@@ -138,7 +138,7 @@ describe('policy_config and licenses', () => {
       policy.mac.popup.malware.message = popupMessage;
       policy.windows.popup.malware.enabled = false;
 
-      const retPolicy = unsetPolicyFeaturesAboveLicenseLevel(policy, Platinum);
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
       expect(retPolicy.windows.popup.malware.enabled).toBeFalsy();
       expect(retPolicy.windows.popup.malware.message).toEqual(popupMessage);
       expect(retPolicy.mac.popup.malware.message).toEqual(popupMessage);
@@ -151,7 +151,7 @@ describe('policy_config and licenses', () => {
       policy.windows.popup.ransomware.enabled = false;
       policy.windows.popup.ransomware.message = popupMessage;
 
-      const retPolicy = unsetPolicyFeaturesAboveLicenseLevel(policy, Platinum);
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
       expect(retPolicy.windows.ransomware.mode).toEqual(ProtectionModes.detect);
       expect(retPolicy.windows.popup.ransomware.enabled).toBeFalsy();
       expect(retPolicy.windows.popup.ransomware.message).toEqual(popupMessage);
@@ -167,7 +167,7 @@ describe('policy_config and licenses', () => {
 
       policy.windows.popup.ransomware.message = popupMessage;
       policy.windows.popup.ransomware.enabled = false;
-      const retPolicy = unsetPolicyFeaturesAboveLicenseLevel(policy, Gold);
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
       expect(retPolicy.windows.popup.malware.enabled).toEqual(
         defaults.windows.popup.malware.enabled
       );
@@ -183,7 +183,7 @@ describe('policy_config and licenses', () => {
       const popupMessage = 'WOOP WOOP';
       policy.windows.popup.ransomware.message = popupMessage;
 
-      const retPolicy = unsetPolicyFeaturesAboveLicenseLevel(policy, Gold);
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
 
       expect(retPolicy.windows.ransomware.mode).toEqual(defaults.windows.ransomware.mode);
       expect(retPolicy.windows.popup.ransomware.enabled).toEqual(
