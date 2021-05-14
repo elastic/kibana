@@ -16,7 +16,7 @@ import { ActiveField } from './types';
 import { SearchUILogic } from './';
 
 describe('SearchUILogic', () => {
-  const { mount } = new LogicMounter(SearchUILogic);
+  const { mount, expectAction } = new LogicMounter(SearchUILogic);
   const { http } = mockHttpValues;
   const { flashAPIErrors } = mockFlashMessageHelpers;
 
@@ -45,79 +45,80 @@ describe('SearchUILogic', () => {
   describe('actions', () => {
     describe('onFieldDataLoaded', () => {
       it('sets initial field values fetched from API call and sets dataLoading to false', () => {
-        mount({
-          validFields: [],
-          validSortFields: [],
-          validFacetFields: [],
-        });
-
-        SearchUILogic.actions.onFieldDataLoaded({
-          validFields: ['foo'],
-          validSortFields: ['bar'],
-          validFacetFields: ['baz'],
-        });
-
-        expect(SearchUILogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          dataLoading: false,
-          validFields: ['foo'],
-          validSortFields: ['bar'],
-          validFacetFields: ['baz'],
+        expectAction(() => {
+          SearchUILogic.actions.onFieldDataLoaded({
+            validFields: ['foo'],
+            validSortFields: ['bar'],
+            validFacetFields: ['baz'],
+          });
+        }).toChangeState({
+          from: {
+            dataLoading: true,
+            validFields: [],
+            validSortFields: [],
+            validFacetFields: [],
+          },
+          to: {
+            dataLoading: false,
+            validFields: ['foo'],
+            validSortFields: ['bar'],
+            validFacetFields: ['baz'],
+          },
         });
       });
     });
 
     describe('onTitleFieldChange', () => {
       it('sets the titleField value', () => {
-        mount({ titleField: '' });
-        SearchUILogic.actions.onTitleFieldChange('foo');
-        expect(SearchUILogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          titleField: 'foo',
+        expectAction(() => {
+          SearchUILogic.actions.onTitleFieldChange('foo');
+        }).toChangeState({
+          from: { titleField: '' },
+          to: { titleField: 'foo' },
         });
       });
     });
 
     describe('onUrlFieldChange', () => {
       it('sets the urlField value', () => {
-        mount({ urlField: '' });
-        SearchUILogic.actions.onUrlFieldChange('foo');
-        expect(SearchUILogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          urlField: 'foo',
+        expectAction(() => {
+          SearchUILogic.actions.onUrlFieldChange('foo');
+        }).toChangeState({
+          from: { urlField: '' },
+          to: { urlField: 'foo' },
         });
       });
     });
 
     describe('onFacetFieldsChange', () => {
       it('sets the facetFields value', () => {
-        mount({ facetFields: [] });
-        SearchUILogic.actions.onFacetFieldsChange(['foo']);
-        expect(SearchUILogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          facetFields: ['foo'],
+        expectAction(() => {
+          SearchUILogic.actions.onFacetFieldsChange(['foo']);
+        }).toChangeState({
+          from: { facetFields: [] },
+          to: { facetFields: ['foo'] },
         });
       });
     });
 
     describe('onSortFieldsChange', () => {
       it('sets the sortFields value', () => {
-        mount({ sortFields: [] });
-        SearchUILogic.actions.onSortFieldsChange(['foo']);
-        expect(SearchUILogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          sortFields: ['foo'],
+        expectAction(() => {
+          SearchUILogic.actions.onSortFieldsChange(['foo']);
+        }).toChangeState({
+          from: { sortFields: [] },
+          to: { sortFields: ['foo'] },
         });
       });
     });
 
     describe('onActiveFieldChange', () => {
       it('sets the activeField value', () => {
-        mount({ activeField: '' });
-        SearchUILogic.actions.onActiveFieldChange(ActiveField.Sort);
-        expect(SearchUILogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          activeField: ActiveField.Sort,
+        expectAction(() => {
+          SearchUILogic.actions.onActiveFieldChange(ActiveField.Sort);
+        }).toChangeState({
+          from: { activeField: '' },
+          to: { activeField: ActiveField.Sort },
         });
       });
     });

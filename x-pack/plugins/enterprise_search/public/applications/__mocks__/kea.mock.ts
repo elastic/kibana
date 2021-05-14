@@ -132,6 +132,36 @@ export class LogicMounter {
     // built logic instance with props, NOT the unmount fn
   };
 
+  // Custom "jest-like" assertions
+  //   ex.
+  //      expectAction(() => {
+  //        SomeLogic.actions.dataInitialized();
+  //      }).toChangeState({
+  //        from: { dataLoading: true },
+  //        to: { dataLoading: false },
+  //      });
+  public expectAction = (action: any) => {
+    return {
+      // Mount state with "from" values and test that the specified "to" values are present in
+      // the updated state, and that no other values have changed.
+      toChangeState: ({ from, to }: { from: object; to: object }, ignoreFields: string[] = []) => {
+        this.mount(from);
+        const originalValues = {
+          ...this.logicFile.values,
+        };
+        action();
+        expect(this.logicFile.values).toEqual({
+          ...originalValues,
+          ...to,
+          ...ignoreFields.reduce((acc: Record<string, object>, field: string) => {
+            acc[field] = expect.anything();
+            return acc;
+          }, {}),
+        });
+      },
+    };
+  };
+
   // Also add unmount as a class method that can be destructured on init without becoming stale later
   public unmount = () => {
     this.unmountFn();
