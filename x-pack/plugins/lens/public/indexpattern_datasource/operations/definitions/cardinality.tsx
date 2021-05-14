@@ -11,7 +11,12 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
-import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
+import {
+  getFormatFromPreviousColumn,
+  getInvalidFieldMessage,
+  getSafeName,
+  getFilter,
+} from './helpers';
 
 const supportedTypes = new Set([
   'string',
@@ -71,8 +76,13 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     );
   },
   filterable: true,
+
+  operationParams: [
+    { name: 'kql', type: 'string', required: false },
+    { name: 'lucene', type: 'string', required: false },
+  ],
   getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
-  buildColumn({ field, previousColumn }) {
+  buildColumn({ field, previousColumn }, columnParams) {
     return {
       label: ofName(field.displayName),
       dataType: 'number',
@@ -80,7 +90,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       scale: SCALE,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
-      filter: previousColumn?.filter,
+      filter: getFilter(previousColumn, columnParams),
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },
