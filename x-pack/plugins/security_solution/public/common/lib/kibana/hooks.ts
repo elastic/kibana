@@ -144,10 +144,7 @@ export interface UseGetUserCasesPermissions {
 }
 
 export const useGetUserCasesPermissions = () => {
-  const [
-    savedObjectsPermissions,
-    setSavedObjectsPermissions,
-  ] = useState<UseGetUserCasesPermissions | null>(null);
+  const [casesPermissions, setCasesPermissions] = useState<UseGetUserCasesPermissions | null>(null);
   const uiCapabilities = useKibana().services.application.capabilities;
 
   useEffect(() => {
@@ -155,11 +152,11 @@ export const useGetUserCasesPermissions = () => {
       typeof uiCapabilities.siem.crud_cases === 'boolean' ? uiCapabilities.siem.crud_cases : false;
     const capabilitiesCanUserRead: boolean =
       typeof uiCapabilities.siem.read_cases === 'boolean' ? uiCapabilities.siem.read_cases : false;
-    setSavedObjectsPermissions({
+    setCasesPermissions({
       crud: capabilitiesCanUserCRUD,
       read: capabilitiesCanUserRead,
     });
   }, [uiCapabilities]);
 
-  return savedObjectsPermissions;
+  return casesPermissions;
 };
