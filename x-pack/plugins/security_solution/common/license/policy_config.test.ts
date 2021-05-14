@@ -12,6 +12,7 @@ import {
 import {
   DefaultMalwareMessage,
   policyFactory,
+  policyFactoryWithSupportedFeatures,
   policyFactoryWithoutPaidFeatures,
 } from '../endpoint/models/policy_config';
 import { licenseMock } from '../../../licensing/common/licensing.mock';
@@ -77,6 +78,7 @@ describe('policy_config and licenses', () => {
     it('allows ransomware to be turned on for Platinum licenses', () => {
       const policy = policyFactoryWithoutPaidFeatures();
       policy.windows.ransomware.mode = ProtectionModes.prevent;
+      policy.windows.ransomware.supported = true;
 
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
@@ -94,6 +96,7 @@ describe('policy_config and licenses', () => {
     it('allows ransomware notification to be turned on with a Platinum license', () => {
       const policy = policyFactoryWithoutPaidFeatures();
       policy.windows.popup.ransomware.enabled = true;
+      policy.windows.ransomware.supported = true;
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
     });
@@ -193,6 +196,26 @@ describe('policy_config and licenses', () => {
 
       // need to invert the test, since it could be either value
       expect(['', DefaultMalwareMessage]).toContain(retPolicy.windows.popup.ransomware.message);
+    });
+
+    it('sets ransomware supported field to false when license is below Platinum', () => {
+      const defaults = policyFactoryWithoutPaidFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+      policy.windows.ransomware.supported = true;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
+
+      expect(retPolicy.windows.ransomware.supported).toEqual(defaults.windows.ransomware.supported);
+    });
+
+    it('sets ransomware supported field to true when license is at Platinum', () => {
+      const defaults = policyFactoryWithSupportedFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+      policy.windows.ransomware.supported = false;
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
+
+      expect(retPolicy.windows.ransomware.supported).toEqual(defaults.windows.ransomware.supported);
     });
   });
 

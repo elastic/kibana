@@ -293,6 +293,7 @@ describe('policy details: ', () => {
                       ransomware: {
                         enabled: false,
                         message: '',
+                        supported: false,
                       },
                     },
                     logging: { file: 'info' },
