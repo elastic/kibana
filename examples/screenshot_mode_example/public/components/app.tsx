@@ -25,7 +25,7 @@ import { CoreStart } from '../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 import { ScreenshotModePluginSetup } from '../../../../src/plugins/screenshot_mode/public';
 
-import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
+import { PLUGIN_NAME } from '../../common';
 
 interface ScreenshotModeExampleAppDeps {
   basename: string;
@@ -58,7 +58,7 @@ export const ScreenshotModeExampleApp = ({
       <I18nProvider>
         <>
           <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
+            appName={PLUGIN_NAME}
             showSearchBar={true}
             useDefaultBehaviors={true}
           />

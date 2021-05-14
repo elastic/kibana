@@ -15,4 +15,3 @@ import { ScreenshotModeExamplePlugin } from './plugin';
 export function plugin() {
   return new ScreenshotModeExamplePlugin();
 }
-export { ScreenshotModeExamplePluginSetup, ScreenshotModeExamplePluginStart } from './types';

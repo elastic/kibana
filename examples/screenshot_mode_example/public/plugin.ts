@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
 import { AppPluginSetupDependencies, AppPluginStartDependencies } from './types';
 import { MetricsTracking } from './services';
@@ -16,11 +15,12 @@ export class ScreenshotModeExamplePlugin implements Plugin<void, void> {
   uiTracking = new MetricsTracking();
 
   public setup(core: CoreSetup, depsSetup: AppPluginSetupDependencies): void {
-    const isScreenshotMode = depsSetup.screenshotMode.isScreenshotMode();
+    const { screenshotMode, usageCollection } = depsSetup;
+    const isScreenshotMode = screenshotMode.isScreenshotMode();
 
     this.uiTracking.setup({
-      // In screenshot mode there will be no user interactions to track
-      disableTracking: isScreenshotMode,
+      disableTracking: isScreenshotMode, // In screenshot mode there will be no user interactions to track
+      usageCollection,
     });
 
     // Register an application into the side navigation menu
@@ -40,18 +40,6 @@ export class ScreenshotModeExamplePlugin implements Plugin<void, void> {
         return renderApp(coreStart, depsSetup, depsStart as AppPluginStartDependencies, params);
       },
     });
-
-    // Return methods that should be available to other plugins
-    return {
-      getGreeting() {
-        return i18n.translate('screenshotModeExample.greetingText', {
-          defaultMessage: 'Hello from {name}!',
-          values: {
-            name: PLUGIN_NAME,
-          },
-        });
-      },
-    };
   }
 
   public start(core: CoreStart): void {}

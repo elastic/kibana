@@ -6,22 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
+import { UiCounterMetricType, METRIC_TYPE } from '@kbn/analytics';
 import { PLUGIN_NAME } from '../../common';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 export class MetricsTracking {
   private trackingDisabled = false;
+  private usageCollection?: UsageCollectionSetup;
 
-  constructor(private readonly usageCollection: UsageCollectionSetup) {}
-
-  private track(eventName: string, type: METRIC_TYPE) {
+  private track(eventName: string, type: UiCounterMetricType) {
     if (this.trackingDisabled) return;
 
-    this.usageCollection.reportUiCounter(PLUGIN_NAME, type, eventName);
+    this.usageCollection?.reportUiCounter(PLUGIN_NAME, type, eventName);
   }
 
-  public setup({ disableTracking }: { disableTracking?: boolean }) {
+  public setup({
+    disableTracking,
+    usageCollection,
+  }: {
+    disableTracking?: boolean;
+    usageCollection: UsageCollectionSetup;
+  }) {
+    this.usageCollection = usageCollection;
     if (disableTracking) this.trackingDisabled = true;
   }
 

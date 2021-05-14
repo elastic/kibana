@@ -8,8 +8,10 @@
 
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
 import { ScreenshotModePluginSetup } from '../../../src/plugins/screenshot_mode/public';
+import { UsageCollectionSetup } from '../../../src/plugins/usage_collection/public';
 
 export interface AppPluginSetupDependencies {
+  usageCollection: UsageCollectionSetup;
   screenshotMode: ScreenshotModePluginSetup;
 }
 
