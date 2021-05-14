@@ -56,9 +56,6 @@ describe('ResultSettingsLogic', () => {
 
   const SELECTOR_FIELDS = Object.keys(SELECTORS);
 
-  // Values without selectors
-  const resultSettingLogicValues = () => omit(ResultSettingsLogic.values, Object.keys(SELECTORS));
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockEngineValues.engineName = 'test-engine';
