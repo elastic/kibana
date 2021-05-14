@@ -105,7 +105,7 @@ describe('state_helpers', () => {
       const source = {
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'Formula',
+        label: 'moving_average(sum(bytes), window=5)',
         operationType: 'formula' as const,
         params: {
           formula: 'moving_average(sum(bytes), window=5)',
@@ -117,7 +117,7 @@ describe('state_helpers', () => {
         customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'math',
+        label: 'formulaX2',
         operationType: 'math' as const,
         params: { tinymathAst: 'formulaX2' },
         references: ['formulaX2'],

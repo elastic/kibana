@@ -120,7 +120,7 @@ export const formulaOperation: OperationDefinition<
       prevFormat = { format: previousColumn.params.format };
     }
     return {
-      label: previousFormula ?? defaultLabel,
+      label: previousFormula || defaultLabel,
       dataType: 'number',
       operationType: 'formula',
       isBucketed: false,
