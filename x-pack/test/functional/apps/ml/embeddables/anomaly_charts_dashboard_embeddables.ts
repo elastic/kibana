@@ -57,6 +57,7 @@ const testDataList = [
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const testSubject = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
 
   describe('anomaly charts', function () {
@@ -107,6 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Feb 11, 2016 @ 00:00:00.000'
           );
           await PageObjects.timePicker.pauseAutoRefresh();
+          await testSubject.waitForDeleted(`mlAnomalyExplorerEmbeddableLoadingIndicator`);
           await ml.dashboardEmbeddables.assertAnomalyChartsSeverityThresholdControlExists();
           await ml.dashboardEmbeddables.assertAnomalyChartsExists();
         });
