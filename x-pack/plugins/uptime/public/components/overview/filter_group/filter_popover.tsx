@@ -29,6 +29,18 @@ export interface FilterPopoverProps {
 const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined =>
   selectedItems.find((selected) => selected === item) ? 'on' : undefined;
 
+export const filterByItemLabel = (item: string, title: string) =>
+  i18n.translate('xpack.uptime.filterPopover.filterItem.label', {
+    defaultMessage: 'Filter by {title} {item}.',
+    values: { item, title },
+  });
+
+export const removeFilterForItemLabel = (item: string, title: string) =>
+  i18n.translate('xpack.uptime.filterPopover.removeFilterItem.label', {
+    defaultMessage: 'Remove filter by {title} {item}.',
+    values: { item, title },
+  });
+
 export const FilterPopover = ({
   fieldName,
   id,
@@ -126,20 +138,22 @@ export const FilterPopover = ({
         />
       </EuiPopoverTitle>
       {!loading &&
-        itemsToDisplay.map((item) => (
-          <EuiFilterSelectItem
-            aria-label={i18n.translate('xpack.uptime.filterPopover.filterItem.label', {
-              defaultMessage: 'Filter by {title} {item}.',
-              values: { item, title },
-            })}
-            checked={isItemSelected(tempSelectedItems, item)}
-            data-test-subj={`filter-popover-item_${item}`}
-            key={item}
-            onClick={() => toggleSelectedItems(item, tempSelectedItems, setTempSelectedItems)}
-          >
-            {item}
-          </EuiFilterSelectItem>
-        ))}
+        itemsToDisplay.map((item) => {
+          const checked = isItemSelected(tempSelectedItems, item);
+          return (
+            <EuiFilterSelectItem
+              aria-label={
+                checked ? removeFilterForItemLabel(item, title) : filterByItemLabel(item, title)
+              }
+              checked={checked}
+              data-test-subj={`filter-popover-item_${item}`}
+              key={item}
+              onClick={() => toggleSelectedItems(item, tempSelectedItems, setTempSelectedItems)}
+            >
+              {item}
+            </EuiFilterSelectItem>
+          );
+        })}
       {id === 'location' && items.length === 0 && <LocationLink />}
     </EuiPopover>
   );
