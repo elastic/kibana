@@ -9,9 +9,9 @@ import { mountWithIntl, setMockActions, setMockValues } from '../../../../__mock
 
 import React from 'react';
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
+import { EuiInMemoryTable, EuiButtonIcon } from '@elastic/eui';
 
 import { SourceEnginesTable } from './source_engines_table';
 
@@ -29,7 +29,7 @@ const MOCK_ACTIONS = {
 };
 
 describe('SourceEnginesTable', () => {
-  beforeAll(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
     setMockActions(MOCK_ACTIONS);
     setMockValues(MOCK_VALUES);
@@ -49,14 +49,35 @@ describe('SourceEnginesTable', () => {
     expect(wrapper.find(EuiInMemoryTable).text()).toContain('26');
   });
 
-  it('clicking a remove engine link calls a confirm dialogue before remove the engine', () => {
-    const confirmSpy = jest.spyOn(window, 'confirm');
-    confirmSpy.mockReturnValueOnce(true);
-    const wrapper = mount(<SourceEnginesTable />);
+  describe('actions column', () => {
+    it('clicking a remove engine link calls a confirm dialogue before remove the engine', () => {
+      const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValueOnce(true);
+      const wrapper = mountWithIntl(<SourceEnginesTable />);
 
-    wrapper.find(EuiButtonEmpty).simulate('click');
+      wrapper.find(EuiButtonIcon).simulate('click');
 
-    expect(confirmSpy).toHaveBeenCalled();
-    expect(MOCK_ACTIONS.removeSourceEngine);
+      expect(confirmSpy).toHaveBeenCalled();
+      expect(MOCK_ACTIONS.removeSourceEngine).toHaveBeenCalled();
+    });
+
+    it('does not remove an engine if the user cancels the confirmation dialog', () => {
+      const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValueOnce(false);
+      const wrapper = mountWithIntl(<SourceEnginesTable />);
+
+      wrapper.find(EuiButtonIcon).simulate('click');
+
+      expect(confirmSpy).toHaveBeenCalled();
+      expect(MOCK_ACTIONS.removeSourceEngine).not.toHaveBeenCalled();
+    });
+
+    it('does not render the actions column if the user does not have permission to manage the engine', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        myRole: { canManageMetaEngineSourceEngines: false },
+      });
+      const wrapper = mountWithIntl(<SourceEnginesTable />);
+
+      expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
+    });
   });
 });

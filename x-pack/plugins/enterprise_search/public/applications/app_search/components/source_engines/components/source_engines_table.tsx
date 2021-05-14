@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTableColumn, EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,6 +18,13 @@ import { AppLogic } from '../../../app_logic';
 import { ENGINE_PATH } from '../../../routes';
 import { generateEncodedPath } from '../../../utils/encode_path_params';
 import { EngineDetails } from '../../engine/types';
+import {
+  NAME_COLUMN,
+  DOCUMENT_COUNT_COLUMN,
+  FIELD_COUNT_COLUMN,
+  ACTIONS_COLUMN,
+} from '../../engines/components/tables/shared_columns';
+
 import { SourceEnginesLogic } from '../source_engines_logic';
 
 const REMOVE_SOURCE_ENGINE_CONFIRM_DIALOGUE = (engineName: string) =>
@@ -45,71 +52,41 @@ export const SourceEnginesTable: React.FC = () => {
   const { removeSourceEngine } = useActions(SourceEnginesLogic);
   const { sourceEngines } = useValues(SourceEnginesLogic);
 
-  const metaEngineSourceEnginesTableActions = canManageMetaEngineSourceEngines
-    ? [
-        {
-          render: (item: EngineDetails) => (
-            <EuiButtonEmpty
-              onClick={() => {
-                if (confirm(REMOVE_SOURCE_ENGINE_CONFIRM_DIALOGUE(item.name))) {
-                  removeSourceEngine(item.name);
-                }
-              }}
-              size="s"
-            >
-              {REMOVE_SOURCE_ENGINE_BUTTON_LABEL}
-            </EuiButtonEmpty>
-          ),
-        },
-      ]
-    : [];
-
   const columns: Array<EuiBasicTableColumn<EngineDetails>> = [
     {
-      name: i18n.translate('xpack.enterpriseSearch.appSearch.sourceEngines.table.column.name', {
-        defaultMessage: 'Name',
-      }),
-      field: 'name',
+      ...NAME_COLUMN,
       render: (engineName: string) => (
-        <EuiLinkTo
-          to={generateEncodedPath(ENGINE_PATH, { engineName })}
-          data-test-subj="EngineName"
-        >
-          {engineName}
-        </EuiLinkTo>
+        <EuiLinkTo to={generateEncodedPath(ENGINE_PATH, { engineName })}>{engineName}</EuiLinkTo>
       ),
     },
-    {
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.sourceEngines.table.column.documents',
-        {
-          defaultMessage: 'Documents',
-        }
-      ),
-      field: 'document_count',
-      width: '20%',
-    },
-    {
-      name: i18n.translate('xpack.enterpriseSearch.appSearch.sourceEngines.table.column.fields', {
-        defaultMessage: 'Fields',
-      }),
-      field: 'field_count',
-      width: '20%',
-    },
-    {
-      name: '',
-      actions: metaEngineSourceEnginesTableActions,
-      width: '20%',
-    },
+    DOCUMENT_COUNT_COLUMN,
+    FIELD_COUNT_COLUMN,
   ];
+  if (canManageMetaEngineSourceEngines) {
+    columns.push({
+      name: ACTIONS_COLUMN.name,
+      actions: [
+        {
+          name: REMOVE_SOURCE_ENGINE_BUTTON_LABEL,
+          description: REMOVE_SOURCE_ENGINE_BUTTON_LABEL,
+          type: 'icon',
+          icon: 'trash',
+          color: 'danger',
+          onClick: (engine: EngineDetails) => {
+            if (confirm(REMOVE_SOURCE_ENGINE_CONFIRM_DIALOGUE(engine.name))) {
+              removeSourceEngine(engine.name);
+            }
+          },
+        },
+      ],
+    });
+  }
 
   return (
     <EuiInMemoryTable
       items={sourceEngines}
       columns={columns}
       pagination={sourceEngines.length > 10}
-      sorting
-      allowNeutralSort
       search={{ box: { incremental: true } }}
     />
   );
