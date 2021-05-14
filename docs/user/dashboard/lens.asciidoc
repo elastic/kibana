@@ -163,8 +163,6 @@ NOTE: In bar charts, you are unable to move the label positions.
 [role="screenshot"]
 image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels menu]
 
-Other type of visualizations do not support labels yet.
-
 [float]
 [[what-is-the-other-category]]
 ===== What data is categorized as Other?
@@ -214,7 +212,7 @@ refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
 Sorting dimensions in visualizations is unsupported in *Lens* for charts.
 
 Sorting is possible in *Lens* datatables, but it is limited to a single column. Click on the column header to sort by the column and select the sorting criteria.
-Note that if the dimension is used within the `Columns` (transposed) then all columns that belong to the same dimension will be sorted.
+If you use the dimension as `Columns`, then all the columns that belong to the same dimension are sorted in the table.
 
 [float]
 [[is-it-possible-to-use-saved-serches-in-lens]]
