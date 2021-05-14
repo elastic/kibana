@@ -71,16 +71,16 @@ describe('palette panel', () => {
 
     function changePaletteIn(instance: ReactWrapper, newPaletteName: string) {
       return ((instance
-        .find('[data-test-subj="lns-palettePicker"]')
-        .first()
+        .find('[data-test-subj="lnsDatatable_dynamicColoring_palette_picker"]')
+        .at(1)
         .prop('onChange') as unknown) as (value: string) => void)?.(newPaletteName);
     }
 
     it('should show only dynamic coloring enabled palette + custom option', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
       const paletteOptions = instance
-        .find('[data-test-subj="lns-palettePicker"]')
-        .first()
+        .find('[data-test-subj="lnsDatatable_dynamicColoring_palette_picker"]')
+        .at(1)
         .prop('palettes') as EuiColorPalettePickerPaletteProps[];
       expect(paletteOptions.length).toEqual(2);
 
@@ -89,6 +89,7 @@ describe('palette panel', () => {
         type: 'fixed',
         value: 'custom',
         palette: ['blue', 'yellow'],
+        'data-test-subj': 'custom-palette',
       });
     });
 
