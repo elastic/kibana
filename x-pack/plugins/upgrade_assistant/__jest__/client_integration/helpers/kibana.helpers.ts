@@ -6,7 +6,7 @@
  */
 
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { KibanaDeprecationsContent } from '../../public/application/components/kibana_deprecations';
+import { KibanaDeprecationsContent } from '../../../public/application/components/kibana_deprecations';
 import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {

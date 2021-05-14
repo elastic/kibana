@@ -9,6 +9,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
+import { getExecuteDetails } from '../../__fixtures__';
+import { WATCH_TYPES } from '../../common/constants';
 import {
   setupEnvironment,
   pageHelpers,
@@ -17,8 +19,6 @@ import {
   unwrapBodyResponse,
 } from './helpers';
 import { WatchCreateThresholdTestBed } from './helpers/watch_create_threshold.helpers';
-import { getExecuteDetails } from '../__fixtures__';
-import { WATCH_TYPES } from '../common/constants';
 
 const WATCH_NAME = 'my_test_watch';
 

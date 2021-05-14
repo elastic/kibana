@@ -6,10 +6,10 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import * as fixtures from '../__fixtures__';
+import * as fixtures from '../../__fixtures__';
+import { ROUTES } from '../../common/constants';
 import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
 import { WatchListTestBed } from './helpers/watch_list.helpers';
-import { ROUTES } from '../common/constants';
 
 const { API_ROOT } = ROUTES;
 
