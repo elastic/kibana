@@ -43,7 +43,9 @@ export function urlparam(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const query = parse(window.location.href, true).query;
+      const uri = parse(window.location.href, true);
+      const viewParam = qs.parse((uri.hash.includes("?")) ? uri.hash.substring(uri.hash.indexOf("?"),uri.hash.length) : "");
+      const query = {...uri.query, ...viewParam};
       return query[args.param] || args.default;
     },
   };
