@@ -32,7 +32,7 @@ const expectToHaveBeenCalledWithStrict = (
 };
 
 describe('ResultSettingsLogic', () => {
-  const { mount } = new LogicMounter(ResultSettingsLogic);
+  const { mount, expectAction } = new LogicMounter(ResultSettingsLogic);
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -53,6 +53,8 @@ describe('ResultSettingsLogic', () => {
     textResultFields: {},
     queryPerformanceScore: 0,
   };
+
+  const SELECTOR_FIELDS = Object.keys(SELECTORS);
 
   // Values without selectors
   const resultSettingLogicValues = () => omit(ResultSettingsLogic.values, Object.keys(SELECTORS));
@@ -91,117 +93,112 @@ describe('ResultSettingsLogic', () => {
       };
 
       it('will initialize all result field state within the UI, based on provided server data', () => {
-        mount({
-          dataLoading: true,
-          saving: true,
-        });
-
-        ResultSettingsLogic.actions.initializeResultFields(
-          serverResultFields,
-          schema,
-          schemaConflicts
-        );
-
-        expect(resultSettingLogicValues()).toEqual({
-          ...DEFAULT_VALUES,
-          dataLoading: false,
-          saving: false,
-          // It converts the passed server result fields to a client results field and stores it
-          // as resultFields
-          resultFields: {
-            foo: {
-              raw: true,
-              rawSize: 5,
-              snippet: false,
-              snippetFallback: false,
-            },
-            // Baz was not part of the original serverResultFields, it was injected based on the schema
-            baz: {
-              raw: false,
-              snippet: false,
-              snippetFallback: false,
-            },
-            bar: {
-              raw: true,
-              rawSize: 5,
-              snippet: false,
-              snippetFallback: false,
-            },
+        expectAction(() => {
+          ResultSettingsLogic.actions.initializeResultFields(
+            serverResultFields,
+            schema,
+            schemaConflicts
+          );
+        }).toChangeState({
+          from: {
+            dataLoading: true,
+            saving: true,
           },
-          // It also saves it as lastSavedResultFields
-          lastSavedResultFields: {
-            foo: {
-              raw: true,
-              rawSize: 5,
-              snippet: false,
-              snippetFallback: false,
+          ignore: SELECTOR_FIELDS,
+          to: {
+            dataLoading: false,
+            saving: false,
+            // It converts the passed server result fields to a client results field and stores it
+            // as resultFields
+            resultFields: {
+              foo: {
+                raw: true,
+                rawSize: 5,
+                snippet: false,
+                snippetFallback: false,
+              },
+              // Baz was not part of the original serverResultFields, it was injected based on the schema
+              baz: {
+                raw: false,
+                snippet: false,
+                snippetFallback: false,
+              },
+              bar: {
+                raw: true,
+                rawSize: 5,
+                snippet: false,
+                snippetFallback: false,
+              },
             },
-            // Baz was not part of the original serverResultFields, it was injected based on the schema
-            baz: {
-              raw: false,
-              snippet: false,
-              snippetFallback: false,
+            // It also saves it as lastSavedResultFields
+            lastSavedResultFields: {
+              foo: {
+                raw: true,
+                rawSize: 5,
+                snippet: false,
+                snippetFallback: false,
+              },
+              // Baz was not part of the original serverResultFields, it was injected based on the schema
+              baz: {
+                raw: false,
+                snippet: false,
+                snippetFallback: false,
+              },
+              bar: {
+                raw: true,
+                rawSize: 5,
+                snippet: false,
+                snippetFallback: false,
+              },
             },
-            bar: {
-              raw: true,
-              rawSize: 5,
-              snippet: false,
-              snippetFallback: false,
-            },
+            // Stores the provided schema details
+            schema,
+            schemaConflicts,
           },
-          // Stores the provided schema details
-          schema,
-          schemaConflicts,
         });
-      });
-
-      it('default schema conflicts data if none was provided', () => {
-        mount();
-
-        ResultSettingsLogic.actions.initializeResultFields(serverResultFields, schema);
-
-        expect(ResultSettingsLogic.values.schemaConflicts).toEqual({});
       });
     });
 
     describe('clearAllFields', () => {
       it('should remove all settings that have been set for each field', () => {
-        mount({
-          resultFields: {
-            quuz: { raw: false, snippet: false, snippetFallback: false },
-            corge: { raw: true, snippet: false, snippetFallback: true },
+        expectAction(() => {
+          ResultSettingsLogic.actions.clearAllFields();
+        }).toChangeState({
+          from: {
+            resultFields: {
+              quuz: { raw: false, snippet: false, snippetFallback: false },
+              corge: { raw: true, snippet: false, snippetFallback: true },
+            },
           },
-        });
-
-        ResultSettingsLogic.actions.clearAllFields();
-
-        expect(resultSettingLogicValues()).toEqual({
-          ...DEFAULT_VALUES,
-          resultFields: {
-            quuz: {},
-            corge: {},
+          to: {
+            resultFields: {
+              quuz: {},
+              corge: {},
+            },
           },
+          ignore: SELECTOR_FIELDS,
         });
       });
     });
 
     describe('resetAllFields', () => {
       it('should reset all settings to their default values per field', () => {
-        mount({
-          resultFields: {
-            quuz: { raw: true, snippet: true, snippetFallback: true },
-            corge: { raw: true, snippet: true, snippetFallback: true },
+        expectAction(() => {
+          ResultSettingsLogic.actions.resetAllFields();
+        }).toChangeState({
+          from: {
+            resultFields: {
+              quuz: { raw: true, snippet: true, snippetFallback: true },
+              corge: { raw: true, snippet: true, snippetFallback: true },
+            },
           },
-        });
-
-        ResultSettingsLogic.actions.resetAllFields();
-
-        expect(resultSettingLogicValues()).toEqual({
-          ...DEFAULT_VALUES,
-          resultFields: {
-            quuz: { raw: true, snippet: false, snippetFallback: false },
-            corge: { raw: true, snippet: false, snippetFallback: false },
+          to: {
+            resultFields: {
+              quuz: { raw: true, snippet: false, snippetFallback: false },
+              corge: { raw: true, snippet: false, snippetFallback: false },
+            },
           },
+          ignore: SELECTOR_FIELDS,
         });
       });
     });
@@ -215,52 +212,45 @@ describe('ResultSettingsLogic', () => {
       };
 
       it('should update settings for an individual field', () => {
-        mount(initialValues);
-
-        ResultSettingsLogic.actions.updateField('foo', {
-          raw: true,
-          snippet: false,
-          snippetFallback: false,
-        });
-
-        expect(resultSettingLogicValues()).toEqual({
-          ...DEFAULT_VALUES,
-          // the settings for foo are updated below for any *ResultFields state in which they appear
-          resultFields: {
-            foo: { raw: true, snippet: false, snippetFallback: false },
-            bar: { raw: true, snippet: true, snippetFallback: true },
+        expectAction(() => {
+          ResultSettingsLogic.actions.updateField('foo', {
+            raw: true,
+            snippet: false,
+            snippetFallback: false,
+          });
+        }).toChangeState({
+          from: initialValues,
+          to: {
+            resultFields: {
+              foo: { raw: true, snippet: false, snippetFallback: false },
+              bar: { raw: true, snippet: true, snippetFallback: true },
+            },
           },
+          ignore: SELECTOR_FIELDS,
         });
       });
 
       it('should do nothing if the specified field does not exist', () => {
-        mount(initialValues);
-
-        ResultSettingsLogic.actions.updateField('baz', {
-          raw: false,
-          snippet: false,
-          snippetFallback: false,
-        });
-
-        // 'baz' does not exist in state, so nothing is updated
-        expect(resultSettingLogicValues()).toEqual({
-          ...DEFAULT_VALUES,
-          ...initialValues,
+        expectAction(() => {
+          ResultSettingsLogic.actions.updateField('baz', {
+            raw: false,
+            snippet: false,
+            snippetFallback: false,
+          });
+        }).toChangeState({
+          from: initialValues,
+          to: initialValues,
         });
       });
     });
 
     describe('saving', () => {
       it('sets saving to true', () => {
-        mount({
-          saving: false,
-        });
-
-        ResultSettingsLogic.actions.saving();
-
-        expect(resultSettingLogicValues()).toEqual({
-          ...DEFAULT_VALUES,
-          saving: true,
+        expectAction(() => {
+          ResultSettingsLogic.actions.saving();
+        }).toChangeState({
+          from: { saving: false },
+          to: { saving: true },
         });
       });
     });

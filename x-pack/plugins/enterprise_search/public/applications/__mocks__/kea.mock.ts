@@ -214,7 +214,7 @@ export class LogicMounter {
     return {
       // Mount state with "from" values and test that the specified "to" values are present in
       // the updated state, and that no other values have changed.
-      toChangeState: ({ from, to }: { from: object; to: object }, ignoreFields: string[] = []) => {
+      toChangeState: ({ from, to, ignore }: { from: object; to: object; ignore?: string[] }) => {
         const logic = this.mount(from, props);
         const originalValues = {
           ...logic.values,
@@ -223,7 +223,7 @@ export class LogicMounter {
         expect(logic.values).toEqual({
           ...originalValues,
           ...to,
-          ...ignoreFields.reduce((acc: Record<string, object>, field: string) => {
+          ...(ignore || []).reduce((acc: Record<string, object>, field: string) => {
             acc[field] = expect.anything();
             return acc;
           }, {}),
