@@ -127,7 +127,7 @@ describe('Case Configuration API', () => {
     });
     test('check url, method, signal', async () => {
       await getCases({
-        filterOptions: DEFAULT_FILTER_OPTIONS,
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
@@ -150,6 +150,7 @@ describe('Case Configuration API', () => {
           tags,
           status: CaseStatuses.open,
           search: 'hello',
+          owner: [SECURITY_SOLUTION_OWNER],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -177,6 +178,7 @@ describe('Case Configuration API', () => {
           tags: weirdTags,
           status: CaseStatuses.open,
           search: 'hello',
+          owner: [SECURITY_SOLUTION_OWNER],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -196,7 +198,7 @@ describe('Case Configuration API', () => {
 
     test('happy path', async () => {
       const resp = await getCases({
-        filterOptions: DEFAULT_FILTER_OPTIONS,
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });

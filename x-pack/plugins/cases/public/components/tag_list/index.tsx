@@ -63,7 +63,7 @@ export const TagList = React.memo(
       }
     }, [onSubmit, submit]);
 
-    const { tags: tagOptions } = useGetTags(owner);
+    const { tags: tagOptions } = useGetTags();
     const [options, setOptions] = useState(
       tagOptions.map((label) => ({
         label,

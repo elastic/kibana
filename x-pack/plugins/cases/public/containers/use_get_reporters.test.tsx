@@ -9,7 +9,6 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useGetReporters, UseGetReporters } from './use_get_reporters';
 import { reporters, respReporters } from './mock';
 import * as api from './api';
-import { SECURITY_SOLUTION_OWNER } from '../../common';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -24,7 +23,7 @@ describe('useGetReporters', () => {
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters([SECURITY_SOLUTION_OWNER])
+        useGetReporters()
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -40,19 +39,17 @@ describe('useGetReporters', () => {
   it('calls getReporters api', async () => {
     const spyOnGetReporters = jest.spyOn(api, 'getReporters');
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters([SECURITY_SOLUTION_OWNER])
-      );
+      const { waitForNextUpdate } = renderHook<string, UseGetReporters>(() => useGetReporters());
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(spyOnGetReporters).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      expect(spyOnGetReporters).toBeCalledWith(abortCtrl.signal);
     });
   });
 
   it('fetch reporters', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters([SECURITY_SOLUTION_OWNER])
+        useGetReporters()
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -70,7 +67,7 @@ describe('useGetReporters', () => {
     const spyOnGetReporters = jest.spyOn(api, 'getReporters');
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters([SECURITY_SOLUTION_OWNER])
+        useGetReporters()
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -87,7 +84,7 @@ describe('useGetReporters', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters([SECURITY_SOLUTION_OWNER])
+        useGetReporters()
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
