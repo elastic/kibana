@@ -2634,7 +2634,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/docs-utils@link:packages/kbn-docs-utils":
+"@kbn/docs-utils@link:bazel-bin/packages/kbn-docs-utils/npm_module":
   version "0.0.0"
   uid ""
 
@@ -2698,11 +2698,24 @@
   version "0.0.0"
   uid ""
 
+"@kbn/rule-data-utils@link:packages/kbn-rule-data-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-constants@link:bazel-bin/packages/kbn-securitysolution-constants/npm_module":
   version "0.0.0"
   uid ""
 
 "@kbn/securitysolution-es-utils@link:bazel-bin/packages/kbn-securitysolution-es-utils/npm_module":
+"@kbn/securitysolution-io-ts-alerting-types@link:bazel-bin/packages/kbn-securitysolution-io-ts-alerting-types/npm_module":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-io-ts-list-types@link:bazel-bin/packages/kbn-securitysolution-io-ts-list-types/npm_module":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-io-ts-types@link:bazel-bin/packages/kbn-securitysolution-io-ts-types/npm_module":
   version "0.0.0"
   uid ""
 

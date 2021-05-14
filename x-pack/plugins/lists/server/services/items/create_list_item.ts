@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { ElasticsearchClient } from 'kibana/server';
-import { IdOrUndefined, MetaOrUndefined, Type } from '@kbn/securitysolution-io-ts-utils';
+import { IdOrUndefined, MetaOrUndefined, Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   DeserializerOrUndefined,
