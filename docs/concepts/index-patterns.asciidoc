@@ -10,10 +10,9 @@ or all indices that contain your data.  It can also point to a
 
 You’ll learn how to:
 
-* Create an index pattern
-* Explore and configure the data fields
+* Create index patterns
 * Set the default index pattern
-* Delete an index pattern
+* Delete index patterns
 
 [float]
 [[index-patterns-read-only-access]]
@@ -133,77 +132,23 @@ To exclude a cluster, use `cluster_*:logstash-*,cluster_one:-*`.
 Once an index pattern is configured using the {ccs} syntax, all searches and
 aggregations using that index pattern in {kib} take advantage of {ccs}.
 
+[float]
+[[delete-index-pattern]]
+=== Delete index patterns
+
+When you delete an index pattern, you are unable to recover the associated field formatters, scripted fields, source filters,
+and field popularity data. Deleting an index pattern does not remove any indices or data documents from {es}.
+
+WARNING: Deleting an index pattern breaks all visualizations, saved searches, and other saved objects that reference the index pattern.
+
+. Open the main menu, then click *Stack Management > Index Patterns*.
+
+. Click the index pattern you want to delete.
+
+. Delete (image:management/index-patterns/images/delete.png[Delete icon]) the index pattern.
 
 [float]
 [[reload-fields]]
-=== Explore and configure the data fields
-
-To explore and configure the data fields in your index pattern, open the main menu, then click
-*Stack Management > Index Patterns*.  Each field has a {ref}/mapping.html[mapping],
-which indicates the type of data the field contains in {es},
-such as strings or boolean values. The field mapping also determines
-how you can use the field, such as whether it can be searched or aggregated.
-
-When a new field is added to the index, the index pattern field list is updated
-the next time the index pattern is loaded, for example, when you load the page or
-move between {kib} apps.
-
-[role="screenshot"]
-image:management/index-patterns/images/new-index-pattern.png["Create index pattern"]
-
-[float]
-=== Format the display of common field types
-
-Whenever possible, {kib} uses the same field type for display as
-{es}. However, some field types that {es} supports are not available
-in {kib}. Using field formatters, you can manually change the field type in {kib} to display your data the way you prefer
-to see it, regardless of how it is stored in {es}.
-
-For example, if you store
-date values in {es}, you can use a {kib} field formatter to change the display to mm/dd/yyyy format.
-{kib} has field formatters for
-<<field-formatters-string, strings>>,
-<<field-formatters-date, dates>>,
-<<field-formatters-geopoint, geopoints>>,
-and <<field-formatters-numeric, numbers>>.
-
-To customize the displayed field name provided by {es}, you can
-use *Custom Label* .
-
-A popularity counter keeps track of the fields you use most often.
-The top five most popular fields and their values are displayed in <<discover,*Discover*>>.
-
-To edit the field display, click the edit icon
-(image:management/index-patterns/images/edit_icon.png[]) in the index pattern detail view.
-
-[role="screenshot"]
-image:management/index-patterns/images/edit-field-format.png["Edit field format"]
-
-[float]
-[[default-index-pattern]]
-=== Set the default index pattern
-
-The first index pattern you create is automatically designated as the default pattern,
-but you can set any index pattern as the default.  The default index pattern is automatically selected when you first open <<discover,*Discover*>> or create a visualization from scratch.
-
-. In *Index patterns*, click the index pattern name.
-. Click the star icon (image:management/index-patterns/images/star.png[Star icon]).
-
-[float]
-[[delete-index-pattern]]
-=== Delete an index pattern
-
-This action removes the pattern from the list of saved objects in {kib}.
-You will not be able to recover field formatters, scripted fields, source filters,
-and field popularity data associated with the index pattern. Deleting an
-index pattern does not remove any indices or data documents from {es}.
-
-WARNING:  Deleting an index pattern breaks all visualizations, saved searches, and other saved objects that reference the pattern.
-
-. In *Index patterns*, click the index pattern name.
-. Click the delete icon (image:management/index-patterns/images/delete.png[Delete icon]).
-
-[float]
 === What’s next
 
-* Learn about <<scripted-fields,scripted fields>> and how to create data on the fly.
+Learn how to <<managing-index-patterns,manage the data fields>> in your index patterns.
