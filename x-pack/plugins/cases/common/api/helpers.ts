@@ -15,6 +15,7 @@ import {
   CASE_PUSH_URL,
   SUB_CASE_USER_ACTIONS_URL,
   CASE_CONFIGURE_DETAILS_URL,
+  CASE_ALERTS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -51,4 +52,8 @@ export const getCasePushUrl = (caseId: string, connectorId: string): string => {
 
 export const getCaseConfigurationDetailsUrl = (configureID: string): string => {
   return CASE_CONFIGURE_DETAILS_URL.replace('{configuration_id}', configureID);
+};
+
+export const getCasesFromAlertsUrl = (alertId: string): string => {
+  return CASE_ALERTS_URL.replace('{alert_id}', alertId);
 };

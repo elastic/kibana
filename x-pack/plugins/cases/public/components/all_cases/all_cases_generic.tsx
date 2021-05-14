@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiProgress } from '@elastic/eui';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import { isEmpty, memoize } from 'lodash/fp';
+import { difference, head, isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import classnames from 'classnames';
 
@@ -17,10 +17,12 @@ import {
   CaseStatuses,
   CaseType,
   CommentRequestAlertType,
+  CaseStatusWithAllStatus,
   CommentType,
   FilterOptions,
   SortFieldCase,
   SubCase,
+  caseStatuses,
 } from '../../../common';
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
@@ -60,7 +62,7 @@ interface AllCasesGenericProps {
   caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelectorView)
   configureCasesNavigation?: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelectorView)
   createCaseNavigation: CasesNavigation;
-  disabledStatuses?: CaseStatuses[];
+  hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
   updateCase?: (newCase: Case) => void;
@@ -73,13 +75,17 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     caseDetailsNavigation,
     configureCasesNavigation,
     createCaseNavigation,
-    disabledStatuses,
+    hiddenStatuses = [],
     isSelectorView,
     onRowClick,
     updateCase,
     userCanCrud,
   }) => {
     const { actionLicense } = useGetActionLicense();
+
+    const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
+    const initialFilterOptions =
+      !isEmpty(hiddenStatuses) && firstAvailableStatus ? { status: firstAvailableStatus } : {};
 
     const {
       data,
@@ -92,7 +98,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       setFilters,
       setQueryParams,
       setSelectedCases,
-    } = useGetCases();
+    } = useGetCases({ initialFilterOptions });
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();
@@ -290,7 +296,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
               status: filterOptions.status,
             }}
             setFilterRefetch={setFilterRefetch}
-            disabledStatuses={disabledStatuses}
+            hiddenStatuses={hiddenStatuses}
           />
           <CasesTable
             columns={columns}
