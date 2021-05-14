@@ -60,8 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubject = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
 
-  // eslint-disable-next-line ban/ban
-  describe.only('anomaly charts', function () {
+  describe('anomaly charts', function () {
     this.tags(['mlqa']);
 
     before(async () => {
@@ -109,7 +108,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Feb 11, 2016 @ 00:00:00.000'
           );
           await PageObjects.timePicker.pauseAutoRefresh();
-          await testSubject.waitForDeleted(`mlAnomalyExplorerEmbeddableLoadingIndicator`);
           await ml.dashboardEmbeddables.assertAnomalyChartsSeverityThresholdControlExists();
           await ml.dashboardEmbeddables.assertAnomalyChartsExists();
         });
