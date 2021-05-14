@@ -76,7 +76,6 @@
   "apm": {
     "totalEvents": 0,
     "memRss": 0,
-    "memTotal": 0,
     "apms": {
       "total": 0
     },
@@ -173,7 +172,6 @@
   "apm": {
     "totalEvents": 0,
     "memRss": 0,
-    "memTotal": 0,
     "apms": {
       "total": 0
     },
@@ -270,7 +268,6 @@
   "apm": {
     "totalEvents": 0,
     "memRss": 0,
-    "memTotal": 0,
     "apms": {
       "total": 0
     },
