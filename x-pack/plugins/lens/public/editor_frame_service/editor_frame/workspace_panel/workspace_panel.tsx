@@ -370,13 +370,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         value={dropProps.value}
         order={dropProps.order}
       >
-        {isFullscreen ? (
-          element
-        ) : (
-          <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-            {element}
-          </EuiPageContentBody>
-        )}
+        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
+          {element}
+        </EuiPageContentBody>
       </DragDrop>
     );
   };
