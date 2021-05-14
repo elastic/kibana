@@ -12,7 +12,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { ExceptionListClient } from '../../../lists/server';
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginStart } from '../../../security/server';
 import {
   AgentService,
   FleetStartContract,
@@ -36,7 +36,7 @@ import { ElasticsearchAssetType } from '../../../fleet/common/types/models';
 import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
-import { LicenseService } from '../../common/license/license';
+import { LicenseService } from '../../common/license';
 import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
@@ -91,7 +91,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   logger: Logger;
   manifestManager?: ManifestManager;
   appClientFactory: AppClientFactory;
-  security: SecurityPluginSetup;
+  security: SecurityPluginStart;
   alerting: AlertsPluginStartContract;
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
@@ -112,6 +112,8 @@ export class EndpointAppContextService {
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private metadataService: MetadataService | undefined;
   private config: ConfigType | undefined;
+  private license: LicenseService | undefined;
+  public security: SecurityPluginStart | undefined;
 
   private experimentalFeatures: ExperimentalFeatures | undefined;
 
@@ -123,6 +125,8 @@ export class EndpointAppContextService {
     this.savedObjectsStart = dependencies.savedObjectsStart;
     this.metadataService = createMetadataService(dependencies.packageService!);
     this.config = dependencies.config;
+    this.license = dependencies.licenseService;
+    this.security = dependencies.security;
 
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental);
 
@@ -179,5 +183,12 @@ export class EndpointAppContextService {
       throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
     }
     return this.savedObjectsStart.getScopedClient(req, { excludedWrappers: ['security'] });
+  }
+
+  public getLicenseService(): LicenseService {
+    if (!this.license) {
+      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+    }
+    return this.license;
   }
 }

@@ -46,6 +46,7 @@ const PackagePolicyBaseSchema = {
     schema.object({
       type: schema.string(),
       enabled: schema.boolean(),
+      keep_enabled: schema.maybe(schema.boolean()),
       vars: schema.maybe(ConfigRecordSchema),
       config: schema.maybe(
         schema.recordOf(
@@ -60,6 +61,7 @@ const PackagePolicyBaseSchema = {
         schema.object({
           id: schema.maybe(schema.string()), // BWC < 7.11
           enabled: schema.boolean(),
+          keep_enabled: schema.maybe(schema.boolean()),
           data_stream: schema.object({ dataset: schema.string(), type: schema.string() }),
           vars: schema.maybe(ConfigRecordSchema),
           config: schema.maybe(

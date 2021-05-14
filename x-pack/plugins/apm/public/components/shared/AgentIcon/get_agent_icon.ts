@@ -14,6 +14,8 @@ import defaultIcon from '../span_icon/icons/default.svg';
 import dotNetIcon from './icons/dot-net.svg';
 import erlangIcon from './icons/erlang.svg';
 import goIcon from './icons/go.svg';
+import iosIcon from './icons/ios.svg';
+import darkIosIcon from './icons/ios_dark.svg';
 import javaIcon from './icons/java.svg';
 import nodeJsIcon from './icons/nodejs.svg';
 import ocamlIcon from './icons/ocaml.svg';
@@ -31,6 +33,7 @@ const agentIcons: { [key: string]: string } = {
   dotnet: dotNetIcon,
   erlang: erlangIcon,
   go: goIcon,
+  ios: iosIcon,
   java: javaIcon,
   nodejs: nodeJsIcon,
   ocaml: ocamlIcon,
@@ -44,6 +47,7 @@ const agentIcons: { [key: string]: string } = {
 
 const darkAgentIcons: { [key: string]: string } = {
   ...agentIcons,
+  ios: darkIosIcon,
   php: darkPhpIcon,
   rum: darkRumJsIcon,
   rust: darkRustIcon,
