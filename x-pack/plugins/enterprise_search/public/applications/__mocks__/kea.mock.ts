@@ -198,17 +198,29 @@ export class LogicMounter {
   //        from: { dataLoading: true },
   //        to: { dataLoading: false },
   //      });
-  public expectAction = (action: any) => {
+  //
+  // For keyed logic:
+  //
+  //   ex.
+  //      expectAction((logic) => {
+  //        logic.actions.dataInitialized();
+  //      }, PROPS).toChangeState({
+  //        from: { dataLoading: true },
+  //        to: { dataLoading: false },
+  //      });
+  //
+
+  public expectAction = (action: (logic: LogicFile) => void, props: object = {}) => {
     return {
       // Mount state with "from" values and test that the specified "to" values are present in
       // the updated state, and that no other values have changed.
       toChangeState: ({ from, to }: { from: object; to: object }, ignoreFields: string[] = []) => {
-        this.mount(from);
+        const logic = this.mount(from, props);
         const originalValues = {
-          ...this.logicFile.values,
+          ...logic.values,
         };
-        action();
-        expect(this.logicFile.values).toEqual({
+        action(logic);
+        expect(logic.values).toEqual({
           ...originalValues,
           ...to,
           ...ignoreFields.reduce((acc: Record<string, object>, field: string) => {
