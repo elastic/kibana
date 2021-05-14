@@ -21,9 +21,10 @@ interface Props {
 export function SavedSearchEmbeddableComponentInner({
   input: { search },
   output: { attributes },
-  props,
   embeddable,
+  props,
 }: Props) {
+  debugger;
   return <DiscoverGridEmbeddable {...props} />;
 }
 

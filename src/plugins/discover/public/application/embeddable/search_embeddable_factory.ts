@@ -80,6 +80,7 @@ export class SearchEmbeddableFactory
     const editUrl = getServices().addBasePath(`/app/discover${url}`);
     try {
       const savedObject = await getServices().getSavedSearchById(savedObjectId);
+      debugger;
       const indexPattern = savedObject.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
       //  const { SearchEmbeddable: SearchEmbeddableClass } = await import('./search_embeddable');

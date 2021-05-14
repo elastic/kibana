@@ -144,6 +144,10 @@ export interface DiscoverGridProps {
    * List of used control columns (available: 'openDetails', 'select')
    */
   controlColumnIds?: string[];
+  /**
+   * Optional class name to apply
+   */
+  className?: string;
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -175,6 +179,7 @@ export const DiscoverGrid = ({
   isSortEnabled = true,
   isPaginationEnabled = true,
   controlColumnIds = ['openDetails', 'select'],
+  className,
 }: DiscoverGridProps) => {
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -284,6 +289,7 @@ export const DiscoverGrid = ({
       ),
     [displayedColumns, indexPattern, showTimeCol, settings, defaultColumns, isSortEnabled]
   );
+
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
@@ -368,6 +374,7 @@ export const DiscoverGrid = ({
         data-title={searchTitle}
         data-description={searchDescription}
         data-document-number={displayedRows.length}
+        className={className || ''}
       >
         <KibanaContextProvider services={{ uiSettings: services.uiSettings }}>
           <EuiDataGridMemoized
