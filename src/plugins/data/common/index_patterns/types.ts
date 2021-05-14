@@ -19,7 +19,7 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 export interface RuntimeField {
   /**
-   * also used as a IndexPatternField's ES type
+   * Also used as a IndexPatternField's ES type
    */
   type: RuntimeType;
   script?: {
