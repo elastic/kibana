@@ -60,8 +60,11 @@ const StyledButton = styled(EuiButtonEmpty)`
   }
 `;
 
+const DEFAULT_MAX_WIDTH = 275;
+
 const StyledTooltip = euiStyled(EuiToolTip)`
-  max-width: ${({ theme }) => parseInt(theme.eui.euiBreakpoints.s, 10) - 5}px;
+  max-width: ${({ theme }) =>
+    parseInt(theme.eui?.euiBreakpoints?.s ?? DEFAULT_MAX_WIDTH, 10) - 5}px;
 `; // prevent wrapping unless URL is longer than our min responsive breakpoint
 
 export const getChunks = (text: string = '') => {
