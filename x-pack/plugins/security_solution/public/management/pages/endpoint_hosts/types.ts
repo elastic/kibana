@@ -33,19 +33,24 @@ export interface EndpointState {
   loading: boolean;
   /** api error from retrieving host list */
   error?: ServerApiError;
-  // TODO bundle details and activity log together
-  /** details data for a specific host */
-  details?: Immutable<HostMetadata>;
-  /** details page is retrieving data */
-  detailsLoading: boolean;
-  /** api error from retrieving host details */
-  detailsError?: ServerApiError;
-  /** activity detail of a specific endpoint */
-  activityLog?: Immutable<EndpointAction[]>;
-  /** details/activity log page is retrieving data */
-  activityLogLoading: boolean;
-  /** api error from retrieving endpoint activity details */
-  activityLogError?: ServerApiError;
+  endpointDetails: {
+    activityLog: {
+      /** activity detail of a specific endpoint */
+      log?: Immutable<EndpointAction[]>;
+      /** details/activity log page is retrieving data */
+      logLoading: boolean;
+      /** api error from retrieving endpoint activity details */
+      logError?: ServerApiError;
+    };
+    hostDetails: {
+      /** details data for a specific host */
+      details?: Immutable<HostMetadata>;
+      /** details page is retrieving data */
+      detailsLoading: boolean;
+      /** api error from retrieving host details */
+      detailsError?: ServerApiError;
+    };
+  };
   /** Holds the Policy Response for the Host currently being displayed in the details */
   policyResponse?: HostPolicyResponse;
   /** policyResponse is being retrieved */

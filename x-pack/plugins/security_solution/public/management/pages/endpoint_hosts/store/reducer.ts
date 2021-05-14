@@ -19,13 +19,18 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   total: 0,
   loading: false,
   error: undefined,
-  // TODO refactor to bundle details and activity log together
-  activityLog: undefined,
-  activityLogLoading: false,
-  activityLogError: undefined,
-  details: undefined,
-  detailsLoading: false,
-  detailsError: undefined,
+  endpointDetails: {
+    activityLog: {
+      log: undefined,
+      logLoading: false,
+      logError: undefined,
+    },
+    hostDetails: {
+      details: undefined,
+      detailsLoading: false,
+      detailsError: undefined,
+    },
+  },
   policyResponse: undefined,
   policyResponseLoading: false,
   policyResponseError: undefined,
@@ -112,30 +117,54 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
   } else if (action.type === 'serverReturnedEndpointDetails') {
     return {
       ...state,
-      details: action.payload.metadata,
+      endpointDetails: {
+        ...state.endpointDetails,
+        hostDetails: {
+          ...state.endpointDetails.hostDetails,
+          details: action.payload.metadata,
+          detailsLoading: false,
+          detailsError: undefined,
+        },
+      },
       policyVersionInfo: action.payload.policy_info,
       hostStatus: action.payload.host_status,
-      detailsLoading: false,
-      detailsError: undefined,
     };
   } else if (action.type === 'serverFailedToReturnEndpointDetails') {
     return {
       ...state,
-      detailsError: action.payload,
-      detailsLoading: false,
+      endpointDetails: {
+        ...state.endpointDetails,
+        hostDetails: {
+          ...state.endpointDetails.hostDetails,
+          detailsError: action.payload,
+          detailsLoading: false,
+        },
+      },
     };
   } else if (action.type === 'serverReturnedEndpointDetailsActivityLog') {
     return {
       ...state,
-      activityLog: action.payload,
-      activityLogError: undefined,
-      activityLogLoading: false,
+      endpointDetails: {
+        ...state.endpointDetails,
+        activityLog: {
+          ...state.endpointDetails.activityLog,
+          log: action.payload,
+          logError: undefined,
+          logLoading: false,
+        },
+      },
     };
   } else if (action.type === 'serverFailedToReturnEndpointDetailsActivityLog') {
     return {
       ...state,
-      activityLogError: action.payload,
-      activityLogLoading: false,
+      endpointDetails: {
+        ...state.endpointDetails,
+        activityLog: {
+          ...state.endpointDetails.activityLog,
+          logError: action.payload,
+          logLoading: false,
+        },
+      },
     };
   } else if (action.type === 'serverReturnedPoliciesForOnboarding') {
     return {
@@ -231,11 +260,17 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       if (!wasPreviouslyOnListPage) {
         return {
           ...state,
+          endpointDetails: {
+            ...state.endpointDetails,
+            hostDetails: {
+              ...state.endpointDetails.hostDetails,
+              detailsError: undefined,
+            },
+          },
           location: action.payload,
           loading: true,
           policyItemsLoading: true,
           error: undefined,
-          detailsError: undefined,
         };
       }
     } else if (isCurrentlyOnDetailsPage) {
@@ -243,23 +278,35 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       if (wasPreviouslyOnDetailsPage || wasPreviouslyOnListPage) {
         return {
           ...state,
+          endpointDetails: {
+            ...state.endpointDetails,
+            hostDetails: {
+              ...state.endpointDetails.hostDetails,
+              detailsLoading: true,
+              detailsError: undefined,
+            },
+          },
           location: action.payload,
-          detailsLoading: true,
           policyResponseLoading: true,
           error: undefined,
-          detailsError: undefined,
           policyResponseError: undefined,
         };
       } else {
         // if previous page was not endpoint list or endpoint details, load both list and details
         return {
           ...state,
+          endpointDetails: {
+            ...state.endpointDetails,
+            hostDetails: {
+              ...state.endpointDetails.hostDetails,
+              detailsLoading: true,
+              detailsError: undefined,
+            },
+          },
           location: action.payload,
           loading: true,
-          detailsLoading: true,
           policyResponseLoading: true,
           error: undefined,
-          detailsError: undefined,
           policyResponseError: undefined,
           policyItemsLoading: true,
         };
@@ -268,9 +315,15 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
     // otherwise we are not on a endpoint list or details page
     return {
       ...state,
+      endpointDetails: {
+        ...state.endpointDetails,
+        hostDetails: {
+          ...state.endpointDetails.hostDetails,
+          detailsError: undefined,
+        },
+      },
       location: action.payload,
       error: undefined,
-      detailsError: undefined,
       policyResponseError: undefined,
       endpointsExist: true,
     };

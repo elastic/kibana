@@ -41,9 +41,18 @@ describe('EndpointList store concerns', () => {
         total: 0,
         loading: false,
         error: undefined,
-        details: undefined,
-        detailsLoading: false,
-        detailsError: undefined,
+        endpointDetails: {
+          activityLog: {
+            log: undefined,
+            logLoading: false,
+            logError: undefined,
+          },
+          hostDetails: {
+            details: undefined,
+            detailsLoading: false,
+            detailsError: undefined,
+          },
+        },
         policyResponse: undefined,
         policyResponseLoading: false,
         policyResponseError: undefined,
