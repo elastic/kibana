@@ -33,7 +33,7 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
           <h2>
             {DataViewLabels[series.reportType] ??
               i18n.translate('xpack.observability.expView.heading.label', {
-                defaultMessage: 'Exploratory view',
+                defaultMessage: 'Analyze data',
               })}{' '}
             <EuiBetaBadge
               style={{

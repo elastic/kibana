@@ -6,6 +6,7 @@
  */
 
 import { UpdateDocumentByQueryResponse } from 'elasticsearch';
+import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
 import { HostIsolationResponse } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -22,6 +23,7 @@ import {
   AlertSearchResponse,
   AlertsIndex,
   UpdateAlertStatusProps,
+  CasesFromAlertsResponse,
 } from './types';
 
 /**
@@ -109,20 +111,38 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
  *
  * @param agent id
  * @param optional comment for the isolation action
+ * @param optional case ids if associated with an alert on the host
  *
  * @throws An error if response is not OK
  */
 export const createHostIsolation = async ({
   agentId,
   comment = '',
+  caseIds,
 }: {
   agentId: string;
   comment?: string;
+  caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
   KibanaServices.get().http.fetch<HostIsolationResponse>(ISOLATE_HOST_ROUTE, {
     method: 'POST',
     body: JSON.stringify({
       agent_ids: [agentId],
       comment,
+      case_ids: caseIds,
     }),
+  });
+
+/**
+ * Get list of associated case ids from alert id
+ *
+ * @param alert id
+ */
+export const getCaseIdsFromAlertId = async ({
+  alertId,
+}: {
+  alertId: string;
+}): Promise<CasesFromAlertsResponse> =>
+  KibanaServices.get().http.fetch<CasesFromAlertsResponse>(getCasesFromAlertsUrl(alertId), {
+    method: 'get',
   });
