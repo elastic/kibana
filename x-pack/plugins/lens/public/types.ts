@@ -65,8 +65,7 @@ export interface EditorFrameProps {
   showNoDataPopover: () => void;
 }
 export interface EditorFrameInstance {
-  mount: (element: Element, props: EditorFrameProps) => Promise<void>;
-  unmount: () => void;
+  EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
 }
 
 export interface EditorFrameSetup {
