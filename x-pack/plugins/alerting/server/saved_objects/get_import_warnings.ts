@@ -16,7 +16,7 @@ export function getImportWarnings(
   }
   const message = i18n.translate('xpack.alerting.savedObjects.onImportText', {
     defaultMessage:
-      '{rulesSavedObjectsLength} {rulesSavedObjectsLength, plural, one {rule} other {rules}} must to be enabled after the import.',
+      '{rulesSavedObjectsLength} {rulesSavedObjectsLength, plural, one {rule} other {rules}} must be enabled after the import.',
     values: {
       rulesSavedObjectsLength: rulesSavedObjects.length,
     },
