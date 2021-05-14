@@ -7,7 +7,12 @@
 
 import React from 'react';
 import { fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
-import { FilterPopoverProps, FilterPopover } from './filter_popover';
+import {
+  FilterPopoverProps,
+  FilterPopover,
+  removeFilterForItemLabel,
+  filterByItemLabel,
+} from './filter_popover';
 import { render } from '../../../lib/helper/rtl_helpers';
 
 describe('FilterPopover component', () => {
@@ -78,15 +83,15 @@ describe('FilterPopover component', () => {
       fireEvent.click(uptimeFilterButton);
 
       selectedPropsItems.forEach((item) => {
-        expect(getByLabelText(`Remove filter by ${props.title} ${item}.`));
+        expect(getByLabelText(removeFilterForItemLabel(item, props.title)));
       });
 
       itemsToClick.forEach((item) => {
         let optionButton: HTMLElement;
         if (selectedPropsItems.some((i) => i === item)) {
-          optionButton = getByLabelText(`Remove filter by ${props.title} ${item}.`);
+          optionButton = getByLabelText(removeFilterForItemLabel(item, props.title));
         } else {
-          optionButton = getByLabelText(`Filter by ${props.title} ${item}.`);
+          optionButton = getByLabelText(filterByItemLabel(item, props.title));
         }
         fireEvent.click(optionButton);
       });

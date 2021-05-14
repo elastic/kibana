@@ -29,13 +29,13 @@ export interface FilterPopoverProps {
 const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined =>
   selectedItems.find((selected) => selected === item) ? 'on' : undefined;
 
-const filterByItemLabel = (item: string, title: string) =>
+export const filterByItemLabel = (item: string, title: string) =>
   i18n.translate('xpack.uptime.filterPopover.filterItem.label', {
     defaultMessage: 'Filter by {title} {item}.',
     values: { item, title },
   });
 
-const removeFilterForItemLabel = (item: string, title: string) =>
+export const removeFilterForItemLabel = (item: string, title: string) =>
   i18n.translate('xpack.uptime.filterPopover.removeFilterItem.label', {
     defaultMessage: 'Remove filter by {title} {item}.',
     values: { item, title },
