@@ -101,14 +101,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
       expect(styleObj['background-color']).to.be(undefined);
-      expect(styleObj.color).to.be('rgb(214, 233, 228)');
+      expect(styleObj.color).to.be('rgb(133,189, 177)');
     });
 
     it('should allow to color cell background rather than text', async () => {
       await PageObjects.lens.setTableDynamicColoring('cell');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(214, 233, 228)');
+      expect(styleObj['background-color']).to.be('rgb(133,189, 177)');
       // should also set text color when in cell mode
       expect(styleObj.color).to.be('rgb(52, 55, 65)');
     });
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openTablePalettePanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(214, 233, 228)');
+      expect(styleObj['background-color']).to.be('rgb(133,189, 177)');
     });
 
     it('tweak the color stops numeric value', async () => {
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(214, 233, 228)');
+      expect(styleObj['background-color']).to.be('rgb(133,189, 177)');
       // should also set text color when in cell mode
       expect(styleObj.color).to.be('rgb(52, 55, 65)');
     });
