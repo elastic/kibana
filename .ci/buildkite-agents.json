@@ -23,7 +23,7 @@
         "queue": "default-nat",
         "name": "kibana-buildkite-nat",
         "overprovision": 0,
-        "minimumAgents": 1,
+        "minimumAgents": 0,
         "maximumAgents": 10,
         "gracefulStopAfterMins": 360,
         "hardStopAfterMins": 540,
