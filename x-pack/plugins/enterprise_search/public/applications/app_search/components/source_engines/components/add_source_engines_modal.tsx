@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { CANCEL_BUTTON_LABEL, SAVE_BUTTON_LABEL } from '../../../../shared/constants';
+
 import { SourceEnginesLogic } from '../source_engines_logic';
 
 export const AddSourceEnginesModal: React.FC = () => {
@@ -36,42 +38,42 @@ export const AddSourceEnginesModal: React.FC = () => {
     .map((engine) => engine.name)
     .filter((engineName) => !sourceEngineNames.includes(engineName));
 
-  const MODAL_TITLE = i18n.translate(
-    'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesModal.title',
-    {
-      defaultMessage: 'Add Engines',
-    }
-  );
-
-  const MODAL_DESCRIPTION = i18n.translate(
-    'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesModal.description',
-    {
-      defaultMessage: 'Add additional Engines to this Meta Engine',
-    }
-  );
-
   return (
     <EuiModal onClose={closeAddSourceEnginesModal}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesModal.title',
+            { defaultMessage: 'Add engines' }
+          )}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiText color="subdued">{MODAL_DESCRIPTION}</EuiText>
+        <EuiText color="subdued">
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesModal.description',
+            { defaultMessage: 'Add additional engines to this meta engine.' }
+          )}
+        </EuiText>
         <EuiSpacer />
         <EuiComboBox
           options={selectableEngineNames.map((engineName) => ({ label: engineName }))}
           selectedOptions={selectedEngineNamesToAdd.map((engineName) => ({ label: engineName }))}
           onChange={(options) => setSelectedEngineNamesToAdd(options.map((option) => option.label))}
+          placeholder={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesModal.placeholder',
+            { defaultMessage: 'Select engine(s)' }
+          )}
         />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeAddSourceEnginesModal}>Cancel</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={closeAddSourceEnginesModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
         <EuiButton
           disabled={selectedEngineNamesToAdd.length === 0}
           onClick={() => addSourceEngines(selectedEngineNamesToAdd)}
           fill
         >
-          Save
+          {SAVE_BUTTON_LABEL}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
