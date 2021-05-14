@@ -6,6 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -25,15 +26,17 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
+    const jobId = `ihp_1_${Date.now()}`;
+
     const testDataList = [
       {
         suiteTitle: 'iowa house prices',
         jobType: 'outlier_detection',
-        jobId: `ihp_1_${Date.now()}`,
-        jobDescription: 'This is the job description',
+        jobId,
+        jobDescription: 'Outlier detection job based on ft_ihp_outlier dataset with runtime fields',
         source: 'ft_ihp_outlier',
         get destinationIndex(): string {
-          return `user-${this.jobId}`;
+          return `user-${jobId}`;
         },
         runtimeFields: {
           lowercase_central_air: {
@@ -82,6 +85,22 @@ export default function ({ getService }: FtrProviderContext) {
             status: 'stopped',
             progress: '100',
           },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: jobId,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":1460,"test_docs_count":0,"skipped_docs_count":0}',
+                  description:
+                    'Outlier detection job based on ft_ihp_outlier dataset with runtime fields',
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '4/4' } },
+            ],
+          } as AnalyticsTableRowDetails,
         },
       },
     ];
@@ -246,6 +265,11 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             progress: testData.expected.row.progress,
           });
+
+          await ml.dataFrameAnalyticsTable.assertAnalyticsRowDetails(
+            testData.jobId,
+            testData.expected.rowDetails
+          );
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {

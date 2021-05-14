@@ -6,26 +6,23 @@
  */
 
 import * as t from 'io-ts';
-
 import {
-  ListId,
+  DefaultVersionNumber,
+  DefaultVersionNumberDecoded,
+  NamespaceType,
   OsTypeArray,
   Tags,
   description,
   exceptionListType,
   meta,
   name,
-  namespace_type,
   osTypeArrayOrUndefined,
   tags,
-} from '../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { DefaultUuid } from '@kbn/securitysolution-io-ts-types';
+
+import { ListId, namespace_type } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import {
-  DefaultUuid,
-  DefaultVersionNumber,
-  DefaultVersionNumberDecoded,
-} from '../../shared_imports';
-import { NamespaceType } from '../types';
 
 export const createExceptionListSchema = t.intersection([
   t.exact(

@@ -12,7 +12,7 @@ import {
   SavedObjectReference,
 } from 'kibana/server';
 
-import { CaseUserActionAttributes } from '../../../common/api';
+import { CaseUserActionAttributes } from '../../../common';
 import {
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_SAVED_OBJECT,

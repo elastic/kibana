@@ -35,7 +35,7 @@ export interface TimelineEventsAllStrategyResponse extends IEsSearchResponse {
 }
 
 export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsPaginated {
-  fields: string[];
+  fields: string[] | Array<{ field: string; include_unmapped: boolean }>;
   fieldRequested: string[];
   language: 'eql' | 'kuery' | 'lucene';
 }

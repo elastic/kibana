@@ -165,6 +165,7 @@ export async function createDefaultSpace({
     {
       index,
       id: 'space:default',
+      refresh: 'wait_for',
       body: {
         type: 'space',
         updated_at: new Date().toISOString(),

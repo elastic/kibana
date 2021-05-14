@@ -10,7 +10,6 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
 import { Logger, LogMeta } from '../../logging';
 import type { ElasticsearchClient } from '../../elasticsearch';
-import { CorruptSavedObjectError } from '../migrations/core/migrate_raw_docs';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
 import { State } from './types';
@@ -49,14 +48,15 @@ const logStateTransition = (
   tookMs: number
 ) => {
   if (newState.logs.length > oldState.logs.length) {
-    newState.logs.slice(oldState.logs.length).forEach((log) => {
-      const getLogger = (level: keyof Logger) => {
-        if (level === 'error') {
-          return logger[level] as Logger['error'];
-        }
-        return logger[level] as Logger['info'];
-      };
-      getLogger(log.level)(logMessagePrefix + log.message);
+    newState.logs.slice(oldState.logs.length).forEach(({ message, level }) => {
+      switch (level) {
+        case 'error':
+          return logger.error(logMessagePrefix + message);
+        case 'info':
+          return logger.info(logMessagePrefix + message);
+        default:
+          throw new Error(`unexpected log level ${level}`);
+      }
     });
   }
 
@@ -73,7 +73,6 @@ const logActionResponse = (
 ) => {
   logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`, res as LogMeta);
 };
-
 const dumpExecutionLog = (logger: Logger, logMessagePrefix: string, executionLog: ExecutionLog) => {
   logger.error(logMessagePrefix + 'migration failed, dumping execution log:');
   executionLog.forEach((log) => {
@@ -210,11 +209,6 @@ export async function migrationStateActionMachine({
       logger.error(e);
 
       dumpExecutionLog(logger, logMessagePrefix, executionLog);
-      if (e instanceof CorruptSavedObjectError) {
-        throw new Error(
-          `${e.message} To allow migrations to proceed, please delete this document from the [${initialState.indexPrefix}_${initialState.kibanaVersion}_001] index.`
-        );
-      }
 
       const newError = new Error(
         `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. ${e}`

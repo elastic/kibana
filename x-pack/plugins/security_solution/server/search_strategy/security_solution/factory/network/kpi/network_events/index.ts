@@ -14,6 +14,7 @@ import {
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { buildNetworkEventsQuery } from './query.network_kpi_network_events.dsl';
+import { buildNetworkEventsQueryEntities } from './query.network_kpi_network_events_entities.dsl';
 
 export const networkKpiNetworkEvents: SecuritySolutionFactory<NetworkKpiQueries.networkEvents> = {
   buildDsl: (options: NetworkKpiNetworkEventsRequestOptions) => buildNetworkEventsQuery(options),
@@ -30,6 +31,26 @@ export const networkKpiNetworkEvents: SecuritySolutionFactory<NetworkKpiQueries.
       inspect,
       // @ts-expect-error code doesn't handle TotalHits
       networkEvents: response.rawResponse.hits.total,
+    };
+  },
+};
+
+export const networkKpiNetworkEventsEntities: SecuritySolutionFactory<NetworkKpiQueries.networkEvents> = {
+  buildDsl: (options: NetworkKpiNetworkEventsRequestOptions) =>
+    buildNetworkEventsQueryEntities(options),
+  parse: async (
+    options: NetworkKpiNetworkEventsRequestOptions,
+    response: IEsSearchResponse<unknown>
+  ): Promise<NetworkKpiNetworkEventsStrategyResponse> => {
+    const inspect = {
+      dsl: [inspectStringifyObject(buildNetworkEventsQueryEntities(options))],
+    };
+
+    return {
+      ...response,
+      inspect,
+      // @ts-expect-error code doesn't handle TotalHits
+      networkEvents: response.rawResponse.aggregations?.events?.value ?? null,
     };
   },
 };

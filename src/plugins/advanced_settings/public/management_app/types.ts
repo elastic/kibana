@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ReactElement } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UiSettingsType, StringValidation, ImageValidation } from '../../../../core/public';
 
@@ -13,7 +14,7 @@ export interface FieldSetting {
   displayName: string;
   name: string;
   value: unknown;
-  description?: string;
+  description?: string | ReactElement;
   options?: string[];
   optionLabels?: Record<string, string>;
   requiresPageReload: boolean;

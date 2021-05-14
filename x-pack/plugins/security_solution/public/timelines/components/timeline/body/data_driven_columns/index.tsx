@@ -6,25 +6,36 @@
  */
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { getOr } from 'lodash/fp';
 
 import { CellValueElementProps } from '../../cell_rendering';
+import { ControlColumnProps, RowCellRender } from '../control_columns';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '../../../../../common/components/drag_and_drop/helpers';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
-import { EventsTd, EVENTS_TD_CLASS_NAME, EventsTdContent, EventsTdGroupData } from '../../styles';
+import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
+import { ActionProps } from '../actions';
+import { inputsModel } from '../../../../../common/store';
+import {
+  EventsTd,
+  EVENTS_TD_CLASS_NAME,
+  EventsTdContent,
+  EventsTdGroupData,
+  EventsTdGroupActions,
+} from '../../styles';
 
 import { StatefulCell } from './stateful_cell';
 import * as i18n from './translations';
 
-interface Props {
+interface CellProps {
   _id: string;
   ariaRowindex: number;
-  columnHeaders: ColumnHeaderOptions[];
+  index: number;
+  header: ColumnHeaderOptions;
   data: TimelineNonEcsData[];
   ecsData: Ecs;
   hasRowRenderers: boolean;
@@ -32,6 +43,38 @@ interface Props {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   tabType?: TimelineTabs;
   timelineId: string;
+}
+
+interface DataDrivenColumnProps {
+  id: string;
+  actionsColumnWidth: number;
+  ariaRowindex: number;
+  checked: boolean;
+  columnHeaders: ColumnHeaderOptions[];
+  columnValues: string;
+  data: TimelineNonEcsData[];
+  ecsData: Ecs;
+  eventIdToNoteIds: Readonly<Record<string, string[]>>;
+  isEventPinned: boolean;
+  isEventViewer?: boolean;
+  loadingEventIds: Readonly<string[]>;
+  notesCount: number;
+  onEventDetailsPanelOpened: () => void;
+  onPinEvent: OnPinEvent;
+  onRowSelected: OnRowSelected;
+  onUnPinEvent: OnUnPinEvent;
+  refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
+  hasRowRenderers: boolean;
+  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  showCheckboxes: boolean;
+  showNotes: boolean;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  tabType?: TimelineTabs;
+  timelineId: string;
+  toggleShowNotes: () => void;
+  trailingControlColumns: ControlColumnProps[];
+  leadingControlColumns: ControlColumnProps[];
 }
 
 const SPACE = ' ';
@@ -77,61 +120,313 @@ export const onKeyDown = (keyboardEvent: React.KeyboardEvent) => {
   }
 };
 
-export const DataDrivenColumns = React.memo<Props>(
+const TgridActionTdCell = ({
+  action: Action,
+  width,
+  actionsColumnWidth,
+  ariaRowindex,
+  columnId,
+  columnValues,
+  data,
+  ecsData,
+  eventIdToNoteIds,
+  index,
+  isEventPinned,
+  isEventViewer,
+  eventId,
+  loadingEventIds,
+  notesCount,
+  onEventDetailsPanelOpened,
+  onPinEvent,
+  onRowSelected,
+  onUnPinEvent,
+  refetch,
+  rowIndex,
+  hasRowRenderers,
+  onRuleChange,
+  selectedEventIds,
+  showCheckboxes,
+  showNotes,
+  tabType,
+  timelineId,
+  toggleShowNotes,
+}: ActionProps & {
+  columnId: string;
+  hasRowRenderers: boolean;
+  actionsColumnWidth: number;
+  notesCount: number;
+  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+}) => {
+  const displayWidth = width ? width : actionsColumnWidth;
+  return (
+    <EventsTdGroupActions
+      width={displayWidth}
+      data-test-subj="event-actions-container"
+      tabIndex={0}
+    >
+      <EventsTd
+        $ariaColumnIndex={index + ARIA_COLUMN_INDEX_OFFSET}
+        key={tabType != null ? `${eventId}_${tabType}` : `${eventId}`}
+        onKeyDown={onKeyDown}
+        role="button"
+        tabIndex={0}
+        width={width}
+      >
+        <EventsTdContent data-test-subj="cell-container">
+          <>
+            <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
+              <p>{i18n.YOU_ARE_IN_A_TABLE_CELL({ row: ariaRowindex, column: index + 2 })}</p>
+            </EuiScreenReaderOnly>
+            {Action && (
+              <Action
+                ariaRowindex={ariaRowindex}
+                width={width}
+                checked={Object.keys(selectedEventIds).includes(eventId)}
+                columnId={columnId}
+                columnValues={columnValues}
+                eventId={eventId}
+                data={data}
+                ecsData={ecsData}
+                eventIdToNoteIds={eventIdToNoteIds}
+                index={index}
+                isEventPinned={isEventPinned}
+                isEventViewer={isEventViewer}
+                loadingEventIds={loadingEventIds}
+                onEventDetailsPanelOpened={onEventDetailsPanelOpened}
+                onPinEvent={onPinEvent}
+                onRowSelected={onRowSelected}
+                onUnPinEvent={onUnPinEvent}
+                refetch={refetch}
+                rowIndex={rowIndex}
+                onRuleChange={onRuleChange}
+                showCheckboxes={showCheckboxes}
+                showNotes={showNotes}
+                timelineId={timelineId}
+                toggleShowNotes={toggleShowNotes}
+              />
+            )}
+          </>
+        </EventsTdContent>
+        {hasRowRenderers ? (
+          <EuiScreenReaderOnly data-test-subj="hasRowRendererScreenReaderOnly">
+            <p>{i18n.EVENT_HAS_AN_EVENT_RENDERER(ariaRowindex)}</p>
+          </EuiScreenReaderOnly>
+        ) : null}
+
+        {notesCount ? (
+          <EuiScreenReaderOnly data-test-subj="hasNotesScreenReaderOnly">
+            <p>{i18n.EVENT_HAS_NOTES({ row: ariaRowindex, notesCount })}</p>
+          </EuiScreenReaderOnly>
+        ) : null}
+      </EventsTd>
+    </EventsTdGroupActions>
+  );
+};
+
+const TgridTdCell = ({
+  _id,
+  ariaRowindex,
+  index,
+  header,
+  data,
+  ecsData,
+  hasRowRenderers,
+  notesCount,
+  renderCellValue,
+  tabType,
+  timelineId,
+}: CellProps) => {
+  return (
+    <EventsTd
+      $ariaColumnIndex={index + ARIA_COLUMN_INDEX_OFFSET}
+      key={tabType != null ? `${header.id}_${tabType}` : `${header.id}`}
+      onKeyDown={onKeyDown}
+      role="button"
+      tabIndex={0}
+      width={header.initialWidth}
+    >
+      <EventsTdContent data-test-subj="cell-container">
+        <>
+          <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
+            <p>{i18n.YOU_ARE_IN_A_TABLE_CELL({ row: ariaRowindex, column: index + 2 })}</p>
+          </EuiScreenReaderOnly>
+          <StatefulCell
+            ariaRowindex={ariaRowindex}
+            data={data}
+            header={header}
+            eventId={_id}
+            linkValues={getOr([], header.linkField ?? '', ecsData)}
+            renderCellValue={renderCellValue}
+            tabType={tabType}
+            timelineId={timelineId}
+          />
+        </>
+      </EventsTdContent>
+      {hasRowRenderers ? (
+        <EuiScreenReaderOnly data-test-subj="hasRowRendererScreenReaderOnly">
+          <p>{i18n.EVENT_HAS_AN_EVENT_RENDERER(ariaRowindex)}</p>
+        </EuiScreenReaderOnly>
+      ) : null}
+
+      {notesCount ? (
+        <EuiScreenReaderOnly data-test-subj="hasNotesScreenReaderOnly">
+          <p>{i18n.EVENT_HAS_NOTES({ row: ariaRowindex, notesCount })}</p>
+        </EuiScreenReaderOnly>
+      ) : null}
+    </EventsTd>
+  );
+};
+
+export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
   ({
-    _id,
     ariaRowindex,
+    actionsColumnWidth,
     columnHeaders,
+    columnValues,
     data,
     ecsData,
-    hasRowRenderers,
+    eventIdToNoteIds,
+    isEventPinned,
+    isEventViewer,
+    id: _id,
+    loadingEventIds,
     notesCount,
+    onEventDetailsPanelOpened,
+    onPinEvent,
+    onRowSelected,
+    onUnPinEvent,
+    refetch,
+    hasRowRenderers,
+    onRuleChange,
     renderCellValue,
+    selectedEventIds,
+    showCheckboxes,
+    showNotes,
     tabType,
     timelineId,
-  }) => (
-    <EventsTdGroupData data-test-subj="data-driven-columns">
-      {columnHeaders.map((header, i) => (
-        <EventsTd
-          $ariaColumnIndex={i + ARIA_COLUMN_INDEX_OFFSET}
-          key={tabType != null ? `${header.id}_${tabType}` : `${header.id}`}
-          onKeyDown={onKeyDown}
-          role="button"
-          tabIndex={0}
-          width={header.width}
-        >
-          <EventsTdContent data-test-subj="cell-container">
-            <>
-              <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
-                <p>{i18n.YOU_ARE_IN_A_TABLE_CELL({ row: ariaRowindex, column: i + 2 })}</p>
-              </EuiScreenReaderOnly>
-              <StatefulCell
+    toggleShowNotes,
+    trailingControlColumns,
+    leadingControlColumns,
+  }) => {
+    const trailingActionCells = useMemo(
+      () =>
+        trailingControlColumns ? trailingControlColumns.map((column) => column.rowCellRender) : [],
+      [trailingControlColumns]
+    );
+    const leadingAndDataColumnCount = useMemo(
+      () => leadingControlColumns.length + columnHeaders.length,
+      [leadingControlColumns, columnHeaders]
+    );
+    const TrailingActions = useMemo(
+      () =>
+        trailingActionCells.map((Action: RowCellRender | undefined, index) => {
+          return (
+            Action && (
+              <TgridActionTdCell
+                action={Action}
+                width={trailingControlColumns[index].width}
+                actionsColumnWidth={actionsColumnWidth}
                 ariaRowindex={ariaRowindex}
-                data={data}
-                header={header}
+                checked={Object.keys(selectedEventIds).includes(_id)}
+                columnId={trailingControlColumns[index].id || ''}
+                columnValues={columnValues}
+                onRowSelected={onRowSelected}
+                data-test-subj="actions"
                 eventId={_id}
-                linkValues={getOr([], header.linkField ?? '', ecsData)}
-                renderCellValue={renderCellValue}
+                data={data}
+                key={index}
+                index={leadingAndDataColumnCount + index}
+                rowIndex={ariaRowindex}
+                ecsData={ecsData}
+                loadingEventIds={loadingEventIds}
+                onEventDetailsPanelOpened={onEventDetailsPanelOpened}
+                showCheckboxes={showCheckboxes}
+                eventIdToNoteIds={eventIdToNoteIds}
+                isEventPinned={isEventPinned}
+                isEventViewer={isEventViewer}
+                notesCount={notesCount}
+                onPinEvent={onPinEvent}
+                onUnPinEvent={onUnPinEvent}
+                refetch={refetch}
+                hasRowRenderers={hasRowRenderers}
+                onRuleChange={onRuleChange}
+                selectedEventIds={selectedEventIds}
+                showNotes={showNotes}
                 tabType={tabType}
                 timelineId={timelineId}
+                toggleShowNotes={toggleShowNotes}
               />
-            </>
-          </EventsTdContent>
-          {hasRowRenderers ? (
-            <EuiScreenReaderOnly data-test-subj="hasRowRendererScreenReaderOnly">
-              <p>{i18n.EVENT_HAS_AN_EVENT_RENDERER(ariaRowindex)}</p>
-            </EuiScreenReaderOnly>
-          ) : null}
-
-          {notesCount ? (
-            <EuiScreenReaderOnly data-test-subj="hasNotesScreenReaderOnly">
-              <p>{i18n.EVENT_HAS_NOTES({ row: ariaRowindex, notesCount })}</p>
-            </EuiScreenReaderOnly>
-          ) : null}
-        </EventsTd>
-      ))}
-    </EventsTdGroupData>
-  )
+            )
+          );
+        }),
+      [
+        trailingControlColumns,
+        _id,
+        data,
+        ecsData,
+        onRowSelected,
+        onPinEvent,
+        isEventPinned,
+        isEventViewer,
+        actionsColumnWidth,
+        ariaRowindex,
+        columnValues,
+        eventIdToNoteIds,
+        hasRowRenderers,
+        leadingAndDataColumnCount,
+        loadingEventIds,
+        notesCount,
+        onEventDetailsPanelOpened,
+        onRuleChange,
+        onUnPinEvent,
+        refetch,
+        selectedEventIds,
+        showCheckboxes,
+        showNotes,
+        tabType,
+        timelineId,
+        toggleShowNotes,
+        trailingActionCells,
+      ]
+    );
+    const ColumnHeaders = useMemo(
+      () =>
+        columnHeaders.map((header, index) => (
+          <TgridTdCell
+            _id={_id}
+            index={index}
+            header={header}
+            key={tabType != null ? `${header.id}_${tabType}` : `${header.id}`}
+            ariaRowindex={ariaRowindex}
+            data={data}
+            ecsData={ecsData}
+            hasRowRenderers={hasRowRenderers}
+            notesCount={notesCount}
+            renderCellValue={renderCellValue}
+            tabType={tabType}
+            timelineId={timelineId}
+          />
+        )),
+      [
+        _id,
+        ariaRowindex,
+        columnHeaders,
+        data,
+        ecsData,
+        hasRowRenderers,
+        notesCount,
+        renderCellValue,
+        tabType,
+        timelineId,
+      ]
+    );
+    return (
+      <EventsTdGroupData data-test-subj="data-driven-columns">
+        {ColumnHeaders}
+        {TrailingActions}
+      </EventsTdGroupData>
+    );
+  }
 );
 
 DataDrivenColumns.displayName = 'DataDrivenColumns';

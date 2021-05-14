@@ -17,6 +17,7 @@ import { createGlobalNoMiddlewareStore, ecsEventMock } from '../../../test_utils
 import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
 import { NAME_ERROR, NAME_PLACEHOLDER } from './translations';
 import { useCurrentUser, useKibana } from '../../../../../../common/lib/kibana';
+import { ExceptionBuilder } from '../../../../../../shared_imports';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../../common/containers/source');
@@ -53,6 +54,9 @@ describe('Event filter form', () => {
   };
 
   beforeEach(() => {
+    const emptyComp = <span data-test-subj="alert-exception-builder" />;
+    jest.spyOn(ExceptionBuilder, 'getExceptionBuilderComponentLazy').mockReturnValue(emptyComp);
+
     (useFetchIndex as jest.Mock).mockImplementation(() => [
       false,
       {
@@ -77,7 +81,7 @@ describe('Event filter form', () => {
   it('should renders correctly with data', () => {
     component = renderComponentWithdata();
 
-    expect(component.getByText(ecsEventMock().process!.executable![0])).not.toBeNull();
+    expect(component.getByTestId('alert-exception-builder')).not.toBeNull();
     expect(component.getByText(NAME_ERROR)).not.toBeNull();
   });
 
@@ -111,8 +115,6 @@ describe('Event filter form', () => {
       });
     });
 
-    expect(store.getState()!.management!.eventFilters!.form!.entry!.comments![0].comment).toBe(
-      'Exception comment'
-    );
+    expect(store.getState()!.management!.eventFilters!.form!.newComment).toBe('Exception comment');
   });
 });

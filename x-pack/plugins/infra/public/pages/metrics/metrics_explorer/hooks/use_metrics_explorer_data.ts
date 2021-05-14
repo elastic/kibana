@@ -7,7 +7,7 @@
 
 import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
@@ -18,6 +18,7 @@ import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 
 function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOptions) {
   return isEqual(current, next);
@@ -40,52 +41,58 @@ export function useMetricsExplorerData(
   const [lastOptions, setLastOptions] = useState<MetricsExplorerOptions | null>(null);
   const [lastTimerange, setLastTimerange] = useState<MetricsExplorerTimeOptions | null>(null);
 
-  const loadData = useCallback(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const from = DateMath.parse(timerange.from);
-        const to = DateMath.parse(timerange.to, { roundUp: true });
+  const from = DateMath.parse(timerange.from);
+  const to = DateMath.parse(timerange.to, { roundUp: true });
+  const [, makeRequest] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'creation',
+      createPromise: () => {
+        setLoading(true);
         if (!from || !to) {
-          throw new Error('Unalble to parse timerange');
+          return Promise.reject(new Error('Unalble to parse timerange'));
         }
         if (!fetchFn) {
-          throw new Error('HTTP service is unavailable');
+          return Promise.reject(new Error('HTTP service is unavailable'));
         }
         if (!source) {
-          throw new Error('Source is unavailable');
+          return Promise.reject(new Error('Source is unavailable'));
         }
-        const response = decodeOrThrow(metricsExplorerResponseRT)(
-          await fetchFn('/api/infra/metrics_explorer', {
-            method: 'POST',
-            body: JSON.stringify({
-              forceInterval: options.forceInterval,
-              dropLastBucket: options.dropLastBucket != null ? options.dropLastBucket : true,
-              metrics:
-                options.aggregation === 'count'
-                  ? [{ aggregation: 'count' }]
-                  : options.metrics.map((metric) => ({
-                      aggregation: metric.aggregation,
-                      field: metric.field,
-                    })),
-              groupBy: options.groupBy,
-              afterKey,
-              limit: options.limit,
-              indexPattern: source.metricAlias,
-              filterQuery:
-                (options.filterQuery &&
-                  convertKueryToElasticSearchQuery(options.filterQuery, derivedIndexPattern)) ||
-                void 0,
-              timerange: {
-                ...timerange,
-                field: source.fields.timestamp,
-                from: from.valueOf(),
-                to: to.valueOf(),
-              },
-            }),
-          })
-        );
+        if (!fetchFn) {
+          return Promise.reject(new Error('HTTP service is unavailable'));
+        }
 
+        return fetchFn('/api/infra/metrics_explorer', {
+          method: 'POST',
+          body: JSON.stringify({
+            forceInterval: options.forceInterval,
+            dropLastBucket: options.dropLastBucket != null ? options.dropLastBucket : true,
+            metrics:
+              options.aggregation === 'count'
+                ? [{ aggregation: 'count' }]
+                : options.metrics.map((metric) => ({
+                    aggregation: metric.aggregation,
+                    field: metric.field,
+                  })),
+            groupBy: options.groupBy,
+            afterKey,
+            limit: options.limit,
+            indexPattern: source.metricAlias,
+            filterQuery:
+              (options.filterQuery &&
+                convertKueryToElasticSearchQuery(options.filterQuery, derivedIndexPattern)) ||
+              void 0,
+            timerange: {
+              ...timerange,
+              field: source.fields.timestamp,
+              from: from.valueOf(),
+              to: to.valueOf(),
+            },
+          }),
+        });
+      },
+      onResolve: (resp: unknown) => {
+        setLoading(false);
+        const response = decodeOrThrow(metricsExplorerResponseRT)(resp);
         if (response) {
           if (
             data &&
@@ -107,20 +114,20 @@ export function useMetricsExplorerData(
           setLastTimerange(timerange);
           setError(null);
         }
-      } catch (e) {
-        setError(e);
-      }
-      setLoading(false);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options, source, timerange, signal, afterKey]);
+      },
+      onReject: (e: unknown) => {
+        setError(e as Error);
+        setLoading(false);
+      },
+    },
+    [source, timerange, options, signal, afterKey]
+  );
 
   useEffect(() => {
     if (!shouldLoadImmediately) {
       return;
     }
-
-    loadData();
-  }, [loadData, shouldLoadImmediately]);
-  return { error, loading, data, loadData };
+    makeRequest();
+  }, [makeRequest, shouldLoadImmediately]);
+  return { error, loading, data, loadData: makeRequest };
 }

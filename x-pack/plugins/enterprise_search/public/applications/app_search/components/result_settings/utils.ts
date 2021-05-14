@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 
-import { Schema } from '../../../shared/types';
+import { Schema } from '../../../shared/schema/types';
 
 import { DEFAULT_FIELD_SETTINGS, DISABLED_FIELD_SETTINGS } from './constants';
 import {

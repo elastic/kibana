@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
         uiCapabilitiesPath: schema.string(),
       }),
       namespaceType: schema.string(),
+      hiddenType: schema.boolean(),
     }),
   });
   const invalidRelationSchema = schema.object({
@@ -89,6 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
           {
@@ -105,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
         ]);
@@ -132,6 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
             relationship: 'child',
           },
@@ -148,6 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
             relationship: 'parent',
           },
@@ -192,6 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
           {
@@ -208,6 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
         ]);
@@ -232,6 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
             relationship: 'child',
           },
@@ -248,6 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
             relationship: 'child',
           },
@@ -292,6 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'discover.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
           {
@@ -308,6 +318,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'dashboard.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
         ]);
@@ -334,6 +345,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'discover.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
             relationship: 'child',
           },
@@ -378,6 +390,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'discover.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
           {
@@ -394,6 +407,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'visualize.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
           },
         ]);
@@ -420,6 +434,7 @@ export default function ({ getService }: FtrProviderContext) {
                 uiCapabilitiesPath: 'discover.show',
               },
               namespaceType: 'single',
+              hiddenType: false,
             },
             relationship: 'parent',
           },
@@ -466,6 +481,7 @@ export default function ({ getService }: FtrProviderContext) {
                   uiCapabilitiesPath: 'visualize.show',
                 },
                 namespaceType: 'single',
+                hiddenType: false,
                 title: 'Visualization',
               },
               relationship: 'child',

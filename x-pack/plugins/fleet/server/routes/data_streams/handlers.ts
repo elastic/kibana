@@ -91,7 +91,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       allDashboards[pkgSavedObject.id] = dashboards;
       return allDashboards;
     }, {});
-    const allDashboardSavedObjects = await context.core.savedObjects.client.bulkGet<{
+    const allDashboardSavedObjectsResponse = await context.core.savedObjects.client.bulkGet<{
       title?: string;
     }>(
       Object.values(dashboardIdsByPackageName).reduce<SavedObjectsBulkGetObject[]>(
@@ -107,8 +107,19 @@ export const getListHandler: RequestHandler = async (context, request, response)
         []
       )
     );
+    // Ignore dashboards not found
+    const allDashboardSavedObjects = allDashboardSavedObjectsResponse.saved_objects.filter((so) => {
+      if (so.error) {
+        if (so.error.statusCode === 404) {
+          return false;
+        }
+        throw so.error;
+      }
+      return true;
+    });
+
     const allDashboardSavedObjectsById = keyBy(
-      allDashboardSavedObjects.saved_objects,
+      allDashboardSavedObjects,
       (dashboardSavedObject) => dashboardSavedObject.id
     );
 

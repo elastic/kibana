@@ -101,7 +101,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
  * @public
  */
 export interface SavedObjectsBulkUpdateObject<T = unknown>
-  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
+  extends Pick<SavedObjectsUpdateOptions<T>, 'version' | 'references'> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -207,13 +207,15 @@ export interface SavedObjectsCheckConflictsResponse {
  *
  * @public
  */
-export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** If specified, will be used to perform an upsert if the document doesn't exist */
+  upsert?: Attributes;
 }
 
 /**
@@ -529,7 +531,7 @@ export class SavedObjectsClient {
     type: string,
     id: string,
     attributes: Partial<T>,
-    options: SavedObjectsUpdateOptions = {}
+    options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     return await this._repository.update(type, id, attributes, options);
   }

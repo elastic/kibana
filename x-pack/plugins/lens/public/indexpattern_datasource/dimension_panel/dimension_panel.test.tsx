@@ -1795,7 +1795,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     );
   });
 
-  it('should clear the dimension when removing the selection in field combobox', () => {
+  it('should keep the latest valid dimension when removing the selection in field combobox', () => {
     wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
     act(() => {
@@ -1805,20 +1805,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .prop('onChange')!([]);
     });
 
-    expect(setState).toHaveBeenCalledWith(
-      {
-        ...state,
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columns: {},
-            columnOrder: [],
-            incompleteColumns: {},
-          },
-        },
-      },
-      { shouldRemoveDimension: false, shouldReplaceDimension: false }
-    );
+    expect(setState).not.toHaveBeenCalled();
   });
 
   it('allows custom format', () => {

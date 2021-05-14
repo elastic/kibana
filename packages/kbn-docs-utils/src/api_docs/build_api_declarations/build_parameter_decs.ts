@@ -12,9 +12,7 @@ import { extractImportReferences } from './extract_import_refs';
 import { AnchorLink, ApiDeclaration } from '../types';
 import { buildApiDeclaration } from './build_api_declaration';
 import { getJSDocParamComment } from './js_doc_utils';
-import { getSourceForNode } from './utils';
-import { getTypeKind } from './get_type_kind';
-import { getApiSectionId } from '../utils';
+import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 
 /**
  * A helper function to capture function parameters, whether it comes from an arrow function, a regular function or
@@ -30,7 +28,9 @@ export function buildApiDecsForParameters(
   params: ParameterDeclaration[],
   plugins: KibanaPlatformPlugin[],
   parentAnchorLink: AnchorLink,
+  currentPluginId: string,
   log: ToolingLog,
+  captureReferences: boolean,
   jsDocs?: JSDoc[]
 ): ApiDeclaration[] {
   let paramIndex = 0;
@@ -52,25 +52,32 @@ export function buildApiDecsForParameters(
     // If we don't want the docs to be too deeply nested we could avoid this special handling.
     if (param.getTypeNode() && param.getTypeNode()!.getKind() === SyntaxKind.TypeLiteral) {
       acc.push(
-        buildApiDeclaration(
-          param.getTypeNode()!,
+        buildApiDeclaration({
+          node: param.getTypeNode()!,
           plugins,
           log,
-          anchorLink.pluginName,
-          anchorLink.scope,
-          anchorLink.apiName,
-          apiName
-        )
+          currentPluginId: anchorLink.pluginName,
+          scope: anchorLink.scope,
+          captureReferences,
+          parentApiId: anchorLink.apiName,
+          name: apiName,
+        })
       );
     } else {
+      const apiDec = buildBasicApiDeclaration({
+        currentPluginId,
+        anchorLink,
+        node: param,
+        plugins,
+        log,
+        apiName,
+        captureReferences,
+      });
       acc.push({
-        id: getApiSectionId(anchorLink),
-        type: getTypeKind(param),
-        label: apiName,
+        ...apiDec,
         isRequired: param.getType().isNullable() === false,
         signature: extractImportReferences(param.getType().getText(), plugins, log),
         description: jsDocs ? getJSDocParamComment(jsDocs, apiName) : [],
-        source: getSourceForNode(param),
       });
     }
     return acc;
