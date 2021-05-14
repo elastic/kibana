@@ -15,9 +15,9 @@ export const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KE
  * localStorage. The ability to set a value in localStorage enables more convenient development and testing
  * in functionality that needs to detect screenshot mode.
  */
-export const getScreenshotMode = (): unknown => {
+export const getScreenshotMode = (): boolean => {
   return (
-    ((window as unknown) as Record<string, unknown>)[KBN_SCREENSHOT_MODE_ENABLED_KEY] ||
+    Boolean(((window as unknown) as Record<string, unknown>)[KBN_SCREENSHOT_MODE_ENABLED_KEY]) ||
     window.localStorage.getItem(KBN_SCREENSHOT_MODE_ENABLED_KEY) === 'true'
   );
 };

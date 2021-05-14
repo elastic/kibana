@@ -12,6 +12,8 @@ export { setScreenshotModeEnabled, KBN_SCREENSHOT_MODE_HEADER } from '../common'
 
 export { ScreenshotModeRequestHandlerContext } from './types';
 
+export { ScreenshotModePluginSetup } from './plugin';
+
 export function plugin() {
   return new ScreenshotModePlugin();
 }
