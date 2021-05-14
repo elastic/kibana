@@ -24,19 +24,19 @@ export const SW_ACTION_TYPE_TITLE = i18n.translate(
 export const SW_REQUIRED_ALERT_NAME = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAlertName',
   {
-    defaultMessage: 'AlertName is required.',
+    defaultMessage: 'Alert Name is required.',
   }
 );
 
 export const SW_REQUIRED_APP_ID_TEXT = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAppIdText',
   {
-    defaultMessage: 'An AppId is required.',
+    defaultMessage: 'An App Id is required.',
   }
 );
 
 export const SW_REQUIRED_FIELD_MAPPINGS_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAppIdText',
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredFieldMappingsText',
   {
     defaultMessage: 'Field mappings are required.',
   }
@@ -61,7 +61,7 @@ export const SW_GET_APPLICATION_API_ERROR = (id: string | null) =>
 export const SW_API_URL_TEXT_FIELD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.apiUrlTextFieldLabel',
   {
-    defaultMessage: 'API URL',
+    defaultMessage: 'API Url',
   }
 );
 

@@ -6,26 +6,82 @@
  */
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function swimlaneTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
+  const mockSwimlane = {
+    name: 'A swimlane action',
+    actionTypeId: '.swimlane',
+    config: {
+      apiUrl: 'http://swimlane.mynonexistent.co',
+      appId: '123456asdf',
+      mappings: {
+        alertSourceConfig: {
+          id: 'adnjls',
+          name: 'Alert Source',
+          key: 'alert-source',
+          fieldType: 'text',
+        },
+        severityConfig: {
+          id: 'adnlas',
+          name: 'Severity',
+          key: 'severity',
+          fieldType: 'text',
+        },
+        alertNameConfig: {
+          id: 'adnfls',
+          name: 'Alert Name',
+          key: 'alert-name',
+          fieldType: 'text',
+        },
+        caseIdConfig: {
+          id: 'a6sst',
+          name: 'Case Id',
+          key: 'case-id-name',
+          fieldType: 'text',
+        },
+        caseNameConfig: {
+          id: 'a6fst',
+          name: 'Case Name',
+          key: 'case-name',
+          fieldType: 'text',
+        },
+        commentsConfig: {
+          id: 'a6fdf',
+          name: 'Comments',
+          key: 'comments',
+          fieldType: 'text',
+        },
+      },
+    },
+    secrets: {
+      apiToken: 'swimlane-api-key',
+    },
+  };
+  describe('swimlane', () => {
+    let swimlaneSimulatorURL: string = '<could not determine kibana url>';
 
-  describe('swimlane action', () => {
+    // need to wait for kibanaServer to settle ...
+    before(() => {
+      swimlaneSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SWIMLANE)
+      );
+    });
     it('should return 403 when creating a swimlane action', async () => {
       await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'A swimlane action',
-          actionTypeId: '.swimlane',
+          ...mockSwimlane,
           config: {
-            apiUrl: 'http://localhost',
-            appId: '123456asdf',
-            username: 'username',
-          },
-          secrets: {
-            apiToken: 'swimlane-api-key',
+            ...mockSwimlane.config,
+            apiUrl: swimlaneSimulatorURL,
           },
         })
         .expect(403, {

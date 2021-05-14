@@ -54,6 +54,10 @@ Table of Contents
       - [`subActionParams (getFields)`](#subactionparams-getfields-2)
       - [`subActionParams (incidentTypes)`](#subactionparams-incidenttypes)
       - [`subActionParams (severity)`](#subactionparams-severity)
+  - [Swimlane](#swimlane)
+    - [`params`](#params-3)
+      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-3)
+      - [`subActionParams (createRecord)`](#subactionparams-createRecord)
 - [Command Line Utility](#command-line-utility)
 - [Developing New Action Types](#developing-new-action-types)
   - [licensing](#licensing)
@@ -394,6 +398,45 @@ No parameters for the `incidentTypes` subaction. Provide an empty object `{}`.
 
 No parameters for the `severity` subaction. Provide an empty object `{}`.
 
+---
+## Swimlane
+
+
+### `params`
+
+| Property        | Description                                                                                        | Type   |
+| --------------- | -------------------------------------------------------------------------------------------------- | ------ |
+| subAction       | The subaction to perform. It can be `pushToService` or `createRecord`. | string |
+| subActionParams | The parameters of the subaction.                                                                   | object |
+
+#### `subActionParams (createRecord)`
+
+| Property      | Description                                                                                                                  | Type                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| alertName     | The alert name of the incident.                                                                                                 | string    |
+| alertSource     | The alert source of the incident.                                                                                             | string _(optional)_   |
+| caseId     | The case id of the incident.                                                                                             | string _(optional)_   |
+| caseName     | The case name of the incident.                                                                                             | string _(optional)_   |
+| comments     | The comments of the incident.                                                                                             | string _(optional)_   |
+| severity     | The severity of the incident.                                                                                             | string _(optional)_   |
+
+`subActionParams (pushToService)`
+
+| Property | Description                                                                                                   | Type                  |
+| -------- | ------------------------------------------------------------------------------------------------------------- | --------------------- |
+| incident | The Swimlane incident.                                                                                   | object                |
+| comments | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`. | object[] _(optional)_ |
+
+The following table describes the properties of the `incident` object.
+
+| Property      | Description                                                                                                                  | Type                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| alertName     | The alert name of the incident.                                                                                                 | string    |
+| alertSource     | The alert source of the incident.                                                                                             | string _(optional)_   |
+| caseId     | The case id of the incident.                                                                                             | string _(optional)_   |
+| caseName     | The case name of the incident.                                                                                             | string _(optional)_   |
+| comments     | The comments of the incident.                                                                                             | string _(optional)_   |
+| severity     | The severity of the incident.
 ---
 # Command Line Utility
 

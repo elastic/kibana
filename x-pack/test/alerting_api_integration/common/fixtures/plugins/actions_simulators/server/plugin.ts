@@ -51,6 +51,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/issue`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/createmeta`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.RESILIENT}/rest/orgs/201/incidents`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SWIMLANE}/api`);
   return allPaths;
 }
 

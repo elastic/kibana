@@ -43,6 +43,7 @@ export const createExternalService = (
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'Private-Token': `${secrets.apiToken}`,
+    'kbn-xsrf': 'why',
   };
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
@@ -105,6 +106,7 @@ export const createExternalService = (
       let isDescriptionPosted = true;
       if (
         fieldId != null &&
+        res.data.comments != null &&
         res.data.comments[fieldId] != null &&
         res.data.comments[fieldId].length &&
         data.comments != null &&

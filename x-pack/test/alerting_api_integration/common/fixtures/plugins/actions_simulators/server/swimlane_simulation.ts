@@ -16,7 +16,7 @@ import {
 export function initPlugin(router: IRouter, path: string) {
   router.post(
     {
-      path,
+      path: `${path}/api/app/{id}/record`,
       options: {
         authRequired: false,
       },
@@ -30,12 +30,31 @@ export function initPlugin(router: IRouter, path: string) {
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
-      const { body } = req;
-
-      return jsonResponse(res, 202, {
-        status: 'success',
-        message: 'Event processed',
-        ...(body.alertName ? { alertName: body.alertName } : {}),
+      return jsonResponse(res, 200, {
+        id: 'wowzeronza',
+        name: 'ET-69',
+      });
+    }
+  );
+  router.patch(
+    {
+      path: `${path}/api/app/{id}/record/{recordId}`,
+      options: {
+        authRequired: false,
+      },
+      validate: {},
+    },
+    // Swimlane simulator: create an action pointing here, and you can get
+    // different responses based on the message posted. See the README.md for
+    // more info.
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      return jsonResponse(res, 200, {
+        id: 'wowzeronza',
+        name: 'ET-69',
       });
     }
   );
