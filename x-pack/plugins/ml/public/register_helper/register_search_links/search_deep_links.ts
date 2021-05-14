@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { AppSearchDeepLink } from 'src/core/public';
+import type { AppDeepLink } from 'src/core/public';
 import { ML_PAGES } from '../../../common/constants/ml_url_generator';
 
-const OVERVIEW_LINK_SEARCH_DEEP_LINK: AppSearchDeepLink = {
+const OVERVIEW_LINK_DEEP_LINK: AppDeepLink = {
   id: 'mlOverviewSearchDeepLink',
   title: i18n.translate('xpack.ml.searchDeepLink.overview', {
     defaultMessage: 'Overview',
@@ -18,7 +18,7 @@ const OVERVIEW_LINK_SEARCH_DEEP_LINK: AppSearchDeepLink = {
   path: `/${ML_PAGES.OVERVIEW}`,
 };
 
-const ANOMALY_DETECTION_SEARCH_DEEP_LINK: AppSearchDeepLink = {
+const ANOMALY_DETECTION_DEEP_LINK: AppDeepLink = {
   id: 'mlAnomalyDetectionSearchDeepLink',
   title: i18n.translate('xpack.ml.searchDeepLink.anomalyDetection', {
     defaultMessage: 'Anomaly Detection',
@@ -26,13 +26,13 @@ const ANOMALY_DETECTION_SEARCH_DEEP_LINK: AppSearchDeepLink = {
   path: `/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`,
 };
 
-const DATA_FRAME_ANALYTICS_SEARCH_DEEP_LINK: AppSearchDeepLink = {
+const DATA_FRAME_ANALYTICS_DEEP_LINK: AppDeepLink = {
   id: 'mlDataFrameAnalyticsSearchDeepLink',
   title: i18n.translate('xpack.ml.searchDeepLink.dataFrameAnalytics', {
     defaultMessage: 'Data Frame Analytics',
   }),
   path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`,
-  searchDeepLinks: [
+  deepLinks: [
     {
       id: 'mlTrainedModelsSearchDeepLink',
       title: i18n.translate('xpack.ml.searchDeepLink.trainedModels', {
@@ -43,7 +43,7 @@ const DATA_FRAME_ANALYTICS_SEARCH_DEEP_LINK: AppSearchDeepLink = {
   ],
 };
 
-const DATA_VISUALIZER_SEARCH_DEEP_LINK: AppSearchDeepLink = {
+const DATA_VISUALIZER_DEEP_LINK: AppDeepLink = {
   id: 'mlDataVisualizerSearchDeepLink',
   title: i18n.translate('xpack.ml.searchDeepLink.dataVisualizer', {
     defaultMessage: 'Data Visualizer',
@@ -51,7 +51,7 @@ const DATA_VISUALIZER_SEARCH_DEEP_LINK: AppSearchDeepLink = {
   path: `/${ML_PAGES.DATA_VISUALIZER}`,
 };
 
-const FILE_UPLOAD_SEARCH_DEEP_LINK: AppSearchDeepLink = {
+const FILE_UPLOAD_DEEP_LINK: AppDeepLink = {
   id: 'mlFileUploadSearchDeepLink',
   title: i18n.translate('xpack.ml.searchDeepLink.fileUpload', {
     defaultMessage: 'File Upload',
@@ -59,7 +59,7 @@ const FILE_UPLOAD_SEARCH_DEEP_LINK: AppSearchDeepLink = {
   path: `/${ML_PAGES.DATA_VISUALIZER_FILE}`,
 };
 
-const INDEX_DATA_VISUALIZER_SEARCH_DEEP_LINK: AppSearchDeepLink = {
+const INDEX_DATA_VISUALIZER_DEEP_LINK: AppDeepLink = {
   id: 'mlIndexDataVisualizerSearchDeepLink',
   title: i18n.translate('xpack.ml.searchDeepLink.indexDataVisualizer', {
     defaultMessage: 'Index Data Visualizer',
@@ -67,13 +67,13 @@ const INDEX_DATA_VISUALIZER_SEARCH_DEEP_LINK: AppSearchDeepLink = {
   path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_SELECT}`,
 };
 
-const SETTINGS_SEARCH_DEEP_LINK: AppSearchDeepLink = {
+const SETTINGS_DEEP_LINK: AppDeepLink = {
   id: 'mlSettingsSearchDeepLink',
   title: i18n.translate('xpack.ml.searchDeepLink.settings', {
     defaultMessage: 'Settings',
   }),
   path: `/${ML_PAGES.SETTINGS}`,
-  searchDeepLinks: [
+  deepLinks: [
     {
       id: 'mlCalendarSettingsSearchDeepLink',
       title: i18n.translate('xpack.ml.searchDeepLink.calendarSettings', {
@@ -91,19 +91,19 @@ const SETTINGS_SEARCH_DEEP_LINK: AppSearchDeepLink = {
   ],
 };
 
-export function getSearchDeepLinks(isFullLicense: boolean) {
-  const deepLinks: AppSearchDeepLink[] = [
-    DATA_VISUALIZER_SEARCH_DEEP_LINK,
-    FILE_UPLOAD_SEARCH_DEEP_LINK,
-    INDEX_DATA_VISUALIZER_SEARCH_DEEP_LINK,
+export function getDeepLinks(isFullLicense: boolean) {
+  const deepLinks: AppDeepLink[] = [
+    DATA_VISUALIZER_DEEP_LINK,
+    FILE_UPLOAD_DEEP_LINK,
+    INDEX_DATA_VISUALIZER_DEEP_LINK,
   ];
 
   if (isFullLicense === true) {
     deepLinks.push(
-      OVERVIEW_LINK_SEARCH_DEEP_LINK,
-      ANOMALY_DETECTION_SEARCH_DEEP_LINK,
-      DATA_FRAME_ANALYTICS_SEARCH_DEEP_LINK,
-      SETTINGS_SEARCH_DEEP_LINK
+      OVERVIEW_LINK_DEEP_LINK,
+      ANOMALY_DETECTION_DEEP_LINK,
+      DATA_FRAME_ANALYTICS_DEEP_LINK,
+      SETTINGS_DEEP_LINK
     );
   }
 
