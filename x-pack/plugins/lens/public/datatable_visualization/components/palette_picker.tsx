@@ -34,12 +34,13 @@ function getCustomPaletteConfig(
         title,
         type: FIXED_PROGRESSION,
         palette,
+        'data-test-subj': `custom-palette`,
       };
     }
   }
   // if not possible just show some text
   if (!activePalette?.params?.stops) {
-    return { value: id, title, type: 'text' as const };
+    return { value: id, title, type: 'text' as const, 'data-test-subj': `custom-palette` };
   }
 
   const referenceStops = activePalette.params.colorStops || activePalette.params.stops;
@@ -51,6 +52,7 @@ function getCustomPaletteConfig(
     value: id,
     title,
     type: FIXED_PROGRESSION,
+    'data-test-subj': `custom-palette`,
     palette: remapStopsByNewInterval(activePalette.params.stops, {
       newInterval: 100,
       oldInterval,
@@ -66,6 +68,7 @@ export function PalettePicker({
   setPalette,
   showCustomPalette,
   showDynamicColorOnly,
+  ...rest
 }: {
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput<CustomPaletteParams>;
@@ -88,6 +91,7 @@ export function PalettePicker({
         title,
         type: FIXED_PROGRESSION,
         palette: activePalette?.params?.reverse ? colors.reverse() : colors,
+        'data-test-subj': `${id}-palette`,
       };
     });
   if (showCustomPalette) {
@@ -106,6 +110,7 @@ export function PalettePicker({
       }}
       valueOfSelected={activePalette?.name || defaultParams.name}
       selectionDisplay="palette"
+      {...rest}
     />
   );
 }

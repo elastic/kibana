@@ -101,43 +101,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
       expect(styleObj['background-color']).to.be(undefined);
-      expect(styleObj.color).to.be('rgb(133,189, 177)');
+      expect(styleObj.color).to.be('rgb(133, 189, 177)');
     });
 
     it('should allow to color cell background rather than text', async () => {
       await PageObjects.lens.setTableDynamicColoring('cell');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(133,189, 177)');
+      expect(styleObj['background-color']).to.be('rgb(133, 189, 177)');
       // should also set text color when in cell mode
-      expect(styleObj.color).to.be('rgb(52, 55, 65)');
+      expect(styleObj.color).to.be('rgb(0, 0, 0)');
     });
 
     it('should open the palette panel to customize the palette look', async () => {
       await PageObjects.lens.openTablePalettePanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.changePaletteTo('temperature');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(133,189, 177)');
+      expect(styleObj['background-color']).to.be('rgb(235, 239, 245)');
     });
 
     it('tweak the color stops numeric value', async () => {
       await testSubjects.setValue('lnsDatatable_dynamicColoring_stop_value_0', '30', {
         clearWithKeyboard: true,
       });
+      // when clicking on another row will trigger a sorting + update
+      await testSubjects.click('lnsDatatable_dynamicColoring_stop_value_1');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(133,189, 177)');
+      // pick a cell without color as is below the range
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(3, 3);
+      expect(styleObj['background-color']).to.be(undefined);
       // should also set text color when in cell mode
-      expect(styleObj.color).to.be('rgb(52, 55, 65)');
+      expect(styleObj.color).to.be(undefined);
     });
 
     it('should allow the user to reverse the palette', async () => {
       await testSubjects.click('lnsDatatable_dynamicColoring_reverse');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(32, 146, 128)');
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(1, 1);
+      expect(styleObj['background-color']).to.be('rgb(168, 191, 218)');
       // should also set text color when in cell mode
-      expect(styleObj.color).to.be('rgb(52, 55, 65)');
+      expect(styleObj.color).to.be('rgb(0, 0, 0)');
     });
   });
 }
