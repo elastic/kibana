@@ -47,7 +47,6 @@ const defaultInitial = {
   reporters: [],
   status: StatusAll,
   tags: [],
-  owner: [],
 };
 
 const CasesTableFiltersComponent = ({
@@ -64,8 +63,8 @@ const CasesTableFiltersComponent = ({
   );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
-  const { tags, fetchTags } = useGetTags(initial.owner);
-  const { reporters, respReporters, fetchReporters } = useGetReporters(initial.owner);
+  const { tags, fetchTags } = useGetTags();
+  const { reporters, respReporters, fetchReporters } = useGetReporters();
 
   const refetch = useCallback(() => {
     fetchTags();

@@ -19,6 +19,7 @@ import {
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getCases, patchCase } from './api';
+import { useOwnerContext } from '../components/owner_context/use_owner_context';
 
 export interface UseGetCasesState {
   data: AllCases;
@@ -105,7 +106,6 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   status: StatusAll,
   tags: [],
   onlyCollectionType: false,
-  owner: [],
 };
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
@@ -145,6 +145,7 @@ export const useGetCases = (
     initialFilterOptions?: Partial<FilterOptions>;
   } = {}
 ): UseGetCases => {
+  const owner = useOwnerContext();
   const { initialQueryParams = empty, initialFilterOptions = empty } = params;
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,
@@ -184,7 +185,7 @@ export const useGetCases = (
         dispatch({ type: 'FETCH_INIT', payload: 'cases' });
 
         const response = await getCases({
-          filterOptions,
+          filterOptions: { ...filterOptions, owner },
           queryParams,
           signal: abortCtrlFetchCases.current.signal,
         });
@@ -207,7 +208,7 @@ export const useGetCases = (
         }
       }
     },
-    [toasts]
+    [owner, toasts]
   );
 
   const dispatchUpdateCaseProperty = useCallback(

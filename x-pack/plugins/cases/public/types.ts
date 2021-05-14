@@ -44,12 +44,12 @@ export interface Owner {
 }
 
 export interface CasesUiStart {
-  getAllCases: (props: AllCasesProps & Owner) => ReactElement<AllCasesProps>;
+  getAllCases: (props: AllCasesProps) => ReactElement<AllCasesProps>;
   getAllCasesSelectorModal: (
-    props: AllCasesSelectorModalProps & Owner
+    props: AllCasesSelectorModalProps
   ) => ReactElement<AllCasesSelectorModalProps>;
   getCaseView: (props: CaseViewProps) => ReactElement<CaseViewProps>;
-  getConfigureCases: (props: ConfigureCasesProps & Owner) => ReactElement<ConfigureCasesProps>;
-  getCreateCase: (props: CreateCaseProps & Owner) => ReactElement<CreateCaseProps>;
-  getRecentCases: (props: RecentCasesProps & Owner) => ReactElement<RecentCasesProps>;
+  getConfigureCases: (props: ConfigureCasesProps) => ReactElement<ConfigureCasesProps>;
+  getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
+  getRecentCases: (props: RecentCasesProps) => ReactElement<RecentCasesProps>;
 }

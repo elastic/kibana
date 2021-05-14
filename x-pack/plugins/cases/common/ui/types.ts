@@ -101,7 +101,6 @@ export interface FilterOptions {
   status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
-  owner: string[];
   onlyCollectionType?: boolean;
 }
 
@@ -131,7 +130,7 @@ export interface ElasticUser {
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
-  filterOptions?: FilterOptions;
+  filterOptions?: FilterOptions & { owner: string[] };
 }
 
 export interface ApiProps {

@@ -12,6 +12,7 @@ import * as i18n from './translations';
 import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
 import { ConnectorTypes } from '../../../common';
 import { useToasts } from '../../common/lib/kibana';
+import { useOwnerContext } from '../../components/owner_context/use_owner_context';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
   closureType: CaseConfigure['closureType'];
@@ -154,12 +155,8 @@ export const initialState: State = {
   id: '',
 };
 
-/**
- * Configurations across multiple plugins is
- * not supported at the moment. For that reason owner: string;
- * instead of owner: string[]
- */
-export const useCaseConfigure = (owner: string): ReturnUseCaseConfigure => {
+export const useCaseConfigure = (): ReturnUseCaseConfigure => {
+  const owner = useOwnerContext();
   const [state, dispatch] = useReducer(configureCasesReducer, initialState);
   const toasts = useToasts();
   const setCurrentConfiguration = useCallback((configuration: ConnectorConfiguration) => {
@@ -240,7 +237,7 @@ export const useCaseConfigure = (owner: string): ReturnUseCaseConfigure => {
       setLoading(true);
       const res = await getCaseConfigure({
         signal: abortCtrlRefetchRef.current.signal,
-        owner: [owner],
+        owner,
       });
 
       if (!isCancelledRefetchRef.current) {
@@ -302,7 +299,8 @@ export const useCaseConfigure = (owner: string): ReturnUseCaseConfigure => {
         const res =
           state.version.length === 0
             ? await postCaseConfigure(
-                { ...connectorObj, owner },
+                // The first owner will be used for case creation
+                { ...connectorObj, owner: owner[0] },
                 abortCtrlPersistRef.current.signal
               )
             : await patchCaseConfigure(

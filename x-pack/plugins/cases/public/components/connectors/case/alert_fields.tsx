@@ -18,6 +18,7 @@ import { CaseActionParams } from './types';
 import { ExistingCase } from './existing_case';
 
 import * as i18n from './translations';
+import { OwnerProvider } from '../../owner_context';
 
 const Container = styled.div`
   ${({ theme }) => `
@@ -95,11 +96,9 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
    */
   return (
     <Container>
-      <ExistingCase
-        onCaseChanged={onCaseChanged}
-        selectedCase={selectedCase}
-        owner={SECURITY_SOLUTION_OWNER}
-      />
+      <OwnerProvider owner={[SECURITY_SOLUTION_OWNER]}>
+        <ExistingCase onCaseChanged={onCaseChanged} selectedCase={selectedCase} />
+      </OwnerProvider>
       <EuiSpacer size="m" />
       <EuiCallOut size="s" title={i18n.CASE_CONNECTOR_CALL_OUT_TITLE} iconType="iInCircle">
         <p>{i18n.CASE_CONNECTOR_CALL_OUT_MSG}</p>

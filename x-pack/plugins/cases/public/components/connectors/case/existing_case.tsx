@@ -18,24 +18,14 @@ import { CasesDropdown, ADD_CASE_BUTTON_ID } from './cases_dropdown';
 interface ExistingCaseProps {
   selectedCase: string | null;
   onCaseChanged: (id: string) => void;
-  /**
-   * We allow only one owner as this component queries
-   * for multiple cases and creates a single case.
-   */
-  owner: string;
 }
 
-const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({
-  onCaseChanged,
-  selectedCase,
-  owner,
-}) => {
+const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, selectedCase }) => {
   const { data: cases, loading: isLoadingCases, refetchCases } = useGetCases({
     initialQueryParams: DEFAULT_QUERY_PARAMS,
     initialFilterOptions: {
       ...DEFAULT_FILTER_OPTIONS,
       onlyCollectionType: true,
-      owner: [owner],
     },
   });
 
@@ -54,7 +44,6 @@ const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({
     // We are making the assumption that this component is only used in rules creation
     // that's why we want to hide ServiceNow SIR
     hideConnectorServiceNowSir: true,
-    owner,
   });
 
   const onChange = useCallback(

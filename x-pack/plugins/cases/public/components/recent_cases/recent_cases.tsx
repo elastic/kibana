@@ -19,7 +19,6 @@ import { NoCases } from './no_cases';
 import { isSubCase } from '../all_cases/helpers';
 import { MarkdownRenderer } from '../markdown_editor';
 import { FilterOptions } from '../../containers/types';
-import { useOwnerContext } from '../owner_context/use_owner_context';
 
 const MarkdownContainer = styled.div`
   max-height: 150px;
@@ -47,11 +46,9 @@ export const RecentCasesComp = ({
   filterOptions,
   maxCasesToShow,
 }: RecentCasesProps) => {
-  const owner = useOwnerContext();
   const previousFilterOptions = usePrevious(filterOptions);
   const { data, loading, setFilters } = useGetCases({
     initialQueryParams: { perPage: maxCasesToShow },
-    initialFilterOptions: { owner },
   });
 
   useEffect(() => {

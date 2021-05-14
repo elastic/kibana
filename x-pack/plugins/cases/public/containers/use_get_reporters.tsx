@@ -12,6 +12,7 @@ import { User } from '../../common';
 import { getReporters } from './api';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
+import { useOwnerContext } from '../components/owner_context/use_owner_context';
 
 interface ReportersState {
   reporters: string[];
@@ -31,7 +32,8 @@ export interface UseGetReporters extends ReportersState {
   fetchReporters: () => void;
 }
 
-export const useGetReporters = (owner: string[]): UseGetReporters => {
+export const useGetReporters = (): UseGetReporters => {
+  const owner = useOwnerContext();
   const [reportersState, setReporterState] = useState<ReportersState>(initialData);
 
   const toasts = useToasts();

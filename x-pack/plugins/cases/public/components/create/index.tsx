@@ -20,6 +20,8 @@ import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../t
 import { fieldName as descriptionFieldName } from './description';
 import { InsertTimeline } from '../insert_timeline';
 import { UsePostComment } from '../../containers/use_post_comment';
+import { Owner } from '../../types';
+import { OwnerProvider } from '../owner_context';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -29,7 +31,7 @@ const Container = styled.div`
   `}
 `;
 
-export interface CreateCaseProps {
+export interface CreateCaseProps extends Owner {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   caseType?: CaseType;
   hideConnectorServiceNowSir?: boolean;
@@ -39,7 +41,7 @@ export interface CreateCaseProps {
   withSteps?: boolean;
 }
 
-export const CreateCase = ({
+const CreateCaseComponent = ({
   afterCaseCreated,
   caseType,
   hideConnectorServiceNowSir,
@@ -47,7 +49,7 @@ export const CreateCase = ({
   onSuccess,
   timelineIntegration,
   withSteps,
-}: CreateCaseProps) => (
+}: Omit<CreateCaseProps, 'owner'>) => (
   <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
     <FormContext
       afterCaseCreated={afterCaseCreated}
@@ -86,5 +88,12 @@ export const CreateCase = ({
   </CasesTimelineIntegrationProvider>
 );
 
+export const CreateCase: React.FC<CreateCaseProps> = React.memo((props) => {
+  return (
+    <OwnerProvider owner={props.owner}>
+      <CreateCaseComponent {...props} />
+    </OwnerProvider>
+  );
+});
 // eslint-disable-next-line import/no-default-export
 export { CreateCase as default };

@@ -38,7 +38,6 @@ import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
-import { useOwnerContext } from '../owner_context/use_owner_context';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -81,7 +80,6 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     userCanCrud,
   }) => {
     const { actionLicense } = useGetActionLicense();
-    const owner = useOwnerContext();
 
     const {
       data,
@@ -94,7 +92,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       setFilters,
       setQueryParams,
       setSelectedCases,
-    } = useGetCases({ initialFilterOptions: { owner } });
+    } = useGetCases();
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();
@@ -290,7 +288,6 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
               reporters: filterOptions.reporters,
               tags: filterOptions.tags,
               status: filterOptions.status,
-              owner: filterOptions.owner,
             }}
             setFilterRefetch={setFilterRefetch}
             disabledStatuses={disabledStatuses}

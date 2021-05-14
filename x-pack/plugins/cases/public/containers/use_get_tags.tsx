@@ -7,6 +7,7 @@
 
 import { useEffect, useReducer, useRef, useCallback } from 'react';
 import { useToasts } from '../common/lib/kibana';
+import { useOwnerContext } from '../components/owner_context/use_owner_context';
 import { getTags } from './api';
 import * as i18n from './translations';
 
@@ -51,7 +52,8 @@ const dataFetchReducer = (state: TagsState, action: Action): TagsState => {
 };
 const initialData: string[] = [];
 
-export const useGetTags = (owner: string[]): UseGetTags => {
+export const useGetTags = (): UseGetTags => {
+  const owner = useOwnerContext();
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: true,
     isError: false,
