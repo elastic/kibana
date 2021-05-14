@@ -122,7 +122,6 @@ function extractTransformFailuresReason(
           .map((errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`)
           .join('/n')
       : '';
-  console.log('transformErrorsReason:', transformErrorsReason);
   return `Migrations failed. Reason:${corruptDocumentIdReason}${transformErrorsReason}. To allow migrations to proceed, please delete these documents.`;
 }
 
