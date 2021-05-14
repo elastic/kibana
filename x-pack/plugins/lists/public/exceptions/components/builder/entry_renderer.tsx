@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import styled from 'styled-components';
-import { OsTypeArray } from '@kbn/securitysolution-io-ts-utils';
+import { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';

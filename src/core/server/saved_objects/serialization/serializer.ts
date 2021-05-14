@@ -76,10 +76,10 @@ export class SavedObjectsSerializer {
    * @param {SavedObjectsRawDoc} doc - The raw ES document to be converted to saved object format.
    * @param {SavedObjectsRawDocParseOptions} options - Options for parsing the raw document.
    */
-  public rawToSavedObject(
+  public rawToSavedObject<T = unknown>(
     doc: SavedObjectsRawDoc,
     options: SavedObjectsRawDocParseOptions = {}
-  ): SavedObjectSanitizedDoc {
+  ): SavedObjectSanitizedDoc<T> {
     this.checkIsRawSavedObject(doc, options); // throws a descriptive error if the document is not a saved object
 
     const { namespaceTreatment = 'strict' } = options;
