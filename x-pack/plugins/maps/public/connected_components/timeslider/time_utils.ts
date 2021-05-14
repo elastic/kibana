@@ -27,7 +27,7 @@ function getScaledDateFormat(interval: number): string {
   }
 
   if (interval >= moment.duration(6, 'h').asMilliseconds()) {
-    return 'MMM D HH:mm';
+    return 'Do HH';
   }
 
   if (interval >= moment.duration(1, 'h').asMilliseconds()) {
@@ -39,10 +39,10 @@ function getScaledDateFormat(interval: number): string {
   }
 
   if (interval >= moment.duration(1, 's').asMilliseconds()) {
-    return 'HH:mm:ss';
+    return 'mm:ss';
   }
 
-  return 'HH:mm:ss.SSS';
+  return 'ss.SSS';
 }
 
 export function epochToKbnDateFormat(epoch: number): string {
