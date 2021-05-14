@@ -54,7 +54,23 @@ import {
   useLensDispatch,
   LensAppState,
   DispatchSetState,
-} from '../state_management/index';
+} from '../state_management';
+import { IndexPattern } from '../../../../../src/plugins/data/public';
+
+import { TableInspectorAdapter } from '../editor_frame_service/types';
+
+export interface LensAppStateLocal {
+  persistedDoc?: Document;
+  lastKnownDoc?: Document;
+
+  // index patterns used to determine which filters are available in the top nav.
+  indexPatternsForTopNav: IndexPattern[];
+  // Determines whether the lens editor shows the 'save and return' button, and the originating app breadcrumb.
+  isLinkedToOriginatingApp?: boolean;
+  isSaveable: boolean;
+  activeData?: TableInspectorAdapter;
+  isAppLoading: boolean;
+}
 
 export function App({
   history,
@@ -86,8 +102,6 @@ export function App({
     dashboardFeatureFlag,
   } = useKibana<LensAppServices>().services;
 
-  const startSession = useCallback(() => data.search.session.start(), [data.search.session]);
-
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = useCallback(
     (state: Partial<LensAppState>) => dispatch(setAppState(state)),
@@ -96,9 +110,9 @@ export function App({
 
   const appState = useLensSelector((state) => state.app);
 
-  const [state, setState] = useState<LensAppState>(() => {
+  const [state, setState] = useState<LensAppStateLocal>(() => {
     return {
-      isLoading: Boolean(initialInput),
+      isAppLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
       isLinkedToOriginatingApp: Boolean(incomingState?.originatingApp),
       isSaveable: false,
@@ -257,7 +271,7 @@ export function App({
       return;
     }
 
-    setState((s) => ({ ...s, isLoading: true }));
+    setState((s) => ({ ...s, isAppLoading: true }));
     attributeService
       .unwrapAttributes(initialInput)
       .then((attributes) => {
@@ -288,7 +302,7 @@ export function App({
             );
             setState((s) => ({
               ...s,
-              isLoading: false,
+              isAppLoading: false,
               ...(!_.isEqual(state.persistedDoc, doc) ? { persistedDoc: doc } : null),
               lastKnownDoc: doc,
               indexPatternsForTopNav: indexPatterns,
@@ -296,12 +310,12 @@ export function App({
             dispatchSetState({ query: doc.state.query });
           })
           .catch((e) => {
-            setState((s) => ({ ...s, isLoading: false }));
+            setState((s) => ({ ...s, isAppLoading: false }));
             redirectTo();
           });
       })
       .catch((e) => {
-        setState((s) => ({ ...s, isLoading: false }));
+        setState((s) => ({ ...s, isAppLoading: false }));
         notifications.toasts.addDanger(
           i18n.translate('xpack.lens.app.docLoadingError', {
             defaultMessage: 'Error loading saved document',
@@ -574,7 +588,7 @@ export function App({
           showFilterBar={true}
           indexPatterns={state.indexPatternsForTopNav}
           showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
-          savedQuery={state.savedQuery}
+          savedQuery={appState.savedQuery}
           data-test-subj="lnsApp_topNav"
           screenTitle={'lens'}
           appName={'lens'}
@@ -587,7 +601,7 @@ export function App({
             } else {
               // Query has changed, renew the session id.
               // Time change will be picked up by the time subscription
-              dispatchSetState({ searchSessionId: startSession() });
+              dispatchSetState({ searchSessionId: data.search.session.start() });
               trackUiEvent('app_query_change');
             }
             if (query) {
@@ -595,27 +609,20 @@ export function App({
             }
           }}
           onSaved={(savedQuery) => {
-            setState((s) => ({ ...s, savedQuery }));
+            dispatchSetState({ savedQuery });
           }}
           onSavedQueryUpdated={(savedQuery) => {
             const savedQueryFilters = savedQuery.attributes.filters || [];
             const globalFilters = data.query.filterManager.getGlobalFilters();
             data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
-            setState((s) => ({
-              ...s,
-              savedQuery: { ...savedQuery }, // Shallow query for reference issues
-            }));
-            dispatchSetState({ query: savedQuery.attributes.query });
+            dispatchSetState({ query: savedQuery.attributes.query, savedQuery: { ...savedQuery } }); // Shallow query for reference issues
           }}
           onClearSavedQuery={() => {
             data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
-            setState((s) => ({
-              ...s,
-              savedQuery: undefined,
-            }));
             dispatchSetState({
               filters: data.query.filterManager.getGlobalFilters(),
               query: data.query.queryString.getDefaultQuery(),
+              savedQuery: undefined,
             });
           }}
           query={appState.query}
@@ -623,7 +630,7 @@ export function App({
           dateRangeTo={toDate}
           indicateNoData={indicateNoData}
         />
-        {(!state.isLoading || state.persistedDoc) && (
+        {(!state.isAppLoading || state.persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}
             resolvedDateRange={resolvedDateRange}
@@ -636,7 +643,7 @@ export function App({
             filters={appState.filters}
             searchSessionId={appState.searchSessionId}
             isSaveable={state.isSaveable}
-            savedQuery={state.savedQuery}
+            savedQuery={appState.savedQuery}
             persistedDoc={state.persistedDoc}
             indexPatterns={state.indexPatternsForTopNav}
             activeData={activeDataRef}
@@ -646,7 +653,9 @@ export function App({
       </div>
       <SaveModal
         isVisible={isSaveModalVisible}
-        originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+        originatingApp={
+          appState.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined
+        }
         savingToLibraryPermitted={savingToLibraryPermitted}
         allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
         savedObjectsTagging={savedObjectsTagging}
@@ -700,7 +709,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   onError: (e: { message: string }) => Toast;
   showNoDataPopover: () => void;
   initialContext: VisualizeFieldContext | undefined;
-  setState: React.Dispatch<React.SetStateAction<LensAppState>>;
+  setState: React.Dispatch<React.SetStateAction<LensAppStateLocal>>;
   data: DataPublicPluginStart;
   lastKnownDoc: React.MutableRefObject<Document | undefined>;
   activeData: React.MutableRefObject<Record<string, Datatable> | undefined>;

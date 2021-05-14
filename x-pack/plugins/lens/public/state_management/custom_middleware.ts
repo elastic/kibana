@@ -7,28 +7,35 @@
 
 import { delay, finalize, switchMap, tap } from 'rxjs/operators';
 import _, { debounce } from 'lodash';
-import { appSlice } from './app_slice';
+import { Dispatch, Action } from '@reduxjs/toolkit';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
-import { waitUntilNextSessionCompletes$ } from '../../../../../src/plugins/data/public';
-import { setState } from '.';
+import {
+  waitUntilNextSessionCompletes$,
+  DataPublicPluginStart,
+} from '../../../../../src/plugins/data/public';
+import { setState, LensGetState, LensDispatch } from '.';
 
-export const customMiddleware = (data) => (store) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const customMiddleware = (data: DataPublicPluginStart) => (store: any) => {
   const unsubscribeFromExternalContext = subscribeToExternalContext(
     data,
     store.getState,
     store.dispatch
   );
-  return (next) => (action) => {
+  return (next: Dispatch) => <A extends Action>(action: A) => {
     if (action.type === 'app/navigateAway') {
       unsubscribeFromExternalContext();
     }
-
     next(action);
   };
 };
 
-function subscribeToExternalContext(data, getState, dispatch) {
+function subscribeToExternalContext(
+  data: DataPublicPluginStart,
+  getState: LensGetState,
+  dispatch: LensDispatch
+) {
   const { query: queryService, search } = data;
   const { filterManager, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
@@ -38,6 +45,7 @@ function subscribeToExternalContext(data, getState, dispatch) {
     const filters = _.isEqual(getState().app.filters, globalFilters)
       ? null
       : { filters: globalFilters };
+
     dispatch(
       setState({
         searchSessionId,
@@ -53,7 +61,7 @@ function subscribeToExternalContext(data, getState, dispatch) {
     // wait for a tick to filter/timerange subscribers the chance to update the session id in the state
     .pipe(delay(0))
     // then update if it didn't get updated yet
-    .subscribe((newSessionId: string) => {
+    .subscribe((newSessionId?: string) => {
       if (newSessionId && getState().app.searchSessionId !== newSessionId) {
         debounceDispatchFromExternal(newSessionId);
       }
@@ -67,13 +75,17 @@ function subscribeToExternalContext(data, getState, dispatch) {
   });
 
   const timeSubscription = timefilterService.getTimeUpdate$().subscribe({
-    next: debounceDispatchFromExternal,
+    next: () => {
+      debounceDispatchFromExternal();
+    },
   });
 
   const autoRefreshSubscription = timefilterService
     .getAutoRefreshFetch$()
     .pipe(
-      tap(debounceDispatchFromExternal),
+      tap(() => {
+        debounceDispatchFromExternal();
+      }),
       switchMap((done) =>
         // best way in lens to estimate that all panels are updated is to rely on search session service state
         waitUntilNextSessionCompletes$(search.session).pipe(finalize(done))

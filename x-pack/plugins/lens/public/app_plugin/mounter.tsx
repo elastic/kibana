@@ -34,7 +34,7 @@ import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actio
 import { LensAttributeService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { makeConfigureStore, navigateAway } from '../state_management/index';
+import { makeConfigureStore, navigateAway, getPreloadedState } from '../state_management';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
@@ -163,22 +163,11 @@ export async function mountApp(
     data.query.filterManager.setAppFilters([]);
   }
 
-  const preloadedState = {
-    app: {
-      query: data.query.queryString.getQuery(),
-      // Do not use app-specific filters from previous app,
-      // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-      filters: !initialContext
-        ? data.query.filterManager.getGlobalFilters()
-        : data.query.filterManager.getFilters(),
-      searchSessionId: '',
-
-      indexPatternsForTopNav: [],
-      isSaveable: false,
-      isAppLoading: false,
-      isLinkedToOriginatingApp: false,
-    },
-  };
+  const preloadedState = getPreloadedState({
+    data,
+    initialContext,
+    isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
+  });
 
   const lensStore = makeConfigureStore(preloadedState, { data });
 
