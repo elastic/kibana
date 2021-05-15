@@ -9,9 +9,7 @@
 import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import type { ElasticsearchClient } from '../../../elasticsearch';
 import { Root } from '../../../root';
 
 const logFilePath = Path.join(__dirname, 'migration_transform_failures_test_kibana.log');
@@ -60,6 +58,13 @@ describe('migration v2', () => {
           //    bar: '7.13.0',
           //  },
           // },
+          // SO that will fail transformation:
+          // {
+          //  type: 'space',
+          //  space: {},
+          // },
+          //
+          //
           dataArchive: Path.join(__dirname, 'archives', '7.13.0_transform_failures_archive.zip'),
         },
       },
