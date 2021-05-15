@@ -9,9 +9,9 @@ import { kea, MakeLogicType } from 'kea';
 
 import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
+import { recursivelyFetchEngines } from '../../utils/recursively_fetch_engines';
 import { EngineLogic } from '../engine';
 import { EngineDetails } from '../engine/types';
-import { EnginesAPIResponse } from '../engines/types';
 
 import { ADD_SOURCE_ENGINES_SUCCESS_MESSAGE, REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE } from './i18n';
 
@@ -26,43 +26,6 @@ export interface SourceEnginesLogicValues {
   selectableEngineNames: string[];
   selectedEngineNamesToAdd: string[];
 }
-
-// TODO Test this seperately from fetchSourceEngines/fetchIndexedEngines
-export const fetchEngines = (
-  path: string,
-  onComplete: (engines: EngineDetails[]) => void,
-  query = {}
-) => {
-  const { http } = HttpLogic.values;
-
-  let enginesAccumulator: EngineDetails[] = [];
-
-  // We need to recursively fetch all source engines because we put the data
-  // into an EuiInMemoryTable to enable searching
-  const recursiveFetchEngines = async (page = 1) => {
-    try {
-      const { meta, results }: EnginesAPIResponse = await http.get(path, {
-        query: {
-          'page[current]': page,
-          'page[size]': 25,
-          ...query,
-        },
-      });
-
-      enginesAccumulator = [...enginesAccumulator, ...results];
-
-      if (page >= meta.page.total_pages) {
-        onComplete(enginesAccumulator);
-      } else {
-        recursiveFetchEngines(page + 1);
-      }
-    } catch (e) {
-      flashAPIErrors(e);
-    }
-  };
-
-  recursiveFetchEngines();
-};
 
 interface SourceEnginesLogicActions {
   addSourceEngines: (sourceEngineNames: string[]) => { sourceEngineNames: string[] };
@@ -192,13 +155,16 @@ export const SourceEnginesLogic = kea<
     fetchSourceEngines: () => {
       const { engineName } = EngineLogic.values;
 
-      fetchEngines(`/api/app_search/engines/${engineName}/source_engines`, (engines) =>
-        actions.onSourceEnginesFetch(engines)
-      );
+      recursivelyFetchEngines({
+        endpoint: `/api/app_search/engines/${engineName}/source_engines`,
+        onComplete: (engines) => actions.onSourceEnginesFetch(engines),
+      });
     },
     fetchIndexedEngines: () => {
-      fetchEngines('/api/app_search/engines', (engines) => actions.setIndexedEngines(engines), {
-        type: 'indexed',
+      recursivelyFetchEngines({
+        endpoint: '/api/app_search/engines',
+        onComplete: (engines) => actions.setIndexedEngines(engines),
+        query: { type: 'indexed' },
       });
     },
     removeSourceEngine: async ({ sourceEngineName }) => {

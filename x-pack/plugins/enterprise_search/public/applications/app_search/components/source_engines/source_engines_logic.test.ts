@@ -6,6 +6,7 @@
  */
 
 import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+import { mockRecursivelyFetchEngines } from '../../__mocks__';
 import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -168,162 +169,37 @@ describe('SourceEnginesLogic', () => {
     });
 
     describe('fetchSourceEngines', () => {
-      it('calls addSourceEngines and displayRow when it has retrieved all pages', async () => {
-        http.get.mockReturnValueOnce(
-          Promise.resolve({
-            meta: {
-              page: {
-                total_pages: 1,
-              },
-            },
-            results: [{ name: 'source-engine-1' }, { name: 'source-engine-2' }],
-          })
-        );
+      it('calls onSourceEnginesFetch with all recursively fetched engines', () => {
         jest.spyOn(SourceEnginesLogic.actions, 'onSourceEnginesFetch');
 
         SourceEnginesLogic.actions.fetchSourceEngines();
-        await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/source_engines',
-          {
-            query: {
-              'page[current]': 1,
-              'page[size]': 25,
-            },
-          }
+        expect(mockRecursivelyFetchEngines).toHaveBeenCalledWith(
+          expect.objectContaining({
+            endpoint: '/api/app_search/engines/some-engine/source_engines',
+          })
         );
         expect(SourceEnginesLogic.actions.onSourceEnginesFetch).toHaveBeenCalledWith([
           { name: 'source-engine-1' },
-          { name: 'source-engine-2' },
-        ]);
-      });
-
-      it('display a flash message on error', async () => {
-        http.get.mockReturnValueOnce(Promise.reject());
-        mount();
-
-        SourceEnginesLogic.actions.fetchSourceEngines();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledTimes(1);
-      });
-
-      it('recursively fetches a number of pages', async () => {
-        mount();
-        jest.spyOn(SourceEnginesLogic.actions, 'onSourceEnginesFetch');
-
-        // First page
-        http.get.mockReturnValueOnce(
-          Promise.resolve({
-            meta: {
-              page: {
-                total_pages: 2,
-              },
-            },
-            results: [{ name: 'source-engine-1' }],
-          })
-        );
-
-        // Second and final page
-        http.get.mockReturnValueOnce(
-          Promise.resolve({
-            meta: {
-              page: {
-                total_pages: 2,
-              },
-            },
-            results: [{ name: 'source-engine-2' }],
-          })
-        );
-
-        SourceEnginesLogic.actions.fetchSourceEngines();
-        await nextTick();
-
-        expect(SourceEnginesLogic.actions.onSourceEnginesFetch).toHaveBeenCalledWith([
-          // First page
-          { name: 'source-engine-1' },
-          // Second and final page
           { name: 'source-engine-2' },
         ]);
       });
     });
 
     describe('fetchIndexedEngines', () => {
-      it('calls setIndexedEngines and displayRow when it has retrieved all pages', async () => {
-        http.get.mockReturnValueOnce(
-          Promise.resolve({
-            meta: {
-              page: {
-                total_pages: 1,
-              },
-            },
-            results: [{ name: 'source-engine-1' }, { name: 'source-engine-2' }],
-          })
-        );
+      it('calls setIndexedEngines with all recursively fetched engines', () => {
         jest.spyOn(SourceEnginesLogic.actions, 'setIndexedEngines');
 
         SourceEnginesLogic.actions.fetchIndexedEngines();
-        await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines', {
-          query: {
-            'page[current]': 1,
-            'page[size]': 25,
-            type: 'indexed',
-          },
-        });
-        expect(SourceEnginesLogic.actions.setIndexedEngines).toHaveBeenCalledWith([
-          { name: 'source-engine-1' },
-          { name: 'source-engine-2' },
-        ]);
-      });
-
-      it('display a flash message on error', async () => {
-        http.get.mockReturnValueOnce(Promise.reject());
-        mount();
-
-        SourceEnginesLogic.actions.fetchIndexedEngines();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledTimes(1);
-      });
-
-      it('recursively fetches a number of pages', async () => {
-        mount();
-        jest.spyOn(SourceEnginesLogic.actions, 'setIndexedEngines');
-
-        // First page
-        http.get.mockReturnValueOnce(
-          Promise.resolve({
-            meta: {
-              page: {
-                total_pages: 2,
-              },
-            },
-            results: [{ name: 'source-engine-1' }],
+        expect(mockRecursivelyFetchEngines).toHaveBeenCalledWith(
+          expect.objectContaining({
+            endpoint: '/api/app_search/engines',
+            query: { type: 'indexed' },
           })
         );
-
-        // Second and final page
-        http.get.mockReturnValueOnce(
-          Promise.resolve({
-            meta: {
-              page: {
-                total_pages: 2,
-              },
-            },
-            results: [{ name: 'source-engine-2' }],
-          })
-        );
-
-        SourceEnginesLogic.actions.fetchIndexedEngines();
-        await nextTick();
-
         expect(SourceEnginesLogic.actions.setIndexedEngines).toHaveBeenCalledWith([
-          // First page
           { name: 'source-engine-1' },
-          // Second and final page
           { name: 'source-engine-2' },
         ]);
       });
@@ -410,7 +286,7 @@ describe('SourceEnginesLogic', () => {
           http.post.mockReturnValueOnce(Promise.reject());
           mount();
 
-          SourceEnginesLogic.actions.fetchSourceEngines();
+          SourceEnginesLogic.actions.addSourceEngines([]);
           await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledTimes(1);
