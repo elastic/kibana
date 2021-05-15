@@ -259,47 +259,4 @@ describe('engine routes', () => {
       });
     });
   });
-
-  describe('GET /api/app_search/engines/{name}/source_engines', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/api/app_search/engines/{name}/source_engines',
-      });
-
-      registerEnginesRoutes({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('validates correctly with name', () => {
-      const request = { params: { name: 'test-engine' } };
-      mockRouter.shouldValidate(request);
-    });
-
-    it('fails validation without name', () => {
-      const request = { params: {} };
-      mockRouter.shouldThrow(request);
-    });
-
-    it('fails validation with a non-string name', () => {
-      const request = { params: { name: 1 } };
-      mockRouter.shouldThrow(request);
-    });
-
-    it('fails validation with missing query params', () => {
-      const request = { query: {} };
-      mockRouter.shouldThrow(request);
-    });
-
-    it('creates a request to enterprise search', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/:name/source_engines',
-      });
-    });
-  });
 });
