@@ -28,6 +28,7 @@ export function FieldValueCombobox({
   loading,
   values,
   setQuery,
+  compressed = true,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<ValueOption[]>(
@@ -47,7 +48,7 @@ export function FieldValueCombobox({
       <EuiFormControlLayout fullWidth prepend={label} compressed>
         <EuiComboBox
           fullWidth
-          compressed
+          compressed={compressed}
           placeholder={i18n.translate(
             'xpack.observability.fieldValueSelection.placeholder.search',
             {

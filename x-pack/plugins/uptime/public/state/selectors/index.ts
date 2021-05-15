@@ -74,17 +74,14 @@ export const selectAlertFlyoutVisibility = ({ ui: { alertFlyoutVisible } }: AppS
 
 export const selectAlertFlyoutType = ({ ui: { alertFlyoutType } }: AppState) => alertFlyoutType;
 
-export const selectMonitorStatusAlert = ({ indexPattern, overviewFilters, ui }: AppState) => ({
+export const selectMonitorStatusAlert = ({ indexPattern, ui }: AppState) => ({
   filters: ui.esKuery,
   indexPattern: indexPattern.index_pattern,
-  locations: overviewFilters.filters.locations,
 });
 
 export const indexStatusSelector = ({ indexStatus }: AppState) => indexStatus.indexStatus;
 
 export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
-
-export const overviewFiltersSelector = ({ overviewFilters }: AppState) => overviewFilters;
 
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 

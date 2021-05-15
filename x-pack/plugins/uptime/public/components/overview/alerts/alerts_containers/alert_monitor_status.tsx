@@ -8,9 +8,9 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { isRight } from 'fp-ts/lib/Either';
-import { overviewFiltersSelector, selectedFiltersSelector } from '../../../../state/selectors';
+import { selectedFiltersSelector } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../monitor_status_alert/alert_monitor_status';
-import { fetchOverviewFilters, setSearchTextAction } from '../../../../state/actions';
+import { setSearchTextAction } from '../../../../state/actions';
 import {
   AtomicStatusCheckParamsType,
   GetMonitorAvailabilityParamsType,
@@ -37,20 +37,6 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   alertParams,
 }) => {
   const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(
-      fetchOverviewFilters({
-        dateRangeStart: 'now-24h',
-        dateRangeEnd: 'now',
-        locations: alertParams.filters?.['observer.geo.name'] ?? [],
-        ports: alertParams.filters?.['url.port'] ?? [],
-        tags: alertParams.filters?.tags ?? [],
-        schemes: alertParams.filters?.['monitor.type'] ?? [],
-      })
-    );
-  }, [alertParams, dispatch]);
-
-  const overviewFilters = useSelector(overviewFiltersSelector);
 
   useEffect(() => {
     if (alertParams.search) {
@@ -91,7 +77,6 @@ export const AlertMonitorStatus: React.FC<Props> = ({
     <AlertMonitorStatusComponent
       alertParams={alertParams}
       enabled={enabled}
-      hasFilters={!!overviewFilters?.filters}
       isOldAlert={isOldAlert}
       numTimes={numTimes}
       setAlertParams={setAlertParams}

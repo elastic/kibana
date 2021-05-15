@@ -31,6 +31,7 @@ export const useValuesList = ({
 }: Props): { values: string[]; loading?: boolean } => {
   const [debouncedQuery, setDebounceQuery] = useState<string>(query);
   const [values, setValues] = useState<string[]>([]);
+  const [allLoaded, setAllLoaded] = useState(false);
 
   const { from, to } = time ?? {};
 
@@ -94,7 +95,11 @@ export const useValuesList = ({
 
   useEffect(() => {
     const newValues =
-      data?.aggregations?.values.buckets.map(({ key: value }) => value as string) ?? [];
+      data?.aggregations?.values.buckets.map(({ key: value }) => String(value)) ?? [];
+
+    if (newValues.length < 100 && !query) {
+      setAllLoaded(true);
+    }
 
     if (keepHistory && query) {
       setValues((prevState) => {

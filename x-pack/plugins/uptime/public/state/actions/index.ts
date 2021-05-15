@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './overview_filters';
 export * from './snapshot';
 export * from './ui';
 export * from './monitor_list';

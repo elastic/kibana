@@ -7,23 +7,25 @@
 
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { FilterPopover } from '../../filter_group/filter_popover';
 import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels, filterAriaLabels } from './translations';
-import { FilterExpressionsSelectProps } from './filters_expression_select_container';
-import { OverviewFiltersState } from '../../../../state/reducers/overview_filters';
+import { FieldValueSuggestions } from '../../../../../../observability/public';
+import { useIndexPattern } from '../../../../contexts/uptime_index_pattern_context';
 
-type Props = FilterExpressionsSelectProps & Pick<OverviewFiltersState, 'filters'>;
+export interface FilterExpressionsSelectProps {
+  alertParams: { [key: string]: any };
+  newFilters: string[];
+  onRemoveFilter: (val: string) => void;
+  setAlertParams: (key: string, value: any) => void;
+  shouldUpdateUrl: boolean;
+}
 
-export const FiltersExpressionsSelect: React.FC<Props> = ({
+export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = ({
   alertParams,
-  filters: overviewFilters,
   newFilters,
   onRemoveFilter,
   setAlertParams,
 }) => {
-  const { tags, ports, schemes, locations } = overviewFilters;
-
   const alertFilters = alertParams?.filters;
 
   const selectedPorts = alertFilters?.['url.port'] ?? [];
@@ -54,13 +56,11 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
 
   const monitorFilters = [
     {
-      'aria-label': filterAriaLabels.PORT,
+      ariaLabel: filterAriaLabels.PORT,
       onFilterFieldChange,
       loading: false,
       fieldName: 'url.port',
       id: 'filter_port',
-      disabled: ports?.length === 0,
-      items: ports?.map((p: number) => p.toString()) ?? [],
       selectedItems: selectedPorts,
       title: filterLabels.PORT,
       description:
@@ -68,39 +68,33 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       value: selectedPorts.length === 0 ? alertFilterLabels.ANY_PORT : selectedPorts?.join(','),
     },
     {
-      'aria-label': filterAriaLabels.TAG,
+      ariaLabel: filterAriaLabels.TAG,
       onFilterFieldChange,
       loading: false,
       fieldName: 'tags',
       id: 'filter_tags',
-      disabled: tags?.length === 0,
-      items: tags ?? [],
       selectedItems: selectedTags,
       title: filterLabels.TAG,
       description: selectedTags.length === 0 ? alertFilterLabels.WITH : alertFilterLabels.WITH_TAG,
       value: selectedTags.length === 0 ? alertFilterLabels.ANY_TAG : selectedTags?.join(','),
     },
     {
-      'aria-label': filterAriaLabels.SCHEME,
+      ariaLabel: filterAriaLabels.SCHEME,
       onFilterFieldChange,
       loading: false,
       fieldName: 'monitor.type',
       id: 'filter_scheme',
-      disabled: schemes?.length === 0,
-      items: schemes ?? [],
       selectedItems: selectedSchemes,
       title: filterLabels.SCHEME,
       description: selectedSchemes.length === 0 ? alertFilterLabels.OF : alertFilterLabels.OF_TYPE,
       value: selectedSchemes.length === 0 ? alertFilterLabels.ANY_TYPE : selectedSchemes?.join(','),
     },
     {
-      'aria-label': filterAriaLabels.LOCATION,
+      ariaLabel: filterAriaLabels.LOCATION,
       onFilterFieldChange,
       loading: false,
       fieldName: 'observer.geo.name',
       id: 'filter_location',
-      disabled: locations?.length === 0,
-      items: locations ?? [],
       selectedItems: selectedLocations,
       title: filterLabels.LOCATION,
       description:
@@ -123,43 +117,57 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
     (curr) => curr.selectedItems.length > 0 || newFilters?.includes(curr.fieldName)
   );
 
+  const indexPattern = useIndexPattern();
+
   return (
     <>
-      {filtersToDisplay.map(({ description, value, ...item }) => (
-        <EuiFlexGroup key={item.id}>
-          <EuiFlexItem>
-            <FilterPopover
-              {...item}
-              btnContent={
-                <EuiExpression
-                  aria-label={item['aria-label']}
-                  color={'secondary'}
-                  data-test-subj={'uptimeCreateStatusAlert.' + item.id}
-                  description={description}
-                  value={value}
-                  onClick={() => setIsOpen({ ...isOpen, [item.id]: !isOpen[item.id] })}
+      {filtersToDisplay.map(
+        ({ description, id, title, value, fieldName, ariaLabel, selectedItems }) => (
+          <EuiFlexGroup key={id}>
+            <EuiFlexItem>
+              {indexPattern && (
+                <FieldValueSuggestions
+                  filters={[]}
+                  indexPattern={indexPattern}
+                  sourceField={fieldName}
+                  label={title}
+                  onChange={(vals) => {
+                    onFilterFieldChange(fieldName, vals);
+                  }}
+                  selectedValue={selectedItems}
+                  button={
+                    <EuiExpression
+                      aria-label={ariaLabel}
+                      color={'secondary'}
+                      data-test-subj={'uptimeCreateStatusAlert.' + id}
+                      description={description}
+                      value={value}
+                      onClick={() => setIsOpen({ ...isOpen, [id]: !isOpen[id] })}
+                    />
+                  }
+                  forceOpen={isOpen[id]}
+                  setForceOpen={() => {
+                    setIsOpen({ ...isOpen, [id]: !isOpen[id] });
+                  }}
+                  asCombobox={false}
                 />
-              }
-              forceOpen={isOpen[item.id]}
-              setForceOpen={() => {
-                setIsOpen({ ...isOpen, [item.id]: !isOpen[item.id] });
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              aria-label={alertFilterLabels.REMOVE_FILTER_LABEL(item.title)}
-              iconType="trash"
-              color="danger"
-              onClick={() => {
-                onRemoveFilter(item.fieldName);
-                onFilterFieldChange(item.fieldName, []);
-              }}
-            />
-          </EuiFlexItem>
-          <EuiSpacer size="xs" />
-        </EuiFlexGroup>
-      ))}
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                aria-label={alertFilterLabels.REMOVE_FILTER_LABEL(title)}
+                iconType="trash"
+                color="danger"
+                onClick={() => {
+                  onRemoveFilter(fieldName);
+                  onFilterFieldChange(fieldName, []);
+                }}
+              />
+            </EuiFlexItem>
+            <EuiSpacer size="xs" />
+          </EuiFlexGroup>
+        )
+      )}
     </>
   );
 };

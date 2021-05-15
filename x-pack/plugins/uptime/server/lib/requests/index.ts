@@ -6,7 +6,6 @@
  */
 
 import { getCerts } from './get_certs';
-import { getFilterBar } from './get_filter_bar';
 import { getUptimeIndexPattern as getIndexPattern } from './get_index_pattern';
 import { getLatestMonitor } from './get_latest_monitor';
 import { getMonitorAvailability } from './get_monitor_availability';
@@ -28,7 +27,6 @@ import { getStepLastSuccessfulStep } from './get_last_successful_step';
 
 export const requests = {
   getCerts,
-  getFilterBar,
   getIndexPattern,
   getLatestMonitor,
   getMonitorAvailability,

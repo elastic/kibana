@@ -17,8 +17,11 @@ interface CommonProps {
   width?: number;
   singleSelection?: boolean;
   forceOpen?: boolean;
+  setForceOpen?: (val: boolean) => void;
   anchorPosition?: PopoverAnchorPosition;
   fullWidth?: boolean;
+  compressed?: boolean;
+  asFilterButton?: boolean;
 }
 
 export type FieldValueSuggestionsProps = CommonProps & {
