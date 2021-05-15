@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { type } from '@kbn/securitysolution-io-ts-utils';
+import { type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { RequiredKeepUndefined } from '../../types';
 import { deserializer, list_id, serializer } from '../common/schemas';

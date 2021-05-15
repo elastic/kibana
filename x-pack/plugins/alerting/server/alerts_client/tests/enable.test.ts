@@ -248,6 +248,11 @@ describe('enable()', () => {
             },
           },
         ],
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          error: null,
+        },
       },
       {
         version: '123',
@@ -352,6 +357,11 @@ describe('enable()', () => {
             },
           },
         ],
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          error: null,
+        },
       },
       {
         version: '123',
