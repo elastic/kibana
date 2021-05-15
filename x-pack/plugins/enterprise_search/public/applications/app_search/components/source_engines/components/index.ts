@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { mockEngineValues, mockEngineActions } from './engine_logic.mock';
-export { mockRecursivelyFetchEngines, mockSourceEngines } from './recursively_fetch_engines.mock';
+export { AddSourceEnginesButton } from './add_source_engines_button';
+export { AddSourceEnginesModal } from './add_source_engines_modal';
+export { SourceEnginesTable } from './source_engines_table';
