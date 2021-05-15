@@ -15,14 +15,12 @@ import { EuiButton } from '@elastic/eui';
 
 import { AddSourceEnginesButton } from './add_source_engines_button';
 
-const MOCK_ACTIONS = {
-  // SourceEnginesLogic
-  openModal: jest.fn(),
-};
-
 describe('AddSourceEnginesButton', () => {
+  const MOCK_ACTIONS = {
+    openModal: jest.fn(),
+  };
+
   it('opens the modal on click', () => {
-    jest.clearAllMocks();
     setMockActions(MOCK_ACTIONS);
 
     const wrapper = shallow(<AddSourceEnginesButton />);

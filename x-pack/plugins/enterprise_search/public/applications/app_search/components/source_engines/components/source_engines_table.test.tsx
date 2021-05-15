@@ -15,20 +15,20 @@ import { EuiInMemoryTable, EuiButtonIcon } from '@elastic/eui';
 
 import { SourceEnginesTable } from './source_engines_table';
 
-const MOCK_VALUES = {
-  // AppLogic
-  myRole: {
-    canManageMetaEngineSourceEngines: true,
-  },
-  // SourceEnginesLogic
-  sourceEngines: [{ name: 'source-engine-1', document_count: 15, field_count: 26 }],
-};
-
-const MOCK_ACTIONS = {
-  removeSourceEngine: jest.fn(),
-};
-
 describe('SourceEnginesTable', () => {
+  const MOCK_VALUES = {
+    // AppLogic
+    myRole: {
+      canManageMetaEngineSourceEngines: true,
+    },
+    // SourceEnginesLogic
+    sourceEngines: [{ name: 'source-engine-1', document_count: 15, field_count: 26 }],
+  };
+
+  const MOCK_ACTIONS = {
+    removeSourceEngine: jest.fn(),
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     setMockActions(MOCK_ACTIONS);

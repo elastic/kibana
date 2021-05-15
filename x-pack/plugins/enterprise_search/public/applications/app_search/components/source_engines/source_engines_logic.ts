@@ -132,7 +132,6 @@ export const SourceEnginesLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        // the response doesn't contain anything we care about
         await http.post(`/api/app_search/engines/${engineName}/source_engines/bulk_create`, {
           body: JSON.stringify({
             source_engine_slugs: sourceEngineNames,
@@ -172,14 +171,16 @@ export const SourceEnginesLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        // the response doesn't contain anything we care about
         await http.delete(
           `/api/app_search/engines/${engineName}/source_engines/${sourceEngineName}`
         );
 
         actions.onSourceEngineRemove(sourceEngineName);
-        EngineLogic.actions.initializeEngine();
         setSuccessMessage(REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE(sourceEngineName));
+
+        // Changing source engines can change schema conflicts and invalid boosts,
+        // so we re-initialize the engine to re-fetch that data
+        EngineLogic.actions.initializeEngine(); //
       } catch (e) {
         flashAPIErrors(e);
       }

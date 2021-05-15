@@ -16,45 +16,29 @@ import { EngineDetails } from '../engine/types';
 
 import { SourceEnginesLogic } from './source_engines_logic';
 
-jest.mock('../engines', () => ({
-  EnginesLogic: {
-    values: {
-      engines: [
-        { name: 'source-engine-1' },
-        { name: 'source-engine-2' },
-        { name: 'source-engine-3' },
-        { name: 'source-engine-4' },
-      ] as EngineDetails[],
-    },
-  },
-}));
-
-const DEFAULT_VALUES = {
-  dataLoading: true,
-  modalLoading: false,
-  isModalOpen: false,
-  indexedEngines: [],
-  indexedEngineNames: [],
-  sourceEngines: [],
-  sourceEngineNames: [],
-  selectedEngineNamesToAdd: [],
-  selectableEngineNames: [],
-};
-
 describe('SourceEnginesLogic', () => {
   const { http } = mockHttpValues;
   const { mount } = new LogicMounter(SourceEnginesLogic);
   const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
 
-  beforeEach(() => {
-    mount();
-  });
+  const DEFAULT_VALUES = {
+    dataLoading: true,
+    modalLoading: false,
+    isModalOpen: false,
+    indexedEngines: [],
+    indexedEngineNames: [],
+    sourceEngines: [],
+    sourceEngineNames: [],
+    selectedEngineNamesToAdd: [],
+    selectableEngineNames: [],
+  };
 
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('initializes with default values', () => {
+    mount();
     expect(SourceEnginesLogic.values).toEqual(DEFAULT_VALUES);
   });
 
@@ -76,81 +60,107 @@ describe('SourceEnginesLogic', () => {
       });
     });
 
-    describe('openModal opens the modal', () => {
-      mount({
-        isModalOpen: false,
+    describe('openModal', () => {
+      it('sets isModalOpen to true', () => {
+        mount({
+          isModalOpen: false,
+        });
+
+        SourceEnginesLogic.actions.openModal();
+
+        expect(SourceEnginesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isModalOpen: true,
+        });
       });
-
-      SourceEnginesLogic.actions.openModal();
-
-      expect(SourceEnginesLogic.values.isModalOpen).toEqual(true);
     });
 
-    describe('onAddEnginesSelection sets the selected engines', () => {
-      SourceEnginesLogic.actions.onAddEnginesSelection(['source-engine-1', 'source-engine-2']);
+    describe('onAddEnginesSelection', () => {
+      it('sets selectedEngineNamesToAdd to the specified value', () => {
+        mount();
 
-      expect(SourceEnginesLogic.values.selectedEngineNamesToAdd).toEqual([
-        'source-engine-1',
-        'source-engine-2',
-      ]);
+        SourceEnginesLogic.actions.onAddEnginesSelection(['source-engine-1', 'source-engine-2']);
+
+        expect(SourceEnginesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          selectedEngineNamesToAdd: ['source-engine-1', 'source-engine-2'],
+        });
+      });
     });
 
-    describe('setIndexedEngines sets the indexed engines', () => {
-      SourceEnginesLogic.actions.setIndexedEngines([
-        { name: 'source-engine-1' },
-        { name: 'source-engine-2' },
-      ] as EngineDetails[]);
+    describe('setIndexedEngines', () => {
+      it('sets indexedEngines to the specified value', () => {
+        mount();
 
-      expect(SourceEnginesLogic.values.indexedEngines).toEqual([
-        { name: 'source-engine-1' },
-        { name: 'source-engine-2' },
-      ]);
+        SourceEnginesLogic.actions.setIndexedEngines([
+          { name: 'source-engine-1' },
+          { name: 'source-engine-2' },
+        ] as EngineDetails[]);
+
+        expect(SourceEnginesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          indexedEngines: [{ name: 'source-engine-1' }, { name: 'source-engine-2' }],
+          // Selectors
+          indexedEngineNames: ['source-engine-1', 'source-engine-2'],
+          selectableEngineNames: ['source-engine-1', 'source-engine-2'],
+        });
+      });
     });
 
     describe('onSourceEnginesFetch', () => {
-      beforeEach(() => {
+      it('sets sourceEngines to the specified value and dataLoading to false', () => {
+        mount();
+
         SourceEnginesLogic.actions.onSourceEnginesFetch([
           { name: 'source-engine-1' },
           { name: 'source-engine-2' },
         ] as EngineDetails[]);
-      });
 
-      it('sets the source engines', () => {
-        expect(SourceEnginesLogic.values.sourceEngines).toEqual([
-          { name: 'source-engine-1' },
-          { name: 'source-engine-2' },
-        ]);
-      });
-
-      it('sets dataLoading to false', () => {
-        expect(SourceEnginesLogic.values.dataLoading).toEqual(false);
+        expect(SourceEnginesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          dataLoading: false,
+          sourceEngines: [{ name: 'source-engine-1' }, { name: 'source-engine-2' }],
+          // Selectors
+          sourceEngineNames: ['source-engine-1', 'source-engine-2'],
+        });
       });
     });
 
     describe('onSourceEnginesAdd', () => {
-      it('adds to existing source engines', () => {
+      it('adds to the existing sourceEngines', () => {
         mount({
           sourceEngines: [
             { name: 'source-engine-1' },
             { name: 'source-engine-2' },
           ] as EngineDetails[],
         });
+
         SourceEnginesLogic.actions.onSourceEnginesAdd([
           { name: 'source-engine-3' },
           { name: 'source-engine-4' },
         ] as EngineDetails[]);
 
-        expect(SourceEnginesLogic.values.sourceEngines).toEqual([
-          { name: 'source-engine-1' },
-          { name: 'source-engine-2' },
-          { name: 'source-engine-3' },
-          { name: 'source-engine-4' },
-        ]);
+        expect(SourceEnginesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          sourceEngines: [
+            { name: 'source-engine-1' },
+            { name: 'source-engine-2' },
+            { name: 'source-engine-3' },
+            { name: 'source-engine-4' },
+          ],
+          // Selectors
+          sourceEngineNames: [
+            'source-engine-1',
+            'source-engine-2',
+            'source-engine-3',
+            'source-engine-4',
+          ],
+        });
       });
     });
 
     describe('onSourceEngineRemove', () => {
-      it('removes an item from the existing source engines', () => {
+      it('removes an item from the existing sourceEngines', () => {
         mount({
           sourceEngines: [
             { name: 'source-engine-1' },
@@ -161,13 +171,50 @@ describe('SourceEnginesLogic', () => {
 
         SourceEnginesLogic.actions.onSourceEngineRemove('source-engine-2');
 
-        expect(SourceEnginesLogic.values.sourceEngines).toEqual([
-          { name: 'source-engine-1' },
-          { name: 'source-engine-3' },
-        ]);
+        expect(SourceEnginesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          sourceEngines: [{ name: 'source-engine-1' }, { name: 'source-engine-3' }],
+          // Selectors
+          sourceEngineNames: ['source-engine-1', 'source-engine-3'],
+        });
+      });
+    });
+  });
+
+  describe('selectors', () => {
+    describe('indexedEngineNames', () => {
+      it('returns a flat array of `indexedEngine.name`s', () => {
+        mount({
+          indexedEngines: [{ name: 'a' }, { name: 'b' }, { name: 'c' }],
+        });
+
+        expect(SourceEnginesLogic.values.indexedEngineNames).toEqual(['a', 'b', 'c']);
       });
     });
 
+    describe('sourceEngineNames', () => {
+      it('returns a flat array of `sourceEngine.name`s', () => {
+        mount({
+          sourceEngines: [{ name: 'd' }, { name: 'e' }],
+        });
+
+        expect(SourceEnginesLogic.values.sourceEngineNames).toEqual(['d', 'e']);
+      });
+    });
+
+    describe('selectableEngineNames', () => {
+      it('returns a flat list of indexedEngineNames that are not already in sourceEngineNames', () => {
+        mount({
+          indexedEngines: [{ name: 'a' }, { name: 'b' }, { name: 'c' }],
+          sourceEngines: [{ name: 'a' }, { name: 'b' }],
+        });
+
+        expect(SourceEnginesLogic.values.selectableEngineNames).toEqual(['c']);
+      });
+    });
+  });
+
+  describe('listeners', () => {
     describe('fetchSourceEngines', () => {
       it('calls onSourceEnginesFetch with all recursively fetched engines', () => {
         jest.spyOn(SourceEnginesLogic.actions, 'onSourceEnginesFetch');
@@ -217,20 +264,16 @@ describe('SourceEnginesLogic', () => {
         });
       });
 
-      describe('happy path', () => {
-        it('calls the bulkCreateLocoMocoEngineSourceEnginesPath endpoint then onSourceEnginesAdd', async () => {
+      describe('on success', () => {
+        beforeEach(() => {
+          http.post.mockReturnValue(Promise.resolve());
           mount({
-            indexedEngines: [
-              {
-                name: 'source-engine-3',
-              },
-              {
-                name: 'source-engine-4',
-              },
-            ],
+            indexedEngines: [{ name: 'source-engine-3' }, { name: 'source-engine-4' }],
           });
+        });
+
+        it('calls the bulk endpoint, adds source engines to state, and shows a success message', async () => {
           jest.spyOn(SourceEnginesLogic.actions, 'onSourceEnginesAdd');
-          http.post.mockReturnValueOnce(Promise.resolve());
 
           SourceEnginesLogic.actions.addSourceEngines(['source-engine-3', 'source-engine-4']);
           await nextTick();
@@ -242,78 +285,53 @@ describe('SourceEnginesLogic', () => {
             }
           );
           expect(SourceEnginesLogic.actions.onSourceEnginesAdd).toHaveBeenCalledWith([
-            {
-              name: 'source-engine-3',
-            },
-            {
-              name: 'source-engine-4',
-            },
+            { name: 'source-engine-3' },
+            { name: 'source-engine-4' },
           ]);
+          expect(setSuccessMessage).toHaveBeenCalledWith(
+            '2 engines have been added to this meta engine.'
+          );
         });
 
-        it('re-initializes the engine', async () => {
+        it('re-initializes the engine and closes the modal', async () => {
           jest.spyOn(EngineLogic.actions, 'initializeEngine');
-          http.post.mockReturnValueOnce(Promise.resolve());
-
-          SourceEnginesLogic.actions.addSourceEngines([]);
-          await nextTick();
-
-          expect(EngineLogic.actions.initializeEngine).toHaveBeenCalledWith();
-        });
-
-        it('shows a success message', async () => {
-          http.post.mockReturnValueOnce(Promise.resolve());
-
-          SourceEnginesLogic.actions.addSourceEngines([]);
-          await nextTick();
-
-          expect(setSuccessMessage).toHaveBeenCalledTimes(1);
-        });
-
-        it('closes the modal', async () => {
           jest.spyOn(SourceEnginesLogic.actions, 'closeModal');
-          http.post.mockReturnValueOnce(Promise.resolve());
 
           SourceEnginesLogic.actions.addSourceEngines([]);
           await nextTick();
 
+          expect(EngineLogic.actions.initializeEngine).toHaveBeenCalled();
           expect(SourceEnginesLogic.actions.closeModal).toHaveBeenCalled();
         });
       });
 
-      describe('unhappy path', () => {
-        it('display a flash message on error', async () => {
-          http.post.mockReturnValueOnce(Promise.reject());
+      describe('on error', () => {
+        beforeEach(() => {
+          http.post.mockReturnValue(Promise.reject());
           mount();
+        });
+
+        it('flashes errors and closes the modal', async () => {
+          jest.spyOn(SourceEnginesLogic.actions, 'closeModal');
 
           SourceEnginesLogic.actions.addSourceEngines([]);
           await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledTimes(1);
-        });
-
-        it('closes the modal', async () => {
-          jest.spyOn(SourceEnginesLogic.actions, 'closeModal');
-          http.post.mockReturnValueOnce(Promise.reject());
-
-          SourceEnginesLogic.actions.addSourceEngines([]);
-          await nextTick();
-
           expect(SourceEnginesLogic.actions.closeModal).toHaveBeenCalled();
         });
       });
     });
 
     describe('removeSourceEngine', () => {
-      describe('happy path', () => {
-        beforeAll(() => {
-          // setup stuff to track actions
-          SourceEnginesLogic.actions.removeSourceEngine('source-engine-2');
+      describe('on success', () => {
+        beforeEach(() => {
+          http.delete.mockReturnValue(Promise.resolve());
+          mount();
         });
 
-        it('calls the locoMocoEngineSourceEnginePath endpoint then onSourceEngineRemove', async () => {
+        it('calls the delete endpoint and removes source engines from state', async () => {
           jest.spyOn(SourceEnginesLogic.actions, 'onSourceEngineRemove');
-          http.delete.mockReturnValueOnce(Promise.resolve());
 
           SourceEnginesLogic.actions.removeSourceEngine('source-engine-2');
           await nextTick();
@@ -327,17 +345,16 @@ describe('SourceEnginesLogic', () => {
         });
 
         it('shows a success message', async () => {
-          http.delete.mockReturnValueOnce(Promise.resolve());
-
           SourceEnginesLogic.actions.removeSourceEngine('source-engine-2');
           await nextTick();
 
-          expect(setSuccessMessage).toHaveBeenCalledTimes(1);
+          expect(setSuccessMessage).toHaveBeenCalledWith(
+            'Engine source-engine-2 has been removed from this meta engine.'
+          );
         });
 
         it('re-initializes the engine', async () => {
           jest.spyOn(EngineLogic.actions, 'initializeEngine');
-          http.delete.mockReturnValueOnce(Promise.resolve());
 
           SourceEnginesLogic.actions.removeSourceEngine('source-engine-2');
           await nextTick();
@@ -346,7 +363,7 @@ describe('SourceEnginesLogic', () => {
         });
       });
 
-      it('display a flash message on error', async () => {
+      it('displays a flash message on error', async () => {
         http.delete.mockReturnValueOnce(Promise.reject());
         mount();
 
@@ -354,39 +371,6 @@ describe('SourceEnginesLogic', () => {
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledTimes(1);
-      });
-    });
-  });
-
-  describe('selectors', () => {
-    describe('indexedEngineNames', () => {
-      it('returns a flat array of `indexedEngine.name`s', () => {
-        mount({
-          indexedEngines: [{ name: 'a' }, { name: 'b' }, { name: 'c' }],
-        });
-
-        expect(SourceEnginesLogic.values.indexedEngineNames).toEqual(['a', 'b', 'c']);
-      });
-    });
-
-    describe('sourceEngineNames', () => {
-      it('returns a flat array of `sourceEngine.name`s', () => {
-        mount({
-          sourceEngines: [{ name: 'd' }, { name: 'e' }],
-        });
-
-        expect(SourceEnginesLogic.values.sourceEngineNames).toEqual(['d', 'e']);
-      });
-    });
-
-    describe('selectableEngineNames', () => {
-      it('returns a flat list of indexedEngineNames that are not already in sourceEngineNames', () => {
-        mount({
-          indexedEngines: [{ name: 'a' }, { name: 'b' }, { name: 'c' }],
-          sourceEngines: [{ name: 'a' }, { name: 'b' }],
-        });
-
-        expect(SourceEnginesLogic.values.selectableEngineNames).toEqual(['c']);
       });
     });
   });
