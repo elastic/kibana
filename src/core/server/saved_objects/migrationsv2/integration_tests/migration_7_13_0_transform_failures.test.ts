@@ -42,13 +42,12 @@ describe('migration v2', () => {
   });
 
   it('migrates the documents to the highest version', async () => {
-    const migratedIndex = `.kibana_${pkg.version}_001`;
     const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
           license: 'basic',
-          // original SO:
+          // example of original 'bar' SO:
           // {
           //  type: 'bar',
           //  bar: {
@@ -61,7 +60,6 @@ describe('migration v2', () => {
           //    bar: '7.13.0',
           //  },
           // },
-          // contains migrated index with 8.0 aliases to skip migration, but run outdated doc search
           dataArchive: Path.join(__dirname, 'archives', '7.13.0_transform_failures_archive.zip'),
         },
       },
@@ -93,28 +91,22 @@ describe('migration v2', () => {
       name: 'foo',
       hidden: false,
       mappings: {
-        properties: {
-          // name: { type: 'text' },
-          // surname: { type: 'text' },
-          // age: { type: 'number' },
-          // old: { type: 'boolean' },
-        },
+        properties: {},
       },
       namespaceType: 'agnostic',
       migrations: {
         '7.13.0': (doc) => doc,
       },
     });
-
-    const coreStart = await root.start();
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-    const migratedDocs = await fetchDocs(esClient, migratedIndex);
-
-    expect(migratedDocs.length).toBe(1);
-    const [doc] = migratedDocs;
-    expect(doc._source.migrationVersion.foo).toBe('7.14.0');
-    expect(doc._source.coreMigrationVersion).toBe('8.0.0');
+    try {
+      await root.start();
+    } catch (err) {
+      const messageString = err.message.split('Error')[0];
+      expect(messageString).toMatchInlineSnapshot(`
+        "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: Corrupt saved object documents: wkBfbXkBrZykqofUMvhC,w0BfbXkBrZykqofUPfi9,xEBfbXkBrZykqofUUPjI,xUBfbXkBrZykqofUXPit,wUBfbXkBrZykqofUFfji,1,2,3,6,5,4,10,9,8,12,11,7,13,14,15,16 Transformation errors: space:default: Document \\"default\\" has property \\"space\\" which belongs to a more recent version of Kibana [6.6.0]. The last known version is [undefined]
+         "
+      `);
+    }
   });
 });
 
@@ -124,6 +116,7 @@ function createRoot() {
       migrations: {
         skip: false,
         enableV2: true,
+        batchSize: 5,
       },
       logging: {
         appenders: {
@@ -147,23 +140,4 @@ function createRoot() {
       oss: true,
     }
   );
-}
-
-async function fetchDocs(esClient: ElasticsearchClient, index: string) {
-  const { body } = await esClient.search<any>({
-    index,
-    body: {
-      query: {
-        bool: {
-          should: [
-            {
-              term: { type: 'bar' },
-            },
-          ],
-        },
-      },
-    },
-  });
-
-  return body.hits.hits;
 }
