@@ -134,6 +134,20 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     }
   }, [params, currentDocIndex, getFieldPreview, notifications.toasts]);
 
+  const goToNextDoc = useCallback(() => {
+    if (navDocsIndex >= totalDocs - 1) {
+      return;
+    }
+    setNavDocsIndex((prev) => prev + 1);
+  }, [navDocsIndex, totalDocs]);
+
+  const goToPrevDoc = useCallback(() => {
+    if (navDocsIndex === 0) {
+      return;
+    }
+    setNavDocsIndex((prev) => prev - 1);
+  }, [navDocsIndex]);
+
   const ctx = useMemo<Context>(
     () => ({
       fields: previewResponse.fields,
@@ -143,11 +157,19 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       navigation: {
         isFirstDoc: navDocsIndex === 0,
         isLastDoc: navDocsIndex >= totalDocs - 1,
-        next: () => setNavDocsIndex((prev) => prev + 1),
-        prev: () => setNavDocsIndex((prev) => prev - 1),
+        next: goToNextDoc,
+        prev: goToPrevDoc,
       },
     }),
-    [previewResponse, updateParams, currentDocument, navDocsIndex, totalDocs]
+    [
+      previewResponse,
+      updateParams,
+      currentDocument,
+      navDocsIndex,
+      totalDocs,
+      goToNextDoc,
+      goToPrevDoc,
+    ]
   );
 
   useDebounce(
