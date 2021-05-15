@@ -21,6 +21,7 @@ import {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '../../../lists_plugin_deps';
+import { TestProviders } from '../../mock';
 import {
   useAddOrUpdateException,
   UseAddOrUpdateExceptionProps,
@@ -133,12 +134,16 @@ describe('useAddOrUpdateException', () => {
 
     addOrUpdateItemsArgs = [ruleId, itemsToAddOrUpdate];
     render = () =>
-      renderHook<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>(() =>
-        useAddOrUpdateException({
-          http: mockKibanaHttpService,
-          onError,
-          onSuccess,
-        })
+      renderHook<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>(
+        () =>
+          useAddOrUpdateException({
+            http: mockKibanaHttpService,
+            onError,
+            onSuccess,
+          }),
+        {
+          wrapper: TestProviders,
+        }
       );
   });
 
