@@ -14,10 +14,11 @@ import {
   TooltipInfo,
 } from '@elastic/charts';
 import { EuiInMemoryTable } from '@elastic/eui';
-import { EuiFieldText } from '@elastic/eui';
+import { Query } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
+import { EuiSearchBar } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import {
-  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -25,7 +26,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { find, sumBy } from 'lodash';
+import { find, keyBy, compact } from 'lodash';
 import { rgba } from 'polished';
 import React, { useMemo, useState } from 'react';
 import seedrandom from 'seedrandom';
@@ -33,7 +34,6 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { useChartTheme } from '../../../../../observability/public';
 import {
   getValueTypeConfig,
-  ProfileNode,
   ProfilingValueType,
   ProfilingValueTypeUnit,
 } from '../../../../common/profiling';
@@ -42,18 +42,12 @@ import {
   asDynamicBytes,
   asInteger,
 } from '../../../../common/utils/formatters';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { px, unit } from '../../../style/variables';
 
 const colors = euiPaletteForTemperature(100).slice(50, 85);
-
-interface ProfileDataPoint {
-  id: string;
-  value: number;
-  depth: number;
-  layers: Record<string, string>;
-}
 
 const TooltipContainer = euiStyled.div`
   background-color: ${(props) => props.theme.eui.euiColorDarkestShade};
@@ -83,18 +77,25 @@ const formatValue = (
 
 function CustomTooltip({
   values,
-  nodes,
+  locations,
   valueUnit,
 }: TooltipInfo & {
-  nodes: Record<string, ProfileNode>;
+  locations: Record<
+    string,
+    { filename?: string; function: string; fqn: string }
+  >;
   valueUnit: ProfilingValueTypeUnit;
 }) {
   const first = values[0];
 
-  const foundNode = find(nodes, (node) => node.label === first.label);
+  const foundNode = find(
+    locations,
+    (location) => location.function === first.label
+  );
 
   const label = foundNode?.fqn ?? first.label;
-  const value = formatValue(first.value, valueUnit) + first.formattedValue;
+  const formattedValue =
+    formatValue(first.value, valueUnit) + first.formattedValue;
 
   return (
     <TooltipContainer>
@@ -112,12 +113,17 @@ function CustomTooltip({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" style={{ fontWeight: 500 }}>
-            {value}
+            {formattedValue}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </TooltipContainer>
   );
+}
+
+enum QueryMode {
+  highlight = 'highlight',
+  show = 'show',
 }
 
 export function ServiceProfilingFlamegraph({
@@ -137,8 +143,16 @@ export function ServiceProfilingFlamegraph({
 }) {
   const theme = useTheme();
 
-  const [collapseSimilarFrames, setCollapseSimilarFrames] = useState(true);
-  const [highlightFilter, setHighlightFilter] = useState('');
+  const {
+    core: { notifications },
+  } = useApmPluginContext();
+
+  const [query, setQuery] = useState<Query | string>('');
+
+  const [queryMode, setQueryMode] = useState<QueryMode>(QueryMode.show);
+
+  const highlightQuery = queryMode === QueryMode.highlight ? query : undefined;
+  const showQuery = queryMode === QueryMode.show ? query : undefined;
 
   const { data } = useFetcher(
     (callApmApi) => {
@@ -165,112 +179,127 @@ export function ServiceProfilingFlamegraph({
     [kuery, start, end, environment, serviceName, valueType]
   );
 
-  const points = useMemo(() => {
+  const hydrated = useMemo(() => {
     if (!data) {
-      return [];
+      return undefined;
     }
-
-    const { rootNodes, nodes } = data;
-
-    const getDataPoints = (
-      node: ProfileNode,
-      depth: number
-    ): ProfileDataPoint[] => {
-      const { children } = node;
-
-      if (!children.length) {
-        // edge
-        return [
-          {
-            id: node.id,
-            value: node.value,
-            depth,
-            layers: {
-              [depth]: node.id,
-            },
-          },
-        ];
-      }
-
-      const directChildNodes = children.map((childId) => nodes[childId]);
-
-      const shouldCollapse =
-        collapseSimilarFrames &&
-        node.value === 0 &&
-        directChildNodes.length === 1 &&
-        directChildNodes[0].value === 0;
-
-      const nextDepth = shouldCollapse ? depth : depth + 1;
-
-      const childDataPoints = children.flatMap((childId) =>
-        getDataPoints(nodes[childId], nextDepth)
-      );
-
-      if (!shouldCollapse) {
-        childDataPoints.forEach((point) => {
-          point.layers[depth] = node.id;
-        });
-      }
-
-      const totalTime = sumBy(childDataPoints, 'value');
-      const selfTime = node.value - totalTime;
-
-      if (selfTime === 0) {
-        return childDataPoints;
-      }
-
-      return [
-        ...childDataPoints,
-        {
-          id: '',
-          value: selfTime,
-          layers: { [nextDepth]: '' },
-          depth,
-        },
-      ];
-    };
 
     const root = {
-      id: 'root',
-      label: 'root',
+      function: 'root',
       fqn: 'root',
-      children: rootNodes,
-      value: 0,
+      total: 0,
+      self: 0,
     };
 
-    nodes.root = root;
+    const { frames, locations, samples } = data;
 
-    return getDataPoints(root, 0);
-  }, [data, collapseSimilarFrames]);
+    const locationsWithFqns = locations.map((location) => {
+      const fqn = [
+        location.filename,
+        [location.function, location.line].filter(Boolean).join(':'),
+      ].join('/');
+      return {
+        ...location,
+        total: 0,
+        self: 0,
+        fqn,
+      };
+    });
+
+    const locationsByFqn = keyBy(
+      locationsWithFqns.concat(root),
+      (location) => location.fqn
+    );
+
+    const hydratedSamples = samples.map((sample) => {
+      return {
+        ...sample,
+        frames: sample.frames.map((frameRef) => {
+          return locationsWithFqns[frames[frameRef]];
+        }),
+      };
+    });
+
+    hydratedSamples.forEach((sample) => {
+      const top = sample.frames[0];
+      top.self += sample.value;
+      sample.frames.forEach((frame) => {
+        frame.total += sample.value;
+      });
+    });
+
+    return {
+      locations: locationsByFqn,
+      samples: hydratedSamples,
+    };
+  }, [data]);
+
+  const points = useMemo(() => {
+    return compact(
+      hydrated?.samples.map((sample) => {
+        const visibleFrames =
+          showQuery && showQuery.toString()
+            ? EuiSearchBar.Query.execute(showQuery, sample.frames)
+            : sample.frames;
+
+        const top = visibleFrames[0];
+
+        if (!top) {
+          return;
+        }
+
+        const depth = visibleFrames.length;
+
+        return {
+          id: top.fqn,
+          value: sample.value,
+          depth,
+          layers: visibleFrames.reduce(
+            (prev, current, index, array) => {
+              prev[depth - index] = current.fqn;
+              return prev;
+            },
+            {
+              '0': 'root',
+            } as Record<string, string>
+          ),
+        };
+      }) ?? []
+    );
+  }, [hydrated, showQuery]);
 
   const layers = useMemo(() => {
-    if (!data || !points.length) {
+    if (!hydrated || !points.length) {
       return [];
     }
 
-    const { nodes } = data;
+    const { locations } = hydrated;
 
-    const maxDepth = Math.max(...points.map((point) => point.depth));
+    const maxDepth = Math.min(
+      Math.max(...points.map((point) => point.depth)),
+      25
+    );
 
     return [...new Array(maxDepth)].map((_, depth) => {
       return {
         groupByRollup: (d: Datum) => d.layers[depth],
         nodeLabel: (id: PrimitiveValue) => {
-          if (nodes[id!]) {
-            return nodes[id!].label;
+          if (locations[id!]) {
+            return locations[id!].function;
           }
           return '';
         },
         showAccessor: (id: PrimitiveValue) => !!id,
         shape: {
           fillColor: (d: { dataName: string }) => {
-            const node = nodes[d.dataName];
+            const location = locations[d.dataName];
 
-            if (
-              !node ||
-              // TODO: apply highlight to entire stack, not just node
-              (highlightFilter && !node.fqn.includes(highlightFilter))
-            ) {
+            const isHighlighted =
+              !highlightQuery ||
+              !highlightQuery.toString() ||
+              EuiSearchBar.Query.execute(highlightQuery, [location]).length > 0;
+
+            if (!isHighlighted) {
               return rgba(0, 0, 0, 0.25);
             }
 
@@ -281,7 +310,7 @@ export function ServiceProfilingFlamegraph({
         },
       };
     });
-  }, [points, highlightFilter, data]);
+  }, [points, hydrated, highlightQuery]);
 
   const chartTheme = useChartTheme();
 
@@ -290,13 +319,14 @@ export function ServiceProfilingFlamegraph({
     width: '100%',
   };
 
-  const items = Object.values(data?.nodes ?? {}).filter((node) =>
-    highlightFilter ? node.fqn.includes(highlightFilter) : true
-  );
-
   const valueUnit = valueType
     ? getValueTypeConfig(valueType).unit
     : ProfilingValueTypeUnit.count;
+
+  const items = EuiSearchBar.Query.execute(
+    query,
+    Object.values(hydrated?.locations ?? {})
+  );
 
   return (
     <EuiFlexGroup direction="row">
@@ -309,7 +339,7 @@ export function ServiceProfilingFlamegraph({
                 <CustomTooltip
                   {...info}
                   valueUnit={valueUnit}
-                  nodes={data?.nodes ?? {}}
+                  locations={hydrated?.locations ?? {}}
                 />
               ),
             }}
@@ -335,39 +365,62 @@ export function ServiceProfilingFlamegraph({
           />
         </Chart>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: px(unit * 24) }}>
+      <EuiFlexItem grow={false} style={{ width: px(unit * 32) }}>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiCheckbox
-              id="collapse_similar_frames"
-              checked={collapseSimilarFrames}
-              onChange={() => {
-                setCollapseSimilarFrames((state) => !state);
-              }}
-              label={i18n.translate(
-                'xpack.apm.profiling.collapseSimilarFrames',
-                {
-                  defaultMessage: 'Collapse similar',
-                }
-              )}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFieldText
-              placeholder={i18n.translate(
-                'xpack.apm.profiling.highlightFrames',
-                { defaultMessage: 'Search' }
-              )}
-              onChange={(e) => {
-                if (!e.target.value) {
-                  setHighlightFilter('');
+            <EuiSearchBar
+              onChange={({ query: nextQuery, queryText, error }) => {
+                if (nextQuery) {
+                  setQuery(nextQuery);
+                } else {
+                  notifications.toasts.addWarning(
+                    error?.message ?? 'Error parsing query'
+                  );
+                  setQuery(queryText);
                 }
               }}
-              onKeyPress={(e) => {
-                if (e.charCode === 13) {
-                  setHighlightFilter(() => (e.target as any).value);
-                }
+              query={query}
+              box={{
+                placeholder: '-function:"(program)"',
+                schema: {
+                  fields: {
+                    function: {
+                      type: 'string',
+                    },
+                    filename: {
+                      type: 'string',
+                    },
+                    fqn: {
+                      type: 'string',
+                    },
+                  },
+                },
               }}
+              toolsRight={
+                <EuiSelect
+                  compressed
+                  value={queryMode}
+                  onChange={(e) => {
+                    setQueryMode((e.target.value as unknown) as QueryMode);
+                  }}
+                  options={[
+                    {
+                      value: QueryMode.highlight,
+                      text: i18n.translate(
+                        'xpack.apm.profiling.queryMode.highlight',
+                        { defaultMessage: 'Highlight' }
+                      ),
+                    },
+                    {
+                      value: QueryMode.show,
+                      text: i18n.translate(
+                        'xpack.apm.profiling.queryMode.show',
+                        { defaultMessage: 'Show' }
+                      ),
+                    },
+                  ]}
+                />
+              }
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -375,7 +428,7 @@ export function ServiceProfilingFlamegraph({
               items={items}
               sorting={{
                 sort: {
-                  field: 'value',
+                  field: 'self',
                   direction: 'desc',
                 },
               }}
@@ -394,18 +447,28 @@ export function ServiceProfilingFlamegraph({
                   render: (_, item) => {
                     return (
                       <EuiToolTip content={item.fqn}>
-                        <span>{item.label}</span>
+                        <span>{item.function}</span>
                       </EuiToolTip>
                     );
                   },
                 },
                 {
-                  field: 'value',
-                  name: i18n.translate('xpack.apm.profiling.table.value', {
+                  field: 'self',
+                  name: i18n.translate('xpack.apm.profiling.table.self', {
                     defaultMessage: 'Self',
                   }),
-                  render: (_, item) => formatValue(item.value, valueUnit),
+                  render: (_, item) => formatValue(item.self, valueUnit),
                   width: px(unit * 6),
+                  sortable: true,
+                },
+                {
+                  field: 'total',
+                  name: i18n.translate('xpack.apm.profiling.table.total', {
+                    defaultMessage: 'Total',
+                  }),
+                  render: (_, item) => formatValue(item.total, valueUnit),
+                  width: px(unit * 6),
+                  sortable: true,
                 },
               ]}
             />

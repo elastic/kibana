@@ -32,12 +32,14 @@ export enum ProfilingValueTypeUnit {
   bytes = 'bytes',
 }
 
-export interface ProfileNode {
-  id: string;
-  label: string;
+export interface ProfilingLocation {
   fqn: string;
+}
+
+export interface ProfilingSample {
   value: number;
-  children: string[];
+  fqn: string;
+  stack: string[];
 }
 
 const config = {
