@@ -92,7 +92,10 @@ export const getPageLoadDistBreakdown = async ({
 
   const { apmEventClient } = setup;
 
-  const { aggregations } = await apmEventClient.search(params);
+  const { aggregations } = await apmEventClient.search(
+    params,
+    'get_page_load_dist_breakdown'
+  );
 
   const pageDistBreakdowns = aggregations?.breakdowns.buckets;
 

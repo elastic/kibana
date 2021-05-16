@@ -117,7 +117,7 @@ export async function getPageLoadDistribution({
   const {
     aggregations,
     hits: { total },
-  } = await apmEventClient.search(params);
+  } = await apmEventClient.search(params, 'get_page_load_distribution');
 
   if (total.value === 0) {
     return null;
@@ -210,7 +210,7 @@ const getPercentilesDistribution = async ({
 
   const { apmEventClient } = setup;
 
-  const { aggregations } = await apmEventClient.search(params);
+  const { aggregations } = await apmEventClient.search(params, 'get_');
 
   return aggregations?.loadDistribution.values ?? [];
 };

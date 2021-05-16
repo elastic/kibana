@@ -64,7 +64,10 @@ export async function getTransactionErrorRateChartPreview({
     body: { size: 0, query, aggs },
   };
 
-  const resp = await apmEventClient.search(params);
+  const resp = await apmEventClient.search(
+    params,
+    'get_transaction_error_rate_chart_preview'
+  );
 
   if (!resp.aggregations) {
     return [];

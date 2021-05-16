@@ -64,7 +64,7 @@ export async function getLongTaskMetrics({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(params, 'get_long_task_metrics');
 
   const pkey = percentile.toFixed(1);
 

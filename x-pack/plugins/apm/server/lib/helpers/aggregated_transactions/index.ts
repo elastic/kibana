@@ -14,7 +14,6 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getHasAggregatedTransactions({
   start,
@@ -25,8 +24,8 @@ export async function getHasAggregatedTransactions({
   end?: number;
   apmEventClient: APMEventClient;
 }) {
-  return withApmSpan('get_has_aggregated_transactions', async () => {
-    const response = await apmEventClient.search({
+  const response = await apmEventClient.search(
+    {
       apm: {
         events: [ProcessorEvent.metric],
       },
@@ -41,14 +40,15 @@ export async function getHasAggregatedTransactions({
         },
       },
       terminateAfter: 1,
-    });
+    },
+    'get_has_aggregated_transactions'
+  );
 
-    if (response.hits.total.value > 0) {
-      return true;
-    }
+  if (response.hits.total.value > 0) {
+    return true;
+  }
 
-    return false;
-  });
+  return false;
 }
 
 export async function getSearchAggregatedTransactions({

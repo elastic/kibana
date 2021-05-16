@@ -8,7 +8,6 @@
 import { ESFilter } from '../../../../../../../typings/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getDurationForPercentile({
@@ -20,9 +19,9 @@ export async function getDurationForPercentile({
   filters: ESFilter[];
   setup: Setup & SetupTimeRange;
 }) {
-  return withApmSpan('get_duration_for_percentiles', async () => {
-    const { apmEventClient } = setup;
-    const res = await apmEventClient.search({
+  const { apmEventClient } = setup;
+  const res = await apmEventClient.search(
+    {
       apm: {
         events: [ProcessorEvent.transaction],
       },
@@ -40,11 +39,10 @@ export async function getDurationForPercentile({
           },
         },
       },
-    });
+    },
+    'get_duration_for_percentiles'
+  );
 
-    const duration = Object.values(
-      res.aggregations?.percentile.values || {}
-    )[0];
-    return duration || 0;
-  });
+  const duration = Object.values(res.aggregations?.percentile.values || {})[0];
+  return duration || 0;
 }

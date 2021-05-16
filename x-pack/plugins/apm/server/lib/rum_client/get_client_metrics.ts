@@ -63,7 +63,7 @@ export async function getClientMetrics({
   });
 
   const { apmEventClient } = setup;
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(params, 'get_client_metrics');
   const {
     hasFetchStartField: { backEnd, totalPageLoadDuration },
   } = response.aggregations!;

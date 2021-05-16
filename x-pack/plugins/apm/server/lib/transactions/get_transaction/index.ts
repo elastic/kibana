@@ -13,9 +13,8 @@ import { rangeQuery } from '../../../../server/utils/queries';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
-export function getTransaction({
+export async function getTransaction({
   transactionId,
   traceId,
   setup,
@@ -24,10 +23,10 @@ export function getTransaction({
   traceId: string;
   setup: Setup & SetupTimeRange;
 }) {
-  return withApmSpan('get_transaction', async () => {
-    const { start, end, apmEventClient } = setup;
+  const { start, end, apmEventClient } = setup;
 
-    const resp = await apmEventClient.search({
+  const resp = await apmEventClient.search(
+    {
       apm: {
         events: [ProcessorEvent.transaction],
       },
@@ -43,8 +42,9 @@ export function getTransaction({
           },
         },
       },
-    });
+    },
+    'get_transaction'
+  );
 
-    return resp.hits.hits[0]?._source;
-  });
+  return resp.hits.hits[0]?._source;
 }

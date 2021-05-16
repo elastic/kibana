@@ -38,8 +38,8 @@ export const getDestinationMap = ({
   return withApmSpan('get_service_destination_map', async () => {
     const { start, end, apmEventClient } = setup;
 
-    const response = await withApmSpan('get_exit_span_samples', async () =>
-      apmEventClient.search({
+    const response = await apmEventClient.search(
+      {
         apm: {
           events: [ProcessorEvent.span],
         },
@@ -86,7 +86,8 @@ export const getDestinationMap = ({
             },
           },
         },
-      })
+      },
+      'get_exit_span_samples'
     );
 
     const outgoingConnections =
@@ -103,38 +104,37 @@ export const getDestinationMap = ({
         };
       }) ?? [];
 
-    const transactionResponse = await withApmSpan(
-      'get_transactions_for_exit_spans',
-      () =>
-        apmEventClient.search({
-          apm: {
-            events: [ProcessorEvent.transaction],
-          },
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      [PARENT_ID]: outgoingConnections.map(
-                        (connection) => connection[SPAN_ID]
-                      ),
-                    },
+    const transactionResponse = await apmEventClient.search(
+      {
+        apm: {
+          events: [ProcessorEvent.transaction],
+        },
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    [PARENT_ID]: outgoingConnections.map(
+                      (connection) => connection[SPAN_ID]
+                    ),
                   },
-                  ...rangeQuery(start, end),
-                ],
-              },
+                },
+                ...rangeQuery(start, end),
+              ],
             },
-            size: outgoingConnections.length,
-            docvalue_fields: asMutableArray([
-              SERVICE_NAME,
-              SERVICE_ENVIRONMENT,
-              AGENT_NAME,
-              PARENT_ID,
-            ] as const),
-            _source: false,
           },
-        })
+          size: outgoingConnections.length,
+          docvalue_fields: asMutableArray([
+            SERVICE_NAME,
+            SERVICE_ENVIRONMENT,
+            AGENT_NAME,
+            PARENT_ID,
+          ] as const),
+          _source: false,
+        },
+      },
+      'get_transactions_for_exit_spans'
     );
 
     const incomingConnections = transactionResponse.hits.hits.map((hit) => ({

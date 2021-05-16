@@ -103,7 +103,7 @@ export async function getWebCoreVitals({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(params, 'get_web_core_vitals');
   const {
     lcp,
     cls,

@@ -6,6 +6,7 @@
  */
 
 import { ValuesType } from 'utility-types';
+import { withApmSpan } from '../../../../utils/with_apm_span';
 import { Profile } from '../../../../../typings/es_schemas/ui/profile';
 import {
   ElasticsearchClient,
@@ -79,9 +80,16 @@ export function createApmEventClient({
   return {
     async search<TParams extends APMEventESSearchRequest>(
       params: TParams,
-      { includeLegacyData = false } = {}
+      optionsOrOperationName:
+        | string
+        | { includeLegacyData?: boolean; operationName: string }
     ): Promise<TypedSearchResponse<TParams>> {
       const withProcessorEventFilter = unpackProcessorEvents(params, indices);
+
+      const { includeLegacyData = false, operationName } =
+        typeof optionsOrOperationName === 'string'
+          ? { operationName: optionsOrOperationName }
+          : optionsOrOperationName ?? {};
 
       const withPossibleLegacyDataFilter = !includeLegacyData
         ? addFilterToExcludeLegacyData(withProcessorEventFilter)
@@ -98,9 +106,9 @@ export function createApmEventClient({
 
       return callAsyncWithDebug({
         cb: () => {
-          const searchPromise = cancelEsRequestOnAbort(
-            esClient.search(searchParams),
-            request
+          const searchPromise = withApmSpan(
+            { name: operationName, intercept: true },
+            () => cancelEsRequestOnAbort(esClient.search(searchParams), request)
           );
 
           return unwrapEsResponse(searchPromise);

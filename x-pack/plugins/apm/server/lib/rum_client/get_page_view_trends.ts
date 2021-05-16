@@ -69,7 +69,7 @@ export async function getPageViewTrends({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(params, 'get_page_view_trends');
 
   const { topBreakdowns } = response.aggregations ?? {};
 

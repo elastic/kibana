@@ -89,48 +89,47 @@ export async function getBuckets({
       ] as QueryDslQueryContainer[];
 
       async function getSamplesForDistributionBuckets() {
-        const response = await withApmSpan(
-          'get_samples_for_latency_distribution_buckets',
-          () =>
-            apmEventClient.search({
-              apm: {
-                events: [ProcessorEvent.transaction],
-              },
-              body: {
-                query: {
-                  bool: {
-                    filter: [
-                      ...commonFilters,
-                      { term: { [TRANSACTION_SAMPLED]: true } },
-                    ],
-                    should: [
-                      { term: { [TRACE_ID]: traceId } },
-                      { term: { [TRANSACTION_ID]: transactionId } },
-                    ] as QueryDslQueryContainer[],
-                  },
+        const response = await apmEventClient.search(
+          {
+            apm: {
+              events: [ProcessorEvent.transaction],
+            },
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    ...commonFilters,
+                    { term: { [TRANSACTION_SAMPLED]: true } },
+                  ],
+                  should: [
+                    { term: { [TRACE_ID]: traceId } },
+                    { term: { [TRANSACTION_ID]: transactionId } },
+                  ] as QueryDslQueryContainer[],
                 },
-                aggs: {
-                  distribution: {
-                    histogram: getHistogramAggOptions({
-                      bucketSize,
-                      field: TRANSACTION_DURATION,
-                      distributionMax,
-                    }),
-                    aggs: {
-                      samples: {
-                        top_hits: {
-                          _source: [TRANSACTION_ID, TRACE_ID],
-                          size: 10,
-                          sort: {
-                            _score: 'desc' as const,
-                          },
+              },
+              aggs: {
+                distribution: {
+                  histogram: getHistogramAggOptions({
+                    bucketSize,
+                    field: TRANSACTION_DURATION,
+                    distributionMax,
+                  }),
+                  aggs: {
+                    samples: {
+                      top_hits: {
+                        _source: [TRANSACTION_ID, TRACE_ID],
+                        size: 10,
+                        sort: {
+                          _score: 'desc' as const,
                         },
                       },
                     },
                   },
                 },
               },
-            })
+            },
+          },
+          'get_samples_for_latency_distribution_buckets'
         );
 
         return (
@@ -148,41 +147,40 @@ export async function getBuckets({
       }
 
       async function getDistributionBuckets() {
-        const response = await withApmSpan(
-          'get_latency_distribution_buckets',
-          () =>
-            apmEventClient.search({
-              apm: {
-                events: [
-                  getProcessorEventForAggregatedTransactions(
-                    searchAggregatedTransactions
-                  ),
-                ],
-              },
-              body: {
-                query: {
-                  bool: {
-                    filter: [
-                      ...commonFilters,
-                      ...getDocumentTypeFilterForAggregatedTransactions(
-                        searchAggregatedTransactions
-                      ),
-                    ],
-                  },
-                },
-                aggs: {
-                  distribution: {
-                    histogram: getHistogramAggOptions({
-                      field: getTransactionDurationFieldForAggregatedTransactions(
-                        searchAggregatedTransactions
-                      ),
-                      bucketSize,
-                      distributionMax,
-                    }),
-                  },
+        const response = await apmEventClient.search(
+          {
+            apm: {
+              events: [
+                getProcessorEventForAggregatedTransactions(
+                  searchAggregatedTransactions
+                ),
+              ],
+            },
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    ...commonFilters,
+                    ...getDocumentTypeFilterForAggregatedTransactions(
+                      searchAggregatedTransactions
+                    ),
+                  ],
                 },
               },
-            })
+              aggs: {
+                distribution: {
+                  histogram: getHistogramAggOptions({
+                    field: getTransactionDurationFieldForAggregatedTransactions(
+                      searchAggregatedTransactions
+                    ),
+                    bucketSize,
+                    distributionMax,
+                  }),
+                },
+              },
+            },
+          },
+          'get_latency_distribution_buckets'
         );
 
         return (

@@ -51,6 +51,7 @@ Array [
         "size": 0,
       },
     },
+    "get_error_distribution_buckets",
   ],
 ]
 `;

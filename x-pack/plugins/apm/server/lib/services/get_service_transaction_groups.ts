@@ -18,7 +18,6 @@ import {
   rangeQuery,
   kqlQuery,
 } from '../../../server/utils/queries';
-import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -56,14 +55,14 @@ export async function getServiceTransactionGroups({
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  return withApmSpan('get_service_transaction_groups', async () => {
-    const { apmEventClient, start, end } = setup;
+  const { apmEventClient, start, end } = setup;
 
-    const field = getTransactionDurationFieldForAggregatedTransactions(
-      searchAggregatedTransactions
-    );
+  const field = getTransactionDurationFieldForAggregatedTransactions(
+    searchAggregatedTransactions
+  );
 
-    const response = await apmEventClient.search({
+  const response = await apmEventClient.search(
+    {
       apm: {
         events: [
           getProcessorEventForAggregatedTransactions(
@@ -110,45 +109,46 @@ export async function getServiceTransactionGroups({
           },
         },
       },
-    });
+    },
+    'get_service_transaction_groups'
+  );
 
-    const totalDuration = response.aggregations?.total_duration.value;
+  const totalDuration = response.aggregations?.total_duration.value;
 
-    const transactionGroups =
-      response.aggregations?.transaction_groups.buckets.map((bucket) => {
-        const errorRate = calculateTransactionErrorPercentage(
-          bucket[EVENT_OUTCOME]
-        );
+  const transactionGroups =
+    response.aggregations?.transaction_groups.buckets.map((bucket) => {
+      const errorRate = calculateTransactionErrorPercentage(
+        bucket[EVENT_OUTCOME]
+      );
 
-        const transactionGroupTotalDuration =
-          bucket.transaction_group_total_duration.value || 0;
+      const transactionGroupTotalDuration =
+        bucket.transaction_group_total_duration.value || 0;
 
-        return {
-          name: bucket.key as string,
-          latency: getLatencyValue({
-            latencyAggregationType,
-            aggregation: bucket.latency,
-          }),
-          throughput: calculateThroughput({
-            start,
-            end,
-            value: bucket.doc_count,
-          }),
-          errorRate,
-          impact: totalDuration
-            ? (transactionGroupTotalDuration * 100) / totalDuration
-            : 0,
-        };
-      }) ?? [];
+      return {
+        name: bucket.key as string,
+        latency: getLatencyValue({
+          latencyAggregationType,
+          aggregation: bucket.latency,
+        }),
+        throughput: calculateThroughput({
+          start,
+          end,
+          value: bucket.doc_count,
+        }),
+        errorRate,
+        impact: totalDuration
+          ? (transactionGroupTotalDuration * 100) / totalDuration
+          : 0,
+      };
+    }) ?? [];
 
-    return {
-      transactionGroups: transactionGroups.map((transactionGroup) => ({
-        ...transactionGroup,
-        transactionType,
-      })),
-      isAggregationAccurate:
-        (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) ===
-        0,
-    };
-  });
+  return {
+    transactionGroups: transactionGroups.map((transactionGroup) => ({
+      ...transactionGroup,
+      transactionType,
+    })),
+    isAggregationAccurate:
+      (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) ===
+      0,
+  };
 }

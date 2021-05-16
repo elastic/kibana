@@ -38,7 +38,7 @@ export async function getRumServices({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(params, 'get_rum_services');
 
   const result = response.aggregations?.services.buckets ?? [];
 
