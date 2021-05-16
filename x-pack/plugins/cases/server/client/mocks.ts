@@ -31,6 +31,7 @@ export const createExternalCasesClientMock = (): CasesClientPluginContractMock =
   getUserActions: jest.fn(),
   update: jest.fn(),
   updateAlertsStatus: jest.fn(),
+  getCaseIdsByAlertId: jest.fn(),
 });
 
 export const createCasesClientWithMockSavedObjectsClient = async ({

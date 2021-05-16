@@ -41,7 +41,7 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
     <FlexGroup direction="column" gutterSize="xs">
       {reportTypes.map(({ id: reportType, label }) => (
         <EuiFlexItem key={reportType}>
-          <EuiButton
+          <Button
             fullWidth
             size="s"
             iconSide="right"
@@ -67,7 +67,7 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
             }}
           >
             {label}
-          </EuiButton>
+          </Button>
         </EuiFlexItem>
       ))}
     </FlexGroup>
@@ -83,4 +83,8 @@ export const SELECTED_DATA_TYPE_FOR_REPORT = i18n.translate(
 
 const FlexGroup = styled(EuiFlexGroup)`
   width: 100%;
+`;
+
+const Button = styled(EuiButton)`
+  will-change: transform;
 `;
