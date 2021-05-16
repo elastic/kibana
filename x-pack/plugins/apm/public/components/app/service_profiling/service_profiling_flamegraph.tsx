@@ -356,6 +356,9 @@ export function ServiceProfilingFlamegraph({
                 clipText: true,
               },
               drilldown: true,
+              animation: {
+                duration: 500,
+              },
               fontFamily: theme.eui.euiCodeFontFamily,
               minFontSize: 9,
               maxFontSize: 9,
