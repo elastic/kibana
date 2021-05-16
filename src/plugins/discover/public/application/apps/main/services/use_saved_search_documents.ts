@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { validateTimeRange } from '../utils/validate_time_range';
-import { fetchStatuses } from '../../../components/constants';
 import { IndexPattern, ISearchSource } from '../../../../kibana_services';
 import { updateSearchSource } from '../utils/update_search_source';
 import { DiscoverServices } from '../../../../build_services';
@@ -20,43 +19,31 @@ export function useSavedSearchDocuments({
   services,
   stateContainer,
   useNewFieldsApi,
-  volatileSearchSource,
-  shouldSearchOnPageLoad,
+  searchSource,
 }: {
   services: DiscoverServices;
   indexPattern: IndexPattern;
   useNewFieldsApi: boolean;
-  volatileSearchSource: ISearchSource;
+  searchSource: ISearchSource;
   stateContainer: GetStateReturn;
-  shouldSearchOnPageLoad: () => boolean;
 }) {
-  const [fetchStatus, setFetchStatus] = useState(
-    shouldSearchOnPageLoad() ? fetchStatuses.LOADING : fetchStatuses.UNINITIALIZED
-  );
-  const [fetchCounter, setFetchCounter] = useState(0);
-  const [fetchError, setFetchError] = useState(undefined);
-
   const fetch = useCallback(
     (abortController: AbortController, searchSessionId: string, inspector: IInspectorInfo) => {
-      setFetchCounter(fetchCounter + 1);
-      setFetchError(undefined);
-
       if (!validateTimeRange(services.timefilter.getTime(), services.toastNotifications)) {
         return Promise.reject();
       }
 
       const { sort } = stateContainer.appStateContainer.getState();
       updateSearchSource({
-        volatileSearchSource,
+        volatileSearchSource: searchSource.getParent(),
         indexPattern,
         services,
         sort: sort as SortOrder[],
         useNewFieldsApi,
         showUnmappedFields: useNewFieldsApi,
       });
-      setFetchStatus(fetchStatuses.LOADING);
 
-      return volatileSearchSource
+      return searchSource
         .fetch$({
           abortSignal: abortController.signal,
           sessionId: searchSessionId,
@@ -64,30 +51,16 @@ export function useSavedSearchDocuments({
         })
         .toPromise()
         .then(({ rawResponse }) => {
-          setFetchStatus(fetchStatuses.COMPLETE);
           return rawResponse.hits.hits;
         })
         .catch((error) => {
           // If the request was aborted then no need to surface this error in the UI
           if (error instanceof Error && error.name === 'AbortError') return;
-          setFetchStatus(fetchStatuses.ERROR);
-          setFetchError(error);
-          services.data.search.showError(error);
         });
     },
-    [
-      fetchCounter,
-      indexPattern,
-      services,
-      stateContainer.appStateContainer,
-      useNewFieldsApi,
-      volatileSearchSource,
-    ]
+    [indexPattern, services, stateContainer.appStateContainer, useNewFieldsApi, searchSource]
   );
   return {
-    fetchStatus,
-    fetchError,
-    fetchCounter,
     fetch,
   };
 }

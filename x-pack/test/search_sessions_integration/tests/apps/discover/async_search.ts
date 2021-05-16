@@ -43,6 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       await testSubjects.existOrFail('discoverNoResultsError'); // expect error because of fake searchSessionId
+      await PageObjects.common.clearAllToasts();
       const searchSessionId1 = await getSearchSessionId();
       expect(searchSessionId1).to.be(fakeSearchSessionId);
       await queryBar.clickQuerySubmitButton();
