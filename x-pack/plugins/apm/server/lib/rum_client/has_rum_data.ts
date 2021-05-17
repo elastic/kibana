@@ -14,7 +14,11 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeQuery } from '../../../server/utils/queries';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
-export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
+export async function hasRumData({
+  setup,
+}: {
+  setup: Setup & Partial<SetupTimeRange>;
+}) {
   try {
     const { start, end } = setup;
 
