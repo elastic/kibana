@@ -64,7 +64,8 @@ export function isColumnInvalid(
   const operationErrorMessages = operationDefinition.getErrorMessage?.(
     layer,
     columnId,
-    indexPattern
+    indexPattern,
+    operationDefinitionMap
   );
 
   return (operationErrorMessages && operationErrorMessages.length > 0) || referencesHaveErrors;
@@ -78,7 +79,12 @@ function getReferencesErrors(
   return column.references?.map((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
     const referencedDefinition = operationDefinitionMap[referencedOperation];
-    return referencedDefinition?.getErrorMessage?.(layer, referenceId, indexPattern);
+    return referencedDefinition?.getErrorMessage?.(
+      layer,
+      referenceId,
+      indexPattern,
+      operationDefinitionMap
+    );
   });
 }
 

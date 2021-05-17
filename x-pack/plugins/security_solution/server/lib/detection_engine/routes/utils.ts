@@ -25,6 +25,9 @@ export interface OutputError {
   statusCode: number;
 }
 
+/**
+ * @deprecated Use kbn-securitysolution-es-utils version
+ */
 export const transformError = (err: Error & Partial<errors.ResponseError>): OutputError => {
   if (Boom.isBoom(err)) {
     return {
@@ -364,6 +367,9 @@ export const getFailingRules = async (
         };
       }, {});
   } catch (exc) {
+    if (Boom.isBoom(exc)) {
+      throw exc;
+    }
     throw new Error(`Failed to get executionStatus with AlertsClient: ${exc.message}`);
   }
 };

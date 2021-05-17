@@ -193,7 +193,7 @@ export const getDetectionRuleMetrics = async (
     filterPath: [],
     ignoreUnavailable: true,
     index: kibanaIndex,
-    size: 1,
+    size: 10_000, // elasticsearch index.max_result_window default value
   };
 
   try {
