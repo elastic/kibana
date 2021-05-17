@@ -54,14 +54,37 @@ export function getInvalidFieldMessage(
         operationDefinition.getPossibleOperationForField(field) !== undefined
       )
   );
-  return isInvalid
-    ? [
-        i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
-          defaultMessage: 'Field {invalidField} was not found',
-          values: { invalidField: sourceField },
+
+  const isWrongType = Boolean(
+    sourceField &&
+      operationDefinition &&
+      field &&
+      !operationDefinition.isTransferable(
+        column as IndexPatternColumn,
+        indexPattern,
+        operationDefinitionMap
+      )
+  );
+  if (isInvalid) {
+    if (isWrongType) {
+      return [
+        i18n.translate('xpack.lens.indexPattern.fieldWrongType', {
+          defaultMessage: 'Field {invalidField} is of the wrong type',
+          values: {
+            invalidField: sourceField,
+          },
         }),
-      ]
-    : undefined;
+      ];
+    }
+    return [
+      i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
+        defaultMessage: 'Field {invalidField} was not found',
+        values: { invalidField: sourceField },
+      }),
+    ];
+  }
+
+  return undefined;
 }
 
 export function getSafeName(name: string, indexPattern: IndexPattern): string {
@@ -99,4 +122,19 @@ export function getFormatFromPreviousColumn(previousColumn: IndexPatternColumn |
     previousColumn.params.format
     ? { format: previousColumn.params.format }
     : undefined;
+}
+
+export function getFilter(
+  previousColumn: IndexPatternColumn | undefined,
+  columnParams: { kql?: string | undefined; lucene?: string | undefined } | undefined
+) {
+  let filter = previousColumn?.filter;
+  if (columnParams) {
+    if ('kql' in columnParams) {
+      filter = { query: columnParams.kql ?? '', language: 'kuery' };
+    } else if ('lucene' in columnParams) {
+      filter = { query: columnParams.lucene ?? '', language: 'lucene' };
+    }
+  }
+  return filter;
 }
