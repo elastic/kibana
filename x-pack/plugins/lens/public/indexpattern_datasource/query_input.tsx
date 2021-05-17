@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern } from './types';
 import { QueryStringInput, Query } from '../../../../../src/plugins/data/public';
