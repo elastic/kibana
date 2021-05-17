@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntriesArray } from '@kbn/securitysolution-io-ts-utils';
+import { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
 export const hasLargeValueList = (entries: EntriesArray): boolean => {
   const found = entries.filter(({ type }) => type === 'list');
