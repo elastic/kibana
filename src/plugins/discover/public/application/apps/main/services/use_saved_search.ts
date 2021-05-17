@@ -140,7 +140,7 @@ export const useSavedSearch = ({
       requests.push(fetchHits(abortControllerRef.current, searchSessionId, inspector));
       savedSearch$.next({
         state: fetchStatuses.LOADING,
-        fetchCounter: cache.current.fetchCounter++,
+        fetchCounter: ++cache.current.fetchCounter,
       });
 
       Promise.all(requests)
