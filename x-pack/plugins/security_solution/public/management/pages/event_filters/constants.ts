@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import { ExceptionListType, ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  ExceptionListType,
-  ExceptionListTypeEnum,
   EXCEPTION_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -23,5 +22,12 @@ export const EVENT_FILTER_LIST = {
   list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
   type: EVENT_FILTER_LIST_TYPE,
 };
+
+export const SEARCHABLE_FIELDS: Readonly<string[]> = [
+  `name`,
+  `entries.value`,
+  `entries.entries.value`,
+  `comments.comment`,
+];
 
 export { ENDPOINT_EVENT_FILTERS_LIST_ID, EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL };
