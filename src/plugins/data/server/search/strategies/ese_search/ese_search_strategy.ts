@@ -40,7 +40,7 @@ export const enhancedEsSearchStrategyProvider = (
   logger: Logger,
   usage?: SearchUsage,
   useInternalUser: boolean = false
-): ISearchStrategy<IEsSearchRequest> => {
+): ISearchStrategy => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     try {
       const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;

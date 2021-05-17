@@ -16,6 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/98974
   describe.skip('dynamic options', () => {
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
+
     describe('without chained controls', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('visualize');

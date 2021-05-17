@@ -115,26 +115,25 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     );
 
     const exceptionBuilderComponentMemo = useMemo(
-      () => (
-        <ExceptionBuilder.ExceptionBuilderComponent
-          allowLargeValueLists
-          httpService={http}
-          autocompleteService={data.autocomplete}
-          exceptionListItems={[exception as ExceptionListItemSchema]}
-          listType={EVENT_FILTER_LIST_TYPE}
-          listId={ENDPOINT_EVENT_FILTERS_LIST_ID}
-          listNamespaceType={'agnostic'}
-          ruleName={RULE_NAME}
-          indexPatterns={indexPatterns}
-          isOrDisabled={true} // TODO: pending to be validated
-          isAndDisabled={false}
-          isNestedDisabled={false}
-          data-test-subj="alert-exception-builder"
-          id-aria="alert-exception-builder"
-          onChange={handleOnBuilderChange}
-          listTypeSpecificIndexPatternFilter={filterIndexPatterns}
-        />
-      ),
+      () =>
+        ExceptionBuilder.getExceptionBuilderComponentLazy({
+          allowLargeValueLists: true,
+          httpService: http,
+          autocompleteService: data.autocomplete,
+          exceptionListItems: [exception as ExceptionListItemSchema],
+          listType: EVENT_FILTER_LIST_TYPE,
+          listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          listNamespaceType: 'agnostic',
+          ruleName: RULE_NAME,
+          indexPatterns,
+          isOrDisabled: true, // TODO: pending to be validated
+          isAndDisabled: false,
+          isNestedDisabled: false,
+          dataTestSubj: 'alert-exception-builder',
+          idAria: 'alert-exception-builder',
+          onChange: handleOnBuilderChange,
+          listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+        }),
       [data, handleOnBuilderChange, http, indexPatterns, exception]
     );
 
