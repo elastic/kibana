@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { transformError } from '@kbn/securitysolution-es-utils';
+import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type {
   AppClient,
@@ -25,7 +25,6 @@ import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 
-import { getIndexExists } from '../../index/get_index_exists';
 import { getLatestPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { installPrepackagedRules } from '../../rules/install_prepacked_rules';
 import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';

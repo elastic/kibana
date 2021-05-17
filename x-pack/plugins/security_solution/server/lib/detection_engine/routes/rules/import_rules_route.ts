@@ -10,7 +10,7 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { createPromiseFromStreams } from '@kbn/utils';
 
-import { transformError } from '@kbn/securitysolution-es-utils';
+import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   importRulesQuerySchema,
@@ -30,7 +30,6 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
 import { readRules } from '../../rules/read_rules';
-import { getIndexExists } from '../../index/get_index_exists';
 import {
   createBulkErrorObject,
   ImportRuleResponse,

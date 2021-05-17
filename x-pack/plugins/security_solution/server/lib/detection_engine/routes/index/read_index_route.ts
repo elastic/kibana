@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
+import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 
 import { buildSiemResponse } from '../utils';
-import { getIndexExists } from '../../index/get_index_exists';
 import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';

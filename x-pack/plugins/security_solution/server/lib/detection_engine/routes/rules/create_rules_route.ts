@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
+import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -13,7 +13,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
-import { getIndexExists } from '../../index/get_index_exists';
 import { buildSiemResponse } from '../utils';
 
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
