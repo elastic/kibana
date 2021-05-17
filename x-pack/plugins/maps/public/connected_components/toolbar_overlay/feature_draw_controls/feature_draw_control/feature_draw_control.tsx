@@ -15,7 +15,7 @@ import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_f
 export interface Props {
   cancelDraw: () => void;
   drawType: string;
-  updateCompletedShape: (shapeToDraw: DRAW_TYPE) => void;
+  setDrawShape: (shapeToDraw: DRAW_TYPE) => void;
   pointsOnly?: boolean;
 }
 
@@ -38,7 +38,7 @@ export function FeatureDrawControl(props: Props) {
               >
                 <EuiButtonIcon
                   size="s"
-                  onClick={() => props.updateCompletedShape(DRAW_TYPE.LINE)}
+                  onClick={() => props.setDrawShape(DRAW_TYPE.LINE)}
                   iconType="minus"
                   aria-label={i18n.translate(
                     'xpack.maps.toolbarOverlay.featureDraw.drawLineLabel',
@@ -61,7 +61,7 @@ export function FeatureDrawControl(props: Props) {
               >
                 <EuiButtonIcon
                   size="s"
-                  onClick={() => props.updateCompletedShape(DRAW_TYPE.POLYGON)}
+                  onClick={() => props.setDrawShape(DRAW_TYPE.POLYGON)}
                   iconType="node"
                   aria-label={i18n.translate(
                     'xpack.maps.toolbarOverlay.featureDraw.drawPolygonLabel',
@@ -84,7 +84,7 @@ export function FeatureDrawControl(props: Props) {
               >
                 <EuiButtonIcon
                   size="s"
-                  onClick={() => props.updateCompletedShape(DRAW_TYPE.DISTANCE)}
+                  onClick={() => props.setDrawShape(DRAW_TYPE.DISTANCE)}
                   iconType="plusInCircle"
                   aria-label={i18n.translate(
                     'xpack.maps.toolbarOverlay.featureDraw.drawCircleLabel',
@@ -107,7 +107,7 @@ export function FeatureDrawControl(props: Props) {
               >
                 <EuiButtonIcon
                   size="s"
-                  onClick={() => props.updateCompletedShape(DRAW_TYPE.BOUNDS)}
+                  onClick={() => props.setDrawShape(DRAW_TYPE.BOUNDS)}
                   iconType="stop"
                   aria-label={i18n.translate(
                     'xpack.maps.toolbarOverlay.featureDraw.drawBBoxLabel',
@@ -132,7 +132,7 @@ export function FeatureDrawControl(props: Props) {
           >
             <EuiButtonIcon
               size="s"
-              onClick={() => props.updateCompletedShape(DRAW_TYPE.POINT)}
+              onClick={() => props.setDrawShape(DRAW_TYPE.POINT)}
               iconType="dot"
               aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPointLabel', {
                 defaultMessage: 'Draw point',

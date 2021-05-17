@@ -15,7 +15,7 @@ import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import {
   getVisibilityToggleIcon,
   getVisibilityToggleLabel,
-  EDIT_LAYER_LABEL,
+  LAYER_SETTINGS_LABEL,
   FIT_TO_DATA_LABEL,
 } from './action_labels';
 import { ILayer } from '../../../../../classes/layers/layer';
@@ -196,11 +196,11 @@ export class TOCEntry extends Component<Props, State> {
     if (!this.props.isReadOnly) {
       quickActions.push(
         <EuiButtonIcon
-          key="edit"
+          key="settings"
           isDisabled={this.props.isEditButtonDisabled}
-          iconType="pencil"
-          aria-label={EDIT_LAYER_LABEL}
-          title={EDIT_LAYER_LABEL}
+          iconType="gear"
+          aria-label={LAYER_SETTINGS_LABEL}
+          title={LAYER_SETTINGS_LABEL}
           onClick={this._openLayerPanelWithCheck}
         />
       );
@@ -277,7 +277,7 @@ export class TOCEntry extends Component<Props, State> {
           layer={layer}
           displayName={this.state.displayName}
           escapedDisplayName={escapeLayerName(this.state.displayName)}
-          editLayer={this._openLayerPanelWithCheck}
+          layerSettings={this._openLayerPanelWithCheck}
           isEditButtonDisabled={this.props.isEditButtonDisabled}
           supportsFitToBounds={this.state.supportsFitToBounds}
         />

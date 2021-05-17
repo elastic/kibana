@@ -48,12 +48,14 @@ import {
   UPDATE_MAP_SETTING,
   SET_VECTOR_LAYER_INDEX_NAME,
   REMOVE_FEATURES_FROM_INDEX_QUEUE,
+  UPDATE_EDIT_LAYER,
 } from './map_action_constants';
 import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import {
   DrawState,
+  EditState,
   MapCenter,
   MapCenterAndZoom,
   MapExtent,
@@ -334,6 +336,18 @@ export function updateDrawState(drawState: DrawState | null) {
     dispatch({
       type: UPDATE_DRAW_STATE,
       drawState,
+    });
+  };
+}
+
+export function updateEditLayer(layerId: string | null) {
+  return (dispatch: Dispatch) => {
+    if (layerId !== null) {
+      dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] }); // tooltips just get in the way
+    }
+    dispatch({
+      type: UPDATE_EDIT_LAYER,
+      layerId,
     });
   };
 }

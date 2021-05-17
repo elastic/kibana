@@ -198,7 +198,7 @@ export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
   map.mapState.drawState;
 
 export const getShapeToDraw = ({ map }: MapStoreState): DRAW_TYPE | undefined =>
-  map.mapState.shapeToDraw;
+  map.mapState.editState ? map.mapState.editState.drawType : undefined;
 
 export const getRefreshConfig = ({ map }: MapStoreState): MapRefreshConfig => {
   if (map.mapState.refreshConfig) {

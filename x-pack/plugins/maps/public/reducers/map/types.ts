@@ -10,6 +10,7 @@
 import { Feature } from 'geojson';
 import {
   DrawState,
+  EditState,
   Goto,
   LayerDescriptor,
   MapCenter,
@@ -38,7 +39,7 @@ export type MapContext = {
   refreshTimerLastTriggeredAt?: string;
   vectorLayerIndexName: string;
   drawState?: DrawState;
-  shapeToDraw?: DRAW_TYPE;
+  editState?: EditState;
   featuresToIndexQueue: Feature[];
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;

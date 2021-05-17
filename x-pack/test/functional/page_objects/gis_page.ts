@@ -311,7 +311,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
     async openLayerPanel(layerName: string) {
       log.debug(`Open layer panel, layer: ${layerName}`);
       await this.openLayerTocActionsPanel(layerName);
-      await testSubjects.click('editLayerButton');
+      await testSubjects.click('layerSettingsButton');
     }
 
     async closeLayerPanel() {

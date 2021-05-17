@@ -50,6 +50,7 @@ import {
   SET_VECTOR_LAYER_INDEX_NAME,
   CLEAR_DRAWING_DATA,
   REMOVE_FEATURES_FROM_INDEX_QUEUE,
+  UPDATE_EDIT_LAYER,
 } from '../../actions';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -83,7 +84,7 @@ export const DEFAULT_MAP_STATE: MapState = {
     refreshTimerLastTriggeredAt: undefined,
     vectorLayerIndexName: '',
     drawState: undefined,
-    shapeToDraw: undefined,
+    editState: undefined,
     featuresToIndexQueue: [],
   },
   selectedLayerId: null,
@@ -103,12 +104,26 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
           drawState: action.drawState,
         },
       };
+    case UPDATE_EDIT_LAYER:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          editState: {
+            ...state.mapState.editState,
+            editLayer: action.editLayer,
+          },
+        },
+      };
     case SET_SHAPE_TO_DRAW:
       return {
         ...state,
         mapState: {
           ...state.mapState,
-          shapeToDraw: action.shapeToDraw,
+          editState: {
+            ...state.mapState.editState,
+            drawType: action.shapeToDraw,
+          },
         },
       };
     case REMOVE_FEATURES_FROM_INDEX_QUEUE:

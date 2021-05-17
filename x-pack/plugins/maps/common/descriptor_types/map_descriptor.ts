@@ -77,3 +77,8 @@ export type DrawState = {
   indexPatternTitle?: string;
   relation?: ES_SPATIAL_RELATIONS;
 };
+
+export type EditState = {
+  layerId: string;
+  drawType?: DRAW_TYPE;
+};

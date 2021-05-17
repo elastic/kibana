@@ -14,14 +14,16 @@ import { TOCEntryButton } from '../toc_entry_button';
 import {
   getVisibilityToggleIcon,
   getVisibilityToggleLabel,
-  EDIT_LAYER_LABEL,
+  LAYER_SETTINGS_LABEL,
   FIT_TO_DATA_LABEL,
+  EDIT_FEATURES_LABEL,
 } from '../action_labels';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
+  enableLayerEditing: (layerId: string) => void;
   displayName: string;
-  editLayer: () => void;
+  layerSettings: () => void;
   escapedDisplayName: string;
   fitToBounds: (layerId: string) => void;
   isEditButtonDisabled: boolean;
@@ -96,16 +98,30 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       },
     ];
 
+    // TODO: Make conditional
+    actionItems.push({
+      // TODO: Determine
+      disabled: false,
+      name: EDIT_FEATURES_LABEL,
+      icon: <EuiIcon type="pencil" size="m" />,
+      'data-test-subj': 'editLayerButton',
+      toolTipContent: null,
+      onClick: () => {
+        this._closePopover();
+        this.props.enableLayerEditing(this.props.layer.getId());
+      },
+    });
+
     if (!this.props.isReadOnly) {
       actionItems.push({
         disabled: this.props.isEditButtonDisabled,
-        name: EDIT_LAYER_LABEL,
-        icon: <EuiIcon type="pencil" size="m" />,
-        'data-test-subj': 'editLayerButton',
+        name: LAYER_SETTINGS_LABEL,
+        icon: <EuiIcon type="gear" size="m" />,
+        'data-test-subj': 'layerSettingsButton',
         toolTipContent: null,
         onClick: () => {
           this._closePopover();
-          this.props.editLayer();
+          this.props.layerSettings();
         },
       });
       actionItems.push({

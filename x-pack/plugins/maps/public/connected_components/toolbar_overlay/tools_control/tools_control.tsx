@@ -38,10 +38,6 @@ const DRAW_DISTANCE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawDistan
   defaultMessage: 'Draw distance to filter data',
 });
 
-const ADD_FEATURES_LABEL = i18n.translate('xpack.maps.toolbarOverlay.editFeaturesLabel', {
-  defaultMessage: 'Add features to index',
-});
-
 const DRAW_SHAPE_LABEL_SHORT = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabelShort', {
   defaultMessage: 'Draw shape',
 });
@@ -54,13 +50,6 @@ const DRAW_DISTANCE_LABEL_SHORT = i18n.translate(
   'xpack.maps.toolbarOverlay.drawDistanceLabelShort',
   {
     defaultMessage: 'Draw distance',
-  }
-);
-
-const ADD_FEATURES_LABEL_SHORT = i18n.translate(
-  'xpack.maps.toolbarOverlay.editFeaturesLabelShort',
-  {
-    defaultMessage: 'Add features',
   }
 );
 
@@ -172,10 +161,6 @@ export class ToolsControl extends Component<Props, State> {
         name: DRAW_DISTANCE_LABEL,
         panel: 3,
       },
-      {
-        name: ADD_FEATURES_LABEL,
-        panel: 4,
-      },
     ];
 
     return [
@@ -237,17 +222,6 @@ export class ToolsControl extends Component<Props, State> {
             getFilterActions={this.props.getFilterActions}
             getActionContext={this.props.getActionContext}
             onSubmit={this._initiateDistanceDraw}
-          />
-        ),
-      },
-      {
-        id: 4,
-        title: ADD_FEATURES_LABEL_SHORT,
-        content: (
-          <IndexGeometrySelectPopoverForm
-            className="mapDrawControl__geometryFilterForm"
-            geoFields={this.props.geoFields}
-            onSubmit={this._initiateFeatureEdit}
           />
         ),
       },
