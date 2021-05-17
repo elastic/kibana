@@ -157,6 +157,7 @@ export class ReportingStore {
     const client = await this.getClient();
     try {
       if (await this.doesIlmPolicyExist()) {
+        this.logger.debug(`Found ILM policy ${this.ilmPolicyName}; skipping creation.`);
         return;
       }
       this.logger.debug(
