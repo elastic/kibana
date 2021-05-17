@@ -73,6 +73,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./service_overview/instances_detailed_statistics'));
     });
 
+    describe('service_overview/instance_details', function () {
+      loadTestFile(require.resolve('./service_overview/instance_details'));
+    });
+
     // Services
     describe('services/agent_name', function () {
       loadTestFile(require.resolve('./services/agent_name'));

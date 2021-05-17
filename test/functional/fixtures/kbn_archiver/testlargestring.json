@@ -1,0 +1,17 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "title": "testlargestring"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "testlargestring",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2021-04-14T20:35:29.121Z",
+  "version": "WzExLDJd"
+}

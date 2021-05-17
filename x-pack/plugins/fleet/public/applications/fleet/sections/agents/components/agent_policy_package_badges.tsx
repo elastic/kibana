@@ -6,8 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiCallOut } from '@elastic/eui';
+
+import { FLEET_SERVER_PACKAGE } from '../../../../../../common/constants';
 
 import type { PackagePolicy, PackagePolicyPackage } from '../../../types';
 import { useGetOneAgentPolicy } from '../../../hooks';
@@ -16,11 +19,13 @@ import { PackageIcon } from '../../../components/package_icon';
 interface Props {
   agentPolicyId: string;
   hideTitle?: boolean;
+  excludeFleetServer?: boolean;
 }
 
 export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
   agentPolicyId,
   hideTitle,
+  excludeFleetServer,
 }) => {
   const agentPolicyRequest = useGetOneAgentPolicy(agentPolicyId);
   const agentPolicy = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
@@ -45,6 +50,19 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
     return [...uniquePackages.values()];
   }, [agentPolicy]);
 
+  const showFleetServerWarning = useMemo(
+    () => excludeFleetServer && packages?.some((pkg) => pkg.name === FLEET_SERVER_PACKAGE),
+    [packages, excludeFleetServer]
+  );
+
+  const collectedIntegrationsCount = useMemo(
+    () =>
+      packages
+        ? packages.filter((pkg) => !excludeFleetServer || pkg.name !== FLEET_SERVER_PACKAGE).length
+        : 0,
+    [packages, excludeFleetServer]
+  );
+
   if (!agentPolicy || !packages) {
     return null;
   }
@@ -58,8 +76,8 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
               id="xpack.fleet.agentReassignPolicy.policyDescription"
               defaultMessage="The selected agent policy will collect data for {count, plural, one {{countValue} integration} other {{countValue} integrations}}:"
               values={{
-                count: packages.length,
-                countValue: <b>{packages.length}</b>,
+                count: collectedIntegrationsCount,
+                countValue: <b>{collectedIntegrationsCount}</b>,
               }}
             />
           </EuiText>
@@ -68,16 +86,47 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
       )}
       {packages.map((pkg, idx) => {
         return (
-          <EuiBadge key={idx} color="hollow">
+          <EuiBadge
+            key={idx}
+            color="hollow"
+            isDisabled={excludeFleetServer && pkg.name === FLEET_SERVER_PACKAGE}
+          >
             <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
-                <PackageIcon packageName={pkg.name} version={pkg.version} size="s" tryApi={true} />
+                <PackageIcon
+                  packageName={pkg.name}
+                  version={pkg.version}
+                  tryApi={true}
+                  style={
+                    // when a custom SVG is used the logo is rendered with <img class="euiIcon euiIcon--small">
+                    // this collides with some EuiText (+img) CSS from the EuiIcon component
+                    // which  makes the button large, wide, and poorly layed out
+                    // override those styles until the bug is fixed or we find a better approach
+                    { margin: 'unset', width: '16px' }
+                  }
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{pkg.title}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiBadge>
         );
       })}
+      {showFleetServerWarning && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="alert"
+            title={i18n.translate(
+              'xpack.fleet.agentReassignPolicy.packageBadgeFleetServerWarning',
+              {
+                defaultMessage: 'Fleet Server will not be enabled in standalone mode.',
+              }
+            )}
+          />
+        </>
+      )}
     </>
   );
 };

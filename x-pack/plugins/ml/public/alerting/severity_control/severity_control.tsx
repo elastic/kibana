@@ -67,7 +67,7 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
         value={value ?? ANOMALY_THRESHOLD.LOW}
         onChange={(e) => {
           // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
-          onChange(e.target.value);
+          onChange(Number(e.target.value));
         }}
         showLabels
         showValue

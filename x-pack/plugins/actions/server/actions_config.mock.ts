@@ -21,6 +21,7 @@ const createActionsConfigMock = () => {
       maxContentLength: 1000000,
       timeout: 360000,
     }),
+    getCustomHostSettings: jest.fn().mockReturnValue(undefined),
   };
   return mocked;
 };

@@ -58,8 +58,8 @@ export class TelemetrySender {
     this.isSending = true;
     try {
       const telemetryUrl = this.telemetryService.getTelemetryUrl();
-      const telemetryData: any | any[] = await this.telemetryService.fetchTelemetry();
-      const clusters: string[] = [].concat(telemetryData);
+      const telemetryData: string | string[] = await this.telemetryService.fetchTelemetry();
+      const clusters: string[] = ([] as string[]).concat(telemetryData);
       await Promise.all(
         clusters.map(
           async (cluster) =>

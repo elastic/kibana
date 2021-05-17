@@ -83,7 +83,7 @@ const indexPattern = ({
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
-indexPattern.formatField = (hit: Record<string, any>, fieldName: string) => {
+indexPattern.formatField = (hit: Record<string, unknown>, fieldName: string) => {
   return fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
 };
 

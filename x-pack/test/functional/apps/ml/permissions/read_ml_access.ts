@@ -300,7 +300,7 @@ export default function ({ getService }: FtrProviderContext) {
               'should display enabled DFA job view and action menu'
             );
             await ml.dataFrameAnalyticsTable.assertJobRowViewButtonEnabled(dfaJobId, true);
-            await ml.dataFrameAnalyticsTable.assertJowRowActionsMenuButtonEnabled(dfaJobId, true);
+            await ml.dataFrameAnalyticsTable.assertJobRowActionsMenuButtonEnabled(dfaJobId, true);
             await ml.dataFrameAnalyticsTable.assertJobActionViewButtonEnabled(dfaJobId, true);
 
             await ml.testExecution.logTestStep(

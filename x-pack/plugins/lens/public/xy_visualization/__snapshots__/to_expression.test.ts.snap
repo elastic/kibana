@@ -58,6 +58,9 @@ Object {
             "type": "expression",
           },
         ],
+        "hideEndzones": Array [
+          true,
+        ],
         "layers": Array [
           Object {
             "chain": Array [

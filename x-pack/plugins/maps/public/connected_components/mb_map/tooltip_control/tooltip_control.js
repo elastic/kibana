@@ -7,8 +7,17 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { FEATURE_ID_PROPERTY_NAME, LON_INDEX } from '../../../../common/constants';
+import { i18n } from '@kbn/i18n';
+import uuid from 'uuid/v4';
+import {
+  ES_GEO_FIELD_TYPE,
+  FEATURE_ID_PROPERTY_NAME,
+  GEO_JSON_TYPE,
+  LON_INDEX,
+} from '../../../../common/constants';
+import { GEOMETRY_FILTER_ACTION } from '../../../../common/descriptor_types';
 import { TooltipPopover } from './tooltip_popover';
+import { FeatureGeometryFilterForm } from '../features_tooltip';
 import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../classes/util/mb_filter_expressions';
 
 function justifyAnchorLocation(mbLngLat, targetFeature) {
@@ -48,6 +57,28 @@ export class TooltipControl extends React.Component {
     }
   };
 
+  _findLayerById = (layerId) => {
+    return this.props.layerList.find((layer) => {
+      return layer.getId() === layerId;
+    });
+  };
+
+  // Must load original geometry instead of using geometry from mapbox feature.
+  // Mapbox feature geometry is from vector tile and is not the same as the original geometry.
+  _getFeatureGeometry = ({ layerId, featureId }) => {
+    const tooltipLayer = this._findLayerById(layerId);
+    if (!tooltipLayer || featureId === undefined) {
+      return null;
+    }
+
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
+    if (!targetFeature) {
+      return null;
+    }
+
+    return targetFeature.geometry;
+  };
+
   _getLayerByMbLayerId(mbLayerId) {
     return this.props.layerList.find((layer) => {
       const mbLayerIds = layer.getMbLayerIds();
@@ -55,7 +86,76 @@ export class TooltipControl extends React.Component {
     });
   }
 
-  _getTooltipFeatures(mbFeatures) {
+  _loadPreIndexedShape = async ({ layerId, featureId }) => {
+    const tooltipLayer = this._findLayerById(layerId);
+    if (!tooltipLayer || typeof featureId === 'undefined') {
+      return null;
+    }
+
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
+    if (!targetFeature) {
+      return null;
+    }
+
+    return await tooltipLayer.getSource().getPreIndexedShape(targetFeature.properties);
+  };
+
+  _getFeatureActions({ layerId, featureId, tooltipId }) {
+    const actions = [];
+
+    const geometry = this._getFeatureGeometry({ layerId, featureId });
+    const geoFieldsForFeature = this._filterGeoFieldsByFeatureGeometry(geometry);
+    if (geoFieldsForFeature.length && this.props.addFilters) {
+      actions.push({
+        label: i18n.translate('xpack.maps.tooltip.action.filterByGeometryLabel', {
+          defaultMessage: 'Filter by geometry',
+        }),
+        id: GEOMETRY_FILTER_ACTION,
+        form: (
+          <FeatureGeometryFilterForm
+            onClose={() => {
+              this.props.closeOnClickTooltip(tooltipId);
+            }}
+            geometry={geometry}
+            geoFields={geoFieldsForFeature}
+            addFilters={this.props.addFilters}
+            getFilterActions={this.props.getFilterActions}
+            getActionContext={this.props.getActionContext}
+            loadPreIndexedShape={async () => {
+              return this._loadPreIndexedShape({ layerId, featureId });
+            }}
+          />
+        ),
+      });
+    }
+
+    return actions;
+  }
+
+  _filterGeoFieldsByFeatureGeometry(geometry) {
+    if (!geometry) {
+      return [];
+    }
+
+    // line geometry can only create filters for geo_shape fields.
+    if (
+      geometry.type === GEO_JSON_TYPE.LINE_STRING ||
+      geometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING
+    ) {
+      return this.props.geoFields.filter(({ geoFieldType }) => {
+        return geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE;
+      });
+    }
+
+    // TODO support geo distance filters for points
+    if (geometry.type === GEO_JSON_TYPE.POINT || geometry.type === GEO_JSON_TYPE.MULTI_POINT) {
+      return [];
+    }
+
+    return this.props.geoFields;
+  }
+
+  _getTooltipFeatures(mbFeatures, isLocked, tooltipId) {
     const uniqueFeatures = [];
     //there may be duplicates in the results from mapbox
     //this is because mapbox returns the results per tile
@@ -81,12 +181,18 @@ export class TooltipControl extends React.Component {
         // - As empty object literal
         // To avoid ambiguity, normalize properties to empty object literal.
         const mbProperties = mbFeature.properties ? mbFeature.properties : {};
-        //This keeps track of first properties (assuming these will be identical for features in different tiles)
-        uniqueFeatures.push({
-          id: featureId,
-          layerId: layerId,
-          mbProperties,
-        });
+        const actions = isLocked ? this._getFeatureActions({ layerId, featureId, tooltipId }) : [];
+
+        const hasActions = isLocked && actions.length;
+        if (hasActions || layer.canShowTooltip()) {
+          //This keeps track of first feature (assuming these will be identical for features in different tiles)
+          uniqueFeatures.push({
+            id: featureId,
+            layerId: layerId,
+            mbProperties,
+            actions,
+          });
+        }
       }
     }
     return uniqueFeatures;
@@ -109,10 +215,17 @@ export class TooltipControl extends React.Component {
     const targetMbFeataure = mbFeatures[0];
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
-    const features = this._getTooltipFeatures(mbFeatures);
+    const isLocked = true;
+    const tooltipId = uuid();
+    const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
+    if (features.length === 0) {
+      return;
+    }
     this.props.openOnClickTooltip({
       features,
       location: popupAnchorLocation,
+      isLocked,
+      id: tooltipId,
     });
   };
 
@@ -129,25 +242,36 @@ export class TooltipControl extends React.Component {
     }
 
     const targetMbFeature = mbFeatures[0];
-    if (this.props.openTooltips[0]) {
+    if (this.props.openTooltips[0] && this.props.openTooltips[0].features.length) {
       const firstFeature = this.props.openTooltips[0].features[0];
       if (targetMbFeature.properties[FEATURE_ID_PROPERTY_NAME] === firstFeature.id) {
         // ignore hover events when hover tooltip is all ready opened for feature
         return;
       }
     }
-
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
-    const features = this._getTooltipFeatures(mbFeatures);
+
+    const isLocked = false;
+    const tooltipId = uuid();
+    const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
+    if (features.length === 0) {
+      return;
+    }
     this.props.openOnHoverTooltip({
       features: features,
       location: popupAnchorLocation,
+      isLocked,
+      id: tooltipId,
     });
   }, 100);
 
   _getMbLayerIdsForTooltips() {
     const mbLayerIds = this.props.layerList.reduce((mbLayerIds, layer) => {
-      return layer.canShowTooltip() ? mbLayerIds.concat(layer.getMbLayerIds()) : mbLayerIds;
+      // tooltips are only supported for vector layers, filter out all other layer types
+      const isVectorLayer = layer.canShowTooltip !== undefined;
+      return layer.isVisible() && isVectorLayer
+        ? mbLayerIds.concat(layer.getMbLayerIds())
+        : mbLayerIds;
     }, []);
 
     //Ensure that all layers are actually on the map.
@@ -198,13 +322,12 @@ export class TooltipControl extends React.Component {
         <TooltipPopover
           key={id}
           mbMap={this.props.mbMap}
-          layerList={this.props.layerList}
+          findLayerById={this._findLayerById}
           addFilters={this.props.addFilters}
           getFilterActions={this.props.getFilterActions}
           getActionContext={this.props.getActionContext}
           onSingleValueTrigger={this.props.onSingleValueTrigger}
           renderTooltipContent={this.props.renderTooltipContent}
-          geoFields={this.props.geoFields}
           features={features}
           location={location}
           closeTooltip={closeTooltip}

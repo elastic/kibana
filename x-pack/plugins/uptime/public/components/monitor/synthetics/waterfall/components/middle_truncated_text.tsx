@@ -66,7 +66,6 @@ const LastChunk = styled.span`
 
 const StyledButton = styled(EuiButtonEmpty)`
   &&& {
-    height: auto;
     border: none;
 
     .euiButtonContent {

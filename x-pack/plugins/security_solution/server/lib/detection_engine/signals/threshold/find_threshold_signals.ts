@@ -141,6 +141,5 @@ export const findThresholdSignals = async ({
     pageSize: 1,
     sortOrder: 'desc',
     buildRuleMessage,
-    excludeDocsWithTimestampOverride: false,
   });
 };

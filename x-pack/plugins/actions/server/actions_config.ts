@@ -11,7 +11,8 @@ import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ActionsConfig, AllowedHosts, EnabledActionTypes } from './config';
+import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } from './config';
+import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
 import { ProxySettings, ResponseSettings } from './types';
 
@@ -32,6 +33,7 @@ export interface ActionsConfigurationUtilities {
   isRejectUnauthorizedCertificatesEnabled: () => boolean;
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
+  getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -107,6 +109,27 @@ function getResponseSettingsFromConfig(config: ActionsConfig): ResponseSettings 
   };
 }
 
+function getCustomHostSettings(
+  config: ActionsConfig,
+  targetUrl: string
+): CustomHostSettings | undefined {
+  const customHostSettings = config.customHostSettings;
+  if (!customHostSettings) {
+    return;
+  }
+
+  let parsedUrl: URL | undefined;
+  try {
+    parsedUrl = new URL(targetUrl);
+  } catch (err) {
+    // presumably this bad URL is reported elsewhere
+    return;
+  }
+
+  const canonicalUrl = getCanonicalCustomHostUrl(parsedUrl);
+  return customHostSettings.find((settings) => settings.url === canonicalUrl);
+}
+
 export function getActionsConfigurationUtilities(
   config: ActionsConfig
 ): ActionsConfigurationUtilities {
@@ -119,6 +142,7 @@ export function getActionsConfigurationUtilities(
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
+    // returns the global rejectUnauthorized setting
     isRejectUnauthorizedCertificatesEnabled: () => config.rejectUnauthorized,
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
@@ -135,5 +159,6 @@ export function getActionsConfigurationUtilities(
         throw new ActionTypeDisabledError(disabledActionTypeErrorMessage(actionType), 'config');
       }
     },
+    getCustomHostSettings: (targetUrl: string) => getCustomHostSettings(config, targetUrl),
   };
 }

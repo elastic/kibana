@@ -37,6 +37,7 @@ export interface IEsErrorAttributes {
   reason: string;
   root_cause?: Reason[];
   failed_shards?: FailedShard[];
+  caused_by?: IEsErrorAttributes;
 }
 
 export type IEsError = KibanaServerError<IEsErrorAttributes>;

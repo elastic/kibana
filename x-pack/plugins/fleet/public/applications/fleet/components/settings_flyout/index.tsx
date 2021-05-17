@@ -42,6 +42,9 @@ import { isDiffPathProtocol } from '../../../../../common/';
 import { SettingsConfirmModal } from './confirm_modal';
 import type { SettingsConfirmModalProps } from './confirm_modal';
 
+import 'brace/mode/yaml';
+import 'brace/theme/textmate';
+
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
 
 interface Props {
@@ -251,19 +254,10 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
 
   const body = settings && (
     <EuiForm>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.fleet.settings.globalOutputTitle"
-            defaultMessage="Global output"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.fleet.settings.globalOutputDescription"
-          defaultMessage="These settings are applied globally to the {outputs} section of all agent policies and will affect all enrolled agents if changed."
+          defaultMessage="These settings are applied globally to the {outputs} section of all agent policies and affect all enrolled agents."
           values={{
             outputs: <EuiCode>outputs</EuiCode>,
           }}
@@ -279,7 +273,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         helpText={
           <FormattedMessage
             id="xpack.fleet.settings.fleetServerHostsHelpTect"
-            defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet will show the first provided URL for enrollment purposes. For more information, see the {link}."
+            defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet shows the first provided URL for enrollment purposes. Refer to the {link}."
             values={{
               link: (
                 <EuiLink
@@ -308,7 +302,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           defaultMessage: 'Elasticsearch hosts',
         })}
         helpText={i18n.translate('xpack.fleet.settings.elasticsearchUrlsHelpTect', {
-          defaultMessage: 'Specify the Elasticsearch URLs where agents will send data.',
+          defaultMessage: 'Specify the Elasticsearch URLs where agents send data.',
         })}
         {...inputs.elasticsearchUrl.formRowProps}
       >
@@ -332,6 +326,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
             maxLines: 30,
             tabSize: 2,
             showGutter: false,
+            showPrintMargin: false,
           }}
           {...inputs.additionalYamlConfig.props}
           onChange={inputs.additionalYamlConfig.setValue}
@@ -349,7 +344,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           onClose={onConfirmModalClose}
         />
       )}
-      <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
+      <EuiFlyout onClose={onClose} size="m">
         <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerSettingsFlyoutTitle">
           <EuiTitle size="m">
             <h2 id="IngestManagerSettingsFlyoutTitle">

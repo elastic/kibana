@@ -71,6 +71,14 @@ export interface AxisSettingsPopoverProps {
    * Toggles the axis title visibility
    */
   toggleAxisTitleVisibility: (axis: AxesSettingsConfigKeys, checked: boolean) => void;
+  /**
+   * Set endzone visibility
+   */
+  setEndzoneVisibility?: (checked: boolean) => void;
+  /**
+   * Flag whether endzones are visible
+   */
+  endzonesVisible?: boolean;
 }
 const popoverConfig = (
   axis: AxesSettingsConfigKeys,
@@ -138,6 +146,8 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   areGridlinesVisible,
   isAxisTitleVisible,
   toggleAxisTitleVisibility,
+  setEndzoneVisibility,
+  endzonesVisible,
 }) => {
   const [title, setTitle] = useState<string | undefined>(axisTitle);
 
@@ -212,6 +222,20 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         onChange={() => toggleGridlinesVisibility(axis)}
         checked={areGridlinesVisible}
       />
+      {setEndzoneVisibility && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiSwitch
+            compressed
+            data-test-subj={`lnsshowEndzones`}
+            label={i18n.translate('xpack.lens.xyChart.showEnzones', {
+              defaultMessage: 'Show partial data markers',
+            })}
+            onChange={() => setEndzoneVisibility(!Boolean(endzonesVisible))}
+            checked={Boolean(endzonesVisible)}
+          />
+        </>
+      )}
     </ToolbarPopover>
   );
 };

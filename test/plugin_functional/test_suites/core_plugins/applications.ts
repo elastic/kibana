@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
 
   const getAppWrapperHeight = async () => {
-    const wrapper = await find.byClassName('app-wrapper');
+    const wrapper = await find.byClassName('kbnAppWrapper');
     return (await wrapper.getSize()).height;
   };
 

@@ -248,6 +248,11 @@ describe('enable()', () => {
             },
           },
         ],
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          error: null,
+        },
       },
       {
         version: '123',
@@ -352,10 +357,26 @@ describe('enable()', () => {
             },
           },
         ],
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          error: null,
+        },
       },
       {
         version: '123',
       }
+    );
+  });
+
+  test('throws an error if API key creation throws', async () => {
+    alertsClientParams.createAPIKey.mockImplementation(() => {
+      throw new Error('no');
+    });
+    expect(
+      async () => await alertsClient.enable({ id: '1' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error enabling rule: could not create API key - no"`
     );
   });
 

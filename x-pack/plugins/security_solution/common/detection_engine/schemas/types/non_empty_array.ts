@@ -8,6 +8,9 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const NonEmptyArray = <C extends t.Mixed>(
   codec: C,
   name: string = `NonEmptyArray<${codec.name}>`

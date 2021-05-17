@@ -71,6 +71,7 @@ Object {
     "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
   },
+  "shutdownTimeout": "PT30S",
   "socketTimeout": 120000,
   "ssl": Object {
     "cipherSuites": Array [

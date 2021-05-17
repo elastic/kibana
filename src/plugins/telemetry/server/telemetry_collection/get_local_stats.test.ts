@@ -20,17 +20,18 @@ import { StatsCollectionConfig } from '../../../telemetry_collection_manager/ser
 function mockUsageCollection(kibanaUsage = {}) {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
   usageCollection.bulkFetch = jest.fn().mockResolvedValue(kibanaUsage);
-  usageCollection.toObject = jest.fn().mockImplementation((data: any) => data);
+  usageCollection.toObject = jest.fn().mockImplementation((data) => data);
   return usageCollection;
 }
 // set up successful call mocks for info, cluster stats, nodes usage and data telemetry
-function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
+function mockGetLocalStats<ClusterInfo, ClusterStats>(
+  clusterInfo: ClusterInfo,
+  clusterStats: ClusterStats
+) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   esClient.info.mockResolvedValue(
     // @ts-expect-error we only care about the response body
-    {
-      body: { ...clusterInfo },
-    }
+    { body: { ...clusterInfo } }
   );
   esClient.cluster.stats
     // @ts-expect-error we only care about the response body
@@ -70,8 +71,8 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
 }
 
 function mockStatsCollectionConfig(
-  clusterInfo: any,
-  clusterStats: any,
+  clusterInfo: unknown,
+  clusterStats: unknown,
   kibana: {}
 ): StatsCollectionConfig {
   return {
@@ -113,13 +114,13 @@ describe('get_local_stats', () => {
       },
     },
   ];
-  const clusterStats = {
+  const clusterStats = ({
     _nodes: { failed: 123 },
     cluster_name: 'real-cool',
     indices: { totally: 456 },
     nodes: { yup: 'abc' },
     random: 123,
-  };
+  } as unknown) as estypes.ClusterStatsResponse;
 
   const kibana = {
     kibana: {

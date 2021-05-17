@@ -103,12 +103,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectAttributes](./kibana-plugin-core-public.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
 |  [SavedObjectError](./kibana-plugin-core-public.savedobjecterror.md) |  |
 |  [SavedObjectReference](./kibana-plugin-core-public.savedobjectreference.md) | A reference to another saved object. |
+|  [SavedObjectReferenceWithContext](./kibana-plugin-core-public.savedobjectreferencewithcontext.md) | A returned input object or one of its references, with additional context. |
 |  [SavedObjectsBaseOptions](./kibana-plugin-core-public.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBatchResponse](./kibana-plugin-core-public.savedobjectsbatchresponse.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-core-public.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkCreateOptions](./kibana-plugin-core-public.savedobjectsbulkcreateoptions.md) |  |
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-core-public.savedobjectsbulkupdateobject.md) |  |
 |  [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-public.savedobjectsbulkupdateoptions.md) |  |
+|  [SavedObjectsCollectMultiNamespaceReferencesResponse](./kibana-plugin-core-public.savedobjectscollectmultinamespacereferencesresponse.md) | The response when object references are collected. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-public.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsFindOptions](./kibana-plugin-core-public.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindOptionsReference](./kibana-plugin-core-public.savedobjectsfindoptionsreference.md) |  |
@@ -138,6 +140,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Variable | Description |
 |  --- | --- |
+|  [APP\_WRAPPER\_CLASS](./kibana-plugin-core-public.app_wrapper_class.md) | The class name for top level \*and\* nested application wrappers to ensure proper layout |
 |  [URL\_MAX\_LENGTH](./kibana-plugin-core-public.url_max_length.md) | The max URL length allowed by the current browser. Should be used to display warnings to users when query parameters cause URL to exceed this limit. |
 
 ## Type Aliases

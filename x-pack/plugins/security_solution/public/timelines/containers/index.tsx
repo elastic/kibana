@@ -40,6 +40,7 @@ import {
   TimelineEqlRequestOptions,
   TimelineEqlResponse,
 } from '../../../common/search_strategy/timeline/events/eql';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -138,7 +139,7 @@ export const useTimelineEvents = ({
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -194,6 +195,7 @@ export const useTimelineEvents = ({
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
     (request: TimelineRequest<typeof language> | null) => {
@@ -242,15 +244,14 @@ export const useTimelineEvents = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                notifications.toasts.addWarning(i18n.ERROR_TIMELINE_EVENTS);
+                addWarning(i18n.ERROR_TIMELINE_EVENTS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_TIMELINE_EVENTS,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -300,7 +301,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, id, notifications.toasts, pageName, refetchGrid, skip, wrappedLoadPage]
+    [data.search, id, addWarning, addError, pageName, refetchGrid, skip, wrappedLoadPage]
   );
 
   useEffect(() => {

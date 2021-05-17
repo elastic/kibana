@@ -11,17 +11,18 @@ import { render } from '../../../../../utils/test_helper';
 import { ReportFilters } from './report_filters';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import { mockIndexPattern, mockUrlStorage } from '../../rtl_helpers';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
 
 describe('Series Builder ReportFilters', function () {
+  const seriesId = 'test-series-id';
+
   const dataViewSeries = getDefaultConfigs({
+    seriesId,
     reportType: 'pld',
     indexPattern: mockIndexPattern,
-    seriesId: NEW_SERIES_KEY,
   });
   mockUrlStorage({});
   it('should render properly', function () {
-    render(<ReportFilters dataViewSeries={dataViewSeries} />);
+    render(<ReportFilters dataViewSeries={dataViewSeries} seriesId={seriesId} />);
 
     screen.getByText('Add filter');
   });
