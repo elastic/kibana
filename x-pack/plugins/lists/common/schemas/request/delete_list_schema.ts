@@ -6,10 +6,10 @@
  */
 
 import * as t from 'io-ts';
+import { id } from '@kbn/securitysolution-io-ts-list-types';
+import { DefaultStringBooleanFalse } from '@kbn/securitysolution-io-ts-types';
 
-import { id } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import { DefaultStringBooleanFalse } from '../types/default_string_boolean_false';
 
 export const deleteListSchema = t.intersection([
   t.exact(

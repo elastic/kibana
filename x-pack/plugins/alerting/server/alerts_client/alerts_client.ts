@@ -59,6 +59,7 @@ import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_a
 import { alertAuditEvent, AlertAuditAction } from './audit_events';
 import { nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField } from './lib';
+import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -288,11 +289,7 @@ export class AlertsClient {
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
-      executionStatus: {
-        status: 'pending',
-        lastExecutionDate: new Date().toISOString(),
-        error: null,
-      },
+      executionStatus: getAlertExecutionStatusPending(new Date().toISOString()),
     };
 
     this.auditLogger?.log(
@@ -981,6 +978,11 @@ export class AlertsClient {
         ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
         updatedBy: username,
         updatedAt: new Date().toISOString(),
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: new Date().toISOString(),
+          error: null,
+        },
       });
       try {
         await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });

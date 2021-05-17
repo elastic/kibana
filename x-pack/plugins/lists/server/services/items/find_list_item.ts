@@ -13,10 +13,10 @@ import {
   ListId,
   Page,
   PerPage,
-  SearchEsListItemSchema,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../common/schemas';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import { getList } from '../lists';
 import {
   encodeCursor,
