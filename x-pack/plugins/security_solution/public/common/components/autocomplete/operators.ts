@@ -6,8 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  ListOperatorEnum as OperatorEnum,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { OperatorOption } from './types';
-import { OperatorEnum, OperatorTypeEnum } from '../../../lists_plugin_deps';
 
 export const isOperator: OperatorOption = {
   message: i18n.translate('xpack.securitySolution.exceptions.isOperatorLabel', {
