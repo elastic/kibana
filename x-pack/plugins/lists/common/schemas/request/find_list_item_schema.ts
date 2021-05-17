@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-utils';
+import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
 
 import { cursor, filter, list_id, sort_field, sort_order } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
