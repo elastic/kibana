@@ -13,7 +13,7 @@ import { getFieldEditorOpener } from './open_editor';
 import { FormatEditorService } from './service';
 import { getDeleteFieldProvider } from './components/delete_field_provider';
 import { getFieldDeleteModalOpener } from './open_delete_modal';
-import { initApi } from './lib';
+import { initApi } from './lib/api';
 
 export class IndexPatternFieldEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
