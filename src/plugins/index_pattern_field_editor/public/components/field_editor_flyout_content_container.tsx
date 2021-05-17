@@ -193,7 +193,11 @@ export const FieldEditorFlyoutContentContainer = ({
   }, [loadEditor]);
 
   return (
-    <FieldEditorProvider indexPattern={indexPattern} services={services}>
+    <FieldEditorProvider
+      indexPattern={indexPattern}
+      fieldTypeToProcess={fieldTypeToProcess}
+      services={services}
+    >
       <FieldPreviewProvider>
         <FieldEditorFlyoutContent
           onSave={saveField}

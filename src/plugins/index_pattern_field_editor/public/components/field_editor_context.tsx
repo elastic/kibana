@@ -10,9 +10,11 @@ import React, { createContext, useContext, FunctionComponent, useMemo } from 're
 import { NotificationsStart } from 'src/core/public';
 import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
 import { ApiService } from '../lib';
+import { InternalFieldType } from '../types';
 
 export interface Context {
   indexPattern: IndexPattern;
+  fieldTypeToProcess: InternalFieldType;
   services: {
     search: DataPublicPluginStart['search'];
     api: ApiService;
@@ -25,14 +27,16 @@ const fieldEditorContext = createContext<Context | undefined>(undefined);
 export const FieldEditorProvider: FunctionComponent<Context> = ({
   services,
   indexPattern,
+  fieldTypeToProcess,
   children,
 }) => {
   const ctx = useMemo<Context>(
     () => ({
       indexPattern,
+      fieldTypeToProcess,
       services,
     }),
-    [indexPattern, services]
+    [indexPattern, fieldTypeToProcess, services]
   );
 
   return <fieldEditorContext.Provider value={ctx}>{children}</fieldEditorContext.Provider>;

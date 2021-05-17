@@ -51,6 +51,7 @@ const defaultParams: Params = { name: null, index: null, script: null, document:
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const {
     indexPattern,
+    fieldTypeToProcess,
     services: {
       search,
       notifications,
@@ -102,6 +103,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   );
 
   const updatePreview = useCallback(async () => {
+    if (fieldTypeToProcess !== 'runtime') {
+      return;
+    }
+
     const response = await getFieldPreview({
       index: currentDocIndex,
       document: params.document!,
@@ -132,7 +137,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         error: null,
       });
     }
-  }, [params, currentDocIndex, getFieldPreview, notifications.toasts]);
+  }, [fieldTypeToProcess, params, currentDocIndex, getFieldPreview, notifications.toasts]);
 
   const goToNextDoc = useCallback(() => {
     if (navDocsIndex >= totalDocs - 1) {
@@ -178,8 +183,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         return;
       }
 
-      // Whenever updatePreview changes (meaning whenever any of the params changes)
-      // we call it to update the preview response.
+      // Whenever updatePreview() changes (meaning whenever any of the params changes)
+      // we call it to update the preview response with the field value or possible error.
       updatePreview();
     },
     500,
@@ -187,8 +192,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   );
 
   useEffect(() => {
-    fetchSampleDocuments();
-  }, [fetchSampleDocuments]);
+    if (fieldTypeToProcess === 'runtime') {
+      fetchSampleDocuments();
+    }
+  }, [fetchSampleDocuments, fieldTypeToProcess]);
 
   useEffect(() => {
     updateParams({ document: currentDocument?._source });

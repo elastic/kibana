@@ -50,6 +50,7 @@ export const WithFieldEditorDependencies = <T extends object = { [key: string]: 
 ) => (props: T) => {
   const dependencies: Context = {
     indexPattern: { title: 'testIndexPattern' } as any,
+    fieldTypeToProcess: 'runtime',
     services: {
       notifications: notificationServiceMock.createStartContract(),
       search,
