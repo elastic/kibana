@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiColorPicker } from '@elastic/eui';
 import { mount } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -70,14 +71,52 @@ describe('Color Stops component', () => {
     ).toBe('#ccc'); // pick previous color
   });
 
-  it('should show color validation message when the color is not valid', () => {
-    props.colorStops[0].color = '#ggg';
-    const component = mount(<CustomStops {...props} />);
-    const invalidRow = component
-      .find('[data-test-subj="my-test_dynamicColoring_stop_row_0"]')
-      .first();
-    expect(invalidRow.prop('isInvalid')).toBe(true);
-    expect(invalidRow.prop('error')).toBe('Color must provide a valid hex value');
+  it('should restore previous color when abandoning the field with an empty color', () => {
+    let component = mount(<CustomStops {...props} />);
+    expect(
+      component
+        .find('[data-test-subj="my-test_dynamicColoring_stop_row_0"]')
+        .first()
+        .find(EuiColorPicker)
+        .first()
+        .prop('color')
+    ).toBe('#aaa');
+    act(() => {
+      component
+        .find('[data-test-subj="my-test_dynamicColoring_stop_row_0"]')
+        .first()
+        .find(EuiColorPicker)
+        .first()
+        .prop('onChange')!('', {
+        rgba: [NaN, NaN, NaN, NaN],
+        hex: '',
+        isValid: false,
+      });
+    });
+    component = component.update();
+    expect(
+      component
+        .find('[data-test-subj="my-test_dynamicColoring_stop_row_0"]')
+        .first()
+        .find(EuiColorPicker)
+        .first()
+        .prop('color')
+    ).toBe('');
+    act(() => {
+      component
+        .find('[data-test-subj="my-test_dynamicColoring_stop_color_0"]')
+        .first()
+        .prop('onBlur')!({} as React.FocusEvent);
+    });
+    component = component.update();
+    expect(
+      component
+        .find('[data-test-subj="my-test_dynamicColoring_stop_row_0"]')
+        .first()
+        .find(EuiColorPicker)
+        .first()
+        .prop('color')
+    ).toBe('#aaa');
   });
 
   it('should sort stops value on whole component blur', () => {
