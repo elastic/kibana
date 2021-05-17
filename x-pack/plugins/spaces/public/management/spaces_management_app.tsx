@@ -140,7 +140,7 @@ export const spacesManagementApp = Object.freeze({
                   </Switch>
                 </Router>
               </RedirectAppLinks>
-            </i18nStart.Context>{' '}
+            </i18nStart.Context>
           </KibanaContextProvider>,
           element
         );
