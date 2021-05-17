@@ -39,7 +39,11 @@ describe('renderApp', () => {
   });
 
   it('renders the app', () => {
-    const { core, config, apmRuleRegistry } = mockApmPluginContextValue;
+    const {
+      core,
+      config,
+      observabilityRuleTypeRegistry,
+    } = mockApmPluginContextValue;
     const plugins = {
       licensing: { license$: new Observable() },
       triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
@@ -92,7 +96,7 @@ describe('renderApp', () => {
         appMountParameters: params as any,
         pluginsStart: startDeps as any,
         config,
-        apmRuleRegistry,
+        observabilityRuleTypeRegistry,
       });
     });
 

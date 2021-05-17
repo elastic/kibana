@@ -6,23 +6,22 @@
  */
 
 import { ReactNode } from 'react';
-import { Ecs } from '../../../../common/ecs';
-import { CodeSignature } from '../../../../common/ecs/file';
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
-import { OperatorOption } from '../autocomplete/types';
-import {
+import type {
   EntryNested,
   Entry,
   EntryMatch,
   EntryMatchAny,
   EntryMatchWildcard,
   EntryExists,
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
   NamespaceType,
-  OperatorTypeEnum,
-  OperatorEnum,
-} from '../../../lists_plugin_deps';
+  ListOperatorTypeEnum as OperatorTypeEnum,
+  ListOperatorEnum as OperatorEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { Ecs } from '../../../../common/ecs';
+import { CodeSignature } from '../../../../common/ecs/file';
+import { IFieldType } from '../../../../../../../src/plugins/data/common';
+import { OperatorOption } from '../autocomplete/types';
+import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../lists_plugin_deps';
 
 export interface FormattedEntry {
   fieldName: string;

@@ -9,8 +9,11 @@ import { Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { HttpStart } from 'kibana/public';
+import {
+  ListOperatorEnum as OperatorEnum,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
 
-import { OperatorEnum, OperatorTypeEnum } from '../../../../common';
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
