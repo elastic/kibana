@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FIXED_AXIS_HEIGHT } from './constants';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   index: number;
@@ -44,10 +45,11 @@ const InnerContainer = styled.span`
   align-items: center;
 `;
 
-const IndexNumber = styled(EuiText)`
+const IndexNumber = euiStyled(EuiText)`
   margin-right: 5px;
   line-height: ${FIXED_AXIS_HEIGHT}px;
   text-align: right;
+  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
 `;
 
 const FirstChunk = styled.span`
@@ -96,7 +98,7 @@ export const MiddleTruncatedText = ({
   highestIndex,
 }: Props) => {
   const secureHttps = fullText.startsWith('https://');
-  const text = fullText.replace(secureHttps ? 'https://' : 'http://', '');
+  const text = fullText.replace(/https:\/\/www|http:\/\//, '');
 
   const chunks = useMemo(() => {
     return getChunks(text);
