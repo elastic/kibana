@@ -35,7 +35,7 @@ export function SyntheticsPackageProvider({ getService }: FtrProviderContext) {
     throw new Error(message);
   };
   const retrieveSyntheticsPackageInfo = (() => {
-    // Retrieve information about the Synthetics  package
+    // Retrieve information about the Synthetics package
     // EPM does not currently have an API to get the "lastest" information for a page given its name,
     // so we'll retrieve a list of packages and then find the package info in the list.
     let apiRequest: Promise<GetPackagesResponse['response'][0] | undefined>;
