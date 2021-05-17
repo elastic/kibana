@@ -152,10 +152,12 @@ const getDataBounds = function (
         }
       });
     });
-    groups[axis.groupId] = {
-      min: Math.round((min + Number.EPSILON) * 100) / 100,
-      max: Math.round((max + Number.EPSILON) * 100) / 100,
-    };
+    if (min !== Number.MAX_VALUE && max !== Number.MIN_VALUE) {
+      groups[axis.groupId] = {
+        min: Math.round((min + Number.EPSILON) * 100) / 100,
+        max: Math.round((max + Number.EPSILON) * 100) / 100,
+      };
+    }
   });
 
   return groups;
