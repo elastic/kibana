@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { OperatorEnum, OperatorTypeEnum } from '../../../../common';
+import {
+  ListOperatorEnum as OperatorEnum,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { OperatorOption } from './types';
 

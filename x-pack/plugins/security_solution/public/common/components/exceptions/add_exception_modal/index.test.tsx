@@ -49,7 +49,10 @@ jest.mock('../../../containers/source');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
-jest.mock('../../../../shared_imports');
+jest.mock('../../../../shared_imports', () => ({
+  ...jest.requireActual('../../../../shared_imports'),
+  useAsync: jest.fn(),
+}));
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
 
 describe('When the add exception modal is opened', () => {
