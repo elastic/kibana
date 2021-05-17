@@ -64,12 +64,27 @@ export function SyntheticsIntegrationPageProvider({
     },
 
     /**
+     * Determines if the policy was created successfully by looking for the creation success toast
+     */
+    async isPolicyCreatedSuccessfully() {
+      await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
+    },
+
+    /**
+     * Selects the monitor type
+     * @params {monitorType} the type of monitor, tcp, http, or icmp
+     */
+    async selectMonitorType(monitorType: string) {
+      await testSubjects.selectValue('syntheticsMonitorTypeField', monitorType);
+    },
+
+    /**
      * Fills a text input
      * @params {testSubj} the testSubj of the input to fill
      * @params {value} the value of the input
      */
     async fillTextInputByTestSubj(testSubj: string, value: string) {
-      const field = await testSubjects.find(testSubj);
+      const field = await testSubjects.find(testSubj, 5000);
       await field.click();
       await field.clearValue();
       await field.type(value);
@@ -112,38 +127,6 @@ export function SyntheticsIntegrationPageProvider({
     },
 
     /**
-     * Finds the policy name field
-     */
-    async findPolicyNameField() {
-      await this.ensureIsOnPackagePage();
-      return await testSubjects.find('packagePolicyNameInput');
-    },
-
-    /**
-     * Finds the policy name field
-     */
-    async findPolicyUrlField() {
-      await this.ensureIsOnPackagePage();
-      return await testSubjects.find('syntheticsUrlField');
-    },
-
-    /**
-     * Finds the policy tcp host field
-     */
-    async findPolicyTCPHostField() {
-      await this.ensureIsOnPackagePage();
-      return await testSubjects.find('syntheticsTCPHostField');
-    },
-
-    /**
-     * Finds the policy icmp host field
-     */
-    async findPolicyICMPHostField() {
-      await this.ensureIsOnPackagePage();
-      return await testSubjects.find('syntheticsICMPHostField');
-    },
-
-    /**
      * ensures that the package page is the currently display view
      */
     async ensureIsOnPackagePage() {
@@ -151,68 +134,12 @@ export function SyntheticsIntegrationPageProvider({
     },
 
     /**
-     * Clicks Save button and confirms update on the Policy Details page
+     * Clicks save button and confirms update on the Policy Details page
      */
     async confirmAndSave(isEditPage?: boolean) {
       await this.ensureIsOnPackagePage();
       const saveButton = await this.findSaveButton(isEditPage);
       saveButton.click();
-    },
-
-    /**
-     * Fills in the fields to create a basic HTTP monitor
-     * @params name {string} the name of the monitor
-     */
-    async createMonitorName(name: string) {
-      await this.fillTextInputByTestSubj('packagePolicyNameInput', name);
-    },
-
-    /**
-     * Fills in the TLS CA
-     * @params value {string} the value of the CA
-     *
-     */
-    async configureTLSCA(value: string) {
-      const policyNameField = await testSubjects.find('syntheticsTLSCA');
-      await policyNameField.click();
-      await policyNameField.clearValue();
-      await policyNameField.type(value);
-    },
-
-    /**
-     * Fills in the TLS Cert
-     * @params value {string} the value of the Cert
-     *
-     */
-    async configureTLSCert(value: string) {
-      const policyNameField = await testSubjects.find('syntheticsTLSCert');
-      await policyNameField.click();
-      await policyNameField.clearValue();
-      await policyNameField.type(value);
-    },
-
-    /**
-     * Fills in the TLS Cert Key
-     * @params value {string} the value of the Cert Key
-     *
-     */
-    async configureTLSCertKey(value: string) {
-      const policyNameField = await testSubjects.find('syntheticsTLSCertKey');
-      await policyNameField.click();
-      await policyNameField.clearValue();
-      await policyNameField.type(value);
-    },
-
-    /**
-     * Fills in the TLS Cert
-     * @params value {string} the value of the Cert
-     *
-     */
-    async configureTLSCertKeyPassphrase(value: string) {
-      const policyNameField = await testSubjects.find('syntheticsTLSCertKeyPassphrase');
-      await policyNameField.click();
-      await policyNameField.clearValue();
-      await policyNameField.type(value);
     },
 
     /**
@@ -223,15 +150,6 @@ export function SyntheticsIntegrationPageProvider({
     async configureUsernameAndPassword({ username, password }: Record<string, string>) {
       await this.fillTextInputByTestSubj('syntheticsUsername', username);
       await this.fillTextInputByTestSubj('syntheticsPassword', password);
-    },
-
-    /**
-     * Fills in the proxy url
-     * @params value {string} the value of the proxy url
-     *
-     */
-    async configureProxyUrl(proxyUrl: string) {
-      await this.fillTextInputByTestSubj('syntheticsProxyUrl', proxyUrl);
     },
 
     /**
@@ -303,7 +221,7 @@ export function SyntheticsIntegrationPageProvider({
      *
      */
     async createBasicMonitorDetails({ name, apmServiceName, tags }: Record<string, string>) {
-      await this.createMonitorName(name);
+      await this.fillTextInputByTestSubj('packagePolicyNameInput', name);
       await this.fillTextInputByTestSubj('syntheticsAPMServiceName', apmServiceName);
       await this.setComboBox('syntheticsTags', tags);
     },
@@ -336,7 +254,7 @@ export function SyntheticsIntegrationPageProvider({
       apmServiceName,
       tags,
     }: Record<string, string>) {
-      await testSubjects.selectValue('syntheticsMontiorTypeField', 'tcp');
+      await this.selectMonitorType('tcp');
       await this.createBasicMonitorDetails({ name, apmServiceName, tags });
       await this.fillTextInputByTestSubj('syntheticsTCPHostField', host);
     },
@@ -352,8 +270,8 @@ export function SyntheticsIntegrationPageProvider({
       apmServiceName,
       tags,
     }: Record<string, string>) {
-      await testSubjects.selectValue('syntheticsMontiorTypeField', 'icmp');
-      await this.createMonitorName(name);
+      await this.selectMonitorType('icmp');
+      await this.fillTextInputByTestSubj('packagePolicyNameInput', name);
       await this.createBasicMonitorDetails({ name, apmServiceName, tags });
       await this.fillTextInputByTestSubj('syntheticsICMPHostField', host);
     },
@@ -379,10 +297,10 @@ export function SyntheticsIntegrationPageProvider({
     }: Record<string, string>) {
       await this.enableTLS();
       await testSubjects.selectValue('syntheticsTLSVerificationMode', verificationMode);
-      await this.configureTLSCA(ca);
-      await this.configureTLSCert(cert);
-      await this.configureTLSCertKey(certKey);
-      await this.configureTLSCertKeyPassphrase(certKeyPassphrase);
+      await this.fillTextInputByTestSubj('syntheticsTLSCA', ca);
+      await this.fillTextInputByTestSubj('syntheticsTLSCert', cert);
+      await this.fillTextInputByTestSubj('syntheticsTLSCertKey', certKey);
+      await this.fillTextInputByTestSubj('syntheticsTLSCertKeyPassphrase', certKeyPassphrase);
     },
 
     /**
@@ -415,7 +333,7 @@ export function SyntheticsIntegrationPageProvider({
       indexResponseBody: boolean;
       indexResponseHeaders: boolean;
     }) {
-      testSubjects.click('syntheticsHTTPAdvancedFieldsAccordion');
+      await testSubjects.click('syntheticsHTTPAdvancedFieldsAccordion');
       await this.configureResponseHeaders(responseHeaders);
       await this.configureRequestHeaders(requestHeaders);
       await this.configureRequestBody(requestBody.type, requestBody.value);
@@ -423,17 +341,17 @@ export function SyntheticsIntegrationPageProvider({
       await this.setComboBox('syntheticsResponseStatusCheck', responseStatusCheck);
       await this.setComboBox('syntheticsResponseBodyCheckPositive', responseBodyCheckPositive);
       await this.setComboBox('syntheticsResponseBodyCheckNegative', responseBodyCheckNegative);
-      await this.configureProxyUrl(proxyUrl);
+      await this.fillTextInputByTestSubj('syntheticsProxyUrl', proxyUrl);
       await testSubjects.selectValue('syntheticsRequestMethod', requestMethod);
       if (!indexResponseBody) {
         const field = await testSubjects.find('syntheticsIndexResponseBody');
         const label = await field.findByCssSelector('label');
-        label.click();
+        await label.click();
       }
       if (!indexResponseHeaders) {
         const field = await testSubjects.find('syntheticsIndexResponseHeaders');
         const label = await field.findByCssSelector('label');
-        label.click();
+        await label.click();
       }
     },
 
@@ -451,14 +369,14 @@ export function SyntheticsIntegrationPageProvider({
       responseReceiveCheck: string;
       proxyUseLocalResolver: boolean;
     }) {
-      testSubjects.click('syntheticsTCPAdvancedFieldsAccordion');
-      await this.configureProxyUrl(proxyUrl);
+      await testSubjects.click('syntheticsTCPAdvancedFieldsAccordion');
+      await this.fillTextInputByTestSubj('syntheticsProxyUrl', proxyUrl);
       await this.fillTextInputByTestSubj('syntheticsTCPRequestSendCheck', requestSendCheck);
       await this.fillTextInputByTestSubj('syntheticsTCPResponseReceiveCheck', responseReceiveCheck);
       if (proxyUseLocalResolver) {
         const field = await testSubjects.find('syntheticsUseLocalResolver');
         const label = await field.findByCssSelector('label');
-        label.click();
+        await label.click();
       }
     },
   };

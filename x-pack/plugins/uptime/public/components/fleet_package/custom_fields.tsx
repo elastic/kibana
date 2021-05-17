@@ -105,7 +105,7 @@ export const CustomFields = memo<Props>(
                         configKey: ConfigKeys.MONITOR_TYPE,
                       })
                     }
-                    data-test-subj="syntheticsMontiorTypeField"
+                    data-test-subj="syntheticsMonitorTypeField"
                   />
                 </EuiFormRow>
               )}
