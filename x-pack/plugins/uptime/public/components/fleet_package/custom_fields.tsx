@@ -392,17 +392,16 @@ export const CustomFields = memo<Props>(
                 defaultMessage="Configure TLS options, including verification mode, certificate authorities, and client certificates."
               />
             }
+            data-test-subj="syntheticsIsTLSEnabled"
           >
             <EuiCheckbox
               id={'uptimeFleetIsTLSEnabled'}
               checked={isTLSEnabled}
               label={
-                <span data-test-subj="syntheticsIsTLSEnabled">
-                  <FormattedMessage
-                    id="xpack.uptime.createPackagePolicy.stepConfigure.certificateSettings.enableSSLSettings.label"
-                    defaultMessage="Enable TLS configuration"
-                  />
-                </span>
+                <FormattedMessage
+                  id="xpack.uptime.createPackagePolicy.stepConfigure.certificateSettings.enableSSLSettings.label"
+                  defaultMessage="Enable TLS configuration"
+                />
               }
               onChange={(event) => setIsTLSEnabled(event.target.checked)}
             />

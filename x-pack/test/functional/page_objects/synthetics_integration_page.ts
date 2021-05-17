@@ -123,7 +123,8 @@ export function SyntheticsIntegrationPageProvider({
      */
     async findEnableTLSCheckbox() {
       await this.ensureIsOnPackagePage();
-      return await testSubjects.find('syntheticsIsTLSEnabled');
+      const tlsCheckboxContainer = await testSubjects.find('syntheticsIsTLSEnabled');
+      return await tlsCheckboxContainer.findByCssSelector('label');
     },
 
     /**
