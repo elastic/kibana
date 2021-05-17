@@ -129,14 +129,14 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async navigateToNewVisualization() {
-      await common.navigateToApp('visualize');
+      await this.gotoVisualizationLandingPage();
       await header.waitUntilLoadingHasFinished();
       await this.clickNewVisualization();
       await this.waitForGroupsSelectPage();
     }
 
     public async navigateToNewAggBasedVisualization() {
-      await common.navigateToApp('visualize');
+      await this.gotoVisualizationLandingPage();
       await header.waitUntilLoadingHasFinished();
       await this.clickNewVisualization();
       await this.clickAggBasedVisualizations();
