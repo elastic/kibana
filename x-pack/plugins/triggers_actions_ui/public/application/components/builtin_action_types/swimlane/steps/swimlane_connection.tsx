@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import * as i18n from '../translations';
 import { StepProps } from './';
@@ -33,12 +33,8 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
   const { apiUrl, appId } = action.config;
   const { apiToken } = action.secrets;
   const { docLinks } = useKibana().services;
-
-  const isValid = () => {
-    return apiUrl && apiToken && appId;
-  };
-
-  const connectSwimlane = async () => {
+  const isValid = useMemo(() => apiUrl && apiToken && appId, [apiToken, apiUrl, appId]);
+  const connectSwimlane = useCallback(async () => {
     // fetch swimlane application configuration
     const application = await getApplication({ http, url: apiUrl, appId, apiToken });
 
@@ -48,42 +44,39 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
     const allFields = application.fields;
     updateFields(allFields);
     updateCurrentStep(2);
-  };
-
-  const getEncryptedFieldNotifyLabel = (isCreate: boolean) => {
-    if (isCreate) {
-      return (
-        <Fragment>
-          <EuiSpacer size="s" />
-          <EuiText size="s" data-test-subj="rememberValuesMessage">
-            {i18n.SW_REMEMBER_VALUE_LABEL}
-          </EuiText>
-          <EuiSpacer size="s" />
-        </Fragment>
-      );
-    }
-    return (
-      <Fragment>
-        <EuiSpacer size="s" />
-        <EuiCallOut
-          size="s"
-          iconType="iInCircle"
-          data-test-subj="reenterValuesMessage"
-          title={i18n.SW_REENTER_VALUE_LABEL}
-        />
-        <EuiSpacer size="m" />
-      </Fragment>
-    );
-  };
-
-  const connectSwimlaneButton = (
-    <EuiButton disabled={!isValid()} onClick={connectSwimlane}>
-      {i18n.SW_RETRIEVE_CONFIGURATION_LABEL}
-    </EuiButton>
+  }, [apiToken, apiUrl, appId, http, updateCurrentStep, updateFields]);
+  const onChangeConfig = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>, key: 'apiUrl' | 'appId') => {
+      editActionConfig(key, e.target.value);
+    },
+    [editActionConfig]
   );
+  const onBlurConfig = useCallback(
+    (key: 'apiUrl' | 'appId') => {
+      if (!action.config[key]) {
+        editActionConfig(key, '');
+      }
+    },
+    [action.config, editActionConfig]
+  );
+  const onChangeSecrets = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      editActionSecrets('apiToken', e.target.value);
+    },
+    [editActionSecrets]
+  );
+  const onBlurSecrets = useCallback(() => {
+    if (!apiToken) {
+      editActionSecrets('apiToken', '');
+    }
+  }, [apiToken, editActionSecrets]);
 
+  const isInvalid = useMemo(() => errors.apiToken.length > 0 && apiToken !== undefined, [
+    apiToken,
+    errors.apiToken.length,
+  ]);
   return (
-    <Fragment>
+    <>
       <EuiFormRow id="apiUrl" fullWidth label={i18n.SW_API_URL_TEXT_FIELD_LABEL}>
         <EuiFieldText
           fullWidth
@@ -91,14 +84,8 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
           value={apiUrl || ''}
           readOnly={readOnly}
           data-test-subj="swimlaneApiUrlInput"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editActionConfig('apiUrl', e.target.value);
-          }}
-          onBlur={() => {
-            if (!apiUrl) {
-              editActionConfig('apiUrl', '');
-            }
-          }}
+          onChange={(e) => onChangeConfig(e, 'apiUrl')}
+          onBlur={() => onBlurConfig('apiUrl')}
         />
       </EuiFormRow>
       <EuiFormRow id="appId" fullWidth label={i18n.SW_APP_ID_TEXT_FIELD_LABEL}>
@@ -108,14 +95,8 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
           value={appId || ''}
           readOnly={readOnly}
           data-test-subj="swimlaneAppIdInput"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editActionConfig('appId', e.target.value);
-          }}
-          onBlur={() => {
-            if (!appId) {
-              editActionConfig('appId', '');
-            }
-          }}
+          onChange={(e) => onChangeConfig(e, 'appId')}
+          onBlur={() => onBlurConfig('appId')}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -133,30 +114,45 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
           </EuiLink>
         }
         error={errors.apiToken}
-        isInvalid={errors.apiToken.length > 0 && apiToken !== undefined}
+        isInvalid={isInvalid}
         label={i18n.SW_API_TOKEN_TEXT_FIELD_LABEL}
       >
-        <Fragment>
-          {getEncryptedFieldNotifyLabel(!action.id)}
+        <>
+          {!action.id ? (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText size="s" data-test-subj="rememberValuesMessage">
+                {i18n.SW_REMEMBER_VALUE_LABEL}
+              </EuiText>
+              <EuiSpacer size="s" />
+            </>
+          ) : (
+            <>
+              <EuiSpacer size="s" />
+              <EuiCallOut
+                size="s"
+                iconType="iInCircle"
+                data-test-subj="reenterValuesMessage"
+                title={i18n.SW_REENTER_VALUE_LABEL}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiFieldText
             fullWidth
-            isInvalid={errors.apiToken.length > 0 && apiToken !== undefined}
+            isInvalid={isInvalid}
             readOnly={readOnly}
             value={apiToken || ''}
             data-test-subj="swimlaneApiTokenInput"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              editActionSecrets('apiToken', e.target.value);
-            }}
-            onBlur={() => {
-              if (!apiToken) {
-                editActionSecrets('apiToken', '');
-              }
-            }}
+            onChange={onChangeSecrets}
+            onBlur={onBlurSecrets}
           />
-        </Fragment>
+        </>
       </EuiFormRow>
       <EuiSpacer />
-      {connectSwimlaneButton}
-    </Fragment>
+      <EuiButton disabled={!isValid} onClick={connectSwimlane}>
+        {i18n.SW_RETRIEVE_CONFIGURATION_LABEL}
+      </EuiButton>
+    </>
   );
 };
