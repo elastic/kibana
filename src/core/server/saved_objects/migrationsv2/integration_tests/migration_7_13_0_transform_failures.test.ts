@@ -12,7 +12,8 @@ import Util from 'util';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 
-const logFilePath = Path.join(__dirname, 'migration_transform_failures_test_kibana.log');
+// const logFilePathOriginal = Path.join(__dirname, 'migration_transform_failures_test_kibana.log');
+const logFilePath = Path.join(__dirname, '7_13_transform_failures_test.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 async function removeLogFile() {
@@ -65,7 +66,7 @@ describe('migration v2', () => {
           // },
           //
           //
-          dataArchive: Path.join(__dirname, 'archives', '7.13.0_transform_failures_archive.zip'),
+          dataArchive: Path.join(__dirname, 'archives', '7_13_transform_failures_archive.zip'),
         },
       },
     });
@@ -75,22 +76,22 @@ describe('migration v2', () => {
     esServer = await startES();
     const coreSetup = await root.setup();
 
-    coreSetup.savedObjects.registerType({
-      name: 'bar',
-      hidden: false,
-      mappings: {
-        properties: {
-          name: { type: 'text' },
-          surname: { type: 'text' },
-          age: { type: 'number' },
-          old: { type: 'boolean' },
-        },
-      },
-      namespaceType: 'agnostic',
-      migrations: {
-        '7.13.0': (doc) => doc,
-      },
-    });
+    // coreSetup.savedObjects.registerType({
+    //   name: 'bar',
+    //   hidden: false,
+    //   mappings: {
+    //     properties: {
+    //       name: { type: 'text' },
+    //       surname: { type: 'text' },
+    //       age: { type: 'number' },
+    //       old: { type: 'boolean' },
+    //     },
+    //   },
+    //   namespaceType: 'agnostic',
+    //   migrations: {
+    //     '7.13.0': (doc) => doc,
+    //   },
+    // });
 
     coreSetup.savedObjects.registerType({
       name: 'foo',
@@ -106,9 +107,12 @@ describe('migration v2', () => {
     try {
       await root.start();
     } catch (err) {
+      // just make sure the error contains info we expect to get.
+      // then read the logs and parse the number of failed transforms from there.
+
       const messageString = err.message.split('Error')[0];
       expect(messageString).toMatchInlineSnapshot(`
-        "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: Corrupt saved object documents: wkBfbXkBrZykqofUMvhC,w0BfbXkBrZykqofUPfi9,xEBfbXkBrZykqofUUPjI,xUBfbXkBrZykqofUXPit,wUBfbXkBrZykqofUFfji,1,2,3,6,5,4,10,9,8,12,11,7,13,14,15,16 Transformation errors: space:default: Document \\"default\\" has property \\"space\\" which belongs to a more recent version of Kibana [6.6.0]. The last known version is [undefined]
+        "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: Transformation errors: space:default: Document \\"default\\" has property \\"space\\" which belongs to a more recent version of Kibana [6.6.0]. The last known version is [undefined]
          "
       `);
     }
