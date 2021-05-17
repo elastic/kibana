@@ -14,7 +14,7 @@ import {
   Name,
   NamespaceType,
   Tags,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { ExceptionListSchema, Immutable, ListId, Version } from '../../../common/schemas';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
