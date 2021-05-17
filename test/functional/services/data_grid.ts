@@ -96,6 +96,12 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
         })`
       );
     }
+
+    public async getDocCount(): Promise<number> {
+      const grid = await find.byCssSelector('[data-document-number]');
+      return Number(await grid.getAttribute('data-document-number'));
+    }
+
     public async getFields() {
       const cells = await find.allByCssSelector('.euiDataGridRowCell');
 

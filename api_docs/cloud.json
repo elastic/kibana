@@ -5,101 +5,115 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "cloud",
         "id": "def-public.CloudConfigType",
         "type": "Interface",
+        "tags": [],
         "label": "CloudConfigType",
         "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.CloudConfigType.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 18
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.CloudConfigType.cname",
-            "type": "string",
-            "label": "cname",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 19
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.CloudConfigType.base_url",
-            "type": "string",
-            "label": "base_url",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 20
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.CloudConfigType.profile_url",
-            "type": "string",
-            "label": "profile_url",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 21
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.CloudConfigType.deployment_url",
-            "type": "string",
-            "label": "deployment_url",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 22
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.CloudConfigType.organization_url",
-            "type": "string",
-            "label": "organization_url",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 23
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
-        ],
         "source": {
           "path": "x-pack/plugins/cloud/public/plugin.ts",
           "lineNumber": 17
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.cname",
+            "type": "string",
+            "tags": [],
+            "label": "cname",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.base_url",
+            "type": "string",
+            "tags": [],
+            "label": "base_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 20
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.profile_url",
+            "type": "string",
+            "tags": [],
+            "label": "profile_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.deployment_url",
+            "type": "string",
+            "tags": [],
+            "label": "deployment_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.organization_url",
+            "type": "string",
+            "tags": [],
+            "label": "organization_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
@@ -107,112 +121,128 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "cloud",
       "id": "def-public.CloudSetup",
       "type": "Interface",
+      "tags": [],
       "label": "CloudSetup",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "x-pack/plugins/cloud/public/plugin.ts",
+        "lineNumber": 35
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "cloud",
           "id": "def-public.CloudSetup.cloudId",
           "type": "string",
+          "tags": [],
           "label": "cloudId",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 35
-          },
           "signature": [
             "string | undefined"
-          ]
-        },
-        {
-          "tags": [],
-          "id": "def-public.CloudSetup.cname",
-          "type": "string",
-          "label": "cname",
-          "description": [],
+          ],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
             "lineNumber": 36
           },
-          "signature": [
-            "string | undefined"
-          ]
+          "deprecated": false
         },
         {
-          "tags": [],
-          "id": "def-public.CloudSetup.baseUrl",
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.cname",
           "type": "string",
-          "label": "baseUrl",
+          "tags": [],
+          "label": "cname",
           "description": [],
+          "signature": [
+            "string | undefined"
+          ],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
             "lineNumber": 37
           },
-          "signature": [
-            "string | undefined"
-          ]
+          "deprecated": false
         },
         {
-          "tags": [],
-          "id": "def-public.CloudSetup.deploymentUrl",
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.baseUrl",
           "type": "string",
-          "label": "deploymentUrl",
+          "tags": [],
+          "label": "baseUrl",
           "description": [],
+          "signature": [
+            "string | undefined"
+          ],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
             "lineNumber": 38
           },
-          "signature": [
-            "string | undefined"
-          ]
+          "deprecated": false
         },
         {
-          "tags": [],
-          "id": "def-public.CloudSetup.profileUrl",
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.deploymentUrl",
           "type": "string",
-          "label": "profileUrl",
+          "tags": [],
+          "label": "deploymentUrl",
           "description": [],
+          "signature": [
+            "string | undefined"
+          ],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
             "lineNumber": 39
           },
-          "signature": [
-            "string | undefined"
-          ]
+          "deprecated": false
         },
         {
-          "tags": [],
-          "id": "def-public.CloudSetup.organizationUrl",
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.profileUrl",
           "type": "string",
-          "label": "organizationUrl",
+          "tags": [],
+          "label": "profileUrl",
           "description": [],
+          "signature": [
+            "string | undefined"
+          ],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
             "lineNumber": 40
           },
-          "signature": [
-            "string | undefined"
-          ]
+          "deprecated": false
         },
         {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.organizationUrl",
+          "type": "string",
           "tags": [],
+          "label": "organizationUrl",
+          "description": [],
+          "signature": [
+            "string | undefined"
+          ],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 41
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
           "id": "def-public.CloudSetup.isCloudEnabled",
           "type": "boolean",
+          "tags": [],
           "label": "isCloudEnabled",
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 41
-          }
+            "lineNumber": 42
+          },
+          "deprecated": false
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/cloud/public/plugin.ts",
-        "lineNumber": 34
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }
@@ -225,56 +255,80 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "cloud",
       "id": "def-server.CloudSetup",
       "type": "Interface",
+      "tags": [],
       "label": "CloudSetup",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "x-pack/plugins/cloud/server/plugin.ts",
+        "lineNumber": 19
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "cloud",
           "id": "def-server.CloudSetup.cloudId",
           "type": "string",
+          "tags": [],
           "label": "cloudId",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 19
-          },
           "signature": [
             "string | undefined"
-          ]
-        },
-        {
-          "tags": [],
-          "id": "def-server.CloudSetup.isCloudEnabled",
-          "type": "boolean",
-          "label": "isCloudEnabled",
-          "description": [],
+          ],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
             "lineNumber": 20
-          }
+          },
+          "deprecated": false
         },
         {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.deploymentId",
+          "type": "string",
           "tags": [],
-          "id": "def-server.CloudSetup.apm",
-          "type": "Object",
-          "label": "apm",
+          "label": "deploymentId",
           "description": [],
+          "signature": [
+            "string | undefined"
+          ],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
             "lineNumber": 21
           },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.isCloudEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isCloudEnabled",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/server/plugin.ts",
+            "lineNumber": 22
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.apm",
+          "type": "Object",
+          "tags": [],
+          "label": "apm",
+          "description": [],
           "signature": [
             "{ url?: string | undefined; secretToken?: string | undefined; }"
-          ]
+          ],
+          "source": {
+            "path": "x-pack/plugins/cloud/server/plugin.ts",
+            "lineNumber": 23
+          },
+          "deprecated": false
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/cloud/server/plugin.ts",
-        "lineNumber": 18
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }

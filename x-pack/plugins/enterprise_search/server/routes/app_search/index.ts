@@ -16,9 +16,11 @@ import { registerEnginesRoutes } from './engines';
 import { registerOnboardingRoutes } from './onboarding';
 import { registerResultSettingsRoutes } from './result_settings';
 import { registerRoleMappingsRoutes } from './role_mappings';
+import { registerSchemaRoutes } from './schema';
 import { registerSearchSettingsRoutes } from './search_settings';
 import { registerSearchUIRoutes } from './search_ui';
 import { registerSettingsRoutes } from './settings';
+import { registerSourceEnginesRoutes } from './source_engines';
 import { registerSynonymsRoutes } from './synonyms';
 
 export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
@@ -28,6 +30,8 @@ export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerAnalyticsRoutes(dependencies);
   registerDocumentsRoutes(dependencies);
   registerDocumentRoutes(dependencies);
+  registerSchemaRoutes(dependencies);
+  registerSourceEnginesRoutes(dependencies);
   registerCurationsRoutes(dependencies);
   registerSynonymsRoutes(dependencies);
   registerSearchSettingsRoutes(dependencies);

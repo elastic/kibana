@@ -167,6 +167,8 @@ function AvailablePackages() {
       title={title}
       controls={controls}
       list={packages}
+      setSelectedCategory={setSelectedCategory}
+      showMissingIntegrationMessage
     />
   );
 }

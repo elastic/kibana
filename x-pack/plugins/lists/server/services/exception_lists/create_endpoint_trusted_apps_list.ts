@@ -13,7 +13,8 @@ import {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_NAME,
 } from '../../../common/constants';
-import { ExceptionListSchema, ExceptionListSoSchema, Version } from '../../../common/schemas';
+import { ExceptionListSchema, Version } from '../../../common/schemas';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
 

@@ -107,24 +107,8 @@ export function registerNewRoleMappingRoute({
   );
 }
 
-export function registerResetRoleMappingRoute({
-  router,
-  enterpriseSearchRequestHandler,
-}: RouteDependencies) {
-  router.post(
-    {
-      path: '/api/app_search/role_mappings/reset',
-      validate: false,
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/role_mappings/reset',
-    })
-  );
-}
-
 export const registerRoleMappingsRoutes = (dependencies: RouteDependencies) => {
   registerRoleMappingsRoute(dependencies);
   registerRoleMappingRoute(dependencies);
   registerNewRoleMappingRoute(dependencies);
-  registerResetRoleMappingRoute(dependencies);
 };

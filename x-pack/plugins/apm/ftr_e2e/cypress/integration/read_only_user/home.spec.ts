@@ -45,4 +45,19 @@ describe('Home page', () => {
     cy.contains('opbeans-java');
     cy.contains('opbeans-node');
   });
+
+  describe('navigations', () => {
+    it('navigates to service overview page with transaction type', () => {
+      const kuery = encodeURIComponent(
+        'transaction.name : "taskManager markAvailableTasksAsClaimed"'
+      );
+      cy.visit(`${baseUrl}&kuery=${kuery}`);
+      cy.contains('taskManager');
+      cy.contains('kibana').click();
+      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+        'have.value',
+        'taskManager'
+      );
+    });
+  });
 });
