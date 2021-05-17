@@ -7,11 +7,11 @@
 
 import { getSearchListItemResponseMock } from '../../../common/schemas/response/search_list_item_schema.mock';
 import { LIST_INDEX, LIST_ITEM_ID, TYPE, VALUE } from '../../../common/constants.mock';
+import { SearchListItemArraySchema } from '../../../common/schemas';
 import {
   getSearchEsListItemMock,
   getSearchListItemMock,
-} from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
-import { SearchListItemArraySchema } from '../../../common/schemas';
+} from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import { transformElasticNamedSearchToListItem } from './transform_elastic_named_search_to_list_item';
 

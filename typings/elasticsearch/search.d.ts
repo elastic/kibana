@@ -49,7 +49,7 @@ type ValueTypeOfField<T> = T extends Record<string, string | number>
 
 type MaybeArray<T> = T | T[];
 
-type Fields = MaybeArray<string | estypes.DateField>;
+type Fields = Exclude<Required<estypes.SearchRequest>['body']['fields'], undefined>;
 type DocValueFields = MaybeArray<string | estypes.DocValueField>;
 
 export type SearchHit<
@@ -58,7 +58,7 @@ export type SearchHit<
   TDocValueFields extends DocValueFields | undefined = undefined
 > = Omit<estypes.Hit, '_source' | 'fields'> &
   (TSource extends false ? {} : { _source: TSource }) &
-  (TFields extends estypes.Fields
+  (TFields extends Fields
     ? {
         fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>;
       }
@@ -77,7 +77,7 @@ type HitsOf<
 > = Array<
   SearchHit<
     TOptions extends { _source: false } ? undefined : TDocument,
-    TOptions extends { fields: estypes.Fields } ? TOptions['fields'] : undefined,
+    TOptions extends { fields: Fields } ? TOptions['fields'] : undefined,
     TOptions extends { docvalue_fields: DocValueFields } ? TOptions['docvalue_fields'] : undefined
   >
 >;

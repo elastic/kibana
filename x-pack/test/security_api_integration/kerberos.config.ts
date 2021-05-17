@@ -32,11 +32,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'xpack.security.authc.realms.kerberos.kerb1.order=0',
         `xpack.security.authc.realms.kerberos.kerb1.keytab.path=${kerberosKeytabPath}`,
       ],
-      serverEnvVars: {
-        // We're going to use the same TGT multiple times and during a short period of time, so we
-        // have to disable replay cache so that ES doesn't complain about that.
-        ES_JAVA_OPTS: `-Djava.security.krb5.conf=${kerberosConfigPath} -Dsun.security.krb5.rcache=none`,
-      },
+
+      // We're going to use the same TGT multiple times and during a short period of time, so we
+      // have to disable replay cache so that ES doesn't complain about that.
+      esJavaOpts: `-Djava.security.krb5.conf=${kerberosConfigPath} -Dsun.security.krb5.rcache=none`,
     },
 
     kbnTestServer: {
