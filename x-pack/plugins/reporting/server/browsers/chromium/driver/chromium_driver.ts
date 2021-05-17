@@ -10,19 +10,14 @@ import { map, truncate } from 'lodash';
 import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
-import { KBN_SCREENSHOT_MODE_HEADER } from '../../../../../../../src/plugins/screenshot_mode/server';
 import { getDisallowedOutgoingUrlError } from '../';
+import { ReportingCore } from '../../..';
+import { KBN_SCREENSHOT_MODE_HEADER } from '../../../../../../../src/plugins/screenshot_mode/server';
 import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
 import { LevelLogger } from '../../../lib';
 import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
 import { ElementPosition } from '../../../lib/screenshots';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
-
-// We use "require" here to ensure the import does not have external references due to code bundling that
-// commonly happens during transpiling which would be missing in the environment puppeteer creates.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const setScreenshotModeEnabled = require('../../../../../../../src/plugins/screenshot_mode/server')
-  .setScreenshotModeEnabled;
 
 export interface ChromiumDriverOptions {
   inspect: boolean;
@@ -66,8 +61,14 @@ export class HeadlessChromiumDriver {
 
   private listenersAttached = false;
   private interceptedCount = 0;
+  private core: ReportingCore;
 
-  constructor(page: puppeteer.Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
+  constructor(
+    core: ReportingCore,
+    page: puppeteer.Page,
+    { inspect, networkPolicy }: ChromiumDriverOptions
+  ) {
+    this.core = core;
     this.page = page;
     this.inspect = inspect;
     this.networkPolicy = networkPolicy;
@@ -105,7 +106,8 @@ export class HeadlessChromiumDriver {
     // Reset intercepted request count
     this.interceptedCount = 0;
 
-    await this.page.evaluateOnNewDocument(setScreenshotModeEnabled);
+    const enableScreenshotMode = this.core.enableScreenshotMode();
+    await this.page.evaluateOnNewDocument(enableScreenshotMode);
     await this.page.setRequestInterception(true);
 
     this.registerListeners(conditionalHeaders, logger);

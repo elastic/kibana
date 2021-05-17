@@ -10,7 +10,11 @@ import { Plugin, CoreSetup } from '../../../core/server';
 import { KBN_SCREENSHOT_MODE_HEADER } from '../common';
 import { ScreenshotModeRequestHandlerContext } from './types';
 
-export class ScreenshotModePlugin implements Plugin {
+export interface ScreenshotModePluginSetup {
+  setScreenshotModeEnabled: () => void;
+}
+
+export class ScreenshotModePlugin implements Plugin<ScreenshotModePluginSetup> {
   public setup(core: CoreSetup) {
     core.http.registerRouteHandlerContext<ScreenshotModeRequestHandlerContext, 'screenshotMode'>(
       'screenshotMode',
@@ -22,6 +26,15 @@ export class ScreenshotModePlugin implements Plugin {
         };
       }
     );
+
+    // We use "require" here to ensure the import does not have external references due to code bundling that
+    // commonly happens during transpiling which would be missing in the environment puppeteer creates.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { setScreenshotModeEnabled } = require('../');
+
+    return {
+      setScreenshotModeEnabled,
+    };
   }
 
   public start() {}
