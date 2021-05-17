@@ -7,11 +7,10 @@
 
 import { isEmpty } from 'lodash';
 
-import {
-  CreateExceptionListItemSchema,
-  EntriesArray,
-  ExceptionListItemSchema,
-} from '../shared_imports';
+import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+
+import { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../shared_imports';
+
 import { Type, JobStatus, Threshold, ThresholdNormalized } from './schemas/common/schemas';
 
 export const hasLargeValueItem = (
