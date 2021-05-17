@@ -17,8 +17,24 @@ import {
   DefaultSeverityMappingArray,
   DefaultThreatArray,
   DefaultThrottleNull,
+  DefaultToString,
+  From,
+  RiskScoreMapping,
+  machine_learning_job_id,
+  risk_score,
+  threat_index,
+  concurrent_searches,
+  items_per_search,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+  threat_language,
+  threat_indicator_path,
+  Threats,
+  type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import { DefaultListArray, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   description,
   anomaly_threshold,
@@ -28,22 +44,17 @@ import {
   timeline_id,
   timeline_title,
   meta,
-  machine_learning_job_id,
-  risk_score,
   MaxSignals,
   name,
   severity,
   Tags,
   To,
-  type,
-  Threats,
   threshold,
   ThrottleOrNull,
   note,
   References,
   Enabled,
   FalsePositives,
-  From,
   Interval,
   language,
   query,
@@ -54,28 +65,11 @@ import {
   rule_name_override,
   timestamp_override,
   Author,
-  RiskScoreMapping,
   SeverityMapping,
   event_category_override,
 } from '../common/schemas';
-import {
-  threat_index,
-  concurrent_searches,
-  items_per_search,
-  threat_query,
-  threat_filters,
-  threat_mapping,
-  threat_language,
-  threat_indicator_path,
-} from '../types/threat_mapping';
 
-import {
-  DefaultStringArray,
-  DefaultBooleanFalse,
-  DefaultToString,
-  DefaultListArray,
-  ListArray,
-} from '../types';
+import { DefaultStringArray, DefaultBooleanFalse } from '../types';
 
 /**
  * Big differences between this schema and the createRulesSchema

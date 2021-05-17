@@ -8,17 +8,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
 
-import { RiskScore } from '../types/risk_score';
 import { UUID } from '../types/uuid';
 import { IsoDateString } from '../types/iso_date_string';
 import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
 import { PositiveInteger } from '../types/positive_integer';
 import { NonEmptyString } from '../types/non_empty_string';
-import { parseScheduleDates } from '../../parse_schedule_dates';
-import { machine_learning_job_id_normalized } from '../types/normalized_ml_job_id';
-
 export const author = t.array(t.string);
 export type Author = t.TypeOf<typeof author>;
 
@@ -70,23 +65,6 @@ export type Filters = t.TypeOf<typeof filters>; // Filters are not easily type-a
 
 export const filtersOrUndefined = t.union([filters, t.undefined]);
 export type FiltersOrUndefined = t.TypeOf<typeof filtersOrUndefined>;
-
-const stringValidator = (input: unknown): input is string => typeof input === 'string';
-export const from = new t.Type<string, string, unknown>(
-  'From',
-  t.string.is,
-  (input, context): Either<t.Errors, string> => {
-    if (stringValidator(input) && parseScheduleDates(input) == null) {
-      return t.failure(input, context, 'Failed to parse "from" on rule param');
-    }
-    return t.string.validate(input, context);
-  },
-  t.identity
-);
-export type From = t.TypeOf<typeof from>;
-
-export const fromOrUndefined = t.union([from, t.undefined]);
-export type FromOrUndefined = t.TypeOf<typeof fromOrUndefined>;
 
 export const immutable = t.boolean;
 export type Immutable = t.TypeOf<typeof immutable>;
@@ -195,12 +173,6 @@ export type AnomalyThreshold = t.TypeOf<typeof PositiveInteger>;
 export const anomalyThresholdOrUndefined = t.union([anomaly_threshold, t.undefined]);
 export type AnomalyThresholdOrUndefined = t.TypeOf<typeof anomalyThresholdOrUndefined>;
 
-export const machine_learning_job_id = t.union([t.string, machine_learning_job_id_normalized]);
-export type MachineLearningJobId = t.TypeOf<typeof machine_learning_job_id>;
-
-export const machineLearningJobIdOrUndefined = t.union([machine_learning_job_id, t.undefined]);
-export type MachineLearningJobIdOrUndefined = t.TypeOf<typeof machineLearningJobIdOrUndefined>;
-
 /**
  * Note that this is a non-exact io-ts type as we allow extra meta information
  * to be added to the meta object
@@ -247,47 +219,6 @@ export type Operator = t.TypeOf<typeof operator>;
 export enum OperatorEnum {
   EQUALS = 'equals',
 }
-
-export const risk_score = RiskScore;
-export type RiskScore = t.TypeOf<typeof risk_score>;
-
-export const riskScoreOrUndefined = t.union([risk_score, t.undefined]);
-export type RiskScoreOrUndefined = t.TypeOf<typeof riskScoreOrUndefined>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const risk_score_mapping_field = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const risk_score_mapping_value = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const risk_score_mapping_item = t.exact(
-  t.type({
-    field: risk_score_mapping_field,
-    value: risk_score_mapping_value,
-    operator,
-    risk_score: riskScoreOrUndefined,
-  })
-);
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const risk_score_mapping = t.array(risk_score_mapping_item);
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type RiskScoreMapping = t.TypeOf<typeof risk_score_mapping>;
-
-export const riskScoreMappingOrUndefined = t.union([risk_score_mapping, t.undefined]);
-export type RiskScoreMappingOrUndefined = t.TypeOf<typeof riskScoreMappingOrUndefined>;
 
 export const rule_name_override = t.string;
 export type RuleNameOverride = t.TypeOf<typeof rule_name_override>;
@@ -384,19 +315,6 @@ export type To = t.TypeOf<typeof to>;
 export const toOrUndefined = t.union([to, t.undefined]);
 export type ToOrUndefined = t.TypeOf<typeof toOrUndefined>;
 
-export const type = t.keyof({
-  eql: null,
-  machine_learning: null,
-  query: null,
-  saved_query: null,
-  threshold: null,
-  threat_match: null,
-});
-export type Type = t.TypeOf<typeof type>;
-
-export const typeOrUndefined = t.union([type, t.undefined]);
-export type TypeOrUndefined = t.TypeOf<typeof typeOrUndefined>;
-
 export const queryFilter = t.string;
 export type QueryFilter = t.TypeOf<typeof queryFilter>;
 
@@ -449,152 +367,6 @@ export const fields = t.array(t.string);
 export type Fields = t.TypeOf<typeof fields>;
 export const fieldsOrUndefined = t.union([fields, t.undefined]);
 export type FieldsOrUndefined = t.TypeOf<typeof fieldsOrUndefined>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_framework = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_tactic_id = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_tactic_name = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_tactic_reference = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_tactic = t.type({
-  id: threat_tactic_id,
-  name: threat_tactic_name,
-  reference: threat_tactic_reference,
-});
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type ThreatTactic = t.TypeOf<typeof threat_tactic>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_subtechnique_id = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_subtechnique_name = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_subtechnique_reference = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_subtechnique = t.type({
-  id: threat_subtechnique_id,
-  name: threat_subtechnique_name,
-  reference: threat_subtechnique_reference,
-});
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type ThreatSubtechnique = t.TypeOf<typeof threat_subtechnique>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_subtechniques = t.array(threat_subtechnique);
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_technique_id = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_technique_name = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_technique_reference = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_technique = t.intersection([
-  t.exact(
-    t.type({
-      id: threat_technique_id,
-      name: threat_technique_name,
-      reference: threat_technique_reference,
-    })
-  ),
-  t.exact(
-    t.partial({
-      subtechnique: threat_subtechniques,
-    })
-  ),
-]);
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type ThreatTechnique = t.TypeOf<typeof threat_technique>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat_techniques = t.array(threat_technique);
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threat = t.intersection([
-  t.exact(
-    t.type({
-      framework: threat_framework,
-      tactic: threat_tactic,
-    })
-  ),
-  t.exact(
-    t.partial({
-      technique: threat_techniques,
-    })
-  ),
-]);
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type Threat = t.TypeOf<typeof threat>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const threats = t.array(threat);
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type Threats = t.TypeOf<typeof threats>;
-
-export const threatsOrUndefined = t.union([threats, t.undefined]);
-export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 
 export const thresholdField = t.exact(
   t.type({

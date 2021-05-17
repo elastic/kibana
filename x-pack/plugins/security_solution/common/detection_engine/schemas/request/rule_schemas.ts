@@ -7,9 +7,12 @@
 
 import * as t from 'io-ts';
 
-import { actions } from '@kbn/securitysolution-io-ts-alerting-types';
-import { listArray } from '../types/lists';
 import {
+  actions,
+  from,
+  risk_score,
+  machine_learning_job_id,
+  risk_score_mapping,
   threat_filters,
   threat_query,
   threat_mapping,
@@ -17,14 +20,15 @@ import {
   threat_indicator_path,
   concurrent_searches,
   items_per_search,
-} from '../types/threat_mapping';
+  threats,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   id,
   index,
   filters,
   event_category_override,
-  risk_score_mapping,
   severity_mapping,
   building_block_type,
   note,
@@ -37,16 +41,12 @@ import {
   author,
   description,
   false_positives,
-  from,
   rule_id,
   immutable,
   output_index,
   query,
-  machine_learning_job_id,
   max_signals,
-  risk_score,
   severity,
-  threats,
   to,
   references,
   version,

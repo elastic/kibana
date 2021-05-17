@@ -12,9 +12,23 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
   actions,
+  from,
+  machine_learning_job_id,
+  risk_score,
   DefaultRiskScoreMappingArray,
   DefaultSeverityMappingArray,
+  threat_index,
+  concurrent_searches,
+  items_per_search,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+  threat_language,
+  threat_indicator_path,
+  threats,
+  type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import { DefaultListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { isMlRule } from '../../../machine_learning/helpers';
 import { isThresholdRule } from '../../utils';
 import {
@@ -23,7 +37,6 @@ import {
   enabled,
   event_category_override,
   false_positives,
-  from,
   id,
   immutable,
   index,
@@ -33,22 +46,18 @@ import {
   name,
   output_index,
   max_signals,
-  machine_learning_job_id,
   query,
   references,
   severity,
   updated_by,
   tags,
   to,
-  risk_score,
   created_at,
   created_by,
   updated_at,
   saved_id,
   timeline_id,
   timeline_title,
-  type,
-  threats,
   threshold,
   throttle,
   job_status,
@@ -66,18 +75,7 @@ import {
   rule_name_override,
   timestamp_override,
 } from '../common/schemas';
-import {
-  threat_index,
-  concurrent_searches,
-  items_per_search,
-  threat_query,
-  threat_filters,
-  threat_mapping,
-  threat_language,
-  threat_indicator_path,
-} from '../types/threat_mapping';
 
-import { DefaultListArray } from '../types/lists_default_array';
 import { DefaultStringArray } from '../types';
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
 

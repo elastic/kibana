@@ -7,11 +7,7 @@
 
 import uuid from 'uuid';
 import { addIdToItem } from '@kbn/securitysolution-utils';
-import {
-  ThreatMap,
-  threatMap,
-  ThreatMapping,
-} from '../../../../common/detection_engine/schemas/types';
+import { ThreatMap, threatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { IndexPattern, IFieldType } from '../../../../../../../src/plugins/data/common';
 import { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';

@@ -7,6 +7,22 @@
 
 import { pickBy, isEmpty } from 'lodash/fp';
 import {
+  FromOrUndefined,
+  MachineLearningJobIdOrUndefined,
+  RiskScoreMappingOrUndefined,
+  RiskScoreOrUndefined,
+  ConcurrentSearchesOrUndefined,
+  ItemsPerSearchOrUndefined,
+  ThreatFiltersOrUndefined,
+  ThreatIndexOrUndefined,
+  ThreatLanguageOrUndefined,
+  ThreatMappingOrUndefined,
+  ThreatQueryOrUndefined,
+  ThreatsOrUndefined,
+  TypeOrUndefined,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import {
   DescriptionOrUndefined,
   AnomalyThresholdOrUndefined,
   QueryOrUndefined,
@@ -14,45 +30,29 @@ import {
   SavedIdOrUndefined,
   TimelineIdOrUndefined,
   TimelineTitleOrUndefined,
-  MachineLearningJobIdOrUndefined,
   IndexOrUndefined,
   NoteOrUndefined,
   MetaOrUndefined,
   VersionOrUndefined,
   FalsePositivesOrUndefined,
-  FromOrUndefined,
   OutputIndexOrUndefined,
   IntervalOrUndefined,
   MaxSignalsOrUndefined,
-  RiskScoreOrUndefined,
   NameOrUndefined,
   SeverityOrUndefined,
   TagsOrUndefined,
   ToOrUndefined,
-  ThreatsOrUndefined,
   ThresholdOrUndefined,
-  TypeOrUndefined,
   ReferencesOrUndefined,
   AuthorOrUndefined,
   BuildingBlockTypeOrUndefined,
   LicenseOrUndefined,
-  RiskScoreMappingOrUndefined,
   RuleNameOverrideOrUndefined,
   SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
-import {
-  ConcurrentSearchesOrUndefined,
-  ItemsPerSearchOrUndefined,
-  ListArrayOrUndefined,
-  ThreatFiltersOrUndefined,
-  ThreatIndexOrUndefined,
-  ThreatLanguageOrUndefined,
-  ThreatMappingOrUndefined,
-  ThreatQueryOrUndefined,
-} from '../../../../common/detection_engine/schemas/types';
 
 export const calculateInterval = (
   interval: string | undefined,

@@ -6,19 +6,31 @@
  */
 
 import {
+  From,
+  MachineLearningJobIdOrUndefined,
+  RiskScore,
+  RiskScoreMappingOrUndefined,
+  ThreatIndexOrUndefined,
+  ThreatQueryOrUndefined,
+  ThreatMappingOrUndefined,
+  ThreatLanguageOrUndefined,
+  ConcurrentSearchesOrUndefined,
+  ItemsPerSearchOrUndefined,
+  ThreatIndicatorPathOrUndefined,
+  ThreatsOrUndefined,
+  Type,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import {
   AnomalyThresholdOrUndefined,
   Description,
   NoteOrUndefined,
-  ThreatsOrUndefined,
   ThresholdOrUndefined,
   FalsePositives,
-  From,
   Immutable,
   IndexOrUndefined,
   LanguageOrUndefined,
   MaxSignals,
-  MachineLearningJobIdOrUndefined,
-  RiskScore,
   OutputIndex,
   QueryOrUndefined,
   References,
@@ -33,26 +45,14 @@ import {
   AuthorOrUndefined,
   BuildingBlockTypeOrUndefined,
   LicenseOrUndefined,
-  RiskScoreMappingOrUndefined,
   RuleNameOverrideOrUndefined,
   SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
-  Type,
   EventCategoryOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
-import {
-  ThreatIndexOrUndefined,
-  ThreatQueryOrUndefined,
-  ThreatMappingOrUndefined,
-  ThreatLanguageOrUndefined,
-  ConcurrentSearchesOrUndefined,
-  ItemsPerSearchOrUndefined,
-  ThreatIndicatorPathOrUndefined,
-} from '../../../common/detection_engine/schemas/types/threat_mapping';
 
 import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
-import { ListArrayOrUndefined } from '../../../common/detection_engine/schemas/types';
 import { AlertTypeParams } from '../../../../alerting/common';
 
 export type PartialFilter = Partial<Filter>;

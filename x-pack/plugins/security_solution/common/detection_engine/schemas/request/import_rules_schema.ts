@@ -17,9 +17,25 @@ import {
   DefaultSeverityMappingArray,
   DefaultThreatArray,
   DefaultThrottleNull,
+  DefaultToString,
+  From,
+  machine_learning_job_id,
+  risk_score,
+  RiskScoreMapping,
+  threat_index,
+  items_per_search,
+  concurrent_searches,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+  threat_language,
+  threat_indicator_path,
+  Threats,
+  type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { DefaultVersionNumber } from '@kbn/securitysolution-io-ts-types';
+import { DefaultListArray, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   description,
   anomaly_threshold,
@@ -31,15 +47,11 @@ import {
   timeline_id,
   timeline_title,
   meta,
-  machine_learning_job_id,
-  risk_score,
   MaxSignals,
   name,
   severity,
   Tags,
   To,
-  type,
-  Threats,
   threshold,
   ThrottleOrNull,
   note,
@@ -47,7 +59,6 @@ import {
   References,
   Enabled,
   FalsePositives,
-  From,
   Interval,
   language,
   query,
@@ -62,29 +73,15 @@ import {
   rule_name_override,
   timestamp_override,
   Author,
-  RiskScoreMapping,
   SeverityMapping,
   event_category_override,
 } from '../common/schemas';
-import {
-  threat_index,
-  items_per_search,
-  concurrent_searches,
-  threat_query,
-  threat_filters,
-  threat_mapping,
-  threat_language,
-  threat_indicator_path,
-} from '../types/threat_mapping';
 
 import {
   DefaultStringArray,
   DefaultBooleanTrue,
-  DefaultToString,
   OnlyFalseAllowed,
   DefaultStringBooleanFalse,
-  DefaultListArray,
-  ListArray,
 } from '../types';
 
 /**

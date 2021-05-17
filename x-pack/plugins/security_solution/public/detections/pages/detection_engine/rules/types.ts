@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import { List } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  RiskScoreMapping,
+  ThreatIndex,
+  ThreatMapping,
+  Threats,
+  Type,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { AlertAction } from '../../../../../../alerting/common';
 import { Filter } from '../../../../../../../../src/plugins/data/common';
@@ -15,20 +23,12 @@ import {
   Author,
   BuildingBlockType,
   License,
-  RiskScoreMapping,
   RuleNameOverride,
   SeverityMapping,
   SortOrder,
   TimestampOverride,
-  Type,
   Severity,
-  Threats,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  List,
-  ThreatIndex,
-  ThreatMapping,
-} from '../../../../../common/detection_engine/schemas/types';
 
 export interface EuiBasicTableSortTypes {
   field: string;

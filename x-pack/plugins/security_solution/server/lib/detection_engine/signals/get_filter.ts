@@ -6,12 +6,12 @@
  */
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { assertUnreachable } from '../../../../common/utility_types';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import {
   LanguageOrUndefined,
   QueryOrUndefined,
-  Type,
   SavedIdOrUndefined,
   IndexOrUndefined,
   Language,

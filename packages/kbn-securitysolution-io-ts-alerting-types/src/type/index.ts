@@ -8,8 +8,15 @@
 
 import * as t from 'io-ts';
 
-export const language = t.keyof({ eql: null, kuery: null, lucene: null });
-export type Language = t.TypeOf<typeof language>;
+export const type = t.keyof({
+  eql: null,
+  machine_learning: null,
+  query: null,
+  saved_query: null,
+  threshold: null,
+  threat_match: null,
+});
+export type Type = t.TypeOf<typeof type>;
 
-export const languageOrUndefined = t.union([language, t.undefined]);
-export type LanguageOrUndefined = t.TypeOf<typeof languageOrUndefined>;
+export const typeOrUndefined = t.union([type, t.undefined]);
+export type TypeOrUndefined = t.TypeOf<typeof typeOrUndefined>;

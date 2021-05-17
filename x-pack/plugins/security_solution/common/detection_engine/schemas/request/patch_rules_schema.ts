@@ -7,8 +7,25 @@
 
 import * as t from 'io-ts';
 
-import { actions } from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  actions,
+  from,
+  machine_learning_job_id,
+  risk_score,
+  risk_score_mapping,
+  threat_index,
+  concurrent_searches,
+  items_per_search,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+  threat_language,
+  threat_indicator_path,
+  threats,
+  type,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 
+import { listArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import {
   description,
   anomaly_threshold,
@@ -19,21 +36,16 @@ import {
   timeline_id,
   timeline_title,
   meta,
-  machine_learning_job_id,
-  risk_score,
   rule_id,
   name,
   severity,
-  type,
   note,
   version,
   false_positives,
   interval,
   max_signals,
-  from,
   enabled,
   tags,
-  threats,
   threshold,
   throttle,
   references,
@@ -46,21 +58,9 @@ import {
   license,
   rule_name_override,
   timestamp_override,
-  risk_score_mapping,
   severity_mapping,
   event_category_override,
 } from '../common/schemas';
-import {
-  threat_index,
-  concurrent_searches,
-  items_per_search,
-  threat_query,
-  threat_filters,
-  threat_mapping,
-  threat_language,
-  threat_indicator_path,
-} from '../types/threat_mapping';
-import { listArrayOrUndefined } from '../types/lists';
 
 /**
  * All of the patch elements should default to undefined if not set

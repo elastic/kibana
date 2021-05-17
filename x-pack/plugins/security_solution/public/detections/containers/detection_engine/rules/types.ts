@@ -7,28 +7,28 @@
 
 import * as t from 'io-ts';
 
+import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  SortOrder,
-  author,
-  building_block_type,
-  license,
   risk_score_mapping,
-  rule_name_override,
-  severity_mapping,
-  timestamp_override,
-  threshold,
-  type,
-  threats,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  listArray,
   threat_query,
   threat_index,
   threat_indicator_path,
   threat_mapping,
   threat_language,
   threat_filters,
-} from '../../../../../common/detection_engine/schemas/types';
+  threats,
+  type,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  SortOrder,
+  author,
+  building_block_type,
+  license,
+  rule_name_override,
+  severity_mapping,
+  timestamp_override,
+  threshold,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   CreateRulesSchema,
   PatchRulesSchema,
