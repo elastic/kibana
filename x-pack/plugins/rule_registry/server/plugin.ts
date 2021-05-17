@@ -5,27 +5,56 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
+import {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  Logger,
+  KibanaRequest,
+  CoreStart,
+  IContextProvider,
+} from 'src/core/server';
+import { SecurityPluginSetup } from '../../security/server';
 import { RuleDataPluginService } from './rule_data_plugin_service';
 import { RuleRegistryPluginConfig } from '.';
-
+import { AlertsClientFactory } from './alert_data_client/alert_client_factory';
+import { PluginStartContract as AlertingStart } from '../../alerting/server';
+import { SpacesPluginStart } from '../../spaces/server';
+import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
 export type RuleRegistryPluginSetupContract = RuleDataPluginService;
 export type RuleRegistryPluginStartContract = void;
 
+export interface RuleRegistryPluginsSetup {
+  security?: SecurityPluginSetup;
+}
+
+export interface RuleRegistryPluginsStart {
+  alerting: AlertingStart;
+  spaces?: SpacesPluginStart;
+}
+
 export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContract> {
-  constructor(private readonly initContext: PluginInitializerContext) {
-    this.initContext = initContext;
+  private readonly logger: Logger;
+  private readonly config: RuleRegistryPluginConfig;
+  private readonly alertsClientFactory: AlertsClientFactory;
+  private security: SecurityPluginSetup | undefined;
+
+  constructor(initContext: PluginInitializerContext) {
+    this.logger = initContext.logger.get();
+    this.config = initContext.config.get<RuleRegistryPluginConfig>();
+    this.alertsClientFactory = new AlertsClientFactory();
   }
 
-  public setup(core: CoreSetup): RuleRegistryPluginSetupContract {
-    const config = this.initContext.config.get<RuleRegistryPluginConfig>();
-
-    const logger = this.initContext.logger.get();
+  public setup(
+    core: CoreSetup,
+    plugins: RuleRegistryPluginsSetup
+  ): RuleRegistryPluginSetupContract {
+    this.security = plugins.security;
 
     const service = new RuleDataPluginService({
-      logger,
-      isWriteEnabled: config.write.enabled,
-      index: config.index,
+      logger: this.logger,
+      isWriteEnabled: this.config.write.enabled,
+      index: this.config.index,
       getClusterClient: async () => {
         const [coreStart] = await core.getStartServices();
 
@@ -37,13 +66,58 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
       const error = new Error('Failed installing assets');
       // @ts-ignore
       error.stack = originalError.stack;
-      logger.error(error);
+      this.logger.error(error);
     });
+
+    // ALERTS ROUTES
+    core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
+      'rac',
+      this.createRouteHandlerContext()
+    );
 
     return service;
   }
 
-  public start(): RuleRegistryPluginStartContract {}
+  public start(core: CoreStart, plugins: RuleRegistryPluginsStart) {
+    const { logger, alertsClientFactory, security } = this;
+
+    alertsClientFactory.initialize({
+      logger,
+      getSpaceId(request: KibanaRequest) {
+        return plugins.spaces?.spacesService.getSpaceId(request);
+      },
+      esClient: core.elasticsearch.client.asInternalUser,
+      // NOTE: Alerts share the authorization client with the alerting plugin
+      getAlertingAuthorization(request: KibanaRequest) {
+        return plugins.alerting.getAlertingAuthorizationWithRequest(request);
+      },
+      securityPluginSetup: security,
+    });
+
+    const getRacClientWithRequest = (request: KibanaRequest) => {
+      return alertsClientFactory.create(request);
+    };
+
+    return {
+      getRacClientWithRequest,
+      alerting: plugins.alerting,
+    };
+  }
+
+  private createRouteHandlerContext = (): IContextProvider<RacRequestHandlerContext, 'rac'> => {
+    const { alertsClientFactory } = this;
+    return async function alertsRouteHandlerContext(
+      context,
+      request
+    ): Promise<RacApiRequestHandlerContext> {
+      return {
+        getRacClient: async () => {
+          const createdClient = alertsClientFactory.create(request);
+          return createdClient;
+        },
+      };
+    };
+  };
 
   public stop() {}
 }
