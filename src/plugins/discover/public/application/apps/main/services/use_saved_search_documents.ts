@@ -52,10 +52,6 @@ export function useSavedSearchDocuments({
         .toPromise()
         .then(({ rawResponse }) => {
           return rawResponse.hits.hits;
-        })
-        .catch((error) => {
-          // If the request was aborted then no need to surface this error in the UI
-          if (error instanceof Error && error.name === 'AbortError') return;
         });
     },
     [indexPattern, services, stateContainer.appStateContainer, useNewFieldsApi, searchSource]

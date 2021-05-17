@@ -46,11 +46,6 @@ export function useSavedSearchTotalHits({
           subject.next({ state: fetchStatuses.COMPLETE, total: rawResponse.hits.total as number });
           return rawResponse.hits.total;
         },
-        error: (error) => {
-          if (error instanceof Error && error.name === 'AbortError') return;
-          data.search.showError(error);
-          return error;
-        },
       });
       return searchSourceFetch$.toPromise();
     },

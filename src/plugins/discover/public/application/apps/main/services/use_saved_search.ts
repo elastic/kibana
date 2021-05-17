@@ -147,21 +147,24 @@ export const useSavedSearch = ({
         .then((res) => {
           cache.current.fetchStatus = fetchStatuses.COMPLETE;
 
-          const newFieldCounts = calcFieldCounts(
-            resetFieldCounts ? {} : cache.current.fieldCounts,
-            res[0] as ElasticSearchHit[],
-            indexPattern
-          );
+          if (res[0]) {
+            const newFieldCounts = calcFieldCounts(
+              resetFieldCounts ? {} : cache.current.fieldCounts,
+              res[0] as ElasticSearchHit[],
+              indexPattern
+            );
 
-          savedSearch$.next({
-            state: fetchStatuses.COMPLETE,
-            rows: res[0] as ElasticSearchHit[],
-            inspectorAdapters,
-            fieldCounts: newFieldCounts,
-          });
-          cache.current.fieldCounts = newFieldCounts;
+            savedSearch$.next({
+              state: fetchStatuses.COMPLETE,
+              rows: res[0] as ElasticSearchHit[],
+              inspectorAdapters,
+              fieldCounts: newFieldCounts,
+            });
+            cache.current.fieldCounts = newFieldCounts;
+          }
         })
         .catch((error) => {
+          if (error instanceof Error && error.name === 'AbortError') return;
           cache.current.fetchStatus = fetchStatuses.ERROR;
           services.data.search.showError(error);
           savedSearch$.next({
