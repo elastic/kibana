@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { Fit, Position } from '@elastic/charts';
+import type { Fit, Position } from '@elastic/charts';
+import type { Style, Labels, PaletteOutput } from '../../../charts/public';
+import type { SchemaConfig } from '../../../visualizations/public';
+import type { ChartType, XyVisType } from '../../common';
+import type {
+  ExpressionValueCategoryAxis,
+  ExpressionValueSeriesParam,
+  ExpressionValueValueAxis,
+  ExpressionValueLabel,
+  ExpressionValueThresholdLine,
+  ExpressionValueTimeMarker,
+  ExpressionValueXYDimension,
+} from '../expression_functions';
 
-import { Style, Labels, PaletteOutput } from '../../../charts/public';
-import { SchemaConfig } from '../../../visualizations/public';
-
-import { ChartType, XyVisType } from '../../common';
-import { ExpressionValueCategoryAxis } from '../expression_functions/category_axis';
-import { ExpressionValueSeriesParam } from '../expression_functions/series_param';
-import { ExpressionValueValueAxis } from '../expression_functions/value_axis';
-import { ExpressionValueLabel } from '../expression_functions/label';
-import { ExpressionValueThresholdLine } from '../expression_functions/threshold_line';
-import { ExpressionValueTimeMarker } from '../expression_functions/time_marker';
-import { ExpressionValueXYDimension } from '../expression_functions/xy_dimension';
-import {
+import type {
   ChartMode,
   AxisMode,
   AxisType,

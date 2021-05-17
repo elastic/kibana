@@ -21,10 +21,12 @@ import {
   setPalettesService,
   setTrackUiMetric,
 } from './services';
+
 import { visTypesDefinitions } from './vis_types';
 import { LEGACY_CHARTS_LIBRARY } from '../common';
 import { xyVisRenderer } from './vis_renderer';
-import { getExpressionFunctionsRegister } from './expression_functions_register';
+
+import * as expressionFunctions from './expression_functions';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeXyPluginSetup {}
@@ -67,18 +69,17 @@ export class VisTypeXyPlugin
       setPalettesService(charts.palettes);
 
       expressions.registerRenderer(xyVisRenderer);
+      expressions.registerFunction(expressionFunctions.visTypeXyVisFn);
+      expressions.registerFunction(expressionFunctions.categoryAxis);
+      expressions.registerFunction(expressionFunctions.timeMarker);
+      expressions.registerFunction(expressionFunctions.valueAxis);
+      expressions.registerFunction(expressionFunctions.seriesParam);
+      expressions.registerFunction(expressionFunctions.thresholdLine);
+      expressions.registerFunction(expressionFunctions.label);
+      expressions.registerFunction(expressionFunctions.visScale);
+      expressions.registerFunction(expressionFunctions.xyDimension);
 
-      const expressionFunctionsRegister = getExpressionFunctionsRegister(expressions);
-
-      visTypesDefinitions.forEach((item) => {
-        visualizations.createBaseVisualization({
-          setup: async (vis) => {
-            await expressionFunctionsRegister();
-            return vis;
-          },
-          ...item,
-        });
-      });
+      visTypesDefinitions.forEach(visualizations.createBaseVisualization);
     }
 
     setTrackUiMetric(usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_xy'));
