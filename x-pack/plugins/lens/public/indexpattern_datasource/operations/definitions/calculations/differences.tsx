@@ -18,7 +18,7 @@ import {
 } from './utils';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn } from '../helpers';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 import { Markdown } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const OPERATION_NAME = 'differences';
@@ -74,14 +74,6 @@ export const derivativeOperation: OperationDefinition<
     return dateBasedOperationToExpression(layer, columnId, 'derivative');
   },
   buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
-    let filter = previousColumn?.filter;
-    if (columnParams) {
-      if ('kql' in columnParams) {
-        filter = { query: columnParams.kql ?? '', language: 'kuery' };
-      } else if ('lucene' in columnParams) {
-        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
-      }
-    }
     const ref = layer.columns[referenceIds[0]];
     return {
       label: ofName(ref?.label, previousColumn?.timeScale),
@@ -91,7 +83,7 @@ export const derivativeOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
-      filter,
+      filter: getFilter(previousColumn, columnParams),
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },

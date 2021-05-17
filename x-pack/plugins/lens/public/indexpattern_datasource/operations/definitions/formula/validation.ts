@@ -24,44 +24,43 @@ import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinitio
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import type { TinymathNodeTypes } from './types';
 
-const validationErrors = {
-  missingField: { message: 'missing field', type: { variablesLength: 1, variablesList: 'string' } },
+interface ValidationErrors {
+  missingField: { message: string; type: { variablesLength: number; variablesList: string } };
   missingOperation: {
-    message: 'missing operation',
-    type: { operationLength: 1, operationsList: 'string' },
-  },
+    message: string;
+    type: { operationLength: number; operationsList: string };
+  };
   missingParameter: {
-    message: 'missing parameter',
-    type: { operation: 'string', params: 'string' },
-  },
+    message: string;
+    type: { operation: string; params: string };
+  };
   wrongTypeParameter: {
-    message: 'wrong type parameter',
-    type: { operation: 'string', params: 'string' },
-  },
+    message: string;
+    type: { operation: string; params: string };
+  };
   wrongFirstArgument: {
-    message: 'wrong first argument',
-    type: { operation: 'string', type: 'string', argument: 'any' as string | number },
-  },
-  cannotAcceptParameter: { message: 'cannot accept parameter', type: { operation: 'string' } },
-  shouldNotHaveField: { message: 'operation should not have field', type: { operation: 'string' } },
-  tooManyArguments: { message: 'too many arguments', type: { operation: 'string' } },
+    message: string;
+    type: { operation: string; type: string; argument: string | number };
+  };
+  cannotAcceptParameter: { message: string; type: { operation: string } };
+  shouldNotHaveField: { message: string; type: { operation: string } };
+  tooManyArguments: { message: string; type: { operation: string } };
   fieldWithNoOperation: {
-    message: 'unexpected field with no operation',
-    type: { field: 'string' },
-  },
-  failedParsing: { message: 'Failed to parse expression', type: { expression: 'string' } },
+    message: string;
+    type: { field: string };
+  };
+  failedParsing: { message: string; type: { expression: string } };
   duplicateArgument: {
-    message: 'duplicate argument',
-    type: { operation: 'string', params: 'string' },
-  },
+    message: string;
+    type: { operation: string; params: string };
+  };
   missingMathArgument: {
-    message: 'missing math argument',
-    type: { operation: 'string', count: 1, params: 'string' },
-  },
-};
-export const errorsLookup = new Set(Object.values(validationErrors).map(({ message }) => message));
-type ErrorTypes = keyof typeof validationErrors;
-type ErrorValues<K extends ErrorTypes> = typeof validationErrors[K]['type'];
+    message: string;
+    type: { operation: string; count: number; params: string };
+  };
+}
+type ErrorTypes = keyof ValidationErrors;
+type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 
 export interface ErrorWrapper {
   message: string;
@@ -70,7 +69,7 @@ export interface ErrorWrapper {
 }
 
 export function isParsingError(message: string) {
-  return message.includes(validationErrors.failedParsing.message);
+  return message.includes('Failed to parse expression');
 }
 
 function findFunctionNodes(root: TinymathAST | string): TinymathFunction[] {
@@ -122,90 +121,92 @@ function getMessageFromId<K extends ErrorTypes>({
   locations: TinymathLocation[];
 }): ErrorWrapper {
   let message: string;
+  // Use a less strict type instead of doing a typecast on each message type
+  const out = (values as unknown) as Record<string, string>;
   switch (messageId) {
     case 'wrongFirstArgument':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
         defaultMessage:
           'The first argument for {operation} should be a {type} name. Found {argument}',
-        values,
+        values: { operation: out.operation, type: out.type, argument: out.argument },
       });
       break;
     case 'shouldNotHaveField':
       message = i18n.translate('xpack.lens.indexPattern.formulaFieldNotRequired', {
         defaultMessage: 'The operation {operation} does not accept any field as argument',
-        values,
+        values: { operation: out.operation },
       });
       break;
     case 'cannotAcceptParameter':
       message = i18n.translate('xpack.lens.indexPattern.formulaParameterNotRequired', {
         defaultMessage: 'The operation {operation} does not accept any parameter',
-        values,
+        values: { operation: out.operation },
       });
       break;
     case 'missingParameter':
       message = i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
         defaultMessage:
           'The operation {operation} in the Formula is missing the following parameters: {params}',
-        values,
+        values: { operation: out.operation, params: out.params },
       });
       break;
     case 'wrongTypeParameter':
-      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
+      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionWrongType', {
         defaultMessage:
           'The parameters for the operation {operation} in the Formula are of the wrong type: {params}',
-        values,
+        values: { operation: out.operation, params: out.params },
       });
       break;
     case 'duplicateArgument':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationDuplicateParams', {
         defaultMessage:
           'The parameters for the operation {operation} have been declared multiple times: {params}',
-        values,
+        values: { operation: out.operation, params: out.params },
       });
       break;
     case 'missingField':
-      message = i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
+      message = i18n.translate('xpack.lens.indexPattern.formulaFieldNotFound', {
         defaultMessage:
           '{variablesLength, plural, one {Field} other {Fields}} {variablesList} not found',
-        values,
+        values: { variablesLength: out.variablesLength, variablesList: out.variablesList },
       });
       break;
     case 'missingOperation':
       message = i18n.translate('xpack.lens.indexPattern.operationsNotFound', {
         defaultMessage:
           '{operationLength, plural, one {Operation} other {Operations}} {operationsList} not found',
-        values,
+        values: { operationLength: out.operationLength, operationsList: out.operationsList },
       });
       break;
     case 'fieldWithNoOperation':
       message = i18n.translate('xpack.lens.indexPattern.fieldNoOperation', {
         defaultMessage: 'The field {field} cannot be used without operation',
-        values,
+        values: { field: out.field },
       });
       break;
     case 'failedParsing':
-      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
+      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionParseError', {
         defaultMessage: 'The Formula {expression} cannot be parsed',
-        values,
+        values: { expression: out.expression },
       });
       break;
     case 'tooManyArguments':
       message = i18n.translate('xpack.lens.indexPattern.formulaWithTooManyArguments', {
         defaultMessage: 'The operation {operation} has too many arguments',
-        values,
+        values: { operation: out.operation },
       });
       break;
     case 'missingMathArgument':
       message = i18n.translate('xpack.lens.indexPattern.formulaMathMissingArgument', {
         defaultMessage:
           'The operation {operation} in the Formula is missing {count} arguments: {params}',
-        values,
+        values: { operation: out.operation, count: out.count, params: out.params },
       });
       break;
     // case 'mathRequiresFunction':
     //   message = i18n.translate('xpack.lens.indexPattern.formulaMathRequiresFunctionLabel', {
     //     defaultMessage; 'The function {name} requires an Elasticsearch function',
-    //     values,
+    //     values: { ...values },
     //   });
     //   break;
     default:

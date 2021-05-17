@@ -16,7 +16,7 @@ import {
   hasDateField,
 } from './utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn } from '../helpers';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 import { Markdown } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const ofName = (name?: string) => {
@@ -77,14 +77,6 @@ export const cumulativeSumOperation: OperationDefinition<
   },
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const ref = layer.columns[referenceIds[0]];
-    let filter = previousColumn?.filter;
-    if (columnParams) {
-      if ('kql' in columnParams) {
-        filter = { query: columnParams.kql ?? '', language: 'kuery' };
-      } else if ('lucene' in columnParams) {
-        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
-      }
-    }
     return {
       label: ofName(
         ref && 'sourceField' in ref
@@ -95,7 +87,7 @@ export const cumulativeSumOperation: OperationDefinition<
       operationType: 'cumulative_sum',
       isBucketed: false,
       scale: 'ratio',
-      filter,
+      filter: getFilter(previousColumn, columnParams),
       references: referenceIds,
       params: getFormatFromPreviousColumn(previousColumn),
     };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
 import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } from '../index';
@@ -15,6 +16,10 @@ import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validat
 import { findVariables, getOperationParams, groupArgsByType } from './util';
 import { FormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
+
+function getManagedId(mainId: string, index: number) {
+  return `${mainId}X${index}`;
+}
 
 function parseAndExtract(
   text: string,
@@ -57,9 +62,9 @@ function extractColumns(
     const nodeOperation = operations[node.name];
     if (!nodeOperation) {
       // it's a regular math node
-      const consumedArgs = node.args.map(parseNode).filter(Boolean) as Array<
-        number | TinymathVariable
-      >;
+      const consumedArgs = node.args
+        .map(parseNode)
+        .filter((n) => typeof n !== 'undefined' && n !== null) as Array<number | TinymathVariable>;
       return {
         ...node,
         args: consumedArgs,
@@ -90,7 +95,7 @@ function extractColumns(
         },
         mappedParams
       );
-      const newColId = `${idPrefix}X${columns.length}`;
+      const newColId = getManagedId(idPrefix, columns.length);
       newCol.customLabel = true;
       newCol.label = newColId;
       columns.push({ column: newCol, location: node.location });
@@ -111,7 +116,7 @@ function extractColumns(
       mathColumn.params.tinymathAst = consumedParam!;
       columns.push({ column: mathColumn });
       mathColumn.customLabel = true;
-      mathColumn.label = `${idPrefix}X${columns.length - 1}`;
+      mathColumn.label = getManagedId(idPrefix, columns.length - 1);
 
       const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
       const newCol = (nodeOperation as OperationDefinition<
@@ -121,11 +126,11 @@ function extractColumns(
         {
           layer,
           indexPattern,
-          referenceIds: [`${idPrefix}X${columns.length - 1}`],
+          referenceIds: [getManagedId(idPrefix, columns.length - 1)],
         },
         mappedParams
       );
-      const newColId = `${idPrefix}X${columns.length}`;
+      const newColId = getManagedId(idPrefix, columns.length);
       newCol.customLabel = true;
       newCol.label = newColId;
       columns.push({ column: newCol, location: node.location });
@@ -144,7 +149,7 @@ function extractColumns(
   });
   mathColumn.references = variables.map(({ value }) => value);
   mathColumn.params.tinymathAst = root!;
-  const newColId = `${idPrefix}X${columns.length}`;
+  const newColId = getManagedId(idPrefix, columns.length);
   mathColumn.customLabel = true;
   mathColumn.label = newColId;
   columns.push({ column: mathColumn });
@@ -178,18 +183,24 @@ export function regenerateLayerFromAst(
   });
 
   extracted.forEach(({ column, location }, index) => {
-    columns[`${columnId}X${index}`] = column;
-    if (location) locations[`${columnId}X${index}`] = location;
+    columns[getManagedId(columnId, index)] = column;
+    if (location) locations[getManagedId(columnId, index)] = location;
   });
 
   columns[columnId] = {
     ...currentColumn,
+    label: !currentColumn.customLabel
+      ? text ??
+        i18n.translate('xpack.lens.indexPattern.formulaLabel', {
+          defaultMessage: 'Formula',
+        })
+      : currentColumn.label,
     params: {
       ...currentColumn.params,
       formula: text,
       isFormulaBroken: !isValid,
     },
-    references: !isValid ? [] : [`${columnId}X${extracted.length - 1}`],
+    references: !isValid ? [] : [getManagedId(columnId, extracted.length - 1)],
   };
 
   return {
@@ -203,8 +214,4 @@ export function regenerateLayerFromAst(
     },
     locations,
   };
-
-  // TODO
-  // turn ast into referenced columns
-  // set state
 }

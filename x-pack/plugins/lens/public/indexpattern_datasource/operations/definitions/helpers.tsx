@@ -123,3 +123,18 @@ export function getFormatFromPreviousColumn(previousColumn: IndexPatternColumn |
     ? { format: previousColumn.params.format }
     : undefined;
 }
+
+export function getFilter(
+  previousColumn: IndexPatternColumn | undefined,
+  columnParams: { kql?: string | undefined; lucene?: string | undefined } | undefined
+) {
+  let filter = previousColumn?.filter;
+  if (columnParams) {
+    if ('kql' in columnParams) {
+      filter = { query: columnParams.kql ?? '', language: 'kuery' };
+    } else if ('lucene' in columnParams) {
+      filter = { query: columnParams.lucene ?? '', language: 'lucene' };
+    }
+  }
+  return filter;
+}

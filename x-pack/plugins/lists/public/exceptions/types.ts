@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExceptionListType, NamespaceType } from '@kbn/securitysolution-io-ts-utils';
+import { ExceptionListType, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   CreateExceptionListItemSchema,

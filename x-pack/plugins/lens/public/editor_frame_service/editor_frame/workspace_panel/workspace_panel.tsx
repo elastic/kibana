@@ -342,18 +342,22 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const element = expression !== null ? renderVisualization() : renderEmptyWorkspace();
 
-  return (
-    <WorkspacePanelWrapper
-      title={title}
-      framePublicAPI={framePublicAPI}
-      dispatch={dispatch}
-      visualizationState={visualizationState}
-      visualizationId={activeVisualizationId}
-      datasourceStates={datasourceStates}
-      datasourceMap={datasourceMap}
-      visualizationMap={visualizationMap}
-      isFullscreen={isFullscreen}
-    >
+  const dragDropContext = useContext(DragContext);
+
+  const renderDragDrop = () => {
+    const customWorkspaceRenderer =
+      activeDatasourceId &&
+      datasourceMap[activeDatasourceId]?.getCustomWorkspaceRenderer &&
+      dragDropContext.dragging
+        ? datasourceMap[activeDatasourceId].getCustomWorkspaceRenderer!(
+            datasourceStates[activeDatasourceId].state,
+            dragDropContext.dragging
+          )
+        : undefined;
+
+    return customWorkspaceRenderer ? (
+      customWorkspaceRenderer()
+    ) : (
       <DragDrop
         className={classNames('lnsWorkspacePanel__dragDrop', {
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -366,14 +370,26 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         value={dropProps.value}
         order={dropProps.order}
       >
-        {isFullscreen ? (
-          element
-        ) : (
-          <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-            {element}
-          </EuiPageContentBody>
-        )}
+        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
+          {element}
+        </EuiPageContentBody>
       </DragDrop>
+    );
+  };
+
+  return (
+    <WorkspacePanelWrapper
+      title={title}
+      framePublicAPI={framePublicAPI}
+      dispatch={dispatch}
+      visualizationState={visualizationState}
+      visualizationId={activeVisualizationId}
+      datasourceStates={datasourceStates}
+      datasourceMap={datasourceMap}
+      visualizationMap={visualizationMap}
+      isFullscreen={isFullscreen}
+    >
+      {renderDragDrop()}
     </WorkspacePanelWrapper>
   );
 });

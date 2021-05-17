@@ -22,6 +22,10 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
+import {
+  DocumentsTransformFailed,
+  DocumentsTransformSuccess,
+} from '../../migrations/core/migrate_raw_docs';
 export type { RetryableEsClientError };
 
 /**
@@ -46,6 +50,7 @@ export interface ActionErrorTypeMap {
   incompatible_mapping_exception: IncompatibleMappingException;
   alias_not_found_exception: AliasNotFound;
   remove_index_not_a_concrete_index: RemoveIndexNotAConcreteIndex;
+  documents_transform_failed: DocumentsTransformFailed;
 }
 
 /**
@@ -451,6 +456,7 @@ export const openPit = (
 export interface ReadWithPit {
   outdatedDocuments: SavedObjectsRawDoc[];
   readonly lastHitSortValue: number[] | undefined;
+  readonly totalHits: number | undefined;
 }
 
 /*
@@ -476,13 +482,20 @@ export const readWithPit = (
         pit: { id: pitId, keep_alive: pitKeepAlive },
         size: batchSize,
         search_after: searchAfter,
-        // Improve performance by not calculating the total number of hits
-        // matching the query.
-        track_total_hits: false,
+        /**
+         * We want to know how many documents we need to process so we can log the progress.
+         * But we also want to increase the performance of these requests,
+         * so we ask ES to report the total count only on the first request (when searchAfter does not exist)
+         */
+        track_total_hits: typeof searchAfter === 'undefined',
         query,
       },
     })
     .then((response) => {
+      const totalHits =
+        typeof response.body.hits.total === 'number'
+          ? response.body.hits.total // This format is to be removed in 8.0
+          : response.body.hits.total?.value;
       const hits = response.body.hits.hits;
 
       if (hits.length > 0) {
@@ -490,12 +503,14 @@ export const readWithPit = (
           // @ts-expect-error @elastic/elasticsearch _source is optional
           outdatedDocuments: hits as SavedObjectsRawDoc[],
           lastHitSortValue: hits[hits.length - 1].sort as number[],
+          totalHits,
         });
       }
 
       return Either.right({
         outdatedDocuments: [],
         lastHitSortValue: undefined,
+        totalHits,
       });
     })
     .catch(catchRetryableEsClientErrors);
@@ -523,28 +538,13 @@ export const closePit = (
 };
 
 /*
- * Transform outdated docs and write them to the index.
+ * Transform outdated docs
  * */
 export const transformDocs = (
-  client: ElasticsearchClient,
   transformRawDocs: TransformRawDocs,
-  outdatedDocuments: SavedObjectsRawDoc[],
-  index: string,
-  // used for testing purposes only
-  refresh: estypes.Refresh
-): TaskEither.TaskEither<
-  RetryableEsClientError | IndexNotFound | TargetIndexHadWriteBlock,
-  'bulk_index_succeeded'
-> =>
-  pipe(
-    TaskEither.tryCatch(
-      () => transformRawDocs(outdatedDocuments),
-      (e) => {
-        throw e;
-      }
-    ),
-    TaskEither.chain((docs) => bulkOverwriteTransformedDocuments(client, index, docs, refresh))
-  );
+  outdatedDocuments: SavedObjectsRawDoc[]
+): TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess> =>
+  transformRawDocs(outdatedDocuments);
 
 /** @internal */
 export interface ReindexResponse {
@@ -747,8 +747,6 @@ export const waitForPickupUpdatedMappingsTask = flow(
     }
   )
 );
-
-/** @internal */
 export interface AliasNotFound {
   type: 'alias_not_found_exception';
 }

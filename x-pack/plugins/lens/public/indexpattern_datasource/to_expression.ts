@@ -116,11 +116,7 @@ function getExpressionForLayer(
       }
     });
 
-    const aggColumnEntries = columnEntries.filter(([, col]) => {
-      const def = operationDefinitionMap[col.operationType];
-      return !(def.input === 'fullReference' || def.input === 'managedReference');
-    });
-    if (aggColumnEntries.length === 0) {
+    if (esAggEntries.length === 0) {
       // Return early if there are no aggs, for example if the user has an empty formula
       return null;
     }

@@ -142,7 +142,7 @@ describe('formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: 'Formula',
+        label: 'average(bytes)',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -170,7 +170,7 @@ describe('formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: 'Formula',
+        label: 'average(bytes)',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -204,7 +204,7 @@ describe('formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: 'Formula',
+        label: `average(bytes, kql='category.keyword: "Men\\'s Clothing" or category.keyword: "Men\\'s Shoes"')`,
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -233,7 +233,7 @@ describe('formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: 'Formula',
+        label: `count(lucene='*')`,
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -291,7 +291,7 @@ describe('formula', () => {
           operationDefinitionMap
         )
       ).toEqual({
-        label: 'Formula',
+        label: 'moving_average(average(bytes), window=3)',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -375,6 +375,7 @@ describe('formula', () => {
           ...layer.columns,
           col1: {
             ...currentColumn,
+            label: formula,
             params: {
               ...currentColumn.params,
               formula,
@@ -415,6 +416,7 @@ describe('formula', () => {
           ...layer.columns,
           col1: {
             ...currentColumn,
+            label: 'average(bytes)',
             references: ['col1X1'],
             params: {
               ...currentColumn.params,
@@ -680,16 +682,6 @@ invalid: "
           operationDefinitionMap
         )
       ).toEqual(undefined);
-
-      // Not sure it will be supported
-      //   expect(
-      //     formulaOperation.getErrorMessage!(
-      //       getNewLayerWithFormula('moving_average(average("bytes"), "window"=7)'),
-      //       'col1',
-      //       indexPattern,
-      //       operationDefinitionMap
-      //     )
-      //   ).toEqual(undefined);
     });
 
     it('returns an error if field is used with no Lens wrapping operation', () => {

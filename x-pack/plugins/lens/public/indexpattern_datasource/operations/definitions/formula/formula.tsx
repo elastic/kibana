@@ -10,7 +10,7 @@ import { OperationDefinition } from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
-import { FormulaEditor } from './editor';
+import { MemoizedFormulaEditor } from './editor';
 import { regenerateLayerFromAst } from './parse';
 import { generateFormula } from './generate';
 
@@ -39,7 +39,7 @@ export const formulaOperation: OperationDefinition<
 > = {
   type: 'formula',
   displayName: defaultLabel,
-  getDefaultLabel: (column, indexPattern) => defaultLabel,
+  getDefaultLabel: (column, indexPattern) => column.params.formula ?? defaultLabel,
   input: 'managedReference',
   hidden: true,
   getDisabledStatus(indexPattern: IndexPattern) {
@@ -120,7 +120,7 @@ export const formulaOperation: OperationDefinition<
       prevFormat = { format: previousColumn.params.format };
     }
     return {
-      label: 'Formula',
+      label: previousFormula || defaultLabel,
       dataType: 'number',
       operationType: 'formula',
       isBucketed: false,
@@ -154,5 +154,5 @@ export const formulaOperation: OperationDefinition<
     return newLayer;
   },
 
-  paramEditor: FormulaEditor,
+  paramEditor: MemoizedFormulaEditor,
 };

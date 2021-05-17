@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
-import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
+import {
+  getFormatFromPreviousColumn,
+  getInvalidFieldMessage,
+  getSafeName,
+  getFilter,
+} from './helpers';
 import {
   FormattedIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -92,14 +97,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
     buildColumn: ({ field, previousColumn }, columnParams) => {
-      let filter = previousColumn?.filter;
-      if (columnParams) {
-        if ('kql' in columnParams) {
-          filter = { query: columnParams.kql ?? '', language: 'kuery' };
-        } else if ('lucene' in columnParams) {
-          filter = { query: columnParams.lucene ?? '', language: 'lucene' };
-        }
-      }
       return {
         label: labelLookup(field.displayName, previousColumn),
         dataType: 'number',
@@ -108,7 +105,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         isBucketed: false,
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
-        filter,
+        filter: getFilter(previousColumn, columnParams),
         params: getFormatFromPreviousColumn(previousColumn),
       } as T;
     },

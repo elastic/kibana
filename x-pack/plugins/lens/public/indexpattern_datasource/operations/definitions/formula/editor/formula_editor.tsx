@@ -44,6 +44,8 @@ import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { regenerateLayerFromAst } from '../parse';
 
+export const MemoizedFormulaEditor = React.memo(FormulaEditor);
+
 export function FormulaEditor({
   layer,
   updateLayer,
@@ -57,6 +59,7 @@ export function FormulaEditor({
   setIsCloseable,
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
+  const [warnings, setWarnings] = useState<Array<{ severity: monaco.MarkerSeverity }>>([]);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const editorModel = React.useRef<monaco.editor.ITextModel>(
     monaco.editor.createModel(text ?? '', LANGUAGE_ID)
@@ -94,6 +97,7 @@ export function FormulaEditor({
       if (!editorModel.current) return;
 
       if (!text) {
+        setWarnings([]);
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
         if (currentColumn.params.formula) {
           // Only submit if valid
@@ -129,10 +133,8 @@ export function FormulaEditor({
       }
 
       if (errors.length) {
-        monaco.editor.setModelMarkers(
-          editorModel.current,
-          'LENS',
-          errors.flatMap((innerError) => {
+        const markers = errors
+          .flatMap((innerError) => {
             if (innerError.locations.length) {
               return innerError.locations.map((location) => {
                 const startPosition = offsetToRowColumn(text, location.min);
@@ -168,7 +170,10 @@ export function FormulaEditor({
               ];
             }
           })
-        );
+          .filter((marker) => marker);
+
+        monaco.editor.setModelMarkers(editorModel.current, 'LENS', markers);
+        setWarnings(markers.map(({ severity }) => ({ severity })));
       } else {
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
 
@@ -214,6 +219,7 @@ export function FormulaEditor({
             return [];
           })
           .filter((marker) => marker);
+        setWarnings(markers.map(({ severity }) => ({ severity })));
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', markers);
       }
     },
@@ -223,6 +229,12 @@ export function FormulaEditor({
     256,
     [text]
   );
+
+  const errorCount = warnings.filter((marker) => marker.severity === monaco.MarkerSeverity.Error)
+    .length;
+  const warningCount = warnings.filter(
+    (marker) => marker.severity === monaco.MarkerSeverity.Warning
+  ).length;
 
   /**
    * The way that Monaco requests autocompletion is not intuitive, but the way we use it
@@ -424,7 +436,7 @@ export function FormulaEditor({
       wordBasedSuggestions: false,
       autoIndent: 'brackets',
       wrappingIndent: 'none',
-      dimension: { width: 290, height: 200 },
+      dimension: { width: 320, height: 200 },
       fixedOverflowWidgets: true,
     },
   };
@@ -478,6 +490,15 @@ export function FormulaEditor({
                       aria-label={i18n.translate('xpack.lens.formula.disableWordWrapLabel', {
                         defaultMessage: 'Disable word wrap',
                       })}
+                      onClick={() => {
+                        editor1.current?.updateOptions({
+                          wordWrap:
+                            editor1.current?.getOption(monaco.editor.EditorOption.wordWrap) ===
+                            'off'
+                              ? 'on'
+                              : 'off',
+                        });
+                      }}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -518,12 +539,16 @@ export function FormulaEditor({
                   editor1.current = editor;
                   disposables.current.push(
                     editor.onDidFocusEditorWidget(() => {
-                      setIsCloseable(false);
+                      setTimeout(() => {
+                        setIsCloseable(false);
+                      });
                     })
                   );
                   disposables.current.push(
                     editor.onDidBlurEditorWidget(() => {
-                      setIsCloseable(true);
+                      setTimeout(() => {
+                        setIsCloseable(true);
+                      });
                     })
                   );
                   // If we ever introduce a second Monaco editor, we need to toggle
@@ -599,12 +624,28 @@ export function FormulaEditor({
                   )}
                 </EuiFlexItem>
 
-                {/* TODO: Hook up the below so that the error count conditionally appears to notify users of the number of errors in their formula. */}
-                <EuiFlexItem className="lnsFormula__editorFooterGroup" grow={false}>
-                  <EuiText className="lnsFormula__editorError" color="danger" size="xs">
-                    <EuiIcon type="alert" /> 1 error
-                  </EuiText>
-                </EuiFlexItem>
+                {errorCount || warningCount ? (
+                  <EuiFlexItem className="lnsFormula__editorFooterGroup" grow={false}>
+                    {errorCount ? (
+                      <EuiText className="lnsFormula__editorError" color="danger" size="xs">
+                        <EuiIcon type="alert" />{' '}
+                        {i18n.translate('xpack.lens.formulaErrorCount', {
+                          defaultMessage: '{count} {count, plural, one {error} other {errors}}',
+                          values: { count: errorCount },
+                        })}
+                      </EuiText>
+                    ) : null}
+                    {warningCount ? (
+                      <EuiText className="lnsFormula__editorError" color="warning" size="xs">
+                        <EuiIcon type="alert" />{' '}
+                        {i18n.translate('xpack.lens.formulaWarningCount', {
+                          defaultMessage: '{count} {count, plural, one {warning} other {warnings}}',
+                          values: { count: warningCount },
+                        })}
+                      </EuiText>
+                    ) : null}
+                  </EuiFlexItem>
+                ) : null}
               </EuiFlexGroup>
             </div>
           </div>
