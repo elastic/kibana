@@ -15,12 +15,6 @@ export const reportingIlmPolicy: PutLifecycleRequest['body'] = {
         actions: {},
         min_age: '0ms',
       },
-      delete: {
-        min_age: '180d',
-        actions: {
-          delete: {},
-        },
-      },
     },
   },
 };
