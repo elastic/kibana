@@ -31,8 +31,8 @@ function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
     updateAlpha: (id: string, alpha: number) => dispatch(updateLayerAlpha(id, alpha)),
     updateLabelsOnTop: (id: string, areLabelsOnTop: boolean) =>
       dispatch(updateLabelsOnTop(id, areLabelsOnTop)),
-    updateFittableFlag: (id: string, isFittableFlag: boolean) =>
-      dispatch(updateFittableFlag(id, isFittableFlag)),
+    updateIncludeInFitToBounds: (id: string, includeInFitToBounds: boolean) =>
+      dispatch(updateFittableFlag(id, includeInFitToBounds)),
   };
 }
 

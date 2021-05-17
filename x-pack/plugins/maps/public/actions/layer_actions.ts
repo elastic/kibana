@@ -408,12 +408,12 @@ export function updateLabelsOnTop(id: string, areLabelsOnTop: boolean) {
   };
 }
 
-export function updateFittableFlag(id: string, isFittableFlag: boolean) {
+export function updateFittableFlag(id: string, includeInFitToBounds: boolean) {
   return {
     type: UPDATE_LAYER_PROP,
     id,
-    propName: 'isFittable',
-    newValue: isFittableFlag,
+    propName: 'includeInFitToBounds',
+    newValue: includeInFitToBounds,
   };
 }
 

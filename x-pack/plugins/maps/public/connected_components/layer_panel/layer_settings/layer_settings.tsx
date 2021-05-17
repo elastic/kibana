@@ -33,7 +33,7 @@ export interface Props {
   updateMaxZoom: (layerId: string, maxZoom: number) => void;
   updateAlpha: (layerId: string, alpha: number) => void;
   updateLabelsOnTop: (layerId: string, areLabelsOnTop: boolean) => void;
-  updateFittableFlag: (layerId: string, isFittable: boolean) => void;
+  updateIncludeInFitToBounds: (layerId: string, includeInFitToBounds: boolean) => void;
   supportsFitToBounds: boolean;
 }
 
@@ -60,8 +60,8 @@ export function LayerSettings(props: Props) {
     props.updateLabelsOnTop(layerId, event.target.checked);
   };
 
-  const isFittableFlagChange = (event: EuiSwitchEvent) => {
-    props.updateFittableFlag(layerId, event.target.checked);
+  const includeInFitToBoundsChange = (event: EuiSwitchEvent) => {
+    props.updateIncludeInFitToBounds(layerId, event.target.checked);
   };
 
   const onAttributionChange = (attribution?: Attribution) => {
@@ -72,7 +72,7 @@ export function LayerSettings(props: Props) {
     }
   };
 
-  const renderIsFittable = () => {
+  const renderIncludeInFitToBounds = () => {
     if (!props.supportsFitToBounds) {
       return null;
     }
@@ -82,8 +82,8 @@ export function LayerSettings(props: Props) {
           label={i18n.translate('xpack.maps.layerPanel.settingsPanel.fittableFlag', {
             defaultMessage: `Include bounds when fitting on all data`,
           })}
-          checked={props.layer.isFittableFlagOn()}
-          onChange={isFittableFlagChange}
+          checked={props.layer.isIncludeInFitToBounds()}
+          onChange={includeInFitToBoundsChange}
           data-test-subj="mapLayerPanelFittableFlagCheckbox"
           compressed
         />
@@ -165,7 +165,7 @@ export function LayerSettings(props: Props) {
         <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
         {renderShowLabelsOnTop()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
-        {renderIsFittable()}
+        {renderIncludeInFitToBounds()}
       </EuiPanel>
 
       <EuiSpacer size="s" />
