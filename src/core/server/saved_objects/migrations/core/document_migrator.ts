@@ -661,13 +661,14 @@ function wrapWithTry(
   migrationFn: SavedObjectMigrationFn,
   log: Logger
 ) {
+  const context = Object.freeze({
+    log: new MigrationLogger(log),
+    migrationVersion: version,
+    convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
+  });
+
   return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
     try {
-      const context = {
-        log: new MigrationLogger(log),
-        migrationVersion: version,
-        convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
-      };
       const result = migrationFn(doc, context);
 
       // A basic sanity check to help migration authors detect basic errors
