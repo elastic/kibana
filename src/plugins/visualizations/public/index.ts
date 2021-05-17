@@ -43,4 +43,3 @@ export { VisualizationListItem, VisualizationStage } from './vis_types/vis_type_
 export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
 export { SavedVisState, VisParams } from '../common';
 export { ExpressionValueVisDimension } from './expression_functions/vis_dimension';
-export { ExpressionValuePieLabels } from './expression_functions/pie_labels';

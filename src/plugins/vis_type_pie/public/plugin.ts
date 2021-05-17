@@ -13,6 +13,7 @@ import { ChartsPluginSetup } from '../../charts/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { LEGACY_CHARTS_LIBRARY } from '../../visualizations/common/constants';
+import { pieLabels as pieLabelsExpressionFunction } from './expression_functions/pie_labels';
 import { createPieVisFn } from './pie_fn';
 import { getPieVisRenderer } from './pie_renderer';
 import { pieVisType } from './vis_type';
@@ -56,6 +57,7 @@ export class VisTypePiePlugin {
       expressions.registerRenderer(
         getPieVisRenderer({ theme: charts.theme, palettes: charts.palettes, getStartDeps })
       );
+      expressions.registerFunction(pieLabelsExpressionFunction);
       visualizations.createBaseVisualization(
         pieVisType({
           showElasticChartsOptions: true,

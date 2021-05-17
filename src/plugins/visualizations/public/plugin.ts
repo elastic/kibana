@@ -33,7 +33,6 @@ import {
 import { TypesService } from './vis_types/types_service';
 import { range as rangeExpressionFunction } from './expression_functions/range';
 import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
-import { pieLabels as pieLabelsExpressionFunction } from './expression_functions/pie_labels';
 
 import { createStartServicesGetter, StartServicesGetter } from '../../kibana_utils/public';
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
@@ -137,7 +136,6 @@ export class VisualizationsPlugin
 
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
-    expressions.registerFunction(pieLabelsExpressionFunction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
