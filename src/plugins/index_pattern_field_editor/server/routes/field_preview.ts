@@ -15,7 +15,7 @@ import { handleEsError } from '../shared_imports';
 
 const bodySchema = schema.object({
   index: schema.string(),
-  script: schema.nullable(schema.object({ source: schema.string() })),
+  script: schema.object({ source: schema.string() }),
   context: schema.oneOf([
     schema.literal('boolean_field'),
     schema.literal('date_field'),
@@ -38,10 +38,6 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
     },
     async (ctx, req, res) => {
       const { client } = ctx.core.elasticsearch;
-
-      if (req.body.script === null) {
-        return res.ok();
-      }
 
       const body = JSON.stringify({
         script: req.body.script,
