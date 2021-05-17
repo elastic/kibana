@@ -19,7 +19,7 @@ import {
   osTypeArray,
   tags,
   updated_by,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   immutableOrUndefined,
