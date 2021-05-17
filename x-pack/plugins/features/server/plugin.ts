@@ -26,6 +26,14 @@ import {
   KibanaFeature,
   KibanaFeatureConfig,
 } from '../common';
+import type {
+  FeaturePrivilegeIterator,
+  SubFeaturePrivilegeIterator,
+} from './feature_privilege_iterator';
+import {
+  featurePrivilegeIterator,
+  subFeaturePrivilegeIterator,
+} from './feature_privilege_iterator';
 
 /**
  * Describes public Features plugin contract returned at the `setup` stage.
@@ -54,6 +62,9 @@ export interface PluginSetupContract {
    * `features` to include Reporting when registering OSS features.
    */
   enableReportingUiCapabilities(): void;
+
+  featurePrivilegeIterator: FeaturePrivilegeIterator;
+  subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator;
 }
 
 export interface PluginStartContract {
@@ -110,6 +121,8 @@ export class FeaturesPlugin
       ),
       getFeaturesUICapabilities,
       enableReportingUiCapabilities: this.enableReportingUiCapabilities.bind(this),
+      featurePrivilegeIterator,
+      subFeaturePrivilegeIterator,
     });
   }
 

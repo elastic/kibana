@@ -7,20 +7,25 @@
 
 import _ from 'lodash';
 
-import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
-import type { LicenseType } from '../../../../../licensing/server';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '../';
+import type { LicenseType } from '../../../licensing/server';
 import { subFeaturePrivilegeIterator } from './sub_feature_privilege_iterator';
 
-interface IteratorOptions {
+export interface IteratorOptions {
   augmentWithSubFeaturePrivileges: boolean;
   licenseType: LicenseType;
   predicate?: (privilegeId: string, privilege: FeatureKibanaPrivileges) => boolean;
 }
 
-export function* featurePrivilegeIterator(
+export type FeaturePrivilegeIterator = (
   feature: KibanaFeature,
   options: IteratorOptions
-): IterableIterator<{ privilegeId: string; privilege: FeatureKibanaPrivileges }> {
+) => IterableIterator<{ privilegeId: string; privilege: FeatureKibanaPrivileges }>;
+
+const featurePrivilegeIterator: FeaturePrivilegeIterator = function* featurePrivilegeIterator(
+  feature: KibanaFeature,
+  options: IteratorOptions
+) {
   for (const entry of Object.entries(feature.privileges ?? {})) {
     const [privilegeId, privilege] = entry;
 
@@ -37,7 +42,7 @@ export function* featurePrivilegeIterator(
       yield { privilegeId, privilege };
     }
   }
-}
+};
 
 function mergeWithSubFeatures(
   privilegeId: string,
@@ -97,3 +102,5 @@ function mergeArrays(input1: readonly string[] | undefined, input2: readonly str
   const second = input2 ?? [];
   return Array.from(new Set([...first, ...second]));
 }
+
+export { featurePrivilegeIterator };

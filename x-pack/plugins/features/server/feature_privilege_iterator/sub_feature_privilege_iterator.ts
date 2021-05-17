@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { KibanaFeature, SubFeaturePrivilegeConfig } from '../../../../../features/common';
-import type { LicenseType } from '../../../../../licensing/server';
+import type { KibanaFeature, SubFeaturePrivilegeConfig } from '../../common';
+import type { LicenseType } from '../../../licensing/server';
 
-export function* subFeaturePrivilegeIterator(
+export type SubFeaturePrivilegeIterator = (
+  feature: KibanaFeature,
+  licenseType: LicenseType
+) => IterableIterator<SubFeaturePrivilegeConfig>;
+
+const subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator = function* subFeaturePrivilegeIterator(
   feature: KibanaFeature,
   licenseType: LicenseType
 ): IterableIterator<SubFeaturePrivilegeConfig> {
@@ -19,4 +24,6 @@ export function* subFeaturePrivilegeIterator(
       );
     }
   }
-}
+};
+
+export { subFeaturePrivilegeIterator };
