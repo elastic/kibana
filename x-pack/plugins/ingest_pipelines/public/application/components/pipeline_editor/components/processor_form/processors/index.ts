@@ -28,6 +28,7 @@ export { Json } from './json';
 export { Kv } from './kv';
 export { Lowercase } from './lowercase';
 export { Pipeline } from './pipeline';
+export { RegisteredDomain } from './registered_domain';
 export { Remove } from './remove';
 export { Rename } from './rename';
 export { Script } from './script';
