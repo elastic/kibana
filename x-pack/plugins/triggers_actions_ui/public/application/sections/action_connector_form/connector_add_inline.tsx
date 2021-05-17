@@ -80,7 +80,7 @@ export const AddConnectorInline = ({
     <EuiText color="danger">
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle"
-        defaultMessage="Unable to load connector."
+        defaultMessage="Unable to load connector"
       />
     </EuiText>
   );
@@ -196,7 +196,7 @@ export const AddConnectorInline = ({
                   data-test-subj={`alertActionAccordionErrorTooltip`}
                   content={
                     <FormattedMessage
-                      defaultMessage="Unable to load connector."
+                      defaultMessage="Unable to load connector"
                       id="xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle'"
                     />
                   }

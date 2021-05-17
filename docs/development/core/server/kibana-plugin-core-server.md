@@ -144,8 +144,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectMigrationContext](./kibana-plugin-core-server.savedobjectmigrationcontext.md) | Migration context provided when invoking a [migration handler](./kibana-plugin-core-server.savedobjectmigrationfn.md) |
 |  [SavedObjectMigrationMap](./kibana-plugin-core-server.savedobjectmigrationmap.md) | A map of [migration functions](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used for a given type. The map's keys must be valid semver versions, and they cannot exceed the current Kibana version.<!-- -->For a given document, only migrations with a higher version number than that of the document will be applied. Migrations are executed in order, starting from the lowest version and ending with the highest one. |
 |  [SavedObjectReference](./kibana-plugin-core-server.savedobjectreference.md) | A reference to another saved object. |
-|  [SavedObjectsAddToNamespacesOptions](./kibana-plugin-core-server.savedobjectsaddtonamespacesoptions.md) |  |
-|  [SavedObjectsAddToNamespacesResponse](./kibana-plugin-core-server.savedobjectsaddtonamespacesresponse.md) |  |
+|  [SavedObjectReferenceWithContext](./kibana-plugin-core-server.savedobjectreferencewithcontext.md) | A returned input object or one of its references, with additional context. |
 |  [SavedObjectsBaseOptions](./kibana-plugin-core-server.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-core-server.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkGetObject](./kibana-plugin-core-server.savedobjectsbulkgetobject.md) |  |
@@ -158,13 +157,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientProviderOptions](./kibana-plugin-core-server.savedobjectsclientprovideroptions.md) | Options to control the creation of the Saved Objects Client. |
 |  [SavedObjectsClientWrapperOptions](./kibana-plugin-core-server.savedobjectsclientwrapperoptions.md) | Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance. |
 |  [SavedObjectsClosePointInTimeResponse](./kibana-plugin-core-server.savedobjectsclosepointintimeresponse.md) |  |
+|  [SavedObjectsCollectMultiNamespaceReferencesObject](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesobject.md) | An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the <code>namespaceType: 'multi'</code> or <code>namespaceType: 'multi-isolated'</code> option).<!-- -->Note: if options.purpose is 'updateObjectsSpaces', it must be a shareable type (in other words, the object type must be registered with the <code>namespaceType: 'multi'</code>). |
+|  [SavedObjectsCollectMultiNamespaceReferencesOptions](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesoptions.md) | Options for collecting references. |
+|  [SavedObjectsCollectMultiNamespaceReferencesResponse](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesresponse.md) | The response when object references are collected. |
 |  [SavedObjectsComplexFieldMapping](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCoreFieldMapping](./kibana-plugin-core-server.savedobjectscorefieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-server.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsCreatePointInTimeFinderDependencies](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.md) |  |
 |  [SavedObjectsDeleteByNamespaceOptions](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.md) |  |
-|  [SavedObjectsDeleteFromNamespacesOptions](./kibana-plugin-core-server.savedobjectsdeletefromnamespacesoptions.md) |  |
-|  [SavedObjectsDeleteFromNamespacesResponse](./kibana-plugin-core-server.savedobjectsdeletefromnamespacesresponse.md) |  |
 |  [SavedObjectsDeleteOptions](./kibana-plugin-core-server.savedobjectsdeleteoptions.md) |  |
 |  [SavedObjectsExportByObjectOptions](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.md) | Options for the [export by objects API](./kibana-plugin-core-server.savedobjectsexporter.exportbyobjects.md) |
 |  [SavedObjectsExportByTypeOptions](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.md) | Options for the [export by type API](./kibana-plugin-core-server.savedobjectsexporter.exportbytypes.md) |
@@ -208,6 +208,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsType](./kibana-plugin-core-server.savedobjectstype.md) |  |
 |  [SavedObjectsTypeManagementDefinition](./kibana-plugin-core-server.savedobjectstypemanagementdefinition.md) | Configuration options for the [type](./kibana-plugin-core-server.savedobjectstype.md)<!-- -->'s management section. |
 |  [SavedObjectsTypeMappingDefinition](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) | Describe a saved object type mapping. |
+|  [SavedObjectsUpdateObjectsSpacesObject](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesobject.md) | An object that should have its spaces updated. |
+|  [SavedObjectsUpdateObjectsSpacesOptions](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesoptions.md) | Options for the update operation. |
+|  [SavedObjectsUpdateObjectsSpacesResponse](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponse.md) | The response when objects' spaces are updated. |
+|  [SavedObjectsUpdateObjectsSpacesResponseObject](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponseobject.md) | Details about a specific object's update result. |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-core-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-core-server.savedobjectsupdateresponse.md) |  |
 |  [SearchResponse](./kibana-plugin-core-server.searchresponse.md) |  |
