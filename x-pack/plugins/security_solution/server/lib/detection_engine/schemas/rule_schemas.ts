@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 
+import { actionsCamel } from '@kbn/securitysolution-io-ts-alerting-types';
 import { listArray } from '../../../../common/detection_engine/schemas/types/lists';
 import {
   threat_mapping,
@@ -53,13 +54,13 @@ import {
   saved_id,
   thresholdNormalized,
   anomaly_threshold,
-  actionsCamel,
   throttleOrNull,
   createdByOrNull,
   updatedByOrNull,
   created_at,
   updated_at,
 } from '../../../../common/detection_engine/schemas/common/schemas';
+
 import { SIGNALS_ID, SERVER_APP_ID } from '../../../../common/constants';
 import { machine_learning_job_id_normalized } from '../../../../common/detection_engine/schemas/types/normalized_ml_job_id';
 

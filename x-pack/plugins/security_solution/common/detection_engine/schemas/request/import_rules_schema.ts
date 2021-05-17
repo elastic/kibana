@@ -8,6 +8,19 @@
 import * as t from 'io-ts';
 
 import {
+  Actions,
+  DefaultActionsArray,
+  DefaultFromString,
+  DefaultIntervalString,
+  DefaultMaxSignalsNumber,
+  DefaultRiskScoreMappingArray,
+  DefaultSeverityMappingArray,
+  DefaultThreatArray,
+  DefaultThrottleNull,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+
+import { DefaultVersionNumber } from '@kbn/securitysolution-io-ts-types';
+import {
   description,
   anomaly_threshold,
   filters,
@@ -32,7 +45,6 @@ import {
   note,
   Version,
   References,
-  Actions,
   Enabled,
   FalsePositives,
   From,
@@ -67,21 +79,12 @@ import {
 
 import {
   DefaultStringArray,
-  DefaultActionsArray,
   DefaultBooleanTrue,
-  DefaultFromString,
-  DefaultIntervalString,
-  DefaultMaxSignalsNumber,
   DefaultToString,
-  DefaultThreatArray,
-  DefaultThrottleNull,
-  DefaultVersionNumber,
   OnlyFalseAllowed,
   DefaultStringBooleanFalse,
   DefaultListArray,
   ListArray,
-  DefaultRiskScoreMappingArray,
-  DefaultSeverityMappingArray,
 } from '../types';
 
 /**

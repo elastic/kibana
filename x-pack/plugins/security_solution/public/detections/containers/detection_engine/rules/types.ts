@@ -38,6 +38,7 @@ import {
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
  * @see x-pack/plugins/alerting/common/alert.ts
+ * @deprecated Use the one from @kbn/security-io-ts-alerting-types
  */
 export const action = t.exact(
   t.type({

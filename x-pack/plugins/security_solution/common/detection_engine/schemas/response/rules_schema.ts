@@ -10,10 +10,14 @@ import { isObject } from 'lodash/fp';
 import { Either, left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
+import {
+  actions,
+  DefaultRiskScoreMappingArray,
+  DefaultSeverityMappingArray,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import { isMlRule } from '../../../machine_learning/helpers';
 import { isThresholdRule } from '../../utils';
 import {
-  actions,
   anomaly_threshold,
   description,
   enabled,
@@ -74,11 +78,7 @@ import {
 } from '../types/threat_mapping';
 
 import { DefaultListArray } from '../types/lists_default_array';
-import {
-  DefaultStringArray,
-  DefaultRiskScoreMappingArray,
-  DefaultSeverityMappingArray,
-} from '../types';
+import { DefaultStringArray } from '../types';
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
 
 /**

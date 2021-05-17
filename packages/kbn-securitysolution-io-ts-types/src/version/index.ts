@@ -7,7 +7,7 @@
  */
 
 import * as t from 'io-ts';
-import { PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
+import { PositiveIntegerGreaterThanZero } from '../positive_integer_greater_than_zero';
 
 /**
  * Note this is just a positive number, but we use it as a type here which is still ok.

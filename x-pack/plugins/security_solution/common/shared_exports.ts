@@ -9,7 +9,3 @@ export { NonEmptyString } from './detection_engine/schemas/types/non_empty_strin
 export { DefaultArray } from './detection_engine/schemas/types/default_array';
 export { DefaultUuid } from './detection_engine/schemas/types/default_uuid';
 export { DefaultStringArray } from './detection_engine/schemas/types/default_string_array';
-export {
-  DefaultVersionNumber,
-  DefaultVersionNumberDecoded,
-} from './detection_engine/schemas/types/default_version_number';

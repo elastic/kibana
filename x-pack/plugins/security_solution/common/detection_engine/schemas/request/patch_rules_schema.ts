@@ -7,6 +7,8 @@
 
 import * as t from 'io-ts';
 
+import { actions } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import {
   description,
   anomaly_threshold,
@@ -25,7 +27,6 @@ import {
   type,
   note,
   version,
-  actions,
   false_positives,
   interval,
   max_signals,

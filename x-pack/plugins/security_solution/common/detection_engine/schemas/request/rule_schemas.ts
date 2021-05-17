@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 
+import { actions } from '@kbn/securitysolution-io-ts-alerting-types';
 import { listArray } from '../types/lists';
 import {
   threat_filters,
@@ -17,6 +18,7 @@ import {
   concurrent_searches,
   items_per_search,
 } from '../types/threat_mapping';
+
 import {
   id,
   index,
@@ -53,7 +55,6 @@ import {
   anomaly_threshold,
   name,
   tags,
-  actions,
   interval,
   enabled,
   updated_at,
