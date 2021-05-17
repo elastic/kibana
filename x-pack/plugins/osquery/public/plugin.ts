@@ -137,24 +137,27 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       packs: boolean;
     }>();
 
+    if (!config.enabled) {
+      return {};
+    }
+
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
-      if (config.enabled) {
-        toggleOsqueryPlugin(this.appUpdater$, core.http, registerExtension);
+      // TODO: Find a better solution
+      // toggleOsqueryPlugin(this.appUpdater$, core.http, registerExtension);
 
-        registerExtension({
-          package: OSQUERY_INTEGRATION_NAME,
-          view: 'package-policy-create',
-          component: LazyOsqueryManagedPolicyCreateImportExtension,
-        });
+      registerExtension({
+        package: OSQUERY_INTEGRATION_NAME,
+        view: 'package-policy-create',
+        component: LazyOsqueryManagedPolicyCreateImportExtension,
+      });
 
-        registerExtension({
-          package: OSQUERY_INTEGRATION_NAME,
-          view: 'package-policy-edit',
-          component: LazyOsqueryManagedPolicyEditExtension,
-        });
-      }
+      registerExtension({
+        package: OSQUERY_INTEGRATION_NAME,
+        view: 'package-policy-edit',
+        component: LazyOsqueryManagedPolicyEditExtension,
+      });
     } else {
       this.appUpdater$.next(() => ({
         status: AppStatus.inaccessible,
