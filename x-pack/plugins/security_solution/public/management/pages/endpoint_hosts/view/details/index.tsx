@@ -20,7 +20,6 @@ import {
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useEndpointSelector } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
@@ -46,6 +45,7 @@ import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
 import { EndpointIsolateFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpoint_details_flyout_subheader';
+import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
 
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -125,12 +125,6 @@ export const EndpointDetailsFlyout = memo(() => {
 
 EndpointDetailsFlyout.displayName = 'EndpointDetailsFlyout';
 
-const PolicyResponseFlyoutBody = styled(EuiFlyoutBody)`
-  .euiFlyoutBody__overflowContent {
-    padding-top: 0;
-  }
-`;
-
 const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
@@ -146,7 +140,7 @@ const PolicyResponseFlyoutPanel = memo<{
     <>
       <BackToEndpointDetailsFlyoutSubHeader endpointId={hostMeta.agent.id} />
 
-      <PolicyResponseFlyoutBody
+      <FlyoutBodyNoTopPadding
         data-test-subj="endpointDetailsPolicyResponseFlyoutBody"
         className="endpointDetailsPolicyResponseFlyoutBody"
       >
@@ -188,7 +182,7 @@ const PolicyResponseFlyoutPanel = memo<{
             responseAttentionCount={responseAttentionCount}
           />
         )}
-      </PolicyResponseFlyoutBody>
+      </FlyoutBodyNoTopPadding>
     </>
   );
 });
