@@ -59,6 +59,10 @@ describe('7.14.0 Endpoint Package Policy migration', () => {
                       },
                     },
                   },
+                  linux: {
+                    events: { process: true, file: true, network: true },
+                    logging: { file: 'info' },
+                  },
                 },
               },
             },
@@ -113,6 +117,8 @@ describe('7.14.0 Endpoint Package Policy migration', () => {
                     },
                   },
                   linux: {
+                    events: { process: true, file: true, network: true },
+                    logging: { file: 'info' },
                     malware: {
                       mode: 'off',
                     },
@@ -180,6 +186,10 @@ describe('7.14.0 Endpoint Package Policy migration', () => {
                       },
                     },
                   },
+                  linux: {
+                    events: { process: true, file: true, network: true },
+                    logging: { file: 'info' },
+                  },
                 },
               },
             },
@@ -220,7 +230,7 @@ describe('7.14.0 Endpoint Package Policy migration', () => {
                       mode: 'off',
                     },
                     malware: {
-                      mode: 'off',
+                      mode: 'on',
                     },
                     popup: {
                       malware: {
@@ -234,6 +244,8 @@ describe('7.14.0 Endpoint Package Policy migration', () => {
                     },
                   },
                   linux: {
+                    events: { process: true, file: true, network: true },
+                    logging: { file: 'info' },
                     malware: {
                       mode: 'on',
                     },

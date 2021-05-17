@@ -21,11 +21,13 @@ export const migrateEndpointPackagePolicyToV7140: SavedObjectMigrationFn<
     const input = updatedPackagePolicyDoc.attributes.inputs[0];
     if (input && input.config) {
       const policy = input.config.policy.value;
-      const windowsMalware = input.config.policy.value.windows.malware;
-      const windowsMalwarePopup = input.config.policy.value.windows.popup.malware;
+      const linuxMalware = cloneDeep(input.config.policy.value.windows.malware);
+      const linuxMalwarePopup = {
+        malware: cloneDeep(input.config.policy.value.windows.popup.malware),
+      };
 
-      policy.linux.malware = windowsMalware;
-      policy.linux.popup.malware = windowsMalwarePopup;
+      policy.linux.malware = linuxMalware;
+      policy.linux.popup = linuxMalwarePopup;
     }
   }
 

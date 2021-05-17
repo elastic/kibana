@@ -314,6 +314,13 @@ describe('policy details: ', () => {
                   linux: {
                     events: { process: true, file: true, network: true },
                     logging: { file: 'info' },
+                    malware: { mode: 'prevent' },
+                    popup: {
+                      malware: {
+                        enabled: true,
+                        message: '',
+                      },
+                    },
                   },
                 },
               },
