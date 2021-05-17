@@ -213,7 +213,13 @@ export const EventFiltersListPage = memo(() => {
 
       {doesDataExist && (
         <>
-          <SearchBar defaultValue={location.filter} onSearch={handleOnSearch} />
+          <SearchBar
+            defaultValue={location.filter}
+            onSearch={handleOnSearch}
+            placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
+              defaultMessage: 'Search on the fields below: name, comments, value',
+            })}
+          />
           <EuiSpacer size="m" />
           <EuiText color="subdued" size="xs" data-test-subj="eventFiltersCountLabel">
             <FormattedMessage

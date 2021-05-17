@@ -37,7 +37,7 @@ import { TrustedAppDeletionDialog } from './trusted_app_deletion_dialog';
 import { TrustedAppsNotifications } from './trusted_apps_notifications';
 import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/types';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { ABOUT_TRUSTED_APPS } from './translations';
+import { ABOUT_TRUSTED_APPS, SEARCH_TRUSTED_APP_PLACEHOLDER } from './translations';
 import { EmptyState } from './components/empty_state';
 import { SearchBar } from '../../../components/search_bar';
 
@@ -96,7 +96,11 @@ export const TrustedAppsPage = memo(() => {
         />
       )}
 
-      <SearchBar defaultValue={location.filter} onSearch={handleOnSearch} />
+      <SearchBar
+        defaultValue={location.filter}
+        onSearch={handleOnSearch}
+        placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
+      />
       {doEntriesExist ? (
         <EuiFlexGroup
           direction="column"
