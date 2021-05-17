@@ -18,6 +18,7 @@ import {
   threat_filters,
   threats,
   type,
+  severity_mapping,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   SortOrder,
@@ -25,7 +26,6 @@ import {
   building_block_type,
   license,
   rule_name_override,
-  severity_mapping,
   timestamp_override,
   threshold,
 } from '../../../../../common/detection_engine/schemas/common/schemas';

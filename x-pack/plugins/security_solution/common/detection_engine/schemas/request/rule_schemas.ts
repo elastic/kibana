@@ -21,15 +21,19 @@ import {
   concurrent_searches,
   items_per_search,
   threats,
+  severity_mapping,
+  severity,
+  max_signals,
+  throttle,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
 
 import {
   id,
   index,
   filters,
   event_category_override,
-  severity_mapping,
   building_block_type,
   note,
   license,
@@ -45,11 +49,8 @@ import {
   immutable,
   output_index,
   query,
-  max_signals,
-  severity,
   to,
   references,
-  version,
   saved_id,
   threshold,
   anomaly_threshold,
@@ -67,7 +68,6 @@ import {
   last_success_message,
   last_failure_at,
   last_failure_message,
-  throttle,
 } from '../common/schemas';
 
 const createSchema = <

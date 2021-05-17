@@ -19,7 +19,13 @@ import {
   ThreatIndicatorPathOrUndefined,
   ThreatsOrUndefined,
   Type,
+  LanguageOrUndefined,
+  Severity,
+  SeverityMappingOrUndefined,
+  MaxSignals,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import { Version } from '@kbn/securitysolution-io-ts-types';
+
 import { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AnomalyThresholdOrUndefined,
@@ -29,24 +35,19 @@ import {
   FalsePositives,
   Immutable,
   IndexOrUndefined,
-  LanguageOrUndefined,
-  MaxSignals,
   OutputIndex,
   QueryOrUndefined,
   References,
   SavedIdOrUndefined,
-  Severity,
   To,
   TimelineIdOrUndefined,
   TimelineTitleOrUndefined,
-  Version,
   MetaOrUndefined,
   RuleId,
   AuthorOrUndefined,
   BuildingBlockTypeOrUndefined,
   LicenseOrUndefined,
   RuleNameOverrideOrUndefined,
-  SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';

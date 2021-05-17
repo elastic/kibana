@@ -12,6 +12,8 @@ import {
   ThreatMapping,
   Threats,
   Type,
+  SeverityMapping,
+  Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { AlertAction } from '../../../../../../alerting/common';
@@ -24,10 +26,8 @@ import {
   BuildingBlockType,
   License,
   RuleNameOverride,
-  SeverityMapping,
   SortOrder,
   TimestampOverride,
-  Severity,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export interface EuiBasicTableSortTypes {

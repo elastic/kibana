@@ -16,3 +16,6 @@ import { PositiveIntegerGreaterThanZero } from '../positive_integer_greater_than
  */
 export const version = PositiveIntegerGreaterThanZero;
 export type Version = t.TypeOf<typeof version>;
+
+export const versionOrUndefined = t.union([version, t.undefined]);
+export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;

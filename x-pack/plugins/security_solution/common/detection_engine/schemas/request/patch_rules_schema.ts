@@ -23,7 +23,14 @@ import {
   threat_indicator_path,
   threats,
   type,
+  language,
+  severity,
+  severity_mapping,
+  max_signals,
+  throttle,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+
+import { version } from '@kbn/securitysolution-io-ts-types';
 
 import { listArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -38,19 +45,14 @@ import {
   meta,
   rule_id,
   name,
-  severity,
   note,
-  version,
   false_positives,
   interval,
-  max_signals,
   enabled,
   tags,
   threshold,
-  throttle,
   references,
   to,
-  language,
   query,
   id,
   building_block_type,
@@ -58,7 +60,6 @@ import {
   license,
   rule_name_override,
   timestamp_override,
-  severity_mapping,
   event_category_override,
 } from '../common/schemas';
 

@@ -9,11 +9,14 @@
 
 import * as t from 'io-ts';
 
-import { UUID } from '../types/uuid';
-import { IsoDateString } from '../types/iso_date_string';
-import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
-import { PositiveInteger } from '../types/positive_integer';
-import { NonEmptyString } from '../types/non_empty_string';
+import {
+  UUID,
+  NonEmptyString,
+  IsoDateString,
+  PositiveIntegerGreaterThanZero,
+  PositiveInteger,
+} from '@kbn/securitysolution-io-ts-types';
+
 export const author = t.array(t.string);
 export type Author = t.TypeOf<typeof author>;
 
@@ -100,26 +103,6 @@ export type Query = t.TypeOf<typeof query>;
 export const queryOrUndefined = t.union([query, t.undefined]);
 export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
 
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const language = t.keyof({ eql: null, kuery: null, lucene: null });
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type Language = t.TypeOf<typeof language>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const languageOrUndefined = t.union([language, t.undefined]);
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type LanguageOrUndefined = t.TypeOf<typeof languageOrUndefined>;
-
 export const license = t.string;
 export type License = t.TypeOf<typeof license>;
 
@@ -158,15 +141,6 @@ export type TimestampOverride = t.TypeOf<typeof timestamp_override>;
 export const timestampOverrideOrUndefined = t.union([timestamp_override, t.undefined]);
 export type TimestampOverrideOrUndefined = t.TypeOf<typeof timestampOverrideOrUndefined>;
 
-export const throttle = t.string;
-export type Throttle = t.TypeOf<typeof throttle>;
-
-export const throttleOrNull = t.union([throttle, t.null]);
-export type ThrottleOrNull = t.TypeOf<typeof throttleOrNull>;
-
-export const throttleOrNullOrUndefined = t.union([throttle, t.null, t.undefined]);
-export type ThrottleOrUndefinedOrNull = t.TypeOf<typeof throttleOrNullOrUndefined>;
-
 export const anomaly_threshold = PositiveInteger;
 export type AnomalyThreshold = t.TypeOf<typeof PositiveInteger>;
 
@@ -182,116 +156,17 @@ export type Meta = t.TypeOf<typeof meta>;
 export const metaOrUndefined = t.union([meta, t.undefined]);
 export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
 
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const max_signals = PositiveIntegerGreaterThanZero;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type MaxSignals = t.TypeOf<typeof max_signals>;
-
-export const maxSignalsOrUndefined = t.union([max_signals, t.undefined]);
-export type MaxSignalsOrUndefined = t.TypeOf<typeof maxSignalsOrUndefined>;
-
 export const name = NonEmptyString;
 export type Name = t.TypeOf<typeof name>;
 
 export const nameOrUndefined = t.union([name, t.undefined]);
 export type NameOrUndefined = t.TypeOf<typeof nameOrUndefined>;
 
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const operator = t.keyof({
-  equals: null,
-});
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type Operator = t.TypeOf<typeof operator>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}
-
 export const rule_name_override = t.string;
 export type RuleNameOverride = t.TypeOf<typeof rule_name_override>;
 
 export const ruleNameOverrideOrUndefined = t.union([rule_name_override, t.undefined]);
 export type RuleNameOverrideOrUndefined = t.TypeOf<typeof ruleNameOverrideOrUndefined>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const severity = t.keyof({ low: null, medium: null, high: null, critical: null });
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type Severity = t.TypeOf<typeof severity>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const severityOrUndefined = t.union([severity, t.undefined]);
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type SeverityOrUndefined = t.TypeOf<typeof severityOrUndefined>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const severity_mapping_field = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const severity_mapping_value = t.string;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const severity_mapping_item = t.exact(
-  t.type({
-    field: severity_mapping_field,
-    operator,
-    value: severity_mapping_value,
-    severity,
-  })
-);
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type SeverityMappingItem = t.TypeOf<typeof severity_mapping_item>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const severity_mapping = t.array(severity_mapping_item);
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type SeverityMapping = t.TypeOf<typeof severity_mapping>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const severityMappingOrUndefined = t.union([severity_mapping, t.undefined]);
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type SeverityMappingOrUndefined = t.TypeOf<typeof severityMappingOrUndefined>;
 
 export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
 export type Status = t.TypeOf<typeof status>;
@@ -418,42 +293,18 @@ export type ThresholdNormalized = t.TypeOf<typeof thresholdNormalized>;
 export const thresholdNormalizedOrUndefined = t.union([thresholdNormalized, t.undefined]);
 export type ThresholdNormalizedOrUndefined = t.TypeOf<typeof thresholdNormalizedOrUndefined>;
 
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
 export const created_at = IsoDateString;
 
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
 export const updated_at = IsoDateString;
 
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
 export const updated_by = t.string;
 
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
 export const created_by = t.string;
+
 export const updatedByOrNull = t.union([updated_by, t.null]);
 export type UpdatedByOrNull = t.TypeOf<typeof updatedByOrNull>;
 export const createdByOrNull = t.union([created_by, t.null]);
 export type CreatedByOrNull = t.TypeOf<typeof createdByOrNull>;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export const version = PositiveIntegerGreaterThanZero;
-
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
-export type Version = t.TypeOf<typeof version>;
-
-export const versionOrUndefined = t.union([version, t.undefined]);
-export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;
 
 export const last_success_at = IsoDateString;
 export type LastSuccessAt = t.TypeOf<typeof IsoDateString>;

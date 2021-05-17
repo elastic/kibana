@@ -91,12 +91,6 @@ export const _version = t.string;
 export const _versionOrUndefined = t.union([_version, t.undefined]);
 export type _VersionOrUndefined = t.TypeOf<typeof _versionOrUndefined>;
 
-export const version = t.number;
-export type Version = t.TypeOf<typeof version>;
-
-export const versionOrUndefined = t.union([version, t.undefined]);
-export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;
-
 export const immutable = t.boolean;
 export type Immutable = t.TypeOf<typeof immutable>;
 

@@ -14,10 +14,10 @@ import {
   ConcurrentSearches,
   ItemsPerSearch,
   ThreatIndicatorPathOrUndefined,
+  LanguageOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ListClient } from '../../../../../../lists/server';
-import { LanguageOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   AlertInstanceContext,
   AlertInstanceState,

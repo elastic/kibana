@@ -32,9 +32,21 @@ import {
   threat_indicator_path,
   Threats,
   type,
+  language,
+  severity,
+  SeverityMapping,
+  ThrottleOrNull,
+  MaxSignals,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { DefaultVersionNumber } from '@kbn/securitysolution-io-ts-types';
+import {
+  DefaultVersionNumber,
+  Version,
+  DefaultStringArray,
+  DefaultBooleanTrue,
+  OnlyFalseAllowed,
+  DefaultStringBooleanFalse,
+} from '@kbn/securitysolution-io-ts-types';
 import { DefaultListArray, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   description,
@@ -47,20 +59,15 @@ import {
   timeline_id,
   timeline_title,
   meta,
-  MaxSignals,
   name,
-  severity,
   Tags,
   To,
   threshold,
-  ThrottleOrNull,
   note,
-  Version,
   References,
   Enabled,
   FalsePositives,
   Interval,
-  language,
   query,
   rule_id,
   id,
@@ -73,16 +80,8 @@ import {
   rule_name_override,
   timestamp_override,
   Author,
-  SeverityMapping,
   event_category_override,
 } from '../common/schemas';
-
-import {
-  DefaultStringArray,
-  DefaultBooleanTrue,
-  OnlyFalseAllowed,
-  DefaultStringBooleanFalse,
-} from '../types';
 
 /**
  * Differences from this and the createRulesSchema are

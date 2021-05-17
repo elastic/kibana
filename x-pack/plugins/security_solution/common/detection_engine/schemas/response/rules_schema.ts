@@ -27,7 +27,13 @@ import {
   threat_indicator_path,
   threats,
   type,
+  language,
+  severity,
+  throttle,
+  max_signals,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import { DefaultStringArray, version } from '@kbn/securitysolution-io-ts-types';
+
 import { DefaultListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { isMlRule } from '../../../machine_learning/helpers';
 import { isThresholdRule } from '../../utils';
@@ -42,13 +48,10 @@ import {
   index,
   interval,
   rule_id,
-  language,
   name,
   output_index,
-  max_signals,
   query,
   references,
-  severity,
   updated_by,
   tags,
   to,
@@ -59,14 +62,12 @@ import {
   timeline_id,
   timeline_title,
   threshold,
-  throttle,
   job_status,
   status_date,
   last_success_at,
   last_success_message,
   last_failure_at,
   last_failure_message,
-  version,
   filters,
   meta,
   note,
@@ -76,7 +77,6 @@ import {
   timestamp_override,
 } from '../common/schemas';
 
-import { DefaultStringArray } from '../types';
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
 
 /**
