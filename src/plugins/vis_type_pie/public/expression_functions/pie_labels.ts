@@ -43,14 +43,14 @@ export const pieLabels = (): ExpressionFunctionDefinition<
   ExpressionValuePieLabels
 > => ({
   name: 'pielabels',
-  help: i18n.translate('visualizations.function.pieLabels.help', {
+  help: i18n.translate('visTypePie.function.pieLabels.help', {
     defaultMessage: 'Generates the pie labels object',
   }),
   type: 'pie_labels',
   args: {
     show: {
       types: ['boolean'],
-      help: i18n.translate('visualizations.function.pieLabels.show.help', {
+      help: i18n.translate('visTypePie.function.pieLabels.show.help', {
         defaultMessage: 'Displays the pie labels',
       }),
       required: true,
@@ -58,34 +58,34 @@ export const pieLabels = (): ExpressionFunctionDefinition<
     position: {
       types: ['string'],
       default: 'default',
-      help: i18n.translate('visualizations.function.pieLabels.position.help', {
+      help: i18n.translate('visTypePie.function.pieLabels.position.help', {
         defaultMessage: 'Defines the label position',
       }),
     },
     values: {
       types: ['boolean'],
-      help: i18n.translate('visualizations.function.pieLabels.values.help', {
+      help: i18n.translate('visTypePie.function.pieLabels.values.help', {
         defaultMessage: 'Displays the values inside the slices',
       }),
       default: true,
     },
     percentDecimals: {
       types: ['number'],
-      help: i18n.translate('visualizations.function.pieLabels.percentDecimals.help', {
+      help: i18n.translate('visTypePie.function.pieLabels.percentDecimals.help', {
         defaultMessage: 'Defines the number of decimals that will appear on the values as percent',
       }),
       default: 2,
     },
     last_level: {
       types: ['boolean'],
-      help: i18n.translate('visualizations.function.pieLabels.lastLevel.help', {
+      help: i18n.translate('visTypePie.function.pieLabels.lastLevel.help', {
         defaultMessage: 'Show top level labels only',
       }),
       default: true,
     },
     truncate: {
       types: ['number', 'null'],
-      help: i18n.translate('visualizations.function.pieLabels.truncate.help', {
+      help: i18n.translate('visTypePie.function.pieLabels.truncate.help', {
         defaultMessage: 'Defines the number of characters that the slice value will display',
       }),
       default: null,
@@ -93,7 +93,7 @@ export const pieLabels = (): ExpressionFunctionDefinition<
     valuesFormat: {
       types: ['string'],
       default: 'percent',
-      help: i18n.translate('visualizations.function.pieLabels.valuesFormat.help', {
+      help: i18n.translate('visTypePie.function.pieLabels.valuesFormat.help', {
         defaultMessage: 'Defines the format of the values',
       }),
     },
