@@ -86,7 +86,7 @@ export function PalettePanelContainer({
                     >
                       <strong>
                         {i18n.translate('xpack.lens.table.palettePanelTitle', {
-                          defaultMessage: 'Color palette settings',
+                          defaultMessage: 'Edit color',
                         })}
                       </strong>
                     </h2>
