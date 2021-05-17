@@ -25,6 +25,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -34,9 +35,9 @@ import { Status } from '../../../../../common/detection_engine/schemas/common/sc
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
-  ExceptionListType,
   ExceptionBuilder,
 } from '../../../../../public/shared_imports';
+
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
@@ -469,28 +470,27 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   <EuiSpacer size="l" />
                 </>
               )}
-              <ExceptionBuilder.ExceptionBuilderComponent
-                allowLargeValueLists={
-                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type)
-                }
-                httpService={http}
-                autocompleteService={data.autocomplete}
-                exceptionListItems={initialExceptionItems}
-                listType={exceptionListType}
-                osTypes={osTypesSelection}
-                listId={ruleExceptionList.list_id}
-                listNamespaceType={ruleExceptionList.namespace_type}
-                listTypeSpecificIndexPatternFilter={filterIndexPatterns}
-                ruleName={ruleName}
-                indexPatterns={indexPatterns}
-                isOrDisabled={isExceptionBuilderFormDisabled}
-                isAndDisabled={isExceptionBuilderFormDisabled}
-                isNestedDisabled={isExceptionBuilderFormDisabled}
-                data-test-subj="alert-exception-builder"
-                id-aria="alert-exception-builder"
-                onChange={handleBuilderOnChange}
-                isDisabled={isExceptionBuilderFormDisabled}
-              />
+              {ExceptionBuilder.getExceptionBuilderComponentLazy({
+                allowLargeValueLists:
+                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
+                httpService: http,
+                autocompleteService: data.autocomplete,
+                exceptionListItems: initialExceptionItems,
+                listType: exceptionListType,
+                osTypes: osTypesSelection,
+                listId: ruleExceptionList.list_id,
+                listNamespaceType: ruleExceptionList.namespace_type,
+                listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+                ruleName,
+                indexPatterns,
+                isOrDisabled: isExceptionBuilderFormDisabled,
+                isAndDisabled: isExceptionBuilderFormDisabled,
+                isNestedDisabled: isExceptionBuilderFormDisabled,
+                dataTestSubj: 'alert-exception-builder',
+                idAria: 'alert-exception-builder',
+                onChange: handleBuilderOnChange,
+                isDisabled: isExceptionBuilderFormDisabled,
+              })}
 
               <EuiSpacer />
 

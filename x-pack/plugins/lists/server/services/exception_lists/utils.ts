@@ -16,7 +16,7 @@ import {
   UpdateCommentsArrayOrUndefined,
   exceptionListItemType,
   exceptionListType,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   SavedObjectType,
