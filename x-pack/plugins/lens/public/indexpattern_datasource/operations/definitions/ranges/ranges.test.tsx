@@ -482,7 +482,7 @@ describe('ranges', () => {
               value: '50',
             },
           } as React.ChangeEvent<HTMLInputElement>);
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 100);
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
           expect(updateLayerSpy).toHaveBeenCalledWith({
             ...layer,
