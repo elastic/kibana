@@ -239,7 +239,7 @@ export class ReportingCore {
     return screenshotsObservableFactory(config.get('capture'), browserDriverFactory);
   }
 
-  public enableScreenshotMode() {
+  public getEnableScreenshotMode() {
     const { screenshotMode } = this.getPluginSetupDeps();
     return screenshotMode.setScreenshotModeEnabled;
   }

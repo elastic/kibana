@@ -106,7 +106,7 @@ export class HeadlessChromiumDriver {
     // Reset intercepted request count
     this.interceptedCount = 0;
 
-    const enableScreenshotMode = this.core.enableScreenshotMode();
+    const enableScreenshotMode = this.core.getEnableScreenshotMode();
     await this.page.evaluateOnNewDocument(enableScreenshotMode);
     await this.page.setRequestInterception(true);
 

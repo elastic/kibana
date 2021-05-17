@@ -8,6 +8,10 @@
 
 import { RequestHandlerContext } from 'src/core/server';
 
+export interface ScreenshotModePluginSetup {
+  setScreenshotModeEnabled: () => void;
+}
+
 export interface ScreenshotModeRequestHandlerContext extends RequestHandlerContext {
   screenshotMode: {
     isScreenshot: boolean;

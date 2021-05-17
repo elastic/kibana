@@ -17,7 +17,7 @@ export const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KE
  */
 export const getScreenshotMode = (): boolean => {
   return (
-    Boolean(((window as unknown) as Record<string, unknown>)[KBN_SCREENSHOT_MODE_ENABLED_KEY]) ||
+    ((window as unknown) as Record<string, unknown>)[KBN_SCREENSHOT_MODE_ENABLED_KEY] === true ||
     window.localStorage.getItem(KBN_SCREENSHOT_MODE_ENABLED_KEY) === 'true'
   );
 };
@@ -30,7 +30,7 @@ export const getScreenshotMode = (): boolean => {
  * code unless the plugin code is guaranteed to, somehow, load before any other code.
  *
  * Additionally, we don't know what environment this code will run in so we remove as many external
- * references as possible so to make it portable. Running inside puppeteer requires this.
+ * references as possible to make it portable. For instance, running inside puppeteer.
  */
 export const setScreenshotModeEnabled = () => {
   Object.defineProperty(window, '__KBN_SCREENSHOT_MODE_ENABLED_KEY__', {
@@ -46,7 +46,6 @@ export const setScreenshotModeDisabled = () => {
     enumerable: true,
     writable: true,
     configurable: false,
-    // For a given page load, we don't expect this to ever change. Will require refresh.
     value: undefined,
   });
 };
