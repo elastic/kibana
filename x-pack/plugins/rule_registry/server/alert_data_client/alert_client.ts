@@ -122,7 +122,7 @@ export class AlertsClient {
     try {
       // use security plugin routes to check what URIs user is authorized to
       await this.authorization.ensureAuthorized({
-        ruleTypeId: hits['kibana.rac.alert.uuid'],
+        ruleTypeId: hits['kibana.rac.alert.id'],
         consumer: hits['kibana.rac.producer'],
         operation: ReadOperations.Get,
         entity: AlertingAuthorizationEntity.Alert,
@@ -186,7 +186,7 @@ export class AlertsClient {
       // ASSUMPTION: user bulk updating alerts from single owner/space
       // may need to iterate to support rules shared across spaces
       await this.authorization.ensureAuthorized({
-        ruleTypeId: hits['kibana.rac.alert.uuid'],
+        ruleTypeId: hits['kibana.rac.alert.id'],
         consumer: hits['kibana.rac.producer'],
         operation: WriteOperations.Update,
         entity: AlertingAuthorizationEntity.Alert,
