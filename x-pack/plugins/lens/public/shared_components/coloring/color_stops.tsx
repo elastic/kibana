@@ -92,23 +92,9 @@ export const CustomStops = ({
           const prevStopValue = Number(localColorStops[index - 1]?.stop ?? -Infinity);
           const nextStopValue = Number(localColorStops[index + 1]?.stop ?? Infinity);
 
-          // TODO: Commented out the below error message code because 1) the individual color stops no longer use an `EuiFormRow` component and 2) I don't think such error message are needed, as the `EuiColorPicker` dropdown already has the hex field displaying such an error in the case of an invalid hex value. Instead of having a redundant error message, can we instead change it so that if an invalid hex value remains on blur of the `EuiColorPicker`, we simply revert to last known good hex value?
-          // const errorMessages = [];
-          // // do not show color error messages if number field is already in error
-          // if (!isValidColor(color) && errorMessages.length === 0) {
-          //   errorMessages.push(
-          //     i18n.translate('xpack.lens.dynamicColoring.customPalette.hexWarningLabel', {
-          //       defaultMessage: 'Color must provide a valid hex value',
-          //     })
-          //   );
-          // }
-
           return (
             <EuiFlexItem
               key={index}
-              // TODO: Commented out the below props, as they no longer apply to this component (as it has changed to an `EuiFlexItem`). Please see above comment for an alternative to adding a duplicative error message.
-              // isInvalid={Boolean(errorMessages.length)}
-              // error={errorMessages[0]}
               data-test-subj={`${dataTestPrefix}_dynamicColoring_stop_row_${index}`}
               onBlur={(e: FocusEvent<HTMLDivElement>) => {
                 // sort the stops when the focus leaves the row container
@@ -156,6 +142,14 @@ export const CustomStops = ({
 
                 <EuiFlexItem
                   data-test-subj={`${dataTestPrefix}_dynamicColoring_stop_color_${index}`}
+                  onBlur={() => {
+                    // make sure that the popover is closed
+                    if (color === '' && !popoverInFocus) {
+                      const newColorStops = [...localColorStops];
+                      newColorStops[index] = { color: colorStops[index].color, stop };
+                      setLocalColorStops(newColorStops);
+                    }
+                  }}
                 >
                   <EuiColorPicker
                     key={stop}
@@ -170,7 +164,14 @@ export const CustomStops = ({
                     showAlpha
                     compressed
                     onFocus={() => setPopoverInFocus(true)}
-                    onBlur={() => setPopoverInFocus(false)}
+                    onBlur={() => {
+                      setPopoverInFocus(false);
+                      if (color === '') {
+                        const newColorStops = [...localColorStops];
+                        newColorStops[index] = { color: colorStops[index].color, stop };
+                        setLocalColorStops(newColorStops);
+                      }
+                    }}
                   />
                 </EuiFlexItem>
 
