@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens', 'header']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens', 'timePicker']);
 
   const find = getService('find');
   const esArchiver = getService('esArchiver');
@@ -70,10 +70,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('is no longer linked to a dashboard after visiting the visuali1ze listing page', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickLensWidget();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -84,8 +83,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         operation: 'average',
         field: 'bytes',
       });
+      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.notLinkedToOriginatingApp();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       // return to origin should not be present in save modal
       await testSubjects.click('lnsApp_saveButton');
