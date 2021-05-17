@@ -65,6 +65,13 @@ export interface FindResult<Params extends AlertTypeParams> {
 }
 
 export interface UpdateOptions<Params extends AlertTypeParams> {
+  id: string;
+  data: {
+    status: string;
+  };
+}
+
+export interface BulkUpdateOptions<Params extends AlertTypeParams> {
   ids: string[];
   owner: string;
   data: {
@@ -108,6 +115,7 @@ export class AlertsClient {
       index: '.alerts-*',
       alertId: id,
     });
+    // TODO: Type out alerts (rule registry fields + alerting alerts type)
     const { body: result } = await this.esClient.search<RawAlert>(query);
     const hits = result.hits.hits[0];
 
@@ -163,11 +171,71 @@ export class AlertsClient {
   }
 
   public async update<Params extends AlertTypeParams = never>({
+    id,
+    data,
+  }: UpdateOptions<Params>): Promise<PartialAlert<Params>> {
+    const query = buildAlertsSearchQuery({
+      index: '.alerts-*',
+      alertId: id,
+    });
+    // TODO: Type out alerts (rule registry fields + alerting alerts type)
+    const { body: result } = await this.esClient.search<RawAlert>(query);
+    const hits = result.hits.hits[0];
+
+    try {
+      // ASSUMPTION: user bulk updating alerts from single owner/space
+      // may need to iterate to support rules shared across spaces
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: hits['kibana.rac.alert.uuid'],
+        consumer: hits['kibana.rac.producer'],
+        operation: WriteOperations.Update,
+        entity: AlertingAuthorizationEntity.Alert,
+      });
+
+      try {
+        const indices = this.authorization.getAuthorizedAlertsIndices([
+          hits['kibana.rac.producer'],
+        ]);
+        // TODO: @Devin fix params for update
+        const updateParameters = {
+          id,
+          index: indices,
+          body: {
+            doc: {
+              'kibana.rac.alert.status': data.status,
+            },
+          },
+        };
+
+        return await this.esClient.update(updateParameters);
+      } catch (error) {
+        // TODO: Update error message
+        this.logger.error('');
+        throw error;
+      }
+    } catch (error) {
+      throw Boom.forbidden(
+        this.auditLogger.racAuthorizationFailure({
+          owner: hits['kibana.rac.producer'],
+          operation: ReadOperations.Get,
+          type: 'access',
+        })
+      );
+    }
+  }
+
+  public async bulkUpdate<Params extends AlertTypeParams = never>({
     ids,
     owner,
     data,
-  }: UpdateOptions<Params>): Promise<PartialAlert<Params>> {
+  }: BulkUpdateOptions<Params>): Promise<PartialAlert<Params>> {
+    // Looking like we may need to first fetch the alerts to ensure we are
+    // pulling the correct ruleTypeId and owner
+    // await this.esClient.mget()
+
     try {
+      // ASSUMPTION: user bulk updating alerts from single owner/space
+      // may need to iterate to support rules shared across spaces
       await this.authorization.ensureAuthorized({
         ruleTypeId: 'myruletypeid', // can they update multiple at once or will a single one just be passed in?
         consumer: owner,
