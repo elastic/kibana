@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import {
   FilterOptions,
   ExceptionsPagination,
@@ -12,7 +13,6 @@ import {
   Filter,
 } from '../types';
 import {
-  ExceptionListType,
   ExceptionListItemSchema,
   ExceptionListIdentifiers,
   Pagination,
