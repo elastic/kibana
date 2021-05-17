@@ -15,15 +15,11 @@ import {
   GetAgentPoliciesResponse,
 } from '../../../../plugins/fleet/common';
 
-// NOTE: import path below should be the deep path to the actual module - else we get CI errors
-
 const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
 const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
 const INGEST_API_PACKAGE_POLICIES_DELETE = `${INGEST_API_PACKAGE_POLICIES}/delete`;
 const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
-
-const SYNTHETICS_PACKAGES_ROUTE = `${INGEST_API_EPM_PACKAGES}/synthetics-0.0.4`;
 
 export function SyntheticsPackageProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -41,14 +37,12 @@ export function SyntheticsPackageProvider({ getService }: FtrProviderContext) {
   const retrieveSyntheticsPackageInfo = (() => {
     // Retrieve information about the Synthetics  package
     // EPM does not currently have an API to get the "lastest" information for a page given its name,
-    // so we'll retrieve a list of packages and then find the package info. in the list.
+    // so we'll retrieve a list of packages and then find the package info in the list.
     let apiRequest: Promise<GetPackagesResponse['response'][0] | undefined>;
 
     return () => {
       if (!apiRequest) {
-        log.info(
-          `Setting up call to retrieve Synthetics package from ${SYNTHETICS_PACKAGES_ROUTE}`
-        );
+        log.info(`Setting up call to retrieve Synthetics package`);
 
         // Currently (as of 2020-june) the package registry used in CI is the public one and
         // at times it encounters network connection issues. We use `retry.try` below to see if
@@ -134,24 +128,12 @@ export function SyntheticsPackageProvider({ getService }: FtrProviderContext) {
      * @param name
      */
     async deletePolicyByName(name: string) {
-      const {
-        body: packagePoliciesResponse,
-      }: { body: GetPackagePoliciesResponse } = await supertest
-        .get(INGEST_API_PACKAGE_POLICIES)
-        .set('kbn-xsrf', 'xxx')
-        .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
-        .send()
-        .expect(200);
-      const packagePolicyList: GetPackagePoliciesResponse['items'] = packagePoliciesResponse.items;
+      const id = await this.getPackagePolicyIdByName(name);
 
-      if (packagePolicyList.length > 1) {
-        throw new Error(`Found ${packagePolicyList.length} Policies - was expecting only one!`);
-      }
-
-      if (packagePolicyList.length) {
+      if (id) {
         try {
           const deletePackagePolicyData: DeletePackagePoliciesRequest['body'] = {
-            packagePolicyIds: [packagePolicyList[0].id],
+            packagePolicyIds: [id],
           };
           await supertest
             .post(INGEST_API_PACKAGE_POLICIES_DELETE)
