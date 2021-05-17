@@ -8,22 +8,22 @@
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import {
-  CountIndexPatternColumn,
-  DateHistogramIndexPatternColumn,
   AvgIndexPatternColumn,
+  CountIndexPatternColumn,
+  DataType,
+  DateHistogramIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   MedianIndexPatternColumn,
-  PercentileIndexPatternColumn,
+  OperationMetadata,
   OperationType,
+  PercentileIndexPatternColumn,
   PersistedIndexPatternLayer,
   RangeIndexPatternColumn,
   SeriesType,
-  TypedLensByValueInput,
-  XYState,
-  XYCurveType,
-  DataType,
-  OperationMetadata,
-  FieldBasedIndexPatternColumn,
   SumIndexPatternColumn,
+  TypedLensByValueInput,
+  XYCurveType,
+  XYState,
 } from '../../../../../../lens/public';
 import {
   buildPhraseFilter,
@@ -136,6 +136,25 @@ export class LensAttributes {
     ];
 
     this.visualization.layers[0].splitAccessor = 'break-down-column';
+  }
+
+  addComparison(compareTo: string) {
+    const yAxisColumn = this.layers.layer1.columns['y-axis-column'];
+
+    this.layers.layer1.columns['comparison-y-axis-column'] = {
+      ...yAxisColumn,
+      label: yAxisColumn.label + `(${compareTo})`,
+      timeShift: compareTo,
+    };
+
+    this.layers.layer1.columnOrder = [
+      'x-axis-column',
+      'y-axis-column',
+      'comparison-y-axis-column',
+      ...Object.keys(this.getChildYAxises()),
+    ];
+
+    this.visualization.layers[0].accessors = ['y-axis-column', 'comparison-y-axis-column'];
   }
 
   removeBreakdown() {
@@ -331,7 +350,7 @@ export class LensAttributes {
           layerId: 'layer1',
           seriesType: this.seriesType ?? 'line',
           palette: this.reportViewConfig.palette,
-          yConfig: [{ forAccessor: 'y-axis-column', color: 'green' }],
+          yConfig: [],
           xAccessor: 'x-axis-column',
         },
       ],

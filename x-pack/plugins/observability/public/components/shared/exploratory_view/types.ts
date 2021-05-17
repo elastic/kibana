@@ -82,6 +82,7 @@ export interface SeriesUrl {
   operationType?: OperationType;
   dataType: AppDataType;
   reportDefinitions?: URLReportDefinition;
+  compareTo?: string;
 }
 
 export interface UrlFilter {
