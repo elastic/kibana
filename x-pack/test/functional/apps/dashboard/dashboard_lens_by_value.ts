@@ -69,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(titles.indexOf(newTitle)).to.not.be(-1);
     });
 
-    it('is no longer linked to a dashboard after visiting the visuali1ze listing page', async () => {
+    it('is no longer linked to a dashboard after visiting the visualize listing page', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickLensWidget();
       await PageObjects.timePicker.ensureHiddenNoDataPopover();
