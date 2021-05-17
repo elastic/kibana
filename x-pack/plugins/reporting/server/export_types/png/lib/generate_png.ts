@@ -7,7 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { finalize, map, tap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { LayoutParams, PreserveLayout } from '../../../lib/layouts';
@@ -42,6 +42,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     if (apmLayout) apmLayout.end();
 
     const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');
+    let apmBuffer: typeof apm.currentSpan;
     const screenshots$ = getScreenshots({
       logger,
       urls: [url],
@@ -49,14 +50,9 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
       layout,
       browserTimezone,
     }).pipe(
-      tap(([{ screenshots }]) => {
-        const [{ base64EncodedData }] = screenshots;
-        const byteLength = getBase64DecodedSize(base64EncodedData);
-
-        logger.debug(`PNG buffer byte length: ${byteLength}`);
-        apmTrans?.setLabel('byte_length', byteLength, false);
+      tap(() => {
         apmScreenshots?.end();
-        apmTrans?.end();
+        apmBuffer = apmTrans?.startSpan('get_buffer', 'output') ?? null;
       }),
       map((results: ScreenshotResults[]) => ({
         base64: results[0].screenshots[0].base64EncodedData,
@@ -66,7 +62,17 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
           }
           return found;
         }, [] as string[]),
-      }))
+      })),
+      tap(({ base64 }) => {
+        const byteLength = getBase64DecodedSize(base64);
+
+        logger.debug(`PNG buffer byte length: ${byteLength}`);
+        apmTrans?.setLabel('byte_length', byteLength, false);
+      }),
+      finalize(() => {
+        apmBuffer?.end();
+        apmTrans?.end();
+      })
     );
 
     return screenshots$;
