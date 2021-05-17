@@ -28,8 +28,8 @@ export enum AlertingAuthorizationEntity {
 
 export enum ReadOperations {
   Get = 'get',
-  GetAlertState = 'getAlertState',
-  GetAlertInstanceSummary = 'getAlertInstanceSummary',
+  GetRuleState = 'getRuleState',
+  GetAlertSummary = 'getAlertSummary',
   Find = 'find',
 }
 
@@ -42,8 +42,8 @@ export enum WriteOperations {
   Disable = 'disable',
   MuteAll = 'muteAll',
   UnmuteAll = 'unmuteAll',
-  MuteInstance = 'muteInstance',
-  UnmuteInstance = 'unmuteInstance',
+  MuteAlert = 'muteAlert',
+  UnmuteAlert = 'unmuteAlert',
 }
 
 export interface EnsureAuthorizedOpts {

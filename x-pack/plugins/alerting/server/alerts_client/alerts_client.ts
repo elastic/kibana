@@ -397,7 +397,7 @@ export class AlertsClient {
     await this.authorization.ensureAuthorized({
       ruleTypeId: alert.alertTypeId,
       consumer: alert.consumer,
-      operation: ReadOperations.GetAlertState,
+      operation: ReadOperations.GetRuleState,
       entity: AlertingAuthorizationEntity.Rule,
     });
     if (alert.scheduledTaskId) {
@@ -418,7 +418,7 @@ export class AlertsClient {
     await this.authorization.ensureAuthorized({
       ruleTypeId: alert.alertTypeId,
       consumer: alert.consumer,
-      operation: ReadOperations.GetAlertInstanceSummary,
+      operation: ReadOperations.GetAlertSummary,
       entity: AlertingAuthorizationEntity.Rule,
     });
 
@@ -1282,7 +1282,7 @@ export class AlertsClient {
       await this.authorization.ensureAuthorized({
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
-        operation: WriteOperations.MuteInstance,
+        operation: WriteOperations.MuteAlert,
         entity: AlertingAuthorizationEntity.Rule,
       });
 
@@ -1350,7 +1350,7 @@ export class AlertsClient {
       await this.authorization.ensureAuthorized({
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
-        operation: WriteOperations.UnmuteInstance,
+        operation: WriteOperations.UnmuteAlert,
         entity: AlertingAuthorizationEntity.Rule,
       });
       if (attributes.actions.length) {

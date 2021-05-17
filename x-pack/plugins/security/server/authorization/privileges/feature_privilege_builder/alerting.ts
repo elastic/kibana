@@ -16,7 +16,7 @@ enum AlertingType {
 }
 
 const readOperations: Record<AlertingType, string[]> = {
-  rule: ['get', 'getAlertState', 'getAlertInstanceSummary', 'find'],
+  rule: ['get', 'getRuleState', 'getAlertSummary', 'find'],
   alert: ['get', 'find'],
 };
 
@@ -30,8 +30,8 @@ const writeOperations: Record<AlertingType, string[]> = {
     'disable',
     'muteAll',
     'unmuteAll',
-    'muteInstance',
-    'unmuteInstance',
+    'muteAlert',
+    'unmuteAlert',
   ],
   alert: ['update'],
 };
