@@ -220,11 +220,16 @@ export class AlertingPlugin {
       this.config
     );
 
-    core.getStartServices().then(async ([, startPlugins]) => {
+    core.getStartServices().then(async ([coreStart, startPlugins]) => {
       core.status.set(
         combineLatest([
           core.status.derivedStatus$,
-          getHealthStatusStream(startPlugins.taskManager),
+          getHealthStatusStream(
+            startPlugins.taskManager,
+            this.logger,
+            coreStart.savedObjects,
+            this.config
+          ),
         ]).pipe(
           map(([derivedStatus, healthStatus]) => {
             if (healthStatus.level > derivedStatus.level) {

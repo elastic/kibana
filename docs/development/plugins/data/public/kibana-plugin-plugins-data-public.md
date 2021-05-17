@@ -66,7 +66,7 @@
 |  [IDataPluginServices](./kibana-plugin-plugins-data-public.idatapluginservices.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-public.ifieldtype.md) |  |
-|  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) | IIndexPattern allows for an IndexPattern OR an index pattern saved object too ambiguous, should be avoided |
+|  [IIndexPattern](./kibana-plugin-plugins-data-public.iindexpattern.md) |  |
 |  [IIndexPatternFieldList](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.md) |  |
 |  [IKibanaSearchRequest](./kibana-plugin-plugins-data-public.ikibanasearchrequest.md) |  |
 |  [IKibanaSearchResponse](./kibana-plugin-plugins-data-public.ikibanasearchresponse.md) |  |

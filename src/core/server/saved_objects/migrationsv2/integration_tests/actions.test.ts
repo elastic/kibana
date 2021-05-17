@@ -41,6 +41,8 @@ import {
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../migrations/core';
+import { TaskEither } from 'fp-ts/lib/TaskEither';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -1014,41 +1016,30 @@ describe('migration actions', () => {
   });
 
   describe('transformDocs', () => {
-    it('applies "transformRawDocs" and writes result into an index', async () => {
-      const index = 'transform_docs_index';
+    it('applies "transformRawDocs" and returns the transformed documents', async () => {
       const originalDocs = [
         { _id: 'foo:1', _source: { type: 'dashboard', value: 1 } },
         { _id: 'foo:2', _source: { type: 'dashboard', value: 2 } },
       ];
 
-      const createIndexTask = createIndex(client, index, {
-        dynamic: true,
-        properties: {},
-      });
-      await createIndexTask();
-
-      async function tranformRawDocs(docs: SavedObjectsRawDoc[]): Promise<SavedObjectsRawDoc[]> {
-        for (const doc of docs) {
-          doc._source.value += 1;
-        }
-        return docs;
+      function innerTransformRawDocs(
+        docs: SavedObjectsRawDoc[]
+      ): TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess> {
+        return async () => {
+          const processedDocs: SavedObjectsRawDoc[] = [];
+          for (const doc of docs) {
+            doc._source.value += 1;
+            processedDocs.push(doc);
+          }
+          return Either.right({ processedDocs });
+        };
       }
+      const transformTask = transformDocs(innerTransformRawDocs, originalDocs);
 
-      const transformTask = transformDocs(client, tranformRawDocs, originalDocs, index, 'wait_for');
-
-      const result = (await transformTask()) as Either.Right<'bulk_index_succeeded'>;
-
-      expect(result.right).toBe('bulk_index_succeeded');
-
-      const { body } = await client.search<{ value: number }>({
-        index,
-      });
-      const hits = body.hits.hits;
-
-      const foo1 = hits.find((h) => h._id === 'foo:1');
-      expect(foo1?._source?.value).toBe(2);
-
-      const foo2 = hits.find((h) => h._id === 'foo:2');
+      const resultsWithProcessDocs = ((await transformTask()) as Either.Right<DocumentsTransformSuccess>)
+        .right.processedDocs;
+      expect(resultsWithProcessDocs.length).toEqual(2);
+      const foo2 = resultsWithProcessDocs.find((h) => h._id === 'foo:2');
       expect(foo2?._source?.value).toBe(3);
     });
   });

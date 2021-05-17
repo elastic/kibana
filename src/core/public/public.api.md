@@ -629,6 +629,7 @@ export interface DocLinksStart {
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
             createRoleMappingTemplates: string;
+            createRollupJobsRequest: string;
             createApiKey: string;
             createPipeline: string;
             createTransformRequest: string;
@@ -1172,6 +1173,20 @@ export interface SavedObjectReference {
     type: string;
 }
 
+// @public
+export interface SavedObjectReferenceWithContext {
+    id: string;
+    inboundReferences: Array<{
+        type: string;
+        id: string;
+        name: string;
+    }>;
+    isMissing?: boolean;
+    spaces: string[];
+    spacesWithMatchingAliases?: string[];
+    type: string;
+}
+
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
     namespace?: string;
@@ -1238,6 +1253,12 @@ export class SavedObjectsClient {
 
 // @public
 export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
+
+// @public
+export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
+    // (undocumented)
+    objects: SavedObjectReferenceWithContext[];
+}
 
 // @public (undocumented)
 export interface SavedObjectsCreateOptions {

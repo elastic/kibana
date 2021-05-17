@@ -27,6 +27,7 @@ import {
   ReturnUseAddOrUpdateException,
   AddOrUpdateExceptionItemsFunc,
 } from './use_add_exception';
+import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -36,11 +37,9 @@ const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
 describe('useAddOrUpdateException', () => {
-  let updateAlertStatus: jest.SpyInstance<ReturnType<typeof alertsApi.updateAlertStatus>>;
-  let addExceptionListItem: jest.SpyInstance<ReturnType<typeof listsApi.addExceptionListItem>>;
-  let updateExceptionListItem: jest.SpyInstance<
-    ReturnType<typeof listsApi.updateExceptionListItem>
-  >;
+  let updateAlertStatus: jest.SpyInstance<Promise<UpdateDocumentByQueryResponse>>;
+  let addExceptionListItem: jest.SpyInstance<Promise<ExceptionListItemSchema>>;
+  let updateExceptionListItem: jest.SpyInstance<Promise<ExceptionListItemSchema>>;
   let getQueryFilter: jest.SpyInstance<ReturnType<typeof getQueryFilterHelper.getQueryFilter>>;
   let buildAlertStatusFilter: jest.SpyInstance<
     ReturnType<typeof buildFilterHelpers.buildAlertStatusFilter>

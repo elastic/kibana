@@ -528,5 +528,27 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       }
       log.debug('> ML saved objects deleted.');
     },
+
+    async installFleetPackage(packageIdentifier: string) {
+      log.debug(`Installing Fleet package'${packageIdentifier}'`);
+
+      await supertest
+        .post(`/api/fleet/epm/packages/${packageIdentifier}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      log.debug(` > Installed`);
+    },
+
+    async removeFleetPackage(packageIdentifier: string) {
+      log.debug(`Removing Fleet package'${packageIdentifier}'`);
+
+      await supertest
+        .delete(`/api/fleet/epm/packages/${packageIdentifier}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      log.debug(` > Removed`);
+    },
   };
 }
