@@ -6,16 +6,18 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { ListsPluginRouter } from '../types';
 import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import {
   UpdateExceptionListItemSchemaDecoded,
   exceptionListItemSchema,
   updateExceptionListItemSchema,
 } from '../../common/schemas';
 import { updateExceptionListItemValidate } from '../../common/schemas/request/update_exception_list_item_validation';
+
+import { buildRouteValidation, buildSiemResponse } from './utils';
 
 import { getExceptionListClient } from '.';
 
