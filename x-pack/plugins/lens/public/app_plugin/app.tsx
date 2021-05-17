@@ -84,6 +84,7 @@ export function App({
   const startSession = useCallback(() => data.search.session.start(), [data.search.session]);
 
   const [state, setState] = useState<LensAppState>(() => {
+    const currentSessionId = data.search.session.getSessionId();
     return {
       query: data.query.queryString.getQuery(),
       // Do not use app-specific filters from previous app,
@@ -95,7 +96,13 @@ export function App({
       indexPatternsForTopNav: [],
       isLinkedToOriginatingApp: Boolean(incomingState?.originatingApp),
       isSaveable: false,
-      searchSessionId: startSession(),
+      searchSessionId:
+        dashboardFeatureFlag.allowByValueEmbeddables &&
+        Boolean(incomingState?.originatingApp) &&
+        !(initialInput as LensByReferenceInput)?.savedObjectId &&
+        currentSessionId
+          ? currentSessionId
+          : startSession(),
     };
   });
 

@@ -229,7 +229,6 @@ export async function mountApp(
     params.element
   );
   return () => {
-    data.search.session.clear();
     unmountComponentAtNode(params.element);
     unlistenParentHistory();
   };
