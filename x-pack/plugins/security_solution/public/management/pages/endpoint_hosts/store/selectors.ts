@@ -247,6 +247,19 @@ export const showView: (state: EndpointState) => 'policy_response' | 'details' =
 );
 
 /**
+ * Returns the selected endpoint's elastic agent Id
+ * used for fetching endpoint actions log
+ */
+export const selectedAgent = (state: Immutable<EndpointState>) => {
+  const hostList = state.hosts;
+  const { selected_endpoint: selectedEndpoint } = uiQueryParams(state);
+  return (
+    hostList.find((host) => host.metadata.agent.id === selectedEndpoint)?.metadata.elastic.agent
+      .id || ''
+  );
+};
+
+/**
  * Returns the Host Status which is connected the fleet agent
  */
 export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
