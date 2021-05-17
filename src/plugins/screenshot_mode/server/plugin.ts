@@ -7,18 +7,21 @@
  */
 
 import { Plugin, CoreSetup } from '../../../core/server';
-import { KBN_SCREENSHOT_MODE_HEADER } from '../common';
-import { ScreenshotModeRequestHandlerContext, ScreenshotModePluginSetup } from './types';
+import {
+  ScreenshotModeRequestHandlerContext,
+  ScreenshotModePluginSetup,
+  ScreenshotModePluginStart,
+} from './types';
+import { isScreenshotMode } from './is_screenshot_mode';
 
-export class ScreenshotModePlugin implements Plugin<ScreenshotModePluginSetup> {
-  public setup(core: CoreSetup) {
+export class ScreenshotModePlugin
+  implements Plugin<ScreenshotModePluginSetup, ScreenshotModePluginStart> {
+  public setup(core: CoreSetup): ScreenshotModePluginSetup {
     core.http.registerRouteHandlerContext<ScreenshotModeRequestHandlerContext, 'screenshotMode'>(
       'screenshotMode',
       (ctx, req) => {
         return {
-          isScreenshot: Object.keys(req.headers).some((header) => {
-            return header.toLowerCase() === KBN_SCREENSHOT_MODE_HEADER;
-          }),
+          isScreenshot: isScreenshotMode(req),
         };
       }
     );
@@ -30,10 +33,15 @@ export class ScreenshotModePlugin implements Plugin<ScreenshotModePluginSetup> {
 
     return {
       setScreenshotModeEnabled,
+      isScreenshotMode,
     };
   }
 
-  public start() {}
+  public start(): ScreenshotModePluginStart {
+    return {
+      isScreenshotMode,
+    };
+  }
 
   public stop() {}
 }

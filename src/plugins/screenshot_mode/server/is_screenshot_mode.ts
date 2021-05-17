@@ -6,16 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ScreenshotModePlugin } from './plugin';
+import { KibanaRequest } from 'src/core/server';
+import { KBN_SCREENSHOT_MODE_HEADER } from '../common';
 
-export { setScreenshotModeEnabled, KBN_SCREENSHOT_MODE_HEADER } from '../common';
-
-export {
-  ScreenshotModeRequestHandlerContext,
-  ScreenshotModePluginSetup,
-  ScreenshotModePluginStart,
-} from './types';
-
-export function plugin() {
-  return new ScreenshotModePlugin();
-}
+export const isScreenshotMode = (request: KibanaRequest): boolean => {
+  return Object.keys(request.headers).some((header) => {
+    return header.toLowerCase() === KBN_SCREENSHOT_MODE_HEADER;
+  });
+};

@@ -7,6 +7,7 @@
  */
 
 import { Plugin, PluginInitializerContext, CoreSetup, Logger } from 'kibana/server';
+import { ScreenshotModePluginSetup } from '../../../src/plugins/screenshot_mode/server';
 import { RouteDependencies } from './types';
 import { registerRoutes } from './routes';
 
@@ -15,8 +16,9 @@ export class ScreenshotModeExamplePlugin implements Plugin<void, void> {
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
   }
-  setup(core: CoreSetup): void {
+  setup(core: CoreSetup, { screenshotMode }: { screenshotMode: ScreenshotModePluginSetup }): void {
     const deps: RouteDependencies = {
+      screenshotMode,
       router: core.http.createRouter(),
       log: this.log,
     };

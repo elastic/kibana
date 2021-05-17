@@ -9,11 +9,12 @@
 import { RouteDependencies } from './types';
 import { BASE_API_ROUTE } from '../common';
 
-export const registerRoutes = ({ router, log }: RouteDependencies) => {
+export const registerRoutes = ({ router, log, screenshotMode }: RouteDependencies) => {
   router.get(
     { path: `${BASE_API_ROUTE}/check_is_screenshot`, validate: false },
     async (ctx, req, res) => {
-      log.info(`Is screenshot client? ${ctx.screenshotMode.isScreenshot}`);
+      log.info(`Reading screenshot mode from a request: ${screenshotMode.isScreenshotMode(req)}`);
+      log.info(`Reading is screenshot mode from ctx: ${ctx.screenshotMode.isScreenshot}`);
       return res.ok();
     }
   );

@@ -8,10 +8,12 @@
 
 import { IRouter, Logger } from 'kibana/server';
 import { ScreenshotModeRequestHandlerContext } from '../../../src/plugins/screenshot_mode/server';
+import { ScreenshotModePluginSetup } from '../../../src/plugins/screenshot_mode/server';
 
 export type ScreenshotModeExampleRouter = IRouter<ScreenshotModeRequestHandlerContext>;
 
 export interface RouteDependencies {
+  screenshotMode: ScreenshotModePluginSetup;
   router: ScreenshotModeExampleRouter;
   log: Logger;
 }
