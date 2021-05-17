@@ -253,6 +253,8 @@ export class AggConfigs {
         addToAggConfigs?: boolean | undefined;
     }) => T;
     // (undocumented)
+    forceNow?: Date;
+    // (undocumented)
     getAll(): AggConfig[];
     // (undocumented)
     getRequestAggById(id: string): AggConfig | undefined;
@@ -302,6 +304,8 @@ export class AggConfigs {
     onSearchRequestStart(searchSource: ISearchSource_2, options?: ISearchOptions_2): Promise<[unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown]>;
     // (undocumented)
     postFlightTransform(response: IEsSearchResponse_2<any>): IEsSearchResponse_2<any>;
+    // (undocumented)
+    setForceNow(now: Date | undefined): void;
     // (undocumented)
     setTimeFields(timeFields: string[] | undefined): void;
     // (undocumented)

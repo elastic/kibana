@@ -1067,14 +1067,18 @@ describe('terms', () => {
             ),
           },
         } as unknown) as CoreStart;
-        const newLayer = await fixAction(coreMock, ({
-          query: { language: 'kuery', query: 'a: b' },
-          filters: [],
-          dateRange: {
-            fromDate: '2020',
-            toDate: '2021',
-          },
-        } as unknown) as FramePublicAPI);
+        const newLayer = await fixAction(
+          coreMock,
+          ({
+            query: { language: 'kuery', query: 'a: b' },
+            filters: [],
+            dateRange: {
+              fromDate: '2020',
+              toDate: '2021',
+            },
+          } as unknown) as FramePublicAPI,
+          'first'
+        );
         expect(newLayer.columns.col1).toEqual(
           expect.objectContaining({
             operationType: 'filters',
