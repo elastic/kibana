@@ -35,7 +35,7 @@ export function useSavedSearchDocuments({
 
       const { sort } = stateContainer.appStateContainer.getState();
       updateSearchSource({
-        volatileSearchSource: searchSource.getParent(),
+        volatileSearchSource: searchSource,
         indexPattern,
         services,
         sort: sort as SortOrder[],

@@ -112,28 +112,6 @@ export const useSavedSearch = ({
     stateContainer,
   });
 
-  const fetch$ = useMemo(() => {
-    return merge(
-      refetch$,
-      filterManager.getFetches$(),
-      timefilter.getFetch$(),
-      timefilter.getAutoRefreshFetch$().pipe(
-        tap((done) => {
-          autoRefreshDoneCb.current = done;
-        }),
-        filter(() => cache.current.fetchStatus !== fetchStatuses.LOADING)
-      ),
-      data.query.queryString.getUpdates$(),
-      searchSessionManager.newSearchSessionIdFromURL$
-    ).pipe(debounceTime(100));
-  }, [
-    data.query.queryString,
-    filterManager,
-    refetch$,
-    searchSessionManager.newSearchSessionIdFromURL$,
-    timefilter,
-  ]);
-
   const fetchAll = useCallback(
     (resetFieldCounts = false) => {
       const inspectorAdapters = { requests: new RequestAdapter() };
@@ -210,6 +188,20 @@ export const useSavedSearch = ({
   );
 
   useEffect(() => {
+    const fetch$ = merge(
+      refetch$,
+      filterManager.getFetches$(),
+      timefilter.getFetch$(),
+      timefilter.getAutoRefreshFetch$().pipe(
+        tap((done) => {
+          autoRefreshDoneCb.current = done;
+        }),
+        filter(() => cache.current.fetchStatus !== fetchStatuses.LOADING)
+      ),
+      data.query.queryString.getUpdates$(),
+      searchSessionManager.newSearchSessionIdFromURL$
+    ).pipe(debounceTime(100));
+
     const subscription = fetch$.subscribe({
       next: (val) => {
         if (val === 'reset') {
@@ -227,7 +219,15 @@ export const useSavedSearch = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetchAll, fetch$, savedSearch$]);
+  }, [
+    data.query.queryString,
+    filterManager,
+    refetch$,
+    searchSessionManager.newSearchSessionIdFromURL$,
+    timefilter,
+    savedSearch$,
+    fetchAll,
+  ]);
 
   useEffect(() => {
     let triggerFetch = false;
@@ -247,9 +247,9 @@ export const useSavedSearch = ({
     }
     cache.current.appState = state;
     if (triggerFetch) {
-      fetchAll(resetFieldCounts);
+      refetch$.next(resetFieldCounts);
     }
-  }, [refetch$, state.interval, state.sort, fetchAll, state]);
+  }, [refetch$, state.interval, state.sort, state]);
 
   return {
     chart$,

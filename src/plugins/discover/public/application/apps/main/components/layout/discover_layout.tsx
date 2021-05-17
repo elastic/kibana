@@ -81,7 +81,6 @@ export function DiscoverLayout({
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
-  const [rows, setRows] = useState<ElasticSearchHit[]>([]);
 
   const [fetchState, setFetchState] = useState<{
     state: string;
@@ -89,23 +88,23 @@ export function DiscoverLayout({
     inspectorAdapters?: { requests: RequestAdapter };
     fieldCounts: Record<string, number>;
     fetchError?: Error;
+    rows: ElasticSearchHit[];
   }>({
     state: savedSearch$.getValue().state,
     fetchCounter: 0,
     fieldCounts: {},
+    rows: [],
   });
-  const { state: fetchStatus, fetchCounter, inspectorAdapters } = fetchState;
+  const { state: fetchStatus, fetchCounter, inspectorAdapters, rows } = fetchState;
 
   useEffect(() => {
     const subscription = savedSearch$.subscribe((next) => {
       if (
         (next.state && next.state !== fetchState.state) ||
-        (next.fetchCounter && next.fetchCounter !== fetchState.fetchCounter)
+        (next.fetchCounter && next.fetchCounter !== fetchState.fetchCounter) ||
+        (next.rows && next.rows !== fetchState.rows)
       ) {
         setFetchState({ ...fetchState, ...next });
-        if (next.rows) {
-          setRows(next.rows);
-        }
       }
     });
     return () => {
