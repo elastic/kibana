@@ -32,6 +32,7 @@ import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';
 import type { IndexPatternLayer, IndexPattern } from '../../../types';
+import { defaultLabel } from '../filters';
 
 function ofName(name?: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
@@ -80,24 +81,34 @@ function getDisallowedTermsMessage(
       label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
         defaultMessage: 'Pin current top values',
       }),
-      newState: async (core: CoreStart, frame: FramePublicAPI) => {
-        const fieldName = (layer.columns[columnId] as TermsIndexPatternColumn).sourceField;
-        const response: FieldStatsResponse<string | number> = await core.http.post(
-          `/api/lens/index_stats/${indexPattern.id}/field`,
-          {
-            body: JSON.stringify({
-              fieldName,
-              dslQuery: esQuery.buildEsQuery(
-                indexPattern as IIndexPattern,
-                frame.query,
-                frame.filters,
-                esQuery.getEsQueryConfig(core.uiSettings)
-              ),
-              fromDate: frame.dateRange.fromDate,
-              toDate: frame.dateRange.toDate,
-            }),
-          }
+      newState: async (core: CoreStart, frame: FramePublicAPI, layerId: string) => {
+        const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;
+        const fieldName = currentColumn.sourceField;
+        let currentTerms = uniq(
+          frame.activeData?.[layerId].rows
+            .map((row) => row[columnId] as string)
+            .filter((term) => typeof term === 'string' && term !== '__other__') || []
         );
+        if (currentTerms.length === 0) {
+          const response: FieldStatsResponse<string | number> = await core.http.post(
+            `/api/lens/index_stats/${indexPattern.id}/field`,
+            {
+              body: JSON.stringify({
+                fieldName,
+                dslQuery: esQuery.buildEsQuery(
+                  indexPattern as IIndexPattern,
+                  frame.query,
+                  frame.filters,
+                  esQuery.getEsQueryConfig(core.uiSettings)
+                ),
+                fromDate: frame.dateRange.fromDate,
+                toDate: frame.dateRange.toDate,
+                size: currentColumn.params.size,
+              }),
+            }
+          );
+          currentTerms = response.topValues?.buckets.map(({ key }) => String(key)) || [];
+        }
         return {
           ...layer,
           columns: {
@@ -114,13 +125,24 @@ function getDisallowedTermsMessage(
               dataType: 'string',
               operationType: 'filters',
               params: {
-                filters: response.topValues?.buckets.map(({ key }) => ({
-                  input: {
-                    query: `${fieldName}: "${key}"`,
-                    language: 'kuery',
-                  },
-                  label: String(key),
-                })),
+                filters:
+                  currentTerms.length > 0
+                    ? currentTerms.map((term) => ({
+                        input: {
+                          query: `${fieldName}: "${term}"`,
+                          language: 'kuery',
+                        },
+                        label: term,
+                      }))
+                    : [
+                        {
+                          input: {
+                            query: '*',
+                            language: 'kuery',
+                          },
+                          label: defaultLabel,
+                        },
+                      ],
               },
             } as FiltersIndexPatternColumn,
           },

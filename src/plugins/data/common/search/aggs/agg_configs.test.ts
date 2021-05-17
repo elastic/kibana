@@ -349,6 +349,14 @@ describe('AggConfigs', () => {
           params: { field: 'bytes', timeShift: '1d' },
         },
       ];
+      indexPattern.fields.push({
+        name: 'timestamp',
+        type: 'date',
+        esTypes: ['date'],
+        aggregatable: true,
+        filterable: true,
+        searchable: true,
+      } as IndexPatternField);
 
       const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
       ac.timeFields = ['timestamp'];

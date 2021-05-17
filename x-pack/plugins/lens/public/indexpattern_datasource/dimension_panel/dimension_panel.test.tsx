@@ -34,6 +34,8 @@ import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_
 import { getFieldByNameFactory } from '../pure_helpers';
 import { Filtering } from './filtering';
 import { TimeShift } from './time_shift';
+import { DimensionEditor } from './dimension_editor';
+import { AdvancedOptions } from './advanced_options';
 
 jest.mock('../loader');
 jest.mock('../query_input', () => ({
@@ -1333,11 +1335,20 @@ describe('IndexPatternDimensionEditorPanel', () => {
       };
     }
 
-    it('should not show custom options if time scaling is not available', () => {
-      const props = getProps({
-        operationType: 'terms',
-        sourceField: 'bytes',
-      });
+    it('should not show custom options if time shift is not available', () => {
+      const props = {
+        ...defaultProps,
+        state: getStateWithColumns({
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: 'Count of records',
+            operationType: 'count',
+            sourceField: 'Records',
+          } as IndexPatternColumn,
+        }),
+        columnId: 'col2',
+      };
       wrapper = shallow(
         <IndexPatternDimensionEditorComponent
           {...props}

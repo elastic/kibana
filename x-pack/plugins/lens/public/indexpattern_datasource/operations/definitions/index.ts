@@ -247,7 +247,11 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
             message: string;
             fixAction?: {
               label: string;
-              newState: (core: CoreStart, frame: FramePublicAPI) => Promise<IndexPatternLayer>;
+              newState: (
+                core: CoreStart,
+                frame: FramePublicAPI,
+                layerId: string
+              ) => Promise<IndexPatternLayer>;
             };
           }
       >
@@ -389,7 +393,11 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
             message: string;
             fixAction?: {
               label: string;
-              newState: (core: CoreStart, frame: FramePublicAPI) => Promise<IndexPatternLayer>;
+              newState: (
+                core: CoreStart,
+                frame: FramePublicAPI,
+                layerId: string
+              ) => Promise<IndexPatternLayer>;
             };
           }
       >

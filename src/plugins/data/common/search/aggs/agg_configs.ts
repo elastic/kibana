@@ -7,16 +7,10 @@
  */
 
 import moment from 'moment';
-import _, { cloneDeep, isArray } from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import {
-  Aggregate,
-  Bucket,
-  FiltersAggregate,
-  FiltersBucketItem,
-  MultiBucketAggregate,
-} from '@elastic/elasticsearch/api/types';
+import { Aggregate, Bucket } from '@elastic/elasticsearch/api/types';
 
 import {
   IEsSearchResponse,
@@ -31,6 +25,7 @@ import { AggGroupNames } from './agg_groups';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import { TimeRange, getTime, isRangeFilter } from '../../../common';
 import { IBucketAggConfig } from './buckets';
+import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -82,6 +77,7 @@ export class AggConfigs {
   public indexPattern: IndexPattern;
   public timeRange?: TimeRange;
   public timeFields?: string[];
+  public forceNow?: Date;
   public hierarchical?: boolean = false;
 
   private readonly typesRegistry: AggTypesRegistryStart;
@@ -106,6 +102,10 @@ export class AggConfigs {
 
   setTimeFields(timeFields: string[] | undefined) {
     this.timeFields = timeFields;
+  }
+
+  setForceNow(now: Date | undefined) {
+    this.forceNow = now;
   }
 
   setTimeRange(timeRange: TimeRange) {
@@ -239,7 +239,7 @@ export class AggConfigs {
       }
 
       if (hasMultipleTimeShifts) {
-        dslLvlCursor = this.insertTimeShiftSplit(config, timeShifts, dslLvlCursor);
+        dslLvlCursor = insertTimeShiftSplit(this, config, timeShifts, dslLvlCursor);
       }
 
       if (config.type.hasNoDsl) {
@@ -282,44 +282,6 @@ export class AggConfigs {
 
     removeParentAggs(dslTopLvl);
     return dslTopLvl;
-  }
-
-  private insertTimeShiftSplit(
-    config: AggConfig,
-    timeShifts: Record<string, moment.Duration>,
-    dslLvlCursor: Record<string, any>
-  ) {
-    if ('splitForTimeShift' in config.type && !config.type.splitForTimeShift(config, this)) {
-      return dslLvlCursor;
-    }
-    if (!this.timeFields || this.timeFields.length < 1) {
-      throw new Error('Time shift can only be used with configured time field');
-    }
-    if (!this.timeRange) {
-      throw new Error('Time shift can only be used with configured time range');
-    }
-    const timeRange = this.timeRange;
-    const filters: Record<string, unknown> = {};
-    const timeField = this.timeFields[0];
-    Object.entries(timeShifts).forEach(([key, shift]) => {
-      filters[key] = {
-        range: {
-          [timeField]: {
-            // only works if there is a time range
-            gte: moment(timeRange.from).subtract(shift).toISOString(),
-            lte: moment(timeRange.to).subtract(shift).toISOString(),
-          },
-        },
-      };
-    });
-    dslLvlCursor.time_offset_split = {
-      filters: {
-        filters,
-      },
-      aggs: {},
-    };
-
-    return dslLvlCursor.time_offset_split.aggs;
   }
 
   getAll() {
@@ -447,8 +409,6 @@ export class AggConfigs {
     if (!this.hasTimeShifts()) {
       return response;
     }
-    const timeShifts = this.getTimeShifts();
-    const hasMultipleTimeShifts = Object.keys(timeShifts).length > 1;
     const transformedRawResponse = cloneDeep(response.rawResponse);
     if (!transformedRawResponse.aggregations) {
       transformedRawResponse.aggregations = {
@@ -457,138 +417,7 @@ export class AggConfigs {
     }
     const aggCursor = transformedRawResponse.aggregations!;
 
-    const requestAggs = this.getRequestAggs();
-    const bucketAggs = this.aggs.filter(
-      (agg) => agg.type.type === AggGroupNames.Buckets
-    ) as IBucketAggConfig[];
-
-    const mergeAggLevel = (
-      target: GenericBucket,
-      source: GenericBucket,
-      shift: moment.Duration,
-      aggIndex: number
-    ) => {
-      Object.entries(source).forEach(([key, val]) => {
-        // copy over doc count into special key
-        if (typeof val === 'number' && key === 'doc_count') {
-          if (shift.asMilliseconds() === 0) {
-            target.doc_count = val;
-          } else {
-            target[`doc_count_${shift.asMilliseconds()}`] = val;
-          }
-        } else if (typeof val !== 'object') {
-          // other meta keys not of interest
-          return;
-        } else {
-          // a sub-agg
-          const agg = requestAggs.find(
-            (requestAgg) => key.substr(0, String(requestAgg.id).length) === requestAgg.id
-          );
-          if (agg && agg.type.type === AggGroupNames.Metrics) {
-            const timeShift = agg.getTimeShift();
-            if (
-              (timeShift && timeShift.asMilliseconds() === shift.asMilliseconds()) ||
-              (shift.asMilliseconds() === 0 && !timeShift)
-            ) {
-              // this is a metric from the current time shift, copy it over
-              target[key] = source[key];
-            }
-          } else if (agg && agg === bucketAggs[aggIndex]) {
-            const bucketAgg = agg as IBucketAggConfig;
-            // expected next bucket sub agg
-            const subAggregate = val as Aggregate;
-            const buckets = ('buckets' in subAggregate ? subAggregate.buckets : undefined) as
-              | GenericBucket[]
-              | Record<string, GenericBucket>
-              | undefined;
-            if (!target[key]) {
-              // sub aggregate only exists in shifted branch, not in base branch - create dummy aggregate
-              // which will be filled with shifted data
-              target[key] = {
-                buckets: isArray(buckets) ? [] : {},
-              };
-            }
-            const baseSubAggregate = target[key] as Aggregate;
-            // only supported bucket formats in agg configs are array of buckets and record of buckets for filters
-            const baseBuckets = ('buckets' in baseSubAggregate
-              ? baseSubAggregate.buckets
-              : undefined) as GenericBucket[] | Record<string, GenericBucket> | undefined;
-            // merge
-            if (isArray(buckets) && isArray(baseBuckets)) {
-              const baseBucketMap: Record<string, GenericBucket> = {};
-              baseBuckets.forEach((bucket) => {
-                baseBucketMap[String(bucket.key)] = bucket;
-              });
-              buckets.forEach((bucket) => {
-                const bucketKey = bucketAgg.type.getShiftedKey(bucketAgg, bucket.key, shift);
-                // if a bucket is missing in the map, create an empty one
-                if (!baseBucketMap[bucketKey]) {
-                  baseBucketMap[String(bucketKey)] = {
-                    key: bucketKey,
-                  } as GenericBucket;
-                }
-                mergeAggLevel(baseBucketMap[bucketKey], bucket, shift, aggIndex + 1);
-              });
-              (baseSubAggregate as MultiBucketAggregate).buckets = Object.values(
-                baseBucketMap
-              ).sort((a, b) => bucketAgg.type.orderBuckets(bucketAgg, a, b));
-            } else if (baseBuckets && buckets && !isArray(baseBuckets)) {
-              Object.entries(buckets).forEach(([bucketKey, bucket]) => {
-                // if a bucket is missing in the base response, create an empty one
-                if (!baseBuckets[bucketKey]) {
-                  baseBuckets[bucketKey] = {} as GenericBucket;
-                }
-                mergeAggLevel(baseBuckets[bucketKey], bucket, shift, aggIndex + 1);
-              });
-            }
-          }
-        }
-      });
-    };
-    const transformTimeShift = (cursor: Record<string, Aggregate>, aggIndex: number): undefined => {
-      const shouldSplit = this.aggs[aggIndex].type.splitForTimeShift(this.aggs[aggIndex], this);
-      if (shouldSplit) {
-        // multiple time shifts caused a filters agg in the tree we have to merge
-        if (hasMultipleTimeShifts && cursor.time_offset_split) {
-          const timeShiftedBuckets = (cursor.time_offset_split as FiltersAggregate)
-            .buckets as Record<string, FiltersBucketItem>;
-          const subTree = {};
-          Object.entries(timeShifts).forEach(([key, shift]) => {
-            mergeAggLevel(
-              subTree as GenericBucket,
-              timeShiftedBuckets[key] as GenericBucket,
-              shift,
-              aggIndex
-            );
-          });
-
-          delete cursor.time_offset_split;
-          Object.assign(cursor, subTree);
-        } else {
-          // otherwise we have to "merge" a single level to shift all keys
-          const [[, shift]] = Object.entries(timeShifts);
-          const subTree = {};
-          mergeAggLevel(subTree, cursor, shift, aggIndex);
-          Object.assign(cursor, subTree);
-        }
-        return;
-      }
-      // recurse deeper into the response object
-      Object.keys(cursor).forEach((subAggId) => {
-        const subAgg = cursor[subAggId];
-        if (typeof subAgg !== 'object' || !('buckets' in subAgg)) {
-          return;
-        }
-        if (isArray(subAgg.buckets)) {
-          subAgg.buckets.forEach((bucket) => transformTimeShift(bucket, aggIndex + 1));
-        } else {
-          Object.values(subAgg.buckets).forEach((bucket) =>
-            transformTimeShift(bucket, aggIndex + 1)
-          );
-        }
-      });
-    };
-    transformTimeShift(aggCursor, 0);
+    mergeTimeShifts(this, aggCursor);
     return {
       ...response,
       rawResponse: transformedRawResponse,

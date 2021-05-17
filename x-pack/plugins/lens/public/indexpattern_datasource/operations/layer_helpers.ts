@@ -1187,7 +1187,7 @@ export function getErrorMessages(
                 ...state,
                 layers: {
                   ...state.layers,
-                  [layerId]: await errorMessage.fixAction!.newState(core, frame),
+                  [layerId]: await errorMessage.fixAction!.newState(core, frame, layerId),
                 },
               }),
             }

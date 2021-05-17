@@ -69,6 +69,7 @@ export const handleRequest = async ({
   const allTimeFields = timeFields && timeFields.length > 0 ? timeFields : defaultTimeFields;
 
   aggs.setTimeRange(timeRange as TimeRange);
+  aggs.setForceNow(forceNow);
   aggs.setTimeFields(allTimeFields);
 
   // For now we need to mirror the history of the passed search source, since

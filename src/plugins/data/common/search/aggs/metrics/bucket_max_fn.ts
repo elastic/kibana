@@ -81,7 +81,7 @@ export const aggBucketMax = (): FunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('data.search.aggs.metrics.timeShift.help', {
         defaultMessage:
-          'Specifies whether the time range of documents used for the metric should be shifted by the specified amount',
+          'Shift the time range for the metric by a set time, for example 1h or 7d. "previous" will use the closest time range from the date histogram or time range filter.',
       }),
     },
   },
