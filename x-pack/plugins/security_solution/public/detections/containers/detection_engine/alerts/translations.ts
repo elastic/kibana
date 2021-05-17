@@ -32,3 +32,8 @@ export const HOST_ISOLATION_FAILURE = i18n.translate(
   'xpack.securitySolution.endpoint.hostIsolation.failedToIsolate.title',
   { defaultMessage: 'Failed to isolate host' }
 );
+
+export const CASES_FROM_ALERTS_FAILURE = i18n.translate(
+  'xpack.securitySolution.endpoint.hostIsolation.casesFromAlerts.title',
+  { defaultMessage: 'Failed to find associated cases' }
+);

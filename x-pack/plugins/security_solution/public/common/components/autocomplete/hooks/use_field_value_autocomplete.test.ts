@@ -15,7 +15,7 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { stubIndexPatternWithFields } from '../../../../../../../../src/plugins/data/common/index_patterns/index_pattern.stub';
 import { getField } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { OperatorTypeEnum } from '../../../../lists_plugin_deps';
+import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 jest.mock('../../../../common/lib/kibana');
 
