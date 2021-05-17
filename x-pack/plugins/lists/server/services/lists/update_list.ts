@@ -11,7 +11,7 @@ import {
   Id,
   MetaOrUndefined,
   NameOrUndefined,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { decodeVersion } from '../utils/decode_version';
 import { encodeHitVersion } from '../utils/encode_hit_version';
