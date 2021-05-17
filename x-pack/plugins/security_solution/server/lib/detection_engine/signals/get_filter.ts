@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { assertUnreachable } from '../../../../common/utility_types';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import {
@@ -22,7 +23,6 @@ import {
   AlertServices,
 } from '../../../../../alerting/server';
 import { PartialFilter } from '../types';
-import { BadRequestError } from '../errors/bad_request_error';
 import { QueryFilter } from './types';
 
 interface GetFilterArgs {

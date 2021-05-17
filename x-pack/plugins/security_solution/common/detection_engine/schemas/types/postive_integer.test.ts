@@ -8,7 +8,7 @@
 import { PositiveInteger } from './positive_integer';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('positive_integer_greater_than_zero', () => {
   test('it should validate a positive number', () => {

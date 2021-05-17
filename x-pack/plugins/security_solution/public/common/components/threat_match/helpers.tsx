@@ -6,6 +6,7 @@
  */
 
 import uuid from 'uuid';
+import { addIdToItem } from '@kbn/securitysolution-utils';
 import {
   ThreatMap,
   threatMap,
@@ -14,7 +15,6 @@ import {
 
 import { IndexPattern, IFieldType } from '../../../../../../../src/plugins/data/common';
 import { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
-import { addIdToItem } from '../../../../common/add_remove_id_to_item';
 
 /**
  * Formats the entry into one that is easily usable for the UI.

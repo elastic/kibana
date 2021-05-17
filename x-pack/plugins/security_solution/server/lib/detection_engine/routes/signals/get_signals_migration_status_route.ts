@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '../../../../../common/constants';
 import { getSignalsMigrationStatusSchema } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema';
@@ -16,7 +17,7 @@ import { getSignalsIndicesInRange } from '../../migrations/get_signals_indices_i
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
 import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
 import { getTemplateVersion } from '../index/check_template_version';
-import { buildSiemResponse, transformError } from '../utils';
+import { buildSiemResponse } from '../utils';
 
 export const getSignalsMigrationStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(

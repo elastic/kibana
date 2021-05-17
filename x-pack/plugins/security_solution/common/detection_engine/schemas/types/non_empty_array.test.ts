@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 import { NonEmptyArray } from './non_empty_array';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 const testSchema = t.keyof({
   valid: true,

@@ -7,7 +7,7 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { OnlyFalseAllowed } from './only_false_allowed';
 
 describe('only_false_allowed', () => {

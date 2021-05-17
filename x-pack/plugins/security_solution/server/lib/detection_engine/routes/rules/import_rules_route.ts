@@ -10,7 +10,8 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { createPromiseFromStreams } from '@kbn/utils';
 
-import { validate } from '../../../../../common/validate';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   importRulesQuerySchema,
   ImportRulesQuerySchemaDecoded,
@@ -36,9 +37,9 @@ import {
   BulkError,
   isBulkError,
   isImportRegular,
-  transformError,
   buildSiemResponse,
 } from '../utils';
+
 import { patchRules } from '../../rules/patch_rules';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';

@@ -13,8 +13,3 @@ export {
   DefaultVersionNumber,
   DefaultVersionNumberDecoded,
 } from './detection_engine/schemas/types/default_version_number';
-export { exactCheck } from './exact_check';
-export { getPaths, foldLeftRight, removeExternalLinkText } from './test_utils';
-export { validate, validateEither } from './validate';
-export { formatErrors } from './format_errors';
-export { addIdToItem, removeIdFromItem } from './add_remove_id_to_item';

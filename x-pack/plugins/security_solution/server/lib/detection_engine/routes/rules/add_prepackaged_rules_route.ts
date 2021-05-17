@@ -6,13 +6,14 @@
  */
 
 import moment from 'moment';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type {
   AppClient,
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
 
-import { validate } from '../../../../../common/validate';
 import {
   PrePackagedRulesAndTimelinesSchema,
   prePackagedRulesAndTimelinesSchema,
@@ -33,7 +34,7 @@ import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
 import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset_saved_objects_client';
 
-import { transformError, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { AlertsClient } from '../../../../../../alerting/server';
 import { FrameworkRequest } from '../../../framework';
 

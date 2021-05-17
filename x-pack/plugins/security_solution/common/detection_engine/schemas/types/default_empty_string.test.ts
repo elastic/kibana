@@ -8,7 +8,7 @@
 import { DefaultEmptyString } from './default_empty_string';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('default_empty_string', () => {
   test('it should validate a regular string', () => {
