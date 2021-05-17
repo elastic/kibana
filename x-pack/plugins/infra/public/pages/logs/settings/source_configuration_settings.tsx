@@ -43,9 +43,10 @@ export const LogsSettingsPage = () => {
 
   const {
     sourceConfiguration: source,
+    hasFailedLoadingSource,
     isLoading,
     isUninitialized,
-    updateSourceConfiguration,
+    updateSource,
     resolvedSourceConfiguration,
   } = useLogSourceContext();
 
@@ -65,9 +66,9 @@ export const LogsSettingsPage = () => {
   } = useLogSourceConfigurationFormState(source?.configuration);
 
   const persistUpdates = useCallback(async () => {
-    await updateSourceConfiguration(formState);
+    await updateSource(formState);
     sourceConfigurationFormElement.resetValue();
-  }, [updateSourceConfiguration, sourceConfigurationFormElement, formState]);
+  }, [updateSource, sourceConfigurationFormElement, formState]);
 
   const isWriteable = useMemo(() => shouldAllowEdit && source && source.origin !== 'internal', [
     shouldAllowEdit,
@@ -77,7 +78,7 @@ export const LogsSettingsPage = () => {
   if ((isLoading || isUninitialized) && !resolvedSourceConfiguration) {
     return <SourceLoadingPage />;
   }
-  if (!source?.configuration) {
+  if (hasFailedLoadingSource) {
     return null;
   }
 

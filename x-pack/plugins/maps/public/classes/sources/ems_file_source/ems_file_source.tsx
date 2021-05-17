@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
 import { Adapters } from 'src/plugins/inspector/public';
 import { FileLayer } from '@elastic/ems-client';
-import { Attribution, ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
 import { SOURCE_TYPES, FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getEmsFileLayers } from '../../../util';
@@ -183,9 +183,11 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     }
   }
 
-  async getAttributions(): Promise<Attribution[]> {
-    const emsFileLayer = await this.getEMSFileLayer();
-    return emsFileLayer.getAttributions();
+  getAttributionProvider() {
+    return async () => {
+      const emsFileLayer = await this.getEMSFileLayer();
+      return emsFileLayer.getAttributions();
+    };
   }
 
   async getLeftJoinFields() {
@@ -194,7 +196,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return fields.map((f) => this.createField({ fieldName: f.name }));
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return this._tooltipFields.length > 0;
   }
 

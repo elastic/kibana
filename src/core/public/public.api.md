@@ -589,6 +589,9 @@ export interface DocLinksStart {
             readonly painlessWalkthrough: string;
             readonly luceneExpressions: string;
         };
+        readonly search: {
+            readonly sessions: string;
+        };
         readonly indexPatterns: {
             readonly introduction: string;
             readonly fieldFormattersNumber: string;
@@ -619,10 +622,14 @@ export interface DocLinksStart {
         readonly visualize: Record<string, string>;
         readonly apis: Readonly<{
             bulkIndexAlias: string;
+            byteSizeUnits: string;
+            createAutoFollowPattern: string;
+            createFollower: string;
             createIndex: string;
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
             createRoleMappingTemplates: string;
+            createRollupJobsRequest: string;
             createApiKey: string;
             createPipeline: string;
             createTransformRequest: string;
@@ -638,6 +645,7 @@ export interface DocLinksStart {
             putIndexTemplateV1: string;
             putWatch: string;
             simulatePipeline: string;
+            timeUnits: string;
             updateTransform: string;
         }>;
         readonly observability: Record<string, string>;
@@ -1165,6 +1173,20 @@ export interface SavedObjectReference {
     type: string;
 }
 
+// @public
+export interface SavedObjectReferenceWithContext {
+    id: string;
+    inboundReferences: Array<{
+        type: string;
+        id: string;
+        name: string;
+    }>;
+    isMissing?: boolean;
+    spaces: string[];
+    spacesWithMatchingAliases?: string[];
+    type: string;
+}
+
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
     namespace?: string;
@@ -1226,11 +1248,17 @@ export class SavedObjectsClient {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
     find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T, unknown>>;
     get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
-    update<T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
+    update<T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
 
 // @public
 export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
+
+// @public
+export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
+    // (undocumented)
+    objects: SavedObjectReferenceWithContext[];
+}
 
 // @public (undocumented)
 export interface SavedObjectsCreateOptions {
@@ -1447,10 +1475,11 @@ export interface SavedObjectsStart {
 }
 
 // @public (undocumented)
-export interface SavedObjectsUpdateOptions {
-    migrationVersion?: SavedObjectsMigrationVersion;
+export interface SavedObjectsUpdateOptions<Attributes = unknown> {
     // (undocumented)
     references?: SavedObjectReference[];
+    // (undocumented)
+    upsert?: Attributes;
     // (undocumented)
     version?: string;
 }

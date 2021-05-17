@@ -23,6 +23,7 @@ import { Documents, DocumentDetail } from '../documents';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
+import { SchemaRouter } from '../schema';
 import { SearchUI } from '../search_ui';
 import { SourceEngines } from '../source_engines';
 import { Synonyms } from '../synonyms';
@@ -110,6 +111,13 @@ describe('EngineRouter', () => {
 
     expect(wrapper.find(Documents)).toHaveLength(1);
     expect(wrapper.find(DocumentDetail)).toHaveLength(1);
+  });
+
+  it('renders a schema view', () => {
+    setMockValues({ ...values, myRole: { canViewEngineSchema: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(SchemaRouter)).toHaveLength(1);
   });
 
   it('renders a synonyms view', () => {

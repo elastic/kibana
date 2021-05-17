@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Persistence via TelemetryController Scheduled Task Hijack",
-  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:(CompatTelRunner.exe or compattelrunner.exe) and process.args:-cv* and not process.name:(conhost.exe or DeviceCensus.exe or devicecensus.exe or CompatTelRunner.exe or compattelrunner.exe or DismHost.exe or dismhost.exe or rundll32.exe or powershell.exe)",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"CompatTelRunner.exe\" and process.args : \"-cv*\" and\n  not process.name : (\"conhost.exe\",\n                      \"DeviceCensus.exe\",\n                      \"CompatTelRunner.exe\",\n                      \"DismHost.exe\",\n                      \"rundll32.exe\",\n                      \"powershell.exe\")\n",
   "references": [
     "https://www.trustedsec.com/blog/abusing-windows-telemetry-for-persistence/?utm_content=131234033&utm_medium=social&utm_source=twitter&hss_channel=tw-403811306"
   ],
@@ -44,6 +44,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 4
+  "type": "eql",
+  "version": 5
 }

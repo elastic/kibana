@@ -7,10 +7,13 @@
 
 import * as t from 'io-ts';
 
-import { exceptionListType, namespaceType } from '../../../shared_imports';
+import { exceptionListType, namespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { NonEmptyString } from './non_empty_string';
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const list = t.exact(
   t.type({
     id: NonEmptyString,

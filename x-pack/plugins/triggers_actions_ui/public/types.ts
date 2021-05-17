@@ -141,6 +141,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   referencedByCount?: number;
   config: Config;
   isPreconfigured: boolean;
+  isMissingSecrets?: boolean;
 }
 
 export type PreConfiguredActionConnector = Omit<

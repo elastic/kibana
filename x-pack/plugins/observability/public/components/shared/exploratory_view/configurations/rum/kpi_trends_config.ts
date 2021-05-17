@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels } from '../constants';
+import { FieldLabels, RECORDS_FIELD } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -27,6 +27,17 @@ import {
   TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_URL,
 } from '../constants/elasticsearch_fieldnames';
+import {
+  BACKEND_TIME_LABEL,
+  CLS_LABEL,
+  FCP_LABEL,
+  FID_LABEL,
+  LCP_LABEL,
+  PAGE_LOAD_TIME_LABEL,
+  PAGE_VIEWS_LABEL,
+  TBT_LABEL,
+  WEB_APPLICATION_LABEL,
+} from '../constants/labels';
 
 export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -62,7 +73,7 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],
-    labels: { ...FieldLabels, [SERVICE_NAME]: 'Web Application' },
+    labels: { ...FieldLabels, [SERVICE_NAME]: WEB_APPLICATION_LABEL },
     reportDefinitions: [
       {
         field: SERVICE_NAME,
@@ -74,16 +85,20 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
       {
         field: 'business.kpi',
         custom: true,
-        defaultValue: 'Records',
+        defaultValue: RECORDS_FIELD,
         options: [
-          { field: 'Records', label: 'Page views' },
-          { label: 'Page load time', field: TRANSACTION_DURATION, columnType: 'operation' },
-          { label: 'Backend time', field: TRANSACTION_TIME_TO_FIRST_BYTE, columnType: 'operation' },
-          { label: 'First contentful paint', field: FCP_FIELD, columnType: 'operation' },
-          { label: 'Total blocking time', field: TBT_FIELD, columnType: 'operation' },
-          { label: 'Largest contentful paint', field: LCP_FIELD, columnType: 'operation' },
-          { label: 'First input delay', field: FID_FIELD, columnType: 'operation' },
-          { label: 'Cumulative layout shift', field: CLS_FIELD, columnType: 'operation' },
+          { field: RECORDS_FIELD, label: PAGE_VIEWS_LABEL },
+          { label: PAGE_LOAD_TIME_LABEL, field: TRANSACTION_DURATION, columnType: 'operation' },
+          {
+            label: BACKEND_TIME_LABEL,
+            field: TRANSACTION_TIME_TO_FIRST_BYTE,
+            columnType: 'operation',
+          },
+          { label: FCP_LABEL, field: FCP_FIELD, columnType: 'operation' },
+          { label: TBT_LABEL, field: TBT_FIELD, columnType: 'operation' },
+          { label: LCP_LABEL, field: LCP_FIELD, columnType: 'operation' },
+          { label: FID_LABEL, field: FID_FIELD, columnType: 'operation' },
+          { label: CLS_LABEL, field: CLS_FIELD, columnType: 'operation' },
         ],
       },
     ],

@@ -111,10 +111,10 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   }
 
   const {
-    sourceConfiguration,
-    loadSourceConfiguration,
-    isLoadingSourceConfiguration,
     derivedIndexPattern,
+    isLoadingSourceConfiguration,
+    loadSource,
+    sourceConfiguration,
   } = useLogSource({
     sourceId,
     fetch: services.http.fetch,
@@ -164,8 +164,8 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
 
   // Component lifetime
   useEffect(() => {
-    loadSourceConfiguration();
-  }, [loadSourceConfiguration]);
+    loadSource();
+  }, [loadSource]);
 
   useEffect(() => {
     fetchEntries();

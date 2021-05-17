@@ -22,10 +22,10 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    savedSearchLoader: {} as any,
-    urlGenerator: {
+    savedSearchLoader: {} as DiscoverStart['savedSearchLoader'],
+    urlGenerator: ({
       createUrl: jest.fn(),
-    } as any,
+    } as unknown) as DiscoverStart['urlGenerator'],
   };
   return startContract;
 };

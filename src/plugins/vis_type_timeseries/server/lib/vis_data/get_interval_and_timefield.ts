@@ -7,14 +7,10 @@
  */
 
 import { AUTO_INTERVAL } from '../../../common/constants';
-import { FetchedIndexPattern, PanelSchema, SeriesItemsSchema } from '../../../common/types';
+import type { FetchedIndexPattern, Panel, Series } from '../../../common/types';
 import { validateField } from '../../../common/fields_utils';
 
-export function getIntervalAndTimefield(
-  panel: PanelSchema,
-  series: SeriesItemsSchema,
-  index: FetchedIndexPattern
-) {
+export function getIntervalAndTimefield(panel: Panel, series: Series, index: FetchedIndexPattern) {
   const timeField =
     (series.override_index_pattern ? series.series_time_field : panel.time_field) ||
     index.indexPattern?.timeFieldName;

@@ -69,8 +69,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(series).to.have.property('id', 'user');
         expect(series).to.have.property('data');
         const datapoint = last(series.data) as any;
-        expect(datapoint).to.have.property('timestamp', 1547571720000);
-        expect(datapoint).to.have.property('value', 0.0018333333333333333);
+        expect(datapoint).to.have.property('timestamp', 1547571780000);
+        expect(datapoint).to.have.property('value', 0.0015);
       });
     });
 

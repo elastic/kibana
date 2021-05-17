@@ -70,14 +70,6 @@ export const JIRA_AUTHENTICATION_LABEL = i18n.translate(
   }
 );
 
-export const JIRA_REMEMBER_VALUES_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.rememberValuesLabel',
-  {
-    defaultMessage:
-      'Remember these values. You must reenter them each time you edit the connector.',
-  }
-);
-
 export const JIRA_REENTER_VALUES_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.reenterValuesLabel',
   {

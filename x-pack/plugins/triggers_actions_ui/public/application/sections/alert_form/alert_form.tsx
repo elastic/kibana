@@ -135,14 +135,10 @@ export function getAlertErrors(
     ...alertBaseErrors,
   } as IErrorObject;
 
-  const alertActionsErrors = alert.actions.reduce((prev, alertAction: AlertAction) => {
-    return {
-      ...prev,
-      [alertAction.id]: actionTypeRegistry
-        .get(alertAction.actionTypeId)
-        ?.validateParams(alertAction.params).errors,
-    };
-  }, {}) as Record<string, IErrorObject>;
+  const alertActionsErrors = alert.actions.map((alertAction: AlertAction) => {
+    return actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
+      .errors;
+  });
   return {
     alertParamsErrors,
     alertBaseErrors,
@@ -160,13 +156,11 @@ export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>
 export function isValidAlert(
   alertObject: InitialAlert | Alert,
   validationResult: IErrorObject,
-  actionsErrors: Record<string, IErrorObject>
+  actionsErrors: IErrorObject[]
 ): alertObject is Alert {
   return (
     !hasObjectErrors(validationResult) &&
-    Object.keys(actionsErrors).find((actionErrorsKey) =>
-      hasObjectErrors(actionsErrors[actionErrorsKey])
-    ) === undefined
+    actionsErrors.every((error: IErrorObject) => !hasObjectErrors(error))
   );
 }
 

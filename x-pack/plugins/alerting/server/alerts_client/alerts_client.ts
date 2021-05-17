@@ -59,6 +59,7 @@ import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_a
 import { alertAuditEvent, AlertAuditAction } from './audit_events';
 import { nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField } from './lib';
+import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -269,7 +270,7 @@ export class AlertsClient {
       throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
     }
 
-    this.validateActions(alertType, data.actions);
+    await this.validateActions(alertType, data.actions);
 
     const createTime = Date.now();
     const { references, actions } = await this.denormalizeActions(data.actions);
@@ -288,11 +289,7 @@ export class AlertsClient {
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
-      executionStatus: {
-        status: 'pending',
-        lastExecutionDate: new Date().toISOString(),
-        error: null,
-      },
+      executionStatus: getAlertExecutionStatusPending(new Date().toISOString()),
     };
 
     this.auditLogger?.log(
@@ -728,7 +725,7 @@ export class AlertsClient {
       data.params,
       alertType.validate?.params
     );
-    this.validateActions(alertType, data.actions);
+    await this.validateActions(alertType, data.actions);
 
     const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
@@ -981,6 +978,11 @@ export class AlertsClient {
         ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
         updatedBy: username,
         updatedAt: new Date().toISOString(),
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: new Date().toISOString(),
+          error: null,
+        },
       });
       try {
         await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
@@ -1434,10 +1436,36 @@ export class AlertsClient {
     };
   }
 
-  private validateActions(
+  private async validateActions(
     alertType: UntypedNormalizedAlertType,
     actions: NormalizedAlertAction[]
-  ): void {
+  ): Promise<void> {
+    if (actions.length === 0) {
+      return;
+    }
+
+    // check for actions using connectors with missing secrets
+    const actionsClient = await this.getActionsClient();
+    const actionIds = [...new Set(actions.map((action) => action.id))];
+    const actionResults = (await actionsClient.getBulk(actionIds)) || [];
+    const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
+      (result) => result.isMissingSecrets
+    );
+
+    if (actionsUsingConnectorsWithMissingSecrets.length) {
+      throw Boom.badRequest(
+        i18n.translate('xpack.alerting.alertsClient.validateActions.misconfiguredConnector', {
+          defaultMessage: 'Invalid connectors: {groups}',
+          values: {
+            groups: actionsUsingConnectorsWithMissingSecrets
+              .map((connector) => connector.name)
+              .join(', '),
+          },
+        })
+      );
+    }
+
+    // check for actions with invalid action groups
     const { actionGroups: alertTypeActionGroups } = alertType;
     const usedAlertActionGroups = actions.map((action) => action.group);
     const availableAlertTypeActionGroups = new Set(map(alertTypeActionGroups, 'id'));

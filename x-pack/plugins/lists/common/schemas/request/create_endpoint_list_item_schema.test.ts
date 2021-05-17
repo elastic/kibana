@@ -7,11 +7,11 @@
 
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 import { getCreateCommentsArrayMock } from '../types/create_comment.mock';
 import { getCommentsMock } from '../types/comment.mock';
-import { CommentsArray } from '../types';
 
 import {
   CreateEndpointListItemSchema,

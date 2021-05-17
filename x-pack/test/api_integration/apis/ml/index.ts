@@ -36,6 +36,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_winlogbeat');
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
       await ml.testResources.deleteIndexPatternByTitle('ft_logs-endpoint.events.*');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_metricbeat');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_cloudtrail');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_metrics_ui');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_apache_data_stream');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_nginx_data_stream');
 
       await esArchiver.unload('ml/ecommerce');
       await esArchiver.unload('ml/categorization');
@@ -54,6 +59,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('ml/farequote');
       await esArchiver.unload('ml/bm_classification');
       await esArchiver.unload('ml/ihp_outlier');
+      await esArchiver.unload('ml/module_metricbeat');
+      await esArchiver.unload('ml/module_siem_cloudtrail');
+      await esArchiver.unload('ml/module_metrics_ui');
+      await esArchiver.unload('ml/module_apache_data_stream');
+      await esArchiver.unload('ml/module_nginx_data_stream');
 
       await ml.testResources.resetKibanaTimeZone();
     });

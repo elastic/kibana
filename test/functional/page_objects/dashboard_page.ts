@@ -24,7 +24,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const renderable = getService('renderable');
   const listingTable = getService('listingTable');
   const elasticChart = getService('elasticChart');
-  const PageObjects = getPageObjects(['common', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'header', 'visualize', 'discover']);
 
   interface SaveDashboardOptions {
     /**
@@ -223,12 +223,18 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
      */
     public async expectToolbarPaginationDisplayed() {
-      const subjects = ['pagination-button-previous', 'pagination-button-next'];
+      const isLegacyDefault = PageObjects.discover.useLegacyTable();
+      if (isLegacyDefault) {
+        const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
+        await Promise.all(subjects.map(async (subj) => await testSubjects.existOrFail(subj)));
+      } else {
+        const subjects = ['pagination-button-previous', 'pagination-button-next'];
 
-      await Promise.all(subjects.map(async (subj) => await testSubjects.existOrFail(subj)));
-      const paginationListExists = await find.existsByCssSelector('.euiPagination__list');
-      if (!paginationListExists) {
-        throw new Error(`expected discover data grid pagination list to exist`);
+        await Promise.all(subjects.map(async (subj) => await testSubjects.existOrFail(subj)));
+        const paginationListExists = await find.existsByCssSelector('.euiPagination__list');
+        if (!paginationListExists) {
+          throw new Error(`expected discover data grid pagination list to exist`);
+        }
       }
     }
 
