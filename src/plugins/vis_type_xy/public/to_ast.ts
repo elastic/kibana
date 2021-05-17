@@ -26,7 +26,7 @@ import {
   Scale,
   TimeMarker,
 } from './types';
-import { visName, VisTypeXyExpressionFunctionDefinition } from './xy_vis_fn';
+import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_functions/xy_vis_fn';
 import { XyVisType } from '../common';
 import { getEsaggsFn } from './to_ast_esaggs';
 import { TimeRangeBounds } from '../../data/common';

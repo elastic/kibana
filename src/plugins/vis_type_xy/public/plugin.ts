@@ -12,16 +12,6 @@ import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/p
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
-
-import { createVisTypeXyVisFn } from './xy_vis_fn';
-import { categoryAxis as categoryAxisExpressionFunction } from './expression_functions/category_axis';
-import { timeMarker as timeMarkerExpressionFunction } from './expression_functions/time_marker';
-import { valueAxis as valueAxisExpressionFunction } from './expression_functions/value_axis';
-import { seriesParam as seriesParamExpressionFunction } from './expression_functions/series_param';
-import { thresholdLine as thresholdLineExpressionFunction } from './expression_functions/threshold_line';
-import { label as labelExpressionFunction } from './expression_functions/label';
-import { visScale as visScaleExpressionFunction } from './expression_functions/vis_scale';
-import { xyDimension as xyDimensionExpressionFunction } from './expression_functions/xy_dimension';
 import {
   setDataActions,
   setFormatService,
@@ -34,6 +24,7 @@ import {
 import { visTypesDefinitions } from './vis_types';
 import { LEGACY_CHARTS_LIBRARY } from '../common';
 import { xyVisRenderer } from './vis_renderer';
+import { getExpressionFunctionsRegister } from './expression_functions_register';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeXyPluginSetup {}
@@ -74,19 +65,20 @@ export class VisTypeXyPlugin
       setUISettings(core.uiSettings);
       setThemeService(charts.theme);
       setPalettesService(charts.palettes);
-      [
-        timeMarkerExpressionFunction,
-        thresholdLineExpressionFunction,
-        labelExpressionFunction,
-        visScaleExpressionFunction,
-        valueAxisExpressionFunction,
-        xyDimensionExpressionFunction,
-        seriesParamExpressionFunction,
-        categoryAxisExpressionFunction,
-        createVisTypeXyVisFn,
-      ].forEach(expressions.registerFunction);
+
       expressions.registerRenderer(xyVisRenderer);
-      visTypesDefinitions.forEach(visualizations.createBaseVisualization);
+
+      const expressionFunctionsRegister = getExpressionFunctionsRegister(expressions);
+
+      visTypesDefinitions.forEach((item) => {
+        visualizations.createBaseVisualization({
+          setup: async (vis) => {
+            await expressionFunctionsRegister();
+            return vis;
+          },
+          ...item,
+        });
+      });
     }
 
     setTrackUiMetric(usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_xy'));

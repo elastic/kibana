@@ -8,10 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
-
-import { ChartType } from '../common';
-import { VisParams, XYVisConfig } from './types';
+import type { ExpressionFunctionDefinition, Datatable, Render } from '../../../expressions/public';
+import type { ChartType } from '../../common';
+import type { VisParams, XYVisConfig } from '../types';
 
 export const visName = 'xy_vis';
 export interface RenderValue {
@@ -28,7 +27,7 @@ export type VisTypeXyExpressionFunctionDefinition = ExpressionFunctionDefinition
   Render<RenderValue>
 >;
 
-export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
+export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
   name: visName,
   type: 'render',
   context: {
