@@ -46,6 +46,17 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
+
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ params }) => {
@@ -470,7 +481,7 @@ describe('ranges', () => {
               value: '50',
             },
           } as React.ChangeEvent<HTMLInputElement>);
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 100);
 
           expect(updateLayerSpy).toHaveBeenCalledWith({
             ...layer,
