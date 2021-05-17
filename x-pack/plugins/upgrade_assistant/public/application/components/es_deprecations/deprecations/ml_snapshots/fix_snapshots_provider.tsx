@@ -27,7 +27,7 @@ import { useAppContext } from '../../../../app_context';
 
 interface Props {
   children: (
-    upgradeSnapshotsPrompt: ({ jobId, snapshotId }: { jobId: string; snapshotId: string }) => void
+    fixSnapshotsPrompt: ({ jobId, snapshotId }: { jobId: string; snapshotId: string }) => void
   ) => React.ReactNode;
 }
 
@@ -44,8 +44,14 @@ const i18nTexts = {
       defaultMessage: 'Cancel',
     }
   ),
+  deleteButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deleteButtonLabel',
+    {
+      defaultMessage: 'Delete',
+    }
+  ),
   flyoutTitle: i18n.translate('xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.title', {
-    defaultMessage: 'Upgrade model snapshot',
+    defaultMessage: 'Upgrade or delete model snapshot',
   }),
   primaryFlyoutDescription: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.primaryDescription',
@@ -57,57 +63,88 @@ const i18nTexts = {
   getSecondaryFlyoutDescription: ({ jobId, snapshotId }: { jobId: string; snapshotId: string }) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.secondaryDescription"
-      defaultMessage="The Upgrade Assistant will upgrade snapshot {snapshotId} for job {jobId} to the current major version."
+      defaultMessage="Please upgrade or delete snapshot {snapshotId} for job {jobId}."
       values={{
         snapshotId: <EuiCode>{snapshotId}</EuiCode>,
         jobId: <EuiCode>{jobId}</EuiCode>,
       }}
     />
   ),
-  successNotificationText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.successNotificationText',
+  upgradeSuccessNotificationText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.upgradeSuccessNotificationText',
     {
       defaultMessage: 'Snapshot upgraded',
     }
   ),
-  errorNotificationText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.errorNotificationText',
+  upgradeErrorNotificationText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.upgradeErrorNotificationText',
     {
       defaultMessage: 'Error upgrading snapshot',
     }
   ),
+  deleteSuccessNotificationText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deleteSuccessNotificationText',
+    {
+      defaultMessage: 'Snapshot deleted',
+    }
+  ),
+  deleteErrorNotificationText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deleteErrorNotificationText',
+    {
+      defaultMessage: 'Error deleting snapshot',
+    }
+  ),
 };
 
-export const UpgradeSnapshotsProvider = ({ children }: Props) => {
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+export const FixSnapshotsProvider = ({ children }: Props) => {
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [isUpgradingSnapshot, setIsUpgradingSnapshot] = useState(false);
+  const [isDeletingSnapshot, setIsDeletingSnapshot] = useState(false);
 
   const jobId = useRef<string | undefined>(undefined);
   const snapshotId = useRef<string | undefined>(undefined);
 
   const { api, notifications } = useAppContext();
 
-  const upgradeMlSnapshots = async () => {
-    setIsLoading(true);
+  const upgradeMlSnapshot = async () => {
+    setIsUpgradingSnapshot(true);
 
-    const { error } = await api.upgradeMlSnapshots({
+    const { error } = await api.upgradeMlSnapshot({
       snapshotId: snapshotId.current!,
       jobId: jobId.current!,
     });
 
-    setIsLoading(false);
+    setIsUpgradingSnapshot(false);
     closeFlyout();
 
     if (error) {
-      notifications.toasts.addDanger(i18nTexts.errorNotificationText);
+      notifications.toasts.addDanger(i18nTexts.upgradeErrorNotificationText);
     } else {
-      notifications.toasts.addSuccess(i18nTexts.successNotificationText);
+      notifications.toasts.addSuccess(i18nTexts.upgradeSuccessNotificationText);
+    }
+  };
+
+  const deleteMlSnapshot = async () => {
+    setIsDeletingSnapshot(true);
+
+    const { error } = await api.deleteMlSnapshot({
+      snapshotId: snapshotId.current!,
+      jobId: jobId.current!,
+    });
+
+    setIsDeletingSnapshot(false);
+    closeFlyout();
+
+    if (error) {
+      notifications.toasts.addDanger(i18nTexts.deleteErrorNotificationText);
+    } else {
+      notifications.toasts.addSuccess(i18nTexts.deleteSuccessNotificationText);
     }
   };
 
   const closeFlyout = () => setIsFlyoutOpen(false);
 
-  const upgradeSnapshotsPrompt = ({
+  const fixSnapshotsPrompt = ({
     jobId: currentJobId,
     snapshotId: currentSnapshotId,
   }: {
@@ -121,7 +158,7 @@ export const UpgradeSnapshotsProvider = ({ children }: Props) => {
 
   return (
     <>
-      {children(upgradeSnapshotsPrompt)}
+      {children(fixSnapshotsPrompt)}
 
       {isFlyoutOpen && (
         <EuiPortal>
@@ -150,9 +187,22 @@ export const UpgradeSnapshotsProvider = ({ children }: Props) => {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={upgradeMlSnapshots} isLoading={isLoading}>
-                    {i18nTexts.upgradeButtonLabel}
-                  </EuiButton>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiButtonEmpty
+                        color="danger"
+                        onClick={upgradeMlSnapshot}
+                        isLoading={isDeletingSnapshot}
+                      >
+                        {i18nTexts.deleteButtonLabel}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiButton fill onClick={deleteMlSnapshot} isLoading={isUpgradingSnapshot}>
+                        {i18nTexts.upgradeButtonLabel}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlyoutFooter>

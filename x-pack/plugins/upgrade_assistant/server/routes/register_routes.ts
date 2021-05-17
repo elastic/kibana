@@ -12,7 +12,7 @@ import { registerDeprecationLoggingRoutes } from './deprecation_logging';
 import { registerReindexIndicesRoutes } from './reindex_indices';
 import { registerTelemetryRoutes } from './telemetry';
 import { registerUpdateSettingsRoute } from './update_index_settings';
-import { registerUpgradeMlSnapshotsRoute } from './ml_snapshots';
+import { registerMlSnapshotRoutes } from './ml_snapshots';
 import { ReindexWorker } from '../lib/reindexing';
 
 export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
@@ -21,5 +21,5 @@ export function registerRoutes(dependencies: RouteDependencies, getWorker: () =>
   registerReindexIndicesRoutes(dependencies, getWorker);
   registerTelemetryRoutes(dependencies);
   registerUpdateSettingsRoute(dependencies);
-  registerUpgradeMlSnapshotsRoute(dependencies);
+  registerMlSnapshotRoutes(dependencies);
 }

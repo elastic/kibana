@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { UpgradeMlSnapshotsButton } from './button';
+export { FixMlSnapshotsButton } from './button';

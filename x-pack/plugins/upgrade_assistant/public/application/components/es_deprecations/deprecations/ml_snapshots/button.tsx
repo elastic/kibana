@@ -10,13 +10,13 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { UpgradeSnapshotsProvider } from './upgrade_snapshots_provider';
+import { FixSnapshotsProvider } from './fix_snapshots_provider';
 
 const i18nTexts = {
-  upgradeButtonLabel: i18n.translate(
+  fixButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.upgradeButtonLabel',
     {
-      defaultMessage: 'Upgrade',
+      defaultMessage: 'Fix',
     }
   ),
   doneButtonLabel: i18n.translate(
@@ -32,20 +32,20 @@ interface Props {
   jobId: string;
 }
 
-export const UpgradeMlSnapshotsButton: React.FunctionComponent<Props> = ({ snapshotId, jobId }) => {
+export const FixMlSnapshotsButton: React.FunctionComponent<Props> = ({ snapshotId, jobId }) => {
   return (
-    <UpgradeSnapshotsProvider>
-      {(upgradeSnapshotsPrompt) => {
+    <FixSnapshotsProvider>
+      {(fixSnapshotsPrompt) => {
         return (
           <EuiButton
             size="s"
-            data-test-subj="upgradeMlSnapshotsButton"
-            onClick={() => upgradeSnapshotsPrompt({ snapshotId, jobId })}
+            data-test-subj="fixMlSnapshotsButton"
+            onClick={() => fixSnapshotsPrompt({ snapshotId, jobId })}
           >
-            {i18nTexts.upgradeButtonLabel}
+            {i18nTexts.fixButtonLabel}
           </EuiButton>
         );
       }}
-    </UpgradeSnapshotsProvider>
+    </FixSnapshotsProvider>
   );
 };

@@ -21,7 +21,7 @@ import { EnrichedDeprecationInfo } from '../../../../../common/types';
 import { AppContext } from '../../../app_context';
 import { ReindexButton } from './reindex';
 import { FixIndexSettingsButton } from './index_settings';
-import { UpgradeMlSnapshotsButton } from './ml_snapshots';
+import { FixMlSnapshotsButton } from './ml_snapshots';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;
@@ -83,7 +83,7 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
 
       {correctiveAction?.type === 'mlSnapshot' && (
         <EuiFlexItem grow={false}>
-          <UpgradeMlSnapshotsButton
+          <FixMlSnapshotsButton
             jobId={correctiveAction.jobId}
             snapshotId={correctiveAction.snapshotId}
           />

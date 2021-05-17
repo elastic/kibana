@@ -31,7 +31,8 @@ export async function getUpgradeAssistantStatus(
         message:
           'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
         url: '',
-        details: 'foo',
+        details:
+          'model snapshot [%s] for job [%s] supports minimum version [%s] and needs to be at least [%s]',
       },
     ],
     cluster_settings: [
@@ -53,36 +54,36 @@ export async function getUpgradeAssistantStatus(
       },
     ],
     index_settings: {
-      deprecated_settings: [
-        {
-          level: 'warning',
-          message: 'translog retention settings are ignored',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
-          details:
-            'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
-        },
-      ],
-      settings: [
-        {
-          level: 'warning',
-          message: 'translog retention settings are ignored',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
-          details:
-            'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
-        },
-      ],
-      nested_multi_fields: [
-        {
-          level: 'warning',
-          message: 'Multi-fields within multi-fields',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html#_defining_multi_fields_within_multi_fields',
-          details:
-            'The names of fields that contain chained multi-fields: [[type: _doc, field: text]]',
-        },
-      ],
+      // deprecated_settings: [
+      //   {
+      //     level: 'warning',
+      //     message: 'translog retention settings are ignored',
+      //     url:
+      //       'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
+      //     details:
+      //       'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
+      //   },
+      // ],
+      // settings: [
+      //   {
+      //     level: 'warning',
+      //     message: 'translog retention settings are ignored',
+      //     url:
+      //       'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
+      //     details:
+      //       'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
+      //   },
+      // ],
+      // nested_multi_fields: [
+      //   {
+      //     level: 'warning',
+      //     message: 'Multi-fields within multi-fields',
+      //     url:
+      //       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html#_defining_multi_fields_within_multi_fields',
+      //     details:
+      //       'The names of fields that contain chained multi-fields: [[type: _doc, field: text]]',
+      //   },
+      // ],
       test2: [
         {
           level: 'critical',
@@ -91,43 +92,43 @@ export async function getUpgradeAssistantStatus(
             'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
           details: 'This index was created using version: 6.8.13',
         },
-        {
-          level: 'warning',
-          message: 'translog retention settings are ignored',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
-          details:
-            'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
-        },
+        // {
+        //   level: 'warning',
+        //   message: 'translog retention settings are ignored',
+        //   url:
+        //     'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
+        //   details:
+        //     'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
+        // },
       ],
-      test3: [
-        {
-          level: 'critical',
-          message: 'Index created before 7.0',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
-          details: 'This index was created using version: 6.8.13',
-        },
-      ],
-      test4: [
-        {
-          level: 'critical',
-          message: 'Index created before 7.0',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
-          details: 'This index was created using version: 6.8.13',
-        },
-      ],
-      translog_settings: [
-        {
-          level: 'warning',
-          message: 'translog retention settings are ignored',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
-          details:
-            'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
-        },
-      ],
+      // test3: [
+      //   {
+      //     level: 'critical',
+      //     message: 'Index created before 7.0',
+      //     url:
+      //       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
+      //     details: 'This index was created using version: 6.8.13',
+      //   },
+      // ],
+      // test4: [
+      //   {
+      //     level: 'critical',
+      //     message: 'Index created before 7.0',
+      //     url:
+      //       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
+      //     details: 'This index was created using version: 6.8.13',
+      //   },
+      // ],
+      // translog_settings: [
+      //   {
+      //     level: 'warning',
+      //     message: 'translog retention settings are ignored',
+      //     url:
+      //       'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
+      //     details:
+      //       'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
+      //   },
+      // ],
     },
   };
 
