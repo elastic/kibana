@@ -58,10 +58,10 @@ export const useDashboardAppState = ({
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
   const [lastSavedState, setLastSavedState] = useState<DashboardState>();
 
-  const [dashboardAppState, setDashboardAppState] = useState<DashboardAppState>({
+  const [dashboardAppState, setDashboardAppState] = useState<DashboardAppState>(() => ({
     $onDashboardStateChange: new BehaviorSubject({} as DashboardState),
     $triggerDashboardRefresh: new Subject<{ force?: boolean }>(),
-  });
+  }));
 
   const $onLastSavedStateChange = useMemo(() => new Subject<DashboardState>(), []);
 
