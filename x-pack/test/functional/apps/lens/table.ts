@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open the palette panel to customize the palette look', async () => {
       await PageObjects.lens.openTablePalettePanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.lens.changePaletteTo('temperature');
+      await PageObjects.lens.setPalette('temperature');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
       expect(styleObj['background-color']).to.be('rgb(235, 239, 245)');

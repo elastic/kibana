@@ -733,7 +733,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsDatatable_dynamicColoring_trigger');
     },
 
-    async changePaletteTo(paletteName: string) {
+    async setPalette(paletteName: string) {
       await testSubjects.click('lnsDatatable_dynamicColoring_palette_picker');
       await testSubjects.click(`${paletteName}-palette`);
     },
@@ -743,11 +743,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click('lns-indexPattern-PalettePanelContainerBack');
         await testSubjects.missingOrFail('lns-indexPattern-PalettePanelContainerBack');
       });
-    },
-
-    async setPalette(paletteName: string) {
-      await testSubjects.click('lns-palettePicker');
-      await find.clickByCssSelector(`#${paletteName}`);
     },
 
     async openColorStopPopup(index = 0) {
