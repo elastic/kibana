@@ -1149,6 +1149,29 @@ describe('getSortedObjectsForExport()', () => {
       ]);
     });
 
+    test('return results including the `namespaces` attribute when includeNamespaces option is used', async () => {
+      const createSavedObject = (obj: any) => ({ ...obj, attributes: {}, references: [] });
+      const objectResults = [
+        createSavedObject({ type: 'multi', id: '1', namespaces: ['foo'] }),
+        createSavedObject({ type: 'multi', id: '2', namespaces: ['bar'] }),
+        createSavedObject({ type: 'other', id: '3' }),
+      ];
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: objectResults,
+      });
+      const exportStream = await exporter.exportByObjects({
+        request,
+        objects: [
+          { type: 'multi', id: '1' },
+          { type: 'multi', id: '2' },
+          { type: 'other', id: '3' },
+        ],
+        includeNamespaces: true,
+      });
+      const response = await readStreamToCompletion(exportStream);
+      expect(response).toEqual([...objectResults, expect.objectContaining({ exportedCount: 3 })]);
+    });
+
     test('includes nested dependencies when passed in', async () => {
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [

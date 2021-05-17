@@ -13,12 +13,12 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
-  EuiFieldText,
   EuiTextArea,
   EuiFormFieldset,
   EuiSelect,
   EuiScreenReaderOnly,
   EuiSpacer,
+  EuiFieldPassword,
 } from '@elastic/eui';
 
 import { useTLSFieldsContext } from './contexts';
@@ -337,7 +337,7 @@ export const TLSFields: React.FunctionComponent<{
         }
         labelAppend={<OptionalLabel />}
       >
-        <EuiFieldText
+        <EuiFieldPassword
           value={fields[ConfigKeys.TLS_KEY_PASSPHRASE].value}
           onChange={(event) => {
             const value = event.target.value;

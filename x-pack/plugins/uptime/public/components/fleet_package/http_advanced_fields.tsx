@@ -17,6 +17,7 @@ import {
   EuiDescribedFormGroup,
   EuiCheckbox,
   EuiSpacer,
+  EuiFieldPassword,
 } from '@elastic/eui';
 
 import { useHTTPAdvancedFieldsContext } from './contexts';
@@ -113,7 +114,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             />
           }
         >
-          <EuiFieldText
+          <EuiFieldPassword
             value={fields[ConfigKeys.PASSWORD]}
             onChange={(event) =>
               handleInputChange({

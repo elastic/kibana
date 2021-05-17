@@ -7,17 +7,19 @@
 
 import uuid from 'uuid';
 
-import { OsType } from '../../../../../lists/common/schemas';
-import {
+import type {
   EntriesArray,
   EntryMatch,
   EntryMatchWildcard,
   EntryNested,
-  ExceptionListItemSchema,
   NestedEntriesArray,
-} from '../../../../../lists/common';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import type { ExceptionListItemSchema } from '../../../../../lists/common';
+
+import type { OsType } from '../../../../../lists/common/schemas';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
-import {
+import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../../../../../lists/server';
