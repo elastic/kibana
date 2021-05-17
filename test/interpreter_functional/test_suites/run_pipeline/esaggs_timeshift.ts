@@ -71,6 +71,40 @@ export default function ({
       expect(getCell(result, 0, 2)).to.be(4618);
     });
 
+    it('shifts single percentile', async () => {
+      const expression = `
+          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
+          | esaggs index={indexPatternLoad id='logstash-*'}
+          aggs={aggSinglePercentile id="1" enabled=true schema="metric" field="bytes" percentile=95}
+          aggs={aggSinglePercentile id="2" enabled=true schema="metric" field="bytes" percentile=95 timeShift="1d"}
+        `;
+      const result = await expectExpression(
+        'esaggs_shift_single_percentile',
+        expression
+      ).getResponse();
+      // percentile is not stable
+      expect(getCell(result, 0, 0)).to.be.within(10400, 10500);
+      expect(getCell(result, 0, 1)).to.be.within(10500, 10600);
+    });
+
+    it('shifts multiple percentiles', async () => {
+      const expression = `
+          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
+          | esaggs index={indexPatternLoad id='logstash-*'}
+          aggs={aggPercentiles id="1" enabled=true schema="metric" field="bytes" percents=5 percents=95}
+          aggs={aggPercentiles id="2" enabled=true schema="metric" field="bytes" percents=5 percents=95 timeShift="1d"}
+        `;
+      const result = await expectExpression(
+        'esaggs_shift_multi_percentile',
+        expression
+      ).getResponse();
+      // percentile is not stable
+      expect(getCell(result, 0, 0)).to.be.within(300, 400);
+      expect(getCell(result, 0, 1)).to.be.within(10400, 10500);
+      expect(getCell(result, 0, 2)).to.be.within(200, 300);
+      expect(getCell(result, 0, 3)).to.be.within(10500, 10600);
+    });
+
     it('shifts date histogram', async () => {
       const expression = `
           kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
@@ -81,6 +115,53 @@ export default function ({
         `;
       const result: Datatable = await expectExpression(
         'esaggs_shift_date_histogram',
+        expression
+      ).getResponse();
+      expect(result.rows.length).to.be(25);
+      checkShift(result.rows, result.columns);
+    });
+
+    it('shifts filtered metrics', async () => {
+      const expression = `
+          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
+          | esaggs index={indexPatternLoad id='logstash-*'}
+          aggs={aggDateHistogram id="1" enabled=true schema="bucket" field="@timestamp" interval="1h"}
+          aggs={aggFilteredMetric
+            id="2"
+            customBucket={aggFilter
+              id="2-filter"
+              enabled=true
+              schema="bucket"
+              filter='{"language":"kuery","query":"geo.src:US"}'
+            }
+            customMetric={aggAvg id="3"
+              field="bytes"
+              enabled=true
+              schema="metric" 
+            }
+            enabled=true
+            schema="metric"
+            timeShift="1h"
+          }
+          aggs={aggFilteredMetric
+            id="4"
+            customBucket={aggFilter
+              id="4-filter"
+              enabled=true
+              schema="bucket"
+              filter='{"language":"kuery","query":"geo.src:US"}'
+            }
+            customMetric={aggAvg id="5"
+              field="bytes"
+              enabled=true
+              schema="metric" 
+            }
+            enabled=true
+            schema="metric"
+          }
+        `;
+      const result: Datatable = await expectExpression(
+        'esaggs_shift_filtered_metrics',
         expression
       ).getResponse();
       expect(result.rows.length).to.be(25);
@@ -123,6 +204,47 @@ export default function ({
       ]);
     });
 
+    it('shifts filters', async () => {
+      const expression = `
+          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
+          | esaggs index={indexPatternLoad id='logstash-*'}
+          aggs={aggFilters id="1" filters='[{"input":{"query":"geo.src:\\"US\\" ","language":"kuery"},"label":""},{"input":{"query":"geo.src: \\"CN\\"","language":"kuery"},"label":""}]'}
+          aggs={aggFilters id="2" filters='[{"input":{"query":"geo.dest:\\"US\\" ","language":"kuery"},"label":""},{"input":{"query":"geo.dest: \\"CN\\"","language":"kuery"},"label":""}]'}
+          aggs={aggAvg id="3" field="bytes" enabled=true schema="metric" timeShift="2h"}
+          aggs={aggAvg id="4" field="bytes" enabled=true schema="metric"}
+        `;
+      const result: Datatable = await expectExpression(
+        'esaggs_shift_filters',
+        expression
+      ).getResponse();
+      expect(result.rows).to.eql([
+        {
+          'col-0-1': 'geo.src:"US" ',
+          'col-1-2': 'geo.dest:"US" ',
+          'col-2-3': 5956.9,
+          'col-3-4': 5956.9,
+        },
+        {
+          'col-0-1': 'geo.src:"US" ',
+          'col-1-2': 'geo.dest: "CN"',
+          'col-2-3': 5127.854838709677,
+          'col-3-4': 5085.746031746032,
+        },
+        {
+          'col-0-1': 'geo.src: "CN"',
+          'col-1-2': 'geo.dest:"US" ',
+          'col-2-3': 5648.25,
+          'col-3-4': 5643.793650793651,
+        },
+        {
+          'col-0-1': 'geo.src: "CN"',
+          'col-1-2': 'geo.dest: "CN"',
+          'col-2-3': 5842.858823529412,
+          'col-3-4': 5842.858823529412,
+        },
+      ]);
+    });
+
     it('shifts histogram', async () => {
       const expression = `
           kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
@@ -159,7 +281,7 @@ export default function ({
       ]);
     });
 
-    it('shifts pipeline aggs', async () => {
+    it('shifts sibling pipeline aggs', async () => {
       const expression = `
           kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
           | esaggs index={indexPatternLoad id='logstash-*'}
@@ -167,11 +289,62 @@ export default function ({
           aggs={aggBucketSum id="5" enabled=true schema="metric" timeShift="1d" customBucket={aggTerms id="6" enabled="true" schema="bucket" field="geo.src" size="3"} customMetric={aggCount id="7" enabled="true" schema="metric"}}
         `;
       const result: Datatable = await expectExpression(
-        'esaggs_shift_pipeline_aggs',
+        'esaggs_shift_sibling_pipeline_aggs',
         expression
       ).getResponse();
       expect(getCell(result, 0, 0)).to.be(2050);
       expect(getCell(result, 0, 1)).to.be(2053);
+    });
+
+    it('shifts parent pipeline aggs', async () => {
+      const expression = `
+          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
+          | esaggs index={indexPatternLoad id='logstash-*'}
+          aggs={aggDateHistogram id="1" enabled=true schema="bucket" field="@timestamp" interval="3h" min_doc_count=0}
+          aggs={aggMovingAvg id="2" enabled=true schema="metric" metricAgg="custom" window=5 script="MovingFunctions.unweightedAvg(values)" timeShift="3h" customMetric={aggCount id="2-metric" enabled="true" schema="metric"}}
+        `;
+      const result: Datatable = await expectExpression(
+        'esaggs_shift_parent_pipeline_aggs',
+        expression
+      ).getResponse();
+      expect(result.rows).to.eql([
+        {
+          'col-0-1': 1442791800000,
+          'col-1-2': null,
+        },
+        {
+          'col-0-1': 1442802600000,
+          'col-1-2': 30,
+        },
+        {
+          'col-0-1': 1442813400000,
+          'col-1-2': 30.5,
+        },
+        {
+          'col-0-1': 1442824200000,
+          'col-1-2': 69.66666666666667,
+        },
+        {
+          'col-0-1': 1442835000000,
+          'col-1-2': 198.5,
+        },
+        {
+          'col-0-1': 1442845800000,
+          'col-1-2': 415.6,
+        },
+        {
+          'col-0-1': 1442856600000,
+          'col-1-2': 702.2,
+        },
+        {
+          'col-0-1': 1442867400000,
+          'col-1-2': 859.8,
+        },
+        {
+          'col-0-1': 1442878200000,
+          'col-1-2': 878.4,
+        },
+      ]);
     });
 
     it('metrics at all levels should work for single shift', async () => {

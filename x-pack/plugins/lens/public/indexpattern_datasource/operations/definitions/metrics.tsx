@@ -121,7 +121,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         enabled: true,
         schema: 'metric',
         field: column.sourceField,
-        timeShift: column.timeShift,
+        timeShift: column.filter ? undefined : column.timeShift,
       }).toAst();
     },
     getErrorMessage: (layer, columnId, indexPattern) =>

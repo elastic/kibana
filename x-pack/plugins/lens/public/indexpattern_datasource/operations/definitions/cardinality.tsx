@@ -101,7 +101,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       enabled: true,
       schema: 'metric',
       field: column.sourceField,
-      timeShift: column.timeShift,
+      timeShift: column.filter ? undefined : column.timeShift,
     }).toAst();
   },
   onFieldChange: (oldColumn, field) => {
