@@ -296,10 +296,9 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
               defaultMessage: 'Bounds',
             })}
             helpText={
-              hasBarOrAreaOnAxis && localExtent.mode !== 'custom'
+              hasBarOrAreaOnAxis
                 ? i18n.translate('xpack.lens.xyChart.axisExtent.disabledDataBoundsMessage', {
-                    defaultMessage:
-                      "Bounds of bar and area series always have to include zero and can't be fit to the data",
+                    defaultMessage: 'Only line charts can be fit to the data bounds',
                   })
                 : undefined
             }
@@ -366,21 +365,20 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                     helpText={
                       hasBarOrAreaOnAxis && !inclusiveZeroError
                         ? i18n.translate('xpack.lens.xyChart.inclusiveZero', {
-                            defaultMessage:
-                              'Bounds have to include include zero for area and bar series',
+                            defaultMessage: 'Bounds must include zero.',
                           })
                         : undefined
                     }
                     error={
                       hasBarOrAreaOnAxis && inclusiveZeroError
                         ? i18n.translate('xpack.lens.xyChart.inclusiveZero', {
-                            defaultMessage:
-                              'Bounds have to include include zero for area and bar series',
+                            defaultMessage: 'Bounds must include zero.',
                           })
                         : undefined
                     }
                   >
                     <EuiFieldNumber
+                      compressed
                       value={localExtent.lowerBound ?? ''}
                       isInvalid={inclusiveZeroError || boundaryError}
                       data-test-subj="lnsXY_axisExtent_lowerBound"
@@ -426,6 +424,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                     }
                   >
                     <EuiFieldNumber
+                      compressed
                       value={localExtent.upperBound ?? ''}
                       data-test-subj="lnsXY_axisExtent_upperBound"
                       onChange={(e) => {
