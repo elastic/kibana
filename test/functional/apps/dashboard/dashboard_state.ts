@@ -256,8 +256,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('for embeddable config color parameters on a visualization', () => {
+        let originalPieSliceStyle = '';
         it('updates a pie slice color on a soft refresh', async function () {
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
+
+          originalPieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
           await PageObjects.visChart.openLegendOptionColors(
             '80,000',
             `[data-title="${PIE_CHART_VIS_NAME}"]`
@@ -298,9 +301,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await retry.try(async () => {
             const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
-            const color = isNewChartsLibraryEnabled ? 'rgb(111, 135, 216)' : 'rgb(87, 193, 123)';
-            // The default color that was stored with the visualization before any dashboard overrides.
-            expect(pieSliceStyle.indexOf(color)).to.be.greaterThan(-1);
+
+            // After removing all overrides, pie slice style should match original.
+            expect(pieSliceStyle).to.be(originalPieSliceStyle);
           });
         });
 

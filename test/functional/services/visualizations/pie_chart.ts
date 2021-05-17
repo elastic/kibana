@@ -93,7 +93,7 @@ export function PieChartProvider({ getService, getPageObjects }: FtrProviderCont
         const selectedSlice = slices.filter((slice) => {
           return slice.name.toString() === name.replace(',', '');
         });
-        return [selectedSlice[0].color];
+        return selectedSlice[0].color;
       }
       const pieSlice = await this.getPieSlice(name);
       return await pieSlice.getAttribute('style');
