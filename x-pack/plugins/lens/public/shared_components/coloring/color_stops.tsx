@@ -172,6 +172,7 @@ export const CustomStops = ({
                         setLocalColorStops(newColorStops);
                       }
                     }}
+                    placeholder=" "
                   />
                 </EuiFlexItem>
 
