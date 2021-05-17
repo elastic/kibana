@@ -6,3 +6,4 @@
  */
 
 export * from './isolation';
+export * from './audit_log';

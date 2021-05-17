@@ -16,3 +16,10 @@ export const HostIsolationRequestSchema = {
     comment: schema.nullable(schema.string()),
   }),
 };
+
+export const EndpointActionLogRequestSchema = {
+  query: schema.object({}),
+  params: schema.object({
+    agent_id: schema.string(),
+  }),
+};

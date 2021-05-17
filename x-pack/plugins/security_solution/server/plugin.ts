@@ -58,7 +58,10 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
-import { registerHostIsolationRoutes } from './endpoint/routes/actions';
+import {
+  registerHostIsolationRoutes,
+  registerActionAuditLogRoutes,
+} from './endpoint/routes/actions';
 import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
@@ -207,6 +210,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerPolicyRoutes(router, endpointContext);
     registerTrustedAppsRoutes(router, endpointContext);
     registerHostIsolationRoutes(router, endpointContext);
+    registerActionAuditLogRoutes(router, endpointContext);
 
     plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
