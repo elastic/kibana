@@ -88,14 +88,16 @@ export const getListFetchError: EventFiltersSelector<
   return (isFailedResourceState(listPageDataState) && listPageDataState.error) || undefined;
 });
 
-export const getListIsLoading: EventFiltersSelector<boolean> = createSelector(
-  getCurrentListPageDataState,
-  (listDataState) => isLoadingResourceState(listDataState)
-);
-
 export const getListPageDataExistsState: EventFiltersSelector<
   StoreState['listPage']['dataExist']
 > = ({ listPage: { dataExist } }) => dataExist;
+
+export const getListIsLoading: EventFiltersSelector<boolean> = createSelector(
+  getCurrentListPageDataState,
+  getListPageDataExistsState,
+  (listDataState, dataExists) =>
+    isLoadingResourceState(listDataState) || isLoadingResourceState(dataExists)
+);
 
 export const getListPageDoesDataExist: EventFiltersSelector<boolean> = createSelector(
   getListPageDataExistsState,
@@ -103,9 +105,14 @@ export const getListPageDoesDataExist: EventFiltersSelector<boolean> = createSel
     if (isLoadedResourceState(dataExistsState)) {
       return dataExistsState.data;
     }
+    if (isLoadingResourceState(dataExistsState)) {
+      // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+      // @ts-ignore
+      return dataExistsState.previousState.data;
+    }
 
-    // Until we know for sure that data exists (LoadedState), we assume `true`
-    return true;
+    // Until we know for sure that data exists (LoadedState), we assume `false`
+    return false;
   }
 );
 
@@ -179,7 +186,7 @@ export const listDataNeedsRefresh: EventFiltersSelector<boolean> = createSelecto
       forceRefresh ||
       location.page_index + 1 !== currentQuery.page ||
       location.page_size !== currentQuery.perPage ||
-      (!!location.filter && location.filter !== currentQuery.filter)
+      location.filter !== currentQuery.filter
     );
   }
 );
