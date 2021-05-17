@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { Type } from '@kbn/securitysolution-io-ts-utils';
+import { Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { SearchListItemArraySchema } from '../../../common/schemas';
 import { SearchEsListItemSchema } from '../../schemas/elastic_response';

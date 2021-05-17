@@ -37,11 +37,12 @@ export const getElasticsearchMetricQuery = (
   }
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
+  const intervalAsMS = intervalAsSeconds * 1000;
 
   const to = roundTimestamp(timeframe ? timeframe.end : Date.now(), timeUnit);
   // We need enough data for 5 buckets worth of data. We also need
   // to convert the intervalAsSeconds to milliseconds.
-  const minimumFrom = to - intervalAsSeconds * 1000 * MINIMUM_BUCKETS;
+  const minimumFrom = to - intervalAsMS * MINIMUM_BUCKETS;
 
   const from = roundTimestamp(
     timeframe && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
@@ -49,6 +50,7 @@ export const getElasticsearchMetricQuery = (
   );
 
   const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
+  const offsetInMS = parseInt(offset, 10) * 1000;
 
   const aggregations =
     aggType === Aggregators.COUNT
@@ -65,20 +67,34 @@ export const getElasticsearchMetricQuery = (
           },
         };
 
-  const baseAggs = {
-    aggregatedIntervals: {
-      date_histogram: {
-        field: timefield,
-        fixed_interval: interval,
-        offset,
-        extended_bounds: {
-          min: from,
-          max: to,
-        },
-      },
-      aggregations,
-    },
-  };
+  const baseAggs =
+    aggType === Aggregators.RATE
+      ? {
+          aggregatedIntervals: {
+            date_histogram: {
+              field: timefield,
+              fixed_interval: interval,
+              offset,
+              extended_bounds: {
+                min: from,
+                max: to,
+              },
+            },
+            aggregations,
+          },
+        }
+      : {
+          aggregatedIntervals: {
+            date_range: {
+              field: timefield,
+              ranges: Array.from(Array(Math.floor((to - from) / intervalAsMS)), (_, i) => ({
+                from: from + intervalAsMS * i + offsetInMS,
+                to: from + intervalAsMS * (i + 1) + offsetInMS,
+              })),
+            },
+            aggregations,
+          },
+        };
 
   const aggs = groupBy
     ? {

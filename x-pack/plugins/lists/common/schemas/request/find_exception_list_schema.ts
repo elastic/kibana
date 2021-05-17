@@ -6,11 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import {
-  DefaultNamespaceArray,
-  NamespaceTypeArray,
-  StringToPositiveNumber,
-} from '@kbn/securitysolution-io-ts-utils';
+import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
+import { DefaultNamespaceArray, NamespaceTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { filter, sort_field, sort_order } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
