@@ -62,14 +62,25 @@ export const getEndpointListPath = (
 };
 
 export const getEndpointDetailsPath = (
-  props: { name: 'endpointDetails' | 'endpointPolicyResponse' } & EndpointIndexUIQueryParams &
+  props: {
+    name: 'endpointDetails' | 'endpointPolicyResponse' | 'endpointIsolate';
+  } & EndpointIndexUIQueryParams &
     EndpointDetailsUrlProps,
   search?: string
 ) => {
   const { name, ...queryParams } = props;
-  queryParams.show = (props.name === 'endpointPolicyResponse'
-    ? 'policy_response'
-    : '') as EndpointIndexUIQueryParams['show'];
+
+  switch (props.name) {
+    case 'endpointIsolate':
+      queryParams.show = 'isolate';
+      break;
+    case 'endpointPolicyResponse':
+      queryParams.show = 'policy_response';
+      break;
+    default:
+      queryParams.show = undefined;
+  }
+
   const urlQueryParams = querystringStringify<EndpointDetailsUrlProps, typeof queryParams>(
     queryParams
   );

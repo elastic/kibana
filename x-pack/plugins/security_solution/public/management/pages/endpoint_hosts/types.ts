@@ -105,7 +105,7 @@ export interface EndpointIndexUIQueryParams {
   /** Which page to show */
   page_index?: string;
   /** show the policy response or host details */
-  show?: 'policy_response' | 'details';
+  show?: 'policy_response' | 'details' | 'isolate';
   /** Query text from search bar*/
   admin_query?: string;
 }

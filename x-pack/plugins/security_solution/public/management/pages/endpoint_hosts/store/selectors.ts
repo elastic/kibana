@@ -171,6 +171,7 @@ export const isOnEndpointPage = (state: Immutable<EndpointState>) => {
   );
 };
 
+/** Sanitized list of URL query params supported by the Details page */
 export const uiQueryParams: (
   state: Immutable<EndpointState>
 ) => Immutable<EndpointIndexUIQueryParams> = createSelector(
@@ -202,7 +203,7 @@ export const uiQueryParams: (
 
         if (value !== undefined) {
           if (key === 'show') {
-            if (value === 'policy_response' || value === 'details') {
+            if (value === 'policy_response' || value === 'details' || value === 'isolate') {
               data[key] = value;
             }
           } else {
@@ -227,12 +228,11 @@ export const hasSelectedEndpoint: (state: Immutable<EndpointState>) => boolean =
 );
 
 /** What policy details panel view to show */
-export const showView: (state: EndpointState) => 'policy_response' | 'details' = createSelector(
-  uiQueryParams,
-  (searchParams) => {
-    return searchParams.show === 'policy_response' ? 'policy_response' : 'details';
-  }
-);
+export const showView: (
+  state: EndpointState
+) => EndpointIndexUIQueryParams['show'] = createSelector(uiQueryParams, (searchParams) => {
+  return searchParams.show ?? 'details';
+});
 
 /**
  * Returns the Host Status which is connected the fleet agent

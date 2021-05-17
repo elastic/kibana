@@ -429,7 +429,7 @@ export const EndpointList = () => {
           {
             render: (item: HostInfo) => {
               const endpointIsolatePath = getEndpointDetailsPath({
-                name: 'endpointDetails',
+                name: 'endpointIsolate',
                 selected_endpoint: item.metadata.agent.id,
               });
 
@@ -437,7 +437,7 @@ export const EndpointList = () => {
                 <TableRowActions
                   items={[
                     {
-                      'data-test-subj': 'hostLink',
+                      'data-test-subj': 'isolateLink',
                       icon: 'logoSecurity',
                       key: 'isolateHost',
                       navigateAppId: MANAGEMENT_APP_ID,
