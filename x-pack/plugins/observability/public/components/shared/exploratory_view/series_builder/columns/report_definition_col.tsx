@@ -6,19 +6,19 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
+import { useUrlStorage } from '../../hooks/use_url_storage';
 import { CustomReportField } from '../custom_report_field';
-import FieldValueSuggestions from '../../../field_value_suggestions';
-import { DataSeries } from '../../types';
+import { DataSeries, URLReportDefinition } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
 import { OperationTypeSelect } from './operation_type_select';
 import { DatePickerCol } from './date_picker_col';
 import { parseCustomFieldName } from '../../configurations/lens_attributes';
+import { ReportDefinitionField } from './report_definition_field';
 
-function getColumnType(dataView: DataSeries, selectedDefinition: Record<string, string>) {
+function getColumnType(dataView: DataSeries, selectedDefinition: URLReportDefinition) {
   const { reportDefinitions } = dataView;
   const customColumn = reportDefinitions.find((item) => item.custom);
   if (customColumn?.field && selectedDefinition[customColumn?.field]) {
@@ -29,108 +29,73 @@ function getColumnType(dataView: DataSeries, selectedDefinition: Record<string, 
   return null;
 }
 
-const MaxWidthStyle = { maxWidth: 250 };
-
-export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSeries }) {
+export function ReportDefinitionCol({
+  dataViewSeries,
+  seriesId,
+}: {
+  dataViewSeries: DataSeries;
+  seriesId: string;
+}) {
   const { indexPattern } = useAppIndexPatternContext();
 
-  const { series, setSeries } = useUrlStorage(NEW_SERIES_KEY);
+  const { series, setSeries } = useUrlStorage(seriesId);
 
-  const { reportDefinitions: rtd = {} } = series;
+  const { reportDefinitions: selectedReportDefinitions = {} } = series;
 
-  const {
-    reportDefinitions,
-    labels,
-    filters,
-    defaultSeriesType,
-    hasOperationType,
-    yAxisColumns,
-  } = dataViewSeries;
+  const { reportDefinitions, defaultSeriesType, hasOperationType, yAxisColumns } = dataViewSeries;
 
-  const onChange = (field: string, value?: string) => {
-    if (!value) {
-      delete rtd[field];
-      setSeries(NEW_SERIES_KEY, {
+  const onChange = (field: string, value?: string[]) => {
+    if (!value?.[0]) {
+      delete selectedReportDefinitions[field];
+      setSeries(seriesId, {
         ...series,
-        reportDefinitions: { ...rtd },
+        reportDefinitions: { ...selectedReportDefinitions },
       });
     } else {
-      setSeries(NEW_SERIES_KEY, {
+      setSeries(seriesId, {
         ...series,
-        reportDefinitions: { ...rtd, [field]: value },
+        reportDefinitions: { ...selectedReportDefinitions, [field]: value },
       });
     }
   };
 
-  const onRemove = (field: string) => {
-    delete rtd[field];
-    setSeries(NEW_SERIES_KEY, {
-      ...series,
-      reportDefinitions: rtd,
-    });
-  };
-
-  const columnType = getColumnType(dataViewSeries, rtd);
+  const columnType = getColumnType(dataViewSeries, selectedReportDefinitions);
 
   return (
     <FlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <DatePickerCol seriesId={NEW_SERIES_KEY} />
+        <DatePickerCol seriesId={seriesId} />
       </EuiFlexItem>
       {indexPattern &&
         reportDefinitions.map(({ field, custom, options, defaultValue }) => (
           <EuiFlexItem key={field}>
             {!custom ? (
-              <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center" wrap>
-                <EuiFlexItem grow={false} style={{ flexBasis: 250 }}>
-                  <FieldValueSuggestions
-                    label={labels[field]}
-                    sourceField={field}
-                    indexPattern={indexPattern}
-                    value={rtd?.[field]}
-                    onChange={(val?: string) => onChange(field, val)}
-                    filters={(filters ?? []).map(({ query }) => query)}
-                    time={series.time}
-                    fullWidth={true}
-                  />
-                </EuiFlexItem>
-                {rtd?.[field] && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge
-                      className="globalFilterItem"
-                      iconSide="right"
-                      iconType="cross"
-                      color="hollow"
-                      onClick={() => onRemove(field)}
-                      iconOnClick={() => onRemove(field)}
-                      iconOnClickAriaLabel={'Click to remove'}
-                      onClickAriaLabel={'Click to remove'}
-                    >
-                      {rtd?.[field]}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
+              <ReportDefinitionField
+                seriesId={seriesId}
+                dataSeries={dataViewSeries}
+                field={field}
+                onChange={onChange}
+              />
             ) : (
               <CustomReportField
                 field={field}
                 options={options}
                 defaultValue={defaultValue}
-                seriesId={NEW_SERIES_KEY}
+                seriesId={seriesId}
               />
             )}
           </EuiFlexItem>
         ))}
       {(hasOperationType || columnType === 'operation') && (
-        <EuiFlexItem style={MaxWidthStyle}>
+        <EuiFlexItem>
           <OperationTypeSelect
-            seriesId={NEW_SERIES_KEY}
+            seriesId={seriesId}
             defaultOperationType={yAxisColumns[0].operationType}
           />
         </EuiFlexItem>
       )}
-      <EuiFlexItem style={MaxWidthStyle}>
-        <SeriesChartTypesSelect seriesId={NEW_SERIES_KEY} defaultChartType={defaultSeriesType} />
+      <EuiFlexItem>
+        <SeriesChartTypesSelect seriesId={seriesId} defaultChartType={defaultSeriesType} />
       </EuiFlexItem>
     </FlexGroup>
   );

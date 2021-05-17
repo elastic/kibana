@@ -12,6 +12,7 @@ import { actions, Actions } from '../common/schemas';
 /**
  * Types the DefaultStringArray as:
  *   - If undefined, then a default action array will be set
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultActionsArray = new t.Type<Actions, Actions | undefined, unknown>(
   'DefaultActionsArray',

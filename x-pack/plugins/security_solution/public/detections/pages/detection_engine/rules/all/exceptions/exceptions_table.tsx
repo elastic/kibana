@@ -15,9 +15,9 @@ import {
 } from '@elastic/eui';
 import { History } from 'history';
 
+import { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
-import { NamespaceType } from '../../../../../../../../lists/common';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { ExceptionListFilter, useApi, useExceptionLists } from '../../../../../../shared_imports';
 import { FormatUrl } from '../../../../../../common/components/link_to';

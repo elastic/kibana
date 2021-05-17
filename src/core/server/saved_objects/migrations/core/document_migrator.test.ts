@@ -11,6 +11,7 @@ import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
+import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectsType } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -724,6 +725,12 @@ describe('DocumentMigrator', () => {
 
     it('logs the original error and throws a transform error if a document transform fails', () => {
       const log = mockLogger;
+      const failedDoc = {
+        id: 'smelly',
+        type: 'dog',
+        attributes: {},
+        migrationVersion: {},
+      };
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({
@@ -737,12 +744,6 @@ describe('DocumentMigrator', () => {
         log,
       });
       migrator.prepareMigrations();
-      const failedDoc = {
-        id: 'smelly',
-        type: 'dog',
-        attributes: {},
-        migrationVersion: {},
-      };
       try {
         migrator.migrate(_.cloneDeep(failedDoc));
         expect('Did not throw').toEqual('But it should have!');
@@ -751,6 +752,7 @@ describe('DocumentMigrator', () => {
           "Failed to transform document smelly. Transform: dog:1.2.3
           Doc: {\\"id\\":\\"smelly\\",\\"type\\":\\"dog\\",\\"attributes\\":{},\\"migrationVersion\\":{}}"
         `);
+        expect(error).toBeInstanceOf(TransformSavedObjectDocumentError);
         expect(loggingSystemMock.collect(mockLoggerFactory).error[0][0]).toMatchInlineSnapshot(
           `[Error: Dang diggity!]`
         );
@@ -980,6 +982,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:loud',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'loud',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
@@ -1044,6 +1047,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:cute',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'cute',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
@@ -1166,6 +1170,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:hungry',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'hungry',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
@@ -1238,6 +1243,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:pretty',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'pretty',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',

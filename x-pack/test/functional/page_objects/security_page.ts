@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { AuthenticatedUser, Role } from '../../../plugins/security/common/model';

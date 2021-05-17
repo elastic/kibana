@@ -240,6 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'discoverApp',
               title: 'OneRecord',
+              hiddenType: false,
               editUrl:
                 '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
@@ -259,6 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'dashboardApp',
               title: 'Dashboard',
+              hiddenType: false,
               editUrl:
                 '/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
@@ -278,6 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'visualizeApp',
               title: 'VisualizationFromSavedSearch',
+              hiddenType: false,
               editUrl:
                 '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
@@ -289,6 +292,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body.saved_objects[1].meta).to.eql({
               icon: 'visualizeApp',
               title: 'Visualization',
+              hiddenType: false,
               editUrl:
                 '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
@@ -308,6 +312,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'indexPatternApp',
               title: 'saved_objects*',
+              hiddenType: false,
               editUrl:
                 '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {

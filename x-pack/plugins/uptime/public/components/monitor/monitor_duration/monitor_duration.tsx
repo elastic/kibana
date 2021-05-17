@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { LocationDurationLine } from '../../../../common/types';
 import { MLIntegrationComponent } from '../ml/ml_integeration';
 import { AnomalyRecords } from '../../../state/actions';
@@ -28,7 +28,6 @@ interface DurationChartProps {
  * @param props The props required for this component to render properly
  */
 export const MonitorDurationComponent = ({
-  exploratoryViewLink,
   locationDurationLines,
   anomalies,
   loading,
@@ -58,11 +57,11 @@ export const MonitorDurationComponent = ({
         <EuiFlexItem grow={false}>
           <MLIntegrationComponent />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton size="s" isDisabled={loading} href={exploratoryViewLink}>
-            <FormattedMessage id="xpack.uptime.monitorDuration.analyze" defaultMessage="Analyze" />
-          </EuiButton>
-        </EuiFlexItem>
+        {/* <EuiFlexItem grow={false}>*/}
+        {/*  <EuiButton size="s" isDisabled={loading} href={exploratoryViewLink}>*/}
+        {/*    <FormattedMessage id="xpack.uptime.monitorDuration.analyze" defaultMessage="Analyze" />*/}
+        {/*  </EuiButton>*/}
+        {/* </EuiFlexItem>*/}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <DurationChartComponent

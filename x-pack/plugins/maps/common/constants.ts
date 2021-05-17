@@ -295,7 +295,7 @@ export enum DATA_MAPPING_FUNCTION {
 }
 export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
-export type RawValue = string | number | boolean | undefined | null;
+export type RawValue = string | string[] | number | boolean | undefined | null;
 
 export type FieldFormatter = (value: RawValue) => string | number;
 

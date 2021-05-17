@@ -17,6 +17,7 @@ import {
 } from './index';
 
 export default function ({ getService }: FtrProviderContext) {
+  const canvasElement = getService('canvasElement');
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
@@ -40,8 +41,8 @@ export default function ({ getService }: FtrProviderContext) {
         source: 'ft_ecommerce',
         groupByEntries: [
           {
-            identifier: 'terms(category.keyword)',
-            label: 'category.keyword',
+            identifier: 'terms(category)',
+            label: 'category',
           } as GroupByEntry,
           {
             identifier: 'date_histogram(order_date)',
@@ -85,16 +86,16 @@ export default function ({ getService }: FtrProviderContext) {
         ],
         transformId: `ec_1_${Date.now()}`,
         transformDescription:
-          'ecommerce batch transform with groups terms(category.keyword) + date_histogram(order_date) 1m and aggregation avg(products.base_price)',
+          'ecommerce batch transform with groups terms(category) + date_histogram(order_date) 1m and aggregation avg(products.base_price)',
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
         discoverAdjustSuperDatePicker: true,
         expected: {
-          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category.keyword": {'],
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category": {'],
           pivotAdvancedEditorValue: {
             group_by: {
-              'category.keyword': {
+              category: {
                 terms: {
                   field: 'category.keyword',
                 },
@@ -156,7 +157,15 @@ export default function ({ getService }: FtrProviderContext) {
             rows: 5,
           },
           histogramCharts: [
-            { chartAvailable: false, id: 'category', legend: 'Chart not supported.' },
+            {
+              chartAvailable: true,
+              id: 'category',
+              legend: '6 categories',
+              colorStats: [
+                { color: '#000000', percentage: 45 },
+                { color: '#54B399', percentage: 55 },
+              ],
+            },
             {
               chartAvailable: true,
               id: 'currency',
@@ -167,12 +176,23 @@ export default function ({ getService }: FtrProviderContext) {
               ],
             },
             {
-              chartAvailable: false,
-              id: 'customer_birth_date',
-              legend: '0 documents contain field.',
+              chartAvailable: true,
+              id: 'customer_first_name',
+              legend: 'top 20 of 46 categories',
+              colorStats: [
+                { color: '#000000', percentage: 60 },
+                { color: '#54B399', percentage: 35 },
+              ],
             },
-            { chartAvailable: false, id: 'customer_first_name', legend: 'Chart not supported.' },
-            { chartAvailable: false, id: 'customer_full_name', legend: 'Chart not supported.' },
+            {
+              chartAvailable: true,
+              id: 'customer_full_name',
+              legend: 'top 20 of 3321 categories',
+              colorStats: [
+                { color: '#000000', percentage: 25 },
+                { color: '#54B399', percentage: 67 },
+              ],
+            },
             {
               chartAvailable: true,
               id: 'customer_gender',
@@ -191,7 +211,15 @@ export default function ({ getService }: FtrProviderContext) {
                 { color: '#000000', percentage: 60 },
               ],
             },
-            { chartAvailable: false, id: 'customer_last_name', legend: 'Chart not supported.' },
+            {
+              chartAvailable: true,
+              id: 'customer_last_name',
+              legend: 'top 20 of 183 categories',
+              colorStats: [
+                { color: '#000000', percentage: 25 },
+                { color: '#54B399', percentage: 70 },
+              ],
+            },
             {
               chartAvailable: true,
               id: 'customer_phone',
@@ -205,6 +233,15 @@ export default function ({ getService }: FtrProviderContext) {
               chartAvailable: true,
               id: 'day_of_week',
               legend: '7 categories',
+              colorStats: [
+                { color: '#000000', percentage: 20 },
+                { color: '#54B399', percentage: 75 },
+              ],
+            },
+            {
+              chartAvailable: true,
+              id: 'day_of_week_i',
+              legend: '0 - 6',
               colorStats: [
                 { color: '#000000', percentage: 20 },
                 { color: '#54B399', percentage: 75 },
@@ -296,7 +333,6 @@ export default function ({ getService }: FtrProviderContext) {
             columns: 10,
             rows: 5,
           },
-          histogramCharts: [],
           discoverQueryHits: '10',
         },
       } as PivotTransformTestData,
@@ -336,7 +372,6 @@ export default function ({ getService }: FtrProviderContext) {
             columns: 10,
             rows: 5,
           },
-          histogramCharts: [],
           transformPreview: {
             column: 0,
             values: [
@@ -401,13 +436,22 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertAdvancedQueryEditorSwitchExists();
           await transform.wizard.assertAdvancedQueryEditorSwitchCheckState(false);
 
+          // Disable anti-aliasing to stabilize canvas image rendering assertions
+          await canvasElement.disableAntiAliasing();
+
           await transform.testExecution.logTestStep('enables the index preview histogram charts');
           await transform.wizard.enableIndexPreviewHistogramCharts(true);
 
-          await transform.testExecution.logTestStep('displays the index preview histogram charts');
-          await transform.wizard.assertIndexPreviewHistogramCharts(
-            testData.expected.histogramCharts
-          );
+          if (Array.isArray(testData.expected.histogramCharts)) {
+            await transform.testExecution.logTestStep(
+              'displays the index preview histogram charts'
+            );
+            await transform.wizard.assertIndexPreviewHistogramCharts(
+              testData.expected.histogramCharts
+            );
+          }
+
+          await canvasElement.resetAntiAliasing();
 
           if (isPivotTransformTestData(testData)) {
             await transform.testExecution.logTestStep('adds the group by entries');

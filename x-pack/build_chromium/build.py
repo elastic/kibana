@@ -3,21 +3,18 @@ from os import path
 from build_util import (
   runcmd,
   runcmdsilent,
-  mkdir,
   md5_file,
-  configure_environment,
 )
 
-# This file builds Chromium headless on Windows, Mac, and Linux.
+# This file builds Chromium headless on Linux.
 
 # Verify that we have an argument, and if not print instructions
 if (len(sys.argv) < 2):
   print('Usage:')
-  print('python build.py {chromium_version} [arch_name]')
+  print('python build.py {chromium_version} {arch_name}')
   print('Example:')
-  print('python build.py 68.0.3440.106')
-  print('python build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479')
-  print('python build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479 arm64 # build for ARM architecture')
+  print('python build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479 x64')
+  print('python build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479 arm64 # cross-compile for ARM architecture')
   print
   sys.exit(1)
 
@@ -57,25 +54,34 @@ if checked_out != 0:
   print('Creating a new branch for tracking the source version')
   runcmd('git checkout -b build-' + base_version + ' ' + source_version)
 
+# configure environment: environment path
 depot_tools_path = os.path.join(build_path, 'depot_tools')
-path_value = depot_tools_path + os.pathsep + os.environ['PATH']
-print('Updating PATH for depot_tools: ' + path_value)
-os.environ['PATH'] = path_value
+full_path = depot_tools_path + os.pathsep + os.environ['PATH']
+print('Updating PATH for depot_tools: ' + full_path)
+os.environ['PATH'] = full_path
+
+# configure environment: build dependencies
+if platform.system() == 'Linux':
+  if arch_name:
+    print('Running sysroot install script...')
+    runcmd(src_path + '/build/linux/sysroot_scripts/install-sysroot.py --arch=' + arch_name)
+  print('Running install-build-deps...')
+  runcmd(src_path + '/build/install-build-deps.sh')
+
+
 print('Updating all modules')
-runcmd('gclient sync')
+runcmd('gclient sync -D')
 
-# Copy build args/{Linux | Darwin | Windows}.gn from the root of our directory to out/headless/args.gn,
-argsgn_destination = path.abspath('out/headless/args.gn')
-print('Generating platform-specific args')
-mkdir('out/headless')
-print(' > cp ' + argsgn_file + ' ' + argsgn_destination)
-shutil.copyfile(argsgn_file, argsgn_destination)
+print('Setting up build directory')
+runcmd('rm -rf out/headless')
+runcmd('mkdir out/headless')
 
+# Copy args.gn from the root of our directory to out/headless/args.gn,
+# add the target_cpu for cross-compilation
 print('Adding target_cpu to args')
-
-f = open('out/headless/args.gn', 'a')
-f.write('\rtarget_cpu = "' + arch_name + '"\r')
-f.close()
+argsgn_file_out = path.abspath('out/headless/args.gn')
+runcmd('cp ' + argsgn_file + ' ' + argsgn_file_out)
+runcmd('echo \'target_cpu="' + arch_name + '"\' >> ' + argsgn_file_out)
 
 runcmd('gn gen out/headless')
 
@@ -83,7 +89,7 @@ runcmd('gn gen out/headless')
 print('Compiling... this will take a while')
 runcmd('autoninja -C out/headless headless_shell')
 
-# Optimize the output on Linux x64 and Mac by stripping inessentials from the binary
+# Optimize the output on Linux x64 by stripping inessentials from the binary
 # ARM must be cross-compiled from Linux and can not read the ARM binary in order to strip
 if platform.system() != 'Windows' and arch_name != 'arm64':
   print('Optimizing headless_shell')
@@ -106,33 +112,16 @@ def archive_file(name):
   archive.write(from_path, to_path)
   return to_path
 
-# Each platform has slightly different requirements for what dependencies
-# must be bundled with the Chromium executable.
-if platform.system() == 'Linux':
-  archive_file('headless_shell')
-  archive_file(path.join('swiftshader', 'libEGL.so'))
-  archive_file(path.join('swiftshader', 'libGLESv2.so'))
-
-  if arch_name == 'arm64':
-    archive_file(path.join('swiftshader', 'libEGL.so'))
-
-elif platform.system() == 'Windows':
-  archive_file('headless_shell.exe')
-  archive_file('dbghelp.dll')
-  archive_file('icudtl.dat')
-  archive_file(path.join('swiftshader', 'libEGL.dll'))
-  archive_file(path.join('swiftshader', 'libEGL.dll.lib'))
-  archive_file(path.join('swiftshader', 'libGLESv2.dll'))
-  archive_file(path.join('swiftshader', 'libGLESv2.dll.lib'))
-
-elif platform.system() == 'Darwin':
-  archive_file('headless_shell')
-  archive_file('libswiftshader_libEGL.dylib')
-  archive_file('libswiftshader_libGLESv2.dylib')
-  archive_file(path.join('Helpers', 'chrome_crashpad_handler'))
+# Add dependencies that must be bundled with the Chromium executable.
+archive_file('headless_shell')
+archive_file(path.join('swiftshader', 'libEGL.so'))
+archive_file(path.join('swiftshader', 'libGLESv2.so'))
 
 archive.close()
 
 print('Creating ' + path.join(src_path, md5_filename))
 with open (md5_filename, 'w') as f:
   f.write(md5_file(zip_filename))
+
+runcmd('gsutil cp ' + path.join(src_path, zip_filename) + ' gs://headless_shell_staging')
+runcmd('gsutil cp ' + path.join(src_path, md5_filename) + ' gs://headless_shell_staging')

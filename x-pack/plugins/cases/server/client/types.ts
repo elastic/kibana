@@ -18,7 +18,7 @@ import {
   GetFieldsResponse,
   CaseUserActionsResponse,
   User,
-} from '../../common/api';
+} from '../../common';
 import { AlertInfo } from '../common';
 import {
   CaseConfigureServiceSetup,
@@ -83,6 +83,10 @@ export interface ConfigureFields {
   connectorType: string;
 }
 
+export interface CasesClientGetCasesByAlert {
+  alertId: string;
+}
+
 /**
  * Defines the fields necessary to update an alert's status.
  */
@@ -106,6 +110,7 @@ export interface CasesClient {
   push(args: CasesClientPush): Promise<CaseResponse>;
   update(args: CasesPatchRequest): Promise<CasesResponse>;
   updateAlertsStatus(args: CasesClientUpdateAlertsStatus): Promise<void>;
+  getCaseIdsByAlertId(args: CasesClientGetCasesByAlert): Promise<string[]>;
 }
 
 export interface MappingsClient {

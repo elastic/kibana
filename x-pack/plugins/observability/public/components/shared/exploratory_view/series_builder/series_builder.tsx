@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { RefObject } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiBasicTable, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { AppDataType, ReportViewTypeId, ReportViewTypes, SeriesUrl } from '../types';
 import { DataTypesCol } from './columns/data_types_col';
 import { ReportTypesCol } from './columns/report_types_col';
@@ -45,8 +45,14 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
   ],
 };
 
-export function SeriesBuilder() {
-  const { series, setSeries, allSeriesIds, removeSeries } = useUrlStorage(NEW_SERIES_KEY);
+export function SeriesBuilder({
+  seriesBuilderRef,
+  seriesId,
+}: {
+  seriesId: string;
+  seriesBuilderRef: RefObject<HTMLDivElement>;
+}) {
+  const { series, setSeries, removeSeries } = useUrlStorage(seriesId);
 
   const {
     dataType,
@@ -59,21 +65,15 @@ export function SeriesBuilder() {
     time,
   } = series;
 
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(!!series.dataType);
-
   const { indexPattern, loading, hasData } = useAppIndexPatternContext();
 
   const getDataViewSeries = () => {
     return getDefaultConfigs({
+      seriesId,
       indexPattern,
       reportType: reportType!,
-      seriesId: NEW_SERIES_KEY,
     });
   };
-
-  useEffect(() => {
-    setIsFlyoutVisible(!!series.dataType);
-  }, [series.dataType]);
 
   const columns = [
     {
@@ -81,7 +81,7 @@ export function SeriesBuilder() {
         defaultMessage: 'Data Type',
       }),
       width: '15%',
-      render: (val: string) => <DataTypesCol />,
+      render: (val: string) => <DataTypesCol seriesId={seriesId} />,
     },
     {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.report', {
@@ -89,7 +89,7 @@ export function SeriesBuilder() {
       }),
       width: '15%',
       render: (val: string) => (
-        <ReportTypesCol reportTypes={dataType ? ReportTypes[dataType] : []} />
+        <ReportTypesCol seriesId={seriesId} reportTypes={dataType ? ReportTypes[dataType] : []} />
       ),
     },
     {
@@ -100,9 +100,9 @@ export function SeriesBuilder() {
       render: (val: string) => {
         if (dataType && hasData) {
           return loading ? (
-            INITIATING_VIEW
+            LOADING_VIEW
           ) : reportType ? (
-            <ReportDefinitionCol dataViewSeries={getDataViewSeries()} />
+            <ReportDefinitionCol seriesId={seriesId} dataViewSeries={getDataViewSeries()} />
           ) : (
             SELECT_REPORT_TYPE
           );
@@ -117,7 +117,9 @@ export function SeriesBuilder() {
       }),
       width: '20%',
       render: (val: string) =>
-        reportType && indexPattern ? <ReportFilters dataViewSeries={getDataViewSeries()} /> : null,
+        reportType && indexPattern ? (
+          <ReportFilters seriesId={seriesId} dataViewSeries={getDataViewSeries()} />
+        ) : null,
     },
     {
       name: i18n.translate('xpack.observability.expView.seriesBuilder.breakdown', {
@@ -127,11 +129,13 @@ export function SeriesBuilder() {
       field: 'id',
       render: (val: string) =>
         reportType && indexPattern ? (
-          <ReportBreakdowns dataViewSeries={getDataViewSeries()} />
+          <ReportBreakdowns seriesId={seriesId} dataViewSeries={getDataViewSeries()} />
         ) : null,
     },
   ];
 
+  // TODO: Remove this if remain unused during multiple series view
+  // @ts-expect-error
   const addSeries = () => {
     if (reportType) {
       const newSeriesId = `${
@@ -141,6 +145,7 @@ export function SeriesBuilder() {
       }`;
 
       const newSeriesN: SeriesUrl = {
+        dataType,
         time,
         filters,
         breakdown,
@@ -152,92 +157,34 @@ export function SeriesBuilder() {
 
       setSeries(newSeriesId, newSeriesN).then(() => {
         removeSeries(NEW_SERIES_KEY);
-        setIsFlyoutVisible(false);
       });
     }
   };
 
-  const items = [{ id: NEW_SERIES_KEY }];
-
-  let flyout;
-
-  if (isFlyoutVisible) {
-    flyout = (
-      <>
-        <EuiBasicTable
-          items={items as any}
-          columns={columns}
-          cellProps={{ style: { borderRight: '1px solid #d3dae6' } }}
-        />
-        <EuiSpacer size="xs" />
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="plus"
-              color="primary"
-              onClick={addSeries}
-              size="s"
-              isDisabled={!series?.reportType}
-            >
-              {i18n.translate('xpack.observability.expView.seriesBuilder.add', {
-                defaultMessage: 'Add',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              iconType="cross"
-              color="text"
-              onClick={() => {
-                removeSeries(NEW_SERIES_KEY);
-                setIsFlyoutVisible(false);
-              }}
-            >
-              {i18n.translate('xpack.observability.expView.seriesBuilder.cancel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  }
+  const items = [{ id: seriesId }];
 
   return (
-    <div>
-      {!isFlyoutVisible && (
-        <>
-          <EuiButton
-            iconType={isFlyoutVisible ? 'arrowDown' : 'arrowRight'}
-            color="primary"
-            iconSide="right"
-            onClick={() => setIsFlyoutVisible((prevState) => !prevState)}
-            disabled={allSeriesIds.length > 0}
-          >
-            {i18n.translate('xpack.observability.expView.seriesBuilder.addSeries', {
-              defaultMessage: 'Add series',
-            })}
-          </EuiButton>
-          <EuiSpacer />
-        </>
-      )}
-      {flyout}
+    <div ref={seriesBuilderRef}>
+      <EuiBasicTable
+        items={items as any}
+        columns={columns}
+        cellProps={{ style: { borderRight: '1px solid #d3dae6', verticalAlign: 'initial' } }}
+        tableLayout="auto"
+      />
     </div>
   );
 }
 
-export const INITIATING_VIEW = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.initView',
+export const LOADING_VIEW = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.loadingView',
   {
-    defaultMessage: 'Initiating view ...',
+    defaultMessage: 'Loading view ...',
   }
 );
 
-const SELECT_REPORT_TYPE = i18n.translate(
+export const SELECT_REPORT_TYPE = i18n.translate(
   'xpack.observability.expView.seriesBuilder.selectReportType',
   {
-    defaultMessage: 'Select a report type to define visualization.',
+    defaultMessage: 'No report type selected',
   }
 );

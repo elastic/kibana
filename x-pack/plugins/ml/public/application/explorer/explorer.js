@@ -70,6 +70,9 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 // Anomalies Table
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
+// Anomalies Map
+import { AnomaliesMap } from './anomalies_map';
+
 import { getToastNotifications } from '../util/dependency_cache';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -398,6 +401,9 @@ export class ExplorerUI extends React.Component {
                 </EuiPanel>
                 <EuiSpacer size="m" />
               </>
+            )}
+            {loading === false && tableData.anomalies?.length && (
+              <AnomaliesMap anomalies={tableData.anomalies} jobIds={selectedJobIds} />
             )}
             {annotationsData.length > 0 && (
               <>

@@ -36,7 +36,7 @@ export const RedirectToNodeLogs = ({
   location,
 }: RedirectToNodeLogsType) => {
   const { services } = useKibanaContextForPlugin();
-  const { isLoading, loadSourceConfiguration, sourceConfiguration } = useLogSource({
+  const { isLoading, loadSource, sourceConfiguration } = useLogSource({
     fetch: services.http.fetch,
     sourceId,
     indexPatternsService: services.data.indexPatterns,
@@ -44,7 +44,7 @@ export const RedirectToNodeLogs = ({
   const fields = sourceConfiguration?.configuration.fields;
 
   useMount(() => {
-    loadSourceConfiguration();
+    loadSource();
   });
 
   if (isLoading) {

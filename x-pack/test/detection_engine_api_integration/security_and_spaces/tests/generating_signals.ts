@@ -11,6 +11,7 @@ import { orderBy, get } from 'lodash';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
+  SavedQueryCreateSchema,
   ThresholdCreateSchema,
 } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../plugins/security_solution/common/constants';
@@ -102,6 +103,57 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: QueryCreateSchema = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
+        };
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        // remove rule to cut down on touch points for test changes when the rule format changes
+        const { rule: removedRule, ...signalNoRule } = signalsOpen.hits.hits[0]._source.signal;
+        expect(signalNoRule).eql({
+          parents: [
+            {
+              id: 'BhbXBmkBR346wHgn4PeZ',
+              type: 'event',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              depth: 0,
+            },
+          ],
+          ancestors: [
+            {
+              id: 'BhbXBmkBR346wHgn4PeZ',
+              type: 'event',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              depth: 0,
+            },
+          ],
+          status: 'open',
+          depth: 1,
+          parent: {
+            id: 'BhbXBmkBR346wHgn4PeZ',
+            type: 'event',
+            index: 'auditbeat-8.0.0-2019.02.19-000001',
+            depth: 0,
+          },
+          original_time: '2019-02-19T17:40:03.790Z',
+          original_event: {
+            action: 'socket_closed',
+            dataset: 'socket',
+            kind: 'event',
+            module: 'system',
+          },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
+        });
+      });
+
+      it('should query and get back expected signal structure using a saved query rule', async () => {
+        const rule: SavedQueryCreateSchema = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          type: 'saved_query',
+          query: `_id:${ID}`,
+          saved_id: 'doesnt-exist',
         };
         const { id } = await createRule(supertest, rule);
         await waitForRuleSuccessOrStatus(supertest, id);

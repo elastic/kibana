@@ -18,9 +18,10 @@ export const createUninitializedUseLogSourceMock: CreateUseLogSource = ({
     fields: [],
     title: 'unknown',
   },
+  hasFailedLoading: false,
   hasFailedLoadingSource: false,
   hasFailedLoadingSourceStatus: false,
-  hasFailedResolvingSourceConfiguration: false,
+  hasFailedResolvingSource: false,
   initialize: jest.fn(),
   isLoading: false,
   isLoadingSourceConfiguration: false,
@@ -29,13 +30,13 @@ export const createUninitializedUseLogSourceMock: CreateUseLogSource = ({
   isUninitialized: true,
   loadSource: jest.fn(),
   loadSourceConfiguration: jest.fn(),
-  loadSourceFailureMessage: undefined,
+  latestLoadSourceFailures: [],
   resolveSourceFailureMessage: undefined,
   loadSourceStatus: jest.fn(),
   sourceConfiguration: undefined,
   sourceId,
   sourceStatus: undefined,
-  updateSourceConfiguration: jest.fn(),
+  updateSource: jest.fn(),
   resolvedSourceConfiguration: undefined,
   loadResolveLogSourceConfiguration: jest.fn(),
 });
@@ -83,6 +84,6 @@ export const createBasicSourceConfiguration = (sourceId: string): LogSourceConfi
   },
 });
 
-export const createAvailableSourceStatus = (logIndexFields = []): LogSourceStatus => ({
+export const createAvailableSourceStatus = (): LogSourceStatus => ({
   logIndexStatus: 'available',
 });

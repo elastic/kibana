@@ -12,6 +12,7 @@ import { ThrottleOrNull, throttle } from '../common/schemas';
 /**
  * Types the DefaultThrottleNull as:
  *   - If null or undefined, then a null will be set
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultThrottleNull = new t.Type<ThrottleOrNull, ThrottleOrNull | undefined, unknown>(
   'DefaultThreatNull',

@@ -41,6 +41,7 @@ describe('Breakdowns', function () {
 
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       breakdown: 'user_agent.name',
+      dataType: 'ux',
       reportType: 'pld',
       time: { from: 'now-15m', to: 'now' },
     });

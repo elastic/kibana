@@ -8,7 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
-import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
+import {
+  getFormatFromPreviousColumn,
+  getInvalidFieldMessage,
+  getSafeName,
+  getFilter,
+} from './helpers';
 import {
   FormattedIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -89,8 +94,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         : (layer.columns[thisColumnId] as T),
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
-    buildColumn: ({ field, previousColumn }) =>
-      ({
+    buildColumn: ({ field, previousColumn }, columnParams) => {
+      return {
         label: labelLookup(field.displayName, previousColumn),
         dataType: 'number',
         operationType: type,
@@ -98,9 +103,10 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         isBucketed: false,
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
-        filter: previousColumn?.filter,
+        filter: getFilter(previousColumn, columnParams),
         params: getFormatFromPreviousColumn(previousColumn),
-      } as T),
+      } as T;
+    },
     onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,

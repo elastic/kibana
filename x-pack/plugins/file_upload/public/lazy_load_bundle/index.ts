@@ -24,7 +24,8 @@ export interface FileUploadComponentProps {
   isIndexingTriggered: boolean;
   onFileSelect: (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => void;
   onFileClear: () => void;
-  onIndexReady: (indexReady: boolean) => void;
+  enableImportBtn: () => void;
+  disableImportBtn: () => void;
   onUploadComplete: (results: FileUploadGeoResults) => void;
   onUploadError: () => void;
 }

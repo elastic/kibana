@@ -248,9 +248,8 @@ export const AnomaliesTable = (props: Props) => {
       },
       defaultPaginationOptions: { pageSize: 10 },
     }),
-    [timeRange, sorting?.field, sorting?.direction, anomalyThreshold]
+    [timeRange.start, timeRange.end, sorting?.field, sorting?.direction, anomalyThreshold]
   );
-
   const {
     metricsHostsAnomalies,
     getMetricsHostsAnomalies,

@@ -6,27 +6,31 @@
  */
 
 import uuid from 'uuid';
-
-import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
-import { addIdToItem, removeIdFromItem, validate } from '../../../../common/shared_imports';
+import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
-  CreateExceptionListItemSchema,
   EntriesArray,
   Entry,
   EntryNested,
-  ExceptionListItemSchema,
   ExceptionListType,
-  ListSchema,
   NamespaceType,
-  OperatorEnum,
-  OperatorTypeEnum,
-  createExceptionListItemSchema,
+  ListOperatorEnum as OperatorEnum,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+  OsTypeArray,
   entriesList,
   entriesNested,
   entry,
-  exceptionListItemSchema,
   nestedEntryItem,
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+  ListSchema,
+  createExceptionListItemSchema,
+  exceptionListItemSchema,
 } from '../../../../common';
+import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
   EXCEPTION_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
@@ -94,7 +98,7 @@ export const filterExceptionItems = (
         return [...acc, item];
       } else if (createExceptionListItemSchema.is(item)) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { meta: _, ...rest } = item;
+        const { meta, ...rest } = item;
         const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
         return [...acc, itemSansMetaId];
       } else {
@@ -279,9 +283,10 @@ export const getFilteredIndexPatterns = (
   patterns: IIndexPattern,
   item: FormattedBuilderEntry,
   type: ExceptionListType,
-  preFilter?: (i: IIndexPattern, t: ExceptionListType) => IIndexPattern
+  preFilter?: (i: IIndexPattern, t: ExceptionListType, o?: OsTypeArray) => IIndexPattern,
+  osTypes?: OsTypeArray
 ): IIndexPattern => {
-  const indexPatterns = preFilter != null ? preFilter(patterns, type) : patterns;
+  const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
 
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown

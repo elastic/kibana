@@ -28,6 +28,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DownloadStep } from '../components/agent_enrollment_flyout/steps';
 import { useStartServices, useGetOutputs, sendGenerateServiceToken } from '../../../hooks';
+import { PLATFORM_OPTIONS, usePlatform } from '../hooks/use_platform';
+import type { PLATFORM_TYPE } from '../hooks/use_platform';
 
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;
@@ -44,13 +46,6 @@ export const ContentWrapper = styled(EuiFlexGroup)`
 const CommandCode = styled.pre({
   overflow: 'scroll',
 });
-
-type PLATFORM_TYPE = 'linux-mac' | 'windows' | 'rpm-deb';
-const PLATFORM_OPTIONS: Array<{ text: string; value: PLATFORM_TYPE }> = [
-  { text: 'Linux / macOS', value: 'linux-mac' },
-  { text: 'Windows', value: 'windows' },
-  { text: 'RPM / DEB', value: 'rpm-deb' },
-];
 
 export const ServiceTokenStep = ({
   serviceToken,
@@ -184,6 +179,27 @@ export const FleetServerCommandStep = ({
         >
           <CommandCode>{installCommand}</CommandCode>
         </EuiCodeBlock>
+        <EuiSpacer size="s" />
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.enrollmentInstructions.troubleshootingText"
+            defaultMessage="If you are having trouble connecting, see our {link}."
+            values={{
+              link: (
+                <EuiLink
+                  target="_blank"
+                  external
+                  href="https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
+                    defaultMessage="troubleshooting guide"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
       </>
     ) : null,
   };
@@ -216,7 +232,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const { notifications } = useStartServices();
   const [serviceToken, setServiceToken] = useState<string>();
   const [isLoadingServiceToken, setIsLoadingServiceToken] = useState<boolean>(false);
-  const [platform, setPlatform] = useState<PLATFORM_TYPE>('linux-mac');
+  const { platform, setPlatform } = usePlatform();
 
   const output = outputsRequest.data?.items?.[0];
   const esHost = output?.hosts?.[0];

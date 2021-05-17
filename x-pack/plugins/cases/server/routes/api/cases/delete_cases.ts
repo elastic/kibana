@@ -11,7 +11,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
-import { CASES_URL, ENABLE_CASE_CONNECTOR } from '../../../../common/constants';
+import { CASES_URL, ENABLE_CASE_CONNECTOR } from '../../../../common';
 import { CaseServiceSetup } from '../../../services';
 
 async function deleteSubCases({

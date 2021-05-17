@@ -18,6 +18,10 @@ interface TelemetryServiceConstructor {
   reportOptInStatusChange?: boolean;
 }
 
+/**
+ * Handles caching telemetry config in the user's session and requests the
+ * backend to fetch telemetry payload requests or notify about config changes.
+ */
 export class TelemetryService {
   private readonly http: CoreStart['http'];
   private readonly reportOptInStatusChange: boolean;
@@ -25,6 +29,7 @@ export class TelemetryService {
   private readonly defaultConfig: TelemetryPluginConfig;
   private updatedConfig?: TelemetryPluginConfig;
 
+  /** Current version of Kibana */
   public readonly currentKibanaVersion: string;
 
   constructor({
@@ -41,40 +46,54 @@ export class TelemetryService {
     this.http = http;
   }
 
+  /**
+   * Config setter to locally persist the updated configuration.
+   * Useful for caching the configuration throughout the users' session,
+   * so they don't need to refresh the page.
+   * @param updatedConfig
+   */
   public set config(updatedConfig: TelemetryPluginConfig) {
     this.updatedConfig = updatedConfig;
   }
 
+  /** Returns the latest configuration **/
   public get config() {
     return { ...this.defaultConfig, ...this.updatedConfig };
   }
 
+  /** Is the cluster opted-in to telemetry **/
   public get isOptedIn() {
     return this.config.optIn;
   }
 
+  /** Changes the opt-in status **/
   public set isOptedIn(optIn) {
     this.config = { ...this.config, optIn };
   }
 
+  /** true if the user has already seen the opt-in/out notice **/
   public get userHasSeenOptedInNotice() {
     return this.config.telemetryNotifyUserAboutOptInDefault;
   }
 
+  /** Changes the notice visibility options **/
   public set userHasSeenOptedInNotice(telemetryNotifyUserAboutOptInDefault) {
     this.config = { ...this.config, telemetryNotifyUserAboutOptInDefault };
   }
 
+  /** Is the cluster allowed to change the opt-in/out status **/
   public getCanChangeOptInStatus = () => {
     const allowChangingOptInStatus = this.config.allowChangingOptInStatus;
     return allowChangingOptInStatus;
   };
 
+  /** Retrieve the opt-in/out notification URL **/
   public getOptInStatusUrl = () => {
     const telemetryOptInStatusUrl = this.config.optInStatusUrl;
     return telemetryOptInStatusUrl;
   };
 
+  /** Retrieve the URL to report telemetry **/
   public getTelemetryUrl = () => {
     const telemetryUrl = this.config.url;
     return telemetryUrl;
@@ -92,22 +111,30 @@ export class TelemetryService {
     );
   }
 
+  /** Is the user allowed to change the opt-in/out status **/
   public get userCanChangeSettings() {
     return this.config.userCanChangeSettings ?? false;
   }
 
+  /** Change the user's permissions to change the opt-in/out status **/
   public set userCanChangeSettings(userCanChangeSettings: boolean) {
     this.config = { ...this.config, userCanChangeSettings };
   }
 
+  /** Is the cluster opted-in to telemetry **/
   public getIsOptedIn = () => {
     return this.isOptedIn;
   };
 
+  /** Fetches an unencrypted telemetry payload so we can show it to the user **/
   public fetchExample = async () => {
     return await this.fetchTelemetry({ unencrypted: true });
   };
 
+  /**
+   * Fetches telemetry payload
+   * @param unencrypted Default `false`. Whether the returned payload should be encrypted or not.
+   */
   public fetchTelemetry = async ({ unencrypted = false } = {}) => {
     return this.http.post('/api/telemetry/v2/clusters/_stats', {
       body: JSON.stringify({
@@ -116,6 +143,11 @@ export class TelemetryService {
     });
   };
 
+  /**
+   * Overwrite the opt-in status.
+   * It will send a final request to the remote telemetry cluster to report about the opt-in/out change.
+   * @param optedIn Whether the user is opting-in (`true`) or out (`false`).
+   */
   public setOptIn = async (optedIn: boolean): Promise<boolean> => {
     const canChangeOptInStatus = this.getCanChangeOptInStatus();
     if (!canChangeOptInStatus) {
@@ -150,6 +182,9 @@ export class TelemetryService {
     return true;
   };
 
+  /**
+   * Discards the notice about usage collection and stores it so we don't bother any other users.
+   */
   public setUserHasSeenNotice = async (): Promise<void> => {
     try {
       await this.http.put('/api/telemetry/v2/userHasSeenNotice');
