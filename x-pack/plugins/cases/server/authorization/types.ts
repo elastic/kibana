@@ -94,7 +94,16 @@ export interface OperationDetails {
  * Defines the helper methods and necessary information for authorizing the find API's request.
  */
 export interface AuthorizationFilter {
+  /**
+   * The owner filter to pass to the saved object client's find operation that is scoped to the authorized owners
+   */
   filter?: KueryNode;
+  /**
+   * Utility function for checking that the returned entities are in fact authorized for the user making the request
+   */
   ensureSavedObjectIsAuthorized: (owner: string) => void;
+  /**
+   * Logs a successful audit message for the request
+   */
   logSuccessfulAuthorization: () => void;
 }

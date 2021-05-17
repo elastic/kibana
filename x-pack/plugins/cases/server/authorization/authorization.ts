@@ -79,6 +79,13 @@ export class Authorization {
     return this.securityAuth?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
+  /**
+   * Checks that the user making the request for the passed in owners and operation has the correct authorization. This
+   * function will throw if the user is not authorized for the requested operation and owners.
+   *
+   * @param owners an array of strings describing the case owners attempting to be authorized
+   * @param operation information describing the operation attempting to be authorized
+   */
   public async ensureAuthorized(owners: string[], operation: OperationDetails) {
     const { securityAuth } = this;
     const areAllOwnersAvailable = owners.every((owner) => this.featureCaseOwners.has(owner));
@@ -116,6 +123,9 @@ export class Authorization {
     // else security is disabled so let the operation proceed
   }
 
+  /**
+   * Returns an object to filter the saved object find request to the authorized owners of an entity.
+   */
   public async getFindAuthorizationFilter(
     operation: OperationDetails
   ): Promise<AuthorizationFilter> {

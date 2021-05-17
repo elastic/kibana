@@ -13,6 +13,9 @@ enum AuthorizationResult {
   Authorized = 'Authorized',
 }
 
+/**
+ * Audit logger for authorization operations
+ */
 export class AuthorizationAuditLogger {
   private readonly auditLogger?: AuditLogger;
 
@@ -63,6 +66,9 @@ export class AuthorizationAuditLogger {
     });
   }
 
+  /**
+   * Creates a audit message describing a failure to authorize
+   */
   public failure({
     username,
     owners,
@@ -95,6 +101,9 @@ export class AuthorizationAuditLogger {
     return message;
   }
 
+  /**
+   * Creates a audit message describing a successful authorization
+   */
   public success({
     username,
     operation,

@@ -60,6 +60,10 @@ export class CasesClientFactory {
     this.options = options;
   }
 
+  /**
+   * Creates a cases client for the current request. This request will be used to authorize the operations done through
+   * the client.
+   */
   public async create({
     request,
     scopedClusterClient,
