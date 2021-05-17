@@ -317,7 +317,7 @@
               "{ authc: ",
               "AuthenticationServiceSetup",
               "; sessionTimeout: ",
-              "ISessionTimeout",
+              "SessionTimeout",
               "; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
               "SecurityLicenseFeatures",
               "; features$: ",
@@ -786,7 +786,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 35
+          "lineNumber": 36
         },
         "deprecated": false,
         "children": [
@@ -802,7 +802,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             },
             "deprecated": false,
             "isRequired": true
@@ -819,7 +819,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             },
             "deprecated": false,
             "isRequired": true
@@ -840,7 +840,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 31
+          "lineNumber": 32
         },
         "deprecated": false,
         "children": [
@@ -856,7 +856,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 31
+              "lineNumber": 32
             },
             "deprecated": false,
             "isRequired": true
@@ -877,7 +877,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 19
+          "lineNumber": 20
         },
         "deprecated": false,
         "children": [
@@ -893,7 +893,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 19
+              "lineNumber": 20
             },
             "deprecated": false,
             "isRequired": true
@@ -914,7 +914,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 47
+          "lineNumber": 48
         },
         "deprecated": false,
         "children": [
@@ -930,7 +930,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             },
             "deprecated": false,
             "isRequired": true
@@ -947,7 +947,44 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 47
+              "lineNumber": 48
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.getCasesFromAlertsUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getCasesFromAlertsUrl",
+        "description": [],
+        "signature": [
+          "(alertId: string) => string"
+        ],
+        "source": {
+          "path": "x-pack/plugins/cases/common/api/helpers.ts",
+          "lineNumber": 52
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.getCasesFromAlertsUrl.$1",
+            "type": "string",
+            "tags": [],
+            "label": "alertId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/cases/common/api/helpers.ts",
+              "lineNumber": 52
             },
             "deprecated": false,
             "isRequired": true
@@ -968,7 +1005,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 39
+          "lineNumber": 40
         },
         "deprecated": false,
         "children": [
@@ -984,7 +1021,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
             "deprecated": false,
             "isRequired": true
@@ -1005,7 +1042,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 27
+          "lineNumber": 28
         },
         "deprecated": false,
         "children": [
@@ -1021,7 +1058,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "deprecated": false,
             "isRequired": true
@@ -1038,7 +1075,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "deprecated": false,
             "isRequired": true
@@ -1059,7 +1096,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 23
+          "lineNumber": 24
         },
         "deprecated": false,
         "children": [
@@ -1075,7 +1112,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 23
+              "lineNumber": 24
             },
             "deprecated": false,
             "isRequired": true
@@ -1096,7 +1133,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/cases/common/api/helpers.ts",
-          "lineNumber": 43
+          "lineNumber": 44
         },
         "deprecated": false,
         "children": [
@@ -1112,7 +1149,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 43
+              "lineNumber": 44
             },
             "deprecated": false,
             "isRequired": true
@@ -1129,7 +1166,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/cases/common/api/helpers.ts",
-              "lineNumber": 43
+              "lineNumber": 44
             },
             "deprecated": false,
             "isRequired": true

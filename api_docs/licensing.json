@@ -608,6 +608,20 @@
               {
                 "plugin": "securitySolution",
                 "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 54
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 55
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
                   "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
                   "lineNumber": 47
                 }
@@ -925,7 +939,7 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/public/plugin.tsx",
-                "lineNumber": 89
+                "lineNumber": 82
               }
             },
             {
@@ -2184,6 +2198,20 @@
               {
                 "plugin": "securitySolution",
                 "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 54
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 55
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
                   "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
                   "lineNumber": 47
                 }
@@ -2590,7 +2618,7 @@
               "plugin": "fleet",
               "link": {
                 "path": "x-pack/plugins/fleet/server/plugin.ts",
-                "lineNumber": 211
+                "lineNumber": 213
               }
             },
             {

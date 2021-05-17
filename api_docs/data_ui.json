@@ -568,7 +568,7 @@
         ],
         "source": {
           "path": "src/plugins/data/public/ui/search_bar/search_bar.tsx",
-          "lineNumber": 80
+          "lineNumber": 79
         },
         "deprecated": false,
         "initialIsOpen": false

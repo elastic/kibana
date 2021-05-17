@@ -2914,6 +2914,72 @@
       },
       {
         "parentPluginId": "ml",
+        "id": "def-server.IndicesOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndicesOptions",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+          "lineNumber": 19
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.IndicesOptions.allow_no_indices",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allow_no_indices",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 20
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.IndicesOptions.expand_wildcards",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "expand_wildcards",
+            "description": [],
+            "signature": [
+              "string | ",
+              "ExpandWildcardOptions",
+              "[] | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.IndicesOptions.ignore_unavailable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_unavailable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
         "id": "def-server.Influencer",
         "type": "Interface",
         "tags": [],
@@ -3899,23 +3965,6 @@
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
           "lineNumber": 27
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
-        "id": "def-server.IndicesOptions",
-        "type": "Type",
-        "tags": [],
-        "label": "IndicesOptions",
-        "description": [],
-        "signature": [
-          "estypes.IndicesOptions"
-        ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
-          "lineNumber": 18
         },
         "deprecated": false,
         "initialIsOpen": false

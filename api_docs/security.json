@@ -510,7 +510,7 @@
       "label": "SecurityPluginSetup",
       "description": [],
       "signature": [
-        "{ authc: AuthenticationServiceSetup; sessionTimeout: ISessionTimeout; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
+        "{ authc: AuthenticationServiceSetup; sessionTimeout: SessionTimeout; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
         "SecurityLicenseFeatures",
         "; features$: ",
         "Observable",
@@ -520,7 +520,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 171
+        "lineNumber": 164
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -540,7 +540,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 172
+        "lineNumber": 165
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -1239,13 +1239,6 @@
               {
                 "plugin": "securitySolution",
                 "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts",
-                  "lineNumber": 28
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts",
                   "lineNumber": 48
                 }
@@ -1298,6 +1291,13 @@
                   "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts",
                   "lineNumber": 41
                 }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts",
+                  "lineNumber": 28
+                }
               }
             ]
           },
@@ -1312,7 +1312,13 @@
             "description": [],
             "signature": [
               "Pick<",
-              "AuthorizationServiceSetup",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.AuthorizationServiceSetup",
+                "text": "AuthorizationServiceSetup"
+              },
               ", \"mode\" | \"actions\" | \"checkPrivilegesDynamicallyWithRequest\" | \"checkPrivilegesWithRequest\">"
             ],
             "source": {
@@ -1456,7 +1462,13 @@
             "description": [],
             "signature": [
               "Pick<",
-              "AuthorizationServiceSetup",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.AuthorizationServiceSetup",
+                "text": "AuthorizationServiceSetup"
+              },
               ", \"mode\" | \"actions\" | \"checkPrivilegesDynamicallyWithRequest\" | \"checkPrivilegesWithRequest\">"
             ],
             "source": {
@@ -1471,6 +1483,31 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "security",
+        "id": "def-server.AuthorizationServiceSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "AuthorizationServiceSetup",
+        "description": [],
+        "signature": [
+          "{ mode: ",
+          "AuthorizationMode",
+          "; actions: ",
+          "Actions",
+          "; checkPrivilegesDynamicallyWithRequest: ",
+          "CheckPrivilegesDynamicallyWithRequest",
+          "; checkPrivilegesWithRequest: ",
+          "CheckPrivilegesWithRequest",
+          "; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security/server/index.ts",
+          "lineNumber": 30
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "security",
         "id": "def-server.ROUTE_TAG_CAN_REDIRECT",

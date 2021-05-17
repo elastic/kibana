@@ -672,7 +672,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/types.ts",
-          "lineNumber": 358
+          "lineNumber": 364
         },
         "deprecated": false,
         "children": [
@@ -694,7 +694,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
-              "lineNumber": 360
+              "lineNumber": 366
             },
             "deprecated": false
           },
@@ -707,7 +707,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
-              "lineNumber": 363
+              "lineNumber": 369
             },
             "deprecated": false
           },
@@ -725,7 +725,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
-              "lineNumber": 369
+              "lineNumber": 375
             },
             "deprecated": false
           }
@@ -1654,11 +1654,11 @@
         "label": "DataType",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"date\" | \"ip\" | \"histogram\" | \"document\""
+          "\"string\" | \"number\" | \"boolean\" | \"date\" | \"ip\" | \"geo_point\" | \"geo_shape\" | \"histogram\" | \"document\""
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/types.ts",
-          "lineNumber": 347
+          "lineNumber": 353
         },
         "deprecated": false,
         "initialIsOpen": false

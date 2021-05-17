@@ -22,7 +22,7 @@
         ],
         "source": {
           "path": "src/plugins/management/public/utils/management_app.ts",
-          "lineNumber": 19
+          "lineNumber": 18
         },
         "deprecated": false,
         "children": [
@@ -38,7 +38,7 @@
             ],
             "source": {
               "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 20
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -51,29 +51,23 @@
             "description": [],
             "source": {
               "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 21
+              "lineNumber": 20
             },
             "deprecated": false
           },
           {
             "parentPluginId": "management",
-            "id": "def-public.ManagementApp.meta",
-            "type": "Object",
+            "id": "def-public.ManagementApp.keywords",
+            "type": "Array",
             "tags": [],
-            "label": "meta",
+            "label": "keywords",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppMeta",
-                "text": "AppMeta"
-              }
+              "string[]"
             ],
             "source": {
               "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 22
+              "lineNumber": 21
             },
             "deprecated": false
           },
@@ -89,7 +83,7 @@
             ],
             "source": {
               "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 24
+              "lineNumber": 23
             },
             "deprecated": false,
             "children": [
@@ -111,7 +105,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/management/public/utils/management_app.ts",
-                  "lineNumber": 24
+                  "lineNumber": 23
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -223,7 +217,7 @@
                 "section": "def-public.RegisterManagementAppArgs",
                 "text": "RegisterManagementAppArgs"
               },
-              ", \"title\" | \"id\" | \"order\" | \"meta\" | \"mount\" | \"euiIconType\" | \"icon\" | \"tip\">) => ",
+              ", \"title\" | \"id\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\">) => ",
               {
                 "pluginId": "management",
                 "scope": "public",
@@ -254,7 +248,7 @@
                     "section": "def-public.RegisterManagementAppArgs",
                     "text": "RegisterManagementAppArgs"
                   },
-                  ", \"title\" | \"id\" | \"order\" | \"meta\" | \"mount\" | \"euiIconType\" | \"icon\" | \"tip\">"
+                  ", \"title\" | \"id\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\">"
                 ],
                 "source": {
                   "path": "src/plugins/management/public/utils/management_section.ts",
@@ -596,7 +590,7 @@
         ],
         "source": {
           "path": "src/plugins/management/public/utils/management_app.ts",
-          "lineNumber": 13
+          "lineNumber": 12
         },
         "deprecated": false,
         "children": [
@@ -612,7 +606,7 @@
             ],
             "source": {
               "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 14
+              "lineNumber": 13
             },
             "deprecated": false
           },
@@ -625,30 +619,23 @@
             "description": [],
             "source": {
               "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 15
+              "lineNumber": 14
             },
             "deprecated": false
           },
           {
             "parentPluginId": "management",
-            "id": "def-public.RegisterManagementAppArgs.meta",
-            "type": "Object",
+            "id": "def-public.RegisterManagementAppArgs.keywords",
+            "type": "Array",
             "tags": [],
-            "label": "meta",
+            "label": "keywords",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppMeta",
-                "text": "AppMeta"
-              },
-              " | undefined"
+              "string[] | undefined"
             ],
             "source": {
               "path": "src/plugins/management/public/utils/management_app.ts",
-              "lineNumber": 16
+              "lineNumber": 15
             },
             "deprecated": false
           }
