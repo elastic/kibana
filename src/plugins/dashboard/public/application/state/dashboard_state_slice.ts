@@ -13,7 +13,7 @@ import { ViewMode } from '../../services/embeddable';
 import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
 
 export const dashboardStateSlice = createSlice({
-  name: 'counter',
+  name: 'dashboardState',
   initialState: {} as DashboardState,
   reducers: {
     setDashboardState: (state, action: PayloadAction<DashboardState>) => {
