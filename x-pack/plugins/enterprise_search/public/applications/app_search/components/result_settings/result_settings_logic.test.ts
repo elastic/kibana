@@ -9,8 +9,6 @@ import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../
 
 import { mockEngineValues } from '../../__mocks__';
 
-import { omit } from 'lodash';
-
 import { nextTick } from '@kbn/test/jest';
 
 import { Schema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
