@@ -6,7 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { DefaultStringBooleanFalse, id } from '@kbn/securitysolution-io-ts-utils';
+import { id } from '@kbn/securitysolution-io-ts-list-types';
+import { DefaultStringBooleanFalse } from '@kbn/securitysolution-io-ts-types';
 
 import { RequiredKeepUndefined } from '../../types';
 

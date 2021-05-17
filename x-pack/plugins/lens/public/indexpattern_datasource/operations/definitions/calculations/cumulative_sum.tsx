@@ -15,7 +15,7 @@ import {
   hasDateField,
 } from './utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn } from '../helpers';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const ofName = (name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {
@@ -48,7 +48,7 @@ export const cumulativeSumOperation: OperationDefinition<
   selectionStyle: 'field',
   requiredReferences: [
     {
-      input: ['field'],
+      input: ['field', 'managedReference'],
       specificOperations: ['count', 'sum'],
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
@@ -73,7 +73,7 @@ export const cumulativeSumOperation: OperationDefinition<
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
   },
-  buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }) => {
+  buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const ref = layer.columns[referenceIds[0]];
     return {
       label: ofName(
@@ -85,7 +85,7 @@ export const cumulativeSumOperation: OperationDefinition<
       operationType: 'cumulative_sum',
       isBucketed: false,
       scale: 'ratio',
-      filter: previousColumn?.filter,
+      filter: getFilter(previousColumn, columnParams),
       references: referenceIds,
       params: getFormatFromPreviousColumn(previousColumn),
     };

@@ -15,7 +15,7 @@ import {
   entriesMatch,
   entriesMatchAny,
   entriesNested,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { Filter } from '../../../../../src/plugins/data/common';
 import { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../schemas';

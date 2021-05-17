@@ -120,14 +120,6 @@ describe('SourceRouter', () => {
   });
 
   describe('reset state', () => {
-    it('does not reset state when switching between source tree views', () => {
-      mockLocation.pathname = `/sources/${contentSource.id}`;
-      shallow(<SourceRouter />);
-      unmountHandler();
-
-      expect(resetSourceState).not.toHaveBeenCalled();
-    });
-
     it('resets state when leaving source tree', () => {
       mockLocation.pathname = '/home';
       shallow(<SourceRouter />);
