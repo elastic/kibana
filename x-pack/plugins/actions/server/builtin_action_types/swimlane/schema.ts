@@ -18,11 +18,11 @@ export const ConfigMapSchema = schema.object(ConfigMap);
 
 export const ConfigMapping = {
   alertNameConfig: ConfigMapSchema,
-  alertSourceConfig: ConfigMapSchema,
-  caseIdConfig: ConfigMapSchema,
+  alertSourceConfig: schema.nullable(ConfigMapSchema),
+  caseIdConfig: schema.nullable(ConfigMapSchema),
   caseNameConfig: schema.nullable(ConfigMapSchema),
   commentsConfig: schema.nullable(ConfigMapSchema),
-  severityConfig: ConfigMapSchema,
+  severityConfig: schema.nullable(ConfigMapSchema),
 };
 
 export const ConfigMappingSchema = schema.object(ConfigMapping);
