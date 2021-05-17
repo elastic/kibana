@@ -6,12 +6,13 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import { HostInfo, HostResultList, ActivityLogList } from '../../../../../common/endpoint/types';
+import { HostInfo, HostResultList, EndpointAction } from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { ImmutableMiddlewareFactory } from '../../../../common/store';
 import {
   isOnEndpointPage,
   hasSelectedEndpoint,
+  selectedAgent,
   uiQueryParams,
   listData,
   endpointPackageInfo,
@@ -30,7 +31,6 @@ import {
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
-import { dummyEndpointActivityLog } from '../view/details/endpoints.stories';
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
@@ -315,15 +315,11 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
       // call the activity log api
       try {
-        // TODO remove this when the actual API is ready
-        const activityLog = await coreStart.http
-          .get<ActivityLogList>(`/api/endpoint/activity_log/${selectedEndpoint}`)
-          .catch(() => dummyEndpointActivityLog(selectedEndpoint));
-
+        const activityLog = await coreStart.http.get<EndpointAction[]>(
+          `/api/endpoint/action_log/${selectedAgent(getState())}`
+        );
         dispatch({
           type: 'serverReturnedEndpointDetailsActivityLog',
-          // @ts-expect-error
-          // remove this when actual API is ready
           payload: activityLog,
         });
       } catch (error) {

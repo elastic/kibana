@@ -73,18 +73,26 @@ export const EndpointDetailsFlyout = memo(() => {
     selected_endpoint: selectedEndpoint,
     ...queryParamsWithoutSelectedEndpoint
   } = queryParams;
-  const details = useEndpointSelector(detailsData);
+
   const activityLog = useEndpointSelector(activityLogData);
   const activityLoading = useEndpointSelector(activityLogLoading);
   const activityError = useEndpointSelector(activityLogError);
+  const hostDetails = useEndpointSelector(detailsData);
+  const hostDetailsLoading = useEndpointSelector(detailsLoading);
+  const hostDetailsError = useEndpointSelector(detailsError);
+
   const policyInfo = useEndpointSelector(policyVersionInfo);
   const hostStatus = useEndpointSelector(hostStatusInfo);
-  const loading = useEndpointSelector(detailsLoading);
-  const error = useEndpointSelector(detailsError);
   const show = useEndpointSelector(showView);
 
-  const pageCount = useEndpointSelector(listData).length;
-  const [activePage, setActivePage] = useState<number>(0);
+  const hostList = useEndpointSelector(listData);
+  const pageCount = hostList.length;
+
+  const [activePage, setActivePage] = useState<number>(() =>
+    // @ts-expect-error
+    // TODO paginate endpoints when details flyout is open
+    hostList.indexOf(hostList.find((host) => host.metadata.agent.id === selectedEndpoint))
+  );
   const onPageClick = useCallback((pageNumber) => {
     setActivePage(pageNumber);
   }, []);
@@ -94,7 +102,7 @@ export const EndpointDetailsFlyout = memo(() => {
   }, [history, queryParamsWithoutSelectedEndpoint]);
 
   useEffect(() => {
-    if (error !== undefined || activityError !== undefined) {
+    if (hostDetailsError !== undefined || activityError !== undefined) {
       toasts.addDanger({
         title: i18n.translate('xpack.securitySolution.endpoint.details.errorTitle', {
           defaultMessage: 'Could not find host',
@@ -104,7 +112,7 @@ export const EndpointDetailsFlyout = memo(() => {
         }),
       });
     }
-  }, [error, activityError, toasts]);
+  }, [hostDetailsError, activityError, toasts]);
 
   return (
     <EuiFlyout
@@ -115,22 +123,22 @@ export const EndpointDetailsFlyout = memo(() => {
       paddingSize="m"
     >
       <EuiFlyoutHeader hasBorder>
-        {loading || activityLoading ? (
+        {hostDetailsLoading || activityLoading ? (
           <EuiLoadingContent lines={1} />
         ) : (
-          <EuiToolTip content={details?.host?.hostname} anchorClassName="eui-textTruncate">
+          <EuiToolTip content={hostDetails?.host?.hostname} anchorClassName="eui-textTruncate">
             <EuiTitle size="s">
               <h2
                 style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
                 data-test-subj="endpointDetailsFlyoutTitle"
               >
-                {details?.host?.hostname}
+                {hostDetails?.host?.hostname}
               </h2>
             </EuiTitle>
           </EuiToolTip>
         )}
       </EuiFlyoutHeader>
-      {details === undefined || activityLog === undefined ? (
+      {hostDetails === undefined || activityLog === undefined ? (
         <>
           <EuiFlyoutBody>
             <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
@@ -150,7 +158,7 @@ export const EndpointDetailsFlyout = memo(() => {
                           name: i18.OVERVIEW,
                           content: (
                             <EndpointDetails
-                              details={details}
+                              details={hostDetails}
                               policyInfo={policyInfo}
                               hostStatus={hostStatus}
                             />
@@ -168,7 +176,7 @@ export const EndpointDetailsFlyout = memo(() => {
               </EuiFlyoutBody>
             </>
           )}
-          {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={details} />}
+          {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={hostDetails} />}
         </>
       )}
       <EuiFlyoutFooter>
