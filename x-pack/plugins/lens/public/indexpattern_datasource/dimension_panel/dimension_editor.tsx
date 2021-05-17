@@ -151,6 +151,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
+      .filter(({ hidden }) => !hidden)
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
@@ -242,6 +243,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         onClick() {
           if (
             operationDefinitionMap[operationType].input === 'none' ||
+            operationDefinitionMap[operationType].input === 'managedReference' ||
             operationDefinitionMap[operationType].input === 'fullReference'
           ) {
             // Clear invalid state because we are reseting to a valid column
@@ -319,7 +321,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   // Need to workout early on the error to decide whether to show this or an help text
   const fieldErrorMessage =
-    (selectedOperationDefinition?.input !== 'fullReference' ||
+    ((selectedOperationDefinition?.input !== 'fullReference' &&
+      selectedOperationDefinition?.input !== 'managedReference') ||
       (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field')) &&
     getErrorMessage(
       selectedColumn,
@@ -447,6 +450,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               currentColumn={state.layers[layerId].columns[columnId]}
               dateRange={dateRange}
               indexPattern={currentIndexPattern}
+              operationDefinitionMap={operationDefinitionMap}
               {...services}
             />
           </>
@@ -586,7 +590,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 function getErrorMessage(
   selectedColumn: IndexPatternColumn | undefined,
   incompleteOperation: boolean,
-  input: 'none' | 'field' | 'fullReference' | undefined,
+  input: 'none' | 'field' | 'fullReference' | 'managedReference' | undefined,
   fieldInvalid: boolean
 ) {
   if (selectedColumn && incompleteOperation) {
