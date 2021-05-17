@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -78,15 +79,22 @@ export function LayerSettings(props: Props) {
     }
     return (
       <EuiFormRow display="columnCompressedSwitch">
-        <EuiSwitch
-          label={i18n.translate('xpack.maps.layerPanel.settingsPanel.fittableFlag', {
-            defaultMessage: `Include bounds when fitting on all data`,
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.maps.layerPanel.settingsPanel.fittableFlagTooltip', {
+            defaultMessage: `Fit to data bounds adjusts your map extent to show all of your data. Layers that provide reference data may not need to be included in the data bounds. Use this option to exclude a layer from the fit to data bounds computation.`,
           })}
-          checked={props.layer.isIncludeInFitToBounds()}
-          onChange={includeInFitToBoundsChange}
-          data-test-subj="mapLayerPanelFittableFlagCheckbox"
-          compressed
-        />
+        >
+          <EuiSwitch
+            label={i18n.translate('xpack.maps.layerPanel.settingsPanel.fittableFlagLabel', {
+              defaultMessage: `Include bounds in fit to data bounds computation`,
+            })}
+            checked={props.layer.isIncludeInFitToBounds()}
+            onChange={includeInFitToBoundsChange}
+            data-test-subj="mapLayerPanelFittableFlagCheckbox"
+            compressed
+          />
+        </EuiToolTip>
       </EuiFormRow>
     );
   };
