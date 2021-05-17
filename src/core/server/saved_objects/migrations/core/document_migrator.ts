@@ -560,6 +560,7 @@ function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
       id: `${namespace}:${type}:${originId}`,
       type: LEGACY_URL_ALIAS_TYPE,
       attributes: {
+        sourceId: originId,
         targetNamespace: namespace,
         targetType: type,
         targetId: id,
@@ -660,13 +661,14 @@ function wrapWithTry(
   migrationFn: SavedObjectMigrationFn,
   log: Logger
 ) {
+  const context = Object.freeze({
+    log: new MigrationLogger(log),
+    migrationVersion: version,
+    convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
+  });
+
   return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
     try {
-      const context = {
-        log: new MigrationLogger(log),
-        migrationVersion: version,
-        convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
-      };
       const result = migrationFn(doc, context);
 
       // A basic sanity check to help migration authors detect basic errors
