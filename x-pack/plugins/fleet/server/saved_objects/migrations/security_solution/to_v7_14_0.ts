@@ -10,8 +10,6 @@ import { cloneDeep } from 'lodash';
 
 import type { PackagePolicy } from '../../../../common';
 
-import { licenseService } from '../../../../common/services';
-
 export const migrateEndpointPackagePolicyToV7140: SavedObjectMigrationFn<
   PackagePolicy,
   PackagePolicy
@@ -19,12 +17,15 @@ export const migrateEndpointPackagePolicyToV7140: SavedObjectMigrationFn<
   const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = cloneDeep(
     packagePolicyDoc
   );
+
   if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
     const input = updatedPackagePolicyDoc.attributes.inputs[0];
     if (input && input.config) {
       const policy = input.config.policy.value;
 
-      policy.windows.ransomware.supported = licenseService.isPlatinum();
+      // This value is based on license.
+      // For the migration, we add 'true', our license watcher will correct it, if needed, when the app starts.
+      policy.windows.ransomware.supported = true;
     }
   }
 
