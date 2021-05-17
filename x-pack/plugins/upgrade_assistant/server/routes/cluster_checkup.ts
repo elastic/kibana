@@ -13,8 +13,6 @@ import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../lib/reindexing';
 
 export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: RouteDependencies) {
-  const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
-
   router.get(
     {
       path: `${API_BASE_PATH}/status`,
@@ -32,7 +30,7 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
         response
       ) => {
         try {
-          const status = await getUpgradeAssistantStatus(client, isCloudEnabled);
+          const status = await getUpgradeAssistantStatus(client);
 
           const asCurrentUser = client.asCurrentUser;
           const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser);

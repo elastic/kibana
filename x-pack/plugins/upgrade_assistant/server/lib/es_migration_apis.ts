@@ -16,123 +16,11 @@ import {
 import { esIndicesStateCheck } from './es_indices_state_check';
 
 export async function getUpgradeAssistantStatus(
-  dataClient: IScopedClusterClient,
-  isCloudEnabled: boolean
+  dataClient: IScopedClusterClient
 ): Promise<UpgradeAssistantStatus> {
-  // TODO uncomment
-  // const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
+  const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
 
-  // TODO mock data for testing purposes only
-  const deprecations = {
-    node_settings: [],
-    ml_settings: [
-      {
-        level: 'critical',
-        message:
-          'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
-        url: '',
-        details:
-          'model snapshot [%s] for job [%s] supports minimum version [%s] and needs to be at least [%s]',
-      },
-    ],
-    cluster_settings: [
-      {
-        level: 'critical',
-        message: 'Index Lifecycle Management poll interval is set too low',
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html#ilm-poll-interval-limit',
-        details:
-          'The Index Lifecycle Management poll interval setting [indices.lifecycle.poll_interval] is currently set to [500ms], but must be 1s or greater',
-      },
-      {
-        level: 'warning',
-        message: 'Index templates contain _field_names settings.',
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html#fieldnames-enabling',
-        details:
-          'Index templates [field_names_enabled] use the deprecated `enable` setting for the `_field_names` field. Using this setting in new index mappings will throw an error in the next major version and needs to be removed from existing mappings and templates.',
-      },
-    ],
-    index_settings: {
-      // deprecated_settings: [
-      //   {
-      //     level: 'warning',
-      //     message: 'translog retention settings are ignored',
-      //     url:
-      //       'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
-      //     details:
-      //       'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
-      //   },
-      // ],
-      // settings: [
-      //   {
-      //     level: 'warning',
-      //     message: 'translog retention settings are ignored',
-      //     url:
-      //       'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
-      //     details:
-      //       'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
-      //   },
-      // ],
-      // nested_multi_fields: [
-      //   {
-      //     level: 'warning',
-      //     message: 'Multi-fields within multi-fields',
-      //     url:
-      //       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html#_defining_multi_fields_within_multi_fields',
-      //     details:
-      //       'The names of fields that contain chained multi-fields: [[type: _doc, field: text]]',
-      //   },
-      // ],
-      test2: [
-        {
-          level: 'critical',
-          message: 'Index created before 7.0',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
-          details: 'This index was created using version: 6.8.13',
-        },
-        // {
-        //   level: 'warning',
-        //   message: 'translog retention settings are ignored',
-        //   url:
-        //     'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
-        //   details:
-        //     'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
-        // },
-      ],
-      // test3: [
-      //   {
-      //     level: 'critical',
-      //     message: 'Index created before 7.0',
-      //     url:
-      //       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
-      //     details: 'This index was created using version: 6.8.13',
-      //   },
-      // ],
-      // test4: [
-      //   {
-      //     level: 'critical',
-      //     message: 'Index created before 7.0',
-      //     url:
-      //       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
-      //     details: 'This index was created using version: 6.8.13',
-      //   },
-      // ],
-      // translog_settings: [
-      //   {
-      //     level: 'warning',
-      //     message: 'translog retention settings are ignored',
-      //     url:
-      //       'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
-      //     details:
-      //       'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
-      //   },
-      // ],
-    },
-  };
-
-  const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
+  const cluster = getClusterDeprecations(deprecations);
   const indices = await getCombinedIndexInfos(deprecations, dataClient);
 
   const criticalWarnings = cluster.concat(indices).filter((d) => d.level === 'critical');
@@ -182,7 +70,7 @@ const getCombinedIndexInfos = async (
   return indices as EnrichedDeprecationInfo[];
 };
 
-const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEnabled: boolean) => {
+const getClusterDeprecations = (deprecations: DeprecationAPIResponse) => {
   const combinedDeprecations = deprecations.cluster_settings
     .concat(deprecations.ml_settings)
     .concat(deprecations.node_settings);
@@ -192,7 +80,7 @@ const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEna
       ...deprecation,
       correctiveAction: getCorrectiveAction(deprecation.message),
     };
-  });
+  }) as EnrichedDeprecationInfo[];
 };
 
 const getCorrectiveAction = (message: string) => {
