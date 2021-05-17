@@ -9,7 +9,7 @@
 import { gt, valid } from 'semver';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import { cloneDeep } from 'lodash';
+
 import { AliasAction, FetchIndexResponse, isLeftTypeof, RetryableEsClientError } from './actions';
 import { AllActionStates, InitState, State } from './types';
 import { IndexMapping } from '../mappings';
@@ -187,7 +187,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   // control state using:
   // `const res = resW as ResponseType<typeof stateP.controlState>;`
 
-  let stateP: State = cloneDeep(currentState);
+  let stateP: State = currentState;
 
   // Handle retryable_es_client_errors. Other left values need to be handled
   // by the control state specific code below.
