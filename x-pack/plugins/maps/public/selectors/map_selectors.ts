@@ -200,6 +200,9 @@ export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
 export const getShapeToDraw = ({ map }: MapStoreState): DRAW_TYPE | undefined =>
   map.mapState.editState ? map.mapState.editState.drawType : undefined;
 
+export const getEditingLayer = ({ map }: MapStoreState): string | undefined =>
+  map.mapState.editState ? map.mapState.editState.layerId : undefined;
+
 export const getRefreshConfig = ({ map }: MapStoreState): MapRefreshConfig => {
   if (map.mapState.refreshConfig) {
     return map.mapState.refreshConfig;

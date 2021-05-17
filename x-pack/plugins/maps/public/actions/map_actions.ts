@@ -24,6 +24,8 @@ import {
   getLayerList,
   getSearchSessionId,
   getSearchSessionMapBuffer,
+  getLayerById,
+  getEditingLayer,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -65,6 +67,7 @@ import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { addFeatureToIndex, getMatchingIndexes } from '../util';
+import { AbstractESSource } from '../classes/sources/es_source';
 
 export interface MapExtentState {
   zoom: number;
@@ -366,15 +369,24 @@ export function setVectorLayerIndexName(indexName: string) {
   };
 }
 
-export function addNewFeatureToIndex(
-  indexName: string,
-  geometry: Geometry | Position[],
-  path: string
-) {
-  return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
-    const matchingIndexes = await getMatchingIndexes('t*');
+export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layerId = getEditingLayer(getState());
+    if (!layerId) {
+      return;
+    }
+    const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+    const layerSource = (await layer.getSource()) as AbstractESSource;
+    const indexPattern = await layerSource.getIndexPattern();
+    const matchingIndexes = await getMatchingIndexes('n*');
     console.log(matchingIndexes);
-    await addFeatureToIndex(indexName, geometry, path);
+    await addFeatureToIndex(indexPattern.title, geometry, layerSource.getGeoFieldName());
     await dispatch(syncDataForAllLayers({ forceRefresh: true }));
   };
 }

@@ -79,6 +79,6 @@ export type DrawState = {
 };
 
 export type EditState = {
-  layerId: string;
+  layerId?: string;
   drawType?: DRAW_TYPE;
 };

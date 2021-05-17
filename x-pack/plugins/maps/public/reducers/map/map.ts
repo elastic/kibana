@@ -111,7 +111,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
           ...state.mapState,
           editState: {
             ...state.mapState.editState,
-            editLayer: action.editLayer,
+            layerId: action.layerId,
           },
         },
       };

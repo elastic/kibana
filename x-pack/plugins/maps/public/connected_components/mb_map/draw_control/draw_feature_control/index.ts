@@ -29,8 +29,8 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    addNewFeatureToIndex(indexName: string, geometry: Geometry | Position[], path: string) {
-      dispatch(addNewFeatureToIndex(indexName, geometry, path));
+    addNewFeatureToIndex(geometry: Geometry | Position[], path: string) {
+      dispatch(addNewFeatureToIndex(geometry));
     },
     disableDrawState() {
       dispatch(setShapeToDraw(null));

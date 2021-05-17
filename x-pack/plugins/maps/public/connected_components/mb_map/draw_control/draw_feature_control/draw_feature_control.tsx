@@ -21,7 +21,7 @@ import { DrawState } from '../../../../../common/descriptor_types';
 const geoJSONReader = new jsts.io.GeoJSONReader();
 
 export interface Props {
-  addNewFeatureToIndex: (indexName: string, geometry: unknown, path: string) => void;
+  addNewFeatureToIndex: (geometry: Geometry | Position[]) => void;
   disableDrawState: () => void;
   removeFeatures: (featureIds: string[]) => void;
   drawType: DRAW_TYPE;
@@ -55,29 +55,13 @@ export class DrawFeatureControl extends Component<Props, {}> {
             })
           );
         }
-        const geoField = this.props.drawState.geoFieldName;
-        const indexPattern = this.props.drawState.indexPatternTitle;
-        if (!geoField) {
-          throw new Error(
-            i18n.translate('xpack.maps.drawFeatureControl.missingGeofield', {
-              defaultMessage: `No geo field designated for feature update`,
-            })
-          );
-        }
-        if (!indexPattern) {
-          throw new Error(
-            i18n.translate('xpack.maps.drawFeatureControl.missingIndexPattern', {
-              defaultMessage: `No index pattern designated for feature update`,
-            })
-          );
-        }
         if ('coordinates' in feature.geometry) {
           // @ts-ignore /* Single position array only used if point geometry */
           const featureGeom: Geometry | Position[] =
             this.props.drawMode === DRAW_MODE.DRAW_POINTS
               ? feature.geometry.coordinates
               : feature.geometry;
-          this.props.addNewFeatureToIndex(indexPattern, featureGeom, geoField);
+          this.props.addNewFeatureToIndex(featureGeom);
         }
       });
     } catch (error) {
