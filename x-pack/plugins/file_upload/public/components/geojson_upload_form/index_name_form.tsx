@@ -15,8 +15,8 @@ export interface Props {
   indexName: string;
   indexNameError?: string;
   onIndexNameChange: (name: string, error?: string) => void;
-  onIndexNameValidationStart: () => void;
-  onIndexNameValidationEnd: () => void;
+  onIndexNameValidationStart?: () => void;
+  onIndexNameValidationEnd?: () => void;
 }
 
 export class IndexNameForm extends Component<Props> {
@@ -34,7 +34,9 @@ export class IndexNameForm extends Component<Props> {
     const indexName = event.target.value;
     this.props.onIndexNameChange(indexName);
     this._validateIndexName(indexName);
-    this.props.onIndexNameValidationStart();
+    if (this.props.onIndexNameValidationStart) {
+      this.props.onIndexNameValidationStart();
+    }
   };
 
   _validateIndexName = _.debounce(async (indexName: string) => {
@@ -42,7 +44,9 @@ export class IndexNameForm extends Component<Props> {
     if (!this._isMounted || indexName !== this.props.indexName) {
       return;
     }
-    this.props.onIndexNameValidationEnd();
+    if (this.props.onIndexNameValidationEnd) {
+      this.props.onIndexNameValidationEnd();
+    }
     this.props.onIndexNameChange(indexName, indexNameError);
   }, 500);
 

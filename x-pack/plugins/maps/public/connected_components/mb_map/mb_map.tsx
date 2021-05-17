@@ -424,11 +424,11 @@ export class MBMap extends Component<Props, State> {
   };
 
   render() {
-    let drawControl;
+    let drawFilterControl;
     let tooltipControl;
     let scaleControl;
     if (this.state.mbMap) {
-      drawControl = this.props.addFilters ? (
+      drawFilterControl = this.props.addFilters ? (
         <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
       ) : null;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
@@ -453,7 +453,7 @@ export class MBMap extends Component<Props, State> {
         ref={this._setContainerRef}
         data-test-subj="mapContainer"
       >
-        {drawControl}
+        {drawFilterControl}
         {scaleControl}
         {tooltipControl}
       </div>
