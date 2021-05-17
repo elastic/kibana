@@ -126,14 +126,17 @@ export const counterRateOperation: OperationDefinition<
       <Markdown
         markdown={i18n.translate('xpack.lens.indexPattern.counterRate.documentation', {
           defaultMessage: `
-# counter_rate
+### counter_rate(metric: number)
 
 Calculates the rate of an ever increasing counter. This function will only yield helpful results on counter metric fields which contain a measurement of some kind monotonically growing over time.
 If the value does get smaller, it will interpret this as a counter reset. To get most precise results, \`counter_rate\` should be calculated on the \`max\` of a field.
 
 This calculation will be done separately for separate series defined by filters or top values dimensions.
 
-Example: Visualize the rate of bytes received over time by a memcached server: \`counter_rate(max(memcached.stats.read.bytes))\`
+Example: Visualize the rate of bytes received over time by a memcached server:
+\`\`\`
+counter_rate(max(memcached.stats.read.bytes))
+\`\`\`
       `,
         })}
       />

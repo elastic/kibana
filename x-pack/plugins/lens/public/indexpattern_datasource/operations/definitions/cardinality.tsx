@@ -117,12 +117,19 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       <Markdown
         markdown={i18n.translate('xpack.lens.indexPattern.cardinality.documentation', {
           defaultMessage: `
-# unique_count
+### unique_count(field: string, [kql]?: string, [lucene]?: string)
 
 Calculates the number of unique values of a specified field. Works for number, string, date and boolean values.
 
-Example: Calculate the number of different products: \`unique_count(product.name)\`
-Example: Calculate the number of different products from the "clothes" group: \`unique_count(product.name, kql="product.group=clothes")\`
+Example: Calculate the number of different products:
+\`\`\`
+unique_count(product.name)
+\`\`\`
+
+Example: Calculate the number of different products from the "clothes" group:
+\`\`\`
+unique_count(product.name, kql="product.group=clothes")
+\`\`\`
       `,
         })}
       />

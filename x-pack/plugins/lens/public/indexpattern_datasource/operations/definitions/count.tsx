@@ -97,12 +97,19 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       <Markdown
         markdown={i18n.translate('xpack.lens.indexPattern.count.documentation', {
           defaultMessage: `
-# count
+### count([kql]?: string, [lucene]?: string)
 
 Calculates the number of documents.
 
-Example: Calculate the number of documents: \`count()\`
-Example: Calculate the number of documents matching a certain filter: \`count(kql="price > 500")\`
+Example: Calculate the number of documents: 
+\`\`\`
+count()
+\`\`\`
+
+Example: Calculate the number of documents matching a certain filter:
+\`\`\`
+count(kql="price > 500")
+\`\`\`
       `,
         })}
       />

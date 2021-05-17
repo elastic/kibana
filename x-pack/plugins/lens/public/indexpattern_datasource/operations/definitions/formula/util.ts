@@ -85,13 +85,20 @@ export const tinymathFunctions: Record<
       { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
     ],
     help: `
-# add \`+\`
+### add(summand1: number, summand2: number) \`+\`
 Adds up two numbers.
 Also works with + symbol
 
-Example: Calculate the sum of two fields \`sum(price) + sum(tax)\`
+Example: Calculate the sum of two fields
+\`\`\`
+sum(price) + sum(tax)
+\`\`\`
 
-Example: Offset count by a static value \`add(count(), 5)\`
+Example: Offset count by a static value
+
+\`\`\`
+add(count(), 5)
+\`\`\`
     `,
   },
   subtract: {
@@ -100,11 +107,14 @@ Example: Offset count by a static value \`add(count(), 5)\`
       { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
     ],
     help: `
-# subtract \`-\`
+### subtract(minuend: number, subtrahend: number) \`-\`
 Subtracts the first number from the second number.
 Also works with ${'`-`'} symbol
 
-Example: Calculate the range of a field ${'`subtract(max(bytes), min(bytes))`'}
+Example: Calculate the range of a field
+\`\`\`
+subtract(max(bytes), min(bytes))
+\`\`\`
     `,
   },
   multiply: {
@@ -113,13 +123,19 @@ Example: Calculate the range of a field ${'`subtract(max(bytes), min(bytes))`'}
       { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
     ],
     help: `
-# multiply \`*\`
+### multiply(factor1: number, factor2: number) \`*\`
 Multiplies two numbers.
 Also works with ${'`*`'} symbol.
 
-Example: Calculate price after current tax rate ${'`sum(bytes) * last_value(tax_rate)`'}
+Example: Calculate price after current tax rate
+\`\`\`
+sum(bytes) * last_value(tax_rate)
+\`\`\`
 
-Example: Calculate price after constant tax rate \`multiply(sum(price), 1.2)\`
+Example: Calculate price after constant tax rate
+\`\`\`
+multiply(sum(price), 1.2)
+\`\`\`
     `,
   },
   divide: {
@@ -128,11 +144,14 @@ Example: Calculate price after constant tax rate \`multiply(sum(price), 1.2)\`
       { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
     ],
     help: `
-# divide \`/\`
+### divide(dividend: number, divisor: number) \`/\`
 Divides the first number by the second number.
 Also works with ${'`/`'} symbol
 
-Example: Calculate profit margin \`sum(profit) / sum(revenue)\`
+Example: Calculate profit margin 
+\`\`\`
+sum(profit) / sum(revenue)
+\`\`\`
     `,
   },
   abs: {
@@ -140,7 +159,7 @@ Example: Calculate profit margin \`sum(profit) / sum(revenue)\`
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-# abs
+### abs(value: number)
 Calculates absolute value. A negative value is multiplied by -1, a positive value stays the same.
 
 Example: Calculate average distance to sea level ${'`abs(average(altitude))`'}
@@ -151,10 +170,13 @@ Example: Calculate average distance to sea level ${'`abs(average(altitude))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-# cbrt
+### cbrt(value: number)
 Cube root of value.
 
-Example: Calculate side length from volume ${'`cbrt(last_value(volume))`'}
+Example: Calculate side length from volume
+\`\`\`
+cbrt(last_value(volume))
+\`\`\`
     `,
   },
   ceil: {
@@ -162,10 +184,13 @@ Example: Calculate side length from volume ${'`cbrt(last_value(volume))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-# ceil
+### ceil(value: number)
 Ceiling of value, rounds up.
 
-Example: Round up price to the next dollar ${'`ceil(sum(price))`'}
+Example: Round up price to the next dollar 
+\`\`\`
+ceil(sum(price))
+\`\`\`
     `,
   },
   clamp: {
@@ -175,21 +200,31 @@ Example: Round up price to the next dollar ${'`ceil(sum(price))`'}
       { name: i18n.translate('xpack.lens.formula.max', { defaultMessage: 'max' }) },
     ],
     help: `
-# clamp
+### clamp(value: number, minimum: number, maximum: number)
 Limits the value from a minimum to maximum.
 
-Example: Make sure to catch outliers ${'`clamp(average(bytes), percentile(bytes, percentile=5), percentile(bytes, percentile=95))`'}
-    `,
+Example: Make sure to catch outliers
+\`\`\`
+clamp(
+  average(bytes),
+  percentile(bytes, percentile=5),
+  percentile(bytes, percentile=95)
+)
+\`\`\`
+`,
   },
   cube: {
     positionalArguments: [
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-# cube
+### cube(value: number)
 Calculates the cube of a number.
 
-Example: Calculate volume from side length ${'`cube(last_value(length))`'}
+Example: Calculate volume from side length
+\`\`\`
+cube(last_value(length))
+\`\`\`
     `,
   },
   exp: {
@@ -197,10 +232,13 @@ Example: Calculate volume from side length ${'`cube(last_value(length))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-# exp
+### exp(value: number)
 Raises <em>e</em> to the nth power.
 
-Example: Calculate the natural expontential function ${'`exp(last_value(duration))`'}
+Example: Calculate the natural expontential function
+\`\`\`
+exp(last_value(duration))
+\`\`\`
     `,
   },
   fix: {
@@ -208,10 +246,13 @@ Example: Calculate the natural expontential function ${'`exp(last_value(duration
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-# fix
+### fix(value: number)
 For positive values, takes the floor. For negative values, takes the ceiling.
 
-Example: Rounding towards zero ${'`fix(sum(profit))`'}
+Example: Rounding towards zero
+\`\`\`
+fix(sum(profit))
+\`\`\`
     `,
   },
   floor: {
@@ -219,10 +260,13 @@ Example: Rounding towards zero ${'`fix(sum(profit))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-# floor
+### floor(value: number)
 Round down to nearest integer value
 
-Example: Round down a price ${'`floor(sum(price))`'}
+Example: Round down a price
+\`\`\`
+floor(sum(price))
+\`\`\`
     `,
   },
   log: {
@@ -234,10 +278,13 @@ Example: Round down a price ${'`floor(sum(price))`'}
       },
     ],
     help: `
-# log
+### log(value: number, base?: number)
 Logarithm with optional base. The natural base <em>e</em> is used as default.
 
-Example: Calculate number of bits required to store values ${'`log(max(price), 2)`'}
+Example: Calculate number of bits required to store values
+\`\`\`
+log(max(price), 2)
+\`\`\`
     `,
   },
   // TODO: check if this is valid for Tinymath
@@ -259,24 +306,30 @@ Example: Calculate number of bits required to store values ${'`log(max(price), 2
       },
     ],
     help: `
-# mod
+### mod(value: number)
 Remainder after dividing the function by a number
 
-Example: Calculate last three digits of a value ${'`mod(sum(price), 1000)`'}
+Example: Calculate last three digits of a value
+\`\`\`
+mod(sum(price), 1000)
+\`\`\`
     `,
   },
   pow: {
     positionalArguments: [
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
       {
-        name: i18n.translate('xpack.lens.formula.base', { defaultMessage: 'base' }),
+        name: i18n.translate('xpack.lens.\\formula.base', { defaultMessage: 'base' }),
       },
     ],
     help: `
-# pow
+### pow(value: number, power: number)
 Raises the value to a certain power. The second argument is required
 
-Example: Calculate volume based on side length ${'`pow(last_value(length), 3)`'}
+Example: Calculate volume based on side length
+\`\`\`
+pow(last_value(length), 3)
+\`\`\`
     `,
   },
   round: {
@@ -288,10 +341,13 @@ Example: Calculate volume based on side length ${'`pow(last_value(length), 3)`'}
       },
     ],
     help: `
-# round
+### round(value: number, digits: number = 0)
 Rounds to a specific number of decimal places, default of 0
 
-Example: Round to the cent ${'`round(sum(price), 2)`'}
+Example: Round to the cent
+\`\`\`
+round(sum(price), 2)
+\`\`\`
     `,
   },
   sqrt: {
@@ -299,10 +355,13 @@ Example: Round to the cent ${'`round(sum(price), 2)`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-# sqrt
+### sqrt(value: number)
 Square root of a positive value only
 
-Example: Calculate side length based on area ${'`sqrt(last_value(area))`'}
+Example: Calculate side length based on area
+\`\`\`
+sqrt(last_value(area))
+\`\`\`
     `,
   },
   square: {
@@ -310,10 +369,13 @@ Example: Calculate side length based on area ${'`sqrt(last_value(area))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-# square
+### square(value: number)
 Raise the value to the 2nd power
 
-Example: Calculate area based on side length ${'`square(last_value(length))`'}
+Example: Calculate area based on side length
+\`\`\`
+square(last_value(length))
+\`\`\`
     `,
   },
 };

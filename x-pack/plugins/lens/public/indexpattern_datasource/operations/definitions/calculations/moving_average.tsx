@@ -140,7 +140,7 @@ export const movingAverageOperation: OperationDefinition<
       <Markdown
         markdown={i18n.translate('xpack.lens.indexPattern.movingAverage.documentation', {
           defaultMessage: `
-# moving_average
+### moving_average(metric: number, [window]: number)
 
 Calculates the moving average of a metric over time, averaging the last n-th values to calculate the current value. To use this function, you need to configure a date histogram dimension as well.
 
@@ -148,7 +148,10 @@ This calculation will be done separately for separate series defined by filters 
 
 Takes a named parameter \`window\` which specifies how many last values to include in the average calculation for the current value.
 
-Example: Smooth a line of measurements: \`moving_average(sum(bytes), window=5)\`
+Example: Smooth a line of measurements:
+\`\`\`
+moving_average(sum(bytes), window=5)
+\`\`\`
       `,
         })}
       />

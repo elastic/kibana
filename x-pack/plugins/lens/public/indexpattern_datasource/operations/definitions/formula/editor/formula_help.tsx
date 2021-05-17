@@ -12,8 +12,11 @@ import {
   EuiFlexItem,
   EuiPopoverTitle,
   EuiText,
-  EuiSelectable,
+  EuiListGroupItem,
   EuiSelectableOption,
+  EuiListGroup,
+  EuiHorizontalRule,
+  EuiSpacer,
 } from '@elastic/eui';
 import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { GenericOperationDefinition } from '../../index';
@@ -46,15 +49,23 @@ function FormulaHelp({
       defaultMessage: 'Math',
     }),
     isGroupLabel: true,
+    description: (
+      <EuiText>
+        {i18n.translate('xpack.lens.formulaDocumentation.mathSectionDescription', {
+          defaultMessage:
+            'These functions will be executed for reach row of the resulting table using single values from the same row calculated using other functions.',
+        })}
+      </EuiText>
+    ),
   });
 
   helpItems.push(
     ...getPossibleFunctions(indexPattern)
       .filter((key) => key in tinymathFunctions)
+      .sort()
       .map((key) => ({
         label: `${key}`,
         description: <Markdown markdown={tinymathFunctions[key].help} />,
-        checked: selectedFunction === key ? ('on' as const) : undefined,
       }))
   );
 
@@ -63,6 +74,14 @@ function FormulaHelp({
       defaultMessage: 'Elasticsearch',
     }),
     isGroupLabel: true,
+    description: (
+      <EuiText>
+        {i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSectionDescription', {
+          defaultMessage:
+            'These functions will be executed on the raw documents for each row of the resulting table, aggregating all documents matching the break down dimensions into a single value.',
+        })}
+      </EuiText>
+    ),
   });
 
   // Es aggs
@@ -73,13 +92,10 @@ function FormulaHelp({
           key in operationDefinitionMap &&
           operationDefinitionMap[key].documentation?.section === 'elasticsearch'
       )
+      .sort()
       .map((key) => ({
-        label: `${key}: ${operationDefinitionMap[key].displayName}`,
+        label: key,
         description: operationDefinitionMap[key].documentation?.description,
-        checked:
-          selectedFunction === `${key}: ${operationDefinitionMap[key].displayName}`
-            ? ('on' as const)
-            : undefined,
       }))
   );
 
@@ -88,6 +104,14 @@ function FormulaHelp({
       defaultMessage: 'Column-wise calculation',
     }),
     isGroupLabel: true,
+    description: (
+      <EuiText>
+        {i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSectionDescription', {
+          defaultMessage:
+            'These functions will be executed for reach row of the resulting table, using data from cells from other rows as well as the current value.',
+        })}
+      </EuiText>
+    ),
   });
 
   // Calculations aggs
@@ -98,8 +122,9 @@ function FormulaHelp({
           key in operationDefinitionMap &&
           operationDefinitionMap[key].documentation?.section === 'calculation'
       )
+      .sort()
       .map((key) => ({
-        label: `${key}: ${operationDefinitionMap[key].displayName}`,
+        label: key,
         description: operationDefinitionMap[key].documentation?.description,
         checked:
           selectedFunction === `${key}: ${operationDefinitionMap[key].displayName}`
@@ -111,32 +136,42 @@ function FormulaHelp({
   return (
     <>
       <EuiPopoverTitle className="lnsFormula__docsHeader" paddingSize="s">
-        Formula reference
+        {i18n.translate('xpack.lens.formulaDocumentation.header', {
+          defaultMessage: 'Formula reference',
+        })}
       </EuiPopoverTitle>
 
       <EuiFlexGroup className="lnsFormula__docsContent" gutterSize="none" responsive={false}>
         <EuiFlexItem className="lnsFormula__docsNav" grow={1}>
-          <EuiSelectable
-            height="full"
-            options={helpItems}
-            singleSelection={true}
-            searchable
-            onChange={(newOptions) => {
-              const chosenType = newOptions.find(({ checked }) => checked === 'on')!;
-              if (!chosenType) {
-                setSelectedFunction(undefined);
+          <EuiListGroup>
+            {helpItems.map((helpItem) => {
+              if (helpItem.isGroupLabel) {
+                return (
+                  <EuiListGroupItem
+                    key={helpItem.label}
+                    label={helpItem.label}
+                    size="m"
+                    color="text"
+                    onClick={() => {
+                      setSelectedFunction(helpItem.label);
+                    }}
+                  />
+                );
               } else {
-                setSelectedFunction(chosenType.label);
+                return (
+                  <EuiListGroupItem
+                    key={helpItem.label}
+                    label={helpItem.label}
+                    size="s"
+                    color="text"
+                    onClick={() => {
+                      setSelectedFunction(helpItem.label);
+                    }}
+                  />
+                );
               }
-            }}
-          >
-            {(list, search) => (
-              <>
-                {search}
-                {list}
-              </>
-            )}
-          </EuiSelectable>
+            })}
+          </EuiListGroup>
         </EuiFlexItem>
 
         <EuiFlexItem className="lnsFormula__docsText" grow={2}>
@@ -174,30 +209,37 @@ queries. If your search has a single quote in it, use a backslash to escape, lik
 
 Math functions can take positional arguments, like pow(count(), 3) is the same as count() * count() * count()
 
-### Basic math
-
 Use the symbols +, -, /, and * to perform basic math.
                   `,
                 description:
                   'Text is in markdown. Do not translate function names or field names like sum(bytes)',
               })}
             />
+            <EuiSpacer />
             {helpItems.map((item, index) => {
-              if (item.isGroupLabel) {
-                return null;
-              } else {
-                return (
-                  <div
-                    ref={(el) => {
-                      if (el) {
-                        scrollTargets.current[item.label] = el;
-                      }
-                    }}
-                  >
-                    <React.Fragment key={index}>{item.description}</React.Fragment>
-                  </div>
-                );
-              }
+              return (
+                <div
+                  key={index}
+                  ref={(el) => {
+                    if (el) {
+                      scrollTargets.current[item.label] = el;
+                    }
+                  }}
+                >
+                  {item.isGroupLabel ? (
+                    <React.Fragment>
+                      <h2>{item.label}</h2>
+                      {item.description}
+                      <EuiSpacer />
+                    </React.Fragment>
+                  ) : (
+                    <React.Fragment>
+                      {item.description}
+                      {helpItems.length - 1 !== index && <EuiHorizontalRule />}
+                    </React.Fragment>
+                  )}
+                </div>
+              );
             })}
           </EuiText>
         </EuiFlexItem>

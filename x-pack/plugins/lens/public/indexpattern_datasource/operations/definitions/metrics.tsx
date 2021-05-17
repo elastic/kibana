@@ -133,13 +133,19 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         <Markdown
           markdown={i18n.translate('xpack.lens.indexPattern.metric.documentation', {
             defaultMessage: `
-# {metric}
+### {metric}(field: string, [kql]?: string, [lucene]?: string)
 
 Returns the {metric} of a field. This function only works for number fields.
 
-Example: Get the {metric} of price: \`{metric}(price)\`
+Example: Get the {metric} of price:
+\`\`\`
+{metric}(price)
+\`\`\`
 
-Example: Get the {metric} of price for orders from the UK: \`{metric}(price, kql="location:UK")\`
+Example: Get the {metric} of price for orders from the UK:
+\`\`\`
+{metric}(price, kql="location:UK")
+\`\`\`
       `,
             values: {
               metric: type,

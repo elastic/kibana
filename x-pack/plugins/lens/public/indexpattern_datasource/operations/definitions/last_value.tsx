@@ -272,13 +272,16 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       <Markdown
         markdown={i18n.translate('xpack.lens.indexPattern.lastValue.documentation', {
           defaultMessage: `
-# last_value
+### last_value(field: string, [kql]?: string, [lucene]?: string)
 
 Returns the value of a field from the last document, ordered by the default time field of the index pattern.
 
 This function is usefull the retrieve the latest state of an entity.
 
-Example: Get the current status of a server: \`last_value(server.status)\`
+Example: Get the current status of server A: 
+\`\`\`
+last_value(server.status, kql='server.name="A"')
+\`\`\`
       `,
         })}
       />

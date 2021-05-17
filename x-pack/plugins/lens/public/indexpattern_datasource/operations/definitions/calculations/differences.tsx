@@ -116,13 +116,16 @@ export const derivativeOperation: OperationDefinition<
       <Markdown
         markdown={i18n.translate('xpack.lens.indexPattern.differences.documentation', {
           defaultMessage: `
-# differences
+### differences(metric: number)
 
 Calculates the difference to the last value of a metric over time. To use this function, you need to configure a date histogram dimension as well.
 
 This calculation will be done separately for separate series defined by filters or top values dimensions.
 
-Example: Visualize the change in bytes received over time: \`differences(sum(bytes))\`
+Example: Visualize the change in bytes received over time:
+\`\`\`
+differences(sum(bytes))
+\`\`\`
       `,
         })}
       />

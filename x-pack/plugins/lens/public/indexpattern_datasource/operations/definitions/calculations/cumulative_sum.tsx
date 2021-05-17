@@ -119,13 +119,16 @@ export const cumulativeSumOperation: OperationDefinition<
       <Markdown
         markdown={i18n.translate('xpack.lens.indexPattern.cumulateSum.documentation', {
           defaultMessage: `
-# cumulative_sum
+### cumulative_sum(metric: number)
 
 Calculates the cumulative sum of a metric over time, adding all previous values of a series to each value. To use this function, you need to configure a date histogram dimension as well.
 
 This calculation will be done separately for separate series defined by filters or top values dimensions.
 
-Example: Visualize the received bytes accumulated over time: \`cumulative_sum(sum(bytes))\`
+Example: Visualize the received bytes accumulated over time:
+\`\`\`
+cumulative_sum(sum(bytes))
+\`\`\`
       `,
         })}
       />

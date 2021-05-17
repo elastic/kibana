@@ -200,11 +200,14 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       <Markdown
         markdown={i18n.translate('xpack.lens.indexPattern.percentile.documentation', {
           defaultMessage: `
-# percentile
+### percentile(field: string, [percentile]: number, [kql]?: string, [lucene]?: string)
 
 Returns the specified percentile of the values of a field. This is the value n percent of the values occuring in documents are smaller.
 
-Example: Get the number of bytes larger than 95 % of values: \`percentile(bytes, percentile=95)\`
+Example: Get the number of bytes larger than 95 % of values:
+\`\`\`
+percentile(bytes, percentile=95)
+\`\`\`
       `,
         })}
       />
