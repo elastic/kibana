@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+// The functionality in this file is intended to be used both in public and server
+// code even but targets a browser environment. Reporting uses these functions when starting
+// puppeteer to set the current browser into "screenshot" mode.
+
 export const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KEY__';
 
 /**
@@ -33,19 +37,27 @@ export const getScreenshotMode = (): boolean => {
  * references as possible to make it portable. For instance, running inside puppeteer.
  */
 export const setScreenshotModeEnabled = () => {
-  Object.defineProperty(window, '__KBN_SCREENSHOT_MODE_ENABLED_KEY__', {
-    enumerable: true,
-    writable: true,
-    configurable: false,
-    value: true,
-  });
+  Object.defineProperty(
+    window,
+    '__KBN_SCREENSHOT_MODE_ENABLED_KEY__', // Literal value to prevent adding an external reference
+    {
+      enumerable: true,
+      writable: true,
+      configurable: false,
+      value: true,
+    }
+  );
 };
 
 export const setScreenshotModeDisabled = () => {
-  Object.defineProperty(window, '__KBN_SCREENSHOT_MODE_ENABLED_KEY__', {
-    enumerable: true,
-    writable: true,
-    configurable: false,
-    value: undefined,
-  });
+  Object.defineProperty(
+    window,
+    '__KBN_SCREENSHOT_MODE_ENABLED_KEY__', // Literal value to prevent adding an external reference
+    {
+      enumerable: true,
+      writable: true,
+      configurable: false,
+      value: undefined,
+    }
+  );
 };
