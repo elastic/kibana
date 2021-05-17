@@ -16,7 +16,6 @@ import {
 } from '../../test_helpers';
 import { Report, ReportDocument } from './report';
 import { ReportingStore } from './store';
-import { reportingIlmPolicy } from './report_ilm_policy';
 
 const { createApiResponse } = elasticsearchServiceMock;
 
@@ -422,12 +421,6 @@ describe('ReportingStore', () => {
           "body": Object {
             "policy": Object {
               "phases": Object {
-                "delete": Object {
-                  "actions": Object {
-                    "delete": Object {},
-                  },
-                  "min_age": "180d",
-                },
                 "hot": Object {
                   "actions": Object {},
                   "min_age": "0ms",
