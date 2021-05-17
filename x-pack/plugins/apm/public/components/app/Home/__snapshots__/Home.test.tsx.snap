@@ -4,10 +4,6 @@ exports[`Home component should render services 1`] = `
 <ContextProvider
   value={
     Object {
-      "apmRuleRegistry": Object {
-        "getTypeByRuleId": [Function],
-        "registerType": [Function],
-      },
       "appMountParameters": Object {
         "setHeaderActionMenu": [Function],
       },
@@ -60,6 +56,9 @@ exports[`Home component should render services 1`] = `
           "get": [Function],
           "get$": [Function],
         },
+      },
+      "observabilityRuleTypeRegistry": Object {
+        "registerFormatter": [Function],
       },
       "plugins": Object {
         "data": Object {
@@ -99,10 +98,6 @@ exports[`Home component should render traces 1`] = `
 <ContextProvider
   value={
     Object {
-      "apmRuleRegistry": Object {
-        "getTypeByRuleId": [Function],
-        "registerType": [Function],
-      },
       "appMountParameters": Object {
         "setHeaderActionMenu": [Function],
       },
@@ -155,6 +150,9 @@ exports[`Home component should render traces 1`] = `
           "get": [Function],
           "get$": [Function],
         },
+      },
+      "observabilityRuleTypeRegistry": Object {
+        "registerFormatter": [Function],
       },
       "plugins": Object {
         "data": Object {

@@ -12,7 +12,7 @@ import {
   metaOrUndefined,
   updated_at,
   updated_by,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { esDataTypeUnion } from '../common/schemas';
 import {

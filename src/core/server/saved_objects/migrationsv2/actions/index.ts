@@ -456,6 +456,7 @@ export const openPit = (
 export interface ReadWithPit {
   outdatedDocuments: SavedObjectsRawDoc[];
   readonly lastHitSortValue: number[] | undefined;
+  readonly totalHits: number | undefined;
 }
 
 /*
@@ -481,13 +482,20 @@ export const readWithPit = (
         pit: { id: pitId, keep_alive: pitKeepAlive },
         size: batchSize,
         search_after: searchAfter,
-        // Improve performance by not calculating the total number of hits
-        // matching the query.
-        track_total_hits: false,
+        /**
+         * We want to know how many documents we need to process so we can log the progress.
+         * But we also want to increase the performance of these requests,
+         * so we ask ES to report the total count only on the first request (when searchAfter does not exist)
+         */
+        track_total_hits: typeof searchAfter === 'undefined',
         query,
       },
     })
     .then((response) => {
+      const totalHits =
+        typeof response.body.hits.total === 'number'
+          ? response.body.hits.total // This format is to be removed in 8.0
+          : response.body.hits.total?.value;
       const hits = response.body.hits.hits;
 
       if (hits.length > 0) {
@@ -495,12 +503,14 @@ export const readWithPit = (
           // @ts-expect-error @elastic/elasticsearch _source is optional
           outdatedDocuments: hits as SavedObjectsRawDoc[],
           lastHitSortValue: hits[hits.length - 1].sort as number[],
+          totalHits,
         });
       }
 
       return Either.right({
         outdatedDocuments: [],
         lastHitSortValue: undefined,
+        totalHits,
       });
     })
     .catch(catchRetryableEsClientErrors);

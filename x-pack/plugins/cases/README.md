@@ -73,7 +73,7 @@ Arguments:
 |---|---|
 |alertData?|`Omit<CommentRequestAlertType, 'type'>;` alert data to post to case
 |createCaseNavigation|`CasesNavigation` route configuration for create cases page
-|disabledStatuses?|`CaseStatuses[];` array of disabled statuses
+|hiddenStatuses?|`CaseStatuses[];` array of hidden statuses
 |onRowClick|<code>(theCase?: Case &vert; SubCase) => void;</code> callback for row click, passing case in row
 |updateCase?|<code>(theCase: Case &vert; SubCase) => void;</code> callback after case has been updated
 |userCanCrud|`boolean;` user permissions to crud
