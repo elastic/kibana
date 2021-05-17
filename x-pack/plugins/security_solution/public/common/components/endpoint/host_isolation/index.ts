@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-import { services } from './services';
-import { pageObjects } from './page_objects';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export * from './isolate_success';
+export * from './isolate_form';
