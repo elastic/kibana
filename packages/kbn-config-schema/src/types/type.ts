@@ -8,7 +8,6 @@
 
 import type { AnySchema, CustomValidator, ErrorReport } from 'joi';
 import { SchemaTypeError, ValidationError } from '../errors';
-// import { internals } from '../internals';
 import { Reference } from '../references';
 
 export interface TypeOptions<T> {
