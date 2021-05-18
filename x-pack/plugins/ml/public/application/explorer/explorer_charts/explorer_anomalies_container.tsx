@@ -98,7 +98,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
               timefilter,
               onSelectEntity,
               tooManyBucketsCalloutMsg,
-              showSelectedInterval: false,
+              showSelectedInterval,
             }}
           />
         )}
