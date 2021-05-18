@@ -47,7 +47,7 @@ export const PageTabs = () => {
     if (isCerts) {
       setSelectedTabId(CERTIFICATES_ROUTE);
     }
-    if (!isOverView?.isExact && !isCerts /* && !isSettings*/) {
+    if (!isOverView?.isExact && !isCerts) {
       setSelectedTabId(null);
     }
   }, [isCerts, isOverView]);
