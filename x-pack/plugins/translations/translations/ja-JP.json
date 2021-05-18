@@ -3776,7 +3776,6 @@
     "timelion.cells.actions.reorderTooltip": "ドラッグして並べ替え",
     "timelion.chart.seriesList.noSchemaWarning": "次のパネルタイプは存在しません：{renderType}",
     "timelion.deprecation.here": "ダッシュボードに移行します。",
-    "timelion.deprecation.message": "Timelionアプリは7.0以降で非推奨となっています。8.0では削除される予定です。Timelionワークシートを引き続き使用するには、{timeLionDeprecationLink}。",
     "timelion.emptyExpressionErrorMessage": "Timelion エラー：式が入力されていません",
     "timelion.expressionInputAriaLabel": "Timelion 式",
     "timelion.expressionInputPlaceholder": "{esQuery} でのクエリを試してみてください。",
