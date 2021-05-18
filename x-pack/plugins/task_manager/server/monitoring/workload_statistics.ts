@@ -352,7 +352,7 @@ export function summarizeWorkloadStat(
 }
 
 function hasAggregations(
-  aggregations?: Record<string, estypes.Aggregate>
+  aggregations?: Record<string, estypes.AggregationsAggregate>
 ): aggregations is WorkloadAggregationResponse {
   return !!(
     aggregations?.taskType &&
@@ -365,9 +365,9 @@ export interface WorkloadAggregationResponse {
   taskType: TaskTypeAggregation;
   schedule: ScheduleAggregation;
   idleTasks: IdleTasksAggregation;
-  [otherAggs: string]: estypes.Aggregate;
+  [otherAggs: string]: estypes.AggregationsAggregate;
 }
-export interface TaskTypeAggregation extends estypes.FiltersAggregate {
+export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregate {
   buckets: Array<{
     doc_count: number;
     key: string | number;
@@ -383,7 +383,7 @@ export interface TaskTypeAggregation extends estypes.FiltersAggregate {
   doc_count_error_upper_bound?: number | undefined;
   sum_other_doc_count?: number | undefined;
 }
-export interface ScheduleAggregation extends estypes.FiltersAggregate {
+export interface ScheduleAggregation extends estypes.AggregationsFiltersAggregate {
   buckets: Array<{
     doc_count: number;
     key: string | number;
@@ -408,7 +408,7 @@ export type ScheduleDensityHistogram = DateRangeBucket & {
     >;
   };
 };
-export interface IdleTasksAggregation extends estypes.FiltersAggregate {
+export interface IdleTasksAggregation extends estypes.AggregationsFiltersAggregate {
   doc_count: number;
   scheduleDensity: {
     buckets: ScheduleDensityHistogram[];
