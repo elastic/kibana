@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingContent } from '@elastic/eui';
 import { FileUploadComponentProps, lazyLoadModules } from '../lazy_load_bundle';
 
 interface State {
@@ -31,6 +31,10 @@ export class JsonUploadAndParseAsyncWrapper extends React.Component<
 
   render() {
     const { JsonUploadAndParse } = this.state;
-    return JsonUploadAndParse ? <JsonUploadAndParse {...this.props} /> : <EuiLoadingSpinner />;
+    return JsonUploadAndParse ? (
+      <JsonUploadAndParse {...this.props} />
+    ) : (
+      <EuiLoadingContent lines={3} />
+    );
   }
 }

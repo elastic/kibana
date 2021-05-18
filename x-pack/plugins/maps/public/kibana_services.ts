@@ -24,7 +24,7 @@ export function setStartServices(core: CoreStart, plugins: MapsPluginStartDepend
 }
 
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
-export const getFileUploadComponent = () => pluginsStart.fileUpload.getFileUploadComponent();
+export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
 export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
 export const getAutocompleteService = () => pluginsStart.data.autocomplete;
 export const getInspector = () => pluginsStart.inspector;

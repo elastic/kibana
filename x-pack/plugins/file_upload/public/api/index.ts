@@ -13,7 +13,7 @@ import { JsonUploadAndParseAsyncWrapper } from './json_upload_and_parse_async_wr
 import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
 
 export interface FileUploadStartApi {
-  getFileUploadComponent(): ReturnType<typeof getFileUploadComponent>;
+  FileUploadComponent: typeof JsonUploadAndParseAsyncWrapper;
   IndexNameFormComponent: typeof IndexNameFormAsyncWrapper;
   importerFactory: typeof importerFactory;
   getMaxBytes: typeof getMaxBytes;
@@ -30,10 +30,7 @@ export interface GetTimeFieldRangeResponse {
   end: { epoch: number; string: string };
 }
 
-export function getFileUploadComponent() {
-  return JsonUploadAndParseAsyncWrapper;
-}
-
+export const FileUploadComponent = JsonUploadAndParseAsyncWrapper;
 export const IndexNameFormComponent = IndexNameFormAsyncWrapper;
 
 export async function importerFactory(
