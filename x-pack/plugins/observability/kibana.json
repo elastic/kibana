@@ -16,7 +16,8 @@
     "data",
     "alerting",
     "ruleRegistry",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "cases"
   ],
   "ui": true,
   "server": true,

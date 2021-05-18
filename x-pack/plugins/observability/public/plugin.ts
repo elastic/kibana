@@ -34,6 +34,8 @@ import { createCallObservabilityApi } from './services/call_observability_api';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { ConfigSchema } from '.';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+import { CASES_APP_ID } from './components/app/cases/constants';
+import { CasesUiStart } from '../../cases/public';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -44,6 +46,7 @@ export interface ObservabilityPublicPluginsSetup {
 }
 
 export interface ObservabilityPublicPluginsStart {
+  cases: CasesUiStart;
   home?: HomePublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
@@ -107,7 +110,6 @@ export class Plugin
       mount,
       updater$,
     });
-
     if (config.unsafe.alertingExperience.enabled) {
       coreSetup.application.register({
         id: 'observability-alerts',
@@ -121,7 +123,7 @@ export class Plugin
       });
 
       coreSetup.application.register({
-        id: 'observability-cases',
+        id: CASES_APP_ID,
         title: 'Cases',
         appRoute: '/app/observability/cases',
         order: 8050,
