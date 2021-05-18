@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { useMemo, useEffect, useRef, useCallback } from 'react';
-import { merge, Subject, BehaviorSubject, zip } from 'rxjs';
+import { merge, Subject, BehaviorSubject, forkJoin } from 'rxjs';
 import { debounceTime, tap, filter } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import { DiscoverServices } from '../../../../build_services';
@@ -104,7 +104,7 @@ export const useSavedSearch = ({
     savedSearch,
   });
 
-  const { fetch$: docs$, fetch: fetchDocs } = useSavedSearchDocuments({
+  const { fetch: fetchDocs } = useSavedSearchDocuments({
     services,
     indexPattern,
     useNewFieldsApi,
@@ -137,13 +137,15 @@ export const useSavedSearch = ({
 
       const fetches$ =
         indexPattern.timeFieldName && !state.hideChart
-          ? zip(fetchDocs(fetchVars), fetchChart(fetchVars), fetchHits(fetchVars), (docs) => ({
-              docs,
-            }))
-          : zip(fetchDocs(fetchVars), fetchHits(fetchVars), (docs) => ({ docs }));
+          ? forkJoin({
+              docs: fetchDocs(fetchVars),
+              chart: fetchChart(fetchVars),
+              totalHits: fetchHits(fetchVars),
+            })
+          : forkJoin({ docs: fetchDocs(fetchVars), totalHits: fetchHits(fetchVars) });
       fetches$.subscribe(
-        () => {
-          const documents = docs$.value.documents;
+        (res) => {
+          const documents = res.docs.rawResponse.hits.hits;
           if (documents) {
             const newFieldCounts = calcFieldCounts(
               resetFieldCounts ? {} : cache.current.fieldCounts,
@@ -187,7 +189,6 @@ export const useSavedSearch = ({
       fetchDocs,
       fetchChart,
       fetchHits,
-      docs$.value.documents,
     ]
   );
 
