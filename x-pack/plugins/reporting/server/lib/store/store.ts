@@ -42,6 +42,7 @@ const checkReportIsEditable = (report: Report) => {
  * - interface for downloading the report
  */
 export class ReportingStore {
+  private readonly ilmPolicyName = 'kibana-reporting'; // name of the ILM policy for managing indices created by this service.
   private readonly indexPrefix: string; // config setting of index prefix in system index name
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private readonly queueTimeoutMins: number; // config setting of queue timeout, rounded up to nearest minute
@@ -133,8 +134,6 @@ export class ReportingStore {
 
     return client.indices.refresh({ index });
   }
-
-  private readonly ilmPolicyName = 'kibana-reporting';
 
   private async doesIlmPolicyExist(): Promise<boolean> {
     const client = await this.getClient();
@@ -401,5 +400,13 @@ export class ReportingStore {
     });
 
     return body.hits?.hits as ReportRecordTimeout[];
+  }
+
+  public getIlmPolicyName(): string {
+    return this.ilmPolicyName;
+  }
+
+  public getIndexPrefix(): string {
+    return this.indexPrefix;
   }
 }
