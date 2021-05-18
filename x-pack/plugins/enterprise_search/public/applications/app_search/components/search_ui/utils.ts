@@ -14,10 +14,7 @@ export const generatePreviewUrl = (query: ParsedQuery) => {
   const { engineName } = EngineLogic.values;
   return queryString.stringifyUrl(
     {
-      query: {
-        ...query,
-        fromKibana: 'true',
-      },
+      query,
       url: getAppSearchUrl(`/engines/${engineName}/reference_application/preview`),
     },
     { arrayFormat: 'bracket', skipEmptyString: true }

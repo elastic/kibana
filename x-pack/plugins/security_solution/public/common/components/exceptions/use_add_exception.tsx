@@ -13,7 +13,7 @@ import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   useApi,
-} from '../../../lists_plugin_deps';
+} from '../../../shared_imports';
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
 import {
