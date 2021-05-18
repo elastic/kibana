@@ -11,11 +11,11 @@ import { DocLinksStart } from 'src/core/public';
 export const getLinks = (docLinks: DocLinksStart) => {
   const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
   const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
-  const esDocsBase = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;
   const painlessDocsBase = `${docsBase}/elasticsearch/painless/${DOC_LINK_VERSION}`;
+  const kibanaDocsBase = `${docsBase}/kibana/${DOC_LINK_VERSION}`;
 
   return {
-    runtimePainless: `${esDocsBase}/runtime.html#runtime-mapping-fields`,
+    runtimePainless: `${kibanaDocsBase}/managing-index-patterns.html#runtime-fields`,
     painlessSyntax: `${painlessDocsBase}/painless-lang-spec.html`,
   };
 };

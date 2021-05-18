@@ -6,5 +6,6 @@
  */
 
 // the file created to remove TS cicular dependency between features and security pluin
+// https://github.com/elastic/kibana/issues/87388
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { featurePrivilegeIterator } from '../../security/server/authorization';

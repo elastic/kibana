@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { NamespaceType, id } from '@kbn/securitysolution-io-ts-utils';
+import { NamespaceType, id } from '@kbn/securitysolution-io-ts-list-types';
 
 import { list_id, namespace_type } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
