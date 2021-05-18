@@ -125,10 +125,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   async isEditable(): Promise<boolean> {
     if (this._isEditable === undefined) {
       if (!this.indexPattern) {
-        return false;
+        await this.getIndexPattern();
       }
-      const matchingIndexes = await getMatchingIndexes(this.indexPattern.title);
-      this._isEditable = matchingIndexes.length <= 1;
+      const { matchingIndexes } = await getMatchingIndexes(this.indexPattern!.title);
+      this._isEditable = matchingIndexes.length === 1;
     }
     return this._isEditable;
   }

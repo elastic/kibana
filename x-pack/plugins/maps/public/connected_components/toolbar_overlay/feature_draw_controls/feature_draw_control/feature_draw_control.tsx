@@ -145,7 +145,7 @@ export function FeatureDrawControl(props: Props) {
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem key={'point'} grow={false}>
+        <EuiFlexItem key={'exit'} grow={false}>
           <EuiPanel
             paddingSize="none"
             className="mapToolbarOverlay__button mapToolbarOverlay__button__exit"

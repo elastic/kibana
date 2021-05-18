@@ -89,6 +89,7 @@ export interface IVectorLayer extends ILayer {
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
   canShowTooltip(): boolean;
+  isEditable(): Promise<boolean>;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -168,6 +169,21 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getJoins().filter((join) => {
       return join.hasCompleteConfig();
     });
+  }
+
+  async isEditable(): Promise<boolean> {
+    if (!(await this.getSource().isEditable())) {
+      return false;
+    }
+    if (
+      (await this.isFilteredByGlobalTime()) ||
+      this.isPreviewLayer() ||
+      !this.isVisible() ||
+      this.hasJoins()
+    ) {
+      return false;
+    }
+    return true;
   }
 
   hasJoins() {

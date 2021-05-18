@@ -36,10 +36,32 @@ export interface Props {
 
 interface State {
   isPopoverOpen: boolean;
+  isLayerEditable: boolean;
 }
 
 export class TOCEntryActionsPopover extends Component<Props, State> {
-  state: State = { isPopoverOpen: false };
+  state: State = { isPopoverOpen: false, isLayerEditable: false };
+  private _isMounted = false;
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidUpdate() {
+    this._checkLayerEditable();
+  }
+
+  async _checkLayerEditable() {
+    const isLayerEditable = await this.props.layer.isEditable();
+    if (!this._isMounted || isLayerEditable === this.state.isLayerEditable) {
+      return;
+    }
+    this.setState({ isLayerEditable });
+  }
 
   _togglePopover = () => {
     this.setState((prevState) => ({
@@ -98,19 +120,18 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       },
     ];
 
-    // TODO: Make conditional
-    actionItems.push({
-      // TODO: Determine
-      disabled: false,
-      name: EDIT_FEATURES_LABEL,
-      icon: <EuiIcon type="pencil" size="m" />,
-      'data-test-subj': 'editLayerButton',
-      toolTipContent: null,
-      onClick: () => {
-        this._closePopover();
-        this.props.enableLayerEditing(this.props.layer.getId());
-      },
-    });
+    if (this.state.isLayerEditable) {
+      actionItems.push({
+        name: EDIT_FEATURES_LABEL,
+        icon: <EuiIcon type="pencil" size="m" />,
+        'data-test-subj': 'editLayerButton',
+        toolTipContent: null,
+        onClick: () => {
+          this._closePopover();
+          this.props.enableLayerEditing(this.props.layer.getId());
+        },
+      });
+    }
 
     if (!this.props.isReadOnly) {
       actionItems.push({
