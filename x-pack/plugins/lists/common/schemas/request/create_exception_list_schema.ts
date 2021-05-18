@@ -7,9 +7,6 @@
 
 import * as t from 'io-ts';
 import {
-  DefaultUuid,
-  DefaultVersionNumber,
-  DefaultVersionNumberDecoded,
   NamespaceType,
   OsTypeArray,
   Tags,
@@ -19,7 +16,12 @@ import {
   name,
   osTypeArrayOrUndefined,
   tags,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  DefaultUuid,
+  DefaultVersionNumber,
+  DefaultVersionNumberDecoded,
+} from '@kbn/securitysolution-io-ts-types';
 
 import { ListId, namespace_type } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';

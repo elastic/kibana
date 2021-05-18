@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema, OperatorTypeEnum } from '../../../../common';
+import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+
+import { ExceptionListItemSchema } from '../../../../common';
 
 import { ExceptionsBuilderExceptionItem } from './types';
 import { getDefaultEmptyEntry } from './helpers';
