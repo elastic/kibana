@@ -3,7 +3,7 @@
   "compilerOptions": {
     "allowJs": true,
     "incremental": true,
-    "outDir": "./target/web",
+    "outDir": "./target_web",
     "declaration": false,
     "isolatedModules": true,
     "sourceMap": true,
