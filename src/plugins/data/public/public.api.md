@@ -10,7 +10,6 @@ import { Adapters as Adapters_2 } from 'src/plugins/inspector/common';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { ApplicationStart } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
-import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import Boom from '@hapi/boom';
 import { ConfigDeprecationProvider } from '@kbn/config';
@@ -78,7 +77,6 @@ import { PublicUiSettingsParams } from 'src/core/server/types';
 import React from 'react';
 import * as React_3 from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Reporter } from '@kbn/analytics';
 import { Request as Request_2 } from '@hapi/hapi';
 import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestStatistics as RequestStatistics_2 } from 'src/plugins/inspector/common';
@@ -103,6 +101,7 @@ import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { Unit } from '@elastic/datemath';
 import { UnregisterCallback } from 'history';
 import { URL } from 'url';
@@ -579,10 +578,6 @@ export type CustomFilter = Filter & {
 //
 // @public
 export interface DataPublicPluginSetup {
-    // Warning: (ae-forgotten-export) The symbol "DataPublicPluginEnhancements" needs to be exported by the entry point index.d.ts
-    //
-    // @internal (undocumented)
-    __enhance: (enhancements: DataPublicPluginEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "AutocompleteSetup" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1183,7 +1178,7 @@ export interface IFieldSubType {
 
 // Warning: (ae-missing-release-tag) "IFieldType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface IFieldType {
     // (undocumented)
     aggregatable?: boolean;
@@ -1227,7 +1222,7 @@ export interface IFieldType {
 
 // Warning: (ae-missing-release-tag) "IIndexPattern" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public
+// @public @deprecated (undocumented)
 export interface IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "SerializedFieldFormat" needs to be exported by the entry point index.d.ts
     //
@@ -1695,10 +1690,6 @@ export interface ISearchOptions {
 //
 // @public
 export interface ISearchSetup {
-    // Warning: (ae-forgotten-export) The symbol "SearchEnhancements" needs to be exported by the entry point index.d.ts
-    //
-    // @internal (undocumented)
-    __enhance: (enhancements: SearchEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "AggsSetup" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -2308,7 +2299,7 @@ export const search: {
         })[];
         InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
         InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
-        Ipv4Address: typeof Ipv4Address;
+        IpAddress: typeof IpAddress;
         isDateHistogramBucketAggConfig: typeof isDateHistogramBucketAggConfig;
         isNumberType: (agg: import("../common").AggConfig) => boolean;
         isStringType: (agg: import("../common").AggConfig) => boolean;
@@ -2387,25 +2378,12 @@ export interface SearchError {
 // @public (undocumented)
 export class SearchInterceptor {
     constructor(deps: SearchInterceptorDeps);
-    // @internal (undocumented)
-    protected application: CoreStart['application'];
-    // (undocumented)
-    protected readonly deps: SearchInterceptorDeps;
-    // (undocumented)
-    protected getSerializableOptions(options?: ISearchOptions): Pick<ISearchOptions, "strategy" | "sessionId" | "isStored" | "isRestore" | "legacyHitsTotal">;
-    // (undocumented)
-    protected getTimeoutMode(): TimeoutErrorMode;
-    // Warning: (ae-forgotten-export) The symbol "AbortError" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    protected handleSearchError(e: KibanaServerError | AbortError, options?: ISearchOptions, isTimeout?: boolean): Error;
-    // @internal
-    protected pendingCount$: BehaviorSubject<number>;
-    // @internal (undocumented)
-    protected runSearch(request: IKibanaSearchRequest, options?: ISearchOptions): Promise<IKibanaSearchResponse>;
-    search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
+    // Warning: (ae-forgotten-export) The symbol "IAsyncSearchOptions" needs to be exported by the entry point index.d.ts
+    search({ id, ...request }: IKibanaSearchRequest, options?: IAsyncSearchOptions): import("rxjs").Observable<IKibanaSearchResponse<any>>;
     // (undocumented)
     showError(e: Error): void;
+    // (undocumented)
+    stop(): void;
     }
 
 // Warning: (ae-missing-release-tag) "SearchInterceptorDeps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -2468,7 +2446,7 @@ export class SearchSource {
     createChild(options?: {}): SearchSource;
     createCopy(): SearchSource;
     destroy(): void;
-    fetch$(options?: ISearchOptions): Observable<estypes.SearchResponse<any>>;
+    fetch$(options?: ISearchOptions): Observable<IKibanaSearchResponse<estypes.SearchResponse<any>>>;
     // @deprecated
     fetch(options?: ISearchOptions): Promise<estypes.SearchResponse<any>>;
     getField<K extends keyof SearchSourceFields>(field: K, recurse?: boolean): SearchSourceFields[K];
@@ -2643,11 +2621,9 @@ export type TimeHistoryContract = PublicMethodsOf<TimeHistory>;
 // @public (undocumented)
 export enum TimeoutErrorMode {
     // (undocumented)
-    CHANGE = 2,
+    CHANGE = 1,
     // (undocumented)
-    CONTACT = 1,
-    // (undocumented)
-    UPGRADE = 0
+    CONTACT = 0
 }
 
 // Warning: (ae-missing-release-tag) "TimeRange" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -2761,7 +2737,7 @@ export interface WaitUntilNextSessionCompletesOptions {
 // src/plugins/data/public/index.ts:410:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:419:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:420:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:421:1 - (ae-forgotten-export) The symbol "Ipv4Address" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:421:1 - (ae-forgotten-export) The symbol "IpAddress" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:422:1 - (ae-forgotten-export) The symbol "isDateHistogramBucketAggConfig" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:426:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:427:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts

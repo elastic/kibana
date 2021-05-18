@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/dom';
+import { screen, waitFor } from '@testing-library/dom';
 import { render, mockUrlStorage, mockCore, mockAppIndexPattern } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
 import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/test_utils';
@@ -43,17 +43,18 @@ describe('ExploratoryView', () => {
 
     await waitFor(() => {
       screen.getByText(/open in lens/i);
-      screen.getByRole('heading', { name: /exploratory view/i });
+      screen.getByRole('heading', { name: /analyze data/i });
     });
   });
 
   it('renders lens component when there is series', async () => {
     mockUrlStorage({
       data: {
-        'uptime-pings-histogram': {
-          dataType: 'synthetics',
-          reportType: 'upp',
-          breakdown: 'monitor.status',
+        'ux-series': {
+          dataType: 'ux',
+          reportType: 'pld',
+          breakdown: 'user_agent.name',
+          reportDefinitions: { 'service.name': ['elastic-co'] },
           time: { from: 'now-15m', to: 'now' },
         },
       },
@@ -61,10 +62,11 @@ describe('ExploratoryView', () => {
 
     render(<ExploratoryView />);
 
+    expect(await screen.findByText(/open in lens/i)).toBeInTheDocument();
+    expect(await screen.findByText('Performance Distribution')).toBeInTheDocument();
+    expect(await screen.findByText(/Lens Embeddable Component/i)).toBeInTheDocument();
+
     await waitFor(() => {
-      screen.getByText(/open in lens/i);
-      screen.getByRole('heading', { name: /uptime pings/i });
-      screen.getByText(/Lens Embeddable Component/i);
       screen.getByRole('table', { name: /this table contains 1 rows\./i });
     });
   });

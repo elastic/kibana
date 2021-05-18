@@ -170,6 +170,7 @@ export function SeriesBuilder({
         items={items as any}
         columns={columns}
         cellProps={{ style: { borderRight: '1px solid #d3dae6', verticalAlign: 'initial' } }}
+        tableLayout="auto"
       />
     </div>
   );
@@ -182,9 +183,9 @@ export const LOADING_VIEW = i18n.translate(
   }
 );
 
-const SELECT_REPORT_TYPE = i18n.translate(
+export const SELECT_REPORT_TYPE = i18n.translate(
   'xpack.observability.expView.seriesBuilder.selectReportType',
   {
-    defaultMessage: 'Select a report type to define visualization.',
+    defaultMessage: 'No report type selected',
   }
 );

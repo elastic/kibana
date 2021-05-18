@@ -715,5 +715,18 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
     },
+    [UI_SETTINGS.SEARCH_TIMEOUT]: {
+      name: i18n.translate('data.advancedSettings.searchTimeout', {
+        defaultMessage: 'Search Timeout',
+      }),
+      value: 600000,
+      description: i18n.translate('data.advancedSettings.searchTimeoutDesc', {
+        defaultMessage:
+          'Change the maximum timeout for a search session or set to 0 to disable the timeout and allow queries to run to completion.',
+      }),
+      type: 'number',
+      category: ['search'],
+      schema: schema.number(),
+    },
   };
 }

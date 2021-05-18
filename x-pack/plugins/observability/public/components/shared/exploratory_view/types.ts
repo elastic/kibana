@@ -17,6 +17,7 @@ import {
 
 import { PersistableFilter } from '../../../../../lens/common';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
+import { ExistsFilter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 
 export const ReportViewTypes = {
   pld: 'page-load-dist',
@@ -67,7 +68,7 @@ export interface DataSeries {
   defaultSeriesType: SeriesType;
   defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
-  filters?: PersistableFilter[];
+  filters?: PersistableFilter[] | ExistsFilter[];
   reportDefinitions: ReportDefinition[];
   labels: Record<string, string>;
   hasOperationType: boolean;

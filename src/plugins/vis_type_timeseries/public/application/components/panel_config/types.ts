@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { IUiSettingsClient } from 'kibana/public';
-import { TimeseriesVisData } from '../../../../common/types';
+import type { TimeseriesVisData } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
 import { VisFields } from '../../lib/fetch_fields';
 

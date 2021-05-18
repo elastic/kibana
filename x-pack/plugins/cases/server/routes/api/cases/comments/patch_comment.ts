@@ -14,12 +14,12 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { CommentableCase } from '../../../../common';
-import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
+import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError, decodeCommentRequest } from '../../utils';
-import { CASE_COMMENTS_URL, ENABLE_CASE_CONNECTOR } from '../../../../../common/constants';
+import { CASE_COMMENTS_URL, ENABLE_CASE_CONNECTOR } from '../../../../../common';
 import { CaseServiceSetup } from '../../../../services';
 
 interface CombinedCaseParams {

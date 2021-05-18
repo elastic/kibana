@@ -47,6 +47,7 @@ describe('Series Builder ReportBreakdowns', function () {
     expect(setSeries).toHaveBeenCalledTimes(1);
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
       breakdown: USER_AGENT_OS,
+      dataType: 'ux',
       reportType: 'pld',
       time: { from: 'now-15m', to: 'now' },
     });
@@ -68,6 +69,7 @@ describe('Series Builder ReportBreakdowns', function () {
     expect(setSeries).toHaveBeenCalledTimes(1);
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
       breakdown: undefined,
+      dataType: 'ux',
       reportType: 'pld',
       time: { from: 'now-15m', to: 'now' },
     });

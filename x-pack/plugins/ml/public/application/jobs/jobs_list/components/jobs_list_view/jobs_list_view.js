@@ -521,6 +521,7 @@ export class JobsListView extends Component {
               <JobListMlAnomalyAlertFlyout
                 setShowFunction={this.setShowCreateAlertFlyoutFunction}
                 unsetShowFunction={this.unsetShowCreateAlertFlyoutFunction}
+                onSave={this.onRefreshClick}
               />
             </div>
           </EuiPageContent>

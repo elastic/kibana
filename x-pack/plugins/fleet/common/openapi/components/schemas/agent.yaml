@@ -30,10 +30,6 @@ properties:
     $ref: ./agent_metadata.yaml
   id:
     type: string
-  current_error_events:
-    type: array
-    items:
-      $ref: ./agent_event.yaml
   access_api_key:
     type: string
   status:
@@ -45,5 +41,4 @@ required:
   - active
   - enrolled_at
   - id
-  - current_error_events
   - status

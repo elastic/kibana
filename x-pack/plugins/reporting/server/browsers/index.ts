@@ -6,16 +6,16 @@
  */
 
 import { first } from 'rxjs/operators';
+import { ReportingConfig } from '../';
 import { LevelLogger } from '../lib';
 import { CaptureConfig } from '../types';
-import { chromium } from './chromium';
+import { chromium, ChromiumArchivePaths } from './chromium';
 import { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
 import { installBrowser } from './install';
-import { ReportingConfig } from '..';
 
+export { chromium } from './chromium';
 export { HeadlessChromiumDriver } from './chromium/driver';
 export { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
-export { chromium } from './chromium';
 
 type CreateDriverFactory = (
   binaryPath: string,
@@ -25,17 +25,7 @@ type CreateDriverFactory = (
 
 export interface BrowserDownload {
   createDriverFactory: CreateDriverFactory;
-  paths: {
-    archivesPath: string;
-    baseUrl: string;
-    packages: Array<{
-      archiveChecksum: string;
-      archiveFilename: string;
-      binaryChecksum: string;
-      binaryRelativePath: string;
-      platforms: string[];
-    }>;
-  };
+  paths: ChromiumArchivePaths;
 }
 
 export const initializeBrowserDriverFactory = async (

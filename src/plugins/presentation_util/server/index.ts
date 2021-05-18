@@ -8,4 +8,5 @@
 
 import { PresentationUtilPlugin } from './plugin';
 
+export { SETTING_CATEGORY } from './ui_settings';
 export const plugin = () => new PresentationUtilPlugin();

@@ -15,7 +15,7 @@ import { ReportToDataTypeMap } from '../../configurations/constants';
 
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   { id: 'synthetics', label: 'Synthetic Monitoring' },
-  { id: 'ux', label: 'User Experience(RUM)' },
+  { id: 'ux', label: 'User Experience (RUM)' },
   // { id: 'infra_logs', label: 'Logs' },
   // { id: 'infra_metrics', label: 'Metrics' },
   // { id: 'apm', label: 'APM' },
@@ -30,7 +30,7 @@ export function DataTypesCol({ seriesId }: { seriesId: string }) {
     if (!dataType) {
       removeSeries(seriesId);
     } else {
-      setSeries(seriesId || dataType, { dataType } as any);
+      setSeries(seriesId || `${dataType}-series`, { dataType } as any);
     }
   };
 
@@ -40,7 +40,7 @@ export function DataTypesCol({ seriesId }: { seriesId: string }) {
     <FlexGroup direction="column" gutterSize="xs">
       {dataTypes.map(({ id: dataTypeId, label }) => (
         <EuiFlexItem key={dataTypeId}>
-          <EuiButton
+          <Button
             size="s"
             iconSide="right"
             iconType="arrowRight"
@@ -53,7 +53,7 @@ export function DataTypesCol({ seriesId }: { seriesId: string }) {
             }}
           >
             {label}
-          </EuiButton>
+          </Button>
         </EuiFlexItem>
       ))}
     </FlexGroup>
@@ -62,4 +62,8 @@ export function DataTypesCol({ seriesId }: { seriesId: string }) {
 
 const FlexGroup = styled(EuiFlexGroup)`
   width: 100%;
+`;
+
+const Button = styled(EuiButton)`
+  will-change: transform;
 `;

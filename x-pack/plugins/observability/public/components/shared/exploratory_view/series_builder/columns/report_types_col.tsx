@@ -41,7 +41,7 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
     <FlexGroup direction="column" gutterSize="xs">
       {reportTypes.map(({ id: reportType, label }) => (
         <EuiFlexItem key={reportType}>
-          <EuiButton
+          <Button
             fullWidth
             size="s"
             iconSide="right"
@@ -59,6 +59,7 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
                 setSeries(seriesId, {
                   ...restSeries,
                   reportType,
+                  operationType: undefined,
                   reportDefinitions: {},
                   time: restSeries?.time ?? DEFAULT_TIME,
                 });
@@ -66,7 +67,7 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
             }}
           >
             {label}
-          </EuiButton>
+          </Button>
         </EuiFlexItem>
       ))}
     </FlexGroup>
@@ -77,9 +78,13 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
 
 export const SELECTED_DATA_TYPE_FOR_REPORT = i18n.translate(
   'xpack.observability.expView.reportType.noDataType',
-  { defaultMessage: 'Select a data type to start building a series.' }
+  { defaultMessage: 'No data type selected.' }
 );
 
 const FlexGroup = styled(EuiFlexGroup)`
   width: 100%;
+`;
+
+const Button = styled(EuiButton)`
+  will-change: transform;
 `;

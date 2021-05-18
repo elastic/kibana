@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_USER_ACTIONS_URL, SUB_CASE_USER_ACTIONS_URL } from '../../../../../common/constants';
+import { CASE_USER_ACTIONS_URL, SUB_CASE_USER_ACTIONS_URL } from '../../../../../common';
 
 export function initGetAllCaseUserActionsApi({ router, logger }: RouteDeps) {
   router.get(

@@ -9,8 +9,6 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { mockAppIndexPattern, mockUrlStorage, render } from '../../rtl_helpers';
 import { dataTypes, DataTypesCol } from './data_types_col';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
-import { ReportDefinitionCol } from './report_definition_col';
 
 describe('DataTypesCol', function () {
   const seriesId = 'test-series-id';
@@ -30,7 +28,7 @@ describe('DataTypesCol', function () {
 
     render(<DataTypesCol seriesId={seriesId} />);
 
-    fireEvent.click(screen.getByText(/user experience\(rum\)/i));
+    fireEvent.click(screen.getByText(/user experience \(rum\)/i));
 
     expect(setSeries).toHaveBeenCalledTimes(1);
     expect(setSeries).toHaveBeenCalledWith(seriesId, { dataType: 'ux' });

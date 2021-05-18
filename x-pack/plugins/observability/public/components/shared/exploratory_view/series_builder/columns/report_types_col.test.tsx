@@ -37,6 +37,7 @@ describe('ReportTypesCol', function () {
 
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
       breakdown: 'user_agent.name',
+      dataType: 'ux',
       reportDefinitions: {},
       reportType: 'upd',
       time: { from: 'now-15m', to: 'now' },

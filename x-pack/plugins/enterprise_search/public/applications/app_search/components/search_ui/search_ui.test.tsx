@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import '../../../__mocks__/shallow_useeffect.mock';
 import '../../__mocks__/engine_logic.mock';
+
+import { setMockActions } from '../../../__mocks__';
 
 import React from 'react';
 
@@ -14,8 +17,22 @@ import { shallow } from 'enzyme';
 import { SearchUI } from './';
 
 describe('SearchUI', () => {
+  const actions = {
+    loadFieldData: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setMockActions(actions);
+  });
+
   it('renders', () => {
     shallow(<SearchUI />);
     // TODO: Check for form
+  });
+
+  it('initializes data on mount', () => {
+    shallow(<SearchUI />);
+    expect(actions.loadFieldData).toHaveBeenCalledTimes(1);
   });
 });

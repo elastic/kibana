@@ -435,6 +435,7 @@ export const AnnotationFlyout: FC<any> = (props) => {
       size="m"
       aria-labelledby="Add annotation"
       data-test-subj={'mlAnnotationFlyout'}
+      className={'mlAnnotationFlyout'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">

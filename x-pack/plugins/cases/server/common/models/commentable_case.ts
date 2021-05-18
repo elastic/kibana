@@ -27,7 +27,7 @@ import {
   ESCaseAttributes,
   SubCaseAttributes,
   User,
-} from '../../../common/api';
+} from '../../../common';
 import { transformESConnectorToCaseConnector } from '../../routes/api/cases/helpers';
 import {
   flattenCommentSavedObjects,

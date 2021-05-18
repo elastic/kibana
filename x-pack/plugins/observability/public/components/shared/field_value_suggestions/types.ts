@@ -24,6 +24,7 @@ interface CommonProps {
 export type FieldValueSuggestionsProps = CommonProps & {
   indexPattern: IndexPattern;
   sourceField: string;
+  asCombobox?: boolean;
   onChange: (val?: string[]) => void;
   filters: ESFilter[];
   time?: { from: string; to: string };

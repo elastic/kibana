@@ -129,10 +129,10 @@ describe('Background Search Session Management Table', () => {
       expect(table.find('tbody td').map((node) => node.text())).toMatchInlineSnapshot(`
         Array [
           "App",
-          "Namevery background search",
-          "StatusIn progress",
+          "Namevery background search ",
+          "StatusExpired",
           "Created2 Dec, 2020, 00:19:32",
-          "Expiration7 Dec, 2020, 00:19:32",
+          "Expiration--",
           "",
           "",
         ]

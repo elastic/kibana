@@ -199,6 +199,8 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
     basePath
   );
 
+  const showAnalyzeButton = false;
+
   return (
     <>
       <EuiFlexGroup>
@@ -212,11 +214,13 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton size="s" href={pingHistogramExploratoryViewLink}>
-            <FormattedMessage id="xpack.uptime.pingHistogram.analyze" defaultMessage="Analyze" />
-          </EuiButton>
-        </EuiFlexItem>
+        {showAnalyzeButton && (
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" href={pingHistogramExploratoryViewLink}>
+              <FormattedMessage id="xpack.uptime.pingHistogram.analyze" defaultMessage="Analyze" />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {content}
     </>

@@ -34,7 +34,7 @@ export const getDefaultConfigs = ({ reportType, seriesId, indexPattern }: Props)
     case 'core-web-vitals':
       return getCoreWebVitalsConfig({ seriesId, indexPattern });
     case 'uptime-duration':
-      return getMonitorDurationConfig({ seriesId });
+      return getMonitorDurationConfig({ seriesId, indexPattern });
     case 'uptime-pings':
       return getMonitorPingsConfig({ seriesId, indexPattern });
     case 'service-latency':

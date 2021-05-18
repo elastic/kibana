@@ -17,6 +17,7 @@ import { SeriesChartTypesSelect } from './chart_types';
 import { OperationTypeSelect } from './operation_type_select';
 import { DatePickerCol } from './date_picker_col';
 import { parseCustomFieldName } from '../../configurations/lens_attributes';
+import { ReportDefinitionField } from './report_definition_field';
 
 function getColumnType(dataView: DataSeries, selectedDefinition: URLReportDefinition) {
   const { reportDefinitions } = dataView;
@@ -29,8 +30,6 @@ function getColumnType(dataView: DataSeries, selectedDefinition: URLReportDefini
   return null;
 }
 
-export const ReportMaxWidthStyle = { maxWidth: 290 };
-
 export function ReportDefinitionCol({
   dataViewSeries,
   seriesId,
@@ -42,41 +41,26 @@ export function ReportDefinitionCol({
 
   const { series, setSeries } = useUrlStorage(seriesId);
 
-  const { reportDefinitions: rtd = {} } = series;
+  const { reportDefinitions: selectedReportDefinitions = {} } = series;
 
-  const {
-    reportDefinitions,
-    labels,
-    filters,
-    defaultSeriesType,
-    hasOperationType,
-    yAxisColumns,
-  } = dataViewSeries;
+  const { reportDefinitions, defaultSeriesType, hasOperationType, yAxisColumns } = dataViewSeries;
 
   const onChange = (field: string, value?: string[]) => {
     if (!value?.[0]) {
-      delete rtd[field];
+      delete selectedReportDefinitions[field];
       setSeries(seriesId, {
         ...series,
-        reportDefinitions: { ...rtd },
+        reportDefinitions: { ...selectedReportDefinitions },
       });
     } else {
       setSeries(seriesId, {
         ...series,
-        reportDefinitions: { ...rtd, [field]: value },
+        reportDefinitions: { ...selectedReportDefinitions, [field]: value },
       });
     }
   };
 
-  const onRemove = (field: string) => {
-    delete rtd[field];
-    setSeries(seriesId, {
-      ...series,
-      reportDefinitions: rtd,
-    });
-  };
-
-  const columnType = getColumnType(dataViewSeries, rtd);
+  const columnType = getColumnType(dataViewSeries, selectedReportDefinitions);
 
   return (
     <FlexGroup direction="column" gutterSize="s">
@@ -88,58 +72,32 @@ export function ReportDefinitionCol({
         reportDefinitions.map(({ field, custom, options }) => (
           <EuiFlexItem key={field}>
             {!custom ? (
-              <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center" wrap>
-                <EuiFlexItem grow={false} style={{ flexBasis: 250 }}>
-                  <FieldValueSuggestions
-                    label={labels[field]}
-                    sourceField={field}
-                    indexPattern={indexPattern}
-                    selectedValue={rtd?.[field]}
-                    onChange={(val?: string[]) => onChange(field, val)}
-                    filters={(filters ?? []).map(({ query }) => query)}
-                    time={series.time}
-                    fullWidth={true}
-                  />
-                </EuiFlexItem>
-                {rtd?.[field] && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge
-                      className="globalFilterItem"
-                      iconSide="right"
-                      iconType="cross"
-                      color="hollow"
-                      iconOnClick={() => onRemove(field)}
-                      iconOnClickAriaLabel={'Click to remove'}
-                    >
-                      {labels[field]}: {(rtd?.[field] ?? []).join(', ')}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
+              <ReportDefinitionField
+                seriesId={seriesId}
+                dataSeries={dataViewSeries}
+                field={field}
+                onChange={onChange}
+              />
             ) : (
               <CustomReportField
                 field={field}
                 options={options}
-                defaultValue={options?.[0].id || options?.[0].field}
+                defaultValue={defaultValue}
                 seriesId={seriesId}
               />
             )}
           </EuiFlexItem>
         ))}
       {(hasOperationType || columnType === 'operation') && (
-        <EuiFlexItem style={ReportMaxWidthStyle}>
+        <EuiFlexItem>
           <OperationTypeSelect
             seriesId={seriesId}
             defaultOperationType={yAxisColumns[0].operationType}
           />
         </EuiFlexItem>
       )}
-      <EuiFlexItem style={ReportMaxWidthStyle}>
-        <SeriesChartTypesSelect
-          seriesId={seriesId}
-          defaultChartType={defaultSeriesType}
-          seriesTypes={dataViewSeries.seriesTypes}
-        />
+      <EuiFlexItem>
+        <SeriesChartTypesSelect seriesId={seriesId} defaultChartType={defaultSeriesType} seriesTypes={dataViewSeries.seriesTypes} />
       </EuiFlexItem>
     </FlexGroup>
   );

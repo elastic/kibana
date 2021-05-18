@@ -13,8 +13,6 @@ import { shallow } from 'enzyme';
 
 import { SideNav, SideNavLink } from '../../../shared/layout';
 
-import { ALPHA_PATH } from '../../routes';
-
 import { WorkplaceSearchNav } from './';
 
 describe('WorkplaceSearchNav', () => {
@@ -22,7 +20,7 @@ describe('WorkplaceSearchNav', () => {
     const wrapper = shallow(<WorkplaceSearchNav />);
 
     expect(wrapper.find(SideNav)).toHaveLength(1);
-    expect(wrapper.find(SideNavLink).first().prop('to')).toEqual(ALPHA_PATH);
+    expect(wrapper.find(SideNavLink).first().prop('to')).toEqual('/');
     expect(wrapper.find(SideNavLink)).toHaveLength(6);
   });
 });

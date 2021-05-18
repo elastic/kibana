@@ -173,7 +173,7 @@ describe('AppSearchNav', () => {
     setMockValues({ myRole: { canViewSettings: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/settings/account');
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/settings');
   });
 
   it('renders the Credentials link', () => {

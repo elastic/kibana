@@ -30,7 +30,7 @@ describe('Series Builder ReportDefinitionCol', function () {
 
   const { setSeries } = mockUrlStorage({
     data: {
-      'performance-dist': {
+      [seriesId]: {
         dataType: 'ux',
         reportType: 'pld',
         time: { from: 'now-30d', to: 'now' },
@@ -38,6 +38,8 @@ describe('Series Builder ReportDefinitionCol', function () {
       },
     },
   });
+
+  mockUseValuesList(['elastic-co']);
 
   it('should render properly', async function () {
     render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
@@ -48,16 +50,24 @@ describe('Series Builder ReportDefinitionCol', function () {
     screen.getByText('Page load time');
   });
 
-  it('should render selected report definitions', function () {
+  it('should render selected report definitions', async function () {
     render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
 
-    screen.getByTitle('Web Application: elastic-co');
+    expect(await screen.findByText('elastic-co')).toBeInTheDocument();
+
+    expect(screen.getAllByTestId('comboBoxToggleListButton')[0]).toBeInTheDocument();
   });
 
-  it('should be able to remove selected definition', function () {
+  it('should be able to remove selected definition', async function () {
     render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
 
-    const removeBtn = screen.getByTitle(/Click to remove/i);
+    expect(
+      await screen.findByLabelText('Remove elastic-co from selection in this group')
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByTestId('comboBoxToggleListButton')[0]);
+
+    const removeBtn = await screen.findByTitle(/Remove elastic-co from selection in this group/i);
 
     fireEvent.click(removeBtn);
 
@@ -68,16 +78,5 @@ describe('Series Builder ReportDefinitionCol', function () {
       reportType: 'pld',
       time: { from: 'now-30d', to: 'now' },
     });
-  });
-
-  it('should be able to unselected selected definition', async function () {
-    mockUseValuesList(['elastic-co']);
-    render(<ReportDefinitionCol dataViewSeries={dataViewSeries} seriesId={seriesId} />);
-
-    const definitionBtn = screen.getByText(/web application/i);
-
-    fireEvent.click(definitionBtn);
-
-    screen.getByText('Apply');
   });
 });

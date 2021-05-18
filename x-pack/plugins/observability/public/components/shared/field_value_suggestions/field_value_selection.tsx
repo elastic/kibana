@@ -43,6 +43,7 @@ export function FieldValueSelection({
   const [options, setOptions] = useState<EuiSelectableOption[]>(
     formatOptions(values, selectedValue ?? [])
   );
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   useEffect(() => {

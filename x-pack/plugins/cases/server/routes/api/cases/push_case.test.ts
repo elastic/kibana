@@ -20,7 +20,7 @@ import {
 } from '../__fixtures__';
 import { initPushCaseApi } from './push_case';
 import { CasesRequestHandlerContext } from '../../../types';
-import { getCasePushUrl } from '../../../../common/api/helpers';
+import { getCasePushUrl } from '../../../../common';
 
 describe('Push case', () => {
   let routeHandler: RequestHandler<any, any, any>;

@@ -38,7 +38,6 @@ const StatefulCellComponent = ({
   timelineId: string;
 }) => {
   const [cellProps, setCellProps] = useState<CommonProps & HTMLAttributes<HTMLDivElement>>({});
-
   return (
     <div data-test-subj="statefulCell" {...cellProps}>
       {renderCellValue({
