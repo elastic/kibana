@@ -118,6 +118,45 @@ describe('registerSessionRoutes', () => {
     expect(mockContext.search!.cancelSession).toHaveBeenCalledWith(id);
   });
 
+  it('cancel doesnt fail if not found', async () => {
+    const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
+    const params = { id };
+
+    const mockRequest = httpServerMock.createKibanaRequest({ params });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const [, cancelHandler] = mockRouter.post.mock.calls[PostHandlerIndex.CANCEL];
+
+    mockContext.search!.cancelSession = jest.fn().mockRejectedValue({
+      statusCode: 404,
+    });
+
+    await cancelHandler(mockContext, mockRequest, mockResponse);
+
+    expect(mockContext.search!.cancelSession).toHaveBeenCalledWith(id);
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+  });
+
+  it('cancel fail on other errors', async () => {
+    const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
+    const params = { id };
+
+    const mockRequest = httpServerMock.createKibanaRequest({ params });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const [, cancelHandler] = mockRouter.post.mock.calls[PostHandlerIndex.CANCEL];
+
+    mockContext.search!.cancelSession = jest.fn().mockRejectedValue({
+      statusCode: 500,
+    });
+
+    await cancelHandler(mockContext, mockRequest, mockResponse).catch(() => {});
+
+    expect(mockResponse.customError).toHaveBeenCalledTimes(1);
+  });
+
   it('delete calls deleteSession with id', async () => {
     const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const params = { id };
@@ -131,6 +170,45 @@ describe('registerSessionRoutes', () => {
     await deleteHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockContext.search!.deleteSession).toHaveBeenCalledWith(id);
+  });
+
+  it('delete doesnt fail if not found', async () => {
+    const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
+    const params = { id };
+
+    const mockRequest = httpServerMock.createKibanaRequest({ params });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const [, deleteHandler] = mockRouter.delete.mock.calls[0];
+
+    mockContext.search!.deleteSession = jest.fn().mockRejectedValue({
+      statusCode: 404,
+    });
+
+    await deleteHandler(mockContext, mockRequest, mockResponse);
+
+    expect(mockContext.search!.deleteSession).toHaveBeenCalledWith(id);
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+  });
+
+  it('delete returns error if another error code occurs', async () => {
+    const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
+    const params = { id };
+
+    const mockRequest = httpServerMock.createKibanaRequest({ params });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const [, deleteHandler] = mockRouter.delete.mock.calls[0];
+
+    mockContext.search!.deleteSession = jest.fn().mockRejectedValue({
+      statusCode: 500,
+    });
+
+    await deleteHandler(mockContext, mockRequest, mockResponse).catch(() => {});
+
+    expect(mockResponse.customError).toHaveBeenCalledTimes(1);
   });
 
   it('extend calls extendSession with id', async () => {

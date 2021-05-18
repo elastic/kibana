@@ -151,6 +151,11 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
         return res.ok();
       } catch (e) {
         const err = e.output?.payload || e;
+        // Don't fail on items that were already deleted
+        if (err.statusCode === 404) {
+          logger.debug(`Search session ${id} not found. Ignoring.`);
+          return res.ok();
+        }
         logger.error(err);
         return reportServerError(res, err);
       }
@@ -177,6 +182,11 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
         return res.ok();
       } catch (e) {
         const err = e.output?.payload || e;
+        // Don't fail on items that were already deleted
+        if (err.statusCode === 404) {
+          logger.debug(`Search session ${id} not found. Ignoring.`);
+          return res.ok();
+        }
         logger.error(err);
         return reportServerError(res, err);
       }
