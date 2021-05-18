@@ -24,7 +24,7 @@ import {
   ExceptionListItemSchema,
   UseExceptionListItemsSuccess,
   useApi,
-} from '../../../../../public/lists_plugin_deps';
+} from '../../../../../public/shared_imports';
 
 import { ExceptionsViewerPagination } from './exceptions_pagination';
 import { ExceptionsViewerUtility } from './exceptions_utility';

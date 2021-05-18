@@ -23,7 +23,7 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   exceptionListItemSchema,
-} from '../../../../common';
+} from '../../../../common/schemas';
 import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { AndOrBadge } from '../and_or_badge';
 
