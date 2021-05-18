@@ -49,7 +49,6 @@ export interface EditorFrameProps {
   doc?: Document;
   dateRange: DateRange;
   query: Query;
-  filters: Filter[];
   savedQuery?: SavedQuery;
   searchSessionId: string;
   initialContext?: VisualizeFieldContext;

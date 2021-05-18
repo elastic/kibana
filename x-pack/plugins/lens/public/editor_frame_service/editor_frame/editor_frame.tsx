@@ -20,7 +20,7 @@ import { Document } from '../../persistence/saved_object_store';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { getSavedObjectFormat } from './save';
 import { generateId } from '../../id_generator';
-import { Filter, Query, SavedQuery } from '../../../../../../src/plugins/data/public';
+import { Query, SavedQuery } from '../../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { EditorFrameStartPlugins } from '../service';
 import { initializeDatasources, createDatasourceLayers } from './state_helpers';
@@ -30,7 +30,13 @@ import {
   switchToSuggestion,
 } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-
+import {
+  // setState as setAppState,
+  useLensSelector,
+  // useLensDispatch,
+  // LensAppState,
+  // DispatchSetState,
+} from '../../state_management';
 export interface EditorFrameProps {
   doc?: Document;
   datasourceMap: Record<string, Datasource>;
@@ -47,7 +53,6 @@ export interface EditorFrameProps {
     toDate: string;
   };
   query: Query;
-  filters: Filter[];
   savedQuery?: SavedQuery;
   searchSessionId: string;
   onChange: (arg: {
@@ -60,6 +65,14 @@ export interface EditorFrameProps {
 }
 
 export function EditorFrame(props: EditorFrameProps) {
+  // const dispatchLens = useLensDispatch();
+  // const dispatchSetState: DispatchSetState = useCallback(
+  //   (state: Partial<LensAppState>) => dispatchLens(setAppState(state)),
+  //   [dispatchLens]
+  // );
+
+  const { filters } = useLensSelector((state) => state.app);
+
   const [state, dispatch] = useReducer(reducer, props, getInitialState);
   const [visualizeTriggerFieldContext, setVisualizeTriggerFieldContext] = useState(
     props.initialContext
@@ -112,7 +125,7 @@ export function EditorFrame(props: EditorFrameProps) {
     activeData: state.activeData,
     dateRange: props.dateRange,
     query: props.query,
-    filters: props.filters,
+    filters,
     searchSessionId: props.searchSessionId,
     availablePalettes: props.palettes,
 
@@ -254,7 +267,7 @@ export function EditorFrame(props: EditorFrameProps) {
       state.visualization,
       state.activeData,
       props.query,
-      props.filters,
+      filters,
       props.savedQuery,
       state.title,
     ]
@@ -328,7 +341,7 @@ export function EditorFrame(props: EditorFrameProps) {
             core={props.core}
             query={props.query}
             dateRange={props.dateRange}
-            filters={props.filters}
+            filters={filters}
             showNoDataPopover={props.showNoDataPopover}
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}

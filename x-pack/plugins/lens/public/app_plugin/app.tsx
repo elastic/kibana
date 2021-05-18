@@ -29,7 +29,6 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   esFilters,
   exporters,
-  Filter,
   Query,
   SavedQuery,
   syncQueryStateWithUrl,
@@ -657,7 +656,6 @@ export function App({
             showNoDataPopover={showNoDataPopover}
             initialContext={initialContext}
             query={appState.query}
-            filters={appState.filters}
             searchSessionId={appState.searchSessionId}
             savedQuery={appState.savedQuery}
             persistedDoc={appState.persistedDoc}
@@ -696,7 +694,6 @@ export function App({
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
   query,
-  filters,
   searchSessionId,
   savedQuery,
   persistedDoc,
@@ -709,7 +706,6 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame: EditorFrameInstance;
   searchSessionId: string;
   query: Query;
-  filters: Filter[];
   savedQuery?: SavedQuery;
   persistedDoc?: Document | undefined;
   resolvedDateRange: { fromDate: string; toDate: string };
@@ -730,7 +726,6 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
       searchSessionId={searchSessionId}
       dateRange={resolvedDateRange}
       query={query}
-      filters={filters}
       savedQuery={savedQuery}
       onError={onError}
       showNoDataPopover={showNoDataPopover}

@@ -139,7 +139,6 @@ export class EditorFrameService {
           onError,
           dateRange,
           query,
-          filters,
           savedQuery,
           onChange,
           showNoDataPopover,
@@ -165,7 +164,6 @@ export class EditorFrameService {
                 doc={doc}
                 dateRange={dateRange}
                 query={query}
-                filters={filters}
                 savedQuery={savedQuery}
                 onChange={onChange}
                 showNoDataPopover={showNoDataPopover}

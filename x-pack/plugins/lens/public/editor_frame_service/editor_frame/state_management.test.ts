@@ -38,7 +38,6 @@ describe('editor_frame state management', () => {
         palettes: chartPluginMock.createPaletteRegistry(),
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         query: { query: '', language: 'lucene' },
-        filters: [],
         showNoDataPopover: jest.fn(),
         searchSessionId: 'sessionId',
       };

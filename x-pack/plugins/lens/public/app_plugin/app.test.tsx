@@ -347,7 +347,6 @@ describe('Lens App', () => {
               "toDate": "2021-01-10T08:00:00.000Z",
             },
             "doc": undefined,
-            "filters": Array [],
             "initialContext": undefined,
             "onChange": [Function],
             "onError": [Function],
@@ -491,7 +490,7 @@ describe('Lens App', () => {
     });
 
     it('loads a document and uses query and filters if initial input is provided', async () => {
-      const { component, frame, services, lensStore } = mountWith({});
+      const { component, services, lensStore } = mountWith({});
       services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
         savedObjectId: defaultSavedObjectId,
         state: {
