@@ -12,6 +12,12 @@ import { useLocation } from 'react-router-dom';
 
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
+import {
+  Threats,
+  Type,
+  SeverityMapping,
+  Severity,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
@@ -27,12 +33,6 @@ import {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
-import {
-  SeverityMapping,
-  Type,
-  Severity,
-  Threats,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
