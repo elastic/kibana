@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationContainer } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   KibanaRequest,
   Logger,
@@ -907,7 +907,9 @@ export class CaseService implements CaseServiceSetup {
     }
   }
 
-  private buildCaseIdsAggs = (size: number = 100): Record<string, AggregationContainer> => ({
+  private buildCaseIdsAggs = (
+    size: number = 100
+  ): Record<string, estypes.AggregationsAggregationContainer> => ({
     references: {
       nested: {
         path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
