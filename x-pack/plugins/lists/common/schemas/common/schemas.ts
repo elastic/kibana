@@ -11,18 +11,6 @@ import * as t from 'io-ts';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { DefaultNamespace } from '@kbn/securitysolution-io-ts-list-types';
 
-/**
- * @deprecated Directly use the type from the package and not from here
- */
-export {
-  DefaultNamespace,
-  Type,
-  OsType,
-  OsTypeArray,
-  listOperator as operator,
-  NonEmptyEntriesArray,
-} from '@kbn/securitysolution-io-ts-list-types';
-
 export const list_id = NonEmptyString;
 export type ListId = t.TypeOf<typeof list_id>;
 export const list_idOrUndefined = t.union([list_id, t.undefined]);
@@ -90,12 +78,6 @@ export type DeserializerOrUndefined = t.TypeOf<typeof deserializerOrUndefined>;
 export const _version = t.string;
 export const _versionOrUndefined = t.union([_version, t.undefined]);
 export type _VersionOrUndefined = t.TypeOf<typeof _versionOrUndefined>;
-
-export const version = t.number;
-export type Version = t.TypeOf<typeof version>;
-
-export const versionOrUndefined = t.union([version, t.undefined]);
-export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;
 
 export const immutable = t.boolean;
 export type Immutable = t.TypeOf<typeof immutable>;

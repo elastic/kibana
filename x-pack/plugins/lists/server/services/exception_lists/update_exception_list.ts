@@ -16,11 +16,11 @@ import {
   OsTypeArray,
   TagsOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
 
 import {
   ExceptionListSchema,
   ListIdOrUndefined,
-  VersionOrUndefined,
   _VersionOrUndefined,
 } from '../../../common/schemas';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
