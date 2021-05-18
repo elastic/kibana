@@ -53,7 +53,7 @@ export const mapColumn: ExpressionFunctionDefinition<
       types: ['string'],
       aliases: ['_', 'column'],
       help: i18n.translate('expressions.functions.mapColumn.args.nameHelpText', {
-        defaultMessage: 'The name of the resulting column.',
+        defaultMessage: 'The name of the resulting column. Names are not required to be unique.',
       }),
       required: true,
     },
@@ -102,8 +102,11 @@ export const mapColumn: ExpressionFunctionDefinition<
 
     return Promise.all(rowPromises).then((rows) => {
       const existingColumnIndex = columns.findIndex(({ id, name }) => {
-        // Columns that have IDs are allowed to have duplicate names, for example esaggs
         if (args.id) {
+          if (!id) {
+            return name === args.id;
+          }
+          // Columns that have IDs are allowed to have duplicate names, for example esaggs
           return id === args.id;
         }
         // If the column has an ID, but there is no ID argument to mapColumn

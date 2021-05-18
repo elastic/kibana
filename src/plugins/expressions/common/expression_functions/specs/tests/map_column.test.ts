@@ -35,45 +35,66 @@ describe('mapColumn', () => {
     expect(result.rows[arbitraryRowIndex]).toHaveProperty('pricePlusTwo');
   });
 
-  it('matches name to id when mapColumn is called without an id', async () => {
-    const result = await runFn(testTable, { name: 'name', expression: pricePlusTwo });
-    const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
-    const arbitraryRowIndex = 4;
+  describe('when the table columns have id', () => {
+    it('does not require the id arg by using the name arg as column id', async () => {
+      const result = await runFn(testTable, { name: 'name', expression: pricePlusTwo });
+      const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
+      const arbitraryRowIndex = 4;
 
-    expect(result.type).toBe('datatable');
-    expect(result.columns).toHaveLength(sqlTable.columns.length);
-    expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name');
-    expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
-    expect(result.rows[arbitraryRowIndex]).toHaveProperty('name', 202);
-  });
-
-  it('overwrites existing column with the new column if an existing column name is missing an id', async () => {
-    const result = await runFn(sqlTable, { name: 'name', expression: pricePlusTwo });
-    const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
-    const arbitraryRowIndex = 4;
-
-    expect(result.type).toBe('datatable');
-    expect(result.columns).toHaveLength(sqlTable.columns.length);
-    expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name');
-    expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
-    expect(result.rows[arbitraryRowIndex]).toHaveProperty('name', 202);
-  });
-
-  it('inserts a new column with a duplicate name if an id and name are provided', async () => {
-    const result = await runFn(testTable, {
-      id: 'new',
-      name: 'name label',
-      expression: pricePlusTwo,
+      expect(result.type).toBe('datatable');
+      expect(result.columns).toHaveLength(sqlTable.columns.length);
+      expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name');
+      expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
+      expect(result.rows[arbitraryRowIndex]).toHaveProperty('name', 202);
     });
-    const nameColumnIndex = result.columns.findIndex(({ id }) => id === 'new');
-    const arbitraryRowIndex = 4;
 
-    expect(result.type).toBe('datatable');
-    expect(result.columns).toHaveLength(testTable.columns.length + 1);
-    expect(result.columns[nameColumnIndex]).toHaveProperty('id', 'new');
-    expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name label');
-    expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
-    expect(result.rows[arbitraryRowIndex]).toHaveProperty('new', 202);
+    it('allows a duplicate name when the ids are different', async () => {
+      const result = await runFn(testTable, {
+        id: 'new',
+        name: 'name label',
+        expression: pricePlusTwo,
+      });
+      const nameColumnIndex = result.columns.findIndex(({ id }) => id === 'new');
+      const arbitraryRowIndex = 4;
+
+      expect(result.type).toBe('datatable');
+      expect(result.columns).toHaveLength(testTable.columns.length + 1);
+      expect(result.columns[nameColumnIndex]).toHaveProperty('id', 'new');
+      expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name label');
+      expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
+      expect(result.rows[arbitraryRowIndex]).toHaveProperty('new', 202);
+    });
+  });
+
+  describe('when the table columns do not have id', () => {
+    it('uses name as unique key when id arg is also missing', async () => {
+      const result = await runFn(sqlTable, { name: 'name', expression: pricePlusTwo });
+      const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
+      const arbitraryRowIndex = 4;
+
+      expect(result.type).toBe('datatable');
+      expect(result.columns).toHaveLength(sqlTable.columns.length);
+      expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name');
+      expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
+      expect(result.rows[arbitraryRowIndex]).toHaveProperty('name', 202);
+    });
+
+    it('overwrites columns matching id === name when the column is missing an id', async () => {
+      const result = await runFn(sqlTable, {
+        id: 'name',
+        name: 'name is ignored',
+        expression: pricePlusTwo,
+      });
+      const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name is ignored');
+      const arbitraryRowIndex = 4;
+
+      expect(result.type).toBe('datatable');
+      expect(result.columns).toHaveLength(sqlTable.columns.length);
+      expect(result.columns[nameColumnIndex]).toHaveProperty('id', 'name');
+      expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name is ignored');
+      expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
+      expect(result.rows[arbitraryRowIndex]).toHaveProperty('name', 202);
+    });
   });
 
   it('adds a column to empty tables', async () => {
