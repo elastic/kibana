@@ -12,8 +12,7 @@ import * as rulesApi from '../../../detections/containers/detection_engine/rules
 import * as listsApi from '../../../../../lists/public/exceptions/api';
 import { getExceptionListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { savedRuleMock } from '../../../detections/containers/detection_engine/rules/mock';
-import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
-import { ListArray } from '../../../../common/detection_engine/schemas/types';
+import type { ExceptionListType, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   useFetchOrCreateRuleExceptionList,
