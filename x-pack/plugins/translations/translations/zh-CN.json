@@ -9603,7 +9603,6 @@
     "xpack.fleet.fleetServerUpgradeModal.breakingChangeMessage": "这是一项重大更改，所以我们在公测版中进行该更改。非常抱歉带来不便。如果您有疑问或需要帮助，请共享 {link}。",
     "xpack.fleet.fleetServerUpgradeModal.checkboxLabel": "不再显示此消息",
     "xpack.fleet.fleetServerUpgradeModal.closeButton": "关闭并开始使用",
-    "xpack.fleet.fleetServerUpgradeModal.cloudDescriptionMessage": "Fleet 服务器现在可用并提供改善的可扩展性和安全性。如果在 Elastic Cloud 上已有 APM，则我们已将其升级到 APM &amp; Fleet。{existingAgentsMessage}要继续使用 Fleet，必须在各个主机上安装 Fleet 服务器和新版 Elastic 代理。详细了解我们的 {link}。",
     "xpack.fleet.fleetServerUpgradeModal.existingAgentText": "您现有的 Elastic 代理已被自动销注且已停止发送数据。",
     "xpack.fleet.fleetServerUpgradeModal.failedUpdateTitle": "保存设置时出错",
     "xpack.fleet.fleetServerUpgradeModal.fleetFeedbackLink": "反馈",
