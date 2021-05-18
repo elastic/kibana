@@ -7,8 +7,9 @@
 
 import * as t from 'io-ts';
 import { description, id, meta, name } from '@kbn/securitysolution-io-ts-list-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
 
-import { _version, version } from '../common/schemas';
+import { _version } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
 export const patchListSchema = t.intersection([
