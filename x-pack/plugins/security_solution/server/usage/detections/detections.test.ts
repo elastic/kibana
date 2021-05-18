@@ -10,7 +10,6 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../../../src/core/server/mocks';
-// import { getAlertMock } from '../../lib/detection_engine/routes/__mocks__/request_responses';
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import {
   getMockJobSummaryResponse,
@@ -30,7 +29,6 @@ const savedObjectsClient = savedObjectsClientMock.create();
 describe('Detections Usage and Metrics', () => {
   let esClientMock: jest.Mocked<ElasticsearchClient>;
   let mlMock: ReturnType<typeof mlServicesMock.createSetupContract>;
-  let alertMock: ReturnType<typeof getAlertMock()>
 
   describe('fetchDetectionsUsage()', () => {
     beforeEach(() => {
@@ -183,8 +181,7 @@ describe('Detections Usage and Metrics', () => {
         .mockReturnValueOnce({ body: getMockRuleSearchResponse() })
         .mockReturnValue({ body: getMockRuleAlertsResponse(3400) });
       (savedObjectsClient.find as jest.Mock).mockReturnValue(getMockAlertCasesResponse());
-      // const mockAlert = jest.fn().mockResolvedValue(getAlertMock);
-      
+
       const result = await fetchDetectionsMetrics('', '', esClientMock, mlMock, savedObjectsClient);
 
       expect(result).toEqual(
