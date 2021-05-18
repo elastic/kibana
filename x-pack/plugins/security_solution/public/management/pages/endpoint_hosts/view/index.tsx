@@ -447,7 +447,7 @@ export const EndpointList = () => {
                       href: formatUrl(endpointIsolatePath),
                       children: (
                         <FormattedMessage
-                          id="xpack.securitySolution.endpoint.list.actions.hostDetails"
+                          id="xpack.securitySolution.endpoint.list.actions.isolateHost"
                           defaultMessage="Isolate Host"
                         />
                       ),
