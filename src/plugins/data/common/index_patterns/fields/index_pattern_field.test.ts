@@ -24,7 +24,7 @@ describe('Field', function () {
     name: 'name',
     type: 'string',
     script: 'script',
-    lang: 'painless' as const,
+    lang: 'java' as const,
     count: 1,
     esTypes: ['text'], // note, this will get replaced by the runtime field type
     aggregatable: true,
