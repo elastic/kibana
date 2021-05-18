@@ -170,13 +170,13 @@ describe('muteInstance()', () => {
     test('throws when user is not authorised to muteInstance this type of alert', async () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to muteInstance a "myType" alert for "myApp"`)
+        new Error(`Unauthorized to muteAlert a "myType" alert for "myApp"`)
       );
 
       await expect(
         alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to muteInstance a "myType" alert for "myApp"]`
+        `[Error: Unauthorized to muteAlert a "myType" alert for "myApp"]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
