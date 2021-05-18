@@ -9514,7 +9514,6 @@
     "xpack.fleet.fleetServerUpgradeModal.breakingChangeMessage": "これは大きい変更であるため、ベータリリースにしています。ご不便をおかけしていることをお詫び申し上げます。ご質問がある場合や、サポートが必要な場合は、{link}を共有してください。",
     "xpack.fleet.fleetServerUpgradeModal.checkboxLabel": "次回以降このメッセージを表示しない",
     "xpack.fleet.fleetServerUpgradeModal.closeButton": "閉じて開始する",
-    "xpack.fleet.fleetServerUpgradeModal.cloudDescriptionMessage": "Fleetサーバーを使用できます。スケーラビリティとセキュリティが強化されました。すでにElastic CloudでAPMを使用している場合は、APM &amp; Fleetにアップグレードされました。{existingAgentsMessage} Fleetを使用し続けるには、Fleetサーバーと新しいバージョンのElasticエージェントを各ホストにインストールする必要があります。詳細については、{link}をご覧ください。",
     "xpack.fleet.fleetServerUpgradeModal.existingAgentText": "既存のElasticエージェントは自動的に登録解除され、データの送信を停止しました。",
     "xpack.fleet.fleetServerUpgradeModal.failedUpdateTitle": "設定の保存エラー",
     "xpack.fleet.fleetServerUpgradeModal.fleetFeedbackLink": "フィードバック",

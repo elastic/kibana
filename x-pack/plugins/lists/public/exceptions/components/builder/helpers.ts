@@ -29,7 +29,7 @@ import {
   ListSchema,
   createExceptionListItemSchema,
   exceptionListItemSchema,
-} from '../../../../common';
+} from '../../../../common/schemas';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
   EXCEPTION_OPERATORS,
