@@ -18,8 +18,8 @@ export const touchdownTemplate = ({ wholeBucket }: Props) => {
     <p className="visTooltip__header">
       <i className="fa fa-info-circle visTooltip__headerIcon" />
       <span className="visTooltip__headerText">
-        {wholeBucket ? 'Part of this bucket' : 'This area'}
-        may contain partial data. The selected time range does not fully cover it.
+        {wholeBucket ? 'Part of this bucket' : 'This area'} may contain partial data. The selected
+        time range does not fully cover it.
       </span>
     </p>
   );
