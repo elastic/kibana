@@ -10,6 +10,7 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../../../src/core/server/mocks';
+// import { getAlertMock } from '../../lib/detection_engine/routes/__mocks__/request_responses';
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import {
   getMockJobSummaryResponse,
@@ -29,6 +30,7 @@ const savedObjectsClient = savedObjectsClientMock.create();
 describe('Detections Usage and Metrics', () => {
   let esClientMock: jest.Mocked<ElasticsearchClient>;
   let mlMock: ReturnType<typeof mlServicesMock.createSetupContract>;
+  let alertMock: ReturnType<typeof getAlertMock()>
 
   describe('fetchDetectionsUsage()', () => {
     beforeEach(() => {
@@ -181,7 +183,8 @@ describe('Detections Usage and Metrics', () => {
         .mockReturnValueOnce({ body: getMockRuleSearchResponse() })
         .mockReturnValue({ body: getMockRuleAlertsResponse(3400) });
       (savedObjectsClient.find as jest.Mock).mockReturnValue(getMockAlertCasesResponse());
-
+      // const mockAlert = jest.fn().mockResolvedValue(getAlertMock);
+      
       const result = await fetchDetectionsMetrics('', '', esClientMock, mlMock, savedObjectsClient);
 
       expect(result).toEqual(
@@ -190,7 +193,7 @@ describe('Detections Usage and Metrics', () => {
             detection_rule_detail: [
               {
                 alert_count_daily: 3400,
-                cases_count_daily: 1,
+                cases_count_total: 1,
                 created_on: '2021-03-23T17:15:59.634Z',
                 elastic_rule: true,
                 enabled: false,
@@ -327,7 +330,7 @@ describe('Detections Usage and Metrics', () => {
             detection_rule_detail: [
               {
                 alert_count_daily: 0,
-                cases_count_daily: 1,
+                cases_count_total: 1,
                 created_on: '2021-03-23T17:15:59.634Z',
                 elastic_rule: true,
                 enabled: false,
