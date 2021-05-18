@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingContent } from '@elastic/eui';
 import { lazyLoadModules } from '../lazy_load_bundle';
 import { IndexNameFormProps } from '../index';
 
@@ -19,16 +19,24 @@ export class IndexNameFormAsyncWrapper extends React.Component<IndexNameFormProp
     IndexNameForm: null,
   };
 
+  private _isMounted = false;
+
+  componentWillUnmount(): void {
+    this._isMounted = false;
+  }
+
   componentDidMount() {
     lazyLoadModules().then((modules) => {
-      this.setState({
-        IndexNameForm: modules.IndexNameForm,
-      });
+      if (this._isMounted) {
+        this.setState({
+          IndexNameForm: modules.IndexNameForm,
+        });
+      }
     });
   }
 
   render() {
     const { IndexNameForm } = this.state;
-    return IndexNameForm ? <IndexNameForm {...this.props} /> : <EuiLoadingSpinner />;
+    return IndexNameForm ? <IndexNameForm {...this.props} /> : <EuiLoadingContent lines={3} />;
   }
 }
