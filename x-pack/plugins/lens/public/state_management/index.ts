@@ -11,6 +11,7 @@ import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { appSlice } from './app_slice';
 import { customMiddleware } from './custom_middleware';
+import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
 
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 export * from './types';
@@ -32,10 +33,13 @@ export const getPreloadedState = ({
   data,
   initialContext = undefined,
   isLinkedToOriginatingApp = false,
+  initialInput,
 }: {
   data: DataPublicPluginStart;
   initialContext: VisualizeFieldContext | undefined;
   isLinkedToOriginatingApp: boolean;
+  // The initial input passed in by the container when editing. Can be either by reference or by value.
+  initialInput?: LensEmbeddableInput;
 }) => {
   return {
     app: {
@@ -49,7 +53,7 @@ export const getPreloadedState = ({
 
       indexPatternsForTopNav: [],
       isSaveable: false,
-      isAppLoading: false,
+      isAppLoading: Boolean(initialInput),
       isLinkedToOriginatingApp,
     },
   };
@@ -86,10 +90,10 @@ export const makeConfigureStore = (
 };
 
 export type LensRootStore = ReturnType<typeof makeConfigureStore>;
-// export type LensDispatch = typeof lensStore.dispatch;
 
-export type LensDispatch = ReturnType<typeof makeConfigureStore>['dispatch'];
-export type LensGetState = ReturnType<typeof makeConfigureStore>['getState'];
+export type LensDispatch = LensRootStore['dispatch'];
+export type LensGetState = LensRootStore['getState'];
+export type LensRootState = ReturnType<LensGetState>;
 
 export const useLensDispatch = () => useDispatch<LensDispatch>();
-export const useLensSelector: TypedUseSelectorHook<LensRootStore> = useSelector;
+export const useLensSelector: TypedUseSelectorHook<LensRootState> = useSelector;

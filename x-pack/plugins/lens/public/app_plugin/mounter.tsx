@@ -34,7 +34,12 @@ import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actio
 import { LensAttributeService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { makeConfigureStore, navigateAway, getPreloadedState } from '../state_management';
+import {
+  makeConfigureStore,
+  navigateAway,
+  getPreloadedState,
+  LensRootStore,
+} from '../state_management';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
@@ -163,13 +168,7 @@ export async function mountApp(
     data.query.filterManager.setAppFilters([]);
   }
 
-  const preloadedState = getPreloadedState({
-    data,
-    initialContext,
-    isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
-  });
-
-  const lensStore = makeConfigureStore(preloadedState, { data });
+  let lensStore: LensRootStore;
 
   // const featureFlagConfig = await getByValueFeatureFlag();
   const EditorRenderer = React.memo(
@@ -181,13 +180,22 @@ export async function mountApp(
         [props.history]
       );
       trackUiEvent('loaded');
+      const initialInput = getInitialInput(props.id, props.editByValue);
+      const preloadedState = getPreloadedState({
+        data,
+        initialContext,
+        isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
+        initialInput,
+      });
+
+      lensStore = makeConfigureStore(preloadedState, { data });
 
       return (
         <Provider store={lensStore}>
           <App
             incomingState={embeddableEditorIncomingState}
             editorFrame={instance}
-            initialInput={getInitialInput(props.id, props.editByValue)}
+            initialInput={initialInput}
             redirectTo={redirectCallback}
             redirectToOrigin={redirectToOrigin}
             redirectToDashboard={redirectToDashboard}

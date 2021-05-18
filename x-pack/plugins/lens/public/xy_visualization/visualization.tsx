@@ -255,10 +255,11 @@ export const getXyVisualization = ({
   },
 
   setDimension({ prevState, layerId, columnId, groupId }) {
-    const newLayer = prevState.layers.find((l) => l.layerId === layerId);
-    if (!newLayer) {
+    const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
+    if (!foundLayer) {
       return prevState;
     }
+    const newLayer = { ...foundLayer };
 
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;

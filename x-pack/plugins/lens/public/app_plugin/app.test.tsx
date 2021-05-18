@@ -265,21 +265,27 @@ describe('Lens App', () => {
     };
   }
 
-  function mountWith(
-    {
-      props: incomingProps,
-      services: incomingServices,
-    }: {
-      props?: jest.Mocked<LensAppProps>;
-      services?: jest.Mocked<LensAppServices>;
-    },
-    initialContext: VisualizeFieldContext | undefined = undefined
-  ) {
+  function mountWith({
+    props: incomingProps,
+    services: incomingServices,
+    storeProps,
+  }: {
+    props?: jest.Mocked<LensAppProps>;
+    services?: jest.Mocked<LensAppServices>;
+    storeProps?: {
+      initialContext?: VisualizeFieldContext | undefined;
+      isLinkedToOriginatingApp?: boolean;
+    };
+  }) {
     const props = incomingProps ?? makeDefaultProps();
     const services = incomingServices ?? makeDefaultServices();
 
     const lensStore = makeConfigureStore(
-      getPreloadedState({ data: services.data, initialContext, isLinkedToOriginatingApp: false }),
+      getPreloadedState({
+        data: services.data,
+        initialContext: storeProps?.initialContext,
+        isLinkedToOriginatingApp: !!storeProps?.isLinkedToOriginatingApp,
+      }),
       {
         data: services.data,
       }
@@ -443,7 +449,14 @@ describe('Lens App', () => {
       const services = makeDefaultServices();
       props.incomingState = { originatingApp: 'coolContainer' };
       services.getOriginatingAppName = jest.fn(() => 'The Coolest Container Ever Made');
-      const { component } = mountWith({ props, services });
+
+      const { component } = mountWith({
+        props,
+        services,
+        storeProps: {
+          isLinkedToOriginatingApp: true,
+        },
+      });
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
@@ -726,7 +739,13 @@ describe('Lens App', () => {
           } as LensByValueInput,
         };
 
-        const { component } = mountWith({ props, services });
+        const { component } = mountWith({
+          props,
+          services,
+          storeProps: {
+            isLinkedToOriginatingApp: true,
+          },
+        });
 
         await act(async () => {
           const topNavMenuConfig = component.find(TopNavMenu).prop('config');
@@ -749,7 +768,12 @@ describe('Lens App', () => {
           originatingApp: 'ultraDashboard',
         };
 
-        const { component } = mountWith({ props });
+        const { component } = mountWith({
+          props,
+          storeProps: {
+            isLinkedToOriginatingApp: true,
+          },
+        });
 
         await act(async () => {
           const topNavMenuConfig = component.find(TopNavMenu).prop('config');

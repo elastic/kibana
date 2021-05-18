@@ -37,8 +37,7 @@ function subscribeToExternalContext(
   dispatch: LensDispatch
 ) {
   const { query: queryService, search } = data;
-  const { filterManager, timefilter } = queryService;
-  const { timefilter: timefilterService } = timefilter;
+  const { filterManager } = queryService;
 
   const dispatchFromExternal = (searchSessionId = search.session.start()) => {
     const globalFilters = filterManager.getFilters();
@@ -74,13 +73,13 @@ function subscribeToExternalContext(
     },
   });
 
-  const timeSubscription = timefilterService.getTimeUpdate$().subscribe({
+  const timeSubscription = data.query.timefilter.timefilter.getTimeUpdate$().subscribe({
     next: () => {
       debounceDispatchFromExternal();
     },
   });
 
-  const autoRefreshSubscription = timefilterService
+  const autoRefreshSubscription = data.query.timefilter.timefilter
     .getAutoRefreshFetch$()
     .pipe(
       tap(() => {
