@@ -13,8 +13,7 @@ import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import json5 from 'json5';
 
-// const logFilePathOriginal = Path.join(__dirname, 'migration_transform_failures_test_kibana.log');
-const logFilePath = Path.join(__dirname, 'my_7_13_corrupt_transform_failures_test.log');
+const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures_test.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 const asyncReadFile = Util.promisify(Fs.readFile);
@@ -89,21 +88,16 @@ describe('migration v2', () => {
         '7.14.0': (doc) => doc,
       },
     });
-    try {
-      await root.start();
-    } catch (err) {
-      // ensure that the migration failed with the expected error
-      const messageString = err.message.split('Error')[0].split(' Reason: ')[0];
-      expect(messageString).toMatchInlineSnapshot(
-        `"Unable to complete saved object migrations for the [.kibana] index: Migrations failed."`
-      );
-    }
+    await expect(root.start()).rejects.toThrowError();
+
+    // parse and verify we collected all the issues before failing the migration.
     const logFileContent = await asyncReadFile(logFilePath, 'utf-8');
     const records = logFileContent
       .split('\n')
       .filter(Boolean)
       .map((str) => json5.parse(str));
 
+    // find one instance and ensure we returned a 'Left' instance of `documents_transform_failed`
     const logRecordsWithTransformFailures = records.find(
       (rec) => rec.message === '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX RESPONSE'
     );
@@ -111,6 +105,7 @@ describe('migration v2', () => {
     expect(logRecordsWithTransformFailures).toBeTruthy();
     expect(logRecordsWithTransformFailures.left.type).toBe('documents_transform_failed');
 
+    // verify we collected corrupt document ids and transformation errors for all batches of migrated docs
     const allRecords = records.filter(
       (rec) => rec.message === '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX RESPONSE'
     );
