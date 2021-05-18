@@ -63,7 +63,16 @@ export interface PluginSetupContract {
    */
   enableReportingUiCapabilities(): void;
 
+  /**
+   * Utility for iterating through all privileges belonging to a specific feature.
+   * {@see FeaturePrivilegeIterator }
+   */
   featurePrivilegeIterator: FeaturePrivilegeIterator;
+
+  /**
+   * Utility for iterating through all sub-feature privileges belonging to a specific feature.
+   * {@see SubFeaturePrivilegeIterator }
+   */
   subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator;
 }
 
