@@ -17,10 +17,10 @@ import {
   entriesNested,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Filter } from '../../../../../src/plugins/data/common';
-import { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../schemas';
+import type { Filter } from '../../../../../src/plugins/data/common';
+import type { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../schemas';
 
-import { BooleanFilter, NestedFilter } from './types';
+import type { BooleanFilter, NestedFilter } from './types';
 import { hasLargeValueList } from './utils';
 
 type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists;

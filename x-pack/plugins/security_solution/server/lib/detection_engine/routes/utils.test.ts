@@ -6,15 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import { errors } from '@elastic/elasticsearch';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 
 import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
-import { BadRequestError } from '../errors/bad_request_error';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
-  transformError,
   transformBulkError,
   BulkError,
   createSuccessObject,
@@ -35,95 +33,6 @@ import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 let alertsClient: ReturnType<typeof alertsClientMock.create>;
 
 describe('utils', () => {
-  describe('transformError', () => {
-    test('returns transformed output error from boom object with a 500 and payload of internal server error', () => {
-      const boom = new Boom.Boom('some boom message');
-      const transformed = transformError(boom);
-      expect(transformed).toEqual({
-        message: 'An internal server error occurred',
-        statusCode: 500,
-      });
-    });
-
-    test('returns transformed output if it is some non boom object that has a statusCode', () => {
-      const error: Error & { statusCode?: number } = {
-        statusCode: 403,
-        name: 'some name',
-        message: 'some message',
-      };
-      const transformed = transformError(error);
-      expect(transformed).toEqual({
-        message: 'some message',
-        statusCode: 403,
-      });
-    });
-
-    test('returns a transformed message with the message set and statusCode', () => {
-      const error: Error & { statusCode?: number } = {
-        statusCode: 403,
-        name: 'some name',
-        message: 'some message',
-      };
-      const transformed = transformError(error);
-      expect(transformed).toEqual({
-        message: 'some message',
-        statusCode: 403,
-      });
-    });
-
-    test('transforms best it can if it is some non boom object but it does not have a status Code.', () => {
-      const error: Error = {
-        name: 'some name',
-        message: 'some message',
-      };
-      const transformed = transformError(error);
-      expect(transformed).toEqual({
-        message: 'some message',
-        statusCode: 500,
-      });
-    });
-
-    test('it detects a BadRequestError and returns a status code of 400 from that particular error type', () => {
-      const error: BadRequestError = new BadRequestError('I have a type error');
-      const transformed = transformError(error);
-      expect(transformed).toEqual({
-        message: 'I have a type error',
-        statusCode: 400,
-      });
-    });
-
-    test('it detects a BadRequestError and returns a Boom status of 400', () => {
-      const error: BadRequestError = new BadRequestError('I have a type error');
-      const transformed = transformError(error);
-      expect(transformed).toEqual({
-        message: 'I have a type error',
-        statusCode: 400,
-      });
-    });
-
-    it('transforms a ResponseError returned by the elasticsearch client', () => {
-      const error: errors.ResponseError = {
-        name: 'ResponseError',
-        message: 'illegal_argument_exception',
-        headers: {},
-        body: {
-          error: {
-            type: 'illegal_argument_exception',
-            reason: 'detailed explanation',
-          },
-        },
-        meta: ({} as unknown) as errors.ResponseError['meta'],
-        statusCode: 400,
-      };
-      const transformed = transformError(error);
-
-      expect(transformed).toEqual({
-        message: 'illegal_argument_exception: detailed explanation',
-        statusCode: 400,
-      });
-    });
-  });
-
   describe('transformBulkError', () => {
     test('returns transformed object if it is a boom object', () => {
       const boom = new Boom.Boom('some boom message', { statusCode: 400 });
