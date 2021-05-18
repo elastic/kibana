@@ -72,6 +72,33 @@ export const APM_FEATURE = {
       ui: ['show', 'alerting:show', 'alerting:save'],
     },
   },
+  subFeatures: [
+    {
+      name: 'Manage Alerts',
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'alert_manage',
+              name: 'Manage Alerts',
+              includeIn: 'all',
+              alerting: {
+                alert: {
+                  all: Object.values(AlertType),
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
 
 interface Feature {
