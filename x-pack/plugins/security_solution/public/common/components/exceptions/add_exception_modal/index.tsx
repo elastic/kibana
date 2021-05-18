@@ -25,7 +25,11 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListType,
+  OsTypeArray,
+  OsType,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -63,7 +67,6 @@ import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
-import { OsTypeArray, OsType } from '../../../../../../lists/common/schemas';
 
 export interface AddExceptionModalProps {
   ruleName: string;

@@ -6,10 +6,10 @@
  */
 
 import { useEffect, useState } from 'react';
+import { List, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { HttpStart } from '../../../../../../../src/core/public';
 
 import { Rule } from '../../../detections/containers/detection_engine/rules/types';
-import { List, ListArray } from '../../../../common/detection_engine/schemas/types';
 import {
   fetchRuleById,
   patchRule,
@@ -18,7 +18,7 @@ import {
   fetchExceptionListById,
   addExceptionList,
   addEndpointExceptionList,
-} from '../../../lists_plugin_deps';
+} from '../../../shared_imports';
 import {
   ExceptionListSchema,
   CreateExceptionListSchema,
