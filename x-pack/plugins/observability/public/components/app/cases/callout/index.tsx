@@ -8,10 +8,10 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { memo, useCallback, useState, useMemo } from 'react';
 
-import { useMessagesStorage } from '../../../common/containers/local_storage/use_messages_storage';
 import { CallOut } from './callout';
 import { ErrorMessage } from './types';
 import { createCalloutId } from './helpers';
+import { useMessagesStorage } from '../../../../hooks/use_messages_storage';
 
 export * from './helpers';
 
@@ -38,7 +38,7 @@ function CaseCallOutComponent({ title, messages = [] }: CaseCallOutProps) {
   const dismissedCallouts = useMemo(
     () =>
       caseMessages.reduce<CalloutVisibility>(
-        (acc, id) => ({
+        (acc: CalloutVisibility, id) => ({
           ...acc,
           [id]: false,
         }),

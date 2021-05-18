@@ -9,11 +9,9 @@ import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
-import { getCaseDetailsUrl } from '../../../common/components/link_to';
-import { useKibana } from '../../../common/lib/kibana';
-import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
-import { useInsertTimeline } from '../use_insert_timeline';
-import { APP_ID } from '../../../../common/constants';
+import { useKibana } from '../../../../utils/kibana_react';
+import { getCaseDetailsUrl } from '../../../../pages/cases/links';
+import { CASES_OWNER } from '../constants';
 
 export const Create = React.memo(() => {
   const { cases } = useKibana().services;
@@ -34,17 +32,7 @@ export const Create = React.memo(() => {
       {cases.getCreateCase({
         onCancel: handleSetIsCancel,
         onSuccess,
-        timelineIntegration: {
-          editor_plugins: {
-            parsingPlugin: timelineMarkdownPlugin.parser,
-            processingPluginRenderer: timelineMarkdownPlugin.renderer,
-            uiPlugin: timelineMarkdownPlugin.plugin,
-          },
-          hooks: {
-            useInsertTimeline,
-          },
-        },
-        owner: [APP_ID],
+        owner: [CASES_OWNER],
       })}
     </EuiPanel>
   );

@@ -32,7 +32,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     application: { navigateToApp },
   } = useKibana().services;
   const history = useHistory();
-  const { formatUrl } = useFormatUrl();
+  const { formatUrl } = useFormatUrl(CASES_APP_ID);
 
   const goToCreateCase = useCallback(
     (ev) => {
@@ -71,6 +71,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       href: formatUrl(getCreateCaseUrl()),
       onClick: goToCreateCase,
     },
+    showTitle: false,
     userCanCrud,
     owner: [CASES_APP_ID],
   });

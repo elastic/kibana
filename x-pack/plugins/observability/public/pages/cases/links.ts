@@ -8,7 +8,6 @@
 import { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
 import { useKibana } from '../../utils/kibana_react';
-import { CASES_APP_ID } from '../../components/app/cases/constants';
 
 export const getCaseDetailsUrl = ({ id, subCaseId }: { id: string; subCaseId?: string }) => {
   if (subCaseId) {
@@ -16,20 +15,23 @@ export const getCaseDetailsUrl = ({ id, subCaseId }: { id: string; subCaseId?: s
   }
   return `/${encodeURIComponent(id)}`;
 };
+interface FormatUrlOptions {
+  absolute: boolean;
+}
 
-export type FormatUrl = (path: string) => string;
-export const useFormatUrl = () => {
+export type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => string;
+export const useFormatUrl = (appId: string) => {
   const { getUrlForApp } = useKibana().services.application;
   const formatUrl = useCallback<FormatUrl>(
-    (path: string) => {
+    (path: string, { absolute = false } = {}) => {
       const pathArr = path.split('?');
       const formattedPath = `${pathArr[0]}${isEmpty(pathArr[1]) ? '' : `?${pathArr[1]}`}`;
-      return getUrlForApp(`${CASES_APP_ID}`, {
+      return getUrlForApp(`${appId}`, {
         path: formattedPath,
-        absolute: false,
+        absolute,
       });
     },
-    [getUrlForApp]
+    [appId, getUrlForApp]
   );
   return { formatUrl };
 };
@@ -54,3 +56,5 @@ export const getCaseDetailsUrlWithCommentId = ({
 export const getCreateCaseUrl = () => `/create`;
 
 export const getConfigureCasesUrl = () => `/configure`;
+export const getCaseUrl = () => `/cases`;
+export const getRuleDetailsUrl = (detailName: string) => `/rules/id/${detailName}`;

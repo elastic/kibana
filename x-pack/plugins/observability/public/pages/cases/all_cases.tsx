@@ -6,9 +6,12 @@
  */
 
 import React from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
 
 // import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { AllCases } from '../../components/app/cases/all_cases';
+import * as i18n from '../../components/app/cases/translations';
+import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 
 // import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../../components/app/cases/callout';
 // import { CaseSavedObjectNoPermissions } from './saved_object_no_permissions';
@@ -25,7 +28,17 @@ export const AllCasesPage = React.memo(() => {
       {/*    messages={[{ ...savedObjectReadOnlyErrorMessage, title: '' }]}*/}
       {/*  />*/}
       {/* )}*/}
-      <AllCases userCanCrud={true} />
+      <EuiPageTemplate
+        pageHeader={{
+          pageTitle: (
+            <>
+              {i18n.PAGE_TITLE} <ExperimentalBadge />
+            </>
+          ),
+        }}
+      >
+        <AllCases userCanCrud={true} />
+      </EuiPageTemplate>
     </>
   );
   //   )

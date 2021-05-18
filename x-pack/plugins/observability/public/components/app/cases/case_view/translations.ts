@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 export const SEND_ALERT_TO_TIMELINE = i18n.translate(
-  'xpack.securitySolution.cases.caseView.sendAlertToTimelineTooltip',
+  'xpack.observability.cases.caseView.sendAlertToTimelineTooltip',
   {
     defaultMessage: 'Investigate in timeline',
   }

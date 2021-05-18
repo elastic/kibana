@@ -88,7 +88,7 @@ export class Plugin
       const { renderApp } = await import('./application');
       // Get start services
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
-
+      console.log('pluginsStart', pluginsStart);
       return renderApp({
         config,
         core: coreStart,

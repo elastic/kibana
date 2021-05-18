@@ -6,4 +6,5 @@
  */
 
 export const CASES_APP_ID = 'observability-cases';
+export const ALERTS_APP_ID = 'observability-alerts';
 export const CASES_OWNER = 'observability';

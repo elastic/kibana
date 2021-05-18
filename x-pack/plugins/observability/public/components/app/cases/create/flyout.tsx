@@ -9,10 +9,10 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
-import * as i18n from '../../translations';
-import { useKibana } from '../../../common/lib/kibana';
-import { Case } from '../../../../../cases/common';
-import { APP_ID } from '../../../../common/constants';
+import * as i18n from '../translations';
+import { Case } from '../../../../../../cases/common';
+import { CASES_OWNER } from '../constants';
+import { useKibana } from '../../../../utils/kibana_react';
 
 export interface CreateCaseModalProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
@@ -65,7 +65,7 @@ function CreateCaseFlyoutComponent({
             onCancel: onCloseFlyout,
             onSuccess,
             withSteps: false,
-            owner: [APP_ID],
+            owner: [CASES_OWNER],
           })}
         </FormWrapper>
       </StyledEuiFlyoutBody>

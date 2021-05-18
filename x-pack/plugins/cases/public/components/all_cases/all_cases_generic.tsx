@@ -65,6 +65,7 @@ interface AllCasesGenericProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
+  showTitle?: boolean;
   updateCase?: (newCase: Case) => void;
   userCanCrud: boolean;
 }
@@ -78,6 +79,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     hiddenStatuses = [],
     isSelectorView,
     onRowClick,
+    showTitle,
     updateCase,
     userCanCrud,
   }) => {
@@ -271,6 +273,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
             createCaseNavigation={createCaseNavigation}
             configureCasesNavigation={configureCasesNavigation}
             refresh={refresh}
+            showTitle={showTitle}
             userCanCrud={userCanCrud}
           />
         )}
