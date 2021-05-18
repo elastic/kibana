@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-// The functionality in this file is intended to be used both in public and server
-// code even but targets a browser environment. Reporting uses these functions when starting
-// puppeteer to set the current browser into "screenshot" mode.
+// **PLEASE NOTE**
+// The functionality in this file targets a browser environment and is intended to be used both in public and server.
+// For instance, reporting uses these functions when starting puppeteer to set the current browser into "screenshot" mode.
 
 export const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KEY__';
 
