@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
+import {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/server';
 import { RuleDataClient } from '../../rule_registry/server';
 import { ObservabilityConfig } from '.';
 import {
@@ -14,23 +20,89 @@ import {
   AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
 import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
+import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+} from '../../cases/common';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
+
+interface PluginSetup {
+  features: FeaturesSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
+}
+
+const caseSavedObjects = [
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
+];
+
+const OBS_CASES_ID = 'observabilityCases';
+const OBSERVABILITY = 'observability';
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
   }
 
-  public setup(
-    core: CoreSetup,
-    plugins: {
-      ruleRegistry: RuleRegistryPluginSetupContract;
-    }
-  ) {
+  public setup(core: CoreSetup, plugins: PluginSetup) {
+    plugins.features.registerKibanaFeature({
+      id: OBS_CASES_ID,
+      name: i18n.translate('xpack.observability.featureRegistry.linkSecuritySolutionTitle', {
+        defaultMessage: 'Cases',
+      }),
+      order: 1100,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      app: [OBS_CASES_ID, 'kibana'],
+      catalogue: [OBSERVABILITY],
+      cases: [OBSERVABILITY],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
+      privileges: {
+        all: {
+          app: [OBS_CASES_ID, 'kibana'],
+          catalogue: [OBSERVABILITY],
+          cases: {
+            all: [OBSERVABILITY],
+          },
+          api: [],
+          savedObject: {
+            all: [...caseSavedObjects],
+            read: ['config'],
+          },
+          management: {
+            insightsAndAlerting: ['triggersActions'],
+          },
+          ui: ['crud_cases', 'read_cases'], // uiCapabilities.observabilityCases.crud_cases or read_cases
+        },
+        read: {
+          app: [OBS_CASES_ID, 'kibana'],
+          catalogue: [OBSERVABILITY],
+          cases: {
+            read: [OBSERVABILITY],
+          },
+          api: [],
+          savedObject: {
+            all: [],
+            read: ['config', ...caseSavedObjects],
+          },
+          management: {
+            insightsAndAlerting: ['triggersActions'],
+          },
+          ui: ['read_cases'], // uiCapabilities.observabilityCases.read_cases
+        },
+      },
+    });
+
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
