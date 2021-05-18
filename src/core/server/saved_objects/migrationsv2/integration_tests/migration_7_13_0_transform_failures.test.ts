@@ -9,9 +9,9 @@
 import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
+import json5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
-import json5 from 'json5';
 
 const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures_test.log');
 
@@ -90,22 +90,18 @@ describe('migration v2', () => {
     });
     await expect(root.start()).rejects.toThrowError();
 
-    // parse and verify we collected all the issues before failing the migration.
     const logFileContent = await asyncReadFile(logFilePath, 'utf-8');
     const records = logFileContent
       .split('\n')
       .filter(Boolean)
       .map((str) => json5.parse(str));
 
-    // find one instance and ensure we returned a 'Left' instance of `documents_transform_failed`
     const logRecordsWithTransformFailures = records.find(
       (rec) => rec.message === '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX RESPONSE'
     );
-
     expect(logRecordsWithTransformFailures).toBeTruthy();
     expect(logRecordsWithTransformFailures.left.type).toBe('documents_transform_failed');
 
-    // verify we collected corrupt document ids and transformation errors for all batches of migrated docs
     const allRecords = records.filter(
       (rec) => rec.message === '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX RESPONSE'
     );

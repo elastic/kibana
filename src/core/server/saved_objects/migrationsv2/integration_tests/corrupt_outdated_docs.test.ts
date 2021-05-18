@@ -9,12 +9,14 @@
 import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
+import json5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 
 const logFilePath = Path.join(__dirname, 'migration_test_corrupt_docs_kibana.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
+const asyncReadFile = Util.promisify(Fs.readFile);
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
@@ -110,20 +112,38 @@ describe('migration v2 with corrupt saved object documents', () => {
         },
       },
     });
-    try {
-      await root.start();
-    } catch (err) {
-      const corruptFooSOs = /foo:/g;
-      const corruptBarSOs = /bar:/g;
-      const corruptBazSOs = /baz:/g;
-      expect(
-        [
-          ...err.message.matchAll(corruptFooSOs),
-          ...err.message.matchAll(corruptBarSOs),
-          ...err.message.matchAll(corruptBazSOs),
-        ].length
-      ).toEqual(16);
-    }
+    await expect(root.start()).rejects.toThrowError();
+
+    const logFileContent = await asyncReadFile(logFilePath, 'utf-8');
+    const records = logFileContent
+      .split('\n')
+      .filter(Boolean)
+      .map((str) => json5.parse(str));
+
+    const logRecordsWithTransformFailures = records.find(
+      (rec) => rec.message === '[.kibana] OUTDATED_DOCUMENTS_TRANSFORM RESPONSE'
+    );
+    expect(logRecordsWithTransformFailures).toBeTruthy();
+    expect(logRecordsWithTransformFailures.left.type).toBe('documents_transform_failed');
+
+    const allRecords = records.filter(
+      (rec) => rec.message === '[.kibana] OUTDATED_DOCUMENTS_TRANSFORM RESPONSE'
+    );
+    expect(allRecords.length).toBeGreaterThan(2);
+
+    const allFailures = allRecords
+      .filter((rec) => rec._tag === 'Left')
+      .map((failure) => failure.left)
+      .reduce(
+        (acc, curr) => {
+          return {
+            corruptIds: [...acc.corruptIds, ...curr.corruptDocumentIds],
+            transformErrs: [...acc.transformErrs, ...curr.transformErrors],
+          };
+        },
+        { corruptIds: [], transformErrs: [] }
+      );
+    expect(allFailures.corruptIds.length).toBeGreaterThan(5);
   });
 });
 
