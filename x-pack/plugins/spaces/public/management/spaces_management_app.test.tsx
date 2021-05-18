@@ -87,7 +87,6 @@ describe('spacesManagementApp', () => {
         >
           Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}}}
         </div>
-         
       </div>
     `);
 
@@ -114,7 +113,6 @@ describe('spacesManagementApp', () => {
         >
           Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}}}
         </div>
-         
       </div>
     `);
 
@@ -147,7 +145,6 @@ describe('spacesManagementApp', () => {
         >
           Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}}}
         </div>
-         
       </div>
     `);
 
