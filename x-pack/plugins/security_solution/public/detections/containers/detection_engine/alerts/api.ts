@@ -25,6 +25,7 @@ import {
   UpdateAlertStatusProps,
   CasesFromAlertsResponse,
 } from './types';
+import { isolateHost } from '../../../../common/lib/host_isolation';
 
 /**
  * Fetch Alerts by providing a query
@@ -124,13 +125,10 @@ export const createHostIsolation = async ({
   comment?: string;
   caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
-  KibanaServices.get().http.fetch<HostIsolationResponse>(ISOLATE_HOST_ROUTE, {
-    method: 'POST',
-    body: JSON.stringify({
-      agent_ids: [agentId],
-      comment,
-      case_ids: caseIds,
-    }),
+  isolateHost({
+    agent_ids: [agentId],
+    comment,
+    case_ids: caseIds,
   });
 
 /**
