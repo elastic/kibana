@@ -7,50 +7,56 @@
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "dataEnhanced",
         "id": "def-public.ENHANCED_ES_SEARCH_STRATEGY",
         "type": "string",
+        "tags": [],
         "label": "ENHANCED_ES_SEARCH_STRATEGY",
         "description": [],
+        "signature": [
+          "\"ese\""
+        ],
         "source": {
           "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
           "lineNumber": 11
         },
-        "signature": [
-          "\"ese\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "dataEnhanced",
         "id": "def-public.EQL_SEARCH_STRATEGY",
         "type": "string",
+        "tags": [],
         "label": "EQL_SEARCH_STRATEGY",
         "description": [],
+        "signature": [
+          "\"eql\""
+        ],
         "source": {
           "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
           "lineNumber": 14
         },
-        "signature": [
-          "\"eql\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "start": {
+      "parentPluginId": "dataEnhanced",
       "id": "def-public.DataEnhancedStart",
       "type": "Type",
-      "label": "DataEnhancedStart",
       "tags": [],
+      "label": "DataEnhancedStart",
       "description": [],
+      "signature": [
+        "void"
+      ],
       "source": {
         "path": "x-pack/plugins/data_enhanced/public/plugin.ts",
         "lineNumber": 37
       },
-      "signature": [
-        "void"
-      ],
+      "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -58,6 +64,7 @@
   "server": {
     "classes": [
       {
+        "parentPluginId": "dataEnhanced",
         "id": "def-server.EnhancedDataServerPlugin",
         "type": "Class",
         "tags": [],
@@ -85,21 +92,35 @@
           "DataEnhancedStartDependencies",
           ">"
         ],
+        "source": {
+          "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
+          "lineNumber": 20
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "dataEnhanced",
             "id": "def-server.EnhancedDataServerPlugin.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "dataEnhanced",
                 "id": "def-server.EnhancedDataServerPlugin.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "initializerContext",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -110,24 +131,23 @@
                   },
                   "<Readonly<{} & { search: Readonly<{} & { sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; pageSize: number; trackingInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                   "lineNumber": 26
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 26
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "dataEnhanced",
             "id": "def-server.EnhancedDataServerPlugin.setup",
             "type": "Function",
+            "tags": [],
             "label": "setup",
+            "description": [],
             "signature": [
               "(core: ",
               {
@@ -143,13 +163,19 @@
               "DataEnhancedSetupDependencies",
               ") => void"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
+              "lineNumber": 31
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "dataEnhanced",
                 "id": "def-server.EnhancedDataServerPlugin.setup.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "core",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -162,38 +188,40 @@
                   "DataEnhancedStartDependencies",
                   ", unknown>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                   "lineNumber": 31
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "dataEnhanced",
                 "id": "def-server.EnhancedDataServerPlugin.setup.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "deps",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "DataEnhancedSetupDependencies"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                   "lineNumber": 31
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 31
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "dataEnhanced",
             "id": "def-server.EnhancedDataServerPlugin.start",
             "type": "Function",
+            "tags": [],
             "label": "start",
+            "description": [],
             "signature": [
               "(core: ",
               {
@@ -207,13 +235,19 @@
               "DataEnhancedStartDependencies",
               ") => void"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "dataEnhanced",
                 "id": "def-server.EnhancedDataServerPlugin.start.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "core",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -223,55 +257,52 @@
                     "text": "CoreStart"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                   "lineNumber": 54
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "dataEnhanced",
                 "id": "def-server.EnhancedDataServerPlugin.start.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "{ taskManager }",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "DataEnhancedStartDependencies"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                   "lineNumber": 54
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 54
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "dataEnhanced",
             "id": "def-server.EnhancedDataServerPlugin.stop",
             "type": "Function",
+            "tags": [],
             "label": "stop",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
               "lineNumber": 60
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-          "lineNumber": 20
-        },
         "initialIsOpen": false
       }
     ],
@@ -280,33 +311,37 @@
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "dataEnhanced",
         "id": "def-server.ENHANCED_ES_SEARCH_STRATEGY",
         "type": "string",
+        "tags": [],
         "label": "ENHANCED_ES_SEARCH_STRATEGY",
         "description": [],
+        "signature": [
+          "\"ese\""
+        ],
         "source": {
           "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
           "lineNumber": 11
         },
-        "signature": [
-          "\"ese\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "dataEnhanced",
         "id": "def-server.EQL_SEARCH_STRATEGY",
         "type": "string",
+        "tags": [],
         "label": "EQL_SEARCH_STRATEGY",
         "description": [],
+        "signature": [
+          "\"eql\""
+        ],
         "source": {
           "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
           "lineNumber": 14
         },
-        "signature": [
-          "\"eql\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],

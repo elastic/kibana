@@ -27,4 +27,5 @@ export const BASE_POLICY_ROUTE = `/api/endpoint/policy`;
 export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
 
 /** Host Isolation Routes */
-export const HOST_ISOLATION_CREATE_API = `/api/endpoint/isolate`;
+export const ISOLATE_HOST_ROUTE = `/api/endpoint/isolate`;
+export const UNISOLATE_HOST_ROUTE = `/api/endpoint/unisolate`;

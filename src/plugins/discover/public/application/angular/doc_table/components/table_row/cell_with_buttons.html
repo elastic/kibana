@@ -1,0 +1,25 @@
+<td class="__classes__" __extraAttrs__ data-test-subj="docTableField">
+  <formatted />
+  <span class="kbnDocTableCell__filter">
+      <button
+        ng-click="inlineFilter($event, '+')"
+        class="kbnDocTableRowFilterButton"
+        data-column="__column__"
+        tooltip-append-to-body="1"
+        data-test-subj="docTableCellFilter"
+        tooltip="{{ ::'discover.docTable.tableRow.filterForValueButtonTooltip' | i18n: {defaultMessage: 'Filter for value'} }}"
+        tooltip-placement="bottom"
+        aria-label="{{ ::'discover.docTable.tableRow.filterForValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter for value'} }}"
+      ><icon type="'plusInCircle'" size="'s'" color="'primary'"></icon></button>
+      <button
+        ng-click="inlineFilter($event, '-')"
+        class="kbnDocTableRowFilterButton"
+        data-column="__column__"
+        data-test-subj="docTableCellFilterNegate"
+        tooltip="{{ ::'discover.docTable.tableRow.filterOutValueButtonTooltip' | i18n: {defaultMessage: 'Filter out value'} }}"
+        aria-label="{{ ::'discover.docTable.tableRow.filterOutValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter out value'} }}"
+        tooltip-append-to-body="1"
+        tooltip-placement="bottom"
+      ><icon type="'minusInCircle'" size="'s'" color="'primary'"></icon></button>
+  </span>
+</td>

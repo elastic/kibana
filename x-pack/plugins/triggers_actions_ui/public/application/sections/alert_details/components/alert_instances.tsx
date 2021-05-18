@@ -226,7 +226,7 @@ const ACTIVE_LABEL = i18n.translate(
 
 const INACTIVE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.inactive',
-  { defaultMessage: 'OK' }
+  { defaultMessage: 'Recovered' }
 );
 
 function getActionGroupName(alertType: AlertType, actionGroupId?: string): string | undefined {

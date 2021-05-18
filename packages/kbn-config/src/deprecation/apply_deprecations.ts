@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, unset } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { ConfigDeprecationWithContext, AddConfigDeprecation } from './types';
 
 const noopAddDeprecationFactory: () => AddConfigDeprecation = () => () => undefined;
@@ -22,9 +23,21 @@ export const applyDeprecations = (
   deprecations: ConfigDeprecationWithContext[],
   createAddDeprecation: (pluginId: string) => AddConfigDeprecation = noopAddDeprecationFactory
 ) => {
-  let processed = cloneDeep(config);
+  const result = cloneDeep(config);
   deprecations.forEach(({ deprecation, path }) => {
-    processed = deprecation(processed, path, createAddDeprecation(path));
+    const commands = deprecation(result, path, createAddDeprecation(path));
+    if (commands) {
+      if (commands.set) {
+        commands.set.forEach(function ({ path: commandPath, value }) {
+          set(result, commandPath, value);
+        });
+      }
+      if (commands.unset) {
+        commands.unset.forEach(function ({ path: commandPath }) {
+          unset(result, commandPath);
+        });
+      }
+    }
   });
-  return processed;
+  return result;
 };

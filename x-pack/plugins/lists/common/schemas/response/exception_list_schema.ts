@@ -6,25 +6,27 @@
  */
 
 import * as t from 'io-ts';
-
 import {
-  _versionOrUndefined,
   created_at,
   created_by,
   description,
   exceptionListType,
   id,
-  immutable,
-  list_id,
   metaOrUndefined,
   name,
-  namespace_type,
   osTypeArray,
   tags,
-  tie_breaker_id,
   updated_at,
   updated_by,
-  version,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
+
+import {
+  _versionOrUndefined,
+  immutable,
+  list_id,
+  namespace_type,
+  tie_breaker_id,
 } from '../common/schemas';
 
 export const exceptionListSchema = t.exact(

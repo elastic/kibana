@@ -5,11 +5,6 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { ListClient } from '../../../../../../lists/server';
-import {
-  Type,
-  LanguageOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   ThreatQuery,
   ThreatMapping,
@@ -19,7 +14,10 @@ import {
   ConcurrentSearches,
   ItemsPerSearch,
   ThreatIndicatorPathOrUndefined,
-} from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+  LanguageOrUndefined,
+  Type,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { ListClient } from '../../../../../../lists/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,

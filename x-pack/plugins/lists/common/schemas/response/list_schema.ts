@@ -6,23 +6,25 @@
  */
 
 import * as t from 'io-ts';
-
 import {
-  _versionOrUndefined,
   created_at,
   created_by,
   description,
-  deserializerOrUndefined,
   id,
-  immutable,
   metaOrUndefined,
   name,
-  serializerOrUndefined,
-  tie_breaker_id,
   type,
   updated_at,
   updated_by,
-  version,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
+
+import {
+  _versionOrUndefined,
+  deserializerOrUndefined,
+  immutable,
+  serializerOrUndefined,
+  tie_breaker_id,
 } from '../common/schemas';
 
 export const listSchema = t.exact(
