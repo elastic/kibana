@@ -30,14 +30,6 @@ export function DeploymentProvider({ getService }: FtrProviderContext) {
       return getUrl.baseUrl(config.get('servers.elasticsearch'));
     },
 
-    /**
-     * Helper to detect an OSS licensed Kibana
-     * Useful for functional testing in cloud environment
-     */
-    async isOss() {
-      return config.get('kbnTestServer.serverArgs').indexOf('--oss') > -1;
-    },
-
     async isCloud(): Promise<boolean> {
       const baseUrl = this.getHostPort();
       const username = config.get('servers.kibana.username');

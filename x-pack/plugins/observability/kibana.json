@@ -15,7 +15,8 @@
   "requiredPlugins": [
     "data",
     "alerting",
-    "ruleRegistry"
+    "ruleRegistry",
+    "triggersActionsUi"
   ],
   "ui": true,
   "server": true,
