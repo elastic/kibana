@@ -12,8 +12,8 @@ import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
+import { NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
-import { NonEmptyEntriesArray } from '../../plugins/lists/common/schemas';
 import { getCreateExceptionListDetectionSchemaMock } from '../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import {
   CreateRulesSchema,
