@@ -20685,13 +20685,6 @@ opn@^5.5.0:
   dependencies:
     is-wsl "^1.1.0"
 
-oppsy@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/oppsy/-/oppsy-2.0.0.tgz#3a194517adc24c3c61cdc56f35f4537e93a35e34"
-  integrity sha1-OhlFF63CTDxhzcVvNfRTfpOjXjQ=
-  dependencies:
-    hoek "5.x.x"
-
 optional-js@^2.0.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/optional-js/-/optional-js-2.1.1.tgz#c2dc519ad119648510b4d241dbb60b1167c36a46"
