@@ -9,12 +9,8 @@ import * as t from 'io-ts';
 import {
   DefaultVersionNumber,
   DefaultVersionNumberDecoded,
-  description,
-  id,
-  meta,
-  name,
-  type,
-} from '@kbn/securitysolution-io-ts-list-types';
+} from '@kbn/securitysolution-io-ts-types';
+import { description, id, meta, name, type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { deserializer, serializer } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
