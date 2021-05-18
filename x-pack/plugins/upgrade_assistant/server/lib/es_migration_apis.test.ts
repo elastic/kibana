@@ -22,7 +22,13 @@ const asApiResponse = <T>(body: T): RequestEvent<T> =>
 
 describe('getUpgradeAssistantStatus', () => {
   const resolvedIndices = {
-    indices: fakeIndexNames.map((f) => ({ name: f, attributes: ['open'] })),
+    indices: fakeIndexNames.map((indexName) => {
+      // mark one index as closed to test blockerForReindexing flag
+      if (indexName === 'closed_index') {
+        return { name: indexName, attributes: ['closed'] };
+      }
+      return { name: indexName, attributes: ['open'] };
+    }),
   };
 
   // @ts-expect-error mock data is too loosely typed

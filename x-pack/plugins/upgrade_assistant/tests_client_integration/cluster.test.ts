@@ -6,13 +6,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { indexSettingDeprecations } from '../common/constants';
-import { UpgradeAssistantStatus } from '../common/types';
+import { MlAction, UpgradeAssistantStatus } from '../common/types';
 
-import { IndicesTestBed, setupIndicesPage, setupEnvironment } from './helpers';
+import { ClusterTestBed, setupClusterPage, setupEnvironment } from './helpers';
 
-describe('Indices tab', () => {
-  let testBed: IndicesTestBed;
+describe('Cluster tab', () => {
+  let testBed: ClusterTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   afterAll(() => {
@@ -22,19 +21,20 @@ describe('Indices tab', () => {
   describe('with deprecations', () => {
     const upgradeStatusMockResponse: UpgradeAssistantStatus = {
       readyForUpgrade: false,
-      cluster: [],
-      indices: [
+      cluster: [
         {
-          level: 'warning',
-          message: indexSettingDeprecations.translog.deprecationMessage,
+          level: 'critical',
+          message:
+            'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
           url: 'doc_url',
-          index: 'my_index',
           correctiveAction: {
-            type: 'indexSetting',
-            deprecatedSettings: indexSettingDeprecations.translog.settings,
+            type: 'mlSnapshot',
+            snapshotId: '1',
+            jobId: 'deprecation_check_job',
           },
         },
       ],
+      indices: [],
     };
 
     beforeEach(async () => {
@@ -42,30 +42,31 @@ describe('Indices tab', () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
 
       await act(async () => {
-        testBed = await setupIndicesPage({ isReadOnlyMode: false });
+        testBed = await setupClusterPage({ isReadOnlyMode: false });
       });
 
       const { actions, component } = testBed;
 
       component.update();
 
-      // Navigate to the indices tab
+      // Navigate to the cluster tab
       await act(async () => {
-        actions.clickTab('indices');
+        actions.clickTab('cluster');
       });
 
       component.update();
     });
 
     test('renders deprecations', () => {
-      const { exists, find } = testBed;
-      expect(exists('indexTabContent')).toBe(true);
+      const { exists } = testBed;
+      expect(exists('clusterTabContent')).toBe(true);
       expect(exists('deprecationsContainer')).toBe(true);
-      expect(find('indexCount').text()).toEqual('1');
     });
 
-    describe('fix indices button', () => {
-      test('removes deprecated index settings', async () => {
+    describe('fix ml snapshots button', () => {
+      let flyout: Element | null;
+
+      beforeEach(async () => {
         const { component, actions, exists, find } = testBed;
 
         expect(exists('deprecationsContainer')).toBe(true);
@@ -73,34 +74,38 @@ describe('Indices tab', () => {
         // Open all deprecations
         actions.clickExpandAll();
 
-        const accordionTestSubj = `depgroup_${indexSettingDeprecations.translog.deprecationMessage
+        // The data-test-subj is derived from the deprecation message
+        const accordionTestSubj = `depgroup_${upgradeStatusMockResponse.cluster[0].message
           .split(' ')
           .join('_')}`;
 
         await act(async () => {
-          find(`${accordionTestSubj}.removeIndexSettingsButton`).simulate('click');
+          find(`${accordionTestSubj}.fixMlSnapshotsButton`).simulate('click');
         });
 
-        // We need to read the document "body" as the modal is added there and not inside
+        component.update();
+
+        // We need to read the document "body" as the flyout is added there and not inside
         // the component DOM tree.
-        const modal = document.body.querySelector(
-          '[data-test-subj="indexSettingsDeleteConfirmModal"]'
+        flyout = document.body.querySelector('[data-test-subj="fixSnapshotsFlyout"]');
+
+        expect(flyout).not.toBe(null);
+        expect(flyout!.textContent).toContain('Upgrade or delete model snapshot');
+      });
+
+      test('upgrades snapshots', async () => {
+        const { component } = testBed;
+
+        const upgradeButton: HTMLButtonElement | null = flyout!.querySelector(
+          '[data-test-subj="upgradeSnapshotButton"]'
         );
-        const confirmButton: HTMLButtonElement | null = modal!.querySelector(
-          '[data-test-subj="confirmModalConfirmButton"]'
-        );
 
-        expect(modal).not.toBe(null);
-        expect(modal!.textContent).toContain('Remove deprecated settings');
-
-        const indexName = upgradeStatusMockResponse.indices[0].index;
-
-        httpRequestsMockHelpers.setUpdateIndexSettingsResponse({
+        httpRequestsMockHelpers.setUpgradeMlSnapshotResponse({
           acknowledged: true,
         });
 
         await act(async () => {
-          confirmButton!.click();
+          upgradeButton!.click();
         });
 
         component.update();
@@ -108,7 +113,36 @@ describe('Indices tab', () => {
         const request = server.requests[server.requests.length - 1];
 
         expect(request.method).toBe('POST');
-        expect(request.url).toBe(`/api/upgrade_assistant/${indexName}/index_settings`);
+        expect(request.url).toBe('/api/upgrade_assistant/ml_snapshots');
+        expect(request.status).toEqual(200);
+      });
+
+      test('deletes snapshots', async () => {
+        const { component } = testBed;
+
+        const deleteButton: HTMLButtonElement | null = flyout!.querySelector(
+          '[data-test-subj="deleteSnapshotButton"]'
+        );
+
+        httpRequestsMockHelpers.setDeleteMlSnapshotResponse({
+          acknowledged: true,
+        });
+
+        await act(async () => {
+          deleteButton!.click();
+        });
+
+        component.update();
+
+        const request = server.requests[server.requests.length - 1];
+        const mlDeprecation = upgradeStatusMockResponse.cluster[0];
+
+        expect(request.method).toBe('DELETE');
+        expect(request.url).toBe(
+          `/api/upgrade_assistant/ml_snapshots/${
+            (mlDeprecation.correctiveAction! as MlAction).jobId
+          }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
+        );
         expect(request.status).toEqual(200);
       });
     });
@@ -125,7 +159,7 @@ describe('Indices tab', () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(noDeprecationsResponse);
 
       await act(async () => {
-        testBed = await setupIndicesPage({ isReadOnlyMode: false });
+        testBed = await setupClusterPage({ isReadOnlyMode: false });
       });
 
       const { component } = testBed;
@@ -151,7 +185,7 @@ describe('Indices tab', () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupIndicesPage({ isReadOnlyMode: false });
+        testBed = await setupClusterPage({ isReadOnlyMode: false });
       });
 
       const { component, exists, find } = testBed;
@@ -177,7 +211,7 @@ describe('Indices tab', () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupIndicesPage({ isReadOnlyMode: false });
+        testBed = await setupClusterPage({ isReadOnlyMode: false });
       });
 
       const { component, exists, find } = testBed;
@@ -203,7 +237,7 @@ describe('Indices tab', () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupIndicesPage({ isReadOnlyMode: false });
+        testBed = await setupClusterPage({ isReadOnlyMode: false });
       });
 
       const { component, exists, find } = testBed;
@@ -226,7 +260,7 @@ describe('Indices tab', () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupIndicesPage({ isReadOnlyMode: false });
+        testBed = await setupClusterPage({ isReadOnlyMode: false });
       });
 
       const { component, exists, find } = testBed;

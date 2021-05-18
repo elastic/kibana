@@ -162,7 +162,13 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
 
       {isFlyoutOpen && (
         <EuiPortal>
-          <EuiFlyout onClose={closeFlyout} ownFocus size="m" maxWidth>
+          <EuiFlyout
+            onClose={closeFlyout}
+            ownFocus
+            size="m"
+            maxWidth
+            data-test-subj="fixSnapshotsFlyout"
+          >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="s">
                 <h2>{i18nTexts.flyoutTitle}</h2>
@@ -190,15 +196,21 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
                   <EuiFlexGroup>
                     <EuiFlexItem>
                       <EuiButtonEmpty
+                        data-test-subj="deleteSnapshotButton"
                         color="danger"
-                        onClick={upgradeMlSnapshot}
+                        onClick={deleteMlSnapshot}
                         isLoading={isDeletingSnapshot}
                       >
                         {i18nTexts.deleteButtonLabel}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiButton fill onClick={deleteMlSnapshot} isLoading={isUpgradingSnapshot}>
+                      <EuiButton
+                        fill
+                        onClick={upgradeMlSnapshot}
+                        isLoading={isUpgradingSnapshot}
+                        data-test-subj="upgradeSnapshotButton"
+                      >
                         {i18nTexts.upgradeButtonLabel}
                       </EuiButton>
                     </EuiFlexItem>

@@ -62,11 +62,29 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setUpgradeMlSnapshotResponse = (response?: object) => {
+    server.respondWith('POST', `${API_BASE_PATH}/ml_snapshots`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
+  const setDeleteMlSnapshotResponse = (response?: object) => {
+    server.respondWith('DELETE', `${API_BASE_PATH}/ml_snapshots/:jobId/:snapshotId`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
   return {
     setLoadEsDeprecationsResponse,
     setLoadDeprecationLoggingResponse,
     setUpdateDeprecationLoggingResponse,
     setUpdateIndexSettingsResponse,
+    setUpgradeMlSnapshotResponse,
+    setDeleteMlSnapshotResponse,
   };
 };
 
