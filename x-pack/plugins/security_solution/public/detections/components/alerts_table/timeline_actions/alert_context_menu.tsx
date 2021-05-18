@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { getOr } from 'lodash/fp';
 import { indexOf } from 'lodash';
 
+import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -44,7 +45,6 @@ import {
 } from '../../../../common/components/toasters';
 import { inputsModel } from '../../../../common/store';
 import { useUserData } from '../../user_info';
-import { ExceptionListType } from '../../../../../common/shared_imports';
 import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';

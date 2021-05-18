@@ -198,6 +198,31 @@ describe('migrations v2 model', () => {
   });
 
   describe('model transitions from', () => {
+    it('transition returns new state', () => {
+      const initState: State = {
+        ...baseState,
+        controlState: 'INIT',
+        currentAlias: '.kibana',
+        versionAlias: '.kibana_7.11.0',
+        versionIndex: '.kibana_7.11.0_001',
+      };
+
+      const res: ResponseType<'INIT'> = Either.right({
+        '.kibana_7.11.0_001': {
+          aliases: {
+            '.kibana': {},
+            '.kibana_7.11.0': {},
+          },
+          mappings: {
+            properties: {},
+          },
+          settings: {},
+        },
+      });
+      const newState = model(initState, res);
+      expect(newState).not.toBe(initState);
+    });
+
     describe('INIT', () => {
       const initState: State = {
         ...baseState,

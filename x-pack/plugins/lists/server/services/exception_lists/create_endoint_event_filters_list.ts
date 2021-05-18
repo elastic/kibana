@@ -7,13 +7,14 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
+import { Version } from '@kbn/securitysolution-io-ts-types';
 
 import {
   ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_NAME,
 } from '../../../common/constants';
-import { ExceptionListSchema, Version } from '../../../common/schemas';
+import { ExceptionListSchema } from '../../../common/schemas';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';

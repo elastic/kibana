@@ -5,55 +5,13 @@
  * 2.0.
  */
 
-// TODO: We should remove these and instead directly import them in the security_solution project. This is to get my PR across the line without too many conflicts.
-export {
-  CommentsArray,
-  Comment,
-  CreateComment,
-  CreateCommentsArray,
-  Entry,
-  EntryExists,
-  EntryMatch,
-  EntryMatchAny,
-  EntryMatchWildcard,
-  EntryNested,
-  EntryList,
-  EntriesArray,
-  NamespaceType,
-  NestedEntriesArray,
-  ListOperator as Operator,
-  ListOperatorEnum as OperatorEnum,
-  ListOperatorTypeEnum as OperatorTypeEnum,
-  listOperator as operator,
-  ExceptionListTypeEnum,
-  ExceptionListType,
-  comment,
-  exceptionListType,
-  entry,
-  entriesNested,
-  nestedEntryItem,
-  entriesMatch,
-  entriesMatchAny,
-  entriesMatchWildcard,
-  entriesExists,
-  entriesList,
-  namespaceType,
-  osType,
-  osTypeArray,
-  OsTypeArray,
-  Type,
-} from '@kbn/securitysolution-io-ts-list-types';
-
-export {
+export type {
   ListSchema,
   ExceptionListSchema,
   ExceptionListItemSchema,
   CreateExceptionListSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-  exceptionListItemSchema,
-  createExceptionListItemSchema,
-  listSchema,
 } from './schemas';
 
 export { buildExceptionFilter } from './exceptions';
