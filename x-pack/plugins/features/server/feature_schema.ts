@@ -171,7 +171,7 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
     throw validateResult.error;
   }
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
-  const { app = [], management = {}, catalogue = [], alerting = [] } = feature;
+  const { app = [], management = {}, catalogue = [], alerting = [], cases = [] } = feature;
 
   const unseenApps = new Set(app);
 
@@ -185,6 +185,8 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
   const unseenCatalogue = new Set(catalogue);
 
   const unseenAlertTypes = new Set(alerting);
+
+  const unseenCasesTypes = new Set(cases);
 
   function validateAppEntry(privilegeId: string, entry: readonly string[] = []) {
     entry.forEach((privilegeApp) => unseenApps.delete(privilegeApp));
@@ -225,6 +227,23 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
         `Feature privilege ${
           feature.id
         }.${privilegeId} has unknown alerting entries: ${unknownAlertingEntries.join(', ')}`
+      );
+    }
+  }
+
+  function validateCasesEntry(privilegeId: string, entry: FeatureKibanaPrivileges['cases']) {
+    const all = entry?.all ?? [];
+    const read = entry?.read ?? [];
+
+    all.forEach((privilegeCasesTypes) => unseenCasesTypes.delete(privilegeCasesTypes));
+    read.forEach((privilegeCasesTypes) => unseenCasesTypes.delete(privilegeCasesTypes));
+
+    const unknownCasesEntries = difference([...all, ...read], cases);
+    if (unknownCasesEntries.length > 0) {
+      throw new Error(
+        `Feature privilege ${
+          feature.id
+        }.${privilegeId} has unknown cases entries: ${unknownCasesEntries.join(', ')}`
       );
     }
   }
@@ -290,6 +309,7 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
 
     validateManagementEntry(privilegeId, privilegeDefinition.management);
     validateAlertingEntry(privilegeId, privilegeDefinition.alerting);
+    validateCasesEntry(privilegeId, privilegeDefinition.cases);
   });
 
   const subFeatureEntries = feature.subFeatures ?? [];
@@ -300,6 +320,7 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
         validateCatalogueEntry(subFeaturePrivilege.id, subFeaturePrivilege.catalogue);
         validateManagementEntry(subFeaturePrivilege.id, subFeaturePrivilege.management);
         validateAlertingEntry(subFeaturePrivilege.id, subFeaturePrivilege.alerting);
+        validateCasesEntry(subFeaturePrivilege.id, subFeaturePrivilege.cases);
       });
     });
   });
@@ -347,6 +368,16 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
         feature.id
       } specifies alerting entries which are not granted to any privileges: ${Array.from(
         unseenAlertTypes.values()
+      ).join(',')}`
+    );
+  }
+
+  if (unseenCasesTypes.size > 0) {
+    throw new Error(
+      `Feature ${
+        feature.id
+      } specifies cases entries which are not granted to any privileges: ${Array.from(
+        unseenCasesTypes.values()
       ).join(',')}`
     );
   }
