@@ -14,7 +14,7 @@ import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
 
 export interface FileUploadStartApi {
   getFileUploadComponent(): ReturnType<typeof getFileUploadComponent>;
-  getIndexNameFormComponent(): ReturnType<typeof getIndexNameFormComponent>;
+  IndexNameFormComponent: typeof IndexNameFormAsyncWrapper;
   importerFactory: typeof importerFactory;
   getMaxBytes: typeof getMaxBytes;
   getMaxBytesFormatted: typeof getMaxBytesFormatted;
@@ -34,9 +34,7 @@ export function getFileUploadComponent() {
   return JsonUploadAndParseAsyncWrapper;
 }
 
-export function getIndexNameFormComponent() {
-  return IndexNameFormAsyncWrapper;
-}
+export const IndexNameFormComponent = IndexNameFormAsyncWrapper;
 
 export async function importerFactory(
   format: string,

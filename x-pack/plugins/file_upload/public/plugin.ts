@@ -11,7 +11,7 @@ import {
   getFileUploadComponent,
   importerFactory,
   hasImportPermission,
-  getIndexNameFormComponent,
+  IndexNameFormComponent,
   checkIndexExists,
   getTimeFieldRange,
   analyzeFile,
@@ -43,7 +43,7 @@ export class FileUploadPlugin
     setStartServices(core, plugins);
     return {
       getFileUploadComponent,
-      getIndexNameFormComponent,
+      IndexNameFormComponent,
       importerFactory,
       getMaxBytes,
       getMaxBytesFormatted,
