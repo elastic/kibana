@@ -47,7 +47,7 @@ export const label = (): ExpressionFunctionDefinition<
     filter: {
       types: ['boolean'],
       help: i18n.translate('visTypeXy.function.label.filter.help', {
-        defaultMessage: 'If true that we hide overlapping labels and duplicates on axis',
+        defaultMessage: 'Hides overlapping labels and duplicates on axis',
       }),
     },
     overwriteColor: {
