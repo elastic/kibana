@@ -15,6 +15,7 @@ import { IIndexPattern } from 'src/plugins/data/public';
 
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
 
+// @ts-expect-error invalid lang type
 const items: ScriptedFieldItem[] = [{ name: '1', lang: 'Elastic', script: '' }];
 
 describe('Table', () => {
