@@ -10,59 +10,13 @@ import { isObject } from 'lodash/fp';
 import { Either, left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { isMlRule } from '../../../machine_learning/helpers';
-import { isThresholdRule } from '../../utils';
 import {
   actions,
-  anomaly_threshold,
-  description,
-  enabled,
-  event_category_override,
-  false_positives,
   from,
-  id,
-  immutable,
-  index,
-  interval,
-  rule_id,
-  language,
-  name,
-  output_index,
-  max_signals,
   machine_learning_job_id,
-  query,
-  references,
-  severity,
-  updated_by,
-  tags,
-  to,
   risk_score,
-  created_at,
-  created_by,
-  updated_at,
-  saved_id,
-  timeline_id,
-  timeline_title,
-  type,
-  threats,
-  threshold,
-  throttle,
-  job_status,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
-  version,
-  filters,
-  meta,
-  note,
-  building_block_type,
-  license,
-  rule_name_override,
-  timestamp_override,
-} from '../common/schemas';
-import {
+  DefaultRiskScoreMappingArray,
+  DefaultSeverityMappingArray,
   threat_index,
   concurrent_searches,
   items_per_search,
@@ -71,14 +25,58 @@ import {
   threat_mapping,
   threat_language,
   threat_indicator_path,
-} from '../types/threat_mapping';
+  threats,
+  type,
+  language,
+  severity,
+  throttle,
+  max_signals,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { DefaultStringArray, version } from '@kbn/securitysolution-io-ts-types';
 
-import { DefaultListArray } from '../types/lists_default_array';
+import { DefaultListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { isMlRule } from '../../../machine_learning/helpers';
+import { isThresholdRule } from '../../utils';
 import {
-  DefaultStringArray,
-  DefaultRiskScoreMappingArray,
-  DefaultSeverityMappingArray,
-} from '../types';
+  anomaly_threshold,
+  description,
+  enabled,
+  event_category_override,
+  false_positives,
+  id,
+  immutable,
+  index,
+  interval,
+  rule_id,
+  name,
+  output_index,
+  query,
+  references,
+  updated_by,
+  tags,
+  to,
+  created_at,
+  created_by,
+  updated_at,
+  saved_id,
+  timeline_id,
+  timeline_title,
+  threshold,
+  job_status,
+  status_date,
+  last_success_at,
+  last_success_message,
+  last_failure_at,
+  last_failure_message,
+  filters,
+  meta,
+  note,
+  building_block_type,
+  license,
+  rule_name_override,
+  timestamp_override,
+} from '../common/schemas';
+
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
 
 /**

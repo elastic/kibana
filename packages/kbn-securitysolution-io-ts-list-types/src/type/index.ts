@@ -40,3 +40,4 @@ export const type = t.keyof({
 
 export const typeOrUndefined = t.union([type, t.undefined]);
 export type Type = t.TypeOf<typeof type>;
+export type TypeOrUndefined = t.TypeOf<typeof typeOrUndefined>;
