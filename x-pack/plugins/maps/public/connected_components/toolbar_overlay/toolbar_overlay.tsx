@@ -7,16 +7,15 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Filter } from 'src/plugins/data/public';
+import { IFieldType, Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
 import { FitToData } from './fit_to_data';
-import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 
 export interface Props {
   addFilters?: ((filters: Filter[], actionId: string) => Promise<void>) | null;
-  geoFields: GeoFieldWithIndex[];
+  geoFields: IFieldType[];
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
 }

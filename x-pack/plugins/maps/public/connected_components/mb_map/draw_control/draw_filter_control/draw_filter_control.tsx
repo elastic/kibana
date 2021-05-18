@@ -33,12 +33,7 @@ export interface Props {
 
 export class DrawFilterControl extends Component<Props, {}> {
   _onDraw = async (e: { features: Feature[] }) => {
-    if (
-      !e.features.length ||
-      !this.props.drawState ||
-      !this.props.drawState.geoFieldName ||
-      !this.props.drawState.indexPatternId
-    ) {
+    if (!e.features.length || !this.props.drawState || !this.props.drawState.geoFieldName) {
       return;
     }
 

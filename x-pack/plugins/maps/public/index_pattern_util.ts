@@ -29,6 +29,27 @@ export function getGeoTileAggNotSupportedReason(field: IFieldType): string | nul
   return null;
 }
 
+export async function getFieldFromIndexByName(indexPatternId: string, fieldName: string) {
+  const indexPattern = await getIndexPatternService().get(indexPatternId);
+  const field = indexPattern.fields.getByName(fieldName);
+  return { indexPattern, field };
+}
+
+export async function getFieldsFromIds(indexPatternIdsWithFields) {
+  const promises: IndexPattern[] = [];
+  indexPatternIdsWithFields.forEach(async ({ indexPatternId, fieldName }) => {
+    try {
+      // @ts-ignore
+      promises.push(getFieldFromIndexByName(indexPatternId, fieldName));
+    } catch (error) {
+      // Unable to load index pattern, better to not throw error so map can render
+      // Error will be surfaced by layer since it too will be unable to locate the index pattern
+      return null;
+    }
+  });
+  return await Promise.all(promises);
+}
+
 export async function getIndexPatternsFromIds(
   indexPatternIds: string[] = []
 ): Promise<IndexPattern[]> {

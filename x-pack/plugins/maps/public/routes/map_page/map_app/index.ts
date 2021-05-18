@@ -14,7 +14,7 @@ import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selecto
 import {
   getFilters,
   getQuery,
-  getQueryableUniqueIndexPatternIds,
+  getQueryableUniqueIndexPatternIdsAndFieldNames,
   getRefreshConfig,
   getTimeFilters,
   hasDirtyState,
@@ -31,7 +31,7 @@ function mapStateToProps(state: MapStoreState) {
     isOpenSettingsDisabled: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     isSaveDisabled: hasDirtyState(state),
     inspectorAdapters: getInspectorAdapters(state),
-    nextIndexPatternIds: getQueryableUniqueIndexPatternIds(state),
+    nextIndexPatternIdsAndFieldNames: getQueryableUniqueIndexPatternIdsAndFieldNames(state),
     flyoutDisplay: getFlyoutDisplay(state),
     refreshConfig: getRefreshConfig(state),
     filters: getFilters(state),

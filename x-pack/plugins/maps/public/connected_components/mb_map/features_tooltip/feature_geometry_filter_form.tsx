@@ -21,7 +21,7 @@ import {
 import { ES_SPATIAL_RELATIONS, GEO_JSON_TYPE } from '../../../../common/constants';
 // @ts-expect-error
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
-import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
+import { IFieldType } from '../../../../../../../src/plugins/data/public';
 
 // over estimated and imprecise value to ensure filter has additional room for any meta keys added when filter is mapped.
 const META_OVERHEAD = 100;
@@ -29,7 +29,7 @@ const META_OVERHEAD = 100;
 interface Props {
   onClose: () => void;
   geometry: Geometry;
-  geoFields: GeoFieldWithIndex[];
+  geoFields: IFieldType[];
   addFilters: (filters: Filter[], actionId: string) => Promise<void>;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;

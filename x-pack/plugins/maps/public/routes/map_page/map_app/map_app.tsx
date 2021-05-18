@@ -37,7 +37,10 @@ import {
   QueryState,
 } from '../../../../../../../src/plugins/data/public';
 import { MapContainer } from '../../../connected_components/map_container';
-import { getIndexPatternsFromIds } from '../../../index_pattern_util';
+import {
+  getIndexPatternsFromIds,
+  getQueryableUniqueIndexPatternIdsAndFieldNames,
+} from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
 import { MapRefreshConfig, MapQuery } from '../../../../common/descriptor_types';
 import { goToSpecifiedPath } from '../../../render_app';
@@ -63,7 +66,7 @@ export interface Props {
   enableFullScreen: () => void;
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
-  nextIndexPatternIds: string[];
+  nextIndexPatternIdsAndFieldNames: Array<{ indexPatternId: string; fieldName: string }>;
   dispatchSetQuery: ({
     forceRefresh,
     filters,
@@ -94,7 +97,10 @@ export class MapApp extends React.Component<Props, State> {
   _globalSyncChangeMonitorSubscription: Subscription | null = null;
   _appSyncUnsubscribe: (() => void) | null = null;
   _appStateManager = new AppStateManager();
-  _prevIndexPatternIds: string[] | null = null;
+  _prevIndexPatternIdsAndFieldNames: Array<{
+    indexPatternId: string;
+    fieldName: string;
+  }> | null = null;
   _isMounted: boolean = false;
 
   constructor(props: Props) {
@@ -131,7 +137,7 @@ export class MapApp extends React.Component<Props, State> {
   }
 
   componentDidUpdate() {
-    this._updateIndexPatterns();
+    this._updateIndexPatternsAndFieldNames();
   }
 
   componentWillUnmount() {
@@ -166,16 +172,17 @@ export class MapApp extends React.Component<Props, State> {
     this._onQueryChange({ time: globalState.time });
   };
 
-  async _updateIndexPatterns() {
-    const { nextIndexPatternIds } = this.props;
+  async _updateIndexPatternsAndFieldNames() {
+    const { nextIndexPatternIdsAndFieldNames } = this.props;
 
-    if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
+    if (_.isEqual(nextIndexPatternIdsAndFieldNames, this._prevIndexPatternIdsAndFieldNames)) {
       return;
     }
 
-    this._prevIndexPatternIds = nextIndexPatternIds;
+    this._prevIndexPatternIdsAndFieldNames = nextIndexPatternIdsAndFieldNames;
 
-    const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
+    const indexPatternIds = _.map(nextIndexPatternIdsAndFieldNames, 'indexPatternId');
+    const indexPatterns = await getIndexPatternsFromIds(indexPatternIds);
     if (this._isMounted) {
       this.setState({ indexPatterns });
     }

@@ -20,7 +20,7 @@ import { ToolbarOverlay } from '../toolbar_overlay';
 import { LayerPanel } from '../layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
-import { getIndexPatternsFromIds } from '../../index_pattern_util';
+import { getFieldsFromIds, getGeoFields } from '../../index_pattern_util';
 import { ES_GEO_FIELD_TYPE, RawValue } from '../../../common/constants';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
 import { FLYOUT_STATE } from '../../reducers/ui';
@@ -28,7 +28,7 @@ import { MapSettings } from '../../reducers/map';
 import { MapSettingsPanel } from '../map_settings_panel';
 import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
+import { IFieldType } from '../../../../../../src/plugins/data/public';
 import { MapRefreshConfig } from '../../../common/descriptor_types';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -44,7 +44,7 @@ export interface Props {
   exitFullScreen: () => void;
   flyoutDisplay: FLYOUT_STATE;
   isFullScreen: boolean;
-  indexPatternIds: string[];
+  indexPatternIdsAndFieldNames: Array<{ indexPatternId: string; fieldName: string }>;
   mapInitError: string | null | undefined;
   refreshConfig: MapRefreshConfig;
   renderTooltipContent?: RenderToolTipContent;
@@ -57,13 +57,16 @@ export interface Props {
 interface State {
   isInitialLoadRenderTimeoutComplete: boolean;
   domId: string;
-  geoFields: GeoFieldWithIndex[];
+  geoFields: IFieldType[];
 }
 
 export class MapContainer extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _isInitalLoadRenderTimerStarted: boolean = false;
-  private _prevIndexPatternIds: string[] = [];
+  private _prevIndexPatternIdsAndFieldNames: Array<{
+    indexPatternId: string;
+    fieldName: string;
+  }> = [];
   private _refreshTimerId: number | null = null;
   private _prevIsPaused: boolean | null = null;
   private _prevInterval: number | null = null;
@@ -88,7 +91,7 @@ export class MapContainer extends Component<Props, State> {
     }
 
     if (!!this.props.addFilters) {
-      this._loadGeoFields(this.props.indexPatternIds);
+      this._loadGeoFields(this.props.indexPatternIdsAndFieldNames);
     }
   }
 
@@ -113,37 +116,22 @@ export class MapContainer extends Component<Props, State> {
     }
   };
 
-  _loadGeoFields = async (nextIndexPatternIds: string[]) => {
-    if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
+  _loadGeoFields = async (
+    nextIndexPatternIdsAndFieldNames: Array<{ indexPatternId: string; fieldName: string }>
+  ) => {
+    if (_.isEqual(nextIndexPatternIdsAndFieldNames, this._prevIndexPatternIdsAndFieldNames)) {
       // all ready loaded index pattern ids
       return;
     }
 
-    this._prevIndexPatternIds = nextIndexPatternIds;
+    this._prevIndexPatternIdsAndFieldNames = nextIndexPatternIdsAndFieldNames;
 
-    const geoFields: GeoFieldWithIndex[] = [];
-    const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
-    indexPatterns.forEach((indexPattern) => {
-      indexPattern.fields.forEach((field) => {
-        if (
-          indexPattern.id &&
-          !indexPatternsUtils.isNestedField(field) &&
-          (field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE)
-        ) {
-          geoFields.push({
-            geoFieldName: field.name,
-            geoFieldType: field.type,
-            indexPatternTitle: indexPattern.title,
-            indexPatternId: indexPattern.id,
-          });
-        }
-      });
-    });
-
+    const queryableFields = await getFieldsFromIds(nextIndexPatternIdsAndFieldNames);
+    let geoFields: IFieldType[] = getGeoFields(_.map(queryableFields, 'field'));
+    geoFields = _.uniqWith(geoFields, _.isEqual);
     if (!this._isMounted) {
       return;
     }
-
     this.setState({ geoFields });
   };
 

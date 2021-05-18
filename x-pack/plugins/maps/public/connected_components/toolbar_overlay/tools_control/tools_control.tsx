@@ -22,7 +22,7 @@ import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../
 // @ts-expect-error
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/distance_filter_form';
-import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
+import { IFieldType } from '../../../../../plugins/data/public';
 import { DrawState } from '../../../../common/descriptor_types';
 
 const DRAW_SHAPE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
@@ -54,7 +54,7 @@ const DRAW_DISTANCE_LABEL_SHORT = i18n.translate(
 
 export interface Props {
   cancelDraw: () => void;
-  geoFields: GeoFieldWithIndex[];
+  geoFields: IFieldType[];
   initiateDraw: (drawState: DrawState) => void;
   isDrawingFilter: boolean;
   getFilterActions?: () => Promise<Action[]>;
