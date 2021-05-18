@@ -88,12 +88,7 @@ function CustomTooltip({
 }) {
   const first = values[0];
 
-  const foundNode = find(
-    locations,
-    (location) => location.function === first.label
-  );
-
-  const label = foundNode?.fqn ?? first.label;
+  const label = first.label;
   const formattedValue =
     formatValue(first.value, valueUnit) + first.formattedValue;
 
@@ -284,10 +279,7 @@ export function ServiceProfilingFlamegraph({
       return {
         groupByRollup: (d: Datum) => d.layers[depth],
         nodeLabel: (id: PrimitiveValue) => {
-          if (locations[id!]) {
-            return locations[id!].function;
-          }
-          return '';
+          return id;
         },
         showAccessor: (id: PrimitiveValue) => !!id,
         shape: {
