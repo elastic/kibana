@@ -16,7 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { Case, CaseStatuses } from '../../../../../cases/common';
+import { Case, CaseStatuses, StatusAll } from '../../../../../cases/common';
 import { APP_ID } from '../../../../common/constants';
 import { Ecs } from '../../../../common/ecs';
 import { SecurityPageName } from '../../../app/types';
@@ -240,7 +240,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
             href: formatUrl(getCreateCaseUrl()),
             onClick: goToCreateCase,
           },
-          disabledStatuses: [CaseStatuses.closed],
+          hiddenStatuses: [CaseStatuses.closed, StatusAll],
           onRowClick: onCaseClicked,
           updateCase: onCaseSuccess,
           userCanCrud: userPermissions?.crud ?? false,
