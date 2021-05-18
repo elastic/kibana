@@ -381,7 +381,7 @@ export interface LegacyDeleteState extends LegacyBaseState {
   readonly controlState: 'LEGACY_DELETE';
 }
 
-export type State =
+export type State = Readonly<
   | FatalState
   | InitState
   | DoneState
@@ -411,7 +411,8 @@ export type State =
   | LegacySetWriteBlockState
   | LegacyReindexState
   | LegacyReindexWaitForTaskState
-  | LegacyDeleteState;
+  | LegacyDeleteState
+>;
 
 export type AllControlStates = State['controlState'];
 /**

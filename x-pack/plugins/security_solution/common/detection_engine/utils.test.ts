@@ -13,7 +13,8 @@ import {
   normalizeMachineLearningJobIds,
   normalizeThresholdField,
 } from './utils';
-import { EntriesArray } from '../shared_imports';
+
+import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('#hasLargeValueList', () => {
   test('it returns false if empty array', () => {
