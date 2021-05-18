@@ -11,7 +11,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { ExceptionsViewer } from './';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useExceptionListItems, useApi } from '../../../../../public/lists_plugin_deps';
+import { useExceptionListItems, useApi } from '../../../../../public/shared_imports';
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
@@ -31,7 +31,7 @@ const mockTheme = getMockTheme({
 });
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../../public/lists_plugin_deps');
+jest.mock('../../../../../public/shared_imports');
 
 describe('ExceptionsViewer', () => {
   const ruleName = 'test rule';

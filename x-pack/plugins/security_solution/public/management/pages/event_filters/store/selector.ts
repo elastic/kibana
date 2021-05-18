@@ -88,24 +88,21 @@ export const getListFetchError: EventFiltersSelector<
   return (isFailedResourceState(listPageDataState) && listPageDataState.error) || undefined;
 });
 
-export const getListIsLoading: EventFiltersSelector<boolean> = createSelector(
-  getCurrentListPageDataState,
-  (listDataState) => isLoadingResourceState(listDataState)
-);
-
 export const getListPageDataExistsState: EventFiltersSelector<
   StoreState['listPage']['dataExist']
 > = ({ listPage: { dataExist } }) => dataExist;
 
+export const getListIsLoading: EventFiltersSelector<boolean> = createSelector(
+  getCurrentListPageDataState,
+  getListPageDataExistsState,
+  (listDataState, dataExists) =>
+    isLoadingResourceState(listDataState) || isLoadingResourceState(dataExists)
+);
+
 export const getListPageDoesDataExist: EventFiltersSelector<boolean> = createSelector(
   getListPageDataExistsState,
   (dataExistsState) => {
-    if (isLoadedResourceState(dataExistsState)) {
-      return dataExistsState.data;
-    }
-
-    // Until we know for sure that data exists (LoadedState), we assume `true`
-    return true;
+    return !!getLastLoadedResourceState(dataExistsState)?.data;
   }
 );
 
@@ -179,7 +176,7 @@ export const listDataNeedsRefresh: EventFiltersSelector<boolean> = createSelecto
       forceRefresh ||
       location.page_index + 1 !== currentQuery.page ||
       location.page_size !== currentQuery.perPage ||
-      (!!location.filter && location.filter !== currentQuery.filter)
+      location.filter !== currentQuery.filter
     );
   }
 );
