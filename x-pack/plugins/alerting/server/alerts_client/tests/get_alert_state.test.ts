@@ -213,7 +213,7 @@ describe('getAlertState()', () => {
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',
-        operation: 'getAlertState',
+        operation: 'getRuleState',
         ruleTypeId: 'myType',
       });
     });
@@ -222,19 +222,19 @@ describe('getAlertState()', () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       // `get` check
       authorization.ensureAuthorized.mockResolvedValueOnce();
-      // `getAlertState` check
+      // `getRuleState` check
       authorization.ensureAuthorized.mockRejectedValueOnce(
-        new Error(`Unauthorized to getAlertState a "myType" alert for "myApp"`)
+        new Error(`Unauthorized to getRuleState a "myType" alert for "myApp"`)
       );
 
       await expect(alertsClient.getAlertState({ id: '1' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to getAlertState a "myType" alert for "myApp"]`
+        `[Error: Unauthorized to getRuleState a "myType" alert for "myApp"]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',
-        operation: 'getAlertState',
+        operation: 'getRuleState',
         ruleTypeId: 'myType',
       });
     });

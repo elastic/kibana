@@ -9,7 +9,6 @@ import * as t from 'io-ts';
 import {
   CreateCommentsArray,
   DefaultCreateCommentsArray,
-  DefaultUuid,
   EntriesArray,
   OsTypeArray,
   Tags,
@@ -20,7 +19,8 @@ import {
   nonEmptyEndpointEntriesArray,
   osTypeArrayOrUndefined,
   tags,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { DefaultUuid } from '@kbn/securitysolution-io-ts-types';
 
 import { ItemId } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';

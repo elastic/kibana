@@ -16,7 +16,7 @@ enum AlertingEntity {
 }
 
 const readOperations: Record<AlertingEntity, string[]> = {
-  rule: ['get', 'getAlertState', 'getAlertInstanceSummary', 'find'],
+  rule: ['get', 'getRuleState', 'getAlertSummary', 'find'],
   alert: ['get', 'find'],
 };
 
@@ -30,8 +30,8 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'disable',
     'muteAll',
     'unmuteAll',
-    'muteInstance',
-    'unmuteInstance',
+    'muteAlert',
+    'unmuteAlert',
   ],
   alert: ['update'],
 };
