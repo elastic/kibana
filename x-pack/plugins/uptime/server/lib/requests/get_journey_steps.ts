@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { SearchHit } from 'typings/elasticsearch/search';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
@@ -45,7 +45,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping
               'monitor.check_group': checkGroup,
             },
           },
-        ] as QueryContainer,
+        ] as QueryDslQueryContainer,
       },
     },
     sort: asMutableArray([

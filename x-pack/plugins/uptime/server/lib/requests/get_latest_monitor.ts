@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types';
 
@@ -45,7 +45,7 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
           },
           ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
           ...(observerLocation ? [{ term: { 'observer.geo.name': observerLocation } }] : []),
-        ] as QueryContainer[],
+        ] as QueryDslQueryContainer[],
       },
     },
     size: 1,
