@@ -10,3 +10,6 @@ import * as t from 'io-ts';
 
 export const language = t.keyof({ eql: null, kuery: null, lucene: null });
 export type Language = t.TypeOf<typeof language>;
+
+export const languageOrUndefined = t.union([language, t.undefined]);
+export type LanguageOrUndefined = t.TypeOf<typeof languageOrUndefined>;
