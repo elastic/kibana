@@ -305,22 +305,52 @@ describe('getProxySettings', () => {
     expect(proxySettings?.proxyUrl).toBe(config.proxyUrl);
   });
 
-  test('returns proxyRejectUnauthorizedCertificates', () => {
+  test('returns legacyRejectUnauthorized', () => {
     const configTrue: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
       proxyRejectUnauthorizedCertificates: true,
     };
     let proxySettings = getActionsConfigurationUtilities(configTrue).getProxySettings();
-    expect(proxySettings?.proxyRejectUnauthorizedCertificates).toBe(true);
+    expect(proxySettings?.proxyTLSSettings.legacyRejectUnauthorized).toBe(true);
 
     const configFalse: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
       proxyRejectUnauthorizedCertificates: false,
+      tls: {
+        proxyVerificationMode: 'none',
+        verificationMode: 'none',
+      },
     };
     proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
-    expect(proxySettings?.proxyRejectUnauthorizedCertificates).toBe(false);
+    expect(proxySettings?.proxyTLSSettings.legacyRejectUnauthorized).toBe(false);
+  });
+
+  test('returns verificationMode', () => {
+    const configTrue: ActionsConfig = {
+      ...defaultActionsConfig,
+      proxyUrl: 'https://proxy.elastic.co',
+      proxyRejectUnauthorizedCertificates: true,
+      tls: {
+        verificationMode: 'none',
+        proxyVerificationMode: 'full',
+      },
+    };
+    let proxySettings = getActionsConfigurationUtilities(configTrue).getProxySettings();
+    expect(proxySettings?.proxyTLSSettings.verificationMode).toBe('full');
+
+    const configFalse: ActionsConfig = {
+      ...defaultActionsConfig,
+      proxyUrl: 'https://proxy.elastic.co',
+      proxyRejectUnauthorizedCertificates: false,
+      tls: {
+        proxyVerificationMode: 'none',
+        verificationMode: 'none',
+      },
+    };
+    proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
+    expect(proxySettings?.proxyTLSSettings.verificationMode).toBe('none');
   });
 
   test('returns proxy headers', () => {

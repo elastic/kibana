@@ -37,9 +37,11 @@ const customHostSettingsSchema = schema.object({
        * @deprecated in favor of `verificationMode`
        **/
       rejectUnauthorized: schema.maybe(schema.boolean()),
-      verificationMode: schema.oneOf(
-        [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-        { defaultValue: 'full' }
+      verificationMode: schema.maybe(
+        schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' }
+        )
       ),
       certificateAuthoritiesFiles: schema.maybe(
         schema.oneOf([
@@ -85,15 +87,19 @@ export const configSchema = schema.object({
    * @deprecatedin favor of `ssl.verificationMode`
    **/
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
-  ssl: schema.maybe(
+  tls: schema.maybe(
     schema.object({
-      verificationMode: schema.oneOf(
-        [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-        { defaultValue: 'none' }
+      verificationMode: schema.maybe(
+        schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' }
+        )
       ),
-      proxyVerificationMode: schema.oneOf(
-        [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-        { defaultValue: 'none' }
+      proxyVerificationMode: schema.maybe(
+        schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' }
+        )
       ),
     })
   ),

@@ -18,7 +18,6 @@ import {
   RequestHandlerContext,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
-import { PeerCertificate } from 'tls';
 export { ActionTypeExecutorResult } from '../common';
 export { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
 export { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
@@ -151,7 +150,10 @@ export interface ResponseSettings {
   timeout: number;
 }
 
-export type TLSSettings = Partial<{
-  rejectUnauthorized: boolean;
-  checkServerIdentity: (host: string, cert: PeerCertificate) => Error | undefined;
-}>;
+export interface TLSSettings {
+  verificationMode?: 'none' | 'certificate' | 'full';
+  /**
+   * @deprecated
+   */
+  legacyRejectUnauthorized?: boolean;
+}

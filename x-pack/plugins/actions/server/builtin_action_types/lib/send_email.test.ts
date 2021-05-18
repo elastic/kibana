@@ -76,7 +76,9 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://example.com',
-        proxyRejectUnauthorizedCertificates: false,
+        proxyTLSSettings: {
+          legacyRejectUnauthorized: false,
+        },
         proxyBypassHosts: undefined,
         proxyOnlyHosts: undefined,
       }
@@ -236,7 +238,9 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyRejectUnauthorizedCertificates: false,
+        proxyTLSSettings: {
+          legacyRejectUnauthorized: false,
+        },
         proxyBypassHosts: new Set(['example.com']),
         proxyOnlyHosts: undefined,
       }
@@ -268,7 +272,9 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyRejectUnauthorizedCertificates: false,
+        proxyTLSSettings: {
+          verificationMode: 'none',
+        },
         proxyBypassHosts: new Set(['not-example.com']),
         proxyOnlyHosts: undefined,
       }
@@ -302,7 +308,9 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyRejectUnauthorizedCertificates: false,
+        proxyTLSSettings: {
+          verificationMode: 'none',
+        },
         proxyBypassHosts: undefined,
         proxyOnlyHosts: new Set(['example.com']),
       }
@@ -336,7 +344,7 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyRejectUnauthorizedCertificates: false,
+        proxyTLSSettings: {},
         proxyBypassHosts: undefined,
         proxyOnlyHosts: new Set(['not-example.com']),
       }
@@ -453,7 +461,7 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyRejectUnauthorizedCertificates: false,
+        proxyTLSSettings: {},
         proxyBypassHosts: undefined,
         proxyOnlyHosts: undefined,
       },

@@ -418,9 +418,7 @@ describe('create()', () => {
       preconfiguredAlertHistoryEsIndex: false,
       preconfigured: {},
       proxyRejectUnauthorizedCertificates: true,
-      proxyVerificationMode: 'full',
       rejectUnauthorized: true,
-      verificationMode: 'full',
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
       maxResponseContentLength: new ByteSizeValue(1000000),
@@ -430,6 +428,10 @@ describe('create()', () => {
         cleanupInterval: schema.duration().validate('5m'),
         idleInterval: schema.duration().validate('1h'),
         pageSize: 100,
+      },
+      tls: {
+        verificationMode: 'none',
+        proxyVerificationMode: 'full',
       },
     });
 

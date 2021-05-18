@@ -30,7 +30,7 @@ export interface ActionsConfigurationUtilities {
   ensureHostnameAllowed: (hostname: string) => void;
   ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
-  getTLSSettings: () => TLSSettings
+  getTLSSettings: () => TLSSettings;
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
@@ -93,35 +93,18 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
     proxyBypassHosts: arrayAsSet(config.proxyBypassHosts),
     proxyOnlyHosts: arrayAsSet(config.proxyOnlyHosts),
     proxyHeaders: config.proxyHeaders,
-    proxyTLSSettings: getTLSSettingsFromConfig(config.ssl?.proxyVerificationMode, config.proxyRejectUnauthorizedCertificates),
+    proxyTLSSettings: getTLSSettingsFromConfig(
+      config.tls?.proxyVerificationMode,
+      config.proxyRejectUnauthorizedCertificates
+    ),
   };
 }
 
-function getTLSSettingsFromConfig(verificationMode?: string, rejectUnauthorized?: boolean): TLSSettings {
-  const tlsConfig: TLSSettings = {};
-  if (!verificationMode) {
-    if (rejectUnauthorized) {
-      tlsConfig.rejectUnauthorized = rejectUnauthorized;
-    }
-    return tlsConfig;
-  }
-  switch (verificationMode) {
-    case 'none':
-      tlsConfig.rejectUnauthorized = false;
-      break;
-    case 'certificate':
-      tlsConfig.rejectUnauthorized = true;
-
-      // by default, NodeJS is checking the server identify
-      tlsConfig.checkServerIdentity = () => undefined;
-      break;
-    case 'full':
-      tlsConfig.rejectUnauthorized = true;
-      break;
-    default:
-      throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
-  }
-  return tlsConfig;
+function getTLSSettingsFromConfig(
+  verificationMode?: 'none' | 'certificate' | 'full',
+  rejectUnauthorized?: boolean
+): TLSSettings {
+  return { legacyRejectUnauthorized: rejectUnauthorized, verificationMode };
 }
 
 function arrayAsSet<T>(arr: T[] | undefined): Set<T> | undefined {
@@ -169,7 +152,8 @@ export function getActionsConfigurationUtilities(
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
-    getTLSSettings: () => getTLSSettingsFromConfig(config.ssl?.verificationMode, config.rejectUnauthorized),
+    getTLSSettings: () =>
+      getTLSSettingsFromConfig(config.tls?.verificationMode, config.rejectUnauthorized),
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));

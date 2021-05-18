@@ -12,6 +12,7 @@ import { default as MarkdownIt } from 'markdown-it';
 import { Logger } from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { CustomHostSettings } from '../../config';
+import { getNodeTLSOptions } from './get_node_tls_options';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -91,10 +92,10 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     customHostSettings = configurationUtilities.getCustomHostSettings(`smtp://${host}:${port}`);
 
     if (proxySettings && useProxy) {
-      transportConfig.tls = {
-        // do not fail on invalid certs if value is false
-        rejectUnauthorized: proxySettings?.proxyTLSSettings.rejectUnauthorized,
-      };
+      transportConfig.tls = getNodeTLSOptions(
+        proxySettings?.proxyTLSSettings.verificationMode,
+        proxySettings?.proxyTLSSettings.legacyRejectUnauthorized
+      );
       transportConfig.proxy = proxySettings.proxyUrl;
       transportConfig.headers = proxySettings.proxyHeaders;
     } else if (!transportConfig.secure && user == null && password == null) {
@@ -103,7 +104,10 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       // authenticate rarely have valid certs; eg cloud proxy, and npm maildev
       transportConfig.tls = { rejectUnauthorized: false };
     } else {
-      transportConfig.tls = { rejectUnauthorized: generalTLSSettings.rejectUnauthorized };
+      transportConfig.tls = getNodeTLSOptions(
+        generalTLSSettings.verificationMode,
+        generalTLSSettings.legacyRejectUnauthorized
+      );
     }
 
     // finally, allow customHostSettings to override some of the settings
@@ -116,14 +120,15 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       if (tlsSettings?.certificateAuthoritiesData) {
         tlsConfig.ca = tlsSettings?.certificateAuthoritiesData;
       }
-      if (tlsSettings?.rejectUnauthorized !== undefined) {
-        tlsConfig.rejectUnauthorized = tlsSettings?.rejectUnauthorized;
-      }
 
+      const nodeTLSOptions = getNodeTLSOptions(
+        tlsSettings?.verificationMode,
+        tlsSettings?.rejectUnauthorized
+      );
       if (!transportConfig.tls) {
-        transportConfig.tls = tlsConfig;
+        transportConfig.tls = nodeTLSOptions;
       } else {
-        transportConfig.tls = { ...transportConfig.tls, ...tlsConfig };
+        transportConfig.tls = { ...transportConfig.tls, ...tlsConfig, ...nodeTLSOptions };
       }
 
       if (smtpSettings?.ignoreTLS) {
