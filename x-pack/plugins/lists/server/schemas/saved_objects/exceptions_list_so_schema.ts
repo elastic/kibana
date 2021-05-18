@@ -20,6 +20,7 @@ import {
   tags,
   updated_by,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { versionOrUndefined } from '@kbn/securitysolution-io-ts-types';
 
 import {
   immutableOrUndefined,
@@ -27,7 +28,6 @@ import {
   list_id,
   list_type,
   tie_breaker_id,
-  versionOrUndefined,
 } from '../../../common/schemas';
 
 /**
