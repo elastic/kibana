@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import { ExceptionListType, ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  ExceptionListType,
-  ExceptionListTypeEnum,
   EXCEPTION_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
   ENDPOINT_EVENT_FILTERS_LIST_ID,

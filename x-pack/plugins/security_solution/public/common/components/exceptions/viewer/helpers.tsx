@@ -7,9 +7,15 @@
 
 import moment from 'moment';
 
-import { entriesNested, ExceptionListItemSchema } from '../../../../lists_plugin_deps';
-import { getEntryValue, getExceptionOperatorSelect, formatOperatingSystems } from '../helpers';
-import { FormattedEntry, BuilderEntry, DescriptionListItem } from '../types';
+import { entriesNested } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ExceptionListItemSchema,
+  getEntryValue,
+  getExceptionOperatorSelect,
+} from '../../../../shared_imports';
+
+import { formatOperatingSystems } from '../helpers';
+import type { FormattedEntry, BuilderEntry, DescriptionListItem } from '../types';
 import * as i18n from '../translations';
 
 /**

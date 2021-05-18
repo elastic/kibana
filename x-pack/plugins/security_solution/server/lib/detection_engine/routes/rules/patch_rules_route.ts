@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { RuleDataClient } from '../../../../../../rule_registry/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { patchRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/patch_rules_type_dependents';
@@ -19,7 +20,8 @@ import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { patchRules } from '../../rules/patch_rules';
-import { transformError, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
+
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
