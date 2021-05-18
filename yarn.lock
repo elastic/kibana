@@ -1766,18 +1766,10 @@
     normalize-path "^2.0.1"
     through2 "^2.0.3"
 
-"@hapi/accept@^3.2.4":
-  version "3.2.4"
-  resolved "https://registry.yarnpkg.com/@hapi/accept/-/accept-3.2.4.tgz#687510529493fe1d7d47954c31aff360d9364bd1"
-  integrity sha512-soThGB+QMgfxlh0Vzhzlf3ZOEOPk5biEwcOXhkF0Eedqx8VnhGiggL9UYHrIsOb1rUg3Be3K8kp0iDL2wbVSOQ==
-  dependencies:
-    "@hapi/boom" "7.x.x"
-    "@hapi/hoek" "8.x.x"
-
-"@hapi/accept@^5.0.1":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@hapi/accept/-/accept-5.0.1.tgz#068553e867f0f63225a506ed74e899441af53e10"
-  integrity sha512-fMr4d7zLzsAXo28PRRQPXR1o2Wmu+6z+VY1UzDp0iFo13Twj8WePakwXBiqn3E1aAlTpSNzCXdnnQXFhst8h8Q==
+"@hapi/accept@^5.0.1", "@hapi/accept@^5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@hapi/accept/-/accept-5.0.2.tgz#ab7043b037e68b722f93f376afb05e85c0699523"
+  integrity sha512-CmzBx/bXUR8451fnZRuZAJRlzgm0Jgu5dltTX/bszmR2lheb9BpyN47Q1RbaGTsvFzn0PXAEs+lXDKfshccYZw==
   dependencies:
     "@hapi/boom" "9.x.x"
     "@hapi/hoek" "9.x.x"
@@ -1795,13 +1787,6 @@
   integrity sha512-ngu0tSEmrezoiIaNGG6rRvKOUkUuDdf4XTPnONHGYfSGRmDqPZX5oJL6HAdKTo1UQHECbdB4OzhWrfgVppjHUw==
   dependencies:
     "@hapi/hoek" "9.x.x"
-
-"@hapi/boom@7.x.x":
-  version "7.4.11"
-  resolved "https://registry.yarnpkg.com/@hapi/boom/-/boom-7.4.11.tgz#37af8417eb9416aef3367aa60fa04a1a9f1fc262"
-  integrity sha512-VSU/Cnj1DXouukYxxkes4nNJonCnlogHvIff1v1RVoN4xzkKhMXX+GRmb3NyH1iar10I9WFPDv2JPwfH3GaV0A==
-  dependencies:
-    "@hapi/hoek" "8.x.x"
 
 "@hapi/boom@9.x.x", "@hapi/boom@^9.0.0", "@hapi/boom@^9.1.1":
   version "9.1.1"
@@ -1928,11 +1913,6 @@
     "@hapi/boom" "9.x.x"
     "@hapi/hoek" "9.x.x"
     "@hapi/validate" "1.x.x"
-
-"@hapi/hoek@8.x.x":
-  version "8.5.1"
-  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-8.5.1.tgz#fde96064ca446dec8c55a8c2f130957b070c6e06"
-  integrity sha512-yN7kbciD87WzLGc5539Tn0sApjyiGHAJgKvG9W8C7O+6c7qmoQMfVs0W4bX17eqz6C78QJqqFrtgdK5EWf6Qow==
 
 "@hapi/hoek@9.x.x", "@hapi/hoek@^9.0.0", "@hapi/hoek@^9.0.4", "@hapi/hoek@^9.1.1":
   version "9.1.1"
@@ -5011,11 +4991,6 @@
     "@types/undertaker" "*"
     "@types/vinyl-fs" "*"
     chokidar "^2.1.2"
-
-"@types/hapi__accept@^3.2.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@types/hapi__accept/-/hapi__accept-3.2.0.tgz#4bf7b9fa7ff9736ad7cee70883e04f47c3fc70ac"
-  integrity sha512-6KaLx2GAjy0Wqa6QTVqisEfKfzI4men6Dq+JZnLb1GDwlZoun0FrYugRnvmJ7D92DoYLpc+IHICxloyBqm/wFw==
 
 "@types/hapi__catbox@*":
   version "10.2.3"
