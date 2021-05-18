@@ -22,42 +22,13 @@ import { getStubIndexPattern } from '../../../../../../../data/public/test_utils
 import { SavedObject } from '../../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { DiscoverServices } from '../../../../../build_services';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { configMock } from '../../../../../__mocks__/config';
 import { indexPatternsMock } from '../../../../../__mocks__/index_patterns';
-
-const mockServices = ({
-  history: () => ({
-    location: {
-      search: '',
-    },
-  }),
-  capabilities: {
-    visualize: {
-      show: true,
-    },
-    discover: {
-      save: false,
-    },
-  },
-  uiSettings: {
-    get: (key: string) => {
-      if (key === 'fields:popularLimit') {
-        return 5;
-      }
-    },
-  },
-  indexPatternFieldEditor: {
-    openEditor: jest.fn(),
-    userPermissions: {
-      editIndexPattern: jest.fn(),
-    },
-  },
-} as unknown) as DiscoverServices;
+import { discoverServiceMock as mockDiscoverServices } from '../../../../../__mocks__/services';
 
 jest.mock('../../../../../kibana_services', () => ({
-  getServices: () => mockServices,
+  getServices: () => mockDiscoverServices,
 }));
 
 jest.mock('./lib/get_index_pattern_field_list', () => ({
@@ -102,7 +73,7 @@ function getCompProps(): DiscoverSidebarProps {
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
-    services: mockServices,
+    services: mockDiscoverServices,
     state: {},
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),

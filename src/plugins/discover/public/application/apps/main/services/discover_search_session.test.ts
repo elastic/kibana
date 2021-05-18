@@ -6,20 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DiscoverSearchSessionManager } from './discover_search_session';
-import { createMemoryHistory } from 'history';
-import { dataPluginMock } from '../../../../../../data/public/mocks';
-import { DataPublicPluginStart } from '../../../../../../data/public';
+import { createSearchServiceMock } from '../../../../__mocks__/search_session';
 
 describe('DiscoverSearchSessionManager', () => {
-  const history = createMemoryHistory();
-  const session = dataPluginMock.createStartContract().search.session as jest.Mocked<
-    DataPublicPluginStart['search']['session']
-  >;
-  const searchSessionManager = new DiscoverSearchSessionManager({
-    history,
-    session,
-  });
+  const { history, session, searchSessionManager } = createSearchServiceMock();
 
   beforeEach(() => {
     history.push('/');

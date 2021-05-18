@@ -7,10 +7,11 @@
  */
 import { useCallback, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { SavedSearch } from '../../../../saved_searches';
 import { DataPublicPluginStart } from '../../../../../../data/public';
-import { IInspectorInfo } from '../../../../../../data/common';
 import { fetchStatuses } from '../../../components/constants';
+import { Adapters } from '../../../../../../inspector/common';
 
 export type TotalHitsSubject = BehaviorSubject<{ state: string; total?: number }>;
 
@@ -27,7 +28,15 @@ export function useSavedSearchTotalHits({
   );
 
   const fetchData = useCallback(
-    (abortController: AbortController, searchSessionId: string, inspector: IInspectorInfo) => {
+    ({
+      abortController,
+      searchSessionId,
+      inspectorAdapters,
+    }: {
+      abortController: AbortController;
+      searchSessionId: string;
+      inspectorAdapters: Adapters;
+    }) => {
       const searchSource = savedSearch.searchSource.createChild();
       const indexPattern = savedSearch.searchSource.getField('index');
       searchSource.setField('trackTotalHits', true);
@@ -36,7 +45,16 @@ export function useSavedSearchTotalHits({
       subject.next({ state: fetchStatuses.LOADING });
 
       const searchSourceFetch$ = searchSource.fetch$({
-        inspector,
+        inspector: {
+          adapter: inspectorAdapters.requests,
+          title: i18n.translate('discover.inspectorRequestDataTitleTotalHits', {
+            defaultMessage: 'total hits data',
+          }),
+          description: i18n.translate('discover.inspectorRequestDescriptionTotalHits', {
+            defaultMessage:
+              'This request queries Elasticsearch to fetch the total hits number for the search.',
+          }),
+        },
         abortSignal: abortController.signal,
         sessionId: searchSessionId,
       });
@@ -47,7 +65,7 @@ export function useSavedSearchTotalHits({
           return rawResponse.hits.total;
         },
       });
-      return searchSourceFetch$.toPromise();
+      return searchSourceFetch$;
     },
     [data, savedSearch.searchSource, subject]
   );

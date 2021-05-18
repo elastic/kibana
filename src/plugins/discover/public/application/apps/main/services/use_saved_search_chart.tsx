@@ -6,54 +6,23 @@
  * Side Public License, v 1.
  */
 import { useCallback, useMemo } from 'react';
-
 import { BehaviorSubject } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
-import {
-  SearchSource,
-  tabifyAggResponse,
-  AggConfigs,
-  IInspectorInfo,
-} from '../../../../../../data/common';
+import { tabifyAggResponse } from '../../../../../../data/common';
+
 import { applyAggsToSearchSource, getDimensions } from '../utils';
 import { SavedSearch } from '../../../../saved_searches';
 import { DataPublicPluginStart, search } from '../../../../../../data/public';
 import { buildPointSeriesData, Chart as IChart } from '../components/chart/point_series';
 import { fetchStatuses } from '../../../components/constants';
+import { Adapters } from '../../../../../../inspector';
 
 export type ChartSubject = BehaviorSubject<{
   state: string;
   data?: IChart;
   bucketInterval?: TimechartBucketInterval;
 }>;
-
-async function fetch(
-  searchSource: SearchSource,
-  abortController: AbortController,
-  chartAggConfigs: AggConfigs,
-  data: DataPublicPluginStart,
-  searchSessionId: string,
-  inspector: IInspectorInfo
-) {
-  try {
-    const { rawResponse } = await searchSource
-      .fetch$({
-        abortSignal: abortController.signal,
-        sessionId: searchSessionId,
-        inspector,
-      })
-      .toPromise();
-    const tabifiedData = tabifyAggResponse(chartAggConfigs, rawResponse);
-    const dimensions = getDimensions(chartAggConfigs, data);
-    if (!dimensions) {
-      return;
-    }
-    return buildPointSeriesData(tabifiedData, dimensions);
-  } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') return;
-    data.search.showError(error);
-  }
-}
 
 export function useSavedSearchChart({
   savedSearch,
@@ -70,32 +39,60 @@ export function useSavedSearchChart({
   );
 
   const fetchData = useCallback(
-    (abortController: AbortController, searchSessionId: string, inspector) => {
+    ({
+      abortController,
+      searchSessionId,
+      inspectorAdapters,
+    }: {
+      abortController: AbortController;
+      searchSessionId: string;
+      inspectorAdapters: Adapters;
+    }) => {
       const searchSource = savedSearch.searchSource.createChild();
       const indexPattern = savedSearch.searchSource.getField('index');
       searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern!));
       searchSource.setField('size', 0);
-
       const chartAggConfigs = applyAggsToSearchSource(searchSource, interval, data);
-      const bucketAggConfig = chartAggConfigs!.aggs[1];
-
-      const newInterval =
-        bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
-          ? bucketAggConfig.buckets?.getInterval()
-          : undefined;
 
       subject.next({ state: fetchStatuses.UNINITIALIZED });
 
-      return fetch(
-        searchSource,
-        abortController,
-        chartAggConfigs!,
-        data,
-        searchSessionId,
-        inspector
-      ).then((result) => {
-        subject.next({ state: fetchStatuses.COMPLETE, data: result, bucketInterval: newInterval });
+      const searchSourceFetch$ = searchSource.fetch$({
+        abortSignal: abortController.signal,
+        sessionId: searchSessionId,
+        inspector: {
+          adapter: inspectorAdapters.requests,
+          title: i18n.translate('discover.inspectorRequestDataTitleChart', {
+            defaultMessage: 'chart data',
+          }),
+          description: i18n.translate('discover.inspectorRequestDescriptionChart', {
+            defaultMessage:
+              'This request queries Elasticsearch to fetch the chart data for the search.',
+          }),
+        },
       });
+
+      searchSourceFetch$.subscribe({
+        next: ({ rawResponse }) => {
+          const bucketAggConfig = chartAggConfigs!.aggs[1];
+          const tabifiedData = tabifyAggResponse(chartAggConfigs, rawResponse);
+          const dimensions = getDimensions(chartAggConfigs, data);
+          if (!dimensions) {
+            return;
+          }
+          const newInterval =
+            bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
+              ? bucketAggConfig.buckets?.getInterval()
+              : undefined;
+          const pointSeriesData = buildPointSeriesData(tabifiedData, dimensions);
+          subject.next({
+            state: fetchStatuses.COMPLETE,
+            data: pointSeriesData,
+            bucketInterval: newInterval,
+          });
+          return pointSeriesData;
+        },
+      });
+      return searchSourceFetch$;
     },
     [data, interval, savedSearch.searchSource, subject]
   );

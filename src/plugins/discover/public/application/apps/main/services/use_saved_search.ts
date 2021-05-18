@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 import { useMemo, useEffect, useRef, useCallback } from 'react';
-import { merge, Subject, BehaviorSubject } from 'rxjs';
-import { i18n } from '@kbn/i18n';
+import { merge, Subject, BehaviorSubject, zip } from 'rxjs';
 import { debounceTime, tap, filter } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import { DiscoverServices } from '../../../../build_services';
@@ -24,6 +23,7 @@ import { useSavedSearchDocuments } from './use_saved_search_documents';
 import { AutoRefreshDoneFn } from '../../../../../../data/public';
 import { calcFieldCounts } from '../utils/calc_field_counts';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../../common';
+import { validateTimeRange } from '../utils/validate_time_range';
 
 export interface UseSavedSearch {
   chart$: ChartSubject;
@@ -104,7 +104,7 @@ export const useSavedSearch = ({
     savedSearch,
   });
 
-  const { fetch } = useSavedSearchDocuments({
+  const { fetch$: docs$, fetch: fetchDocs } = useSavedSearchDocuments({
     services,
     indexPattern,
     useNewFieldsApi,
@@ -114,56 +114,53 @@ export const useSavedSearch = ({
 
   const fetchAll = useCallback(
     (resetFieldCounts = false) => {
+      if (!validateTimeRange(services.timefilter.getTime(), services.toastNotifications)) {
+        return Promise.reject();
+      }
       const inspectorAdapters = { requests: new RequestAdapter() };
-      const inspector = {
-        adapter: inspectorAdapters.requests,
-        title: i18n.translate('discover.inspectorRequestDataTitle', {
-          defaultMessage: 'data',
-        }),
-        description: i18n.translate('discover.inspectorRequestDescription', {
-          defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
-        }),
-      };
       cache.current.fetchStatus = fetchStatuses.LOADING;
 
       if (abortControllerRef.current) abortControllerRef.current.abort();
       abortControllerRef.current = new AbortController();
-      const requests: Array<Promise<unknown>> = [];
       const searchSessionId = searchSessionManager.getNextSearchSessionId();
 
-      requests.push(fetch(abortControllerRef.current, searchSessionId, inspector));
-
-      if (indexPattern.timeFieldName && !state.hideChart) {
-        requests.push(fetchChart(abortControllerRef.current, searchSessionId, inspector));
-      }
-
-      requests.push(fetchHits(abortControllerRef.current, searchSessionId, inspector));
       savedSearch$.next({
         state: fetchStatuses.LOADING,
         fetchCounter: ++cache.current.fetchCounter,
       });
 
-      Promise.all(requests)
-        .then((res) => {
-          cache.current.fetchStatus = fetchStatuses.COMPLETE;
+      const fetchVars = {
+        abortController: abortControllerRef.current,
+        searchSessionId,
+        inspectorAdapters,
+      };
 
-          if (res[0]) {
+      const fetches$ =
+        indexPattern.timeFieldName && !state.hideChart
+          ? zip(fetchDocs(fetchVars), fetchChart(fetchVars), fetchHits(fetchVars), (docs) => ({
+              docs,
+            }))
+          : zip(fetchDocs(fetchVars), fetchHits(fetchVars), (docs) => ({ docs }));
+      fetches$.subscribe(
+        () => {
+          const documents = docs$.value.documents;
+          if (documents) {
             const newFieldCounts = calcFieldCounts(
               resetFieldCounts ? {} : cache.current.fieldCounts,
-              res[0] as ElasticSearchHit[],
+              documents,
               indexPattern
             );
 
             savedSearch$.next({
               state: fetchStatuses.COMPLETE,
-              rows: res[0] as ElasticSearchHit[],
+              rows: documents,
               inspectorAdapters,
-              fieldCounts: newFieldCounts,
+              fieldCounts: {},
             });
             cache.current.fieldCounts = newFieldCounts;
           }
-        })
-        .catch((error) => {
+        },
+        (error) => {
           if (error instanceof Error && error.name === 'AbortError') return;
           cache.current.fetchStatus = fetchStatuses.ERROR;
           services.data.search.showError(error);
@@ -172,21 +169,25 @@ export const useSavedSearch = ({
             inspectorAdapters,
             fetchError: error,
           });
-        })
-        .finally(() => {
+        },
+        () => {
           autoRefreshDoneCb.current?.();
           autoRefreshDoneCb.current = undefined;
-        });
+        }
+      );
     },
     [
-      fetch,
+      services.timefilter,
+      services.toastNotifications,
+      services.data.search,
+      searchSessionManager,
+      savedSearch$,
+      indexPattern,
+      state.hideChart,
+      fetchDocs,
       fetchChart,
       fetchHits,
-      indexPattern,
-      savedSearch$,
-      searchSessionManager,
-      services.data.search,
-      state.hideChart,
+      docs$.value.documents,
     ]
   );
 

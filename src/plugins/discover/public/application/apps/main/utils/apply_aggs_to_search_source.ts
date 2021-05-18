@@ -35,8 +35,6 @@ export function applyAggsToSearchSource(
   ];
   const chartAggConfigs = data.search.aggs.createAggConfigs(indexPattern, visStateAggs);
 
-  searchSource.setField('aggs', function () {
-    return chartAggConfigs.toDsl();
-  });
+  searchSource.setField('aggs', () => chartAggConfigs.toDsl());
   return chartAggConfigs;
 }
