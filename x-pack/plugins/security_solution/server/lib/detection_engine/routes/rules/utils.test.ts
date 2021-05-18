@@ -32,7 +32,7 @@ import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_fro
 import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 import {
   getMlRuleParams,
