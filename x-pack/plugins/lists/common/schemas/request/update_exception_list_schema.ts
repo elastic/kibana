@@ -17,9 +17,10 @@ import {
   name,
   osTypeArrayOrUndefined,
   tags,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
 
-import { _version, list_id, namespace_type, version } from '../common/schemas';
+import { _version, list_id, namespace_type } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
 export const updateExceptionListSchema = t.intersection([

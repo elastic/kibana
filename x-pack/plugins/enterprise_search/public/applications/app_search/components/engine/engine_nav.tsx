@@ -70,6 +70,7 @@ export const EngineNav: React.FC = () => {
     dataLoading,
     isSampleEngine,
     isMetaEngine,
+    hasSchemaErrors,
     hasSchemaConflicts,
     hasUnconfirmedSchemaFields,
     engine,
@@ -128,9 +129,19 @@ export const EngineNav: React.FC = () => {
           shouldShowActiveForSubroutes
           data-test-subj="EngineSchemaLink"
         >
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
             <EuiFlexItem>{SCHEMA_TITLE}</EuiFlexItem>
             <EuiFlexItem className="appSearchNavIcons">
+              {hasSchemaErrors && (
+                <EuiIcon
+                  type="alert"
+                  color="danger"
+                  title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.errors', {
+                    defaultMessage: 'Schema change errors',
+                  })}
+                  data-test-subj="EngineNavSchemaErrors"
+                />
+              )}
               {hasUnconfirmedSchemaFields && (
                 <EuiIcon
                   type="iInCircle"
@@ -179,7 +190,7 @@ export const EngineNav: React.FC = () => {
           to={generateEnginePath(ENGINE_RELEVANCE_TUNING_PATH)}
           data-test-subj="EngineRelevanceTuningLink"
         >
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
             <EuiFlexItem>{RELEVANCE_TUNING_TITLE}</EuiFlexItem>
             <EuiFlexItem className="appSearchNavIcons">
               {invalidBoosts && (
