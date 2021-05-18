@@ -85,24 +85,27 @@ describe('#hostname', () => {
     expect(hostNameSchema.validate('www.example.com')).toBe('www.example.com');
     expect(hostNameSchema.validate('3domain.local')).toBe('3domain.local');
     expect(hostNameSchema.validate('hostname')).toBe('hostname');
-    // DOMAIN_INVALID_TLDS_CHARS (last segment must start with alphanum) - https://github.com/sideway/address/blob/master/lib/domain.js#L88
-    // expect(hostNameSchema.validate('2387628')).toBe('2387628');
     expect(hostNameSchema.validate('::1')).toBe('::1');
     expect(hostNameSchema.validate('0:0:0:0:0:0:0:1')).toBe('0:0:0:0:0:0:0:1');
     expect(hostNameSchema.validate('xn----ascii-7gg5ei7b1i.xn--90a3a')).toBe(
       'xn----ascii-7gg5ei7b1i.xn--90a3a'
     );
 
-    // DOMAIN_LONG_SEGMENT (63 chars max per segment) - https://github.com/sideway/address/blob/master/lib/domain.js#L79
-    // const hostNameWithMaxAllowedLength = 'a'.repeat(100);
-    // expect(hostNameSchema.validate(hostNameWithMaxAllowedLength)).toBe(
-    //  hostNameWithMaxAllowedLength
-    // );
+    const hostNameWithMaxAllowedLength = Array(4).fill('a'.repeat(63)).join('.');
+    expect(hostNameSchema.validate(hostNameWithMaxAllowedLength)).toBe(
+      hostNameWithMaxAllowedLength
+    );
   });
 
   test('returns error when value is not a valid hostname', () => {
     const hostNameSchema = schema.string({ hostname: true });
 
+    expect(() => hostNameSchema.validate('2387628')).toThrowErrorMatchingInlineSnapshot(
+      `"value must be a valid hostname (see RFC 1123)."`
+    );
+    expect(() =>
+      hostNameSchema.validate(Array(4).fill('a'.repeat(64)).join('.'))
+    ).toThrowErrorMatchingInlineSnapshot(`"value must be a valid hostname (see RFC 1123)."`);
     expect(() => hostNameSchema.validate('host:name')).toThrowErrorMatchingInlineSnapshot(
       `"value must be a valid hostname (see RFC 1123)."`
     );
@@ -115,9 +118,7 @@ describe('#hostname', () => {
     expect(() => hostNameSchema.validate('0:?:0:0:0:0:0:1')).toThrowErrorMatchingInlineSnapshot(
       `"value must be a valid hostname (see RFC 1123)."`
     );
-
-    const tooLongHostName = 'a'.repeat(256);
-    expect(() => hostNameSchema.validate(tooLongHostName)).toThrowErrorMatchingInlineSnapshot(
+    expect(() => hostNameSchema.validate('a'.repeat(256))).toThrowErrorMatchingInlineSnapshot(
       `"value must be a valid hostname (see RFC 1123)."`
     );
   });
