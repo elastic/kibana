@@ -7,7 +7,7 @@
  */
 
 import { extname } from 'path';
-import Accept from '@hapi/accept';
+import Accept from 'accept';
 import { open } from './fs';
 
 declare module 'accept' {
