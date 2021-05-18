@@ -9,7 +9,7 @@
 import { mapValues } from 'lodash';
 import { AnyExpressionFunctionDefinition } from '../../types';
 import { ExecutionContext } from '../../../execution/types';
-import { Datatable, DatatableColumn } from '../../../expression_types';
+import { Datatable } from '../../../expression_types';
 
 /**
  * Takes a function spec and passes in default args,
@@ -224,32 +224,4 @@ const stringTable: Datatable = {
   ],
 };
 
-// Emulates a SQL table that doesn't have any IDs
-const sqlTable: Datatable = {
-  type: 'datatable',
-  columns: [
-    ({
-      name: 'name',
-      meta: { type: 'string' },
-    } as unknown) as DatatableColumn,
-    ({
-      name: 'time',
-      meta: { type: 'date' },
-    } as unknown) as DatatableColumn,
-    ({
-      name: 'price',
-      meta: { type: 'number' },
-    } as unknown) as DatatableColumn,
-    ({
-      name: 'quantity',
-      meta: { type: 'number' },
-    } as unknown) as DatatableColumn,
-    ({
-      name: 'in_stock',
-      meta: { type: 'boolean' },
-    } as unknown) as DatatableColumn,
-  ],
-  rows: [...testTable.rows],
-};
-
-export { emptyTable, testTable, stringTable, sqlTable };
+export { emptyTable, testTable, stringTable };

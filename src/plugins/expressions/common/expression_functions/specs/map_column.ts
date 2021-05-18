@@ -44,7 +44,7 @@ export const mapColumn: ExpressionFunctionDefinition<
       types: ['string', 'null'],
       help: i18n.translate('expressions.functions.mapColumn.args.idHelpText', {
         defaultMessage:
-          'An optional id of the resulting column. When `null` the name/column argument is used as id.',
+          'An optional id of the resulting column. When no id is provided, the id will be looked up from the existing column and default to the name.',
       }),
       required: false,
       default: null,
@@ -86,9 +86,18 @@ export const mapColumn: ExpressionFunctionDefinition<
         .expression?.(...params)
         .pipe(take(1))
         .toPromise() ?? Promise.resolve(null);
-    const columnId = args.id != null ? args.id : args.name;
 
     const columns = [...input.columns];
+    const existingColumnIndex = columns.findIndex(({ id, name }) => {
+      if (args.id) {
+        return id === args.id;
+      }
+      return name === args.name;
+    });
+    const columnLength = columns.length;
+    const columnId =
+      existingColumnIndex === -1 ? args.id ?? args.name : columns[existingColumnIndex].id;
+
     const rowPromises = input.rows.map((row) => {
       return expression({
         type: 'datatable',
@@ -101,21 +110,6 @@ export const mapColumn: ExpressionFunctionDefinition<
     });
 
     return Promise.all(rowPromises).then((rows) => {
-      const existingColumnIndex = columns.findIndex(({ id, name }) => {
-        if (args.id) {
-          if (!id) {
-            return name === args.id;
-          }
-          // Columns that have IDs are allowed to have duplicate names, for example esaggs
-          return id === args.id;
-        }
-        // If the column has an ID, but there is no ID argument to mapColumn
-        if (id) {
-          return id === args.name;
-        }
-        // Columns without ID use name as the unique key. For example, SQL output does not have IDs
-        return name === args.name;
-      });
       const type = rows.length ? getType(rows[0][columnId]) : 'null';
       const newColumn = {
         id: columnId,
@@ -128,7 +122,7 @@ export const mapColumn: ExpressionFunctionDefinition<
       }
 
       if (existingColumnIndex === -1) {
-        columns.push(newColumn);
+        columns[columnLength] = newColumn;
       } else {
         columns[existingColumnIndex] = newColumn;
       }
