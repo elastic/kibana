@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EntriesArray, validate } from '@kbn/securitysolution-io-ts-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { ListsPluginRouter } from '../types';
