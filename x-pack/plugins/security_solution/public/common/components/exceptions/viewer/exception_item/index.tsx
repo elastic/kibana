@@ -20,8 +20,8 @@ import { ExceptionDetails } from './exception_details';
 import { ExceptionEntries } from './exception_entries';
 import { getFormattedComments } from '../../helpers';
 import { getFormattedEntries } from '../helpers';
-import { FormattedEntry, ExceptionListItemIdentifiers } from '../../types';
-import { ExceptionListItemSchema } from '../../../../../../public/lists_plugin_deps';
+import type { FormattedEntry, ExceptionListItemIdentifiers } from '../../types';
+import type { ExceptionListItemSchema } from '../../../../../../public/shared_imports';
 
 const MyFlexItem = styled(EuiFlexItem)`
   &.comments--show {

@@ -108,6 +108,7 @@ export class APMPlugin
     plugins.home?.tutorials.registerTutorial(() => {
       const ossPart = ossTutorialProvider({});
       if (this.currentConfig!['xpack.apm.ui.enabled'] && ossPart.artifacts) {
+        // @ts-expect-error ossPart.artifacts.application is readonly
         ossPart.artifacts.application = {
           path: '/app/apm',
           label: i18n.translate(

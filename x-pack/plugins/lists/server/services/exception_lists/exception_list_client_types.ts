@@ -30,6 +30,8 @@ import {
 import {
   EmptyStringArrayDecoded,
   NonEmptyStringArrayDecoded,
+  Version,
+  VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-types';
 
 import {
@@ -43,8 +45,6 @@ import {
   PerPageOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-  Version,
-  VersionOrUndefined,
   _VersionOrUndefined,
 } from '../../../common/schemas';
 
