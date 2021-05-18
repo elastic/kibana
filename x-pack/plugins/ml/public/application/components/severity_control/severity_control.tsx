@@ -7,9 +7,14 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
-import { SEVERITY_OPTIONS } from '../controls/select_severity/select_severity';
+import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiRange,
+  EuiRangeProps,
+} from '@elastic/eui';
 import { ANOMALY_THRESHOLD } from '../../../../common';
 import './styles.scss';
 
@@ -44,41 +49,53 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
     },
   ];
 
-  const toggleButtons = SEVERITY_OPTIONS.map((v) => ({
-    value: v.val,
-    label: v.display,
-  }));
+  const label = i18n.translate('xpack.ml.severitySelector.formControlLabel', {
+    defaultMessage: 'Severity',
+  });
+
+  const resultValue = value ?? ANOMALY_THRESHOLD.LOW;
+
+  const onChangeCallback = (
+    e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
+  ) => {
+    // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
+    onChange(Number(e.target.value));
+  };
 
   return (
-    <EuiFormRow
-      fullWidth
-      label={
-        <FormattedMessage
-          id="xpack.ml.severitySelector.formControlLabel"
-          defaultMessage="Severity"
-        />
-      }
-    >
-      <EuiRange
-        className={'mlSeverityControl'}
-        fullWidth
-        min={ANOMALY_THRESHOLD.LOW}
-        max={MAX_ANOMALY_SCORE}
-        value={value ?? ANOMALY_THRESHOLD.LOW}
-        onChange={(e) => {
-          // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
-          onChange(Number(e.target.value));
-        }}
-        showLabels
-        showValue
-        aria-label={i18n.translate('xpack.ml.severitySelector.formControlAriaLabel', {
-          defaultMessage: 'Select severity threshold',
-        })}
-        showTicks
-        ticks={toggleButtons}
-        levels={levels}
-        data-test-subj={'mlAnomalyAlertScoreSelection'}
-      />
+    <EuiFormRow fullWidth>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFieldNumber
+            id="severityControl"
+            style={{ width: '70px' }}
+            compressed
+            prepend={label}
+            value={resultValue}
+            onChange={onChangeCallback}
+            min={ANOMALY_THRESHOLD.LOW}
+            max={MAX_ANOMALY_SCORE}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiRange
+            className={'mlSeverityControl'}
+            fullWidth
+            min={ANOMALY_THRESHOLD.LOW}
+            max={MAX_ANOMALY_SCORE}
+            value={resultValue}
+            onChange={onChangeCallback}
+            aria-label={i18n.translate('xpack.ml.severitySelector.formControlAriaLabel', {
+              defaultMessage: 'Select severity threshold',
+            })}
+            showTicks
+            tickInterval={10}
+            showRange={false}
+            levels={levels}
+            data-test-subj={'mlAnomalyAlertScoreSelection'}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFormRow>
   );
 });
