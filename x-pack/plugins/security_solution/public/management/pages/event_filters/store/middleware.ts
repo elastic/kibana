@@ -14,8 +14,6 @@ import {
 
 import { EventFiltersHttpService } from '../service';
 
-import { getLastLoadedResourceState } from '../../../state/async_resource_state';
-
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
@@ -33,7 +31,13 @@ import {
   getFormEntry,
   getSubmissionResource,
   getNewComment,
+  isDeletionInProgress,
+  getItemToDelete,
+  getDeletionState,
 } from './selector';
+
+import { parseQueryFilterToKQL } from '../../../common/utils';
+import { SEARCHABLE_FIELDS } from '../constants';
 import {
   EventFiltersListPageData,
   EventFiltersListPageState,
@@ -44,7 +48,9 @@ import {
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
+  getLastLoadedResourceState,
 } from '../../../state';
+import { ServerApiError } from '../../../../common/types';
 
 const addNewComments = (
   entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema,
@@ -233,12 +239,13 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
       },
     });
 
-    const { page_size: pageSize, page_index: pageIndex } = getCurrentLocation(state);
+    const { page_size: pageSize, page_index: pageIndex, filter } = getCurrentLocation(state);
     const query: EventFiltersServiceGetListOptions = {
       page: pageIndex + 1,
       perPage: pageSize,
       sortField: 'created_at',
       sortOrder: 'desc',
+      filter: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
     };
 
     try {
@@ -275,6 +282,43 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
   }
 };
 
+const eventFilterDeleteEntry: MiddlewareActionHandler = async (
+  { getState, dispatch },
+  eventFiltersService
+) => {
+  const state = getState();
+
+  if (isDeletionInProgress(state)) {
+    return;
+  }
+
+  const itemId = getItemToDelete(state)?.id;
+
+  if (!itemId) {
+    return;
+  }
+
+  dispatch({
+    type: 'eventFilterDeleteStatusChanged',
+    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+    // @ts-ignore
+    payload: createLoadingResourceState(getDeletionState(state).status),
+  });
+
+  try {
+    const response = await eventFiltersService.deleteOne(itemId);
+    dispatch({
+      type: 'eventFilterDeleteStatusChanged',
+      payload: createLoadedResourceState(response),
+    });
+  } catch (e) {
+    dispatch({
+      type: 'eventFilterDeleteStatusChanged',
+      payload: createFailedResourceState<ExceptionListItemSchema, ServerApiError>(e.body ?? e),
+    });
+  }
+};
+
 export const createEventFiltersPageMiddleware = (
   eventFiltersService: EventFiltersService
 ): ImmutableMiddleware<EventFiltersListPageState, AppAction> => {
@@ -294,9 +338,12 @@ export const createEventFiltersPageMiddleware = (
       if (
         action.type === 'userChangedUrl' ||
         action.type === 'eventFiltersCreateSuccess' ||
-        action.type === 'eventFiltersUpdateSuccess'
+        action.type === 'eventFiltersUpdateSuccess' ||
+        action.type === 'eventFilterDeleteStatusChanged'
       ) {
         refreshListDataIfNeeded(store, eventFiltersService);
+      } else if (action.type === 'eventFilterDeleteSubmit') {
+        eventFilterDeleteEntry(store, eventFiltersService);
       }
     }
   };
