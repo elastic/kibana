@@ -122,4 +122,6 @@ export interface UsageStats {
   'labs:canvas:enable_ui': boolean;
   'labs:canvas:useDataService': boolean;
   'labs:presentation:timeToPresent': boolean;
+  'labs:dashboard:enable_ui': boolean;
+  'labs:dashboard:deferBelowFold': boolean;
 }

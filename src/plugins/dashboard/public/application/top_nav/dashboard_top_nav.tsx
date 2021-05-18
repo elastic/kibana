@@ -13,6 +13,7 @@ import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import UseUnmount from 'react-use/lib/useUnmount';
+import { UI_SETTINGS } from '../../../common';
 import { BaseVisType, VisTypeAlias } from '../../../../visualizations/public';
 import {
   AddFromLibraryButton,
@@ -30,6 +31,7 @@ import {
   SaveResult,
   showSaveModal,
 } from '../../services/saved_objects';
+import { LazyLabsFlyout, withSuspense } from '../../../../presentation_util/public';
 
 import { NavAction } from '../../types';
 import { DashboardSavedObject } from '../..';
@@ -76,6 +78,8 @@ export interface DashboardTopNavProps {
   viewMode: ViewMode;
 }
 
+const Flyout = withSuspense(LazyLabsFlyout, null);
+
 export function DashboardTopNav({
   dashboardStateManager,
   clearUnsavedChanges,
@@ -109,11 +113,13 @@ export function DashboardTopNav({
 
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
+  const [isLabsShown, setIsLabsShown] = useState(false);
 
   const lensAlias = visualizations.getAliases().find(({ name }) => name === 'lens');
   const quickButtonVisTypes = ['markdown', 'maps'];
   const stateTransferService = embeddable.getStateTransfer();
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+  const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
   const trackUiMetric = usageCollection?.reportUiCounter.bind(
     usageCollection,
@@ -489,6 +495,12 @@ export function DashboardTopNav({
           dashboardCapabilities,
         });
     }
+
+    if (isLabsEnabled) {
+      actions[TopNavIds.LABS] = () => {
+        setIsLabsShown(!isLabsShown);
+      };
+    }
     return actions;
   }, [
     dashboardCapabilities,
@@ -499,6 +511,8 @@ export function DashboardTopNav({
     runSave,
     runQuickSave,
     share,
+    isLabsEnabled,
+    isLabsShown,
   ]);
 
   UseUnmount(() => {
@@ -528,6 +542,7 @@ export function DashboardTopNav({
       isNewDashboard: !savedDashboard.id,
       isDirty: dashboardStateManager.getIsDirty(timefilter),
       isSaveInProgress,
+      isLabsEnabled,
     });
 
     const badges = unsavedChanges
@@ -620,6 +635,9 @@ export function DashboardTopNav({
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
+      {isLabsEnabled && isLabsShown ? (
+        <Flyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+      ) : null}
       {viewMode !== ViewMode.VIEW ? (
         <>
           <EuiHorizontalRule margin="none" />
