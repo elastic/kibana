@@ -9,7 +9,7 @@
 import { Config } from './config';
 
 describe('Config', () => {
-  it('recognize keys under `object().pattern`', () => {
+  it('recognizes keys under `object().pattern`', () => {
     const config = new Config({
       settings: {
         services: {
