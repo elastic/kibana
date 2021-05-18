@@ -56,7 +56,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   public setup(core: CoreSetup, plugins: PluginSetup) {
     plugins.features.registerKibanaFeature({
       id: OBS_CASES_ID,
-      name: i18n.translate('xpack.observability.featureRegistry.linkSecuritySolutionTitle', {
+      name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
         defaultMessage: 'Cases',
       }),
       order: 1100,

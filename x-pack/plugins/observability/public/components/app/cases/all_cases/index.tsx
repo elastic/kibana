@@ -15,7 +15,7 @@ import {
   useFormatUrl,
 } from '../../../../pages/cases/links';
 import { useKibana } from '../../../../utils/kibana_react';
-import { CASES_APP_ID } from '../constants';
+import { CASES_APP_ID, CASES_OWNER } from '../constants';
 
 export interface AllCasesNavProps {
   detailName: string;
@@ -73,7 +73,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     },
     showTitle: false,
     userCanCrud,
-    owner: [CASES_APP_ID],
+    owner: [CASES_OWNER],
   });
 });
 
