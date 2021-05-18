@@ -92,7 +92,17 @@ The existing agents in {kib} are not migrated as part of the migration to Fleet.
 *Impact* +
 The existing agent API keys are invalidated and display as `Inactive` on the *Agents* page.
 ====
-      
+
+[float]
+[[known-issue-7.13.0]]
+=== Known issue
+
+*Details* +
+ An issue was found where, on page load, Kibana calls the Fleet packages API. For more information, refer to {kibana-issue}100285[#100285].
+
+*Impact* +
+In some cases, this results in dev browser tools displaying a 403 error with the message "Access to Fleet API require the superuser role". Though this error might display during debugging tasks, it does not impact your access to Fleet.
+
 
 // end::notable-breaking-changes[]
 
@@ -115,7 +125,7 @@ Scripted fields are deprecated. For more information, refer to {kibana-pull}9757
 *Impact* +
 For greater flexibility and Painless scripting language support, use runtime fields.
 ====
-      
+
 [discrete]
 [[deprecation-96517]]
 .Deprecates the location map from Uptime
@@ -127,7 +137,7 @@ The location map is removed from the *Uptime* monitor page. For more information
 *Impact* +
 For monitoring details, refer to the *Availability* and *Last check* columns.
 ====
-      
+
 [discrete]
 [[deprecation-96398]]
 .Deprecates migrations.enableV2 setting
@@ -136,7 +146,7 @@ For monitoring details, refer to the *Availability* and *Last check* columns.
 *Details* +
 Deprecates the `migrations.enableV2` setting. For more information, refer to {kibana-pull}96398[#96398].
 ====
-      
+
 [discrete]
 [[deprecation-95510]]
 .Deprecates the /src/legacy directory
@@ -148,7 +158,7 @@ The legacy `/src/legacy` directory is deprecated. For more information, refer to
 *Impact* +
 Use the `/src/legacy` directory in the Bazel build system.
 ====
-      
+
 [discrete]
 [[deprecation-94238]]
 .Deprecates legacy logging dest, json, verbosity, and rotate configurations
@@ -158,10 +168,10 @@ Use the `/src/legacy` directory in the Bazel build system.
 Deprecates legacy logging configuration in favor of the new {kib} Platform logging system. For example, deprecates `logging.json` and `logging.rotate.*`. For more information, refer to {kibana-pull}94238[#94238].
 
 *Impact* +
-When `logging.root.appenders` is configured and won't show a deprecation warning, `--verbose` replaces the legacy-format logs with the {kib} platform log format. 
+When `logging.root.appenders` is configured and won't show a deprecation warning, `--verbose` replaces the legacy-format logs with the {kib} platform log format.
 When {kib} platform logging is not configured, `--verbose` sets `logging.verbose: true` and provides a warning for the deprecated configuration.
 ====
-      
+
 [discrete]
 [[deprecation-93977]]
 .Deprecates old alerts APIs
@@ -173,7 +183,7 @@ The `/api/alerts/*` APIs are deprecated and will be removed in 8.0. For more inf
 *Impact* +
 Use the new `/api/alerting/*` APIs.
 ====
-      
+
 [discrete]
 [[deprecation-92451]]
 .Deprecates old actions APIs
@@ -185,7 +195,7 @@ The old `/api/actions/*` APIs are deprecated and will be removed in 8.0. For mor
 *Impact* +
 Use the new `/api/actions/*` APIs.
 ====
-      
+
 [float]
 [[features-7.13.0]]
 === Features
@@ -632,8 +642,8 @@ Use Geo containment alerts.
 [%collapsible]
 ====
 *Details* +
-When you upgrade to 7.12.0, {kib} uses a new algorithm to migrate saved objects to reduce the downtime caused by temporary issues, such as network errors or temporarily overloaded {es} clusters. 
-With the new algorithm, {kib} now retries the failed migrations without user intervention, which allows the migration to continue after the issues are resolved. 
+When you upgrade to 7.12.0, {kib} uses a new algorithm to migrate saved objects to reduce the downtime caused by temporary issues, such as network errors or temporarily overloaded {es} clusters.
+With the new algorithm, {kib} now retries the failed migrations without user intervention, which allows the migration to continue after the issues are resolved.
 For more information, refer to <<upgrade-migrations, saved object upgrade migrations>>.
 
 *Impact* +
@@ -646,7 +656,7 @@ Before you upgrade to 7.12.0, review the documentation for <<upgrade-migrations-
 [%collapsible]
 ====
 *Details* +
-In 7.12.0, {kib} introduces a major incompatibility with cross-cluster search. When one or more remote {es} clusters use a version prior to 7.12.0, *Discover*, *Maps*, *Canvas*, and *Logs* are 
+In 7.12.0, {kib} introduces a major incompatibility with cross-cluster search. When one or more remote {es} clusters use a version prior to 7.12.0, *Discover*, *Maps*, *Canvas*, and *Logs* are
 unable to display the cluster data. For information about the cross-cluster search limitations in {kib}, refer to {kibana-issue}94965[#94965].
 
 *Impact* +
@@ -712,7 +722,7 @@ Deprecates `services.callCluster` in the alert and action type executors. For mo
 *Impact* +
 Use `services.scopedClusterClient`.
 ====
-      
+
 [discrete]
 [[deprecation-87114]]
 .Deprecates configuring [kib] with a `server.host` value of `0`
@@ -724,15 +734,15 @@ In the new version of joi, `0` is an invalid hostname. When upgraded, the extra 
 *Impact* +
 To bind to all interfaces, use `0.0.0.0`.
 ====
-      
+
 [discrete]
 [[deprecation-89296]]
 .Deprecates the use of `elasticsearch.logQueries`
 [%collapsible]
 ====
 *Details* +
-When `logging.verbose: true` or `logging.root.level: 'debug'`, {es} query logs are now always shown. 
-In 7.11.0 and earlier, {es} query logs were not included in verbose logging unless `elasticsearch.logQueries` was configured. 
+When `logging.verbose: true` or `logging.root.level: 'debug'`, {es} query logs are now always shown.
+In 7.11.0 and earlier, {es} query logs were not included in verbose logging unless `elasticsearch.logQueries` was configured.
 For more information, refer to {kibana-pull}89296[#89296].
 
 *Impact* +
@@ -754,7 +764,7 @@ logging:
       appenders: [console]
 ----
 ====
-      
+
 [float]
 [[features-7.12.0]]
 === Features
@@ -3077,9 +3087,9 @@ you make the necessary updates after you upgrade to 7.7.0.
 
 *Details* +
 
-Deprecates the `xpack.security.authc.saml.realm` and `xpack.security.authc.saml.maxRedirectURLSize` settings used for {kib} SAML authentication. 
+Deprecates the `xpack.security.authc.saml.realm` and `xpack.security.authc.saml.maxRedirectURLSize` settings used for {kib} SAML authentication.
 
-Deprecates the `xpack.security.authc.oidc.realm` settings used for {kib} OpenID Connect authentication. 
+Deprecates the `xpack.security.authc.oidc.realm` settings used for {kib} OpenID Connect authentication.
 
 For more information, refer to {kibana-pull}53010[#53010].
 
@@ -4779,7 +4789,7 @@ you make the necessary updates after you upgrade to 7.3.0.
 
 *Details:* Deprecates the `xpack.security.authProviders` and `xpack.security.public` settings used for {kib} SAML authentication. For more information, refer to {pull}37346[#37346].
 
-*Impact:* 
+*Impact:*
 
 When you use the SAML authentication provider, use the following settings:
 
