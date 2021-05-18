@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { DataPublicPluginStart } from '../shared_imports';
-import { EsRuntimeField } from '../types';
+import type { EsRuntimeField } from '../types';
 
 export interface RuntimeFieldPainlessError {
   message: string;

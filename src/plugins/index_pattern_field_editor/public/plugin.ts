@@ -8,9 +8,9 @@
 
 import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 
-import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
+import type { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getFieldEditorOpener } from './open_editor';
-import { FormatEditorService } from './service';
+import { FormatEditorService } from './service/format_editor_service';
 import { getDeleteFieldProvider } from './components/delete_field_provider';
 import { getFieldDeleteModalOpener } from './open_delete_modal';
 import { initApi } from './lib/api';

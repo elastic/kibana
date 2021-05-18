@@ -18,10 +18,10 @@ import {
   RuntimeType,
   UsageCollectionStart,
 } from '../shared_imports';
-import { Field, PluginStart, InternalFieldType } from '../types';
+import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
 import { deserializeField, getRuntimeFieldValidator, ApiService } from '../lib';
-import { Props as FieldEditorProps } from './field_editor/field_editor';
+import type { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 import { FieldEditorProvider } from './field_editor_context';
 import { FieldPreviewProvider } from './field_preview_context';

@@ -18,8 +18,8 @@ import React, {
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 
-import { FieldPreviewContext } from '../types';
-import { parseEsError } from '../lib';
+import type { FieldPreviewContext } from '../types';
+import { parseEsError } from '../lib/runtime_field_validation';
 import { RuntimeType, RuntimeField } from '../shared_imports';
 import { useFieldEditorContext } from './field_editor_context';
 

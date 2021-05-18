@@ -10,8 +10,8 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { UseField, useFormData, ES_FIELD_TYPES, useFormContext } from '../../../shared_imports';
 import { FormatSelectEditor, FormatSelectEditorProps } from '../../field_format_editor';
-import { FieldFormInternal } from '../field_editor';
-import { FieldFormatConfig } from '../../../types';
+import type { FieldFormInternal } from '../field_editor';
+import type { FieldFormatConfig } from '../../../types';
 
 export const FormatField = ({
   indexPattern,

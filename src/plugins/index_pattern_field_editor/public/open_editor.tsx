@@ -19,11 +19,9 @@ import {
   UsageCollectionStart,
 } from './shared_imports';
 
-import { InternalFieldType, CloseEditor } from './types';
+import type { PluginStart, InternalFieldType, CloseEditor } from './types';
 import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
-import { ApiService } from './lib';
-import { PluginStart } from './types';
-
+import { ApiService } from './lib/api';
 export interface OpenFieldEditorOptions {
   ctx: {
     indexPattern: IndexPattern;

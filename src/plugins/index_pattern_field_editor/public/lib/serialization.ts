@@ -7,7 +7,7 @@
  */
 
 import { IndexPatternField, IndexPattern } from '../shared_imports';
-import { Field } from '../types';
+import type { Field } from '../types';
 
 export const deserializeField = (
   indexPattern: IndexPattern,

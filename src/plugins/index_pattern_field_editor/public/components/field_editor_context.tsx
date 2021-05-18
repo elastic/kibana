@@ -9,8 +9,8 @@
 import React, { createContext, useContext, FunctionComponent, useMemo } from 'react';
 import { NotificationsStart } from 'src/core/public';
 import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
-import { ApiService } from '../lib';
-import { InternalFieldType } from '../types';
+import { ApiService } from '../lib/api';
+import type { InternalFieldType } from '../types';
 
 export interface Context {
   indexPattern: IndexPattern;
