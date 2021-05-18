@@ -12,7 +12,7 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import { IField } from '../fields/field';
-import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import { FieldFormatter, MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../common/constants';
 import { AbstractSourceDescriptor, Attribution } from '../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
 import { LICENSED_FEATURES } from '../../licensed_features';
@@ -34,6 +34,7 @@ export interface ISource {
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): Adapters | undefined;
   isFieldAware(): boolean;
+  isEditable(): Promise<boolean>;
   isFilterByMapBounds(): boolean;
   isGeoGridPrecisionAware(): boolean;
   isQueryAware(): boolean;
@@ -102,6 +103,10 @@ export class AbstractSource implements ISource {
   }
 
   isFieldAware(): boolean {
+    return false;
+  }
+
+  async isEditable(): Promise<boolean> {
     return false;
   }
 

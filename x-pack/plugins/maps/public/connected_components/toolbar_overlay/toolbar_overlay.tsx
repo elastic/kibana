@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { SetViewControl } from './set_view_control';
@@ -24,7 +23,6 @@ export interface Props {
   showEditButton: boolean;
   shapeDrawModeActive: boolean;
   pointDrawModeActive: boolean;
-  cancelEditing: () => void;
 }
 
 export function ToolbarOverlay(props: Props) {
@@ -54,26 +52,9 @@ export function ToolbarOverlay(props: Props) {
 
   function renderFeatureDrawControl() {
     return props.shapeDrawModeActive || props.pointDrawModeActive ? (
-      <>
-        <EuiFlexItem>
-          <FeatureDrawControl pointsOnly={props.pointDrawModeActive} />
-        </EuiFlexItem>
-        <EuiFlexItem key={'cancel'} grow={false}>
-          <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
-            <EuiButtonIcon
-              size="s"
-              onClick={props.cancelEditing}
-              iconType="exit"
-              aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.cancelDraw', {
-                defaultMessage: 'Exit feature editing',
-              })}
-              title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.cancelDrawTitle', {
-                defaultMessage: 'Exit feature editing',
-              })}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </>
+      <EuiFlexItem>
+        <FeatureDrawControl pointsOnly={props.pointDrawModeActive} />
+      </EuiFlexItem>
     ) : null;
   }
 

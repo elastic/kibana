@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { Component, RefObject } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import { EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Map as MbMap } from 'mapbox-gl';
 import { DRAW_TYPE } from '../../../../common/constants';
@@ -109,13 +109,6 @@ export class DrawTooltip extends Component<Props, State> {
       <div style={{ height: '26px', width: '26px', background: 'transparent' }} />
     );
 
-    const title =
-      this.props.indexPatternId && this.props.geoField ? (
-        <EuiPopoverTitle paddingSize="s">
-          {`${this.props.indexPatternId}: ${this.props.geoField}`}
-        </EuiPopoverTitle>
-      ) : undefined;
-
     return (
       <EuiPopover
         panelPaddingSize="s"
@@ -130,7 +123,6 @@ export class DrawTooltip extends Component<Props, State> {
           transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`,
         }}
       >
-        {title ? title : null}
         <EuiText color="subdued" size="xs">
           {instructions}
         </EuiText>

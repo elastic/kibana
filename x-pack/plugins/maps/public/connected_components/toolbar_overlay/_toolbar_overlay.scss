@@ -42,6 +42,12 @@
   }
 }
 
+.mapToolbarOverlay__button__exit {
+  .euiButtonIcon {
+    color: $euiColorDangerText !important;
+  }
+}
+
 .mapToolbarOverlay__button__selected {
   position: relative;
   transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;

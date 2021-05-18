@@ -384,8 +384,6 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
     }
     const layerSource = (await layer.getSource()) as AbstractESSource;
     const indexPattern = await layerSource.getIndexPattern();
-    const matchingIndexes = await getMatchingIndexes('n*');
-    console.log(matchingIndexes);
     await addFeatureToIndex(indexPattern.title, geometry, layerSource.getGeoFieldName());
     await dispatch(syncDataForAllLayers({ forceRefresh: true }));
   };

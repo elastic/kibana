@@ -13,10 +13,10 @@ import { DRAW_TYPE } from '../../../../../common/constants';
 import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 
 export interface Props {
-  cancelDraw: () => void;
   drawType: string;
   setDrawShape: (shapeToDraw: DRAW_TYPE) => void;
   pointsOnly?: boolean;
+  cancelEditing: () => void;
 }
 
 export function FeatureDrawControl(props: Props) {
@@ -142,6 +142,24 @@ export function FeatureDrawControl(props: Props) {
               })}
               aria-pressed={drawPointSelected}
               isSelected={drawPointSelected}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem key={'point'} grow={false}>
+          <EuiPanel
+            paddingSize="none"
+            className="mapToolbarOverlay__button mapToolbarOverlay__button__exit"
+          >
+            <EuiButtonIcon
+              size="s"
+              onClick={props.cancelEditing}
+              iconType="exit"
+              aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.cancelDraw', {
+                defaultMessage: 'Exit feature editing',
+              })}
+              title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.cancelDrawTitle', {
+                defaultMessage: 'Exit feature editing',
+              })}
             />
           </EuiPanel>
         </EuiFlexItem>

@@ -36,6 +36,7 @@ import { IField } from '../../fields/field';
 import { FieldFormatter } from '../../../../common/constants';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { getMatchingIndexes } from '../../../util';
 
 export function isSearchSourceAbortError(error: Error) {
   return error.name === 'AbortError';
@@ -68,6 +69,7 @@ export interface IESSource extends IVectorSource {
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
   indexPattern?: IndexPattern;
+  _isEditable: boolean | undefined;
 
   readonly _descriptor: AbstractESSourceDescriptor;
 
@@ -118,6 +120,17 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   isQueryAware(): boolean {
     return true;
+  }
+
+  async isEditable(): Promise<boolean> {
+    if (this._isEditable === undefined) {
+      if (!this.indexPattern) {
+        return false;
+      }
+      const matchingIndexes = await getMatchingIndexes(this.indexPattern.title);
+      this._isEditable = matchingIndexes.length <= 1;
+    }
+    return this._isEditable;
   }
 
   getIndexPatternIds(): string[] {
