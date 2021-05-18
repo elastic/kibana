@@ -67,7 +67,11 @@ describe('migration v2', () => {
           // },
           //
           //
-          dataArchive: Path.join(__dirname, 'archives', 'my_7_13_archive.zip'),
+          dataArchive: Path.join(
+            __dirname,
+            'archives',
+            '7.13.0_with_corrupt_and_transform_failures_docs.zip'
+          ),
         },
       },
     });
