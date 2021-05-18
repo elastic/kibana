@@ -2658,7 +2658,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/i18n@link:packages/kbn-i18n":
+"@kbn/i18n@link:bazel-bin/packages/kbn-i18n/npm_module":
   version "0.0.0"
   uid ""
 
@@ -2731,7 +2731,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/server-http-tools@link:packages/kbn-server-http-tools":
+"@kbn/server-http-tools@link:bazel-bin/packages/kbn-server-http-tools/npm_module":
   version "0.0.0"
   uid ""
 
