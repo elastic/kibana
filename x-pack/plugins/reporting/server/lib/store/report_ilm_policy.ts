@@ -13,7 +13,6 @@ export const reportingIlmPolicy: PutLifecycleRequest['body'] = {
     phases: {
       hot: {
         actions: {},
-        min_age: '0ms',
       },
     },
   },
