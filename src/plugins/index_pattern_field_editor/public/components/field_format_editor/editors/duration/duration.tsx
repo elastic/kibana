@@ -41,6 +41,7 @@ interface DurationFormatEditorFormatParams {
   inputFormat: string;
   outputFormat: string;
   showSuffix?: boolean;
+  useShortSuffix?: boolean;
 }
 
 export class DurationFormatEditor extends DefaultFormatEditor<
@@ -170,6 +171,21 @@ export class DurationFormatEditor extends DefaultFormatEditor<
                 checked={Boolean(formatParams.showSuffix)}
                 onChange={(e) => {
                   this.onChange({ showSuffix: !formatParams.showSuffix });
+                }}
+              />
+            </EuiFormRow>
+            <EuiFormRow>
+              <EuiSwitch
+                disabled={!Boolean(formatParams.showSuffix)}
+                label={
+                  <FormattedMessage
+                    id="indexPatternFieldEditor.duration.showSuffixLabel.short"
+                    defaultMessage="Use short suffix"
+                  />
+                }
+                checked={Boolean(formatParams.useShortSuffix)}
+                onChange={(e) => {
+                  this.onChange({ useShortSuffix: !formatParams.useShortSuffix });
                 }}
               />
             </EuiFormRow>

@@ -100,11 +100,17 @@ const outputFormats = [
     text: i18n.translate('data.fieldFormats.duration.outputFormats.asMilliseconds', {
       defaultMessage: 'Milliseconds',
     }),
+    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asMilliseconds.short', {
+      defaultMessage: 'ms',
+    }),
     method: 'asMilliseconds',
   },
   {
     text: i18n.translate('data.fieldFormats.duration.outputFormats.asSeconds', {
       defaultMessage: 'Seconds',
+    }),
+    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asSeconds.short', {
+      defaultMessage: 'sec',
     }),
     method: 'asSeconds',
   },
@@ -112,11 +118,17 @@ const outputFormats = [
     text: i18n.translate('data.fieldFormats.duration.outputFormats.asMinutes', {
       defaultMessage: 'Minutes',
     }),
+    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asMinutes.short', {
+      defaultMessage: 'min',
+    }),
     method: 'asMinutes',
   },
   {
     text: i18n.translate('data.fieldFormats.duration.outputFormats.asHours', {
       defaultMessage: 'Hours',
+    }),
+    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asHours.short', {
+      defaultMessage: 'hr',
     }),
     method: 'asHours',
   },
@@ -124,11 +136,17 @@ const outputFormats = [
     text: i18n.translate('data.fieldFormats.duration.outputFormats.asDays', {
       defaultMessage: 'Days',
     }),
+    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asDays.short', {
+      defaultMessage: 'd',
+    }),
     method: 'asDays',
   },
   {
     text: i18n.translate('data.fieldFormats.duration.outputFormats.asWeeks', {
       defaultMessage: 'Weeks',
+    }),
+    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asWeeks.short', {
+      defaultMessage: 'w',
     }),
     method: 'asWeeks',
   },
@@ -136,13 +154,25 @@ const outputFormats = [
     text: i18n.translate('data.fieldFormats.duration.outputFormats.asMonths', {
       defaultMessage: 'Months',
     }),
+    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asMonths.short', {
+      defaultMessage: 'mon',
+    }),
     method: 'asMonths',
   },
   {
     text: i18n.translate('data.fieldFormats.duration.outputFormats.asYears', {
       defaultMessage: 'Years',
     }),
+    shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asYears.short', {
+      defaultMessage: 'Yr',
+    }),
     method: 'asYears',
+  },
+  {
+    text: i18n.translate('data.fieldFormats.duration.outputFormats.dynamic', {
+      defaultMessage: 'Dynamic',
+    }),
+    method: 'dynamic',
   },
 ];
 
@@ -152,6 +182,22 @@ function parseInputAsDuration(val: number, inputFormat: string) {
     ? 'seconds'
     : inputFormat) as unitOfTime.DurationConstructor;
   return moment.duration(val * ratio, kind);
+}
+
+function formatInputDynamically(
+  val: number,
+  inputFormat: string,
+  outputPrecision: number,
+  showSuffix: boolean,
+  useShortSuffix: boolean
+) {
+  const ratio = ratioToSeconds[inputFormat] || 1;
+  const kind = (inputFormat in ratioToSeconds
+    ? 'seconds'
+    : inputFormat) as unitOfTime.DurationConstructor;
+  const valueInDuration = moment.duration(val * ratio, kind);
+
+  return formatDuration(valueInDuration, outputPrecision, showSuffix, useShortSuffix);
 }
 
 export class DurationFormat extends FieldFormat {
@@ -167,6 +213,11 @@ export class DurationFormat extends FieldFormat {
   isHuman() {
     return this.param('outputFormat') === HUMAN_FRIENDLY;
   }
+
+  isDynamic() {
+    return this.param('outputFormat') === 'dynamic';
+  }
+
   getParamDefaults() {
     return {
       inputFormat: DEFAULT_INPUT_FORMAT.kind,
@@ -180,7 +231,9 @@ export class DurationFormat extends FieldFormat {
     const outputFormat = this.param('outputFormat') as keyof Duration;
     const outputPrecision = this.param('outputPrecision');
     const showSuffix = Boolean(this.param('showSuffix'));
+    const useShortSuffix = Boolean(this.param('useShortSuffix'));
     const human = this.isHuman();
+    const dyanmic = this.isDynamic();
     const prefix =
       val < 0 && human
         ? i18n.translate('data.fieldFormats.duration.negativeLabel', {
@@ -188,11 +241,64 @@ export class DurationFormat extends FieldFormat {
           }) + ' '
         : '';
     const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
-    const formatted = duration[outputFormat]();
-    const precise = human ? formatted : formatted.toFixed(outputPrecision);
+    const formatted = dyanmic
+      ? formatInputDynamically(val, inputFormat, outputPrecision, showSuffix, useShortSuffix)
+      : duration[outputFormat]();
+    const precise = human || dyanmic ? formatted : formatted.toFixed(outputPrecision);
     const type = outputFormats.find(({ method }) => method === outputFormat);
-    const suffix = showSuffix && type ? ` ${type.text}` : '';
 
-    return prefix + precise + suffix;
+    const unitText = useShortSuffix ? type?.shortText : type?.text;
+
+    const suffix = showSuffix && unitText ? ` ${unitText}` : '';
+
+    return dyanmic ? precise : prefix + precise + suffix;
   };
+}
+
+function formatDuration(
+  duration: moment.Duration,
+  outputPrecision: number,
+  showSuffix: boolean,
+  useShortSuffix: boolean
+) {
+  const parts = [];
+  // const duration = moment.duration(period);
+
+  // return nothing when the duration is falsy or not correctly parsed (P0D)
+  if (!duration || duration.toISOString() === 'P0D') return;
+
+  const units = [
+    { unit: duration.years(), nextUnitRate: 12, method: 'asYears' },
+    { unit: duration.months(), nextUnitRate: 4, method: 'asMonths' },
+    { unit: duration.weeks(), nextUnitRate: 7, method: 'asWeeks' },
+    { unit: duration.days(), nextUnitRate: 24, method: 'asDays' },
+    { unit: duration.hours(), nextUnitRate: 60, method: 'asHours' },
+    { unit: duration.minutes(), nextUnitRate: 60, method: 'asMinutes' },
+    { unit: duration.seconds(), nextUnitRate: 1000, method: 'asSeconds' },
+    { unit: duration.milliseconds(), nextUnitRate: 1000, method: 'asMilliseconds' },
+  ];
+
+  for (let i = 0; i < units.length; i++) {
+    const unitValue = units[i].unit;
+    if (unitValue >= 1) {
+      const type = outputFormats.find(({ method }) => method === units[i].method);
+      const unitText = showSuffix ? (useShortSuffix ? type?.shortText : type?.text) : '';
+
+      const value = Math.floor(unitValue);
+      if (units?.[i + 1]) {
+        const decimalPointValue = Math.floor(units[i + 1].unit);
+        parts.push(
+          (value + decimalPointValue / units[i].nextUnitRate).toFixed(outputPrecision) +
+            ' ' +
+            unitText
+        );
+        return parts.join(', ');
+      } else {
+        parts.push(value + ' ' + unitText);
+        return parts.join(', ');
+      }
+    }
+  }
+
+  return 0;
 }
