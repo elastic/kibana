@@ -18,7 +18,7 @@ import {
   fetchExceptionListById,
   addExceptionList,
   addEndpointExceptionList,
-} from '../../../lists_plugin_deps';
+} from '../../../shared_imports';
 import {
   ExceptionListSchema,
   CreateExceptionListSchema,
