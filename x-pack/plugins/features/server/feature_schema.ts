@@ -85,6 +85,12 @@ const kibanaPrivilegeSchema = schema.object({
       read: schema.maybe(alertingSchema),
     })
   ),
+  cases: schema.maybe(
+    schema.object({
+      all: schema.maybe(casesSchema),
+      read: schema.maybe(casesSchema),
+    })
+  ),
   savedObject: schema.object({
     all: schema.arrayOf(schema.string()),
     read: schema.arrayOf(schema.string()),
@@ -113,8 +119,8 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
   ),
   cases: schema.maybe(
     schema.object({
-      all: schema.maybe(alertingSchema),
-      read: schema.maybe(alertingSchema),
+      all: schema.maybe(casesSchema),
+      read: schema.maybe(casesSchema),
     })
   ),
   api: schema.maybe(schema.arrayOf(schema.string())),
