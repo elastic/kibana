@@ -64,7 +64,6 @@ export class ExplorerChartDistribution extends React.Component {
   renderChart() {
     const { tooManyBuckets, tooltipService, timeBuckets, showSelectedInterval } = this.props;
 
-    console.log('showSelectedInterval', showSelectedInterval);
     const element = this.rootNode;
     const config = this.props.seriesConfig;
     const severity = this.props.severity;
