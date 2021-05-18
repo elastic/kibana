@@ -10,7 +10,7 @@ import { execSync } from 'child_process';
 import moment from 'moment';
 import path from 'path';
 import fs from 'fs';
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { getEsClient } from '../shared/get_es_client';
 import { parseIndexUrl } from '../shared/parse_index_url';
 
@@ -117,7 +117,7 @@ async function run() {
 
   const query = {
     bool: {
-      should: should.map(({ bool }) => ({ bool })) as QueryContainer[],
+      should: should.map(({ bool }) => ({ bool })) as QueryDslQueryContainer[],
       minimum_should_match: 1,
     },
   };

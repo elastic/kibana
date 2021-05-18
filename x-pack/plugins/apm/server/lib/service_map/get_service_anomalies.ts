@@ -64,7 +64,7 @@ export async function getServiceAnomalies({
                   by_field_value: [TRANSACTION_REQUEST, TRANSACTION_PAGE_LOAD],
                 },
               },
-            ] as estypes.QueryContainer[],
+            ] as estypes.QueryDslQueryContainer[],
           },
         },
         aggs: {

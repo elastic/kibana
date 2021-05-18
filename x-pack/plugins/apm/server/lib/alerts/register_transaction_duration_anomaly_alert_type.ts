@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { compact } from 'lodash';
 import { ESSearchResponse } from 'typings/elasticsearch';
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -157,7 +157,7 @@ export function registerTransactionDurationAnomalyAlertType({
                         },
                       ]
                     : []),
-                ] as QueryContainer[],
+                ] as QueryDslQueryContainer[],
               },
             },
             aggs: {

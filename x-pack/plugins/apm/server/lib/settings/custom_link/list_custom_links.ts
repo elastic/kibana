@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   CustomLink,
   CustomLinkES,
@@ -32,7 +32,7 @@ export function listCustomLinks({
           should: [
             { term: { [key]: value } },
             { bool: { must_not: [{ exists: { field: key } }] } },
-          ] as QueryContainer[],
+          ] as QueryDslQueryContainer[],
         },
       };
     });

@@ -48,6 +48,7 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'single',
     migrations: getMigrations(encryptedSavedObjects),
+    // @ts-expect-error mappings is not properly types json
     mappings: mappings.alert,
     management: {
       importableAndExportable: true,

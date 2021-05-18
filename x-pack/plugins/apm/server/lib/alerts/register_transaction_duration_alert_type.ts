@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -109,7 +109,7 @@ export function registerTransactionDurationAlertType({
                   },
                 },
                 ...environmentQuery(alertParams.environment),
-              ] as QueryContainer[],
+              ] as QueryDslQueryContainer[],
             },
           },
           aggs: {
