@@ -18,7 +18,7 @@ const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 export const newVectorLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.newVectorLayerWizard.description', {
-    defaultMessage: 'Draw points, lines, and polygons to create or edit documents',
+    defaultMessage: 'Creates a new empty layer. Use this to add shapes to the map',
   }),
   disabledReason: i18n.translate('xpack.maps.newVectorLayerWizard.disabledDesc', {
     defaultMessage:
@@ -44,6 +44,6 @@ export const newVectorLayerWizardConfig: LayerWizard = {
     return <NewVectorLayerEditor {...renderWizardArguments} />;
   },
   title: i18n.translate('xpack.maps.newVectorLayerWizard.title', {
-    defaultMessage: 'Draw',
+    defaultMessage: 'Create new layer',
   }),
 };
