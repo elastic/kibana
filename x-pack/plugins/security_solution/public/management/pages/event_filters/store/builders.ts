@@ -28,7 +28,6 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     active: false,
     forceRefresh: false,
     data: createUninitialisedResourceState(),
-    /** We started off assuming data exists, until we can confirm otherwise */
     dataExist: createUninitialisedResourceState(),
     deletion: {
       item: undefined,
