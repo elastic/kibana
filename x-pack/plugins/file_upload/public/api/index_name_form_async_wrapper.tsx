@@ -26,6 +26,7 @@ export class IndexNameFormAsyncWrapper extends React.Component<IndexNameFormProp
   }
 
   componentDidMount() {
+    this._isMounted = true;
     lazyLoadModules().then((modules) => {
       if (this._isMounted) {
         this.setState({

@@ -20,12 +20,15 @@ export class JsonUploadAndParseAsyncWrapper extends React.Component<
   state: State = {
     JsonUploadAndParse: null,
   };
-
+  private _isMounted = false;
   componentDidMount() {
+    this._isMounted = true;
     lazyLoadModules().then((modules) => {
-      this.setState({
-        JsonUploadAndParse: modules.JsonUploadAndParse,
-      });
+      if (this._isMounted) {
+        this.setState({
+          JsonUploadAndParse: modules.JsonUploadAndParse,
+        });
+      }
     });
   }
 
