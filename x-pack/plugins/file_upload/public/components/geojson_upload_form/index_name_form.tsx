@@ -15,8 +15,8 @@ export interface Props {
   indexName: string;
   indexNameError?: string;
   onIndexNameChange: (name: string, error?: string) => void;
-  onIndexNameValidationStart?: () => void;
-  onIndexNameValidationEnd?: () => void;
+  onIndexNameValidationStart: () => void;
+  onIndexNameValidationEnd: () => void;
 }
 
 export class IndexNameForm extends Component<Props> {
