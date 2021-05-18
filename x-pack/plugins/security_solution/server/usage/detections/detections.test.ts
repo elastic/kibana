@@ -190,7 +190,7 @@ describe('Detections Usage and Metrics', () => {
             detection_rule_detail: [
               {
                 alert_count_daily: 3400,
-                cases_count_daily: 1,
+                cases_count_total: 1,
                 created_on: '2021-03-23T17:15:59.634Z',
                 elastic_rule: true,
                 enabled: false,
@@ -327,7 +327,7 @@ describe('Detections Usage and Metrics', () => {
             detection_rule_detail: [
               {
                 alert_count_daily: 0,
-                cases_count_daily: 1,
+                cases_count_total: 1,
                 created_on: '2021-03-23T17:15:59.634Z',
                 elastic_rule: true,
                 enabled: false,
