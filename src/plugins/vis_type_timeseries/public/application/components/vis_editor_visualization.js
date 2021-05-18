@@ -51,6 +51,7 @@ class VisEditorVisualizationUI extends Component {
 
     const { onDataChange, embeddableHandler } = this.props;
 
+    console.log(embeddableHandler);
     this._handler = embeddableHandler;
     await this._handler.render(this._visEl.current);
     this.props.eventEmitter.emit('embeddableRendered');

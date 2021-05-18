@@ -12,7 +12,7 @@ import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import _, { get, isUndefined, assign, includes, pick } from 'lodash';
 import { Metric } from '../../../visualizations/views/metric';
-import { getLastValue } from '../../../../../common/get_last_value';
+import { getLastValueOrZero } from '../../../../../common/get_last_value';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
 function getColors(props) {
@@ -23,7 +23,7 @@ function getColors(props) {
   if (model.background_color_rules) {
     model.background_color_rules.forEach((rule) => {
       if (rule.operator && rule.value != null) {
-        const value = (series[0] && getLastValue(series[0].data)) || 0;
+        const value = (series[0] && getLastValueOrZero(series[0].data)) || 0;
         if (_[rule.operator](value, rule.value)) {
           background = rule.background_color;
           color = rule.color;

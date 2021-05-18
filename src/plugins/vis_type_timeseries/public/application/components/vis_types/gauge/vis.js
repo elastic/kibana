@@ -12,7 +12,7 @@ import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import _, { get, isUndefined, assign, includes } from 'lodash';
 import { Gauge } from '../../../visualizations/views/gauge';
-import { getLastValue } from '../../../../../common/get_last_value';
+import { getLastValueOrZero } from '../../../../../common/get_last_value';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -22,7 +22,7 @@ function getColors(props) {
   if (model.gauge_color_rules) {
     model.gauge_color_rules.forEach((rule) => {
       if (rule.operator && rule.value != null) {
-        const value = (series[0] && getLastValue(series[0].data)) || 0;
+        const value = (series[0] && getLastValueOrZero(series[0].data)) || 0;
         if (_[rule.operator](value, rule.value)) {
           gauge = rule.gauge;
           text = rule.text;

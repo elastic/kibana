@@ -14,8 +14,14 @@ const extractValue = (data) => (data && data[1]) ?? null;
 
 export const getLastValue = (data) => {
   if (!isArray(data)) {
-    return data ?? DEFAULT_VALUE;
+    return data;
   }
 
-  return extractValue(last(data)) ?? DEFAULT_VALUE;
+  return extractValue(last(data));
 };
+
+export const getLastValueOrDefault = (data, defaultValue = DEFAULT_VALUE) => {
+  return getLastValue(data) ?? defaultValue;
+};
+
+export const getLastValueOrZero = (data) => getLastValueOrDefault(data, 0);

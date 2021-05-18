@@ -9,7 +9,7 @@
 import { getCoreStart } from '../../../../services';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { TopN } from '../../../visualizations/views/top_n';
-import { getLastValue } from '../../../../../common/get_last_value';
+import { getLastValueOrZero } from '../../../../../common/get_last_value';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { replaceVars } from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
@@ -33,7 +33,7 @@ function sortSeries(visData, model) {
     });
     const direction = item.terms_direction || 'desc';
     if (item.terms_order_by === '_key') return acc.concat(itemSeries);
-    return acc.concat(sortByDirection(itemSeries, direction, (s) => getLastValue(s.data)));
+    return acc.concat(sortByDirection(itemSeries, direction, (s) => getLastValueOrZero(s.data)));
   }, []);
 }
 
@@ -49,7 +49,7 @@ function TopNVisualization(props) {
         seriesConfig.value_template,
         props.getConfig
       );
-      const value = getLastValue(item.data);
+      const value = getLastValueOrZero(item.data);
       let color = item.color || seriesConfig.color;
       if (model.bar_color_rules) {
         model.bar_color_rules.forEach((rule) => {

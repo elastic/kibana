@@ -8,7 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { getLastValue } from '../../../../common/get_last_value';
+import { getLastValueOrZero } from '../../../../common/get_last_value';
 import { labelDateFormatter } from '../../components/lib/label_date_formatter';
 import { emptyLabel } from '../../../../common/empty_label';
 import reactcss from 'reactcss';
@@ -96,7 +96,7 @@ export class TopN extends Component {
     return (item) => {
       const renderMode = TopN.getRenderMode(min, max);
       const key = `${item.id || item.label}`;
-      const lastValue = getLastValue(item.data);
+      const lastValue = getLastValueOrZero(item.data);
       const formatter = item.tickFormatter || this.props.tickFormatter;
       const isPositiveValue = lastValue >= 0;
 
@@ -150,7 +150,7 @@ export class TopN extends Component {
 
     const intervalSettings = this.props.series.reduce(
       (acc, series, index) => {
-        const value = getLastValue(series.data);
+        const value = getLastValueOrZero(series.data);
 
         return {
           min: !index || value < acc.min ? value : acc.min,
