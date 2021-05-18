@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { NameList } from 'elasticsearch';
 import { IAggConfigs } from 'src/plugins/data/public';
 import { Query } from '../..';
@@ -156,7 +156,7 @@ export interface ShardFailure {
       type: string;
     };
     reason: string;
-    lang?: string;
+    lang?: estypes.ScriptLanguage;
     script?: string;
     script_stack?: string[];
     type: string;

@@ -169,7 +169,7 @@ export const enhancedEsSearchStrategyProvider = (
     extend: async (id, keepAlive, options, { esClient }) => {
       logger.debug(`extend ${id} by ${keepAlive}`);
       try {
-        await esClient.asCurrentUser.asyncSearch.get({ id, body: { keep_alive: keepAlive } });
+        await esClient.asCurrentUser.asyncSearch.get({ id, keep_alive: keepAlive });
       } catch (e) {
         throw getKbnServerError(e);
       }
