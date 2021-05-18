@@ -1227,9 +1227,6 @@ describe('migrations v2 model', () => {
       const corruptDocumentIds = ['a:somethingelse'];
       const originalTransformError = new Error('Dang diggity!');
       const transFormErr = new TransformSavedObjectDocumentError(
-        'id',
-        'type',
-        'namespace',
         'failedTransform',
         'failedDoc',
         originalTransformError
