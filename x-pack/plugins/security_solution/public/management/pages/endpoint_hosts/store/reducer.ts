@@ -11,6 +11,7 @@ import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
+import { createUninitialisedResourceState } from '../../../state';
 
 export const initialEndpointListState: Immutable<EndpointState> = {
   hosts: [],
@@ -44,6 +45,7 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   queryStrategyVersion: undefined,
   policyVersionInfo: undefined,
   hostStatus: undefined,
+  isolateHost: createUninitialisedResourceState(),
 };
 
 /* eslint-disable-next-line complexity */
@@ -198,6 +200,11 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       ...state,
       isAutoRefreshEnabled: action.payload.isAutoRefreshEnabled ?? state.isAutoRefreshEnabled,
       autoRefreshInterval: action.payload.autoRefreshInterval ?? state.autoRefreshInterval,
+    };
+  } else if (action.type === 'endpointIsolationStateChanged') {
+    return {
+      ...state,
+      isolateHost: action.payload,
     };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<EndpointState> = {

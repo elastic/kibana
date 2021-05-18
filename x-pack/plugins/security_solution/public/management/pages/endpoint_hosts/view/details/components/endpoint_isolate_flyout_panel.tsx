@@ -5,23 +5,47 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { Dispatch } from 'redux';
+import { i18n } from '@kbn/i18n';
 import { HostMetadata } from '../../../../../../../common/endpoint/types';
 import { BackToEndpointDetailsFlyoutSubHeader } from './back_to_endpoint_details_flyout_subheader';
-import { EndpointIsolateForm } from '../../../../../../common/components/endpoint/host_isolation';
+import {
+  EndpointIsolatedFormProps,
+  EndpointIsolateForm,
+  EndpointIsolateSuccess,
+} from '../../../../../../common/components/endpoint/host_isolation';
 import { FlyoutBodyNoTopPadding } from './flyout_body_no_top_padding';
 import { getEndpointDetailsPath } from '../../../../../common/routing';
 import { useEndpointSelector } from '../../hooks';
-import { uiQueryParams } from '../../../store/selectors';
+import {
+  getEndpointIsolateError,
+  getIsIsolationRequestPending,
+  getWasEndpointIsolated,
+  uiQueryParams,
+} from '../../../store/selectors';
+import { AppAction } from '../../../../../../common/store/actions';
+import { useToasts } from '../../../../../../common/lib/kibana';
 
 export const EndpointIsolateFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
   const history = useHistory();
-  const { show, ...queryParams } = useEndpointSelector(uiQueryParams);
+  const dispatch = useDispatch<Dispatch<AppAction>>();
+  const toast = useToasts();
 
-  const handleCancel = useCallback(() => {
+  const { show, ...queryParams } = useEndpointSelector(uiQueryParams);
+  const isPending = useEndpointSelector(getIsIsolationRequestPending);
+  const wasSuccessful = useEndpointSelector(getWasEndpointIsolated);
+  const isolateError = useEndpointSelector(getEndpointIsolateError);
+
+  const [formValues, setFormValues] = useState<
+    Parameters<EndpointIsolatedFormProps['onChange']>[0]
+  >({ comment: '' });
+
+  const handleCancel: EndpointIsolatedFormProps['onCancel'] = useCallback(() => {
     history.push(
       getEndpointDetailsPath({
         name: 'endpointDetails',
@@ -31,21 +55,57 @@ export const EndpointIsolateFlyoutPanel = memo<{
     );
   }, [history, hostMeta.agent.id, queryParams]);
 
-  const handleConfirm = useCallback(() => {}, []);
+  const handleConfirm: EndpointIsolatedFormProps['onConfirm'] = useCallback(() => {
+    dispatch({
+      type: 'isolateEndpointHost',
+      payload: {
+        endpoint_ids: [hostMeta.agent.id],
+        comment: formValues.comment,
+      },
+    });
+  }, [dispatch, formValues.comment, hostMeta.agent.id]);
 
-  const handleChange = useCallback(() => {}, []);
+  const handleChange: EndpointIsolatedFormProps['onChange'] = useCallback((changes) => {
+    setFormValues((prevState) => {
+      return {
+        ...prevState,
+        ...changes,
+      };
+    });
+  }, []);
+
+  useEffect(() => {
+    if (isolateError) {
+      toast.addDanger(isolateError.message);
+    }
+  }, [isolateError, toast]);
 
   return (
     <>
       <BackToEndpointDetailsFlyoutSubHeader endpointId={hostMeta.agent.id} />
 
       <FlyoutBodyNoTopPadding>
-        <EndpointIsolateForm
-          hostName={hostMeta.host.name}
-          onCancel={handleCancel}
-          onConfirm={handleConfirm}
-          onChange={handleChange}
-        />
+        {wasSuccessful && (
+          <EndpointIsolateSuccess
+            hostName={hostMeta.host.name}
+            completeButtonLabel={i18n.translate(
+              'xpack.securitySolution.endpoint.hostIsolation.successProceedButton',
+              { defaultMessage: 'Return to endpoint details' }
+            )}
+            onComplete={handleCancel}
+          />
+        )}
+
+        {!wasSuccessful && (
+          <EndpointIsolateForm
+            comment={formValues.comment}
+            isLoading={isPending}
+            hostName={hostMeta.host.name}
+            onCancel={handleCancel}
+            onConfirm={handleConfirm}
+            onChange={handleChange}
+          />
+        )}
       </FlyoutBodyNoTopPadding>
     </>
   );

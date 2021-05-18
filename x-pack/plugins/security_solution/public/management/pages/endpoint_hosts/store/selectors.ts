@@ -26,6 +26,12 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
 } from '../../../common/constants';
 import { Query } from '../../../../../../../../src/plugins/data/common/query/types';
+import {
+  isFailedResourceState,
+  isLoadedResourceState,
+  isLoadingResourceState,
+} from '../../../state';
+import { ServerApiError } from '../../../../common/types';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -299,3 +305,29 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
     return decodedQuery;
   }
 );
+
+export const getCurrentIsolationState = (
+  state: Immutable<EndpointState>
+): EndpointState['isolateHost'] => {
+  return state.isolateHost;
+};
+
+export const getIsIsolationRequestPending: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getCurrentIsolationState, (isolateHost) =>
+  isLoadingResourceState(isolateHost)
+);
+
+export const getWasEndpointIsolated: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getCurrentIsolationState, (isolateHost) =>
+  isLoadedResourceState(isolateHost)
+);
+
+export const getEndpointIsolateError: (
+  state: Immutable<EndpointState>
+) => ServerApiError | undefined = createSelector(getCurrentIsolationState, (isolateHost) => {
+  if (isFailedResourceState(isolateHost)) {
+    return isolateHost.error;
+  }
+});

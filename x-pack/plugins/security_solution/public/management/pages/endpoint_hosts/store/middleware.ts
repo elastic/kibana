@@ -6,7 +6,12 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import { HostInfo, HostResultList } from '../../../../../common/endpoint/types';
+import {
+  HostInfo,
+  HostIsolationRequestBody,
+  HostIsolationResponse,
+  HostResultList,
+} from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { ImmutableMiddlewareFactory } from '../../../../common/store';
 import {
@@ -19,6 +24,8 @@ import {
   patterns,
   searchBarQuery,
   isTransformEnabled,
+  getIsIsolationRequestPending,
+  getCurrentIsolationState,
 } from './selectors';
 import { EndpointState, PolicyIds } from '../types';
 import {
@@ -30,6 +37,12 @@ import {
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
+import {
+  createFailedResourceState,
+  createLoadedResourceState,
+  createLoadingResourceState,
+} from '../../../state';
+import { isolateHost } from '../../../../common/lib/host_isolation';
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
@@ -325,6 +338,37 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         dispatch({
           type: 'serverFailedToReturnEndpointPolicyResponse',
           payload: error,
+        });
+      }
+    }
+
+    // Isolate Host
+    if (action.type === 'isolateEndpointHost') {
+      const state = getState();
+
+      if (getIsIsolationRequestPending(state)) {
+        return;
+      }
+
+      dispatch({
+        type: 'endpointIsolationStateChanged',
+        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+        // @ts-ignore
+        payload: createLoadingResourceState(getCurrentIsolationState(state)),
+      });
+
+      try {
+        // Cast needed below due to the valeu of payload being `Immutable<>`
+        const response = await isolateHost(action.payload as HostIsolationRequestBody);
+
+        dispatch({
+          type: 'endpointIsolationStateChanged',
+          payload: createLoadedResourceState<HostIsolationResponse>(response),
+        });
+      } catch (error) {
+        dispatch({
+          type: 'endpointIsolationStateChanged',
+          payload: createFailedResourceState<HostIsolationResponse>(error.body ?? error),
         });
       }
     }

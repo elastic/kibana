@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { Action } from 'redux';
 import {
   HostResultList,
   HostInfo,
   GetHostPolicyResponse,
+  HostIsolationRequestBody,
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
@@ -134,6 +136,14 @@ interface ServerFailedToReturnEndpointsTotal {
   payload: ServerApiError;
 }
 
+type IsolateEndpointHost = Action<'isolateEndpointHost'> & {
+  payload: HostIsolationRequestBody;
+};
+
+type EndpointIsolationStateChange = Action<'endpointIsolationStateChanged'> & {
+  payload: EndpointState['isolateHost'];
+};
+
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
@@ -157,4 +167,6 @@ export type EndpointAction =
   | UserUpdatedEndpointListRefreshOptions
   | ServerReturnedEndpointsTotal
   | ServerFailedToReturnAgenstWithEndpointsTotal
-  | ServerFailedToReturnEndpointsTotal;
+  | ServerFailedToReturnEndpointsTotal
+  | IsolateEndpointHost
+  | EndpointIsolationStateChange;
