@@ -36,6 +36,7 @@ import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from '
 import { NoOverallData } from './components/no_overall_data';
 import { SeverityControl } from '../components/severity_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
+import { isDefined } from '../../../common/types/guards';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -213,7 +214,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     values={{ viewByLoadedForTimeFormatted }}
                   />
                 )}
-                {viewByLoadedForTimeFormatted === undefined && (
+                {isDefined(viewByLoadedForTimeFormatted) ? null : (
                   <FormattedMessage
                     id="xpack.ml.explorer.sortedByMaxAnomalyScoreLabel"
                     defaultMessage="(Sorted by max anomaly score)"
