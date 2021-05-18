@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Entry, EntryMatch, EntryNested } from '@kbn/securitysolution-io-ts-utils';
+import { Entry, EntryMatch, EntryNested } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ExceptionListItemSchema } from '../../common/schemas/response/exception_list_item_schema';
 import { UpdateExceptionListItemSchema } from '../../common/schemas/request/update_exception_list_item_schema';
