@@ -83,8 +83,8 @@ export default function ({
         expression
       ).getResponse();
       // percentile is not stable
-      expect(getCell(result, 0, 0)).to.be.within(10400, 10500);
-      expect(getCell(result, 0, 1)).to.be.within(10500, 10600);
+      expect(getCell(result, 0, 0)).to.be.within(10000, 20000);
+      expect(getCell(result, 0, 1)).to.be.within(10000, 20000);
     });
 
     it('shifts multiple percentiles', async () => {
@@ -99,10 +99,10 @@ export default function ({
         expression
       ).getResponse();
       // percentile is not stable
-      expect(getCell(result, 0, 0)).to.be.within(300, 400);
-      expect(getCell(result, 0, 1)).to.be.within(10400, 10500);
-      expect(getCell(result, 0, 2)).to.be.within(200, 300);
-      expect(getCell(result, 0, 3)).to.be.within(10500, 10600);
+      expect(getCell(result, 0, 0)).to.be.within(100, 1000);
+      expect(getCell(result, 0, 1)).to.be.within(10000, 20000);
+      expect(getCell(result, 0, 2)).to.be.within(100, 1000);
+      expect(getCell(result, 0, 3)).to.be.within(10000, 20000);
     });
 
     it('shifts date histogram', async () => {
