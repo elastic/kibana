@@ -8,6 +8,11 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import styled from 'styled-components';
+import {
+  ExceptionListType,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+  OsTypeArray,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
@@ -20,9 +25,8 @@ import { AutocompleteFieldExistsComponent } from '../autocomplete/field_value_ex
 import { AutocompleteFieldMatchComponent } from '../autocomplete/field_value_match';
 import { AutocompleteFieldMatchAnyComponent } from '../autocomplete/field_value_match_any';
 import { AutocompleteFieldListsComponent } from '../autocomplete/field_value_lists';
-import { ExceptionListType, ListSchema, OperatorTypeEnum } from '../../../../common';
+import { ListSchema } from '../../../../common';
 import { getEmptyValue } from '../../../common/empty_value';
-import { OsTypeArray } from '../../../../common/schemas/common';
 
 import {
   getEntryOnFieldChange,
@@ -193,7 +197,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           entry,
           listType,
           entry.field != null && entry.field.type === 'boolean',
-          isFirst && !allowLargeValueLists
+          isFirst && allowLargeValueLists
         );
     const comboBox = (
       <OperatorComponent

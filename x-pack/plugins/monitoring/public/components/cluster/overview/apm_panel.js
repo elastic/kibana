@@ -50,6 +50,7 @@ const getServerTitle = (isFleetTypeMetric, total) => {
         values: { apmsTotal },
       }
     );
+    return linkLabel;
   }
   linkLabel.link = (
     <FormattedMessage
@@ -187,7 +188,7 @@ export function ApmPanel(props) {
               <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.apmPanel.memoryUsageLabel"
-                  defaultMessage="Memory Usage"
+                  defaultMessage="Memory Usage (delta)"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="apmMemoryUsage">

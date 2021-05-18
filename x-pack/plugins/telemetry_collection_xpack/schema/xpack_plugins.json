@@ -4441,14 +4441,20 @@
         "index_patterns": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup index patterns"
+              }
             }
           }
         },
         "saved_searches": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup saved searches"
+              }
             }
           }
         },
@@ -4457,12 +4463,30 @@
             "saved_searches": {
               "properties": {
                 "total": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the visualizations that are based on rollup saved searches"
+                  }
+                },
+                "lens_total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
+                  }
                 }
               }
             },
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the visualizations that are based on rollup index patterns"
+              }
+            },
+            "lens_total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the lens visualizations that are based on rollup index patterns"
+              }
             }
           }
         }
@@ -5218,13 +5242,13 @@
         "available": {
           "type": "boolean",
           "_meta": {
-            "description": "Indicates if the spaces feature is available in this installation."
+            "description": "Indicates if the Spaces feature is available in this installation."
           }
         },
         "enabled": {
           "type": "boolean",
           "_meta": {
-            "description": "Indicates if the spaces feature is enabled in this installation."
+            "description": "Indicates if the Spaces feature is enabled in this installation."
           }
         },
         "count": {
@@ -5405,13 +5429,22 @@
                 "monitor_name_stats": {
                   "properties": {
                     "avg_length": {
-                      "type": "float"
+                      "type": "float",
+                      "_meta": {
+                        "description": "This field represents the average length of monitor names"
+                      }
                     },
                     "max_length": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "This field represents the max length of monitor names"
+                      }
                     },
                     "min_length": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "This field represents the min length of monitor names"
+                      }
                     }
                   }
                 },
@@ -5419,21 +5452,36 @@
                   "type": "long"
                 },
                 "no_of_unique_monitors": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "This field represents the number of unique configured monitors"
+                  }
                 },
                 "no_of_unique_observer_locations": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "This field represents the number of unique monitor observer locations"
+                  }
                 },
                 "observer_location_name_stats": {
                   "properties": {
                     "avg_length": {
-                      "type": "float"
+                      "type": "float",
+                      "_meta": {
+                        "description": "This field represents the average length of monitor observer location names"
+                      }
                     },
                     "max_length": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "This field represents the max length of monitor observer location names"
+                      }
                     },
                     "min_length": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "This field represents the min length of monitor observer location names"
+                      }
                     }
                   }
                 },
@@ -5442,6 +5490,43 @@
                 },
                 "settings_page": {
                   "type": "long"
+                },
+                "fleet_monitor_name_stats": {
+                  "properties": {
+                    "avg_length": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "This field represents the average length of fleet managed monitor names"
+                      }
+                    },
+                    "max_length": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "This field represents the max length of fleet managed monitor names"
+                      }
+                    },
+                    "min_length": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "This field represents the min length of fleet managed monitor names"
+                      }
+                    }
+                  }
+                },
+                "fleet_monitor_frequency": {
+                  "type": "array",
+                  "items": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "This field represents the average the monitor frequency of fleet managed monitors"
+                    }
+                  }
+                },
+                "fleet_no_of_unique_monitors": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "This field represents the number of unique configured fleet managed monitors"
+                  }
                 }
               }
             }

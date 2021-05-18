@@ -6,18 +6,20 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-
 import {
   Description,
-  DeserializerOrUndefined,
   Id,
-  Immutable,
-  ListSchema,
   MetaOrUndefined,
   Name,
-  SerializerOrUndefined,
   Type,
-  Version,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { Version } from '@kbn/securitysolution-io-ts-types';
+
+import {
+  DeserializerOrUndefined,
+  Immutable,
+  ListSchema,
+  SerializerOrUndefined,
 } from '../../../common/schemas';
 
 import { getList } from './get_list';

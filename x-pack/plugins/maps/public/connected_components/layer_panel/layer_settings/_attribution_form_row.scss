@@ -1,0 +1,27 @@
+.mapAttributionFormRow {
+  display: flex;
+  margin: $euiSizeS 0;
+}
+
+.mapAttributionFormRow__legend {
+  @include euiFormLabel;
+  display: inline-flex;
+  width: calc(33% - #{$euiSizeS});
+  height: $euiSizeXL;
+  align-items: center;
+  margin-right: $euiSizeS;
+}
+
+.mapAttributionFormRow__field {
+  width: 67%;
+}
+
+.mapAttributionFormRow__addButton {
+  margin-top: $euiSizeXS;
+}
+
+.mapAttributionFormRow__buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: $euiSizeXS;
+}

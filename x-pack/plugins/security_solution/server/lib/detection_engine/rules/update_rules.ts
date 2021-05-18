@@ -33,7 +33,6 @@ export const updateRules = async ({
   }
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
-  const throttle = ruleUpdate.throttle ?? null;
   const enabled = ruleUpdate.enabled ?? true;
   const newInternalRule: InternalRuleUpdate = {
     name: ruleUpdate.name,
@@ -73,7 +72,10 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions: throttle === 'rule' ? (ruleUpdate.actions ?? []).map(transformRuleToAlertAction) : [],
+    actions:
+      ruleUpdate.throttle === 'rule'
+        ? (ruleUpdate.actions ?? []).map(transformRuleToAlertAction)
+        : [],
     throttle: null,
     notifyWhen: null,
   };

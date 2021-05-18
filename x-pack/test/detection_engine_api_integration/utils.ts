@@ -12,8 +12,8 @@ import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
+import { NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
-import { NonEmptyEntriesArray } from '../../plugins/lists/common/schemas';
 import { getCreateExceptionListDetectionSchemaMock } from '../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import {
   CreateRulesSchema,
@@ -683,7 +683,7 @@ export const getWebHookAction = () => ({
 export const getRuleWithWebHookAction = (
   id: string,
   enabled = false,
-  rule?: QueryCreateSchema
+  rule?: CreateRulesSchema
 ): CreateRulesSchema | UpdateRulesSchema => {
   const finalRule = rule != null ? { ...rule, enabled } : getSimpleRule('rule-1', enabled);
   return {
@@ -888,7 +888,7 @@ export const createNewAction = async (supertest: SuperTest<supertestAsPromised.T
 
 /**
  * Helper to cut down on the noise in some of the tests. This
- * creates a new action and expects a 200 and does not do any retries.
+ * uses the find API to get an immutable rule by id.
  * @param supertest The supertest deps
  */
 export const findImmutableRuleById = async (
