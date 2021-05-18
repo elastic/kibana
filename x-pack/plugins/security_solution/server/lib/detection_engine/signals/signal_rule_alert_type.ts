@@ -12,7 +12,7 @@ import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
 import * as t from 'io-ts';
-import { validateNonExact } from '../../../../common/validate';
+import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { toError, toPromise } from '../../../../common/fp_utils';
 
 import {
