@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import {
+  KibanaRequest,
+  PluginConfigDescriptor,
+  PluginInitializerContext,
+  RequestHandlerContext,
+} from 'kibana/server';
+import { CasesClient } from './client';
+export { CasesClient } from './client';
 import { ConfigType, ConfigSchema } from './config';
 import { CasePlugin } from './plugin';
 
@@ -18,3 +25,10 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CasePlugin(initializerContext);
+
+export interface PluginStartContract {
+  getCasesClientWithRequestAndContext(
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): CasesClient;
+}

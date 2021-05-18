@@ -8,6 +8,10 @@ import { ValuesType } from 'utility-types';
 import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart, KibanaRequest } from 'kibana/server';
 import {
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
+} from '../../rule_registry/server';
+import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
@@ -115,6 +119,10 @@ interface DependencyMap {
     setup: DataPluginSetup;
     start: DataPluginStart;
   };
+  ruleRegistry: {
+    setup: RuleRegistryPluginSetupContract;
+    start: RuleRegistryPluginStartContract;
+  };
 }
 
 const requiredDependencies = [
@@ -126,6 +134,7 @@ const requiredDependencies = [
   'embeddable',
   'infra',
   'observability',
+  'ruleRegistry',
 ] as const;
 
 const optionalDependencies = [

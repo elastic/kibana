@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from 'src/core/server';
+import type { SampleDatasetSchema } from './sample_dataset_schema';
+export type { SampleDatasetSchema, AppLinkSchema, DataIndexSchema } from './sample_dataset_schema';
 
 export enum DatasetStatusTypes {
   NOT_INSTALLED = 'not_installed',
@@ -26,57 +27,4 @@ export enum EmbeddableTypes {
   SEARCH_EMBEDDABLE_TYPE = 'search',
   VISUALIZE_EMBEDDABLE_TYPE = 'visualization',
 }
-export interface DataIndexSchema {
-  id: string;
-
-  // path to newline delimented JSON file containing data relative to KIBANA_HOME
-  dataPath: string;
-
-  // Object defining Elasticsearch field mappings (contents of index.mappings.type.properties)
-  fields: object;
-
-  // times fields that will be updated relative to now when data is installed
-  timeFields: string[];
-
-  // Reference to now in your test data set.
-  // When data is installed, timestamps are converted to the present time.
-  // The distance between a timestamp and currentTimeMarker is preserved but the date and time will change.
-  // For example:
-  //   sample data set:    timestamp: 2018-01-01T00:00:00Z, currentTimeMarker: 2018-01-01T12:00:00Z
-  //   installed data set: timestamp: 2018-04-18T20:33:14Z, currentTimeMarker: 2018-04-19T08:33:14Z
-  currentTimeMarker: string;
-
-  // Set to true to move timestamp to current week, preserving day of week and time of day
-  // Relative distance from timestamp to currentTimeMarker will not remain the same
-  preserveDayOfWeekTimeOfDay: boolean;
-}
-
-export interface AppLinkSchema {
-  path: string;
-  icon: string;
-  label: string;
-}
-
-export interface SampleDatasetSchema<T = unknown> {
-  id: string;
-  name: string;
-  description: string;
-  previewImagePath: string;
-  darkPreviewImagePath: string;
-
-  // saved object id of main dashboard for sample data set
-  overviewDashboard: string;
-  appLinks: AppLinkSchema[];
-
-  // saved object id of default index-pattern for sample data set
-  defaultIndex: string;
-
-  // Kibana saved objects (index patter, visualizations, dashboard, ...)
-  // Should provide a nice demo of Kibana's functionality with the sample data set
-  savedObjects: Array<SavedObject<T>>;
-  dataIndices: DataIndexSchema[];
-  status?: string | undefined;
-  statusMsg?: unknown;
-}
-
 export type SampleDatasetProvider = () => SampleDatasetSchema;
