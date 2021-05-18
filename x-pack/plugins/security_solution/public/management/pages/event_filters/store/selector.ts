@@ -102,17 +102,7 @@ export const getListIsLoading: EventFiltersSelector<boolean> = createSelector(
 export const getListPageDoesDataExist: EventFiltersSelector<boolean> = createSelector(
   getListPageDataExistsState,
   (dataExistsState) => {
-    if (isLoadedResourceState(dataExistsState)) {
-      return dataExistsState.data;
-    }
-    if (isLoadingResourceState(dataExistsState)) {
-      // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-      // @ts-ignore
-      return dataExistsState.previousState.data;
-    }
-
-    // Until we know for sure that data exists (LoadedState), we assume `false`
-    return false;
+    return !!getLastLoadedResourceState(dataExistsState)?.data;
   }
 );
 
