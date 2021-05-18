@@ -3796,7 +3796,6 @@
     "timelion.cells.actions.reorderTooltip": "拖动以重新排序",
     "timelion.chart.seriesList.noSchemaWarning": "没有此类面板类型：{renderType}",
     "timelion.deprecation.here": "请将其迁移至仪表板。",
-    "timelion.deprecation.message": "Timelion 应用自 7.0 版起已过时，将在 8.0 中移除。要继续使用 Timelion 工作表，{timeLionDeprecationLink}。",
     "timelion.emptyExpressionErrorMessage": "Timelion 错误：未提供表达式",
     "timelion.expressionInputAriaLabel": "Timelion 表达式",
     "timelion.expressionInputPlaceholder": "请尝试使用 {esQuery} 查询",
