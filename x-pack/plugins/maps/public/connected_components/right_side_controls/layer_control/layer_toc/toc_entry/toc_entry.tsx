@@ -31,6 +31,7 @@ export interface ReduxStateProps {
   hasDirtyStateSelector: boolean;
   isLegendDetailsOpen: boolean;
   isEditButtonDisabled: boolean;
+  layerIsInEditMode: boolean;
 }
 
 export interface ReduxDispatchProps {
@@ -314,6 +315,7 @@ export class TOCEntry extends Component<Props, State> {
       'mapTocEntry-isSelected':
         this.props.layer.isPreviewLayer() ||
         (this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId()),
+      'mapTocEntry-isInEditingMode': this.props.layerIsInEditMode,
     });
 
     return (

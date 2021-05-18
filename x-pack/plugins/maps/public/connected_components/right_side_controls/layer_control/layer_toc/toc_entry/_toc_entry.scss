@@ -30,6 +30,11 @@
   }
 }
 
+.mapTocEntry-isInEditingMode {
+  background-color: $euiColorLightShade !important;
+  border: 2px dashed $euiColorAccent !important;
+}
+
 .mapTocEntry-isDragging {
   @include euiBottomShadowMedium;
 }
