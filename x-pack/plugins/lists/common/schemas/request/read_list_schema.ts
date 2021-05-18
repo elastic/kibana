@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { id } from '@kbn/securitysolution-io-ts-utils';
+import { id } from '@kbn/securitysolution-io-ts-list-types';
 
 export const readListSchema = t.exact(
   t.type({
