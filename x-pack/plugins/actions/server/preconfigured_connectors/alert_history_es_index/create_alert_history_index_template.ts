@@ -56,6 +56,7 @@ async function createIndexTemplate({
     await client.indices.putIndexTemplate({
       name: templateName,
       body: template,
+      // @ts-expect-error doesn't exist in @elastic/elasticsearch
       create: true,
     });
   } catch (err) {
