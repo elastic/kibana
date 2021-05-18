@@ -92,4 +92,13 @@ export class EventFiltersHttpService implements EventFiltersService {
       body: JSON.stringify(exception),
     });
   }
+
+  async deleteOne(id: string): Promise<ExceptionListItemSchema> {
+    return (await this.httpWrapper()).delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      query: {
+        id,
+        namespace_type: 'agnostic',
+      },
+    });
+  }
 }

@@ -131,6 +131,7 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
     {
       id: Mode.TEXT,
       name: modeLabels[Mode.TEXT],
+      'data-test-subj': `syntheticsRequestBodyTab__${Mode.TEXT}`,
       content: (
         <CodeEditor
           ariaLabel={i18n.translate(
@@ -151,6 +152,7 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
     {
       id: Mode.JSON,
       name: modeLabels[Mode.JSON],
+      'data-test-subj': `syntheticsRequestBodyTab__${Mode.JSON}`,
       content: (
         <CodeEditor
           ariaLabel={i18n.translate(
@@ -171,6 +173,7 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
     {
       id: Mode.XML,
       name: modeLabels[Mode.XML],
+      'data-test-subj': `syntheticsRequestBodyTab__${Mode.XML}`,
       content: (
         <CodeEditor
           ariaLabel={i18n.translate(
@@ -191,6 +194,7 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
     {
       id: Mode.FORM,
       name: modeLabels[Mode.FORM],
+      'data-test-subj': `syntheticsRequestBodyTab__${Mode.FORM}`,
       content: (
         <KeyValuePairsField
           addPairControlLabel={

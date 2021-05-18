@@ -14,55 +14,70 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import {
+  MachineLearningJobIdOrUndefined,
+  From,
+  FromOrUndefined,
+  RiskScore,
+  RiskScoreMapping,
+  RiskScoreMappingOrUndefined,
+  RiskScoreOrUndefined,
+  ThreatIndexOrUndefined,
+  ThreatQueryOrUndefined,
+  ThreatMappingOrUndefined,
+  ThreatFiltersOrUndefined,
+  ThreatLanguageOrUndefined,
+  ConcurrentSearchesOrUndefined,
+  ItemsPerSearchOrUndefined,
+  ThreatIndicatorPathOrUndefined,
+  Threats,
+  ThreatsOrUndefined,
+  TypeOrUndefined,
+  Type,
+  LanguageOrUndefined,
+  SeverityMapping,
+  SeverityMappingOrUndefined,
+  SeverityOrUndefined,
+  Severity,
+  MaxSignalsOrUndefined,
+  MaxSignals,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
+
+import { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {
   FalsePositives,
-  From,
   RuleId,
   Immutable,
   DescriptionOrUndefined,
   Interval,
-  MaxSignals,
-  RiskScore,
   OutputIndex,
   Name,
-  Severity,
   Tags,
-  Threats,
   To,
-  Type,
   References,
-  Version,
   AnomalyThresholdOrUndefined,
   QueryOrUndefined,
-  LanguageOrUndefined,
   SavedIdOrUndefined,
   TimelineIdOrUndefined,
   TimelineTitleOrUndefined,
-  MachineLearningJobIdOrUndefined,
   IndexOrUndefined,
   NoteOrUndefined,
   MetaOrUndefined,
   Description,
   Enabled,
-  VersionOrUndefined,
   IdOrUndefined,
   RuleIdOrUndefined,
   EnabledOrUndefined,
   FalsePositivesOrUndefined,
-  FromOrUndefined,
   OutputIndexOrUndefined,
   IntervalOrUndefined,
-  MaxSignalsOrUndefined,
-  RiskScoreOrUndefined,
   NameOrUndefined,
-  SeverityOrUndefined,
   TagsOrUndefined,
   ToOrUndefined,
-  ThreatsOrUndefined,
   ThresholdOrUndefined,
-  TypeOrUndefined,
   ReferencesOrUndefined,
   PerPageOrUndefined,
   PageOrUndefined,
@@ -79,31 +94,16 @@ import {
   Author,
   AuthorOrUndefined,
   LicenseOrUndefined,
-  RiskScoreMapping,
-  RiskScoreMappingOrUndefined,
-  SeverityMapping,
-  SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
   BuildingBlockTypeOrUndefined,
   RuleNameOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-import {
-  ThreatIndexOrUndefined,
-  ThreatQueryOrUndefined,
-  ThreatMappingOrUndefined,
-  ThreatFiltersOrUndefined,
-  ThreatLanguageOrUndefined,
-  ConcurrentSearchesOrUndefined,
-  ItemsPerSearchOrUndefined,
-  ThreatIndicatorPathOrUndefined,
-} from '../../../../common/detection_engine/schemas/types/threat_mapping';
 
 import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
 import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
-import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
 import { RuleParams } from '../schemas/rule_schemas';
 
 export type RuleAlertType = Alert<RuleParams>;
