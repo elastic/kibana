@@ -37,6 +37,10 @@ const defaultActionsConfig: ActionsConfig = {
     idleInterval: schema.duration().validate('1h'),
     pageSize: 100,
   },
+  tls: {
+    proxyVerificationMode: 'full',
+    verificationMode: 'full',
+  },
 };
 
 describe('ensureUriAllowed', () => {
@@ -305,7 +309,7 @@ describe('getProxySettings', () => {
     expect(proxySettings?.proxyUrl).toBe(config.proxyUrl);
   });
 
-  test('returns legacyRejectUnauthorized', () => {
+  test('returns proper legacyRejectUnauthorized values, beased on the legacy config option proxyRejectUnauthorizedCertificates', () => {
     const configTrue: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
@@ -318,22 +322,16 @@ describe('getProxySettings', () => {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
       proxyRejectUnauthorizedCertificates: false,
-      tls: {
-        proxyVerificationMode: 'none',
-        verificationMode: 'none',
-      },
     };
     proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
     expect(proxySettings?.proxyTLSSettings.legacyRejectUnauthorized).toBe(false);
   });
 
-  test('returns verificationMode', () => {
+  test('returns proper verificationMode value, based on the TLS proxy configuration', () => {
     const configTrue: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
-      proxyRejectUnauthorizedCertificates: true,
       tls: {
-        verificationMode: 'none',
         proxyVerificationMode: 'full',
       },
     };
@@ -343,10 +341,8 @@ describe('getProxySettings', () => {
     const configFalse: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
-      proxyRejectUnauthorizedCertificates: false,
       tls: {
         proxyVerificationMode: 'none',
-        verificationMode: 'none',
       },
     };
     proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
@@ -436,13 +432,13 @@ describe('getProxySettings', () => {
         {
           url: 'https://elastic.co',
           tls: {
-            rejectUnauthorized: true,
+            verificationMode: 'full',
           },
         },
         {
           url: 'smtp://elastic.co:123',
           tls: {
-            rejectUnauthorized: false,
+            verificationMode: 'none',
           },
           smtp: {
             ignoreTLS: true,
@@ -465,5 +461,27 @@ describe('getProxySettings', () => {
 
     const chs = getActionsConfigurationUtilities(config).getCustomHostSettings(badUrl);
     expect(chs).toEqual(undefined);
+  });
+});
+
+describe('getTLSSettings', () => {
+  test('returns proper verificationMode value, based on the TLS proxy configuration', () => {
+    const configTrue: ActionsConfig = {
+      ...defaultActionsConfig,
+      tls: {
+        verificationMode: 'full',
+      },
+    };
+    let tlsSettings = getActionsConfigurationUtilities(configTrue).getTLSSettings();
+    expect(tlsSettings.verificationMode).toBe('full');
+
+    const configFalse: ActionsConfig = {
+      ...defaultActionsConfig,
+      tls: {
+        verificationMode: 'none',
+      },
+    };
+    tlsSettings = getActionsConfigurationUtilities(configFalse).getTLSSettings();
+    expect(tlsSettings.verificationMode).toBe('none');
   });
 });

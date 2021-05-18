@@ -417,8 +417,8 @@ describe('create()', () => {
       allowedHosts: ['*'],
       preconfiguredAlertHistoryEsIndex: false,
       preconfigured: {},
-      proxyRejectUnauthorizedCertificates: true,
-      rejectUnauthorized: true,
+      proxyRejectUnauthorizedCertificates: true, // legacy
+      rejectUnauthorized: true, // legacy
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
       maxResponseContentLength: new ByteSizeValue(1000000),
@@ -430,7 +430,7 @@ describe('create()', () => {
         pageSize: 100,
       },
       tls: {
-        verificationMode: 'none',
+        verificationMode: 'full',
         proxyVerificationMode: 'full',
       },
     });
