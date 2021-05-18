@@ -47,7 +47,7 @@ export const getSignalsWithES = async ({
   es: KibanaClient;
   indices: string | string[];
   ids: string | string[];
-}): Promise<Map<string, Map<string, estypes.Hit<SignalHit>>>> => {
+}): Promise<Map<string, Map<string, estypes.SearchTypesHit<SignalHit>>>> => {
   const signals: ApiResponse<estypes.SearchResponse<SignalHit>> = await es.search({
     index: indices,
     body: {
@@ -69,13 +69,13 @@ export const getSignalsWithES = async ({
   return signals.body.hits.hits.reduce((acc, hit) => {
     let indexMap = acc.get(hit._index);
     if (indexMap === undefined) {
-      indexMap = new Map<string, estypes.Hit<SignalHit>>([[hit._id, hit]]);
+      indexMap = new Map<string, estypes.SearchTypesHit<SignalHit>>([[hit._id, hit]]);
     } else {
       indexMap.set(hit._id, hit);
     }
     acc.set(hit._index, indexMap);
     return acc;
-  }, new Map<string, Map<string, estypes.Hit<SignalHit>>>());
+  }, new Map<string, Map<string, estypes.SearchTypesHit<SignalHit>>>());
 };
 
 interface SetStatusCasesParams {

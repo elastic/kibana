@@ -13,7 +13,7 @@ export type Datafeed = estypes.Datafeed;
 
 export type ChunkingConfig = estypes.ChunkingConfig;
 
-export type Aggregation = Record<string, estypes.AggregationContainer>;
+export type Aggregation = Record<string, estypes.AggregationsAggregationContainer>;
 
 // export type IndicesOptions = estypes.IndicesOptions;
 export interface IndicesOptions {
