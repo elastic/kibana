@@ -13,13 +13,13 @@ import {
   Name,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { Version } from '@kbn/securitysolution-io-ts-types';
 
 import {
   DeserializerOrUndefined,
   Immutable,
   ListSchema,
   SerializerOrUndefined,
-  Version,
 } from '../../../common/schemas';
 
 import { getList } from './get_list';
