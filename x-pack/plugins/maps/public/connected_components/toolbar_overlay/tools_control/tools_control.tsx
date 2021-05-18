@@ -57,7 +57,6 @@ export interface Props {
   cancelDraw: () => void;
   geoFields: GeoFieldWithIndex[];
   filterModeActive: boolean;
-  featureModeActive: boolean;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   activateDrawFilterMode: (drawState: DrawState) => void;
@@ -234,7 +233,7 @@ export class ToolsControl extends Component<Props, State> {
         <EuiButtonIcon
           size="s"
           color="text"
-          iconType="pencil"
+          iconType="gear"
           onClick={this._togglePopover}
           aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
             defaultMessage: 'Tools',
@@ -261,10 +260,7 @@ export class ToolsControl extends Component<Props, State> {
       </EuiPopover>
     );
 
-    if (
-      !(this.props.filterModeActive || this.props.featureModeActive) ||
-      this.state.isPopoverOpen
-    ) {
+    if (!this.props.filterModeActive || this.state.isPopoverOpen) {
       return toolsPopoverButton;
     }
 

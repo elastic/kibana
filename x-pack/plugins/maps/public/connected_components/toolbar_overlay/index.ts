@@ -6,11 +6,14 @@
  */
 
 import { connect } from 'react-redux';
+import { ThunkDispatch } from 'redux-thunk';
+import { AnyAction } from 'redux';
 import { ToolbarOverlay } from './toolbar_overlay';
 import { MapStoreState } from '../../reducers/store';
 import { getDrawMode } from '../../selectors/ui_selectors';
 import { getLayersBySourceType } from '../../selectors/map_selectors';
 import { DRAW_MODE, SOURCE_TYPES } from '../../../common';
+import { setDrawMode } from '../../actions';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -20,5 +23,13 @@ function mapStateToProps(state: MapStoreState) {
   };
 }
 
-const connected = connect(mapStateToProps, null)(ToolbarOverlay);
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
+  return {
+    cancelEditing: () => {
+      dispatch(setDrawMode(DRAW_MODE.NONE));
+    },
+  };
+}
+
+const connected = connect(mapStateToProps, mapDispatchToProps)(ToolbarOverlay);
 export { connected as ToolbarOverlay };

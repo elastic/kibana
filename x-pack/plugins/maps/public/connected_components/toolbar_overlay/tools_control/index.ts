@@ -19,7 +19,6 @@ function mapStateToProps(state: MapStoreState) {
   const drawMode = getDrawMode(state);
   return {
     filterModeActive: drawMode === DRAW_MODE.DRAW_FILTERS,
-    featureModeActive: drawMode === DRAW_MODE.DRAW_POINTS || drawMode === DRAW_MODE.DRAW_SHAPES,
   };
 }
 
