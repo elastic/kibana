@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
+import { TooltipState } from '../../../../common/descriptor_types';
 import { TooltipControl } from './tooltip_control';
 import {
   closeOnClickTooltip,
@@ -19,8 +22,9 @@ import {
   getHasLockedTooltips,
   isDrawingFilter,
 } from '../../../selectors/map_selectors';
+import { MapStoreState } from '../../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     layerList: getLayerList(state),
     hasLockedTooltips: getHasLockedTooltips(state),
@@ -29,18 +33,18 @@ function mapStateToProps(state = {}) {
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    closeOnClickTooltip(tooltipId) {
+    closeOnClickTooltip(tooltipId: string) {
       dispatch(closeOnClickTooltip(tooltipId));
     },
-    openOnClickTooltip(tooltipState) {
+    openOnClickTooltip(tooltipState: TooltipState) {
       dispatch(openOnClickTooltip(tooltipState));
     },
     closeOnHoverTooltip() {
       dispatch(closeOnHoverTooltip());
     },
-    openOnHoverTooltip(tooltipState) {
+    openOnHoverTooltip(tooltipState: TooltipState) {
       dispatch(openOnHoverTooltip(tooltipState));
     },
   };

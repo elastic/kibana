@@ -18,10 +18,10 @@ import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { GeoJsonProperties } from 'geojson';
 import { Filter } from 'src/plugins/data/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
-import { isUrlDrilldown } from '../../../trigger_actions/trigger_utils';
-import { RawValue } from '../../../../common/constants';
-import { ITooltipProperty } from '../../../classes/tooltips/tooltip_property';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public';
+import { isUrlDrilldown } from '../../../../trigger_actions/trigger_utils';
+import { RawValue } from '../../../../../common/constants';
+import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
 
 interface Props {
   featureId?: string | number;
