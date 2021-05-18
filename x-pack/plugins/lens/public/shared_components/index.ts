@@ -12,3 +12,4 @@ export { PalettePicker } from './palette_picker';
 export { TooltipWrapper } from './tooltip_wrapper';
 export * from './coloring';
 export { useDebouncedValue } from './debounced_value';
+export * from './helpers';

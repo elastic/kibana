@@ -20,7 +20,7 @@ import {
 import { DEFAULT_COLOR } from './constants';
 import { getDataMinMax, getStepValue, isValidColor } from './utils';
 import { TooltipWrapper } from '../index';
-import { useDebounceWithOptions } from '../../indexpattern_datasource/operations/definitions/helpers';
+import { useDebounceWithOptions } from '../helpers';
 import { ColorStop } from './types';
 
 export interface CustomStopsProps {
