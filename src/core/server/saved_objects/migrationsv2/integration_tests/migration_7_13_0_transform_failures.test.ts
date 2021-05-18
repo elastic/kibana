@@ -92,9 +92,7 @@ describe('migration v2', () => {
     try {
       await root.start();
     } catch (err) {
-      // just make sure the error contains info we expect to get.
-      // then read the logs and parse the number of failed transforms from there.
-
+      // ensure that the migration failed with the expected error
       const messageString = err.message.split('Error')[0].split(' Reason: ')[0];
       expect(messageString).toMatchInlineSnapshot(
         `"Unable to complete saved object migrations for the [.kibana] index: Migrations failed."`
@@ -106,7 +104,6 @@ describe('migration v2', () => {
       .filter(Boolean)
       .map((str) => json5.parse(str));
 
-    // we will get back more than one
     const logRecordsWithTransformFailures = records.find(
       (rec) => rec.message === '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX RESPONSE'
     );
@@ -118,39 +115,21 @@ describe('migration v2', () => {
       (rec) => rec.message === '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX RESPONSE'
     );
     expect(allRecords.length).toBeGreaterThan(5);
-    const allFailed = allRecords
+
+    const allFailures = allRecords
       .filter((rec) => rec._tag === 'Left')
       .map((failure) => failure.left)
       .reduce(
-        function (acc, curr) {
-          const corrIds = acc.corruptIds.concat(curr.corruptDocumentIds);
-          const transErrs = acc.transformErrs.concat(curr.transformErrors);
-          return { corruptIds: corrIds, transformErrs: transErrs };
+        (acc, curr) => {
+          return {
+            corruptIds: [...acc.corruptIds, ...curr.corruptDocumentIds],
+            transformErrs: [...acc.transformErrs, ...curr.transformErrors],
+          };
         },
         { corruptIds: [], transformErrs: [] }
       );
-    // console.log('allFailed:', allFailed);
-    // returns:
-    /**
-     * allFailed: {
-      corruptIds: [
-        'P2SQfHkBs3dBRGh--No5',
-        'QGSZfHkBs3dBRGh-ANoD',
-        'QWSZfHkBs3dBRGh-hNob',
-        'QmSZfHkBs3dBRGh-w9qH',
-        'Q2SZfHkBs3dBRGh-9dp2',
-        'one',
-        'two'
-      ],
-      transformErrs: [
-        { rawId: 'space:default', err: [Object] },
-        {
-          rawId: 'ingest_manager_settings:af2624d0-b763-11eb-93ce-1931add1dc9a',
-          err: [Object]
-        }
-      ]
-    }
-     */
+    expect(allFailures.corruptIds.length).toBeGreaterThan(5);
+    expect(allFailures.transformErrs.length).toBeGreaterThan(0);
   });
 });
 
