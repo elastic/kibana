@@ -8,9 +8,9 @@
 import { estypes } from '@elastic/elasticsearch';
 import { InferSearchResponseOf, AggregateOf as AggregationResultOf, SearchHit } from './search';
 
-export type ESFilter = estypes.QueryContainer;
+export type ESFilter = estypes.QueryDslQueryContainer;
 export type ESSearchRequest = estypes.SearchRequest;
-export type AggregationOptionsByType = Required<estypes.AggregationContainer>;
+export type AggregationOptionsByType = Required<estypes.AggregationsAggregationContainer>;
 
 // Typings for Elasticsearch queries and aggregations. These are intended to be
 // moved to the Elasticsearch JS client at some point (see #77720.)
