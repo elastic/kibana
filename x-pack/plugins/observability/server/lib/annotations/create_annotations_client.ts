@@ -34,7 +34,6 @@ export function createAnnotationsClient(params: {
   const initIndex = () =>
     createOrUpdateIndex({
       index,
-      // @ts-expect-error @elastic-elasticsearch types don't support nested properties
       mappings,
       client: esClient,
       logger,
