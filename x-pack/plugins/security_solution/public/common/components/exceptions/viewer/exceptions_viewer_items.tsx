@@ -12,8 +12,8 @@ import styled from 'styled-components';
 import * as i18n from '../translations';
 import { ExceptionItem } from './exception_item';
 import { AndOrBadge } from '../../and_or_badge';
-import { ExceptionListItemSchema } from '../../../../../public/lists_plugin_deps';
-import { ExceptionListItemIdentifiers } from '../types';
+import type { ExceptionListItemSchema } from '../../../../../public/shared_imports';
+import type { ExceptionListItemIdentifiers } from '../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
   margin: ${({ theme }) => `${theme.eui.euiSize} 0`};
