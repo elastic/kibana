@@ -82,7 +82,7 @@ changed to *Stack Rules*.
 [role="screenshot"]
 image::user/images/highlights-rules-connectors.png[Rules and connectors management page]
 
-*Rules and Connectors* was tweaked for usability&mdash;your can sort rules by name or status.
+*Rules and Connectors* was tweaked for usability&mdash;you can sort rules by name or status.
 
 [role="screenshot"]
 image::user/images/highlights-rules-list-sort.png[Sorting in Rules and connectors page]
