@@ -138,7 +138,7 @@ In addition:
 
 * Tooltips include the layer name.
 * Interactive spatial filters work with geo_points (and already worked with geo_shapes).
-* The file size limit for GeoJSON uploads is 1GB.
+* The file size limit for GeoJSON uploads is now 1GB.
 * The scaling option for “Top hits” is in its own layer card, making it easier for anyone to
 create a layer showing the most relevant or recent documents.
 
