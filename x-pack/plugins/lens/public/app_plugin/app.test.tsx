@@ -385,11 +385,10 @@ describe('Lens App', () => {
         filters: [pinnedFilter],
       }),
     });
+
     expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
       expect.objectContaining({
         dateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
-        query: { query: '', language: 'kuery' },
-        filters: [pinnedFilter],
       }),
       {}
     );
@@ -492,7 +491,7 @@ describe('Lens App', () => {
     });
 
     it('loads a document and uses query and filters if initial input is provided', async () => {
-      const { component, frame, services } = mountWith({});
+      const { component, frame, services, lensStore } = mountWith({});
       services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
         savedObjectId: defaultSavedObjectId,
         state: {
@@ -521,9 +520,9 @@ describe('Lens App', () => {
         {}
       );
 
-      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
-        expect.objectContaining({
-          doc: expect.objectContaining({
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
+          persistedDoc: expect.objectContaining({
             savedObjectId: defaultSavedObjectId,
             state: expect.objectContaining({
               query: 'fake query',
@@ -531,8 +530,7 @@ describe('Lens App', () => {
             }),
           }),
         }),
-        {}
-      );
+      });
     });
 
     it('does not load documents on sequential renders unless the id changes', async () => {
@@ -1070,7 +1068,7 @@ describe('Lens App', () => {
 
   describe('query bar state management', () => {
     it('uses the default time and query language settings', () => {
-      const { frame } = mountWith({});
+      const { frame, lensStore } = mountWith({});
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: '', language: 'kuery' },
@@ -1082,10 +1080,15 @@ describe('Lens App', () => {
       expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           dateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
-          query: { query: '', language: 'kuery' },
         }),
         {}
       );
+
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
+          query: { query: '', language: 'kuery' },
+        }),
+      });
     });
 
     it('updates the index patterns when the editor frame is changed', async () => {
@@ -1129,7 +1132,7 @@ describe('Lens App', () => {
     });
 
     it('updates the editor frame when the user changes query or time in the search bar', () => {
-      const { component, frame, services } = mountWith({});
+      const { component, frame, services, lensStore } = mountWith({});
       (services.data.query.timefilter.timefilter.calculateBounds as jest.Mock).mockReturnValue({
         min: moment('2021-01-09T04:00:00.000Z'),
         max: moment('2021-01-09T08:00:00.000Z'),
@@ -1156,10 +1159,14 @@ describe('Lens App', () => {
       expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           dateRange: { fromDate: '2021-01-09T04:00:00.000Z', toDate: '2021-01-09T08:00:00.000Z' },
-          query: { query: 'new', language: 'lucene' },
         }),
         {}
       );
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
+          query: { query: 'new', language: 'lucene' },
+        }),
+      });
     });
 
     it('updates the filters when the user changes them', () => {
@@ -1346,7 +1353,7 @@ describe('Lens App', () => {
     });
 
     it('clears all existing unpinned filters when the active saved query is cleared', () => {
-      const { component, frame, services } = mountWith({});
+      const { component, services, lensStore } = mountWith({});
       act(() =>
         component.find(TopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
@@ -1363,18 +1370,17 @@ describe('Lens App', () => {
       component.update();
       act(() => component.find(TopNavMenu).prop('onClearSavedQuery')!());
       component.update();
-      expect(frame.EditorFrameContainer).toHaveBeenLastCalledWith(
-        expect.objectContaining({
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
           filters: [pinned],
         }),
-        {}
-      );
+      });
     });
   });
 
   describe('search session id management', () => {
     it('updates the searchSessionId when the query is updated', () => {
-      const { component, frame } = mountWith({});
+      const { component, lensStore } = mountWith({});
       act(() => {
         component.find(TopNavMenu).prop('onSaved')!({
           id: '1',
@@ -1396,17 +1402,16 @@ describe('Lens App', () => {
         });
       });
       component.update();
-      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
-        expect.objectContaining({
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
           searchSessionId: `sessionId-2`,
         }),
-        {}
-      );
+      });
     });
 
     it('re-renders the frame if session id changes from the outside', async () => {
       const services = makeDefaultServices();
-      const { frame } = mountWith({ props: undefined, services });
+      const { lensStore } = mountWith({ props: undefined, services });
 
       act(() => {
         sessionIdSubject.next('new-session-id');
@@ -1414,12 +1419,11 @@ describe('Lens App', () => {
       await act(async () => {
         await new Promise((r) => setTimeout(r, 0));
       });
-      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
-        expect.objectContaining({
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
           searchSessionId: `new-session-id`,
         }),
-        {}
-      );
+      });
     });
 
     it('updates the searchSessionId when the active saved query is cleared', () => {
@@ -1481,7 +1485,7 @@ describe('Lens App', () => {
     });
 
     it('does update the searchSessionId when the state changes and too much time passed', () => {
-      const { component, frame, services } = mountWith({});
+      const { component, frame, lensStore, services } = mountWith({});
 
       // time range is 100,000ms ago to 30,000ms ago (that's a lag of 30 percent)
       (services.data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
@@ -1498,12 +1502,11 @@ describe('Lens App', () => {
         component.find(frame.EditorFrameContainer).prop('onChange')(mockUpdate);
       });
       component.update();
-      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
-        expect.objectContaining({
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
           searchSessionId: `sessionId-2`,
         }),
-        {}
-      );
+      });
     });
 
     it('does not update the searchSessionId when the state changes and too little time has passed', () => {

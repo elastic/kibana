@@ -118,7 +118,7 @@ export function App({
 
   const { resolvedDateRange, from: fromDate, to: toDate } = useTimeRange(
     data,
-    appState.lastKnownDoc,
+    lastKnownDoc,
     dispatchSetState,
     appState.searchSessionId
   );
