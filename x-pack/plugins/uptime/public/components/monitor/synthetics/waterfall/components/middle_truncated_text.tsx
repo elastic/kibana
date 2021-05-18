@@ -98,7 +98,7 @@ export const MiddleTruncatedText = ({
   highestIndex,
 }: Props) => {
   const secureHttps = fullText.startsWith('https://');
-  const text = fullText.replace(/https:\/\/www|http:\/\//, '');
+  const text = fullText.replace(/https:\/\/www.|http:\/\/www.|http:\/\/|https:\/\//, '');
 
   const chunks = useMemo(() => {
     return getChunks(text);
