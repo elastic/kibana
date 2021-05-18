@@ -30,3 +30,5 @@ export const threat_technique = t.intersection([
   ),
 ]);
 export const threat_techniques = t.array(threat_technique);
+
+export type ThreatTechnique = t.TypeOf<typeof threat_technique>;
