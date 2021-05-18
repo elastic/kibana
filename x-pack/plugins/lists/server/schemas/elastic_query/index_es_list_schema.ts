@@ -16,13 +16,13 @@ import {
   updated_at,
   updated_by,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
 
 import {
   deserializerOrUndefined,
   immutable,
   serializerOrUndefined,
   tie_breaker_id,
-  version,
 } from '../../../common/schemas';
 
 export const indexEsListSchema = t.exact(
