@@ -11,11 +11,13 @@ import Fs from 'fs';
 import Util from 'util';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
+import json5 from 'json5';
 
 // const logFilePathOriginal = Path.join(__dirname, 'migration_transform_failures_test_kibana.log');
-const logFilePath = Path.join(__dirname, '7_13_transform_failures_test.log');
+const logFilePath = Path.join(__dirname, 'my_7_13_corrupt_transform_failures_test.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
+const asyncReadFile = Util.promisify(Fs.readFile);
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
@@ -66,7 +68,7 @@ describe('migration v2', () => {
           // },
           //
           //
-          dataArchive: Path.join(__dirname, 'archives', '7_13_transform_failures_archive.zip'),
+          dataArchive: Path.join(__dirname, 'archives', 'my_7_13_archive.zip'),
         },
       },
     });
@@ -76,23 +78,6 @@ describe('migration v2', () => {
     esServer = await startES();
     const coreSetup = await root.setup();
 
-    // coreSetup.savedObjects.registerType({
-    //   name: 'bar',
-    //   hidden: false,
-    //   mappings: {
-    //     properties: {
-    //       name: { type: 'text' },
-    //       surname: { type: 'text' },
-    //       age: { type: 'number' },
-    //       old: { type: 'boolean' },
-    //     },
-    //   },
-    //   namespaceType: 'agnostic',
-    //   migrations: {
-    //     '7.13.0': (doc) => doc,
-    //   },
-    // });
-
     coreSetup.savedObjects.registerType({
       name: 'foo',
       hidden: false,
@@ -101,7 +86,7 @@ describe('migration v2', () => {
       },
       namespaceType: 'agnostic',
       migrations: {
-        '7.13.0': (doc) => doc,
+        '7.14.0': (doc) => doc,
       },
     });
     try {
@@ -110,12 +95,62 @@ describe('migration v2', () => {
       // just make sure the error contains info we expect to get.
       // then read the logs and parse the number of failed transforms from there.
 
-      const messageString = err.message.split('Error')[0];
-      expect(messageString).toMatchInlineSnapshot(`
-        "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: Transformation errors: space:default: Document \\"default\\" has property \\"space\\" which belongs to a more recent version of Kibana [6.6.0]. The last known version is [undefined]
-         "
-      `);
+      const messageString = err.message.split('Error')[0].split(' Reason: ')[0];
+      expect(messageString).toMatchInlineSnapshot(
+        `"Unable to complete saved object migrations for the [.kibana] index: Migrations failed."`
+      );
     }
+    const logFileContent = await asyncReadFile(logFilePath, 'utf-8');
+    const records = logFileContent
+      .split('\n')
+      .filter(Boolean)
+      .map((str) => json5.parse(str));
+
+    // we will get back more than one
+    const logRecordsWithTransformFailures = records.find(
+      (rec) => rec.message === '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX RESPONSE'
+    );
+
+    expect(logRecordsWithTransformFailures).toBeTruthy();
+    expect(logRecordsWithTransformFailures.left.type).toBe('documents_transform_failed');
+
+    const allRecords = records.filter(
+      (rec) => rec.message === '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX RESPONSE'
+    );
+    expect(allRecords.length).toBeGreaterThan(5);
+    const allFailed = allRecords
+      .filter((rec) => rec._tag === 'Left')
+      .map((failure) => failure.left)
+      .reduce(
+        function (acc, curr) {
+          const corrIds = acc.corruptIds.concat(curr.corruptDocumentIds);
+          const transErrs = acc.transformErrs.concat(curr.transformErrors);
+          return { corruptIds: corrIds, transformErrs: transErrs };
+        },
+        { corruptIds: [], transformErrs: [] }
+      );
+    // console.log('allFailed:', allFailed);
+    // returns:
+    /**
+     * allFailed: {
+      corruptIds: [
+        'P2SQfHkBs3dBRGh--No5',
+        'QGSZfHkBs3dBRGh-ANoD',
+        'QWSZfHkBs3dBRGh-hNob',
+        'QmSZfHkBs3dBRGh-w9qH',
+        'Q2SZfHkBs3dBRGh-9dp2',
+        'one',
+        'two'
+      ],
+      transformErrs: [
+        { rawId: 'space:default', err: [Object] },
+        {
+          rawId: 'ingest_manager_settings:af2624d0-b763-11eb-93ce-1931add1dc9a',
+          err: [Object]
+        }
+      ]
+    }
+     */
   });
 });
 
