@@ -178,19 +178,12 @@ describe('config validation', () => {
     );
   });
 
-  test('action with configured ssl', () => {
+  test('action with tls configuration', () => {
     const config: Record<string, unknown> = {
-      preconfigured: {
-        mySlack1: {
-          actionTypeId: '.slack',
-          name: 'Slack #xyz',
-          config: {
-            webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
-          },
-        },
+      tls: {
+        verificationMode: 'none',
+        proxyVerificationMode: 'none',
       },
-      proxyRejectUnauthorizedCertificates: false,
-      rejectUnauthorized: false,
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
@@ -210,20 +203,15 @@ describe('config validation', () => {
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
         },
-        "preconfigured": Object {
-          "mySlack1": Object {
-            "actionTypeId": ".slack",
-            "config": Object {
-              "webhookUrl": "https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz",
-            },
-            "name": "Slack #xyz",
-            "secrets": Object {},
-          },
-        },
+        "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
-        "proxyRejectUnauthorizedCertificates": false,
-        "rejectUnauthorized": false,
+        "proxyRejectUnauthorizedCertificates": true,
+        "rejectUnauthorized": true,
         "responseTimeout": "PT1M",
+        "tls": Object {
+          "proxyVerificationMode": "none",
+          "verificationMode": "none",
+        },
       }
     `);
   });
