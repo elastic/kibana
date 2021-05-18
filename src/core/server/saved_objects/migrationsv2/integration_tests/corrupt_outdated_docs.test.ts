@@ -85,9 +85,7 @@ describe('migration v2 with corrupt saved object documents', () => {
       mappings: { properties: {} },
       namespaceType: 'agnostic',
       migrations: {
-        '7.14.0': (doc) => {
-          throw new Error('nope!');
-        },
+        '7.14.0': (doc) => doc,
       },
     });
     coreSetup.savedObjects.registerType({
@@ -96,9 +94,7 @@ describe('migration v2 with corrupt saved object documents', () => {
       mappings: { properties: {} },
       namespaceType: 'agnostic',
       migrations: {
-        '7.14.0': (doc) => {
-          throw new Error('nope!');
-        },
+        '7.14.0': (doc) => doc,
       },
     });
     coreSetup.savedObjects.registerType({
@@ -107,9 +103,7 @@ describe('migration v2 with corrupt saved object documents', () => {
       mappings: { properties: {} },
       namespaceType: 'agnostic',
       migrations: {
-        '7.14.0': (doc) => {
-          throw new Error('nope');
-        },
+        '7.14.0': (doc) => doc,
       },
     });
     await expect(root.start()).rejects.toThrowError();
@@ -144,6 +138,7 @@ describe('migration v2 with corrupt saved object documents', () => {
         { corruptIds: [], transformErrs: [] }
       );
     expect(allFailures.corruptIds.length).toBeGreaterThan(5);
+    expect(allFailures.transformErrs.length).toEqual(0);
   });
 });
 
