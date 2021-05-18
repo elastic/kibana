@@ -828,8 +828,8 @@ export interface AcknowledgeResponse {
   shardsAcknowledged: boolean;
 }
 
-function aliasArrayToRecord(aliases: string[]): Record<string, estypes.Alias> {
-  const result: Record<string, estypes.Alias> = {};
+function aliasArrayToRecord(aliases: string[]): Record<string, estypes.IndicesAlias> {
+  const result: Record<string, estypes.IndicesAlias> = {};
   for (const alias of aliases) {
     result[alias] = {};
   }

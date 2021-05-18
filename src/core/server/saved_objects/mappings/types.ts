@@ -121,7 +121,7 @@ export interface IndexMappingMeta {
  *
  * @public
  */
-export type SavedObjectsCoreFieldMapping = estypes.Property & {
+export type SavedObjectsCoreFieldMapping = estypes.MappingProperty & {
   /**
    * The dynamic property of the mapping, either `false` or `'strict'`. If
    * unspecified `dynamic: 'strict'` will be inherited from the top-level

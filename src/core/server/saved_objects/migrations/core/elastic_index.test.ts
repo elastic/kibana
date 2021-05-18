@@ -43,7 +43,7 @@ describe('ElasticIndex', () => {
             mappings: { dynamic: 'strict', properties: { a: 'b' } as any },
             settings: {},
           },
-        } as estypes.GetIndexResponse);
+        } as estypes.IndicesGetResponse);
       });
 
       const info = await Index.fetchInfo(client, '.baz');
@@ -164,7 +164,7 @@ describe('ElasticIndex', () => {
       client.tasks.get.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           completed: true,
-        } as estypes.GetTaskResponse)
+        } as estypes.TaskGetTaskResponse)
       );
 
       const info = {
@@ -248,7 +248,7 @@ describe('ElasticIndex', () => {
             reason: 'all shards failed',
             failed_shards: [],
           },
-        } as estypes.GetTaskResponse)
+        } as estypes.TaskGetTaskResponse)
       );
 
       const info = {
