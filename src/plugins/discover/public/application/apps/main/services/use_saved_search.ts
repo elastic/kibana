@@ -157,7 +157,7 @@ export const useSavedSearch = ({
               state: fetchStatuses.COMPLETE,
               rows: documents,
               inspectorAdapters,
-              fieldCounts: {},
+              fieldCounts: newFieldCounts,
             });
             cache.current.fieldCounts = newFieldCounts;
           }
