@@ -44,15 +44,44 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     if (this.props.currentStepId === ADD_LAYER_STEP_ID && !this.state.indexingTriggered) {
       this.setState({ indexingTriggered: true });
       await this._createNewIndex();
-      if (!this._isMounted) {
-        return;
-      }
-      this.props.advanceToNextStep();
     }
   }
 
+  _setCreateIndexError(message: string) {
+    if (!this._isMounted) {
+      return;
+    }
+    this.setState({
+      indexError: i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexError', {
+        defaultMessage: 'Could not create index: {errorMessage}',
+        values: {
+          errorMessage: message,
+        },
+      }),
+    });
+  }
+
   _createNewIndex = async () => {
-    const { indexPatternId } = await createNewIndexAndPattern(this.state.indexName);
+    let indexPatternId: string;
+    try {
+      const response = await createNewIndexAndPattern(this.state.indexName);
+      indexPatternId = response.indexPatternId;
+    } catch (e) {
+      this._setCreateIndexError(e.message);
+      return;
+    }
+
+    if (!indexPatternId) {
+      return this._setCreateIndexError(
+        i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexError', {
+          defaultMessage: 'Could not create index: {errorMessage}',
+          values: {
+            errorMessage: message,
+          },
+        })
+      );
+    }
+
     if (!this._isMounted) {
       return;
     }
@@ -67,6 +96,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       this.props.mapColors
     );
     this.props.previewLayers([layerDescriptor]);
+    this.props.advanceToNextStep();
   };
 
   _onIndexChange = (indexName: string, indexError?: string) => {
@@ -89,8 +119,8 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
           <EuiEmptyPrompt
             title={
               <h4>
-                {i18n.translate('xpack.maps.layers.newVectorLayerWizard.drawVectorShapes', {
-                  defaultMessage: 'Draw shapes',
+                {i18n.translate('xpack.maps.layers.newVectorLayerWizard.createNewLayer', {
+                  defaultMessage: 'Create new layer',
                 })}
               </h4>
             }
@@ -100,7 +130,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
                   {i18n.translate(
                     'xpack.maps.layers.newVectorLayerWizard.vectorEditorDescription',
                     {
-                      defaultMessage: `Use the editor on the left to draw your points and shapes.`,
+                      defaultMessage: `Creates a new vector layer. This can be used to draw and store new shapes.`,
                     }
                   )}
                 </p>
