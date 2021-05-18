@@ -27,10 +27,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         altId: '',
         numElements: 35,
       },
-      { name: 'logs',
+      {
+        name: 'logs',
         id: 'workpad-5563cc40-5760-4afe-bf33-9da72fac53b7/page/1',
         altId: 'workpad-ad72a4e9-b422-480c-be6d-a64a0b79541d',
-        numElements: 57 },
+        numElements: 57,
+      },
       {
         name: 'ecommerce',
         id: 'workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1',
@@ -54,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             });
             await PageObjects.header.waitUntilLoadingHasFinished();
             const url = await browser.getCurrentUrl();
-            if (! url.includes(id) && altId.length > 0) {
+            if (!url.includes(id) && altId.length > 0) {
               await PageObjects.common.navigateToActualUrl('canvas', 'workpad/' + altId, {
                 basePath,
               });
