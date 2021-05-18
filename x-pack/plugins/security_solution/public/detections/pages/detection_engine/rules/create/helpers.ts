@@ -9,20 +9,22 @@ import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
 
-import type { ExceptionListType, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
-import { assertUnreachable } from '../../../../../../common/utility_types';
-import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import { List } from '../../../../../../common/detection_engine/schemas/types';
-import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import type {
+  ExceptionListType,
+  NamespaceType,
+  List,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   Threats,
   ThreatSubtechnique,
   ThreatTechnique,
   Type,
-} from '../../../../../../common/detection_engine/schemas/common/schemas';
-
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
+import { assertUnreachable } from '../../../../../../common/utility_types';
+import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
+import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
+import { Rule } from '../../../../containers/detection_engine/rules';
 import {
   AboutStepRule,
   DefineStepRule,
