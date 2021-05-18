@@ -21,7 +21,7 @@ export interface FilterEventsAgainstListOptions<T> {
 }
 
 export interface CreateSetToFilterAgainstOptions<T> {
-  events: Array<estypes.Hit<T>>;
+  events: Array<estypes.SearchTypesHit<T>>;
   field: string;
   listId: string;
   listType: Type;
@@ -31,12 +31,12 @@ export interface CreateSetToFilterAgainstOptions<T> {
 }
 
 export interface FilterEventsOptions<T> {
-  events: Array<estypes.Hit<T>>;
+  events: Array<estypes.SearchTypesHit<T>>;
   fieldAndSetTuples: FieldSet[];
 }
 
 export interface CreateFieldAndSetTuplesOptions<T> {
-  events: Array<estypes.Hit<T>>;
+  events: Array<estypes.SearchTypesHit<T>>;
   exceptionItem: ExceptionListItemSchema;
   listClient: ListClient;
   logger: Logger;

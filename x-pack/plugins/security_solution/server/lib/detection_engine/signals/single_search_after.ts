@@ -23,7 +23,7 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface SingleSearchAfterParams {
-  aggregations?: Record<string, estypes.AggregationContainer>;
+  aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   searchAfterSortIds: SortResults | undefined;
   index: string[];
   from: string;
@@ -32,7 +32,7 @@ interface SingleSearchAfterParams {
   logger: Logger;
   pageSize: number;
   sortOrder?: SortOrderOrUndefined;
-  filter?: estypes.QueryContainer;
+  filter?: estypes.QueryDslQueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
 }

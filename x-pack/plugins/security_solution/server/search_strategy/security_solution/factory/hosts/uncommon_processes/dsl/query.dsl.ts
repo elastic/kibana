@@ -120,7 +120,7 @@ export const buildQuery = ({
                       'event.action': 'executed',
                     },
                   },
-                ] as estypes.QueryContainer[],
+                ] as estypes.QueryDslQueryContainer[],
               },
             },
             {
@@ -146,7 +146,7 @@ export const buildQuery = ({
                       'event.action': 'process_started',
                     },
                   },
-                ] as estypes.QueryContainer[],
+                ] as estypes.QueryDslQueryContainer[],
               },
             },
             {
