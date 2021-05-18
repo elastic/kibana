@@ -22,7 +22,7 @@ const dataIndexSchema = schema.object({
   dataPath: schema.string(),
 
   // Object defining Elasticsearch field mappings (contents of index.mappings.type.properties)
-  fields: schema.object({}, { unknowns: 'allow' }),
+  fields: schema.recordOf(schema.string(), schema.any()),
 
   // times fields that will be updated relative to now when data is installed
   timeFields: schema.arrayOf(schema.string()),

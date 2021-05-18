@@ -46,7 +46,7 @@ const listOfCapabilitiesSchema = schema.arrayOf(
   schema.string({
     validate(key: string) {
       if (!uiCapabilitiesRegex.test(key)) {
-        return 'Allowed symbols are /a-zA-Z0-9:_-/';
+        return `Does not satisfy regexp ${uiCapabilitiesRegex.toString()}`;
       }
     },
   })
@@ -55,7 +55,7 @@ const managementSchema = schema.recordOf(
   schema.string({
     validate(key: string) {
       if (!managementSectionIdRegex.test(key)) {
-        return 'Allowed symbols are /a-zA-Z0-9_-/';
+        return `Does not satisfy regexp ${managementSectionIdRegex.toString()}`;
       }
     },
   }),
@@ -95,7 +95,7 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
   id: schema.string({
     validate(key: string) {
       if (!subFeaturePrivilegePartRegex.test(key)) {
-        return 'Allowed symbols are /a-zA-Z0-9_-/';
+        return `Does not satisfy regexp ${subFeaturePrivilegePartRegex.toString()}`;
       }
     },
   }),
@@ -151,7 +151,7 @@ const kibanaFeatureSchema = schema.object({
   id: schema.string({
     validate(value: string) {
       if (!featurePrivilegePartRegex.test(value)) {
-        return 'Allowed symbols are /a-zA-Z0-9_-/';
+        return `Does not satisfy regexp ${featurePrivilegePartRegex.toString()}`;
       }
       if (prohibitedFeatureIds.has(value)) {
         return `[${value}] is not allowed`;
@@ -192,7 +192,7 @@ const kibanaFeatureSchema = schema.object({
           id: schema.string({
             validate(value: string) {
               if (!reservedFeaturePrrivilegePartRegex.test(value)) {
-                return 'Does not satisfy /^(?!reserved_)[a-zA-Z0-9_-]+$/';
+                return `Does not satisfy regexp ${reservedFeaturePrrivilegePartRegex.toString()}`;
               }
             },
           }),
@@ -216,7 +216,7 @@ const elasticsearchFeatureSchema = schema.object({
   id: schema.string({
     validate(value: string) {
       if (!featurePrivilegePartRegex.test(value)) {
-        return 'Allowed symbols are /a-zA-Z0-9_-/';
+        return `Does not satisfy regexp ${featurePrivilegePartRegex.toString()}`;
       }
       if (prohibitedFeatureIds.has(value)) {
         return `[${value}] is not allowed`;

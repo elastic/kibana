@@ -47,7 +47,7 @@ const statusCheckSchema = schema.object({
   error: schema.maybe(schema.string()),
   esHitsCheck: schema.object({
     index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
-    query: schema.object({}, { unknowns: 'allow' }),
+    query: schema.recordOf(schema.string(), schema.any()),
   }),
 });
 
@@ -125,7 +125,7 @@ export const tutorialSchema = schema.object({
     },
   }),
   moduleName: schema.maybe(schema.string()),
-  isBeta: schema.maybe(schema.boolean({ defaultValue: false })),
+  isBeta: schema.maybe(schema.boolean()),
   shortDescription: schema.string(),
   // EUI icon type string, one of https://elastic.github.io/eui/#/icons
   euiIconType: schema.maybe(schema.string()),

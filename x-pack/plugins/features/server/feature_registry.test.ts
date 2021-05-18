@@ -1279,7 +1279,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[reserved.privileges.0.id]: Does not satisfy /^(?!reserved_)[a-zA-Z0-9_-]+$/"`
+        `"[reserved.privileges.0.id]: Does not satisfy regexp /^(?!reserved_)[a-zA-Z0-9_-]+$/"`
       );
     });
 
