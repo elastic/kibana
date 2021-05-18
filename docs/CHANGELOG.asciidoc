@@ -218,8 +218,9 @@ Machine Learning::
 * Adds runtime support for anomaly charts & add composite validations {kibana-pull}96348[#96348]
 * Data frame analytics: Adds support for runtime fields {kibana-pull}95734[#95734]
 * Adds Anomaly Explorer charts embeddable {kibana-pull}94396[#94396]
-* Data frame analytics creation wizard: Add validation step (part 1) {kibana-pull}93478[#93478]
+* Data frame analytics creation wizard: Add validation step {kibana-pull}93478[#93478]
 * Adding support for saved object based ML modules {kibana-pull}92855[#92855]
+* Adds search time runtime support for index based Data Visualizer {kibana-pull}95252[#95252]
 Metrics::
 * Observability Overview Host Summary {kibana-pull}90879[#90879]
 Platform::
@@ -314,7 +315,7 @@ Machine Learning::
 * Adding ML module asset type {kibana-pull}94950[#94950]
 * Data frame analytics: Fix ROC curve chart for binary classification {kibana-pull}94791[#94791]
 * Adds Anomaly Explorer charts embeddable {kibana-pull}94396[#94396]
-* Data frame analytics creation wizard: Add validation step (part 1) {kibana-pull}93478[#93478]
+* Data frame analytics creation wizard: Add validation step {kibana-pull}93478[#93478]
 * Adding support for saved object based ML modules {kibana-pull}92855[#92855]
 * Rename advanced setting ml:fileDataVisualizerMaxFileSize to fileUpload:maxFileSize and increase max geojson upload size to 1GB {kibana-pull}92620[#92620]
 * Use indices options in anomaly detection job wizards {kibana-pull}91830[#91830]
