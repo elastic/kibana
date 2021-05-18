@@ -82,12 +82,12 @@ export function LayerSettings(props: Props) {
         <EuiToolTip
           position="top"
           content={i18n.translate('xpack.maps.layerPanel.settingsPanel.fittableFlagTooltip', {
-            defaultMessage: `Fit to data bounds adjusts your map extent to show all of your data. Layers that provide reference data may not need to be included in the data bounds. Use this option to exclude a layer from the fit to data bounds computation.`,
+            defaultMessage: `Fit to data bounds adjusts your map extent to show all of your data. Layers may provide reference data and should not be included in the fit to data bounds computation. Use this option to exclude a layer from fit to data bounds computation.`,
           })}
         >
           <EuiSwitch
             label={i18n.translate('xpack.maps.layerPanel.settingsPanel.fittableFlagLabel', {
-              defaultMessage: `Include bounds in fit to data bounds computation`,
+              defaultMessage: `Include layer in fit to data bounds computation`,
             })}
             checked={props.layer.isIncludeInFitToBounds()}
             onChange={includeInFitToBoundsChange}
