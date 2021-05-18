@@ -203,8 +203,7 @@ export const PaginatedContent = memo(
           return <Item {...itemComponentProps(item)} key={key} />;
         });
       }
-
-      return noItemsMessage || <DefaultNoItemsFound />;
+      if (!loading) return noItemsMessage || <DefaultNoItemsFound />;
     }, [
       ItemComponent,
       error,
@@ -214,6 +213,7 @@ export const PaginatedContent = memo(
       itemKeys,
       items,
       noItemsMessage,
+      loading,
     ]);
 
     return (
