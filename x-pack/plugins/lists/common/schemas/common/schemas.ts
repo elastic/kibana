@@ -8,18 +8,20 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
-import { DefaultNamespace, NonEmptyString } from '@kbn/securitysolution-io-ts-utils';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+import { DefaultNamespace } from '@kbn/securitysolution-io-ts-list-types';
 
 /**
  * @deprecated Directly use the type from the package and not from here
  */
 export {
+  DefaultNamespace,
   Type,
   OsType,
   OsTypeArray,
   listOperator as operator,
   NonEmptyEntriesArray,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 export const list_id = NonEmptyString;
 export type ListId = t.TypeOf<typeof list_id>;

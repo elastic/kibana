@@ -6,12 +6,11 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
+import { Id, NamespaceTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EmptyStringArrayDecoded,
-  Id,
-  NamespaceTypeArray,
   NonEmptyStringArrayDecoded,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-types';
 
 import {
   SavedObjectType,
