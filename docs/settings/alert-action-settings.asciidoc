@@ -124,8 +124,9 @@ xpack.actions.customHostSettings:
 
 | `xpack.actions.customHostSettings[n]`
 `.tls.verificationMode`
-  | Controls the verification of the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to {es}. Valid values are `full`, `certificate`, and `none`. 
- Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. *Default: `full`*. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
+  | Controls the verification of the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`. 
+ Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. *Default: `full`*. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>. Overrides the general `xpack.actions.tls.verificationMode` configuration
+  for requests made for this hostname/port.
 
 | `xpack.actions.customHostSettings[n]`
 `.tls.certificateAuthoritiesFiles`
@@ -168,7 +169,7 @@ a|`xpack.actions.`
 
 a|`xpack.actions[n]`
 `.tls.proxyVerificationMode` {ess-icon}
-| Controls the verification for the proxy server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to {es}. Valid values are `full`, `certificate`, and `none`. 
+| Controls the verification for the proxy server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the proxy server. Valid values are `full`, `certificate`, and `none`. 
 Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. *Default: `full`*. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
 
 | `xpack.actions.rejectUnauthorized` {ess-icon}
@@ -179,8 +180,11 @@ Use `full` to perform hostname verification, `certificate` to skip hostname veri
 
 a|`xpack.actions[n]`
 `.tls.verificationMode` {ess-icon}
-| Controls the verification for the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to {es}. Valid values are `full`, `certificate`, and `none`. 
+| Controls the verification for the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`. 
   Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. *Default: `full`*. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
+  +
+  As an alternative to setting `xpack.actions.tls.verificationMode`, you can use the setting
+  `xpack.actions.customHostSettings` to set TLS options for specific servers.
 
 
 
