@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldMap, FieldMapType, TypeOfFieldMap } from '../../../common';
+import { FieldMap, FieldMapType, TypeOfFieldMap } from '../../../common/field_map';
 
 export interface EventSchema<TMap extends FieldMap> {
   objectFields: TMap;

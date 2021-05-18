@@ -76,7 +76,7 @@ const testImplementation = async (service: IEventLogService, logger: Logger) => 
   // Log some rule execution events.
 
   const baseTemplate = executionLog.getLoggerTemplate({
-    'kibana.rac.producer': 'security',
+    'kibana.rac.alert.producer': 'security',
   });
 
   const ruleTemplate = baseTemplate.getLoggerTemplate({

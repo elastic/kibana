@@ -6,7 +6,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { FieldMap } from '../../../../common';
+import { FieldMap } from '../../../../common/field_map';
 import { IndexMappings } from '../../elasticsearch';
 
 export function mappingFromFieldMap(fieldMap: FieldMap): IndexMappings {

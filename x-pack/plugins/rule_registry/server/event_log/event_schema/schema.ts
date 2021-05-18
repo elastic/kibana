@@ -6,15 +6,13 @@
  */
 
 import { EventSchema, Event } from './schema_types';
+import { FieldMap, runtimeTypeFromFieldMap, mergeFieldMaps } from '../../../common/field_map';
 import {
-  FieldMap,
-  BaseRuleFieldMap,
-  baseRuleFieldMap,
-  runtimeTypeFromFieldMap,
-  mergeFieldMaps,
-} from '../../../common';
+  TechnicalRuleFieldMaps,
+  technicalRuleFieldMap,
+} from '../../../common/assets/field_maps/technical_rule_field_map';
 
-const baseSchema = createSchema(baseRuleFieldMap);
+const baseSchema = createSchema(technicalRuleFieldMap);
 
 export abstract class Schema {
   public static create<TMap extends FieldMap>(fields: TMap): EventSchema<TMap> {
@@ -29,13 +27,13 @@ export abstract class Schema {
     return createSchema(combinedFields);
   }
 
-  public static getBase(): EventSchema<BaseRuleFieldMap> {
+  public static getBase(): EventSchema<TechnicalRuleFieldMaps> {
     return baseSchema;
   }
 
   public static extendBase<TMap extends FieldMap>(
     fields: TMap
-  ): EventSchema<BaseRuleFieldMap & TMap> {
+  ): EventSchema<TechnicalRuleFieldMaps & TMap> {
     const extensionSchema = createSchema(fields);
     return this.combine(baseSchema, extensionSchema);
   }
