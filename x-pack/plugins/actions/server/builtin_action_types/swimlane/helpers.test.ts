@@ -64,13 +64,13 @@ describe('Create Record Mapping', () => {
       externalId: null,
     };
     const data = getBodyForEventAction(appId, mappingConfig, params);
-    expect(data?.values?.[mappingConfig.alertSourceConfig.id]).toEqual(params.alertSource);
+    expect(data?.values?.[mappingConfig.alertSourceConfig?.id ?? 0]).toEqual(params.alertSource);
     expect(data?.values?.[mappingConfig.alertNameConfig.id]).toEqual(params.alertName);
     // @ts-ignore
     expect(data?.values?.[mappingConfig.caseNameConfig.id]).toEqual(params.caseName);
-    expect(data?.values?.[mappingConfig.caseIdConfig.id]).toEqual(params.caseId);
+    expect(data?.values?.[mappingConfig.caseIdConfig?.id ?? 0]).toEqual(params.caseId);
     // @ts-ignore
     expect(data?.values?.[mappingConfig.commentsConfig.id]).toEqual(params.comments);
-    expect(data?.values?.[mappingConfig.severityConfig.id]).toEqual(params.severity);
+    expect(data?.values?.[mappingConfig?.severityConfig?.id ?? 0]).toEqual(params.severity);
   });
 });
