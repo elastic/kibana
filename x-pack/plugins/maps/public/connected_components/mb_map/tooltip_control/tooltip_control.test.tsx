@@ -14,14 +14,16 @@ jest.mock('./tooltip_popover', () => ({
 import sinon from 'sinon';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
+import { Map as MbMap, MapMouseEvent, MapboxGeoJSONFeature } from 'mapbox-gl';
 import { TooltipControl } from './tooltip_control';
+import { IVectorLayer } from '../../../classes/layers/vector_layer';
 
 // mutable map state
-let featuresAtLocation;
+let featuresAtLocation: MapboxGeoJSONFeature[] = [];
 
 const layerId = 'tfi3f';
 const mbLayerId = 'tfi3f_circle';
-const mockLayer = {
+const mockLayer = ({
   getMbLayerIds: () => {
     return [mbLayerId];
   },
@@ -50,21 +52,21 @@ const mockLayer = {
       },
     };
   },
-};
+} as unknown) as IVectorLayer;
 
-const mockMbMapHandlers = {};
-const mockMBMap = {
-  on: (eventName, callback) => {
+const mockMbMapHandlers: { [key: string]: (event?: MapMouseEvent) => void } = {};
+const mockMBMap = ({
+  on: (eventName: string, callback: (event?: MapMouseEvent) => void) => {
     mockMbMapHandlers[eventName] = callback;
   },
-  off: (eventName) => {
+  off: (eventName: string) => {
     delete mockMbMapHandlers[eventName];
   },
   getLayer: () => {},
   queryRenderedFeatures: () => {
     return featuresAtLocation;
   },
-};
+} as unknown) as MbMap;
 
 const defaultProps = {
   mbMap: mockMBMap,
@@ -74,8 +76,8 @@ const defaultProps = {
   openOnHoverTooltip: () => {},
   layerList: [mockLayer],
   isDrawingFilter: false,
-  addFilters: () => {},
-  geoFields: [{}],
+  addFilters: async () => {},
+  geoFields: [],
   openTooltips: [],
   hasLockedTooltips: false,
 };
@@ -83,12 +85,13 @@ const defaultProps = {
 const hoverTooltipState = {
   id: '1',
   isLocked: false,
-  location: [-120, 30],
+  location: [-120, 30] as [number, number],
   features: [
     {
       id: 1,
-      layerId: layerId,
-      geometry: {},
+      layerId,
+      mbProperties: {},
+      actions: [],
     },
   ],
 };
@@ -96,12 +99,13 @@ const hoverTooltipState = {
 const lockedTooltipState = {
   id: '2',
   isLocked: true,
-  location: [-120, 30],
+  location: [-120, 30] as [number, number],
   features: [
     {
       id: 1,
-      layerId: layerId,
-      geometry: {},
+      layerId,
+      mbProperties: {},
+      actions: [],
     },
   ],
 };
@@ -186,10 +190,10 @@ describe('TooltipControl', () => {
   });
 
   describe('on click', () => {
-    const mockMapMouseEvent = {
+    const mockMapMouseEvent = ({
       point: { x: 0, y: 0 },
       lngLat: { lng: 0, lat: 0 },
-    };
+    } as unknown) as MapMouseEvent;
     const openOnClickTooltipStub = sinon.stub();
     const closeOnClickTooltipStub = sinon.stub();
 
@@ -231,7 +235,7 @@ describe('TooltipControl', () => {
     });
 
     test('should set tooltip state when there are features at clicked location and remove duplicate features', () => {
-      const feature = {
+      const feature = ({
         geometry: {
           type: 'Point',
           coordinates: [100, 30],
@@ -242,7 +246,7 @@ describe('TooltipControl', () => {
         properties: {
           __kbn__feature_id__: 1,
         },
-      };
+      } as unknown) as MapboxGeoJSONFeature;
       featuresAtLocation = [feature, feature];
       mount(
         <TooltipControl
