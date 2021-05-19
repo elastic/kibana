@@ -12,6 +12,7 @@ import Util from 'util';
 import json5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
+import { search } from 'superagent';
 
 const logFilePath = Path.join(__dirname, 'migration_test_corrupt_docs_kibana.log');
 
@@ -57,7 +58,7 @@ describe('migration v2 with corrupt saved object documents', () => {
           // },
           // original corrupt SO example:
           // {
-          //  id: 'bar:123'
+          //  id: 'bar:123' // '123' etc
           //  type: 'foo',
           //  foo: {},
           //  migrationVersion: {
@@ -106,39 +107,45 @@ describe('migration v2 with corrupt saved object documents', () => {
         '7.14.0': (doc) => doc,
       },
     });
-    await expect(root.start()).rejects.toThrowError();
-
-    const logFileContent = await asyncReadFile(logFilePath, 'utf-8');
-    const records = logFileContent
-      .split('\n')
-      .filter(Boolean)
-      .map((str) => json5.parse(str));
-
-    const logRecordsWithTransformFailures = records.find(
-      (rec) => rec.message === '[.kibana] OUTDATED_DOCUMENTS_TRANSFORM RESPONSE'
-    );
-    expect(logRecordsWithTransformFailures).toBeTruthy();
-    expect(logRecordsWithTransformFailures.left.type).toBe('documents_transform_failed');
-
-    const allRecords = records.filter(
-      (rec) => rec.message === '[.kibana] OUTDATED_DOCUMENTS_TRANSFORM RESPONSE'
-    );
-    expect(allRecords.length).toBeGreaterThan(2);
-
-    const allFailures = allRecords
-      .filter((rec) => rec._tag === 'Left')
-      .map((failure) => failure.left)
-      .reduce(
-        (acc, curr) => {
-          return {
-            corruptIds: [...acc.corruptIds, ...curr.corruptDocumentIds],
-            transformErrs: [...acc.transformErrs, ...curr.transformErrors],
-          };
-        },
-        { corruptIds: [], transformErrs: [] }
-      );
-    expect(allFailures.corruptIds.length).toBeGreaterThan(5);
-    expect(allFailures.transformErrs.length).toEqual(0);
+    try {
+      await root.start();
+    } catch (err) {
+      const errorMessage = err.message;
+      expect(
+        errorMessage.startsWith(
+          'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: Corrupt saved object documents: '
+        )
+      ).toBeTruthy();
+      expect(
+        errorMessage.endsWith(' To allow migrations to proceed, please delete these documents.')
+      ).toBeTruthy();
+      const expectedCorruptDocIds = [
+        '"foo:my_name"',
+        '"123"',
+        '"456"',
+        '"789"',
+        '"foo:other_name"',
+        '"bar:123"',
+        '"baz:123"',
+        '"bar:345"',
+        '"bar:890"',
+        '"baz:456"',
+        '"baz:789"',
+        '"bar:other_name"',
+        '"baz:other_name"',
+        '"bar:my_name"',
+        '"baz:my_name"',
+        '"foo:123"',
+        '"foo:456"',
+        '"foo:789"',
+        '"foo:other"',
+      ];
+      const regex = /"[^"]+"/g; // matchers for all corrupt documents
+      const docIdsPattern = errorMessage.match(regex);
+      const corruptDocIds: string[] = errorMessage.match(docIdsPattern)[0].split(',');
+      expect(corruptDocIds.length).toBeGreaterThan(5);
+      expect(corruptDocIds).toEqual(expectedCorruptDocIds);
+    }
   });
 });
 
