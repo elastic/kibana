@@ -29,7 +29,9 @@ export const useInvalidFilterQuery = ({
 
   useEffect(() => {
     if (filterQuery === undefined && kqlError != null) {
-      addError(kqlError, { title: kqlError.name, toastMessage: kqlError.message });
+      // Removes error stack from user view
+      delete kqlError.stack;
+      addError(kqlError, { title: kqlError.name });
     }
     // This disable is required to only trigger the toast once per render
     // eslint-disable-next-line react-hooks/exhaustive-deps
