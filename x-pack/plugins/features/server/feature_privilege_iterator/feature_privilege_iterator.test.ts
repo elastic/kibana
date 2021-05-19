@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaFeature } from '../../../../../features/server';
+import { KibanaFeature } from '../';
 import { featurePrivilegeIterator } from './feature_privilege_iterator';
 
 describe('featurePrivilegeIterator', () => {
