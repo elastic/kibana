@@ -160,7 +160,7 @@ export const StyledWithEuiBreakpoints = euiStyled.div`
   @media only screen and (min-width: 1600px) {
     max-width: initial;
   }
-`;
+`; // sets a max-width within the bounds of the EUI breakpoints
 
 export const WaterfallChartTooltip = euiStyled(StyledWithEuiBreakpoints)`
   background-color: ${(props) => props.theme.eui.euiColorDarkestShade};
