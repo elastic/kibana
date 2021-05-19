@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import { useMemo, useEffect, useRef, useCallback } from 'react';
-import { merge, Subject, BehaviorSubject, forkJoin } from 'rxjs';
+import { merge, Subject, BehaviorSubject, forkJoin, of } from 'rxjs';
 import { debounceTime, tap, filter } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { IndexPattern, ISearchSource } from '../../../../../../data/common';
+import { IndexPattern, isCompleteResponse, ISearchSource } from '../../../../../../data/common';
 import { SavedSearch } from '../../../../saved_searches';
 import { AppState, GetStateReturn } from './discover_state';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
@@ -119,7 +119,7 @@ export const useSavedSearch = ({
   });
 
   const fetchAll = useCallback(
-    (resetFieldCounts = false) => {
+    (reset = false) => {
       if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
         return Promise.reject();
       }
@@ -129,10 +129,20 @@ export const useSavedSearch = ({
       refs.current.abortController = new AbortController();
 
       refs.current.fetchStatus = fetchStatuses.LOADING;
-      savedSearch$.next({
-        state: fetchStatuses.LOADING,
-        fetchCounter: ++refs.current.fetchCounter,
-      });
+      if (reset) {
+        // triggered e.g. when runtime field was added, changed, deleted, index pattern was switched
+        savedSearch$.next({
+          state: fetchStatuses.LOADING,
+          rows: [],
+          fieldCounts: {},
+          fetchCounter: ++refs.current.fetchCounter,
+        });
+      } else {
+        savedSearch$.next({
+          state: fetchStatuses.LOADING,
+          fetchCounter: ++refs.current.fetchCounter,
+        });
+      }
 
       const fetchVars = {
         abortController: refs.current.abortController,
@@ -140,21 +150,19 @@ export const useSavedSearch = ({
         inspectorAdapters,
       };
 
-      const fetches$ =
-        indexPattern.timeFieldName && !state.hideChart
-          ? forkJoin({
-              docs: fetchDocs(fetchVars),
-              chart: fetchChart(fetchVars),
-              totalHits: fetchHits(fetchVars),
-            })
-          : forkJoin({ docs: fetchDocs(fetchVars), totalHits: fetchHits(fetchVars) });
-
-      fetches$.subscribe(
+      forkJoin({
+        docs: fetchDocs(fetchVars),
+        chart: indexPattern.timeFieldName && !state.hideChart ? fetchChart(fetchVars) : of(null),
+        totalHits: fetchHits(fetchVars),
+      }).subscribe(
         (res) => {
+          if (!isCompleteResponse(res.docs)) {
+            return;
+          }
           const documents = res.docs.rawResponse.hits.hits;
           if (documents) {
             const newFieldCounts = calcFieldCounts(
-              resetFieldCounts ? {} : refs.current.fieldCounts,
+              reset ? {} : refs.current.fieldCounts,
               documents,
               indexPattern
             );
@@ -199,6 +207,10 @@ export const useSavedSearch = ({
     ]
   );
 
+  /**
+   * This part takes care of triggering the data fetching by creating and subscribing
+   * to an observable of various possible changes in state
+   */
   useEffect(() => {
     const fetch$ = merge(
       refetch$,
@@ -216,14 +228,6 @@ export const useSavedSearch = ({
 
     const subscription = fetch$.subscribe({
       next: (val) => {
-        if (val === 'reset') {
-          // triggered e.g. when runtime field was added, changed, deleted
-          savedSearch$.next({
-            state: fetchStatuses.LOADING,
-            rows: [],
-            fieldCounts: {},
-          });
-        }
         fetchAll(val === 'reset');
       },
     });
@@ -237,7 +241,6 @@ export const useSavedSearch = ({
     refetch$,
     searchSessionManager.newSearchSessionIdFromURL$,
     timefilter,
-    savedSearch$,
     fetchAll,
   ]);
 
@@ -248,19 +251,23 @@ export const useSavedSearch = ({
     let triggerFetch = false;
     let resetFieldCounts = false;
     if (state.hideChart !== refs.current.appState.hideChart && !state.hideChart) {
+      // chart was hidden, now it should be displayed, so data is needed
       triggerFetch = true;
     } else if (state.interval !== refs.current.appState.interval) {
+      // inverval of chart was changed
       triggerFetch = true;
     } else if (!isEqual(state.sort, refs.current.appState.sort)) {
+      // sorting of document table was changed
       triggerFetch = true;
     }
     if (!isEqual(state.index, refs.current.appState.index)) {
+      // different index was selected
       triggerFetch = true;
       resetFieldCounts = true;
     }
     refs.current.appState = state;
     if (triggerFetch) {
-      refetch$.next(resetFieldCounts);
+      refetch$.next(resetFieldCounts ? 'reset' : '');
     }
   }, [refetch$, state.interval, state.sort, state]);
 
