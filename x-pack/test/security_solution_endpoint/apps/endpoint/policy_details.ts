@@ -636,6 +636,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id,
           policyInfo.packagePolicy.id
         );
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
       afterEach(async () => {
         if (policyInfo) {
