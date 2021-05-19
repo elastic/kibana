@@ -9,9 +9,7 @@ import { CoreStart, HttpSetup } from 'kibana/public';
 import { applyMiddleware, createStore, Store } from 'redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { History, createBrowserHistory } from 'history';
-
 import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
-
 import {
   createSpyMiddleware,
   MiddlewareActionSpyHelper,
