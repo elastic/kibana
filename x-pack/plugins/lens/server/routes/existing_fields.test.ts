@@ -79,7 +79,7 @@ describe('existingFields', () => {
     const result = existingFields(
       [
         {
-          // @ts-expect-error _mymeta is not defined on estypes.SearchTypesHit
+          // @ts-expect-error _mymeta is not defined on estypes.SearchHit
           _mymeta: 'abc',
           ...searchResults({ bar: ['scriptvalue'] }),
         },

@@ -232,7 +232,7 @@ async function fetchIndexPatternStats({
 /**
  * Exported only for unit tests.
  */
-export function existingFields(docs: estypes.SearchTypesHit[], fields: Field[]): string[] {
+export function existingFields(docs: estypes.SearchHit[], fields: Field[]): string[] {
   const missingFields = new Set(fields);
 
   for (const doc of docs) {

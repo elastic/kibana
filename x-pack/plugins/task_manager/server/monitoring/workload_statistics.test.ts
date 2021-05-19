@@ -944,7 +944,7 @@ function setTaskTypeCount(
       ...rest.hits,
       total: {
         value: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0),
-        relation: 'eq' as estypes.SearchTypesTotalHitsRelation,
+        relation: 'eq' as estypes.SearchTotalHitsRelation,
       },
     },
     aggregations: {

@@ -51,15 +51,15 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
    * @param [overrides] any partial value to the full document
    */
   generateEsHit(
-    overrides: DeepPartial<estypes.SearchTypesHit<FleetServerAgent>> = {}
-  ): estypes.SearchTypesHit<FleetServerAgent> {
+    overrides: DeepPartial<estypes.SearchHit<FleetServerAgent>> = {}
+  ): estypes.SearchHit<FleetServerAgent> {
     const hostname = this.randomHostname();
     const now = new Date().toISOString();
     const osFamily = this.randomOSFamily();
 
     return merge<
-      estypes.SearchTypesHit<FleetServerAgent>,
-      DeepPartial<estypes.SearchTypesHit<FleetServerAgent>>
+      estypes.SearchHit<FleetServerAgent>,
+      DeepPartial<estypes.SearchHit<FleetServerAgent>>
     >(
       {
         _index: AGENTS_INDEX,

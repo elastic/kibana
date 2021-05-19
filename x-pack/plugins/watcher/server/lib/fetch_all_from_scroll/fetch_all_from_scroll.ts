@@ -13,7 +13,7 @@ import { ES_SCROLL_SETTINGS } from '../../../common/constants';
 export function fetchAllFromScroll(
   searchResults: estypes.ScrollResponse<unknown>,
   dataClient: IScopedClusterClient,
-  hits: estypes.SearchTypesHit[] = []
+  hits: estypes.SearchHit[] = []
 ): Promise<estypes.ScrollResponse['hits']['hits']> {
   const newHits = get(searchResults, 'hits.hits', []);
   const scrollId = get(searchResults, '_scroll_id');

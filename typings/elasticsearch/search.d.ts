@@ -56,7 +56,7 @@ export type SearchHit<
   TSource extends any = unknown,
   TFields extends Fields | undefined = undefined,
   TDocValueFields extends DocValueFields | undefined = undefined
-> = Omit<estypes.SearchTypesHit, '_source' | 'fields'> &
+> = Omit<estypes.SearchHit, '_source' | 'fields'> &
   (TSource extends false ? {} : { _source: TSource }) &
   (TFields extends Fields
     ? {
@@ -526,7 +526,7 @@ export type AggregateOf<
       max_score: number | null;
       hits: TAggregationContainer extends { top_hits: estypes.TopHitsAggregation }
         ? HitsOf<TAggregationContainer['top_hits'], TDocument>
-        : estypes.SearchTypesHitsMetadata<TDocument>;
+        : estypes.SearchHitsMetadata<TDocument>;
     };
   };
   top_metrics: {

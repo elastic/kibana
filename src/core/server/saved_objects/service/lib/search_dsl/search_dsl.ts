@@ -26,7 +26,7 @@ interface GetSearchDslOptions {
   rootSearchFields?: string[];
   searchAfter?: estypes.Id[];
   sortField?: string;
-  sortOrder?: estypes.SearchTypesSortOrder;
+  sortOrder?: estypes.SearchSortOrder;
   namespaces?: string[];
   pit?: SavedObjectsPitParams;
   typeToNamespacesMap?: Map<string, string[] | undefined>;

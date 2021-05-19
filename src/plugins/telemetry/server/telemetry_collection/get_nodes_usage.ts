@@ -14,7 +14,7 @@ import { TIMEOUT } from './constants';
  * Data returned by GET /_nodes/usage, but flattened as an array of {@link estypes.NodeUsageInformation}
  * with the node ID set in the field `node_id`.
  */
-export interface NodeUsage extends estypes.NodesNodesUsageNodeUsage {
+export interface NodeUsage extends estypes.NodesUsageNodeUsage {
   /**
    * The Node ID as reported by ES
    */
@@ -31,7 +31,7 @@ export type NodesUsageGetter = (esClient: ElasticsearchClient) => Promise<{ node
  */
 export async function fetchNodesUsage(
   esClient: ElasticsearchClient
-): Promise<estypes.NodesNodesUsageResponse> {
+): Promise<estypes.NodesUsageResponse> {
   const { body } = await esClient.nodes.usage({
     timeout: TIMEOUT,
   });

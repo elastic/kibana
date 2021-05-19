@@ -46,7 +46,7 @@ export interface StoreOpts {
 export interface SearchOpts {
   search_after?: Array<number | string>;
   size?: number;
-  sort?: estypes.SearchTypesSort;
+  sort?: estypes.SearchSort;
   query?: estypes.QueryDslQueryContainer;
   seq_no_primary_term?: boolean;
 }

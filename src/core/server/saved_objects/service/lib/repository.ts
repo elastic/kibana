@@ -896,7 +896,7 @@ export class SavedObjectsRepository {
       per_page: perPage,
       total: body.hits.total,
       saved_objects: body.hits.hits.map(
-        (hit: estypes.SearchTypesHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
+        (hit: estypes.SearchHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
           // @ts-expect-error @elastic/elasticsearch declared Id as string | number
           ...this._rawToSavedObject(hit),
           score: hit._score!,

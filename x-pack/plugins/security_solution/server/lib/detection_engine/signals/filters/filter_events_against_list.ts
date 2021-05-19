@@ -58,9 +58,9 @@ export const filterEventsAgainstList = async <T>({
       return listItem.entries.every((entry) => entriesList.is(entry));
     });
 
-    const res = await valueListExceptionItems.reduce<Promise<Array<estypes.SearchTypesHit<T>>>>(
+    const res = await valueListExceptionItems.reduce<Promise<Array<estypes.SearchHit<T>>>>(
       async (
-        filteredAccum: Promise<Array<estypes.SearchTypesHit<T>>>,
+        filteredAccum: Promise<Array<estypes.SearchHit<T>>>,
         exceptionItem: ExceptionListItemSchema
       ) => {
         const events = await filteredAccum;
@@ -78,7 +78,7 @@ export const filterEventsAgainstList = async <T>({
         );
         return filteredEvents;
       },
-      Promise.resolve<Array<estypes.SearchTypesHit<T>>>(eventSearchResult.hits.hits)
+      Promise.resolve<Array<estypes.SearchHit<T>>>(eventSearchResult.hits.hits)
     );
 
     return {

@@ -192,7 +192,7 @@ export async function updateObjectsSpaces({
 
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;
-  const bulkOperationParams: estypes.BulkBulkOperationContainer[] = [];
+  const bulkOperationParams: estypes.BulkOperationContainer[] = [];
   const expectedBulkOperationResults: Either[] = expectedBulkGetResults.map(
     (expectedBulkGetResult) => {
       if (isLeft(expectedBulkGetResult)) {
