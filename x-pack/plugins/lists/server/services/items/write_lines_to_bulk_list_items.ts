@@ -9,6 +9,7 @@ import { Readable } from 'stream';
 
 import { ElasticsearchClient } from 'kibana/server';
 import { MetaOrUndefined, Type } from '@kbn/securitysolution-io-ts-list-types';
+import { Version } from '@kbn/securitysolution-io-ts-types';
 
 import { createListIfItDoesNotExist } from '../lists/create_list_if_it_does_not_exist';
 import {
@@ -16,7 +17,6 @@ import {
   ListIdOrUndefined,
   ListSchema,
   SerializerOrUndefined,
-  Version,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
 
