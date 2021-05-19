@@ -137,7 +137,7 @@ export class ReportingCore {
     if (deprecatedRoles !== false) {
       // refer to roles.allow configuration (deprecated path)
       const allowedRoles = ['superuser', ...(deprecatedRoles ?? [])];
-      const privileges = allowedRoles.map(role => ({
+      const privileges = allowedRoles.map((role) => ({
         requiredClusterPrivileges: [],
         requiredRoles: [role],
         ui: [],
@@ -207,7 +207,7 @@ export class ReportingCore {
     const { licensing } = this.getPluginSetupDeps();
     return await licensing.license$
       .pipe(
-        map(license => checkLicense(this.getExportTypesRegistry(), license)),
+        map((license) => checkLicense(this.getExportTypesRegistry(), license)),
         first()
       )
       .toPromise();
