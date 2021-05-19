@@ -24,3 +24,6 @@ export const from = new t.Type<string, string, unknown>(
   t.identity
 );
 export type From = t.TypeOf<typeof from>;
+
+export const fromOrUndefined = t.union([from, t.undefined]);
+export type FromOrUndefined = t.TypeOf<typeof fromOrUndefined>;
