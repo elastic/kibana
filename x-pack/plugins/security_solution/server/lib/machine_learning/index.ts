@@ -7,8 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { buildExceptionFilter } from '../../../common/shared_imports';
-import { ExceptionListItemSchema } from '../../../../lists/common';
 import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 
 export { Anomaly };

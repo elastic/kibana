@@ -12,7 +12,7 @@ import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { listMock } from '../../../../../../lists/server/mocks';
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas/response';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   createPackagePolicyWithManifestMock,
   createPackagePolicyWithInitialManifestMock,
