@@ -46,7 +46,7 @@ export function getApi(
 ): NewsfeedApi {
   const userLanguage = i18n.getLocale();
   const fetchInterval = config.fetchInterval.asMilliseconds();
-  const mainInterval = 2000; // config.mainInterval.asMilliseconds();
+  const mainInterval = config.mainInterval.asMilliseconds();
   const storage = new NewsfeedStorage(newsfeedId);
   const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval, storage);
 
@@ -65,14 +65,14 @@ export function getApi(
         })
       )
     ),
-    tap(() => driver.updateLastFetch())
+    tap(() => storage.setLastFetchTime(new Date()))
   );
 
-  const merged$ = combineLatest([results$, storage.getUnreadStatus$()]).pipe(
-    map(([results, unreadStatus]) => {
+  const merged$ = combineLatest([results$, storage.isAnyUnread$()]).pipe(
+    map(([results, isAnyUnread]) => {
       return {
         ...results,
-        hasNew: results.error ? false : unreadStatus,
+        hasNew: results.error ? false : isAnyUnread,
       };
     })
   );

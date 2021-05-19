@@ -18,8 +18,8 @@ export class NewsfeedStorage {
   private readonly unreadStatus$: BehaviorSubject<boolean>;
 
   constructor(storagePrefix: string) {
-    this.lastFetchStorageKey = `newsfeed.${storagePrefix}.lastFetch`;
-    this.readStatusStorageKey = `newsfeed.${storagePrefix}.readStatus`;
+    this.lastFetchStorageKey = getStorageKey(storagePrefix, 'lastFetch');
+    this.readStatusStorageKey = getStorageKey(storagePrefix, 'readStatus');
     this.unreadStatus$ = new BehaviorSubject<boolean>(anyUnread(this.getReadStatus()));
   }
 
@@ -60,11 +60,11 @@ export class NewsfeedStorage {
     return anyUnread(updatedReadStatus);
   }
 
-  getUnreadStatus(): boolean {
+  isAnyUnread(): boolean {
     return this.unreadStatus$.value;
   }
 
-  getUnreadStatus$(): Observable<boolean> {
+  isAnyUnread$(): Observable<boolean> {
     return this.unreadStatus$.asObservable();
   }
 
@@ -84,3 +84,6 @@ export class NewsfeedStorage {
 
 const anyUnread = (status: Record<string, boolean>): boolean =>
   Object.values(status).some((read) => !read);
+
+/** @internal */
+export const getStorageKey = (prefix: string, key: string) => `newsfeed.${prefix}.${key}`;

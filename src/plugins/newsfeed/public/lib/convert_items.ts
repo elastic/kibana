@@ -17,7 +17,7 @@ export const convertItems = (items: ApiItem[], userLanguage: string): NewsfeedIt
     .filter(validateIntegrity);
 };
 
-const validatePublishedDate = (item: ApiItem): boolean => {
+export const validatePublishedDate = (item: ApiItem): boolean => {
   if (moment(item.expire_on).isBefore(Date.now())) {
     return false; // ignore item if expired
   }
@@ -28,7 +28,7 @@ const validatePublishedDate = (item: ApiItem): boolean => {
   return true;
 };
 
-const convertItem = (rawItem: ApiItem, userLanguage: string): NewsfeedItem => {
+export const convertItem = (rawItem: ApiItem, userLanguage: string): NewsfeedItem => {
   const {
     expire_on: expireOnUtc,
     publish_on: publishOnUtc,
@@ -58,7 +58,7 @@ const convertItem = (rawItem: ApiItem, userLanguage: string): NewsfeedItem => {
   };
 };
 
-const validateIntegrity = (item: Partial<NewsfeedItem>): boolean => {
+export const validateIntegrity = (item: Partial<NewsfeedItem>): boolean => {
   const hasMissing = [
     item.title,
     item.description,
