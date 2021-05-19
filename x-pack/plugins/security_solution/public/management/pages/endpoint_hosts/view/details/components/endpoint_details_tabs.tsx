@@ -25,24 +25,19 @@ interface EndpointDetailsTabs {
 }
 
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
   overflow: hidden;
 
   > [role='tabpanel'] {
-    padding: 12px 0;
-    display: flex;
-    flex: 1;
-    flex-direction: column;
+    height: 100%;
+    padding-right: 12px;
     overflow: hidden;
     overflow-y: auto;
     ::-webkit-scrollbar {
       -webkit-appearance: none;
-      width: 7px;
+      width: 4px;
     }
     ::-webkit-scrollbar-thumb {
-      border-radius: 4px;
+      border-radius: 2px;
       background-color: rgba(0, 0, 0, 0.5);
       -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
     }

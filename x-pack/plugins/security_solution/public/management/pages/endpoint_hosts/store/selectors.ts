@@ -250,7 +250,7 @@ export const showView: (state: EndpointState) => 'policy_response' | 'details' =
  * Returns the selected endpoint's elastic agent Id
  * used for fetching endpoint actions log
  */
-export const selectedAgent = (state: Immutable<EndpointState>) => {
+export const selectedAgent = (state: Immutable<EndpointState>): string => {
   const hostList = state.hosts;
   const { selected_endpoint: selectedEndpoint } = uiQueryParams(state);
   return (

@@ -13,7 +13,7 @@ import { SecuritySolutionPluginRouter } from '../../../types';
 import { EndpointAppContext } from '../../types';
 
 /**
- * Registers the Host-(un-)isolation routes
+ * Registers the endpoint activity-log route
  */
 export function registerActionAuditLogRoutes(
   router: SecuritySolutionPluginRouter,

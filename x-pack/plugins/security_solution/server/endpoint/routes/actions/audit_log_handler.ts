@@ -47,7 +47,7 @@ export const actionsLogRequestHandler = (
       return res.customError({
         statusCode: 500,
         body: {
-          message: `Error fetching Actions Log for: ${req.params.agent_id}`,
+          message: `Error fetching actions log for agent_id ${req.params.agent_id}`,
         },
       });
     }

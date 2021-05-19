@@ -65,6 +65,27 @@ import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
 
+const contentLoadingMarkup = (
+  <>
+    <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
+  </>
+);
+
+const DetailsFlyoutBody = styled(EuiFlyoutBody)`
+  overflow-y: hidden;
+  flex: 1;
+
+  .euiFlyoutBody__overflow {
+    overflow: hidden;
+    mask-image: none;
+  }
+
+  .euiFlyoutBody__overflowContent {
+    height: 100%;
+    display: flex;
+  }
+`;
+
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
   const toasts = useToasts();
@@ -102,13 +123,23 @@ export const EndpointDetailsFlyout = memo(() => {
   }, [history, queryParamsWithoutSelectedEndpoint]);
 
   useEffect(() => {
-    if (hostDetailsError !== undefined || activityError !== undefined) {
+    if (hostDetailsError !== undefined) {
       toasts.addDanger({
         title: i18n.translate('xpack.securitySolution.endpoint.details.errorTitle', {
           defaultMessage: 'Could not find host',
         }),
         text: i18n.translate('xpack.securitySolution.endpoint.details.errorBody', {
           defaultMessage: 'Please exit the flyout and select an available host.',
+        }),
+      });
+    }
+    if (activityError !== undefined) {
+      toasts.addDanger({
+        title: i18n.translate('xpack.securitySolution.endpoint.activityLog.errorTitle', {
+          defaultMessage: 'Could not find activity log for host',
+        }),
+        text: i18n.translate('xpack.securitySolution.endpoint.activityLog.errorBody', {
+          defaultMessage: 'Please exit the flyout and select another host with actions.',
         }),
       });
     }
@@ -138,47 +169,48 @@ export const EndpointDetailsFlyout = memo(() => {
           </EuiToolTip>
         )}
       </EuiFlyoutHeader>
-      {hostDetails === undefined || activityLog === undefined ? (
+      {show === 'details' && (
         <>
-          <EuiFlyoutBody>
-            <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
-          </EuiFlyoutBody>
-        </>
-      ) : (
-        <>
-          {show === 'details' && (
-            <>
-              <EuiFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EndpointDetailsFlyoutTabs
-                      tabs={[
-                        {
-                          id: EndpointDetailsTabsTypes.overview,
-                          name: i18.OVERVIEW,
-                          content: (
-                            <EndpointDetails
-                              details={hostDetails}
-                              policyInfo={policyInfo}
-                              hostStatus={hostStatus}
-                            />
-                          ),
-                        },
-                        {
-                          id: EndpointDetailsTabsTypes.activityLog,
-                          name: i18.ACTIVITY_LOG,
-                          content: <EndpointActivityLog endpointActions={activityLog} />,
-                        },
-                      ]}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlyoutBody>
-            </>
-          )}
-          {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={hostDetails} />}
+          <DetailsFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EndpointDetailsFlyoutTabs
+                  tabs={[
+                    {
+                      id: EndpointDetailsTabsTypes.overview,
+                      name: i18.OVERVIEW,
+                      content:
+                        hostDetails === undefined ? (
+                          contentLoadingMarkup
+                        ) : (
+                          <EndpointDetails
+                            details={hostDetails}
+                            policyInfo={policyInfo}
+                            hostStatus={hostStatus}
+                          />
+                        ),
+                    },
+                    {
+                      id: EndpointDetailsTabsTypes.activityLog,
+                      name: i18.ACTIVITY_LOG,
+                      content:
+                        activityLog === undefined ? (
+                          contentLoadingMarkup
+                        ) : (
+                          <EndpointActivityLog endpointActions={activityLog} />
+                        ),
+                    },
+                  ]}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </DetailsFlyoutBody>
         </>
       )}
+      {show === 'policy_response' && !!hostDetails && (
+        <PolicyResponseFlyoutPanel hostMeta={hostDetails} />
+      )}
+
       <EuiFlyoutFooter>
         <EuiPagination
           pageCount={pageCount}
