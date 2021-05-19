@@ -487,7 +487,9 @@ export default function ({ getService }: FtrProviderContext) {
           .delete(`/internal/session/${sessionId}`)
           .set('kbn-xsrf', 'foo')
           .auth('other_user', 'password')
-          .expect(404);
+          .expect(200);
+
+        await supertest.get(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(200);
       });
 
       it(`should prevent users from cancelling other users' sessions`, async () => {
@@ -508,7 +510,15 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/session/${sessionId}/cancel`)
           .set('kbn-xsrf', 'foo')
           .auth('other_user', 'password')
-          .expect(404);
+          .expect(200);
+
+        const resp = await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        const { status } = resp.body.attributes;
+        expect(status).not.to.equal(SearchSessionStatus.CANCELLED);
       });
 
       it(`should prevent users from extending other users' sessions`, async () => {
