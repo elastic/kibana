@@ -9,8 +9,8 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiScreenReaderOnly, EuiToolTip, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import { StyledWithEuiBreakpoints } from './styles';
 import { FIXED_AXIS_HEIGHT } from './constants';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   ariaLabel: string;
@@ -60,13 +60,6 @@ const StyledButton = styled(EuiButtonEmpty)`
   }
 `;
 
-const DEFAULT_MAX_WIDTH = 275;
-
-const StyledTooltip = euiStyled(EuiToolTip)`
-  max-width: ${({ theme }) =>
-    parseInt(theme.eui?.euiBreakpoints?.s ?? DEFAULT_MAX_WIDTH, 10) - 5}px;
-`; // prevent wrapping unless URL is longer than our min responsive breakpoint
-
 export const getChunks = (text: string = '') => {
   const END_CHARS = 12;
   const chars = text.split('');
@@ -88,7 +81,8 @@ export const MiddleTruncatedText = ({ ariaLabel, text, onClick, setButtonRef, ur
       <EuiScreenReaderOnly>
         <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
       </EuiScreenReaderOnly>
-      <StyledTooltip
+      <StyledWithEuiBreakpoints
+        as={EuiToolTip}
         content={text}
         data-test-subj="middleTruncatedTextToolTip"
         delay="long"
@@ -113,7 +107,7 @@ export const MiddleTruncatedText = ({ ariaLabel, text, onClick, setButtonRef, ur
             </InnerContainer>
           )}
         </>
-      </StyledTooltip>
+      </StyledWithEuiBreakpoints>
       <span>
         <EuiLink href={url} external target="_blank">
           <EuiScreenReaderOnly>
