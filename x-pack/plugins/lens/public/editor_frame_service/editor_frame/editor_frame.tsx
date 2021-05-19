@@ -72,6 +72,7 @@ export function EditorFrame(props: EditorFrameProps) {
   const { filters, searchSessionId, savedQuery } = useLensSelector((state) => state.app);
 
   const query = props.query;
+  const doc = props.doc;
 
   const [state, dispatch] = useReducer(reducer, props, getInitialState);
   const [visualizeTriggerFieldContext, setVisualizeTriggerFieldContext] = useState(
@@ -94,7 +95,7 @@ export function EditorFrame(props: EditorFrameProps) {
         initializeDatasources(
           props.datasourceMap,
           state.datasourceStates,
-          props.doc?.references,
+          doc?.references,
           visualizeTriggerFieldContext,
           { isFullEditor: true }
         )
@@ -173,19 +174,19 @@ export function EditorFrame(props: EditorFrameProps) {
 
   useEffect(
     () => {
-      if (props.doc) {
+      if (doc) {
         dispatch({
           type: 'VISUALIZATION_LOADED',
           doc: {
-            ...props.doc,
+            ...doc,
             state: {
-              ...props.doc.state,
-              visualization: props.doc.visualizationType
-                ? props.visualizationMap[props.doc.visualizationType].initialize(
+              ...doc.state,
+              visualization: doc.visualizationType
+                ? props.visualizationMap[doc.visualizationType].initialize(
                     framePublicAPI,
-                    props.doc.state.visualization
+                    doc.state.visualization
                   )
-                : props.doc.state.visualization,
+                : doc.state.visualization,
             },
           },
         });
@@ -197,7 +198,7 @@ export function EditorFrame(props: EditorFrameProps) {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.doc]
+    [doc]
   );
 
   // Initialize visualization as soon as all datasources are ready
@@ -218,7 +219,7 @@ export function EditorFrame(props: EditorFrameProps) {
 
   // Get suggestions for visualize field when all datasources are ready
   useEffect(() => {
-    if (allLoaded && visualizeTriggerFieldContext && !props.doc) {
+    if (allLoaded && visualizeTriggerFieldContext && !doc) {
       applyVisualizeFieldSuggestions({
         datasourceMap: props.datasourceMap,
         datasourceStates: state.datasourceStates,

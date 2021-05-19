@@ -153,8 +153,9 @@ describe('editor_frame', () => {
   const mountWithProvider = async (props: EditorFrameProps) => {
     const lensStore = makeConfigureStore(
       getPreloadedState({
-        data: props.plugins.data,
-        initialContext: undefined,
+        query: props.plugins.data.query.queryString.getQuery(),
+        filters: props.plugins.data.query.filterManager.getGlobalFilters(),
+        searchSessionId: props.plugins.data.search.session.start(),
         isLinkedToOriginatingApp: false,
       }),
       {

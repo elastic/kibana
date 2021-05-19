@@ -38,5 +38,3 @@ export type DispatchSetState = (
 export interface State {
   app: LensAppState;
 }
-
-export type GetState = () => State;

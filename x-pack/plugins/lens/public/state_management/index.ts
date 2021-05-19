@@ -8,55 +8,27 @@
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
 import logger from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
-import { appSlice } from './app_slice';
+import { appSlice, initialState } from './app_slice';
 import { customMiddleware } from './custom_middleware';
-import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
 
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { LensAppState } from './types';
 export * from './types';
 
 export const reducer = {
   app: appSlice.reducer,
 };
 
-export const {
-  startSession,
-  setFilters,
-  setQuery,
-  setState,
-  setStateM,
-  navigateAway,
-} = appSlice.actions;
+export const { setState, navigateAway } = appSlice.actions;
 
-export const getPreloadedState = ({
-  data,
-  initialContext = undefined,
-  isLinkedToOriginatingApp = false,
-  initialInput,
-}: {
-  data: DataPublicPluginStart;
-  initialContext: VisualizeFieldContext | undefined;
-  isLinkedToOriginatingApp: boolean;
-  // The initial input passed in by the container when editing. Can be either by reference or by value.
-  initialInput?: LensEmbeddableInput;
-}) => {
-  return {
+export const getPreloadedState = (initializedState: Partial<LensAppState>) => {
+  const state = {
     app: {
-      query: data.query.queryString.getQuery(),
-      // Do not use app-specific filters from previous app,
-      // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-      filters: !initialContext
-        ? data.query.filterManager.getGlobalFilters()
-        : data.query.filterManager.getFilters(),
-      searchSessionId: data.search.session.start(),
-
-      indexPatternsForTopNav: [],
-      isSaveable: false,
-      isAppLoading: Boolean(initialInput),
-      isLinkedToOriginatingApp,
+      ...initialState,
+      ...initializedState,
     },
-  };
+  } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  return state;
 };
 
 type PreloadedState = ReturnType<typeof getPreloadedState>;

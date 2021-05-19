@@ -8,7 +8,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { LensAppState } from './types';
 
-const initialState: LensAppState = {
+export const initialState: LensAppState = {
   searchSessionId: '',
   filters: [],
   query: { language: 'kuery', query: '' },

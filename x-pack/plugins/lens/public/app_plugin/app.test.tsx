@@ -282,8 +282,9 @@ describe('Lens App', () => {
 
     const lensStore = makeConfigureStore(
       getPreloadedState({
-        data: services.data,
-        initialContext: storeProps?.initialContext,
+        query: services.data.query.queryString.getQuery(),
+        filters: services.data.query.filterManager.getGlobalFilters(),
+        searchSessionId: services.data.search.session.start(),
         isLinkedToOriginatingApp: !!storeProps?.isLinkedToOriginatingApp,
       }),
       {

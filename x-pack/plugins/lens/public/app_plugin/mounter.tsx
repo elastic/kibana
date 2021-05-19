@@ -182,10 +182,16 @@ export async function mountApp(
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
       const preloadedState = getPreloadedState({
-        data,
-        initialContext,
+        query: data.query.queryString.getQuery(),
+        // Do not use app-specific filters from previous app,
+        // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
+        filters: !initialContext
+          ? data.query.filterManager.getGlobalFilters()
+          : data.query.filterManager.getFilters(),
+        searchSessionId: data.search.session.start(),
+
         isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
-        initialInput,
+        isAppLoading: Boolean(initialInput),
       });
 
       lensStore = makeConfigureStore(preloadedState, { data });
