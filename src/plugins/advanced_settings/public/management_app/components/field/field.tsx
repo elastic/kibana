@@ -178,11 +178,8 @@ export class Field extends PureComponent<FieldProps> {
         newUnsavedValue = targetValue;
     }
 
-    let errorParams = {};
-
     this.handleChange({
       value: newUnsavedValue,
-      ...errorParams,
     });
   };
 
