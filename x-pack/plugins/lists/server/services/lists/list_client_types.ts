@@ -18,6 +18,7 @@ import {
   NameOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { Version, VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
 
 import {
   DeserializerOrUndefined,
@@ -30,8 +31,6 @@ import {
   SerializerOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-  Version,
-  VersionOrUndefined,
   _VersionOrUndefined,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
