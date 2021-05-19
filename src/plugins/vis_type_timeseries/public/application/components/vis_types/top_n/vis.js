@@ -9,13 +9,13 @@
 import { getCoreStart } from '../../../../services';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { TopN } from '../../../visualizations/views/top_n';
-import { getLastValueOrZero } from '../../../../../common/get_last_value';
+import { getLastValueOrEmpty } from '../../../../../common/get_last_value';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { replaceVars } from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { sortBy, first, get, gt, gte, lt, lte } from 'lodash';
-const OPERATORS = { gt, gte, lt, lte };
+import { sortBy, first, get, gt, gte, lt, lte, isEqual } from 'lodash';
+const OPERATORS = { gt, gte, lt, lte, isEqual };
 
 function sortByDirection(data, direction, fn) {
   if (direction === 'desc') {
@@ -33,7 +33,7 @@ function sortSeries(visData, model) {
     });
     const direction = item.terms_direction || 'desc';
     if (item.terms_order_by === '_key') return acc.concat(itemSeries);
-    return acc.concat(sortByDirection(itemSeries, direction, (s) => getLastValueOrZero(s.data)));
+    return acc.concat(sortByDirection(itemSeries, direction, (s) => getLastValueOrEmpty(s.data)));
   }, []);
 }
 
@@ -49,11 +49,14 @@ function TopNVisualization(props) {
         seriesConfig.value_template,
         props.getConfig
       );
-      const value = getLastValueOrZero(item.data);
+      const value = getLastValueOrEmpty(item.data);
+      // This comparison is necessary for preventing from comparing null/empty array values
+      // with numeric rules.
       let color = item.color || seriesConfig.color;
       if (model.bar_color_rules) {
         model.bar_color_rules.forEach((rule) => {
-          if (rule.operator && rule.value != null && rule.bar_color) {
+          const shouldOperate = typeof value === typeof rule.value;
+          if (shouldOperate && rule.operator && rule.value != null && rule.bar_color) {
             if (OPERATORS[rule.operator](value, rule.value)) {
               color = rule.bar_color;
             }
