@@ -56,8 +56,6 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
   let afterKey: AfterKey;
   let monitors: any = [];
   do {
-    // today this value is hardcoded. In the future we may support
-    // multiple status types for this alert, and this will become a parameter
     const esParams = createEsQuery({
       query: {
         bool: {

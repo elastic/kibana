@@ -125,7 +125,7 @@ export const getIsMonitorDown = (
   // has down monitors, trigger alert
   if (downMonitorsByLocation.length > 0) {
     return true;
-    // has down monitors, resolve  alert
+    // has up monitors, resolve  alert
   } else if (upMonitorsByLocation.length > 0) {
     return false;
     // has no monitors, persist the alert state or default to false
@@ -323,7 +323,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
             status: 'up',
           })) || [];
       }
-      const alertInstanceIds = new Set<string>();
 
       /* If there are neither down monitors nor up monitors in the current timespan,
        * check if currently down monitors exist in the alert state.
@@ -346,7 +345,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         for (const monitorLoc of monitorsToAlertOn) {
           const monitorInfo = monitorLoc.monitorInfo;
           const instanceId = getInstanceId(monitorInfo, monitorLoc.location);
-          alertInstanceIds.add(instanceId);
 
           const alertInstance = alertInstanceFactory(instanceId);
 
