@@ -14,10 +14,10 @@ import {
   EuiFlexItem,
   EuiTextColor,
 } from '@elastic/eui';
-import { ILayer } from '../../../classes/layers/layer';
+import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 interface Props {
-  findLayerById: (layerId: string) => ILayer | undefined;
+  findLayerById: (layerId: string) => IVectorLayer | undefined;
   isLocked: boolean;
   layerId: string;
   onClose: () => void;

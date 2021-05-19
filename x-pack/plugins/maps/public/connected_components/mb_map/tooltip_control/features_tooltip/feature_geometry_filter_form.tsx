@@ -12,16 +12,16 @@ import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { Geometry, Polygon } from 'geojson';
 import rison, { RisonObject } from 'rison-node';
-import { URL_MAX_LENGTH } from '../../../../../../../src/core/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
+import { URL_MAX_LENGTH } from '../../../../../../../../src/core/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public';
 import {
   createSpatialFilterWithGeometry,
   PreIndexedShape,
-} from '../../../../common/elasticsearch_util';
-import { ES_SPATIAL_RELATIONS, GEO_JSON_TYPE } from '../../../../common/constants';
+} from '../../../../../common/elasticsearch_util';
+import { ES_SPATIAL_RELATIONS, GEO_JSON_TYPE } from '../../../../../common/constants';
 // @ts-expect-error
-import { GeometryFilterForm } from '../../../components/geometry_filter_form';
-import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
+import { GeometryFilterForm } from '../../../../components/geometry_filter_form';
+import { GeoFieldWithIndex } from '../../../../components/geo_field_with_index';
 
 // over estimated and imprecise value to ensure filter has additional room for any meta keys added when filter is mapped.
 const META_OVERHEAD = 100;

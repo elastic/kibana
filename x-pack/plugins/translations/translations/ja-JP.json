@@ -20505,7 +20505,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.activateTitle": "有効化",
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.gap": "最後のギャップ (該当する場合) ",
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.indexingTimes": "インデックス時間 (ミリ秒) ",
-    "xpack.securitySolution.detectionEngine.rules.allRules.columns.lastLookBackDate": "前回の確認日",
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.lastResponseTitle": "前回の応答",
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.lastRunTitle": "前回の実行",
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.lastUpdateTitle": "最終更新",
