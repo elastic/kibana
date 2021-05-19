@@ -15,6 +15,7 @@ import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } f
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
 import { ProxySettings, ResponseSettings, TLSSettings } from './types';
+import { getTLSSettingsFromConfig } from './builtin_action_types/lib/get_node_tls_options';
 
 export { AllowedHosts, EnabledActionTypes } from './config';
 
@@ -98,13 +99,6 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
       config.proxyRejectUnauthorizedCertificates
     ),
   };
-}
-
-function getTLSSettingsFromConfig(
-  verificationMode?: 'none' | 'certificate' | 'full',
-  rejectUnauthorized?: boolean
-): TLSSettings {
-  return { legacyRejectUnauthorized: rejectUnauthorized, verificationMode };
 }
 
 function arrayAsSet<T>(arr: T[] | undefined): Set<T> | undefined {

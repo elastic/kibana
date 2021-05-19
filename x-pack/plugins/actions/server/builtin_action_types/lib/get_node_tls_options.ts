@@ -6,10 +6,10 @@
  */
 
 import { PeerCertificate } from 'tls';
+import { TLSSettings } from '../../types';
 
 export function getNodeTLSOptions(
-  verificationMode?: string,
-  legacyRejectUnauthorized?: boolean
+  verificationMode?: string
 ): {
   rejectUnauthorized?: boolean;
   checkServerIdentity?: ((host: string, cert: PeerCertificate) => Error | undefined) | undefined;
@@ -36,8 +36,18 @@ export function getNodeTLSOptions(
     }
     // see: src/core/server/elasticsearch/legacy/elasticsearch_client_config.ts
     // This is where the global rejectUnauthorized is overridden by a custom host
-  } else if (legacyRejectUnauthorized !== undefined) {
-    agentOptions.rejectUnauthorized = legacyRejectUnauthorized;
   }
   return agentOptions;
+}
+
+export function getTLSSettingsFromConfig(
+  verificationMode?: 'none' | 'certificate' | 'full',
+  rejectUnauthorized?: boolean
+): TLSSettings {
+  if (verificationMode) {
+    return { verificationMode };
+  } else if (rejectUnauthorized !== undefined) {
+    return { verificationMode: rejectUnauthorized ? 'full' : 'none' };
+  }
+  return {};
 }

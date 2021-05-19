@@ -77,7 +77,7 @@ describe('send_email module', () => {
       {
         proxyUrl: 'https://example.com',
         proxyTLSSettings: {
-          legacyRejectUnauthorized: false,
+          verificationMode: 'none',
         },
         proxyBypassHosts: undefined,
         proxyOnlyHosts: undefined,
@@ -239,7 +239,7 @@ describe('send_email module', () => {
       {
         proxyUrl: 'https://proxy.com',
         proxyTLSSettings: {
-          legacyRejectUnauthorized: false,
+          verificationMode: 'none',
         },
         proxyBypassHosts: new Set(['example.com']),
         proxyOnlyHosts: undefined,

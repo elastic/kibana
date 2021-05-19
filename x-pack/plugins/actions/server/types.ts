@@ -152,8 +152,4 @@ export interface ResponseSettings {
 
 export interface TLSSettings {
   verificationMode?: 'none' | 'certificate' | 'full';
-  /**
-   * @deprecated
-   */
-  legacyRejectUnauthorized?: boolean;
 }

@@ -162,9 +162,9 @@ describe('getCustomAgents', () => {
     expect(httpsAgent?.options.rejectUnauthorized).toBe(false);
   });
 
-  test('handles overriding global rejectUnauthorized false', () => {
+  test('handles overriding global verificationMode "none"', () => {
     configurationUtilities.getTLSSettings.mockReturnValue({
-      legacyRejectUnauthorized: false,
+      verificationMode: 'none',
     });
     configurationUtilities.getCustomHostSettings.mockReturnValue({
       url: targetUrlCanonical,
@@ -180,9 +180,9 @@ describe('getCustomAgents', () => {
     expect(httpsAgent?.options.rejectUnauthorized).toBeTruthy();
   });
 
-  test('handles overriding global rejectUnauthorized true', () => {
+  test('handles overriding global verificationMode "full"', () => {
     configurationUtilities.getTLSSettings.mockReturnValue({
-      legacyRejectUnauthorized: true,
+      verificationMode: 'full',
     });
     configurationUtilities.getCustomHostSettings.mockReturnValue({
       url: targetUrlCanonical,
@@ -198,9 +198,9 @@ describe('getCustomAgents', () => {
     expect(httpsAgent?.options.rejectUnauthorized).toBeFalsy();
   });
 
-  test('handles overriding global rejectUnauthorized false with a proxy', () => {
+  test('handles overriding global verificationMode "none" with a proxy', () => {
     configurationUtilities.getTLSSettings.mockReturnValue({
-      legacyRejectUnauthorized: false,
+      verificationMode: 'none',
     });
     configurationUtilities.getCustomHostSettings.mockReturnValue({
       url: targetUrlCanonical,
@@ -225,9 +225,9 @@ describe('getCustomAgents', () => {
     expect(httpsAgent?.options.rejectUnauthorized).toBeTruthy();
   });
 
-  test('handles overriding global rejectUnauthorized true with a proxy', () => {
+  test('handles overriding global verificationMode "full" with a proxy', () => {
     configurationUtilities.getTLSSettings.mockReturnValue({
-      legacyRejectUnauthorized: true,
+      verificationMode: 'full',
     });
     configurationUtilities.getCustomHostSettings.mockReturnValue({
       url: targetUrlCanonical,

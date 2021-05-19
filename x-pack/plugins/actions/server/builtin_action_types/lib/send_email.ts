@@ -12,7 +12,7 @@ import { default as MarkdownIt } from 'markdown-it';
 import { Logger } from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { CustomHostSettings } from '../../config';
-import { getNodeTLSOptions } from './get_node_tls_options';
+import { getNodeTLSOptions, getTLSSettingsFromConfig } from './get_node_tls_options';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -92,10 +92,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     customHostSettings = configurationUtilities.getCustomHostSettings(`smtp://${host}:${port}`);
 
     if (proxySettings && useProxy) {
-      transportConfig.tls = getNodeTLSOptions(
-        proxySettings?.proxyTLSSettings.verificationMode,
-        proxySettings?.proxyTLSSettings.legacyRejectUnauthorized
-      );
+      transportConfig.tls = getNodeTLSOptions(proxySettings?.proxyTLSSettings.verificationMode);
       transportConfig.proxy = proxySettings.proxyUrl;
       transportConfig.headers = proxySettings.proxyHeaders;
     } else if (!transportConfig.secure && user == null && password == null) {
@@ -104,10 +101,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       // authenticate rarely have valid certs; eg cloud proxy, and npm maildev
       transportConfig.tls = { rejectUnauthorized: false };
     } else {
-      transportConfig.tls = getNodeTLSOptions(
-        generalTLSSettings.verificationMode,
-        generalTLSSettings.legacyRejectUnauthorized
-      );
+      transportConfig.tls = getNodeTLSOptions(generalTLSSettings.verificationMode);
     }
 
     // finally, allow customHostSettings to override some of the settings
@@ -121,10 +115,11 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
         tlsConfig.ca = tlsSettings?.certificateAuthoritiesData;
       }
 
-      const nodeTLSOptions = getNodeTLSOptions(
+      const tlsSettingsFromConfig = getTLSSettingsFromConfig(
         tlsSettings?.verificationMode,
         tlsSettings?.rejectUnauthorized
       );
+      const nodeTLSOptions = getNodeTLSOptions(tlsSettingsFromConfig.verificationMode);
       if (!transportConfig.tls) {
         transportConfig.tls = nodeTLSOptions;
       } else {

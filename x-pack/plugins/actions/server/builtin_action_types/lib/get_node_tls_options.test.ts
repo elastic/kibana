@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getNodeTLSOptions } from './get_node_tls_options';
+import { getNodeTLSOptions, getTLSSettingsFromConfig } from './get_node_tls_options';
 
 describe('getNodeTLSOptions', () => {
   test('get node.js TLS options: rejectUnauthorized eql true for the verification mode "full"', () => {
@@ -26,18 +26,27 @@ describe('getNodeTLSOptions', () => {
       rejectUnauthorized: false,
     });
   });
+});
 
-  test('get node.js TLS options: rejectUnauthorized eql false for the verification mode "none", ignore legacy settings if it is defined', () => {
-    const nodeOption = getNodeTLSOptions('none', true);
+describe('getTLSSettingsFromConfig', () => {
+  test('get verificationMode eql "none" if legacy rejectUnauthorized eql false', () => {
+    const nodeOption = getTLSSettingsFromConfig(undefined, false);
     expect(nodeOption).toMatchObject({
-      rejectUnauthorized: false,
+      verificationMode: 'none',
     });
   });
 
-  test('get node.js TLS options: rejectUnauthorized eql if legacy tls setting is used and verification mode is not defined', () => {
-    const nodeOption = getNodeTLSOptions(undefined, true);
+  test('get verificationMode eql "none" if legacy rejectUnauthorized eql true', () => {
+    const nodeOption = getTLSSettingsFromConfig(undefined, true);
     expect(nodeOption).toMatchObject({
-      rejectUnauthorized: true,
+      verificationMode: 'full',
+    });
+  });
+
+  test('get verificationMode eql "certificate", ignore rejectUnauthorized', () => {
+    const nodeOption = getTLSSettingsFromConfig('certificate', false);
+    expect(nodeOption).toMatchObject({
+      verificationMode: 'certificate',
     });
   });
 });

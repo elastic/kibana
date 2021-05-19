@@ -309,22 +309,23 @@ describe('getProxySettings', () => {
     expect(proxySettings?.proxyUrl).toBe(config.proxyUrl);
   });
 
-  test('returns proper legacyRejectUnauthorized values, beased on the legacy config option proxyRejectUnauthorizedCertificates', () => {
+  test('returns proper verificationMode values, beased on the legacy config option proxyRejectUnauthorizedCertificates', () => {
     const configTrue: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
       proxyRejectUnauthorizedCertificates: true,
     };
     let proxySettings = getActionsConfigurationUtilities(configTrue).getProxySettings();
-    expect(proxySettings?.proxyTLSSettings.legacyRejectUnauthorized).toBe(true);
+    expect(proxySettings?.proxyTLSSettings.verificationMode).toBe('full');
 
     const configFalse: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
       proxyRejectUnauthorizedCertificates: false,
+      tls: {},
     };
     proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
-    expect(proxySettings?.proxyTLSSettings.legacyRejectUnauthorized).toBe(false);
+    expect(proxySettings?.proxyTLSSettings.verificationMode).toBe('none');
   });
 
   test('returns proper verificationMode value, based on the TLS proxy configuration', () => {
