@@ -147,7 +147,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       filters: tabsFilters,
     });
 
-    useInvalidFilterQuery({ filterQuery, kqlError });
+    useInvalidFilterQuery({ filterQuery, kqlError, query, startDate: from, endDate: to });
 
     return (
       <>

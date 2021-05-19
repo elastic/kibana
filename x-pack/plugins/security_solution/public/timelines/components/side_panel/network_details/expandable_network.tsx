@@ -105,7 +105,7 @@ export const ExpandableNetworkDetails = ({
     filters,
   });
 
-  useInvalidFilterQuery({ filterQuery, kqlError });
+  useInvalidFilterQuery({ filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const [loading, { id, networkDetails }] = useNetworkDetails({
     docValueFields,

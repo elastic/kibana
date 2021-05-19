@@ -111,7 +111,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     filters: getFilters(),
   });
 
-  useInvalidFilterQuery({ filterQuery, kqlError });
+  useInvalidFilterQuery({ filterQuery, kqlError, query, startDate: from, endDate: to });
 
   useEffect(() => {
     dispatch(setHostDetailsTablesActivePageToZero());

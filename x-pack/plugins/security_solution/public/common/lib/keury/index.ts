@@ -80,7 +80,7 @@ export const convertToBuildEsQuery = ({
   indexPattern: IIndexPattern;
   queries: Query[];
   filters: Filter[];
-}): [string | undefined, Error | undefined] => {
+}): [string, undefined] | [undefined, Error] => {
   try {
     return [
       JSON.stringify(

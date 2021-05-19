@@ -132,7 +132,7 @@ const HostsComponent = () => {
     [indexPattern, query, tabsFilters, uiSettings]
   );
 
-  useInvalidFilterQuery({ filterQuery, kqlError });
+  useInvalidFilterQuery({ filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current

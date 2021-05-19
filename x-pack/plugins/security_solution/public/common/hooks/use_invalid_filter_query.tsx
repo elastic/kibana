@@ -6,6 +6,7 @@
  */
 
 import { useEffect } from 'react';
+import { Query } from 'src/plugins/data/public';
 import { useAppToasts } from './use_app_toasts';
 
 /**
@@ -14,17 +15,23 @@ import { useAppToasts } from './use_app_toasts';
 export const useInvalidFilterQuery = ({
   filterQuery,
   kqlError,
+  query,
+  startDate,
+  endDate,
 }: {
   filterQuery?: string;
   kqlError?: Error;
+  query: Query;
+  startDate: string;
+  endDate: string;
 }) => {
   const { addError } = useAppToasts();
 
   useEffect(() => {
     if (filterQuery === undefined && kqlError != null) {
-      addError(kqlError, { title: kqlError.name });
+      addError(kqlError, { title: kqlError.name, toastMessage: kqlError.message });
     }
     // This disable is required to only trigger the toast once per render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterQuery, addError]);
+  }, [filterQuery, addError, query, startDate, endDate]);
 };

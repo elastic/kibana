@@ -137,6 +137,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   useInvalidFilterQuery({
     filterQuery: getGlobalQuery([])?.filterQuery,
     kqlError: getGlobalQuery([])?.kqlError,
+    query: globalQuery,
+    startDate: from,
+    endDate: to,
   });
 
   const setEventsLoadingCallback = useCallback(

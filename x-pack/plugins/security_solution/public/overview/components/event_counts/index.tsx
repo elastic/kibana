@@ -68,9 +68,21 @@ const EventCountsComponent: React.FC<Props> = ({
     [filters, indexPattern, uiSettings, query]
   );
 
-  useInvalidFilterQuery({ filterQuery: hostFilterQuery, kqlError: hostKqlError });
+  useInvalidFilterQuery({
+    filterQuery: hostFilterQuery,
+    kqlError: hostKqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
-  useInvalidFilterQuery({ filterQuery: networkFilterQuery, kqlError: networkKqlError });
+  useInvalidFilterQuery({
+    filterQuery: networkFilterQuery,
+    kqlError: networkKqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
