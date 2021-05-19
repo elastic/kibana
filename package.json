@@ -266,7 +266,7 @@
     "jsonwebtoken": "^8.5.1",
     "jsts": "^1.6.2",
     "@kbn/rule-data-utils": "link:packages/kbn-rule-data-utils",
-    "kea": "^2.3.0",
+    "kea": "^2.4.2",
     "leaflet": "1.5.1",
     "leaflet-draw": "0.4.14",
     "leaflet-responsive-popup": "0.6.4",
