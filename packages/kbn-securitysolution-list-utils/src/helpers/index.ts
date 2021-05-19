@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import uuid from 'uuid';
@@ -28,7 +29,11 @@ import {
   nestedEntryItem,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+// TODO: I have to use any here for now, but once this is available below, we should use the correct types
+// import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+type IFieldType = any;
+type IIndexPattern = any;
+
 import {
   EXCEPTION_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
@@ -37,8 +42,8 @@ import {
   isNotOperator,
   isOneOfOperator,
   isOperator,
-} from '../autocomplete/operators';
-import { OperatorOption } from '../autocomplete/types';
+} from '../autocomplete_operators';
+import { OperatorOption } from '../autocomplete_operators/types';
 
 import {
   BuilderEntry,
@@ -47,7 +52,7 @@ import {
   EmptyNestedEntry,
   ExceptionsBuilderExceptionItem,
   FormattedBuilderEntry,
-} from './types';
+} from '../types';
 
 export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
   return (item as EntryNested).entries != null;
@@ -95,7 +100,6 @@ export const filterExceptionItems = (
       if (exceptionListItemSchema.is(item)) {
         return [...acc, item];
       } else if (createExceptionListItemSchema.is(item)) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { meta, ...rest } = item;
         const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
         return [...acc, itemSansMetaId];
@@ -185,7 +189,7 @@ export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption =
       return item.operator === operatorOption.operator && operatorType === operatorOption.type;
     });
 
-    return foundOperator ?? isOperator;
+    return foundOperator != null ? foundOperator : isOperator;
   }
 };
 
@@ -223,7 +227,8 @@ export const getUpdatedEntriesOnDelete = (
   entryIndex: number,
   nestedParentIndex: number | null
 ): ExceptionsBuilderExceptionItem => {
-  const itemOfInterest: BuilderEntry = exceptionItem.entries[nestedParentIndex ?? entryIndex];
+  const itemOfInterest: BuilderEntry =
+    exceptionItem.entries[nestedParentIndex != null ? nestedParentIndex : entryIndex];
 
   if (nestedParentIndex != null && itemOfInterest.type === OperatorTypeEnum.NESTED) {
     const updatedEntryEntries = [
@@ -244,7 +249,7 @@ export const getUpdatedEntriesOnDelete = (
       const updatedItemOfInterest: EntryNested | EmptyNestedEntry = {
         entries: updatedEntryEntries,
         field,
-        id: itemOfInterest.id ?? `${entryIndex}`,
+        id: itemOfInterest.id != null ? itemOfInterest.id : `${entryIndex}`,
         type: OperatorTypeEnum.NESTED,
       };
 
@@ -291,6 +296,7 @@ export const getFilteredIndexPatterns = (
     return {
       ...indexPatterns,
       fields: indexPatterns.fields
+        // @ts-expect-error This will go away once we type IField from any
         .filter((indexField) => {
           const fieldHasCommonParentPath =
             indexField.subType != null &&
@@ -300,6 +306,7 @@ export const getFilteredIndexPatterns = (
 
           return fieldHasCommonParentPath;
         })
+        // @ts-expect-error This will go away once we type IField from any
         .map((f) => {
           const [fieldNameWithoutParentPath] = f.name.split('.').slice(-1);
           return { ...f, name: fieldNameWithoutParentPath };
@@ -313,6 +320,7 @@ export const getFilteredIndexPatterns = (
     return {
       ...indexPatterns,
       fields: indexPatterns.fields.filter(
+        // @ts-expect-error This will go away once we type IField from any
         (field) => field.subType != null && field.subType.nested != null
       ),
     };
@@ -351,7 +359,7 @@ export const getEntryOnFieldChange = (
       updatedEntry: {
         entries: [
           addIdToItem({
-            field: newChildFieldValue ?? '',
+            field: newChildFieldValue != null ? newChildFieldValue : '',
             operator: isOperator.operator,
             type: OperatorTypeEnum.MATCH,
             value: '',
@@ -370,7 +378,7 @@ export const getEntryOnFieldChange = (
         entries: [
           ...parent.parent.entries.slice(0, entryIndex),
           {
-            field: newChildFieldValue ?? '',
+            field: newChildFieldValue != null ? newChildFieldValue : '',
             id: item.id,
             operator: isOperator.operator,
             type: OperatorTypeEnum.MATCH,
@@ -683,6 +691,7 @@ export const getFormattedBuilderEntry = (
 ): FormattedBuilderEntry => {
   const { fields } = indexPattern;
   const field = parent != null ? `${parent.field}.${item.field}` : item.field;
+  // @ts-expect-error This will go away once we type IField from any
   const [foundField] = fields.filter(({ name }) => field != null && field === name);
   const correspondingKeywordField = getCorrespondingKeywordField({
     fields,
@@ -697,7 +706,7 @@ export const getFormattedBuilderEntry = (
         foundField != null
           ? { ...foundField, name: foundField.name.split('.').slice(-1)[0] }
           : foundField,
-      id: item.id ?? `${itemIndex}`,
+      id: item.id != null ? item.id : `${itemIndex}`,
       nested: 'child',
       operator: getExceptionOperatorSelect(item),
       parent: { parent, parentIndex },
@@ -708,7 +717,7 @@ export const getFormattedBuilderEntry = (
       correspondingKeywordField,
       entryIndex: itemIndex,
       field: foundField,
-      id: item.id ?? `${itemIndex}`,
+      id: item.id != null ? item.id : `${itemIndex}`,
       nested: undefined,
       operator: getExceptionOperatorSelect(item),
       parent: undefined,
@@ -755,11 +764,11 @@ export const getFormattedBuilderEntries = (
           : {
               aggregatable: false,
               esTypes: ['nested'],
-              name: item.field ?? '',
+              name: item.field != null ? item.field : '',
               searchable: false,
               type: 'string',
             },
-        id: item.id ?? `${index}`,
+        id: item.id != null ? item.id : `${index}`,
         nested: 'parent',
         operator: isOperator,
         parent: undefined,

@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -10,78 +11,79 @@ import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
+
 import { OperatorOption } from './types';
 
 export const isOperator: OperatorOption = {
-  message: i18n.translate('xpack.securitySolution.exceptions.isOperatorLabel', {
+  message: i18n.translate('lists.exceptions.isOperatorLabel', {
     defaultMessage: 'is',
   }),
-  value: 'is',
-  type: OperatorTypeEnum.MATCH,
   operator: OperatorEnum.INCLUDED,
+  type: OperatorTypeEnum.MATCH,
+  value: 'is',
 };
 
 export const isNotOperator: OperatorOption = {
-  message: i18n.translate('xpack.securitySolution.exceptions.isNotOperatorLabel', {
+  message: i18n.translate('lists.exceptions.isNotOperatorLabel', {
     defaultMessage: 'is not',
   }),
-  value: 'is_not',
-  type: OperatorTypeEnum.MATCH,
   operator: OperatorEnum.EXCLUDED,
+  type: OperatorTypeEnum.MATCH,
+  value: 'is_not',
 };
 
 export const isOneOfOperator: OperatorOption = {
-  message: i18n.translate('xpack.securitySolution.exceptions.isOneOfOperatorLabel', {
+  message: i18n.translate('lists.exceptions.isOneOfOperatorLabel', {
     defaultMessage: 'is one of',
   }),
-  value: 'is_one_of',
-  type: OperatorTypeEnum.MATCH_ANY,
   operator: OperatorEnum.INCLUDED,
+  type: OperatorTypeEnum.MATCH_ANY,
+  value: 'is_one_of',
 };
 
 export const isNotOneOfOperator: OperatorOption = {
-  message: i18n.translate('xpack.securitySolution.exceptions.isNotOneOfOperatorLabel', {
+  message: i18n.translate('lists.exceptions.isNotOneOfOperatorLabel', {
     defaultMessage: 'is not one of',
   }),
-  value: 'is_not_one_of',
-  type: OperatorTypeEnum.MATCH_ANY,
   operator: OperatorEnum.EXCLUDED,
+  type: OperatorTypeEnum.MATCH_ANY,
+  value: 'is_not_one_of',
 };
 
 export const existsOperator: OperatorOption = {
-  message: i18n.translate('xpack.securitySolution.exceptions.existsOperatorLabel', {
+  message: i18n.translate('lists.exceptions.existsOperatorLabel', {
     defaultMessage: 'exists',
   }),
-  value: 'exists',
-  type: OperatorTypeEnum.EXISTS,
   operator: OperatorEnum.INCLUDED,
+  type: OperatorTypeEnum.EXISTS,
+  value: 'exists',
 };
 
 export const doesNotExistOperator: OperatorOption = {
-  message: i18n.translate('xpack.securitySolution.exceptions.doesNotExistOperatorLabel', {
+  message: i18n.translate('lists.exceptions.doesNotExistOperatorLabel', {
     defaultMessage: 'does not exist',
   }),
-  value: 'does_not_exist',
-  type: OperatorTypeEnum.EXISTS,
   operator: OperatorEnum.EXCLUDED,
+  type: OperatorTypeEnum.EXISTS,
+  value: 'does_not_exist',
 };
 
 export const isInListOperator: OperatorOption = {
-  message: i18n.translate('xpack.securitySolution.exceptions.isInListOperatorLabel', {
+  message: i18n.translate('lists.exceptions.isInListOperatorLabel', {
     defaultMessage: 'is in list',
   }),
-  value: 'is_in_list',
-  type: OperatorTypeEnum.LIST,
   operator: OperatorEnum.INCLUDED,
+  type: OperatorTypeEnum.LIST,
+  value: 'is_in_list',
 };
 
 export const isNotInListOperator: OperatorOption = {
-  message: i18n.translate('xpack.securitySolution.exceptions.isNotInListOperatorLabel', {
+  message: i18n.translate('lists.exceptions.isNotInListOperatorLabel', {
     defaultMessage: 'is not in list',
   }),
-  value: 'is_not_in_list',
-  type: OperatorTypeEnum.LIST,
   operator: OperatorEnum.EXCLUDED,
+  type: OperatorTypeEnum.LIST,
+  value: 'is_not_in_list',
 };
 
 export const EXCEPTION_OPERATORS: OperatorOption[] = [

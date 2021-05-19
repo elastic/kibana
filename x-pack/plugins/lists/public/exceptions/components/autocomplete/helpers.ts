@@ -8,16 +8,16 @@
 import dateMath from '@elastic/datemath';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { ListSchema, Type } from '@kbn/securitysolution-io-ts-list-types';
-
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
-
 import {
   EXCEPTION_OPERATORS,
   doesNotExistOperator,
   existsOperator,
   isNotOperator,
   isOperator,
-} from './operators';
+} from '@kbn/securitysolution-list-utils';
+
+import { IFieldType } from '../../../../../../../src/plugins/data/common';
+
 import { GetGenericComboBoxPropsReturn, OperatorOption } from './types';
 import * as i18n from './translations';
 

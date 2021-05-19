@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type {
@@ -18,8 +19,13 @@ import type {
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
-import { OperatorOption } from '../autocomplete/types';
+import type { OperatorOption } from '../autocomplete_operators/types';
+
+/**
+ * @deprecated Use the one from core once it is in its own package which will be from:
+ * Original import was // import { IFieldType } from '../../../../../../../src/plugins/data/common';
+ */
+type IFieldType = any;
 
 export interface FormattedBuilderEntry {
   id: string;

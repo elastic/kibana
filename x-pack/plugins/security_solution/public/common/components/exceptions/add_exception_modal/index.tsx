@@ -32,6 +32,7 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -62,7 +63,7 @@ import {
   filterIndexPatterns,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
+import { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 

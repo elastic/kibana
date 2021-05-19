@@ -21,21 +21,22 @@ import {
   entriesNested,
   exceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-
-import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
-import { AndOrBadge } from '../and_or_badge';
-
-import { CreateExceptionListItemBuilderSchema, ExceptionsBuilderExceptionItem } from './types';
-import { BuilderExceptionListItemComponent } from './exception_item_renderer';
-import { BuilderLogicButtons } from './logic_buttons';
-import { State, exceptionsBuilderReducer } from './reducer';
 import {
+  CreateExceptionListItemBuilderSchema,
+  ExceptionsBuilderExceptionItem,
   containsValueListEntry,
   filterExceptionItems,
   getDefaultEmptyEntry,
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
-} from './helpers';
+} from '@kbn/securitysolution-list-utils';
+
+import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { AndOrBadge } from '../and_or_badge';
+
+import { BuilderExceptionListItemComponent } from './exception_item_renderer';
+import { BuilderLogicButtons } from './logic_buttons';
+import { State, exceptionsBuilderReducer } from './reducer';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;

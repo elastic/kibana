@@ -17,7 +17,7 @@ import {
   isNotOperator,
   existsOperator,
   doesNotExistOperator,
-} from './operators';
+} from '@kbn/securitysolution-list-utils';
 import {
   getOperators,
   checkEmptyValue,
