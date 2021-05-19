@@ -4,24 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
+import { recursivelyFetchEngines } from '../../utils/recursively_fetch_engines';
 import { EngineLogic } from '../engine';
 import { EngineDetails } from '../engine/types';
-import { EnginesAPIResponse } from '../engines/types';
 
-interface SourceEnginesLogicValues {
+import { ADD_SOURCE_ENGINES_SUCCESS_MESSAGE, REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE } from './i18n';
+
+export interface SourceEnginesLogicValues {
   dataLoading: boolean;
+  modalLoading: boolean;
+  isModalOpen: boolean;
+  indexedEngines: EngineDetails[];
+  indexedEngineNames: string[];
   sourceEngines: EngineDetails[];
+  sourceEngineNames: string[];
+  selectableEngineNames: string[];
+  selectedEngineNamesToAdd: string[];
 }
 
 interface SourceEnginesLogicActions {
+  addSourceEngines: (sourceEngineNames: string[]) => { sourceEngineNames: string[] };
+  fetchIndexedEngines: () => void;
   fetchSourceEngines: () => void;
+  onSourceEngineRemove: (sourceEngineNameToRemove: string) => { sourceEngineNameToRemove: string };
+  onSourceEnginesAdd: (
+    sourceEnginesToAdd: EngineDetails[]
+  ) => { sourceEnginesToAdd: EngineDetails[] };
   onSourceEnginesFetch: (
     sourceEngines: SourceEnginesLogicValues['sourceEngines']
   ) => { sourceEngines: SourceEnginesLogicValues['sourceEngines'] };
+  removeSourceEngine: (sourceEngineName: string) => { sourceEngineName: string };
+  setIndexedEngines: (indexedEngines: EngineDetails[]) => { indexedEngines: EngineDetails[] };
+  openModal: () => void;
+  closeModal: () => void;
+  onAddEnginesSelection: (
+    selectedEngineNamesToAdd: string[]
+  ) => { selectedEngineNamesToAdd: string[] };
 }
 
 export const SourceEnginesLogic = kea<
@@ -29,8 +52,17 @@ export const SourceEnginesLogic = kea<
 >({
   path: ['enterprise_search', 'app_search', 'source_engines_logic'],
   actions: () => ({
+    addSourceEngines: (sourceEngineNames) => ({ sourceEngineNames }),
+    fetchIndexedEngines: true,
     fetchSourceEngines: true,
+    onSourceEngineRemove: (sourceEngineNameToRemove) => ({ sourceEngineNameToRemove }),
+    onSourceEnginesAdd: (sourceEnginesToAdd) => ({ sourceEnginesToAdd }),
     onSourceEnginesFetch: (sourceEngines) => ({ sourceEngines }),
+    removeSourceEngine: (sourceEngineName) => ({ sourceEngineName }),
+    setIndexedEngines: (indexedEngines) => ({ indexedEngines }),
+    openModal: true,
+    closeModal: true,
+    onAddEnginesSelection: (selectedEngineNamesToAdd) => ({ selectedEngineNamesToAdd }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -39,47 +71,119 @@ export const SourceEnginesLogic = kea<
         onSourceEnginesFetch: () => false,
       },
     ],
+    modalLoading: [
+      false,
+      {
+        addSourceEngines: () => true,
+        closeModal: () => false,
+      },
+    ],
+    isModalOpen: [
+      false,
+      {
+        openModal: () => true,
+        closeModal: () => false,
+      },
+    ],
+    indexedEngines: [
+      [],
+      {
+        setIndexedEngines: (_, { indexedEngines }) => indexedEngines,
+      },
+    ],
+    selectedEngineNamesToAdd: [
+      [],
+      {
+        closeModal: () => [],
+        onAddEnginesSelection: (_, { selectedEngineNamesToAdd }) => selectedEngineNamesToAdd,
+      },
+    ],
     sourceEngines: [
       [],
       {
+        onSourceEnginesAdd: (sourceEngines, { sourceEnginesToAdd }) => [
+          ...sourceEngines,
+          ...sourceEnginesToAdd,
+        ],
         onSourceEnginesFetch: (_, { sourceEngines }) => sourceEngines,
+        onSourceEngineRemove: (sourceEngines, { sourceEngineNameToRemove }) =>
+          sourceEngines.filter((sourceEngine) => sourceEngine.name !== sourceEngineNameToRemove),
       },
     ],
   }),
-  listeners: ({ actions }) => ({
-    fetchSourceEngines: () => {
+  selectors: {
+    indexedEngineNames: [
+      (selectors) => [selectors.indexedEngines],
+      (indexedEngines) => indexedEngines.map((engine: EngineDetails) => engine.name),
+    ],
+    sourceEngineNames: [
+      (selectors) => [selectors.sourceEngines],
+      (sourceEngines) => sourceEngines.map((engine: EngineDetails) => engine.name),
+    ],
+    selectableEngineNames: [
+      (selectors) => [selectors.indexedEngineNames, selectors.sourceEngineNames],
+      (indexedEngineNames, sourceEngineNames) =>
+        indexedEngineNames.filter((engineName: string) => !sourceEngineNames.includes(engineName)),
+    ],
+  },
+  listeners: ({ actions, values }) => ({
+    addSourceEngines: async ({ sourceEngineNames }) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
-      let enginesAccumulator: EngineDetails[] = [];
+      try {
+        await http.post(`/api/app_search/engines/${engineName}/source_engines/bulk_create`, {
+          body: JSON.stringify({
+            source_engine_slugs: sourceEngineNames,
+          }),
+        });
 
-      // We need to recursively fetch all source engines because we put the data
-      // into an EuiInMemoryTable to enable searching
-      const recursiveFetchSourceEngines = async (page = 1) => {
-        try {
-          const { meta, results }: EnginesAPIResponse = await http.get(
-            `/api/app_search/engines/${engineName}/source_engines`,
-            {
-              query: {
-                'page[current]': page,
-                'page[size]': 25,
-              },
-            }
-          );
+        const sourceEnginesToAdd = values.indexedEngines.filter(({ name }) =>
+          sourceEngineNames.includes(name)
+        );
 
-          enginesAccumulator = [...enginesAccumulator, ...results];
+        actions.onSourceEnginesAdd(sourceEnginesToAdd);
+        setSuccessMessage(ADD_SOURCE_ENGINES_SUCCESS_MESSAGE(sourceEngineNames));
+        EngineLogic.actions.initializeEngine();
+      } catch (e) {
+        flashAPIErrors(e);
+      } finally {
+        actions.closeModal();
+      }
+    },
+    fetchSourceEngines: () => {
+      const { engineName } = EngineLogic.values;
 
-          if (page >= meta.page.total_pages) {
-            actions.onSourceEnginesFetch(enginesAccumulator);
-          } else {
-            recursiveFetchSourceEngines(page + 1);
-          }
-        } catch (e) {
-          flashAPIErrors(e);
-        }
-      };
+      recursivelyFetchEngines({
+        endpoint: `/api/app_search/engines/${engineName}/source_engines`,
+        onComplete: (engines) => actions.onSourceEnginesFetch(engines),
+      });
+    },
+    fetchIndexedEngines: () => {
+      recursivelyFetchEngines({
+        endpoint: '/api/app_search/engines',
+        onComplete: (engines) => actions.setIndexedEngines(engines),
+        query: { type: 'indexed' },
+      });
+    },
+    removeSourceEngine: async ({ sourceEngineName }) => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
 
-      recursiveFetchSourceEngines();
+      try {
+        await http.delete(
+          `/api/app_search/engines/${engineName}/source_engines/${sourceEngineName}`
+        );
+
+        actions.onSourceEngineRemove(sourceEngineName);
+        setSuccessMessage(REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE(sourceEngineName));
+
+        // Changing source engines can change schema conflicts and invalid boosts,
+        // so we re-initialize the engine to re-fetch that data
+        EngineLogic.actions.initializeEngine(); //
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
   }),
 });

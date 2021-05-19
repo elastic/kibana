@@ -10,19 +10,21 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
-import { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ExceptionListType,
+  NamespaceType,
+  ListOperatorEnum as OperatorEnum,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+  OsTypeArray,
+  entriesNested,
+} from '@kbn/securitysolution-io-ts-list-types';
 
-import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
-  ExceptionListType,
-  NamespaceType,
-  OperatorEnum,
-  OperatorTypeEnum,
-  entriesNested,
   exceptionListItemSchema,
-} from '../../../../common';
+} from '../../../../common/schemas';
+import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { AndOrBadge } from '../and_or_badge';
 
 import { CreateExceptionListItemBuilderSchema, ExceptionsBuilderExceptionItem } from './types';
