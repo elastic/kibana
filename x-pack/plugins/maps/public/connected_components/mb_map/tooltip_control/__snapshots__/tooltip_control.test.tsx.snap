@@ -9,9 +9,10 @@ exports[`TooltipControl render should render hover tooltip 1`] = `
   features={
     Array [
       Object {
-        "geometry": Object {},
+        "actions": Array [],
         "id": 1,
         "layerId": "tfi3f",
+        "mbProperties": Object {},
       },
     ]
   }
@@ -19,6 +20,7 @@ exports[`TooltipControl render should render hover tooltip 1`] = `
   index={0}
   isLocked={false}
   key="1"
+  loadFeatureGeometry={[Function]}
   location={
     Array [
       -120,
@@ -43,9 +45,10 @@ exports[`TooltipControl render should render locked tooltip 1`] = `
   features={
     Array [
       Object {
-        "geometry": Object {},
+        "actions": Array [],
         "id": 1,
         "layerId": "tfi3f",
+        "mbProperties": Object {},
       },
     ]
   }
@@ -53,6 +56,7 @@ exports[`TooltipControl render should render locked tooltip 1`] = `
   index={0}
   isLocked={true}
   key="2"
+  loadFeatureGeometry={[Function]}
   location={
     Array [
       -120,
