@@ -3,11 +3,12 @@
   "compilerOptions": {
     "allowJs": true,
     "incremental": true,
-    "outDir": "./target/web",
+    "outDir": "./target_web",
     "declaration": false,
     "isolatedModules": true,
     "sourceMap": true,
-    "sourceRoot": "../../../../../packages/kbn-i18n/src"
+    "sourceRoot": "../../../../../packages/kbn-i18n/src",
+    "types": ["node"],
   },
   "include": [
     "src/**/*.ts",
