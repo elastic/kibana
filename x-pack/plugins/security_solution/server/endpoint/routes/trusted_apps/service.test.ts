@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {

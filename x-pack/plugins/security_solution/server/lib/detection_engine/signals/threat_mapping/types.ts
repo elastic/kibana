@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   ThreatQuery,
   ThreatMapping,
   ThreatMappingEntries,
@@ -17,7 +17,7 @@ import {
   LanguageOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ListClient } from '../../../../../../lists/server';
 import {
   AlertInstanceContext,

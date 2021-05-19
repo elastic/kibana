@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { SearchEsListItemSchema } from '../../schemas/elastic_response';

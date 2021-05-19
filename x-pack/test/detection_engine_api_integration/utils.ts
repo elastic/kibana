@@ -12,7 +12,7 @@ import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
-import { NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,

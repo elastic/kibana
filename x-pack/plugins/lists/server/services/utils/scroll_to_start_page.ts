@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import {
+import type {
   Filter,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
