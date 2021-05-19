@@ -11,15 +11,28 @@ import { Maybe } from '../../../../../../observability/common/typings';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { getHostMetadata } from './api';
 import { ISOLATION_STATUS_FAILURE } from './translations';
+
+interface HostIsolationStatusResponse {
+  loading: boolean;
+  isIsolated: boolean;
+}
+
 /*
  * Retrieves the current isolation status of a host */
-export const useHostIsolationStatus = ({ agentId }: { agentId: string }): Maybe<boolean> => {
+export const useHostIsolationStatus = ({
+  agentId,
+}: {
+  agentId: string;
+}): HostIsolationStatusResponse => {
   const [isIsolated, setIsIsolated] = useState<Maybe<boolean>>();
+  const [loading, setLoading] = useState(false);
+
   const { addError } = useAppToasts();
 
   useEffect(() => {
     // isMounted tracks if a component is mounted before changing state
     let isMounted = true;
+    setLoading(true);
     const fetchData = async () => {
       try {
         const metadataResponse = await getHostMetadata({ agentId });
@@ -30,6 +43,10 @@ export const useHostIsolationStatus = ({ agentId }: { agentId: string }): Maybe<
         addError(error.message, { title: ISOLATION_STATUS_FAILURE });
       }
     };
+    if (isMounted) {
+      setLoading(false);
+    }
+
     if (!isEmpty(agentId)) {
       fetchData();
     }
@@ -37,6 +54,6 @@ export const useHostIsolationStatus = ({ agentId }: { agentId: string }): Maybe<
       // updates to show component is unmounted
       isMounted = false;
     };
-  }, [addError, agentId]);
-  return isIsolated;
+  }, [addError, agentId, loading]);
+  return { loading, isIsolated };
 };

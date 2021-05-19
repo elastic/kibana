@@ -17,6 +17,7 @@ import {
 import {
   HOST_METADATA_GET_API,
   ISOLATE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE,
 } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
@@ -137,6 +138,32 @@ export const createHostIsolation = async ({
     }),
   });
 
+/**
+ * Unisolate a host
+ *
+ * @param agent id
+ * @param optional comment for the unisolation action
+ * @param optional case ids if associated with an alert on the host
+ *
+ * @throws An error if response is not OK
+ */
+export const createHostUnisolation = async ({
+  agentId,
+  comment = '',
+  caseIds,
+}: {
+  agentId: string;
+  comment?: string;
+  caseIds?: string[];
+}): Promise<HostIsolationResponse> =>
+  KibanaServices.get().http.fetch<HostIsolationResponse>(UNISOLATE_HOST_ROUTE, {
+    method: 'POST',
+    body: JSON.stringify({
+      agent_ids: [agentId],
+      comment,
+      case_ids: caseIds,
+    }),
+  });
 /**
  * Get list of associated case ids from alert id
  *
