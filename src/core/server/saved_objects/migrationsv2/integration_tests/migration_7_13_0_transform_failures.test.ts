@@ -125,7 +125,9 @@ describe('migration v2', () => {
         .filter((instance: string) => !instance.startsWith('Error'));
       expect(transformErrorInstances.length).toBeGreaterThan(0);
       expect(transformErrorInstances[0]).toMatchInlineSnapshot(`
-      space:default: Document "default" has property "space" which belongs to a more recent version of Kibana [6.6.0]. The last known version is [undefined]`);
+        "space:default: Document \\"default\\" has property \\"space\\" which belongs to a more recent version of Kibana [6.6.0]. The last known version is [undefined]
+         "
+      `);
     }
   });
 });
