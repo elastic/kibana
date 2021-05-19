@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 400 for a painless error', async () => {
         const resp = await supertest.post(`/internal/search/es`).send(painlessErrReq).expect(400);
 
-        verifyErrorResponse(resp.body, 400, 'script_exception', true);
+        verifyErrorResponse(resp.body, 400, 'search_phase_execution_exception', true);
       });
     });
 
