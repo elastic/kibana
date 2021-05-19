@@ -74,7 +74,7 @@ Access to connectors is granted based on your privileges to alerting-enabled fea
 [float]
 === Connector networking configuration
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations.
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[connectors-list]]

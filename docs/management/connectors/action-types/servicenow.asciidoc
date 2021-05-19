@@ -19,6 +19,11 @@ Username::  Username for HTTP Basic authentication.
 Password::  Password for HTTP Basic authentication.
 
 [float]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
 [[Preconfigured-servicenow-configuration]]
 ==== Preconfigured connector type
 
