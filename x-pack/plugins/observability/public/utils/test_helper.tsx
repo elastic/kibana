@@ -7,10 +7,13 @@
 
 import { render as testLibRender } from '@testing-library/react';
 import { AppMountParameters, CoreStart } from 'kibana/public';
-import React, { PropsWithChildren } from 'react';
+import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { of } from 'rxjs';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaPageTemplate,
+} from '../../../../../src/plugins/kibana_react/public';
 import translations from '../../../translations/translations/ja-JP.json';
 import { PluginContext } from '../context/plugin_context';
 import { ObservabilityPublicPluginsStart } from '../plugin';
@@ -39,10 +42,6 @@ const plugins = ({
 
 const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
-function ObservabilityPageTemplate({ children }: PropsWithChildren<{}>) {
-  return <>{children}</>;
-}
-
 export const render = (component: React.ReactNode) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
@@ -54,7 +53,7 @@ export const render = (component: React.ReactNode) => {
             core,
             plugins,
             observabilityRuleTypeRegistry,
-            ObservabilityPageTemplate,
+            ObservabilityPageTemplate: KibanaPageTemplate,
           }}
         >
           <EuiThemeProvider>{component}</EuiThemeProvider>

@@ -24,6 +24,7 @@ import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -55,7 +56,7 @@ const withCore = makeDecorator({
               },
             } as unknown) as ObservabilityPublicPluginsStart,
             observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-            ObservabilityPageTemplate: ({ children }) => <>{children}</>,
+            ObservabilityPageTemplate: KibanaPageTemplate,
           }}
         >
           <EuiThemeProvider>

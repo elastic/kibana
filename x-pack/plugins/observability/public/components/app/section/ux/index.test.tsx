@@ -16,6 +16,7 @@ import { render } from '../../../../utils/test_helper';
 import { UXSection } from './';
 import { response } from './mock_data/ux.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
+import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -56,7 +57,7 @@ describe('UXSection', () => {
         },
       } as unknown) as ObservabilityPublicPluginsStart,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      ObservabilityPageTemplate: ({ children }) => <>{children}</>,
+      ObservabilityPageTemplate: KibanaPageTemplate,
     }));
   });
   it('renders with core web vitals', () => {
