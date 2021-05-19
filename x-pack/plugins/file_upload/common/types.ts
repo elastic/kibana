@@ -124,6 +124,7 @@ export interface Settings {
   pipeline?: string;
   index: string;
   body: any[];
+  refresh: boolean;
   [key: string]: any;
 }
 

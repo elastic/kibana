@@ -114,7 +114,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
         body.push(data[i]);
       }
 
-      const settings: Settings = { index, body };
+      const settings: Settings = { index, body, refresh: true };
       if (pipelineId !== undefined) {
         settings.pipeline = pipelineId;
       }
