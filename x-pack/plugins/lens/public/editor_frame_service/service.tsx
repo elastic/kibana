@@ -138,7 +138,6 @@ export class EditorFrameService {
           doc,
           onError,
           dateRange,
-          query,
           onChange,
           showNoDataPopover,
           initialContext,
@@ -159,9 +158,7 @@ export class EditorFrameService {
                 plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
                 palettes={palettes}
-                doc={doc}
                 dateRange={dateRange}
-                query={query}
                 onChange={onChange}
                 showNoDataPopover={showNoDataPopover}
                 initialContext={initialContext}

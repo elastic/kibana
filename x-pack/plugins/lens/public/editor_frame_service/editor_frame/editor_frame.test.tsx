@@ -7,7 +7,12 @@
 
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
-import { makeConfigureStore, getPreloadedState, setState } from '../../state_management/index';
+import {
+  makeConfigureStore,
+  getPreloadedState,
+  setState,
+  LensAppState,
+} from '../../state_management/index';
 import { Provider } from 'react-redux';
 
 // Tests are executed in a jsdom environment who does not have sizing methods,
@@ -150,13 +155,17 @@ describe('editor_frame', () => {
     expressionRendererMock = createExpressionRendererMock();
   });
 
-  const mountWithProvider = async (props: EditorFrameProps) => {
+  const mountWithProvider = async (
+    props: EditorFrameProps,
+    storePreloadedState?: Partial<LensAppState>
+  ) => {
     const lensStore = makeConfigureStore(
       getPreloadedState({
         query: props.plugins.data.query.queryString.getQuery(),
         filters: props.plugins.data.query.filterManager.getGlobalFilters(),
         searchSessionId: props.plugins.data.search.session.start(),
         isLinkedToOriginatingApp: false,
+        ...storePreloadedState,
       }),
       {
         data: props.plugins.data,
@@ -235,7 +244,10 @@ describe('editor_frame', () => {
         initialDatasourceId: 'testDatasource',
         initialVisualizationId: 'testVis',
         ExpressionRenderer: expressionRendererMock,
-        doc: {
+      };
+
+      await mountWithProvider(props, {
+        persistedDoc: {
           visualizationType: 'testVis',
           title: '',
           state: {
@@ -249,9 +261,7 @@ describe('editor_frame', () => {
           },
           references: [],
         },
-      };
-
-      await mountWithProvider(props);
+      });
 
       expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State, [], undefined, {
         isFullEditor: true,
@@ -504,23 +514,26 @@ describe('editor_frame', () => {
         initialDatasourceId: 'testDatasource',
         initialVisualizationId: 'testVis',
         ExpressionRenderer: expressionRendererMock,
-        doc: {
-          visualizationType: 'testVis',
-          title: '',
-          state: {
-            datasourceStates: {
-              testDatasource: {},
-              testDatasource2: {},
-            },
-            visualization: {},
-            query: { query: '', language: 'lucene' },
-            filters: [],
-          },
-          references: [],
-        },
       };
 
-      instance = (await mountWithProvider(props)).instance;
+      instance = (
+        await mountWithProvider(props, {
+          persistedDoc: {
+            visualizationType: 'testVis',
+            title: '',
+            state: {
+              datasourceStates: {
+                testDatasource: {},
+                testDatasource2: {},
+              },
+              visualization: {},
+              query: { query: '', language: 'lucene' },
+              filters: [],
+            },
+            references: [],
+          },
+        })
+      ).instance;
 
       instance.update();
 
@@ -728,7 +741,9 @@ describe('editor_frame', () => {
         initialDatasourceId: 'testDatasource',
         initialVisualizationId: 'testVis',
         ExpressionRenderer: expressionRendererMock,
-        doc: {
+      };
+      await mountWithProvider(props, {
+        persistedDoc: {
           visualizationType: 'testVis',
           title: '',
           state: {
@@ -742,8 +757,7 @@ describe('editor_frame', () => {
           },
           references: [],
         },
-      };
-      await mountWithProvider(props);
+      });
 
       expect(mockVisualization.getConfiguration).toHaveBeenCalled();
 
@@ -777,7 +791,9 @@ describe('editor_frame', () => {
         initialDatasourceId: 'testDatasource',
         initialVisualizationId: 'testVis',
         ExpressionRenderer: expressionRendererMock,
-        doc: {
+      };
+      await mountWithProvider(props, {
+        persistedDoc: {
           visualizationType: 'testVis',
           title: '',
           state: {
@@ -791,8 +807,7 @@ describe('editor_frame', () => {
           },
           references: [],
         },
-      };
-      await mountWithProvider(props);
+      });
 
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith(
         expect.objectContaining({

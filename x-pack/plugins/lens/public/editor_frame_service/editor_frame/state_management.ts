@@ -107,21 +107,23 @@ export function getActiveDatasourceIdFromDoc(doc?: Document) {
   return initialDatasourceId || null;
 }
 
-function getInitialDatasourceId(props: EditorFrameProps) {
-  return props.initialDatasourceId
-    ? props.initialDatasourceId
-    : getActiveDatasourceIdFromDoc(props.doc);
+function getInitialDatasourceId(params: EditorFrameProps & { doc?: Document }) {
+  return params.initialDatasourceId
+    ? params.initialDatasourceId
+    : getActiveDatasourceIdFromDoc(params.doc);
 }
 
-export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
+export const getInitialState = (
+  params: EditorFrameProps & { doc?: Document }
+): EditorFrameState => {
   const datasourceStates: EditorFrameState['datasourceStates'] = {};
 
-  if (props.doc) {
-    Object.entries(props.doc.state.datasourceStates).forEach(([datasourceId, state]) => {
+  if (params.doc) {
+    Object.entries(params.doc.state.datasourceStates).forEach(([datasourceId, state]) => {
       datasourceStates[datasourceId] = { isLoading: true, state };
     });
-  } else if (props.initialDatasourceId) {
-    datasourceStates[props.initialDatasourceId] = {
+  } else if (params.initialDatasourceId) {
+    datasourceStates[params.initialDatasourceId] = {
       state: null,
       isLoading: true,
     };
@@ -130,10 +132,10 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   return {
     title: '',
     datasourceStates,
-    activeDatasourceId: getInitialDatasourceId(props),
+    activeDatasourceId: getInitialDatasourceId(params),
     visualization: {
       state: null,
-      activeId: props.initialVisualizationId,
+      activeId: params.initialVisualizationId,
     },
   };
 };

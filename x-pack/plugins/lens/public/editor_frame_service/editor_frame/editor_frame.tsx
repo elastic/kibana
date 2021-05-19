@@ -37,7 +37,6 @@ import {
   // DispatchSetState,
 } from '../../state_management';
 export interface EditorFrameProps {
-  doc?: Document;
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
   initialDatasourceId: string | null;
@@ -67,10 +66,10 @@ export function EditorFrame(props: EditorFrameProps) {
   //   [dispatchLens]
   // );
 
-  const { filters, searchSessionId, savedQuery, query } = useLensSelector((state) => state.app);
-
-  const doc = props.doc;
-  const [state, dispatch] = useReducer(reducer, props, getInitialState);
+  const { filters, searchSessionId, savedQuery, query, persistedDoc: doc } = useLensSelector(
+    (state) => state.app
+  );
+  const [state, dispatch] = useReducer(reducer, { ...props, doc }, getInitialState);
   const [visualizeTriggerFieldContext, setVisualizeTriggerFieldContext] = useState(
     props.initialContext
   );
@@ -233,12 +232,11 @@ export function EditorFrame(props: EditorFrameProps) {
   // The frame needs to call onChange every time its internal state changes
   useEffect(
     () => {
-
       const activeDatasource =
-      state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
-      ? props.datasourceMap[state.activeDatasourceId]
-      : undefined;
-      
+        state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
+          ? props.datasourceMap[state.activeDatasourceId]
+          : undefined;
+
       if (!activeDatasource || !activeVisualization) {
         return;
       }
@@ -264,7 +262,7 @@ export function EditorFrame(props: EditorFrameProps) {
       state.datasourceStates,
       state.visualization,
       state.activeData,
-      query, 
+      query,
       filters,
       savedQuery,
       state.title,
