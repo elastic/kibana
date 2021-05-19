@@ -27,21 +27,7 @@ export async function getUpgradeAssistantStatus(
 
   return {
     readyForUpgrade: criticalWarnings.length === 0,
-    cluster: [
-      {
-        level: 'critical',
-        message:
-          'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
-        url: '',
-        details:
-          'model snapshot [%s] for job [%s] supports minimum version [%s] and needs to be at least [%s]',
-        correctiveAction: {
-          type: 'mlSnapshot',
-          jobId: 'my_job', // ID of your ML job
-          snapshotId: '1621449683', // ID of an older snapshot associated with the job ID defined (cannot be snapshot currently in use)
-        },
-      },
-    ],
+    cluster,
     indices,
   };
 }
