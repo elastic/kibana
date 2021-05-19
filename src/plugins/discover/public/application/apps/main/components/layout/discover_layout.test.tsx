@@ -26,7 +26,6 @@ import { DataPublicPluginStart } from '../../../../../../../data/public';
 import { TopNavMenu } from '../../../../../../../navigation/public';
 import { fetchStatuses } from '../../../../components/constants';
 import { DiscoverLayoutProps } from './types';
-import { TotalHitsSubject } from '../../services/use_saved_search_total_hits';
 import { SavedSearchSubject } from '../../services/use_saved_search';
 
 setHeaderActionMenuMounter(jest.fn());
@@ -68,21 +67,16 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
   const indexPatternList = ([indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
   }) as unknown) as Array<SavedObject<IndexPatternAttributes>>;
-  const hits$ = new BehaviorSubject({
-    state: fetchStatuses.COMPLETE,
-    total: Number(esHits.length),
-  }) as TotalHitsSubject;
 
   const savedSearch$ = new BehaviorSubject({
     state: fetchStatuses.COMPLETE,
     rows: esHits,
     fetchCounter: 1,
     fieldCounts: {},
+    hits: Number(esHits.length),
   }) as SavedSearchSubject;
 
   return {
-    chart$: new BehaviorSubject({ state: fetchStatuses.UNINITIALIZED }),
-    hits$,
     indexPattern,
     indexPatternList,
     navigateTo: jest.fn(),
