@@ -31,7 +31,7 @@ export const customMiddleware = (data: DataPublicPluginStart) => (store: any) =>
     store.getState,
     store.dispatch
   );
-  return (next: Dispatch) => <A extends PayloadAction<LensAppState>>(action: A) => {
+  return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
     if (action.type === 'app/navigateAway') {
       unsubscribeFromExternalContext();
     }
@@ -41,7 +41,7 @@ export const customMiddleware = (data: DataPublicPluginStart) => (store: any) =>
       action.payload?.lastKnownDoc &&
       !_.isEqual(action.payload?.lastKnownDoc, store.getState().app.lastKnownDoc)
     ) {
-      updateTimeRange(data, store.getState, store.dispatch);
+      updateTimeRange(data, store.dispatch);
     }
     next(action);
   };

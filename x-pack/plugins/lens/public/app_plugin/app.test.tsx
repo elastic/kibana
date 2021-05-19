@@ -1438,7 +1438,6 @@ describe('Lens App', () => {
       activeData: undefined,
     };
 
-    // should be tested in middleware
     it('updates the state if session id changes from the outside', async () => {
       const services = makeDefaultServices();
       const { lensStore } = mountWith({ props: undefined, services });
@@ -1456,7 +1455,6 @@ describe('Lens App', () => {
       });
     });
 
-    // should be tested in middleware
     it('does not update the searchSessionId when the state changes', async () => {
       const { lensStore } = mountWith({});
       act(() => {
@@ -1474,59 +1472,6 @@ describe('Lens App', () => {
         }),
       });
     });
-
-    // //todo: move daterange to redux and move this test
-    // it('does update the searchSessionId when the state changes and too much time passed', () => {
-    //   const { component, frame, lensStore, services } = mountWith({});
-
-    //   // time range is 100,000ms ago to 30,000ms ago (that's a lag of 30 percent)
-    //   (services.data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
-    //   (services.data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
-    //     from: 'now-2m',
-    //     to: 'now',
-    //   });
-    //   (services.data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
-    //     min: moment(Date.now() - 100000),
-    //     max: moment(Date.now() - 30000),
-    //   });
-
-    //   act(() => {
-    //     component.find(frame.EditorFrameContainer).prop('onChange')(mockUpdate);
-    //   });
-    //   component.update();
-    //   expect(lensStore.getState()).toEqual({
-    //     app: expect.objectContaining({
-    //       searchSessionId: `sessionId-2`,
-    //     }),
-    //   });
-    // });
-
-    // //todo: move daterange to redux and move this test
-    // it('does not update the searchSessionId when the state changes and too little time has passed', () => {
-    //   const { component, frame, services } = mountWith({});
-
-    //   // time range is 100,000ms ago to 300ms ago (that's a lag of .3 percent, not enough to trigger a session update)
-    //   (services.data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 300));
-    //   (services.data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
-    //     from: 'now-2m',
-    //     to: 'now',
-    //   });
-    //   (services.data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
-    //     min: moment(Date.now() - 100000),
-    //     max: moment(Date.now() - 300),
-    //   });
-
-    //   act(() => {
-    //     component.find(frame.EditorFrameContainer).prop('onChange')(mockUpdate);
-    //   });
-    //   component.update();
-    //   expect(frame.EditorFrameContainer).not.toHaveBeenCalledWith(
-    //     expect.objectContaining({
-    //       searchSessionId: `sessionId-2`,
-    //     }),
-    //     {}
-    //   );
-    // });
   });
 
   describe('showing a confirm message when leaving', () => {
