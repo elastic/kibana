@@ -7,7 +7,7 @@
 
 import path from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { defineDockerServersConfig } from '@kbn/test';
 
 // Docker image to use for Fleet API integration tests.

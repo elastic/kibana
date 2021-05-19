@@ -11,7 +11,7 @@ import { Dispatch } from 'redux';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { AppAction } from '../../../../common/store/actions';
@@ -30,6 +30,7 @@ import {
   getListPageDoesDataExist,
   getActionError,
   getFormEntry,
+  showDeleteModal,
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { ExceptionListItemSchema } from '../../../../../../lists/common';
@@ -38,6 +39,7 @@ import {
   ExceptionItem,
   ExceptionItemProps,
 } from '../../../../common/components/exceptions/viewer/exception_item';
+import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 
 import { SearchBar } from '../../../components/search_bar';
 
@@ -67,6 +69,7 @@ export const EventFiltersListPage = memo(() => {
   const fetchError = useEventFiltersSelector(getListFetchError);
   const location = useEventFiltersSelector(getCurrentLocation);
   const doesDataExist = useEventFiltersSelector(getListPageDoesDataExist);
+  const showDelete = useEventFiltersSelector(showDeleteModal);
 
   const navigateCallback = useEventFiltersNavigateCallback();
   const showFlyout = !!location.show;
@@ -128,9 +131,16 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleItemDelete: ExceptionItemProps['onDeleteException'] = useCallback((args) => {
-    // TODO: implement delete item
-  }, []);
+  const handleItemDelete: ExceptionItemProps['onDeleteException'] = useCallback(
+    ({ id }) => {
+      dispatch({
+        type: 'eventFilterForDeletion',
+        // Casting below needed due to error around the comments array needing to be mutable
+        payload: listItems.find((item) => item.id === id)! as ExceptionListItemSchema,
+      });
+    },
+    [dispatch, listItems]
+  );
 
   const handleItemComponentProps: EventListPaginatedContent['itemComponentProps'] = useCallback(
     (exceptionItem) => ({
@@ -199,12 +209,29 @@ export const EventFiltersListPage = memo(() => {
         />
       )}
 
+      {showDelete && <EventFilterDeleteModal />}
+
       {doesDataExist && (
         <>
-          <SearchBar defaultValue={location.filter} onSearch={handleOnSearch} />
+          <SearchBar
+            defaultValue={location.filter}
+            onSearch={handleOnSearch}
+            placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
+              defaultMessage: 'Search on the fields below: name, comments, value',
+            })}
+          />
           <EuiSpacer size="m" />
+          <EuiText color="subdued" size="xs" data-test-subj="eventFiltersCountLabel">
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.list.totalCount"
+              defaultMessage="{total, plural, one {# event filter} other {# event filters}}"
+              values={{ total: listItems.length }}
+            />
+          </EuiText>
+          <EuiHorizontalRule margin="m" />
         </>
       )}
+
       <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof ExceptionItem>
         items={listItems}
         ItemComponent={ExceptionItem}

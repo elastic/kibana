@@ -167,10 +167,6 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
       await testSubjects.click(`${spaceName}-deleteSpace`);
     }
 
-    async setSpaceNameTobeDeleted(spaceName: string) {
-      await testSubjects.setValue('deleteSpaceInput', spaceName);
-    }
-
     async cancelDeletingSpace() {
       await testSubjects.click('confirmModalCancelButton');
     }

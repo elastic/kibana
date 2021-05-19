@@ -11,6 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { createConcatStream, createSplitStream, createMapStream } from '@kbn/utils';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
   parseNdjsonStrings,
   filterExportedCounts,
@@ -19,7 +20,6 @@ import {
 
 import { ImportTimelineResponse } from './types';
 import { ImportTimelinesSchemaRt } from '../../../schemas/timelines/import_timelines_schema';
-import { BadRequestError } from '../../../../detection_engine/errors/bad_request_error';
 import { throwErrors } from '../../../utils/common';
 
 type ErrorFactory = (message: string) => Error;
