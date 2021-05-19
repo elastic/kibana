@@ -6,6 +6,7 @@
  */
 
 import { History } from 'history';
+import { OnSaveProps } from 'src/plugins/saved_objects/public';
 import {
   ApplicationStart,
   AppMountParameters,
@@ -52,6 +53,32 @@ export interface LensAppProps {
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
   initialContext?: VisualizeFieldContext;
+}
+
+export type RunSave = (
+  saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
+    returnToOrigin: boolean;
+    dashboardId?: string | null;
+    onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
+    newDescription?: string;
+    newTags?: string[];
+  },
+  options: {
+    saveToLibrary: boolean;
+  }
+) => Promise<void>;
+
+export interface LensTopNavMenuProps {
+  onAppLeave: AppMountParameters['onAppLeave'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+
+  redirectToOrigin?: (props?: RedirectToOriginProps) => void;
+  // The initial input passed in by the container when editing. Can be either by reference or by value.
+  initialInput?: LensEmbeddableInput;
+  getIsByValueMode: () => boolean;
+  indicateNoData: boolean;
+  setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  runSave: RunSave;
 }
 
 export interface HistoryLocationState {

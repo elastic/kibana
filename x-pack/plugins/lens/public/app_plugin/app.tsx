@@ -14,26 +14,18 @@ import { Toast } from 'kibana/public';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { Datatable } from 'src/plugins/expressions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
-import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import {
-  OnSaveProps,
-  checkForDuplicateTitle,
-} from '../../../../../src/plugins/saved_objects/public';
+import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
 import { injectFilterReferences } from '../persistence';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import {
-  esFilters,
-  exporters,
-  syncQueryStateWithUrl,
-} from '../../../../../src/plugins/data/public';
+import { esFilters, syncQueryStateWithUrl } from '../../../../../src/plugins/data/public';
 import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
-import { LensAppProps, LensAppServices } from './types';
-import { getLensTopNavConfig } from './lens_top_nav';
+import { LensAppProps, LensAppServices, RunSave } from './types';
+import { LensTopNavMenu } from './lens_top_nav';
 import { Document } from '../persistence';
 import { SaveModal } from './save_modal';
 import {
@@ -68,7 +60,6 @@ export function App({
     data,
     chrome,
     overlays,
-    navigation,
     uiSettings,
     application,
     stateTransfer,
@@ -113,7 +104,7 @@ export function App({
     appState.searchSessionId,
   ]);
 
-  const { resolvedDateRange, from: fromDate, to: toDate } = useTimeRange(
+  const { resolvedDateRange } = useTimeRange(
     data,
     lastKnownDoc,
     dispatchSetState,
@@ -315,16 +306,7 @@ export function App({
       ? savedObjectsTagging.ui.getTagIdsFromReferences(appState.persistedDoc.references)
       : [];
 
-  const runSave = async (
-    saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
-      returnToOrigin: boolean;
-      dashboardId?: string | null;
-      onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
-      newDescription?: string;
-      newTags?: string[];
-    },
-    options: { saveToLibrary: boolean }
-  ) => {
+  const runSave: RunSave = async (saveProps, options) => {
     if (!lastKnownDoc) {
       return;
     }
@@ -460,93 +442,9 @@ export function App({
   const activeDataRef = useRef(appState.activeData);
   activeDataRef.current = appState.activeData;
 
-  const { TopNavMenu } = navigation.ui;
-
   const savingToLibraryPermitted = Boolean(
     appState.isSaveable && application.capabilities.visualize.save
   );
-  const savingToDashboardPermitted = Boolean(
-    appState.isSaveable && application.capabilities.dashboard?.showWriteControls
-  );
-
-  const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
-    defaultMessage: 'unsaved',
-  });
-  const topNavConfig = getLensTopNavConfig({
-    showSaveAndReturn: Boolean(
-      appState.isLinkedToOriginatingApp &&
-        // Temporarily required until the 'by value' paradigm is default.
-        (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
-    ),
-    enableExportToCSV: Boolean(
-      appState.isSaveable && appState.activeData && Object.keys(appState.activeData).length
-    ),
-    isByValueMode: getIsByValueMode(),
-    allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
-    showCancel: Boolean(appState.isLinkedToOriginatingApp),
-    savingToLibraryPermitted,
-    savingToDashboardPermitted,
-    actions: {
-      exportToCSV: () => {
-        if (!appState.activeData) {
-          return;
-        }
-        const datatables = Object.values(appState.activeData);
-        const content = datatables.reduce<Record<string, { content: string; type: string }>>(
-          (memo, datatable, i) => {
-            // skip empty datatables
-            if (datatable) {
-              const postFix = datatables.length > 1 ? `-${i + 1}` : '';
-
-              memo[`${lastKnownDoc?.title || unsavedTitle}${postFix}.csv`] = {
-                content: exporters.datatableToCSV(datatable, {
-                  csvSeparator: uiSettings.get('csv:separator', ','),
-                  quoteValues: uiSettings.get('csv:quoteValues', true),
-                  formatFactory: data.fieldFormats.deserialize,
-                }),
-                type: exporters.CSV_MIME_TYPE,
-              };
-            }
-            return memo;
-          },
-          {}
-        );
-        if (content) {
-          downloadMultipleAs(content);
-        }
-      },
-      saveAndReturn: () => {
-        if (savingToDashboardPermitted && lastKnownDoc) {
-          // disabling the validation on app leave because the document has been saved.
-          onAppLeave((actions) => {
-            return actions.default();
-          });
-          runSave(
-            {
-              newTitle: lastKnownDoc.title,
-              newCopyOnSave: false,
-              isTitleDuplicateConfirmed: false,
-              returnToOrigin: true,
-            },
-            {
-              saveToLibrary:
-                (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
-            }
-          );
-        }
-      },
-      showSaveModal: () => {
-        if (savingToDashboardPermitted || savingToLibraryPermitted) {
-          setIsSaveModalVisible(true);
-        }
-      },
-      cancel: () => {
-        if (redirectToOrigin) {
-          redirectToOrigin();
-        }
-      },
-    },
-  });
 
   const onChange: (newState: {
     filterableIndexPatterns: string[];
@@ -602,55 +500,14 @@ export function App({
   return (
     <>
       <div className="lnsApp">
-        <TopNavMenu
-          setMenuMountPoint={setHeaderActionMenu}
-          config={topNavConfig}
-          showSearchBar={true}
-          showDatePicker={true}
-          showQueryBar={true}
-          showFilterBar={true}
-          indexPatterns={appState.indexPatternsForTopNav}
-          showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
-          savedQuery={appState.savedQuery}
-          data-test-subj="lnsApp_topNav"
-          screenTitle={'lens'}
-          appName={'lens'}
-          onQuerySubmit={(payload) => {
-            const { dateRange, query } = payload;
-            const currentRange = data.query.timefilter.timefilter.getTime();
-            if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
-              data.query.timefilter.timefilter.setTime(dateRange);
-              trackUiEvent('app_date_change');
-            } else {
-              // Query has changed, renew the session id.
-              // Time change will be picked up by the time subscription
-              dispatchSetState({ searchSessionId: data.search.session.start() });
-              trackUiEvent('app_query_change');
-            }
-            if (query) {
-              dispatchSetState({ query });
-            }
-          }}
-          onSaved={(savedQuery) => {
-            dispatchSetState({ savedQuery });
-          }}
-          onSavedQueryUpdated={(savedQuery) => {
-            const savedQueryFilters = savedQuery.attributes.filters || [];
-            const globalFilters = data.query.filterManager.getGlobalFilters();
-            data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
-            dispatchSetState({ query: savedQuery.attributes.query, savedQuery: { ...savedQuery } }); // Shallow query for reference issues
-          }}
-          onClearSavedQuery={() => {
-            data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
-            dispatchSetState({
-              filters: data.query.filterManager.getGlobalFilters(),
-              query: data.query.queryString.getDefaultQuery(),
-              savedQuery: undefined,
-            });
-          }}
-          query={appState.query}
-          dateRangeFrom={fromDate}
-          dateRangeTo={toDate}
+        <LensTopNavMenu
+          initialInput={initialInput}
+          redirectToOrigin={redirectToOrigin}
+          getIsByValueMode={getIsByValueMode}
+          onAppLeave={onAppLeave}
+          runSave={runSave}
+          setIsSaveModalVisible={setIsSaveModalVisible}
+          setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
         />
         {(!appState.isAppLoading || appState.persistedDoc) && (
