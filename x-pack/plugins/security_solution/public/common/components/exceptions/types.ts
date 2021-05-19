@@ -6,25 +6,9 @@
  */
 
 import { ReactNode } from 'react';
-import type {
-  EntryNested,
-  Entry,
-  EntryMatch,
-  EntryMatchAny,
-  EntryMatchWildcard,
-  EntryExists,
-  NamespaceType,
-  ListOperatorTypeEnum as OperatorTypeEnum,
-  ListOperatorEnum as OperatorEnum,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { Ecs } from '../../../../common/ecs';
 import type { CodeSignature } from '../../../../common/ecs/file';
-import type { IFieldType } from '../../../../../../../src/plugins/data/common';
-import type { OperatorOption } from '../autocomplete/types';
-import type {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '../../../shared_imports';
 
 export interface FormattedEntry {
   fieldName: string;
@@ -61,78 +45,6 @@ export interface ExceptionsPagination {
   totalItemCount: number;
   pageSizeOptions: number[];
 }
-
-export interface FormattedBuilderEntry {
-  id: string;
-  field: IFieldType | undefined;
-  operator: OperatorOption;
-  value: string | string[] | undefined;
-  nested: 'parent' | 'child' | undefined;
-  entryIndex: number;
-  parent: { parent: BuilderEntryNested; parentIndex: number } | undefined;
-  correspondingKeywordField: IFieldType | undefined;
-}
-
-export interface EmptyEntry {
-  id: string;
-  field: string | undefined;
-  operator: OperatorEnum;
-  type: OperatorTypeEnum.MATCH | OperatorTypeEnum.MATCH_ANY;
-  value: string | string[] | undefined;
-}
-
-export interface EmptyListEntry {
-  id: string;
-  field: string | undefined;
-  operator: OperatorEnum;
-  type: OperatorTypeEnum.LIST;
-  list: { id: string | undefined; type: string | undefined };
-}
-
-export interface EmptyNestedEntry {
-  id: string;
-  field: string | undefined;
-  type: OperatorTypeEnum.NESTED;
-  entries: Array<
-    | (EntryMatch & { id?: string })
-    | (EntryMatchWildcard & { id?: string })
-    | (EntryMatchAny & { id?: string })
-    | (EntryExists & { id?: string })
-  >;
-}
-
-export type BuilderEntry =
-  | (Entry & { id?: string })
-  | EmptyListEntry
-  | EmptyEntry
-  | BuilderEntryNested
-  | EmptyNestedEntry;
-
-export type BuilderEntryNested = Omit<EntryNested, 'entries'> & {
-  id?: string;
-  entries: Array<
-    | (EntryMatch & { id?: string })
-    | (EntryMatchWildcard & { id?: string })
-    | (EntryMatchAny & { id?: string })
-    | (EntryExists & { id?: string })
-  >;
-};
-
-export type ExceptionListItemBuilderSchema = Omit<ExceptionListItemSchema, 'entries'> & {
-  entries: BuilderEntry[];
-};
-
-export type CreateExceptionListItemBuilderSchema = Omit<
-  CreateExceptionListItemSchema,
-  'meta' | 'entries'
-> & {
-  meta: { temporaryUuid: string };
-  entries: BuilderEntry[];
-};
-
-export type ExceptionsBuilderExceptionItem =
-  | ExceptionListItemBuilderSchema
-  | CreateExceptionListItemBuilderSchema;
 
 export interface FlattenedCodeSignature {
   subject_name: string;
