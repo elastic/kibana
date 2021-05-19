@@ -8,6 +8,7 @@
 import Hapi from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { first, map, take } from 'rxjs/operators';
+import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import {
   BasePath,
   IClusterClient,
@@ -39,6 +40,7 @@ export interface ReportingInternalSetup {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
+  screenshotMode: ScreenshotModePluginSetup;
   logger: LevelLogger;
 }
 
@@ -135,7 +137,7 @@ export class ReportingCore {
     if (deprecatedRoles !== false) {
       // refer to roles.allow configuration (deprecated path)
       const allowedRoles = ['superuser', ...(deprecatedRoles ?? [])];
-      const privileges = allowedRoles.map((role) => ({
+      const privileges = allowedRoles.map(role => ({
         requiredClusterPrivileges: [],
         requiredRoles: [role],
         ui: [],
@@ -205,7 +207,7 @@ export class ReportingCore {
     const { licensing } = this.getPluginSetupDeps();
     return await licensing.license$
       .pipe(
-        map((license) => checkLicense(this.getExportTypesRegistry(), license)),
+        map(license => checkLicense(this.getExportTypesRegistry(), license)),
         first()
       )
       .toPromise();
@@ -215,6 +217,11 @@ export class ReportingCore {
     const config = this.getConfig();
     const { browserDriverFactory } = await this.getPluginStartDeps();
     return screenshotsObservableFactory(config.get('capture'), browserDriverFactory);
+  }
+
+  public getEnableScreenshotMode() {
+    const { screenshotMode } = this.getPluginSetupDeps();
+    return screenshotMode.setScreenshotModeEnabled;
   }
 
   /*
