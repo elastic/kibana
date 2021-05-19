@@ -8,6 +8,13 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { parse, format } from 'url';
 import { uniqBy } from 'lodash';
+import {
+  ALERT_ID,
+  ALERT_START,
+  RULE_ID,
+  RULE_NAME,
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import { parseTechnicalFields } from '../../../../../../rule_registry/common';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
@@ -20,7 +27,7 @@ interface AlertDetailProps {
 
 export function AlertDetails({ alerts }: AlertDetailProps) {
   const {
-    apmRuleRegistry,
+    observabilityRuleTypeRegistry,
     core: {
       http: {
         basePath: { prepend },
@@ -32,20 +39,23 @@ export function AlertDetails({ alerts }: AlertDetailProps) {
     urlParams: { rangeFrom, rangeTo },
   } = useUrlParams();
 
-  const collapsedAlerts = uniqBy(
-    alerts,
-    (alert) => alert['kibana.rac.alert.id']!
+  const collapsedAlerts = uniqBy(alerts, (alert) => alert[ALERT_ID]![0]!).map(
+    (alert) => {
+      return parseTechnicalFields(alert);
+    }
   );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {collapsedAlerts.map((alert) => {
-        const ruleType = apmRuleRegistry.getTypeByRuleId(alert['rule.id']!);
+        const formatter = observabilityRuleTypeRegistry.getFormatter(
+          alert[RULE_ID]!
+        );
         const formatted = {
           link: undefined,
-          reason: alert['rule.name'],
-          ...(ruleType?.format?.({
-            alert,
+          reason: alert[RULE_NAME],
+          ...(formatter?.({
+            fields: alert,
             formatters: { asDuration, asPercent },
           }) ?? {}),
         };
@@ -55,7 +65,7 @@ export function AlertDetails({ alerts }: AlertDetailProps) {
           : undefined;
 
         return (
-          <EuiFlexItem grow>
+          <EuiFlexItem grow key={alert[ALERT_ID]}>
             <EuiFlexGroup direction="row" gutterSize="s">
               <EuiFlexItem grow>
                 {parsedLink ? (
@@ -79,7 +89,7 @@ export function AlertDetails({ alerts }: AlertDetailProps) {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <TimestampTooltip
-                  time={new Date(alert['kibana.rac.alert.start']!).getTime()}
+                  time={new Date(alert[ALERT_START]!).getTime()}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -7,11 +7,10 @@
 
 import { flow } from 'fp-ts/lib/function';
 import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
+import type { EntriesArray, Entry } from '@kbn/securitysolution-io-ts-list-types';
 
-import {
+import type {
   CreateExceptionListItemSchema,
-  EntriesArray,
-  Entry,
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '../../common';

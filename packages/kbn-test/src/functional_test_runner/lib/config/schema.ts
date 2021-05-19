@@ -172,7 +172,7 @@ export const schema = Joi.object()
         license: Joi.string().default('basic'),
         from: Joi.string().default('snapshot'),
         serverArgs: Joi.array(),
-        serverEnvVars: Joi.object(),
+        esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
       })
