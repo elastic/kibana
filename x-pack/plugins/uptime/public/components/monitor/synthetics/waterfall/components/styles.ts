@@ -144,23 +144,8 @@ export const WaterfallChartLegendContainer = euiStyled.div`
 `; // NOTE: EuiShadowColor is a little too dark to work with the background-color
 
 export const StyledWithEuiBreakpoints = euiStyled.div`
-  @media only screen and (max-width: ${(props) =>
-    parseInt(props.theme.eui.euiBreakpoints.m, 10) - 5}px) {
-    max-width: ${({ theme }) => parseInt(theme.eui.euiBreakpoints.s, 10) - 5}px;
-  }
-  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
-    max-width: ${({ theme }) => parseInt(theme.eui.euiBreakpoints.m, 10) - 5}px;
-  }
-  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.l}) {
-    max-width: ${({ theme }) => parseInt(theme.eui.euiBreakpoints.l, 10) - 5}px;
-  }
-  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.xl}) {
-    max-width: ${({ theme }) => parseInt(theme.eui.euiBreakpoints.xl, 10) - 5}px;
-  }
-  @media only screen and (min-width: 1600px) {
-    max-width: initial;
-  }
-`; // sets a max-width within the bounds of the EUI breakpoints
+  max-width: 90vw;
+`;
 
 export const WaterfallChartTooltip = euiStyled(StyledWithEuiBreakpoints)`
   background-color: ${(props) => props.theme.eui.euiColorDarkestShade};
