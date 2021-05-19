@@ -54,6 +54,10 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     defaultMessage: 'Unique count',
   }),
   input: 'field',
+  description: i18n.translate('xpack.lens.indexPattern.cardinality.description', {
+    defaultMessage:
+      'A single-value metrics aggregation that calculates an approximate count of distinct values.',
+  }),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       supportedTypes.has(type) &&

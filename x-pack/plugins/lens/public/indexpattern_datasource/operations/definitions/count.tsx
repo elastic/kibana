@@ -33,6 +33,9 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     defaultMessage: 'Count',
   }),
   input: 'field',
+  description: i18n.translate('xpack.lens.indexPattern.count.description', {
+    defaultMessage: 'A metric aggregation that calculates the number of documents.',
+  }),
   getErrorMessage: (layer, columnId, indexPattern) =>
     getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   onFieldChange: (oldColumn, field) => {

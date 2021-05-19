@@ -98,6 +98,10 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   }),
   getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
   input: 'field',
+  description: i18n.translate('xpack.lens.indexPattern.lastValue.description', {
+    defaultMessage:
+      'A single-value metric aggregation that returns the last value (based on time) of the provided field extracted from the aggregated documents.',
+  }),
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
 

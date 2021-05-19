@@ -73,6 +73,7 @@ export const tinymathFunctions: Record<
     positionalArguments: Array<{
       name: string;
       optional?: boolean;
+      defaultValue?: string | number;
     }>;
     // help: React.ReactElement;
     // Help is in Markdown format
@@ -86,8 +87,12 @@ export const tinymathFunctions: Record<
     ],
     help: `
 Also works with + symbol
-Example: ${'`count() + sum(bytes)`'}
-Example: ${'`add(count(), 5)`'}
+
+**Examples**:
+\`\`\`
+count() + sum(bytes)
+add(count(), 5)
+\`\`\`
     `,
   },
   subtract: {
@@ -117,7 +122,7 @@ Example: ${'`multiply(sum(bytes), 2)`'}
     ],
     help: `
 Also works with ${'`/`'} symbol
-Example: ${'`ceil(sum(bytes))`'}
+Example: ${'`divide(sum(bytes), 2)`'}
     `,
   },
   abs: {
@@ -155,7 +160,7 @@ Example: ${'`ceil(sum(bytes))`'}
     ],
     help: `
 Limits the value from a minimum to maximum
-Example: ${'`ceil(sum(bytes))`'}
+Example: ${'`clamp(sum(bytes), 1, 100)`'}
     `,
   },
   cube: {
@@ -164,7 +169,7 @@ Example: ${'`ceil(sum(bytes))`'}
     ],
     help: `
 Limits the value from a minimum to maximum
-Example: ${'`ceil(sum(bytes))`'}
+Example: ${'`cube(sum(bytes))`'}
     `,
   },
   exp: {
@@ -172,7 +177,7 @@ Example: ${'`ceil(sum(bytes))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-Raises <em>e</em> to the nth power.
+Raises *e* to the nth power.
 Example: ${'`exp(sum(bytes))`'}
     `,
   },
@@ -200,12 +205,17 @@ Example: ${'`floor(sum(bytes))`'}
       {
         name: i18n.translate('xpack.lens.formula.base', { defaultMessage: 'base' }),
         optional: true,
+        defaultValue: 'e',
       },
     ],
     help: `
-Logarithm with optional base. The natural base <em>e</em> is used as default.
-Example: ${'`log(sum(bytes))`'}
-Example: ${'`log(sum(bytes), 2)`'}
+Logarithm with optional base. The natural base *e* is used as default.
+
+**Examples**:
+\`\`\`
+log(sum(bytes))
+log(sum(bytes), 2)
+\`\`\`
     `,
   },
   // TODO: check if this is valid for Tinymath
@@ -223,7 +233,6 @@ Example: ${'`log(sum(bytes), 2)`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
       {
         name: i18n.translate('xpack.lens.formula.base', { defaultMessage: 'base' }),
-        optional: true,
       },
     ],
     help: `
@@ -249,12 +258,17 @@ Example: ${'`pow(sum(bytes), 3)`'}
       {
         name: i18n.translate('xpack.lens.formula.decimals', { defaultMessage: 'decimals' }),
         optional: true,
+        defaultValue: 0,
       },
     ],
     help: `
 Rounds to a specific number of decimal places, default of 0
-Example: ${'`round(sum(bytes))`'}
-Example: ${'`round(sum(bytes), 2)`'}
+
+**Examples**:
+\`\`\`
+round(sum(bytes))
+round(sum(bytes), 2)
+\`\`\`
     `,
   },
   sqrt: {

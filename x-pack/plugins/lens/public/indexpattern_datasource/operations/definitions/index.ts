@@ -186,6 +186,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    */
   displayName: string;
   /**
+   * A short description of the operation, useful for help or documentation
+   */
+  description?: string;
+  /**
    * The default label is assigned by the editor
    */
   getDefaultLabel: (
@@ -273,6 +277,7 @@ interface OperationParam {
   name: string;
   type: string;
   required?: boolean;
+  defaultValue?: string | number;
 }
 
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {

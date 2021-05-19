@@ -14,14 +14,24 @@ import {
   EuiText,
   EuiSelectable,
   EuiSelectableOption,
+  EuiCode,
+  EuiSpacer,
+  EuiMarkdownFormat,
+  EuiTitle,
 } from '@elastic/eui';
 import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { GenericOperationDefinition, ParamEditorProps } from '../../index';
-import { IndexPattern } from '../../../../types';
 import { tinymathFunctions } from '../util';
 import { getPossibleFunctions } from './math_completion';
+import { hasFunctionFieldArgument } from '../validation';
 
-import { FormulaIndexPatternColumn } from '../formula';
+import type {
+  GenericOperationDefinition,
+  IndexPatternColumn,
+  OperationDefinition,
+  ParamEditorProps,
+} from '../../index';
+import type { IndexPattern } from '../../../../types';
+import type { FormulaIndexPatternColumn } from '../formula';
 
 function FormulaHelp({
   indexPattern,
@@ -41,7 +51,16 @@ function FormulaHelp({
       .filter((key) => key in tinymathFunctions)
       .map((key) => ({
         label: `${key}`,
-        description: <Markdown markdown={tinymathFunctions[key].help} />,
+        description: (
+          <>
+            <EuiTitle size="s">
+              <h3>{getFunctionSignatureLabel(key, operationDefinitionMap)}</h3>
+            </EuiTitle>
+            <EuiMarkdownFormat>
+              {tinymathFunctions[key].help.replace(/\n/g, '\n\n')}
+            </EuiMarkdownFormat>
+          </>
+        ),
         checked: selectedFunction === key ? ('on' as const) : undefined,
       }))
   );
@@ -65,7 +84,9 @@ function FormulaHelp({
   return (
     <>
       <EuiPopoverTitle className="lnsFormula__docsHeader" paddingSize="s">
-        Formula reference
+        {i18n.translate('xpack.lens.formulaReference', {
+          defaultMessage: 'Formula reference',
+        })}
       </EuiPopoverTitle>
 
       <EuiFlexGroup className="lnsFormula__docsContent" gutterSize="none" responsive={false}>
@@ -149,36 +170,127 @@ Use the symbols +, -, /, and * to perform basic math.
 
 export const MemoizedFormulaHelp = React.memo(FormulaHelp);
 
-// TODO: i18n this whole thing, or move examples into the operation definitions with i18n
+export function getFunctionSignatureLabel(
+  name: string,
+  operationDefinitionMap: ParamEditorProps<FormulaIndexPatternColumn>['operationDefinitionMap'],
+  firstParam?: { label: string | [number, number] } | null
+): string {
+  if (tinymathFunctions[name]) {
+    return `${name}(${tinymathFunctions[name].positionalArguments
+      .map(({ name: argName, optional }) => `${argName}${optional ? '?' : ''}`)
+      .join(', ')})`;
+  }
+  if (operationDefinitionMap[name]) {
+    const def = operationDefinitionMap[name];
+    if ('operationParams' in def && def.operationParams) {
+      return `${name}(${firstParam ? firstParam.label + ', ' : ''}${def.operationParams.map(
+        ({ name: argName, type, required }) => `${argName}${required ? '' : '?'}=${type}`
+      )})`;
+    }
+    return `${name}(${firstParam ? firstParam.label : ''})`;
+  }
+  return '';
+}
+
+function getFunctionArgumentsStringified(
+  params: Required<
+    OperationDefinition<IndexPatternColumn, 'field' | 'fullReference'>
+  >['operationParams']
+) {
+  return params
+    .map(
+      ({ name, type: argType, defaultValue = 5 }) =>
+        `${name}=${argType === 'string' ? `"${defaultValue}"` : defaultValue}`
+    )
+    .join(', ');
+}
+
+/**
+ * Get an array of strings containing all possible information about a specific
+ * operation type: examples and infos.
+ */
+export function getHelpTextContent(
+  type: string,
+  operationDefinitionMap: ParamEditorProps<FormulaIndexPatternColumn>['operationDefinitionMap']
+): { description: string; examples: string[] } {
+  const definition = operationDefinitionMap[type];
+  const description: string = definition.description ?? '';
+  // as for the time being just add examples text.
+  // Later will enrich with more information taken from the operation definitions.
+  const examples: string[] = [];
+
+  if (!hasFunctionFieldArgument(type)) {
+    // ideally this should have the same example automation as the operations below
+    examples.push(`${type}()`);
+    return { description, examples };
+  }
+  if (definition.input === 'field') {
+    const mandatoryArgs = definition.operationParams?.filter(({ required }) => required) || [];
+    if (mandatoryArgs.length === 0) {
+      examples.push(`${type}(bytes)`);
+    }
+    if (mandatoryArgs.length) {
+      const additionalArgs = getFunctionArgumentsStringified(mandatoryArgs);
+      examples.push(`${type}(bytes, ${additionalArgs})`);
+    }
+    if (definition.operationParams && mandatoryArgs.length !== definition.operationParams.length) {
+      const additionalArgs = getFunctionArgumentsStringified(definition.operationParams);
+      examples.push(`${type}(bytes, ${additionalArgs})`);
+    }
+  }
+  if (definition.input === 'fullReference') {
+    const mandatoryArgs = definition.operationParams?.filter(({ required }) => required) || [];
+    if (mandatoryArgs.length === 0) {
+      examples.push(`${type}(sum(bytes))`);
+    }
+    if (mandatoryArgs.length) {
+      const additionalArgs = getFunctionArgumentsStringified(mandatoryArgs);
+      examples.push(`${type}(sum(bytes), ${additionalArgs})`);
+    }
+    if (definition.operationParams && mandatoryArgs.length !== definition.operationParams.length) {
+      const additionalArgs = getFunctionArgumentsStringified(definition.operationParams);
+      examples.push(`${type}(sum(bytes), ${additionalArgs})`);
+    }
+  }
+  return { description, examples };
+}
+
 function getHelpText(
   type: string,
   operationDefinitionMap: ParamEditorProps<FormulaIndexPatternColumn>['operationDefinitionMap']
 ) {
-  const definition = operationDefinitionMap[type];
-
-  if (type === 'count') {
-    return (
-      <EuiText size="s">
-        <p>Example: count()</p>
-      </EuiText>
-    );
-  }
-
+  const { description, examples } = getHelpTextContent(type, operationDefinitionMap);
+  const def = operationDefinitionMap[type];
+  const firstParam = hasFunctionFieldArgument(type)
+    ? {
+        label: def.input === 'field' ? 'field' : def.input === 'fullReference' ? 'function' : '',
+      }
+    : null;
   return (
-    <EuiText size="s">
-      {definition.input === 'field' ? <p>Example: {type}(bytes)</p> : null}
-      {definition.input === 'fullReference' && !('operationParams' in definition) ? (
-        <p>Example: {type}(sum(bytes))</p>
-      ) : null}
-
-      {'operationParams' in definition && definition.operationParams ? (
-        <p>
-          <p>
-            Example: {type}(sum(bytes),{' '}
-            {definition.operationParams.map((p) => `${p.name}=5`).join(', ')})
-          </p>
-        </p>
-      ) : null}
-    </EuiText>
+    <>
+      <EuiTitle size="s">
+        <h3>{getFunctionSignatureLabel(type, operationDefinitionMap, firstParam)}</h3>
+      </EuiTitle>
+      <EuiText size="s">
+        {description}
+        {examples.length ? (
+          <>
+            <EuiSpacer />
+            <p>
+              <b>
+                {i18n.translate('xpack.lens.formulaExamples', {
+                  defaultMessage: 'Examples',
+                })}
+              </b>
+            </p>
+            {examples.map((example) => (
+              <p key={example}>
+                <EuiCode>{example}</EuiCode>
+              </p>
+            ))}
+          </>
+        ) : null}
+      </EuiText>
+    </>
   );
 }

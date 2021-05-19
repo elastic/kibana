@@ -52,7 +52,16 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     defaultMessage: 'Percentile',
   }),
   input: 'field',
-  operationParams: [{ name: 'percentile', type: 'number', required: false }],
+  description: i18n.translate('xpack.lens.indexPattern.percentile.description', {
+    defaultMessage:
+      'A single-metric aggregation that calculates the given percentiles (accepted as argument) over numeric values extracted from the aggregated documents. The default percentile value is {percentile}.',
+    values: {
+      percentile: DEFAULT_PERCENTILE_VALUE,
+    },
+  }),
+  operationParams: [
+    { name: 'percentile', type: 'number', required: false, defaultValue: DEFAULT_PERCENTILE_VALUE },
+  ],
   filterable: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
     if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {

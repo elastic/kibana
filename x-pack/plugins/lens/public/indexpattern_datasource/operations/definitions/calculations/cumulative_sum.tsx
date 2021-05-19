@@ -45,6 +45,10 @@ export const cumulativeSumOperation: OperationDefinition<
     defaultMessage: 'Cumulative sum',
   }),
   input: 'fullReference',
+  description: i18n.translate('xpack.lens.indexPattern.cumulativeSum.description', {
+    defaultMessage:
+      'An aggregation that calculates the cumulative sum of a specified field in each date_histogram bucket. Cumulative sums always start with 0.',
+  }),
   selectionStyle: 'field',
   requiredReferences: [
     {

@@ -47,6 +47,10 @@ export const counterRateOperation: OperationDefinition<
     defaultMessage: 'Counter rate',
   }),
   input: 'fullReference',
+  description: i18n.translate('xpack.lens.indexPattern.counterRate.description', {
+    defaultMessage:
+      'An aggregation that calculates a rate of documents or a field in each date_histogram bucket.',
+  }),
   selectionStyle: 'field',
   requiredReferences: [
     {

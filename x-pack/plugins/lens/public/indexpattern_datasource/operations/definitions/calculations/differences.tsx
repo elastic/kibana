@@ -49,6 +49,10 @@ export const derivativeOperation: OperationDefinition<
     defaultMessage: 'Differences',
   }),
   input: 'fullReference',
+  description: i18n.translate('xpack.lens.indexPattern.derivative.description', {
+    defaultMessage:
+      'An aggregation that calculates the difference over numeric values of a specified field between each pair of date_histogram buckets. Derivative always start with an undefined value for the first bucket, and it requires a minimum of two buckets.',
+  }),
   selectionStyle: 'full',
   requiredReferences: [
     {

@@ -63,13 +63,22 @@ export const movingAverageOperation: OperationDefinition<
   }),
   input: 'fullReference',
   selectionStyle: 'full',
+  description: i18n.translate('xpack.lens.indexPattern.movingAverage.description', {
+    defaultMessage:
+      'Given an ordered series of data, the aggregation will slide a window across the data and emit the average value of that window. The default window value is {defaultValue}',
+    values: {
+      defaultValue: WINDOW_DEFAULT_VALUE,
+    },
+  }),
   requiredReferences: [
     {
       input: ['field', 'managedReference'],
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
-  operationParams: [{ name: 'window', type: 'number', required: true }],
+  operationParams: [
+    { name: 'window', type: 'number', required: false, defaultValue: WINDOW_DEFAULT_VALUE },
+  ],
   getPossibleOperation: (indexPattern) => {
     if (hasDateField(indexPattern)) {
       return {

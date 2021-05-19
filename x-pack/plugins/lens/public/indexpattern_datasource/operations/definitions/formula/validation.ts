@@ -606,7 +606,11 @@ export function validateParams(
 }
 
 export function shouldHaveFieldArgument(node: TinymathFunction) {
-  return !['count'].includes(node.name);
+  return hasFunctionFieldArgument(node.name);
+}
+
+export function hasFunctionFieldArgument(type: string) {
+  return !['count'].includes(type);
 }
 
 export function isFirstArgumentValidType(arg: TinymathAST, type: TinymathNodeTypes['type']) {
