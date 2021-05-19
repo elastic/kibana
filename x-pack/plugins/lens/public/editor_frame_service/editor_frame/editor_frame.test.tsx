@@ -1555,9 +1555,10 @@ describe('editor_frame', () => {
 
       mockDatasource.toExpression.mockReturnValue('data expression');
       mockVisualization.toExpression.mockReturnValue('vis expression');
-      instance.setProps({ query: { query: 'new query', language: 'lucene' } });
-
-      lensStore.dispatch(setState({ query: { query: 'new query', language: 'lucene' } }));
+      // instance.setProps({ query: { query: 'new query', language: 'lucene' } });
+      await act(async () => {
+        lensStore.dispatch(setState({ query: { query: 'new query', language: 'lucene' } }));
+      });
 
       instance.update();
 

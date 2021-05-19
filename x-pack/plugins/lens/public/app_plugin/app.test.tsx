@@ -351,10 +351,6 @@ describe('Lens App', () => {
             "initialContext": undefined,
             "onChange": [Function],
             "onError": [Function],
-            "query": Object {
-              "language": "kuery",
-              "query": "",
-            },
             "showNoDataPopover": [Function],
           },
           Object {},

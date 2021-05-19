@@ -20,7 +20,6 @@ import { Document } from '../../persistence/saved_object_store';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { getSavedObjectFormat } from './save';
 import { generateId } from '../../id_generator';
-import { Query } from '../../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { EditorFrameStartPlugins } from '../service';
 import { initializeDatasources, createDatasourceLayers } from './state_helpers';
@@ -52,7 +51,6 @@ export interface EditorFrameProps {
     fromDate: string;
     toDate: string;
   };
-  query: Query;
   onChange: (arg: {
     filterableIndexPatterns: string[];
     doc: Document;
@@ -69,11 +67,9 @@ export function EditorFrame(props: EditorFrameProps) {
   //   [dispatchLens]
   // );
 
-  const { filters, searchSessionId, savedQuery } = useLensSelector((state) => state.app);
+  const { filters, searchSessionId, savedQuery, query } = useLensSelector((state) => state.app);
 
-  const query = props.query;
   const doc = props.doc;
-
   const [state, dispatch] = useReducer(reducer, props, getInitialState);
   const [visualizeTriggerFieldContext, setVisualizeTriggerFieldContext] = useState(
     props.initialContext
@@ -237,11 +233,12 @@ export function EditorFrame(props: EditorFrameProps) {
   // The frame needs to call onChange every time its internal state changes
   useEffect(
     () => {
-      const activeDatasource =
-        state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
-          ? props.datasourceMap[state.activeDatasourceId]
-          : undefined;
 
+      const activeDatasource =
+      state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
+      ? props.datasourceMap[state.activeDatasourceId]
+      : undefined;
+      
       if (!activeDatasource || !activeVisualization) {
         return;
       }
@@ -267,7 +264,7 @@ export function EditorFrame(props: EditorFrameProps) {
       state.datasourceStates,
       state.visualization,
       state.activeData,
-      query,
+      query, 
       filters,
       savedQuery,
       state.title,

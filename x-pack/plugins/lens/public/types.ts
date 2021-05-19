@@ -48,7 +48,6 @@ export interface EditorFrameProps {
   onError: ErrorCallback;
   doc?: Document;
   dateRange: DateRange;
-  query: Query;
   initialContext?: VisualizeFieldContext;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates

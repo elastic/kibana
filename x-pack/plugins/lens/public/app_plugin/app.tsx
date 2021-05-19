@@ -29,7 +29,6 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   esFilters,
   exporters,
-  Query,
   syncQueryStateWithUrl,
 } from '../../../../../src/plugins/data/public';
 import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
@@ -654,7 +653,6 @@ export function App({
             onError={onError}
             showNoDataPopover={showNoDataPopover}
             initialContext={initialContext}
-            query={appState.query}
             persistedDoc={appState.persistedDoc}
             onChange={onChange}
           />
@@ -690,7 +688,6 @@ export function App({
 
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
-  query,
   persistedDoc,
   resolvedDateRange,
   onError,
@@ -699,7 +696,6 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   onChange,
 }: {
   editorFrame: EditorFrameInstance;
-  query: Query;
   persistedDoc?: Document | undefined;
   resolvedDateRange: { fromDate: string; toDate: string };
   onError: (e: { message: string }) => Toast;
@@ -717,7 +713,6 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
     <EditorFrameContainer
       doc={persistedDoc}
       dateRange={resolvedDateRange}
-      query={query}
       onError={onError}
       showNoDataPopover={showNoDataPopover}
       initialContext={initialContext}
