@@ -3360,22 +3360,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the first time 
       >
         <div
           class="body-content undefined"
-        >
-          <div
-            class="euiEmptyPrompt"
-          >
-            <span
-              class="euiTextColor euiTextColor--subdued"
-            >
-              <span>
-                No items found
-              </span>
-              <div
-                class="euiSpacer euiSpacer--m"
-              />
-            </span>
-          </div>
-        </div>
+        />
       </div>
     </div>
   </div>

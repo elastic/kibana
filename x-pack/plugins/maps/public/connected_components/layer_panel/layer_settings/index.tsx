@@ -16,6 +16,7 @@ import {
   updateLayerMinZoom,
   updateLayerAlpha,
   updateLabelsOnTop,
+  updateFittableFlag,
 } from '../../../actions';
 import { Attribution } from '../../../../common/descriptor_types';
 
@@ -30,6 +31,8 @@ function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
     updateAlpha: (id: string, alpha: number) => dispatch(updateLayerAlpha(id, alpha)),
     updateLabelsOnTop: (id: string, areLabelsOnTop: boolean) =>
       dispatch(updateLabelsOnTop(id, areLabelsOnTop)),
+    updateIncludeInFitToBounds: (id: string, includeInFitToBounds: boolean) =>
+      dispatch(updateFittableFlag(id, includeInFitToBounds)),
   };
 }
 
