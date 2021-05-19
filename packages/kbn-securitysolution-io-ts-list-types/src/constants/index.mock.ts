@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EndpointEntriesArray } from '../endpoint';
-import { EntriesArray, Entry } from '../entries';
-import { EntryMatch } from '../entry_match';
-import { EntryNested } from '../entry_nested';
-import { OsTypeArray } from '../os_type';
+import { EndpointEntriesArray } from '../common/endpoint/entries';
+import { EntriesArray, Entry } from '../common/entries';
+import { EntryMatch } from '../common/entry_match';
+import { EntryNested } from '../common/entry_nested';
+import { OsTypeArray } from '../common/os_type';
 
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
 export const OLD_DATE_RELATIVE_TO_DATE_NOW = '2020-04-19T15:25:31.830Z';
