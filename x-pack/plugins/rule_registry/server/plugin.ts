@@ -21,6 +21,7 @@ import { AlertsClientFactory } from './alert_data_client/alert_client_factory';
 import { PluginStartContract as AlertingStart } from '../../alerting/server';
 import { SpacesPluginStart } from '../../spaces/server';
 import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
+import { defineRoutes } from './routes';
 export type RuleRegistryPluginSetupContract = RuleDataPluginService;
 export type RuleRegistryPluginStartContract = void;
 
@@ -70,10 +71,13 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
     });
 
     // ALERTS ROUTES
+    const router = core.http.createRouter<RacRequestHandlerContext>();
     core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
       'rac',
       this.createRouteHandlerContext()
     );
+
+    defineRoutes(router);
 
     return service;
   }
@@ -111,7 +115,7 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
       request
     ): Promise<RacApiRequestHandlerContext> {
       return {
-        getRacClient: async () => {
+        getAlertsClient: async () => {
           const createdClient = alertsClientFactory.create(request);
           return createdClient;
         },

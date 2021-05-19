@@ -20,7 +20,7 @@ import {
   AlertingAuthorizationEntity,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../alerting/server/authorization';
-import { Logger, ElasticsearchClient } from '../../../../../src/core/server';
+import { Logger, ElasticsearchClient, HttpResponsePayload } from '../../../../../src/core/server';
 import { buildAlertsSearchQuery, buildAlertsUpdateParameters } from './utils';
 import { RacAuthorizationAuditLogger } from './audit_logger';
 
@@ -108,7 +108,8 @@ export class AlertsClient {
     this.auditLogger = auditLogger;
   }
 
-  public async get({ id }: GetAlertParams): Promise<unknown> {
+  // TODO: Type out alerts (rule registry fields + alerting alerts type)
+  public async get({ id }: GetAlertParams): Promise<HttpResponsePayload> {
     // first search for the alert specified, then check if user has access to it
     // and return search results
     const query = buildAlertsSearchQuery({
@@ -117,20 +118,21 @@ export class AlertsClient {
     });
     // TODO: Type out alerts (rule registry fields + alerting alerts type)
     const { body: result } = await this.esClient.search<RawAlert>(query);
-    const hits = result.hits.hits[0];
+    // TODO: I thought we were moving away from using _source?
+    const hits = result.hits.hits[0]._source;
 
     try {
       // use security plugin routes to check what URIs user is authorized to
       await this.authorization.ensureAuthorized({
-        ruleTypeId: hits['kibana.rac.alert.id'],
-        consumer: hits['kibana.rac.producer'],
+        ruleTypeId: hits['rule.id'],
+        consumer: hits['kibana.rac.alert.producer'],
         operation: ReadOperations.Get,
         entity: AlertingAuthorizationEntity.Alert,
       });
     } catch (error) {
       throw Boom.forbidden(
         this.auditLogger.racAuthorizationFailure({
-          owner: hits['kibana.rac.producer'],
+          owner: hits['kibana.rac.alert.producer'],
           operation: ReadOperations.Get,
           type: 'access',
         })

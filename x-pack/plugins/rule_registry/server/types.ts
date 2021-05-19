@@ -45,12 +45,12 @@ export type AlertTypeWithExecutor<
  * @public
  */
 export interface RacApiRequestHandlerContext {
-  getRacClient: () => Promise<AlertsClient>;
+  getAlertsClient: () => Promise<AlertsClient>;
 }
 
 /**
  * @internal
  */
 export interface RacRequestHandlerContext extends RequestHandlerContext {
-  rac?: RacApiRequestHandlerContext;
+  rac: RacApiRequestHandlerContext;
 }

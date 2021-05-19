@@ -31,7 +31,7 @@ export const APM_FEATURE = {
   privileges: {
     all: {
       app: ['apm', 'ux', 'kibana'],
-      api: ['apm', 'apm_write'],
+      api: ['apm', 'apm_write', 'rac'],
       catalogue: ['apm'],
       savedObject: {
         all: [],
@@ -52,7 +52,7 @@ export const APM_FEATURE = {
     },
     read: {
       app: ['apm', 'ux', 'kibana'],
-      api: ['apm'],
+      api: ['apm', 'rac'],
       catalogue: ['apm'],
       savedObject: {
         all: [],
@@ -74,14 +74,21 @@ export const APM_FEATURE = {
   },
   subFeatures: [
     {
-      name: 'Manage Alerts',
+      name: i18n.translate('xpack.apm.featureRegistry.manageAlerts', {
+        defaultMessage: 'Manage Alerts',
+      }),
       privilegeGroups: [
         {
           groupType: 'independent',
           privileges: [
             {
               id: 'alert_manage',
-              name: 'Manage Alerts',
+              name: i18n.translate(
+                'xpack.apm.featureRegistry.subfeature.apmFeatureName',
+                {
+                  defaultMessage: 'Manage Alerts',
+                }
+              ),
               includeIn: 'all',
               alerting: {
                 alert: {
