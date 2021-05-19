@@ -187,6 +187,7 @@ describe('Package policy service', () => {
             },
           ],
         } as unknown) as PackageInfo,
+        {},
         [
           {
             type: 'log',
