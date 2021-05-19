@@ -92,7 +92,7 @@
     "**/underscore": "^1.13.1"
   },
   "engines": {
-    "node": "14.16.1",
+    "node": "14.17.0",
     "yarn": "^1.21.1"
   },
   "dependencies": {
@@ -113,6 +113,7 @@
     "@elastic/safer-lodash-set": "link:bazel-bin/packages/elastic-safer-lodash-set/npm_module",
     "@elastic/search-ui-app-search-connector": "^1.5.0",
     "@elastic/ui-ace": "0.2.3",
+    "@hapi/accept": "^5.0.2",
     "@hapi/boom": "^9.1.1",
     "@hapi/cookie": "^11.0.2",
     "@hapi/good-squeeze": "6.0.0",
@@ -171,7 +172,6 @@
     "JSONStream": "1.3.5",
     "abort-controller": "^3.0.0",
     "abortcontroller-polyfill": "^1.4.0",
-    "accept": "3.0.2",
     "ajv": "^6.12.4",
     "angular": "^1.8.0",
     "angular-aria": "^1.8.0",
@@ -488,7 +488,6 @@
     "@testing-library/react": "^11.2.6",
     "@testing-library/react-hooks": "^5.1.1",
     "@testing-library/user-event": "^13.1.1",
-    "@types/accept": "3.1.1",
     "@types/angular": "^1.6.56",
     "@types/angular-mocks": "^1.7.0",
     "@types/archiver": "^5.1.0",
