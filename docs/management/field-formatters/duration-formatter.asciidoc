@@ -1,4 +1,4 @@
-The `Duration` field formatter can display the numeric value of a field in the following increments:
+The *Duration* field formatter displays the numeric value of a field in the following increments:
 
 * Picoseconds
 * Nanoseconds
@@ -12,4 +12,4 @@ The `Duration` field formatter can display the numeric value of a field in the f
 * Months
 * Years
 
-You can specify these increments with up to 20 decimal places for both input and output formats.
+You can specify these increments with up to 20 decimal places for input and output formats.
