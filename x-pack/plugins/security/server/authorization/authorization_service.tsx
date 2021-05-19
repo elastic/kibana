@@ -51,7 +51,6 @@ import { validateReservedPrivileges } from './validate_reserved_privileges';
 
 export { Actions } from './actions';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
-export { featurePrivilegeIterator } from './privileges';
 
 interface AuthorizationServiceSetupParams {
   packageVersion: string;
