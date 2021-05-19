@@ -14,10 +14,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
   const security = getService('security');
+  const PageObjects = getPageObjects(['visualize']);
+
   const { visualize, visEditor } = getPageObjects(['visualize', 'visEditor']);
 
   describe('input control range', () => {
     before(async () => {
+      await PageObjects.visualize.initTests();
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       await esArchiver.load('kibana_sample_data_flights_index_pattern');
       await visualize.navigateToNewVisualization();
@@ -48,10 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('kibana_sample_data_flights_index_pattern');
-      // loading back default data
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('long_window_logstash');
-      await esArchiver.load('visualize');
       await security.testUser.restoreDefaults();
     });
   });

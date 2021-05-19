@@ -21,7 +21,7 @@ import {
   nonEmptyEntriesArray,
   osTypeArrayOrUndefined,
   tags,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { _version, namespace_type } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';

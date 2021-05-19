@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
@@ -123,47 +121,33 @@ export class EditorFrameService {
 
   public start(core: CoreStart, plugins: EditorFrameStartPlugins): EditorFrameStart {
     const createInstance = async (): Promise<EditorFrameInstance> => {
-      let domElement: Element;
       const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
         collectAsyncDefinitions(this.datasources),
         collectAsyncDefinitions(this.visualizations),
       ]);
 
-      const unmount = () => {
-        if (domElement) {
-          unmountComponentAtNode(domElement);
-        }
-      };
+      const firstDatasourceId = Object.keys(resolvedDatasources)[0];
+      const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
+
+      const { EditorFrame, getActiveDatasourceIdFromDoc } = await import('../async_services');
+
+      const palettes = await plugins.charts.palettes.getPalettes();
 
       return {
-        mount: async (
-          element,
-          {
-            doc,
-            onError,
-            dateRange,
-            query,
-            filters,
-            savedQuery,
-            onChange,
-            showNoDataPopover,
-            initialContext,
-            searchSessionId,
-          }
-        ) => {
-          if (domElement !== element) {
-            unmount();
-          }
-          domElement = element;
-          const firstDatasourceId = Object.keys(resolvedDatasources)[0];
-          const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
-
-          const { EditorFrame, getActiveDatasourceIdFromDoc } = await import('../async_services');
-
-          const palettes = await plugins.charts.palettes.getPalettes();
-
-          render(
-            <I18nProvider>
+        EditorFrameContainer: ({
+          doc,
+          onError,
+          dateRange,
+          query,
+          filters,
+          savedQuery,
+          onChange,
+          showNoDataPopover,
+          initialContext,
+          searchSessionId,
+        }) => {
+          return (
+            <div className="lnsApp__frame">
               <EditorFrame
                 data-test-subj="lnsEditorFrame"
                 onError={onError}
@@ -188,11 +172,9 @@ export class EditorFrameService {
                 initialContext={initialContext}
                 searchSessionId={searchSessionId}
               />
-            </I18nProvider>,
-            domElement
+            </div>
           );
         },
-        unmount,
       };
     };
 

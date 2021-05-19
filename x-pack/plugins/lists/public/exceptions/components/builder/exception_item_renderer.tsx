@@ -10,9 +10,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 import { AutocompleteStart } from 'src/plugins/data/public';
-import { OsTypeArray } from '@kbn/securitysolution-io-ts-utils';
+import { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ExceptionListType } from '../../../../common';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 import { BuilderEntry, ExceptionsBuilderExceptionItem, FormattedBuilderEntry } from './types';
