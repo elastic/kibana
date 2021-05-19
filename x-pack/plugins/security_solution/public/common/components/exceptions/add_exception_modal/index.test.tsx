@@ -21,9 +21,8 @@ import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_e
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { EntriesArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ExceptionListItemSchema } from '../../../../../../lists/common';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
