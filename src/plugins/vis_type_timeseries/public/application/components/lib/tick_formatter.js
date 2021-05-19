@@ -41,8 +41,8 @@ export const createTickFormatter = (format = '0,0.[00]', template, getConfig = n
     if (isEqual(val, DEFAULT_VALUE)) {
       return val;
     }
-    
-    if(isEqual(val, EMPTY_VALUE)) {
+
+    if (isEqual(val, EMPTY_VALUE)) {
       return DISPLAY_EMPTY_VALUE;
     }
 

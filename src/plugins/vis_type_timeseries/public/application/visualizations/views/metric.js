@@ -59,7 +59,7 @@ export class Metric extends Component {
     const { scale, translateX, translateY } = this.state;
     const primaryFormatter = (metric && (metric.tickFormatter || metric.formatter)) || ((n) => n);
     const primaryValue = primaryFormatter(getLastValueOrEmpty(metric && metric.data));
-    
+
     const styles = reactcss(
       {
         default: {
