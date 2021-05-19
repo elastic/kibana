@@ -78,13 +78,13 @@ export const configSchema = schema.object({
   proxyUrl: schema.maybe(schema.string()),
   proxyHeaders: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   /**
-   * @deprecated in favor of `ssl.proxyVerificationMode`
+   * @deprecated in favor of `tls.proxyVerificationMode`
    **/
   proxyRejectUnauthorizedCertificates: schema.boolean({ defaultValue: true }),
   proxyBypassHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   proxyOnlyHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   /**
-   * @deprecatedin favor of `ssl.verificationMode`
+   * @deprecated in favor of `tls.verificationMode`
    **/
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
   tls: schema.maybe(
