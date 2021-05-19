@@ -10,6 +10,7 @@ import type { RequestHandler, RouteConfig } from 'src/core/server';
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { SESSION_EXPIRATION_WARNING_MS } from '../../../common/constants';
 import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
@@ -29,7 +30,7 @@ describe('Info session routes', () => {
     defineSessionInfoRoutes(routeParamsMock);
   });
 
-  describe('extend session', () => {
+  describe('session info', () => {
     let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
     beforeEach(() => {
@@ -63,30 +64,94 @@ describe('Info session routes', () => {
     });
 
     it('returns session info.', async () => {
-      session.get.mockResolvedValue(
-        sessionMock.createValue({ idleTimeoutExpiration: 100, lifespanExpiration: 200 })
-      );
-
+      const now = 1000;
       const dateSpy = jest.spyOn(Date, 'now');
-      dateSpy.mockReturnValue(1234);
+      dateSpy.mockReturnValue(now);
 
-      const expectedBody = {
-        now: 1234,
-        provider: { type: 'basic', name: 'basic1' },
-        idleTimeoutExpiration: 100,
-        lifespanExpiration: 200,
-      };
-      await expect(
-        routeHandler(
-          ({} as unknown) as SecurityRequestHandlerContext,
-          httpServerMock.createKibanaRequest(),
-          kibanaResponseFactory
-        )
-      ).resolves.toEqual({
-        status: 200,
-        payload: expectedBody,
-        options: { body: expectedBody },
-      });
+      const assertions = [
+        [
+          {
+            idleTimeoutExpiration: 100 + now,
+            lifespanExpiration: 200 + SESSION_EXPIRATION_WARNING_MS + now,
+          },
+          {
+            canBeExtended: true,
+            expiresInMs: 100,
+          },
+        ],
+        [
+          {
+            idleTimeoutExpiration: 100 + now,
+            lifespanExpiration: 200 + now,
+          },
+          {
+            canBeExtended: false,
+            expiresInMs: 100,
+          },
+        ],
+        [
+          {
+            idleTimeoutExpiration: 200 + now,
+            lifespanExpiration: 100 + now,
+          },
+          {
+            canBeExtended: false,
+            expiresInMs: 100,
+          },
+        ],
+        [
+          {
+            idleTimeoutExpiration: null,
+            lifespanExpiration: 100 + now,
+          },
+          {
+            canBeExtended: false,
+            expiresInMs: 100,
+          },
+        ],
+        [
+          {
+            idleTimeoutExpiration: 100 + now,
+            lifespanExpiration: null,
+          },
+          {
+            canBeExtended: true,
+            expiresInMs: 100,
+          },
+        ],
+        [
+          {
+            idleTimeoutExpiration: null,
+            lifespanExpiration: null,
+          },
+          {
+            canBeExtended: false,
+            expiresInMs: null,
+          },
+        ],
+      ];
+
+      for (const [sessionInfo, expected] of assertions) {
+        session.get.mockResolvedValue(sessionMock.createValue(sessionInfo));
+
+        const expectedBody = {
+          canBeExtended: expected.canBeExtended,
+          expiresInMs: expected.expiresInMs,
+          provider: { type: 'basic', name: 'basic1' },
+        };
+
+        await expect(
+          routeHandler(
+            ({} as unknown) as SecurityRequestHandlerContext,
+            httpServerMock.createKibanaRequest(),
+            kibanaResponseFactory
+          )
+        ).resolves.toEqual({
+          status: 200,
+          payload: expectedBody,
+          options: { body: expectedBody },
+        });
+      }
     });
 
     it('returns empty response if session is not available.', async () => {

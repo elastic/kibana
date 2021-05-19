@@ -8,6 +8,7 @@
 
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
+import uuid from 'uuid/v4';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
@@ -79,6 +80,9 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
             ? TIME_RANGE_DATA_MODES.LAST_VALUE
             : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
         ...this.props.vis.params,
+        ...(!this.props.vis.id && {
+          id: uuid(),
+        }),
       },
       extractedIndexPatterns: [''],
     };

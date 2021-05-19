@@ -97,6 +97,7 @@ const defaultOptions = {
   data: dataStart,
   http: {} as HttpSetup,
   indexPattern: indexPattern1,
+  operationDefinitionMap: {},
 };
 
 describe('date_histogram', () => {

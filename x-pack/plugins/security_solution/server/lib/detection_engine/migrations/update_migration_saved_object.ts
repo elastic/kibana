@@ -9,7 +9,7 @@ import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { SavedObjectsClientContract, SavedObjectsUpdateResponse } from 'src/core/server';
-import { validateTaskEither } from '../../../../common/validate';
+import { validateTaskEither } from '@kbn/securitysolution-io-ts-utils';
 import { toError, toPromise } from '../../../../common/fp_utils';
 import { signalsMigrationSOClient } from './saved_objects_client';
 import {

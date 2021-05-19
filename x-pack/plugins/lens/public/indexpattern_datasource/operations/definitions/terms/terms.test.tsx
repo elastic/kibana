@@ -28,6 +28,7 @@ const defaultProps = {
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
+  operationDefinitionMap: {},
 };
 
 describe('terms', () => {

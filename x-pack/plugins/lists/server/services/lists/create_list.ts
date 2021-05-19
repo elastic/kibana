@@ -13,7 +13,8 @@ import {
   MetaOrUndefined,
   Name,
   Type,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { Version } from '@kbn/securitysolution-io-ts-types';
 
 import { encodeHitVersion } from '../utils/encode_hit_version';
 import {
@@ -21,7 +22,6 @@ import {
   Immutable,
   ListSchema,
   SerializerOrUndefined,
-  Version,
 } from '../../../common/schemas';
 import { IndexEsListSchema } from '../../schemas/elastic_query';
 

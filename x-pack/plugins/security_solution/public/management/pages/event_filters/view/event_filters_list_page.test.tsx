@@ -140,5 +140,40 @@ describe('When on the Event Filters List Page', () => {
 
       expect(renderResult.getByTestId('eventFiltersContent-error').textContent).toEqual(' oh no');
     });
+
+    it('should show modal when delete is clicked on a card', async () => {
+      render();
+      await dataReceived();
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('exceptionsViewerDeleteBtn'));
+      });
+
+      expect(
+        renderResult.baseElement.querySelector('[data-test-subj="eventFilterDeleteModalHeader"]')
+      ).not.toBeNull();
+    });
+  });
+
+  describe('And search is dispatched', () => {
+    beforeEach(async () => {
+      act(() => {
+        history.push('/event_filters?filter=test');
+      });
+      renderResult = render();
+      await act(async () => {
+        await waitForAction('eventFiltersListPageDataChanged');
+      });
+    });
+
+    it('search bar is filled with query params', () => {
+      expect(renderResult.getByDisplayValue('test')).not.toBeNull();
+    });
+
+    it('search action is dispatched', async () => {
+      await act(async () => {
+        fireEvent.click(renderResult.getByTestId('searchButton'));
+        expect(await waitForAction('userChangedUrl')).not.toBeNull();
+      });
+    });
   });
 });
