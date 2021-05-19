@@ -85,7 +85,7 @@ const colorRulesOperatorsList: ColorRulesOperator[] = [
   {
     translateNameId: 'visTypeTimeseries.colorRules.emptyLabel',
     defaultName: 'empty',
-    method: 'eq',
+    method: 'isEqual',
     defaultValue: [],
   },
 ];
@@ -117,12 +117,12 @@ export class ColorRules extends Component<ColorRulesProps> {
   handleOperatorChange = (item: ColorRule) => {
     return (options: Array<EuiComboBoxOptionOption<string>>) => {
       const selectedOperator: ColorRulesOperator | void = colorRulesOperatorsList.find(
-        (operator) => options[0].value === operator.method
+        (operator) => options[0]?.value === operator.method
       );
       const value = (selectedOperator && selectedOperator.defaultValue) ?? null;
       collectionActions.handleChange(this.props, {
         ...item,
-        operator: options[0].value,
+        operator: options[0]?.value,
         value,
       });
     };

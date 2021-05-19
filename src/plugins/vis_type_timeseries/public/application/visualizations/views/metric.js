@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import reactcss from 'reactcss';
 
-import { getLastValueOrZero } from '../../../../common/get_last_value';
+import { getLastValueOrEmpty } from '../../../../common/get_last_value';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 
 export class Metric extends Component {
@@ -58,7 +58,7 @@ export class Metric extends Component {
     const { metric, secondary } = this.props;
     const { scale, translateX, translateY } = this.state;
     const primaryFormatter = (metric && (metric.tickFormatter || metric.formatter)) || ((n) => n);
-    const primaryValue = primaryFormatter(getLastValueOrZero(metric && metric.data));
+    const primaryValue = primaryFormatter(getLastValueOrEmpty(metric && metric.data));
     
     const styles = reactcss(
       {
@@ -91,7 +91,7 @@ export class Metric extends Component {
     let secondarySnippet;
     if (secondary) {
       const secondaryFormatter = secondary.formatter || ((n) => n);
-      const secondaryValue = secondaryFormatter(getLastValueOrZero(secondary.data));
+      const secondaryValue = secondaryFormatter(getLastValueOrEmpty(secondary.data));
       if (secondary.color) styles.secondary_value.color = secondary.color;
       let secondaryLabel;
       if (secondary.label) {
@@ -121,7 +121,6 @@ export class Metric extends Component {
     if (this.props.reversed) {
       className += ' tvbVisMetric--reversed';
     }
-
     return (
       <div className={className} style={styles.container}>
         <div ref={(el) => (this.resize = el)} className="tvbVisMetric__resize">

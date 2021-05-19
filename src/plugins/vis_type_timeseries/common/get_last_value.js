@@ -9,6 +9,8 @@
 import { isArray, last } from 'lodash';
 
 export const DEFAULT_VALUE = '-';
+export const EMPTY_VALUE = [];
+export const DISPLAY_EMPTY_VALUE = DEFAULT_VALUE;
 
 const extractValue = (data) => (data && data[1]) ?? null;
 
@@ -25,3 +27,5 @@ export const getLastValueOrDefault = (data, defaultValue = DEFAULT_VALUE) => {
 };
 
 export const getLastValueOrZero = (data) => getLastValueOrDefault(data, 0);
+
+export const getLastValueOrEmpty = (data) => getLastValueOrDefault(data, EMPTY_VALUE);
