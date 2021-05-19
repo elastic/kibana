@@ -262,6 +262,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * Operations can be used as middleware for other operations, hence not shown in the panel UI
    */
   hidden?: boolean;
+  documentation?: {
+    description: JSX.Element;
+    section: 'elasticsearch' | 'calculation';
+  };
 }
 
 interface BaseBuildColumnArgs {

@@ -5,56 +5,127 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopoverTitle,
   EuiText,
-  EuiSelectable,
+  EuiListGroupItem,
   EuiSelectableOption,
+  EuiListGroup,
+  EuiHorizontalRule,
+  EuiSpacer,
 } from '@elastic/eui';
 import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { GenericOperationDefinition, ParamEditorProps } from '../../index';
+import { GenericOperationDefinition } from '../../index';
 import { IndexPattern } from '../../../../types';
 import { tinymathFunctions } from '../util';
 import { getPossibleFunctions } from './math_completion';
 
-import { FormulaIndexPatternColumn } from '../formula';
-
 function FormulaHelp({
   indexPattern,
   operationDefinitionMap,
+  isFullscreen,
 }: {
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
+  isFullscreen: boolean;
 }) {
   const [selectedFunction, setSelectedFunction] = useState<string | undefined>();
+  const scrollTargets = useRef<Record<string, HTMLDivElement>>({});
+
+  useEffect(() => {
+    if (selectedFunction && scrollTargets.current[selectedFunction]) {
+      scrollTargets.current[selectedFunction].scrollIntoView();
+    }
+  }, [selectedFunction]);
 
   const helpItems: Array<EuiSelectableOption & { description?: JSX.Element }> = [];
 
-  helpItems.push({ label: 'Math', isGroupLabel: true });
+  helpItems.push({
+    label: i18n.translate('xpack.lens.formulaDocumentation.mathSection', {
+      defaultMessage: 'Math',
+    }),
+    isGroupLabel: true,
+    description: (
+      <EuiText>
+        {i18n.translate('xpack.lens.formulaDocumentation.mathSectionDescription', {
+          defaultMessage:
+            'These functions will be executed for reach row of the resulting table using single values from the same row calculated using other functions.',
+        })}
+      </EuiText>
+    ),
+  });
 
   helpItems.push(
     ...getPossibleFunctions(indexPattern)
       .filter((key) => key in tinymathFunctions)
+      .sort()
       .map((key) => ({
         label: `${key}`,
         description: <Markdown markdown={tinymathFunctions[key].help} />,
-        checked: selectedFunction === key ? ('on' as const) : undefined,
       }))
   );
 
-  helpItems.push({ label: 'Elasticsearch', isGroupLabel: true });
+  helpItems.push({
+    label: i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSection', {
+      defaultMessage: 'Elasticsearch',
+    }),
+    isGroupLabel: true,
+    description: (
+      <EuiText>
+        {i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSectionDescription', {
+          defaultMessage:
+            'These functions will be executed on the raw documents for each row of the resulting table, aggregating all documents matching the break down dimensions into a single value.',
+        })}
+      </EuiText>
+    ),
+  });
 
   // Es aggs
   helpItems.push(
     ...getPossibleFunctions(indexPattern)
-      .filter((key) => key in operationDefinitionMap)
+      .filter(
+        (key) =>
+          key in operationDefinitionMap &&
+          operationDefinitionMap[key].documentation?.section === 'elasticsearch'
+      )
+      .sort()
       .map((key) => ({
-        label: `${key}: ${operationDefinitionMap[key].displayName}`,
-        description: getHelpText(key, operationDefinitionMap),
+        label: key,
+        description: operationDefinitionMap[key].documentation?.description,
+      }))
+  );
+
+  helpItems.push({
+    label: i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSection', {
+      defaultMessage: 'Column-wise calculation',
+    }),
+    isGroupLabel: true,
+    description: (
+      <EuiText>
+        {i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSectionDescription', {
+          defaultMessage:
+            'These functions will be executed for reach row of the resulting table, using data from cells from other rows as well as the current value.',
+        })}
+      </EuiText>
+    ),
+  });
+
+  // Calculations aggs
+  helpItems.push(
+    ...getPossibleFunctions(indexPattern)
+      .filter(
+        (key) =>
+          key in operationDefinitionMap &&
+          operationDefinitionMap[key].documentation?.section === 'calculation'
+      )
+      .sort()
+      .map((key) => ({
+        label: key,
+        description: operationDefinitionMap[key].documentation?.description,
         checked:
           selectedFunction === `${key}: ${operationDefinitionMap[key].displayName}`
             ? ('on' as const)
@@ -65,42 +136,49 @@ function FormulaHelp({
   return (
     <>
       <EuiPopoverTitle className="lnsFormula__docsHeader" paddingSize="s">
-        Formula reference
+        {i18n.translate('xpack.lens.formulaDocumentation.header', {
+          defaultMessage: 'Formula reference',
+        })}
       </EuiPopoverTitle>
 
       <EuiFlexGroup className="lnsFormula__docsContent" gutterSize="none" responsive={false}>
         <EuiFlexItem className="lnsFormula__docsNav" grow={1}>
-          <EuiSelectable
-            height="full"
-            options={helpItems}
-            singleSelection={true}
-            searchable
-            onChange={(newOptions) => {
-              const chosenType = newOptions.find(({ checked }) => checked === 'on')!;
-              if (!chosenType) {
-                setSelectedFunction(undefined);
+          <EuiListGroup>
+            {helpItems.map((helpItem) => {
+              if (helpItem.isGroupLabel) {
+                return (
+                  <EuiListGroupItem
+                    key={helpItem.label}
+                    label={helpItem.label}
+                    size="m"
+                    color="text"
+                    onClick={() => {
+                      setSelectedFunction(helpItem.label);
+                    }}
+                  />
+                );
               } else {
-                setSelectedFunction(chosenType.label);
+                return (
+                  <EuiListGroupItem
+                    key={helpItem.label}
+                    label={helpItem.label}
+                    size="s"
+                    color="text"
+                    onClick={() => {
+                      setSelectedFunction(helpItem.label);
+                    }}
+                  />
+                );
               }
-            }}
-          >
-            {(list, search) => (
-              <>
-                {search}
-                {list}
-              </>
-            )}
-          </EuiSelectable>
+            })}
+          </EuiListGroup>
         </EuiFlexItem>
 
         <EuiFlexItem className="lnsFormula__docsText" grow={2}>
           <EuiText size="s">
-            {selectedFunction ? (
-              helpItems.find(({ label }) => label === selectedFunction)?.description
-            ) : (
-              <Markdown
-                markdown={i18n.translate('xpack.lens.formulaDocumentation', {
-                  defaultMessage: `
+            <Markdown
+              markdown={i18n.translate('xpack.lens.formulaDocumentation', {
+                defaultMessage: `
 ## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
@@ -131,15 +209,38 @@ queries. If your search has a single quote in it, use a backslash to escape, lik
 
 Math functions can take positional arguments, like pow(count(), 3) is the same as count() * count() * count()
 
-### Basic math
-
 Use the symbols +, -, /, and * to perform basic math.
                   `,
-                  description:
-                    'Text is in markdown. Do not translate function names or field names like sum(bytes)',
-                })}
-              />
-            )}
+                description:
+                  'Text is in markdown. Do not translate function names or field names like sum(bytes)',
+              })}
+            />
+            <EuiSpacer />
+            {helpItems.map((item, index) => {
+              return (
+                <div
+                  key={index}
+                  ref={(el) => {
+                    if (el) {
+                      scrollTargets.current[item.label] = el;
+                    }
+                  }}
+                >
+                  {item.isGroupLabel ? (
+                    <React.Fragment>
+                      <h2>{item.label}</h2>
+                      {item.description}
+                      <EuiSpacer />
+                    </React.Fragment>
+                  ) : (
+                    <React.Fragment>
+                      {item.description}
+                      {helpItems.length - 1 !== index && <EuiHorizontalRule />}
+                    </React.Fragment>
+                  )}
+                </div>
+              );
+            })}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -148,37 +249,3 @@ Use the symbols +, -, /, and * to perform basic math.
 }
 
 export const MemoizedFormulaHelp = React.memo(FormulaHelp);
-
-// TODO: i18n this whole thing, or move examples into the operation definitions with i18n
-function getHelpText(
-  type: string,
-  operationDefinitionMap: ParamEditorProps<FormulaIndexPatternColumn>['operationDefinitionMap']
-) {
-  const definition = operationDefinitionMap[type];
-
-  if (type === 'count') {
-    return (
-      <EuiText size="s">
-        <p>Example: count()</p>
-      </EuiText>
-    );
-  }
-
-  return (
-    <EuiText size="s">
-      {definition.input === 'field' ? <p>Example: {type}(bytes)</p> : null}
-      {definition.input === 'fullReference' && !('operationParams' in definition) ? (
-        <p>Example: {type}(sum(bytes))</p>
-      ) : null}
-
-      {'operationParams' in definition && definition.operationParams ? (
-        <p>
-          <p>
-            Example: {type}(sum(bytes),{' '}
-            {definition.operationParams.map((p) => `${p.name}=5`).join(', ')})
-          </p>
-        </p>
-      ) : null}
-    </EuiText>
-  );
-}

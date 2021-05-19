@@ -30,6 +30,12 @@
   padding: $euiSizeS;
 }
 
+.lnsFormula__editorFooter {
+  // make sure docs are rendered in front of monaco
+  z-index: 1;
+  background-color: $euiColorLightestShade;
+}
+
 .lnsFormula__editorHeaderGroup,
 .lnsFormula__editorFooterGroup {
   display: block; // Overrides EUI's styling of `display: flex` on `EuiFlexItem` components
@@ -65,6 +71,8 @@
 .lnsFormula__docs--inline {
   display: flex;
   flex-direction: column;
+  // make sure docs are rendered in front of monaco
+  z-index: 1;
 }
 
 .lnsFormula__docsContent {
@@ -84,6 +92,7 @@
 }
 
 .lnsFormula__docsNav {
+  @include euiYScroll;
   background: $euiColorLightestShade;
   padding: $euiSizeS;
 }

@@ -6,10 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
+import { Markdown } from '../../../../../../../src/plugins/kibana_react/public';
 
 import {
   getFormatFromPreviousColumn,
@@ -108,5 +110,29 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       label: ofName(field.displayName),
       sourceField: field.name,
     };
+  },
+  documentation: {
+    section: 'elasticsearch',
+    description: (
+      <Markdown
+        markdown={i18n.translate('xpack.lens.indexPattern.cardinality.documentation', {
+          defaultMessage: `
+### unique_count(field: string, [kql]?: string, [lucene]?: string)
+
+Calculates the number of unique values of a specified field. Works for number, string, date and boolean values.
+
+Example: Calculate the number of different products:
+\`\`\`
+unique_count(product.name)
+\`\`\`
+
+Example: Calculate the number of different products from the "clothes" group:
+\`\`\`
+unique_count(product.name, kql="product.group=clothes")
+\`\`\`
+      `,
+        })}
+      />
+    ),
   },
 };

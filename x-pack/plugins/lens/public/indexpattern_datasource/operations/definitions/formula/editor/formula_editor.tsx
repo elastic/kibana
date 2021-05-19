@@ -61,7 +61,7 @@ export function FormulaEditor({
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
   const [warnings, setWarnings] = useState<Array<{ severity: monaco.MarkerSeverity }>>([]);
-  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(isFullscreen);
   const editorModel = React.useRef<monaco.editor.ITextModel>(
     monaco.editor.createModel(text ?? '', LANGUAGE_ID)
   );
@@ -568,11 +568,16 @@ export function FormulaEditor({
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem className="lnsFormula__editorFooterGroup">
                   {isFullscreen ? (
-                    // TODO: Hook up the below `EuiLink` button so that it toggles the presence of the `.lnsFormula__docs--inline` element in fullscreen mode. Note that when docs are hidden, the `arrowDown` button should change to `arrowUp` and the label should change to `Show function reference`.
                     <EuiToolTip
-                      content={i18n.translate('xpack.lens.formula.editorHelpInlineHideToolTip', {
-                        defaultMessage: 'Hide function reference',
-                      })}
+                      content={
+                        isHelpOpen
+                          ? i18n.translate('xpack.lens.formula.editorHelpInlineHideToolTip', {
+                              defaultMessage: 'Hide function reference',
+                            })
+                          : i18n.translate('xpack.lens.formula.editorHelpInlineShowToolTip', {
+                              defaultMessage: 'Show function reference',
+                            })
+                      }
                       delay="long"
                       position="top"
                     >
@@ -582,9 +587,10 @@ export function FormulaEditor({
                         })}
                         className="lnsFormula__editorHelp lnsFormula__editorHelp--inline"
                         color="text"
+                        onClick={() => setIsHelpOpen(!isHelpOpen)}
                       >
                         <EuiIcon type="help" />
-                        <EuiIcon type="arrowDown" />
+                        <EuiIcon type={isHelpOpen ? 'arrowDown' : 'arrowUp'} />
                       </EuiLink>
                     </EuiToolTip>
                   ) : (
@@ -617,6 +623,7 @@ export function FormulaEditor({
                         }
                       >
                         <MemoizedFormulaHelp
+                          isFullscreen={isFullscreen}
                           indexPattern={indexPattern}
                           operationDefinitionMap={operationDefinitionMap}
                         />
@@ -651,9 +658,10 @@ export function FormulaEditor({
             </div>
           </div>
 
-          {isFullscreen ? (
+          {isFullscreen && isHelpOpen ? (
             <div className="lnsFormula__docs lnsFormula__docs--inline">
               <MemoizedFormulaHelp
+                isFullscreen={isFullscreen}
                 indexPattern={indexPattern}
                 operationDefinitionMap={operationDefinitionMap}
               />

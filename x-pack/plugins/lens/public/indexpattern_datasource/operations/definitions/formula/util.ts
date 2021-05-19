@@ -85,9 +85,20 @@ export const tinymathFunctions: Record<
       { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
     ],
     help: `
+### add(summand1: number, summand2: number) \`+\`
+Adds up two numbers.
 Also works with + symbol
-Example: ${'`count() + sum(bytes)`'}
-Example: ${'`add(count(), 5)`'}
+
+Example: Calculate the sum of two fields
+\`\`\`
+sum(price) + sum(tax)
+\`\`\`
+
+Example: Offset count by a static value
+
+\`\`\`
+add(count(), 5)
+\`\`\`
     `,
   },
   subtract: {
@@ -96,8 +107,14 @@ Example: ${'`add(count(), 5)`'}
       { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
     ],
     help: `
+### subtract(minuend: number, subtrahend: number) \`-\`
+Subtracts the first number from the second number.
 Also works with ${'`-`'} symbol
-Example: ${'`subtract(sum(bytes), avg(bytes))`'}
+
+Example: Calculate the range of a field
+\`\`\`
+subtract(max(bytes), min(bytes))
+\`\`\`
     `,
   },
   multiply: {
@@ -106,8 +123,19 @@ Example: ${'`subtract(sum(bytes), avg(bytes))`'}
       { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
     ],
     help: `
-Also works with ${'`*`'} symbol
-Example: ${'`multiply(sum(bytes), 2)`'}
+### multiply(factor1: number, factor2: number) \`*\`
+Multiplies two numbers.
+Also works with ${'`*`'} symbol.
+
+Example: Calculate price after current tax rate
+\`\`\`
+sum(bytes) * last_value(tax_rate)
+\`\`\`
+
+Example: Calculate price after constant tax rate
+\`\`\`
+multiply(sum(price), 1.2)
+\`\`\`
     `,
   },
   divide: {
@@ -116,8 +144,14 @@ Example: ${'`multiply(sum(bytes), 2)`'}
       { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
     ],
     help: `
+### divide(dividend: number, divisor: number) \`/\`
+Divides the first number by the second number.
 Also works with ${'`/`'} symbol
-Example: ${'`ceil(sum(bytes))`'}
+
+Example: Calculate profit margin 
+\`\`\`
+sum(profit) / sum(revenue)
+\`\`\`
     `,
   },
   abs: {
@@ -125,8 +159,10 @@ Example: ${'`ceil(sum(bytes))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-Absolute value
-Example: ${'`abs(sum(bytes))`'}
+### abs(value: number)
+Calculates absolute value. A negative value is multiplied by -1, a positive value stays the same.
+
+Example: Calculate average distance to sea level ${'`abs(average(altitude))`'}
     `,
   },
   cbrt: {
@@ -134,8 +170,13 @@ Example: ${'`abs(sum(bytes))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-Cube root of value
-Example: ${'`cbrt(sum(bytes))`'}
+### cbrt(value: number)
+Cube root of value.
+
+Example: Calculate side length from volume
+\`\`\`
+cbrt(last_value(volume))
+\`\`\`
     `,
   },
   ceil: {
@@ -143,8 +184,13 @@ Example: ${'`cbrt(sum(bytes))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-Ceiling of value, rounds up
-Example: ${'`ceil(sum(bytes))`'}
+### ceil(value: number)
+Ceiling of value, rounds up.
+
+Example: Round up price to the next dollar 
+\`\`\`
+ceil(sum(price))
+\`\`\`
     `,
   },
   clamp: {
@@ -154,17 +200,31 @@ Example: ${'`ceil(sum(bytes))`'}
       { name: i18n.translate('xpack.lens.formula.max', { defaultMessage: 'max' }) },
     ],
     help: `
-Limits the value from a minimum to maximum
-Example: ${'`ceil(sum(bytes))`'}
-    `,
+### clamp(value: number, minimum: number, maximum: number)
+Limits the value from a minimum to maximum.
+
+Example: Make sure to catch outliers
+\`\`\`
+clamp(
+  average(bytes),
+  percentile(bytes, percentile=5),
+  percentile(bytes, percentile=95)
+)
+\`\`\`
+`,
   },
   cube: {
     positionalArguments: [
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
-Limits the value from a minimum to maximum
-Example: ${'`ceil(sum(bytes))`'}
+### cube(value: number)
+Calculates the cube of a number.
+
+Example: Calculate volume from side length
+\`\`\`
+cube(last_value(length))
+\`\`\`
     `,
   },
   exp: {
@@ -172,8 +232,13 @@ Example: ${'`ceil(sum(bytes))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
+### exp(value: number)
 Raises <em>e</em> to the nth power.
-Example: ${'`exp(sum(bytes))`'}
+
+Example: Calculate the natural expontential function
+\`\`\`
+exp(last_value(duration))
+\`\`\`
     `,
   },
   fix: {
@@ -181,8 +246,13 @@ Example: ${'`exp(sum(bytes))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
+### fix(value: number)
 For positive values, takes the floor. For negative values, takes the ceiling.
-Example: ${'`fix(sum(bytes))`'}
+
+Example: Rounding towards zero
+\`\`\`
+fix(sum(profit))
+\`\`\`
     `,
   },
   floor: {
@@ -190,8 +260,13 @@ Example: ${'`fix(sum(bytes))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
+### floor(value: number)
 Round down to nearest integer value
-Example: ${'`floor(sum(bytes))`'}
+
+Example: Round down a price
+\`\`\`
+floor(sum(price))
+\`\`\`
     `,
   },
   log: {
@@ -203,9 +278,13 @@ Example: ${'`floor(sum(bytes))`'}
       },
     ],
     help: `
+### log(value: number, base?: number)
 Logarithm with optional base. The natural base <em>e</em> is used as default.
-Example: ${'`log(sum(bytes))`'}
-Example: ${'`log(sum(bytes), 2)`'}
+
+Example: Calculate number of bits required to store values
+\`\`\`
+log(max(price), 2)
+\`\`\`
     `,
   },
   // TODO: check if this is valid for Tinymath
@@ -227,20 +306,30 @@ Example: ${'`log(sum(bytes), 2)`'}
       },
     ],
     help: `
+### mod(value: number)
 Remainder after dividing the function by a number
-Example: ${'`mod(sum(bytes), 2)`'}
+
+Example: Calculate last three digits of a value
+\`\`\`
+mod(sum(price), 1000)
+\`\`\`
     `,
   },
   pow: {
     positionalArguments: [
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
       {
-        name: i18n.translate('xpack.lens.formula.base', { defaultMessage: 'base' }),
+        name: i18n.translate('xpack.lens.\\formula.base', { defaultMessage: 'base' }),
       },
     ],
     help: `
+### pow(value: number, power: number)
 Raises the value to a certain power. The second argument is required
-Example: ${'`pow(sum(bytes), 3)`'}
+
+Example: Calculate volume based on side length
+\`\`\`
+pow(last_value(length), 3)
+\`\`\`
     `,
   },
   round: {
@@ -252,9 +341,13 @@ Example: ${'`pow(sum(bytes), 3)`'}
       },
     ],
     help: `
+### round(value: number, digits: number = 0)
 Rounds to a specific number of decimal places, default of 0
-Example: ${'`round(sum(bytes))`'}
-Example: ${'`round(sum(bytes), 2)`'}
+
+Example: Round to the cent
+\`\`\`
+round(sum(price), 2)
+\`\`\`
     `,
   },
   sqrt: {
@@ -262,8 +355,13 @@ Example: ${'`round(sum(bytes), 2)`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
+### sqrt(value: number)
 Square root of a positive value only
-Example: ${'`sqrt(sum(bytes))`'}
+
+Example: Calculate side length based on area
+\`\`\`
+sqrt(last_value(area))
+\`\`\`
     `,
   },
   square: {
@@ -271,8 +369,13 @@ Example: ${'`sqrt(sum(bytes))`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
     ],
     help: `
+### square(value: number)
 Raise the value to the 2nd power
-Example: ${'`square(sum(bytes))`'}
+
+Example: Calculate area based on side length
+\`\`\`
+square(last_value(length))
+\`\`\`
     `,
   },
 };
