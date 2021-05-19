@@ -74,8 +74,8 @@ export const metricsVisDefinition = {
     showIndexSelection: false,
   },
   toExpressionAst,
-  getSupportedTriggers: (params: VisParams) => {
-    if (params.type === PANEL_TYPES.TIMESERIES) {
+  getSupportedTriggers: (params?: VisParams) => {
+    if (params?.type === PANEL_TYPES.TIMESERIES) {
       return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
     }
     return [];
