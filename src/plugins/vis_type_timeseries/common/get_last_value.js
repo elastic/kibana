@@ -26,6 +26,4 @@ export const getLastValueOrDefault = (data, defaultValue = DEFAULT_VALUE) => {
   return getLastValue(data) ?? defaultValue;
 };
 
-export const getLastValueOrZero = (data) => getLastValueOrDefault(data, 0);
-
 export const getLastValueOrEmpty = (data) => getLastValueOrDefault(data, EMPTY_VALUE);

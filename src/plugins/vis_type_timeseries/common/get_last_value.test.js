@@ -9,8 +9,9 @@
 import {
   getLastValue,
   getLastValueOrDefault,
-  getLastValueOrZero,
+  getLastValueOrEmpty,
   DEFAULT_VALUE,
+  EMPTY_VALUE,
 } from './get_last_value';
 
 describe('getLastValue(data)', () => {
@@ -84,22 +85,22 @@ describe('getLastValueOrDefault(data)', () => {
   });
 });
 
-describe('getLastValueOrZero(data)', () => {
-  test('should return 0', () => {
-    expect(getLastValueOrZero()).toBe(0);
+describe('getLastValueOrEmpty(data)', () => {
+  test('should return empty array', () => {
+    expect(getLastValueOrEmpty()).toBe(EMPTY_VALUE);
   });
 
   test('should return the last value', () => {
     const lastValue = 10;
     const data = [[1, lastValue]];
-    expect(getLastValueOrZero(data)).toBe(lastValue);
+    expect(getLastValueOrEmpty(data)).toBe(lastValue);
   });
 
-  test(`should return zero, if second array is empty or it's last element is null/undefined (default)`, () => {
+  test(`should return empty array, if second array is empty or it's last element is null/undefined (default)`, () => {
     let data = [[1, null]];
-    expect(getLastValueOrZero(data)).toBe(0);
+    expect(getLastValueOrEmpty(data)).toBe(EMPTY_VALUE);
 
     data = [[1, undefined]];
-    expect(getLastValueOrZero(data)).toBe(0);
+    expect(getLastValueOrEmpty(data)).toBe(EMPTY_VALUE);
   });
 });

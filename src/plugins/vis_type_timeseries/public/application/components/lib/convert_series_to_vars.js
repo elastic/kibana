@@ -8,7 +8,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import { getLastValueOrZero } from '../../../../common/get_last_value';
+import { getLastValueOrEmpty } from '../../../../common/get_last_value';
 import { emptyLabel } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
 import { labelDateFormatter } from './label_date_formatter';
@@ -28,7 +28,7 @@ export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig
           seriesModel.value_template,
           getConfig
         );
-        const lastValue = getLastValueOrZero(row.data);
+        const lastValue = getLastValueOrEmpty(row.data);
 
         const data = {
           last: {
