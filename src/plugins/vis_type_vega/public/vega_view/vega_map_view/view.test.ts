@@ -31,27 +31,29 @@ import { initVegaLayer, initTmsRasterLayer } from './layers';
 
 import { mapboxgl } from '@kbn/mapbox-gl';
 
-jest.mock('mapbox-gl/dist/mapbox-gl-csp', () => ({
-  setRTLTextPlugin: jest.fn(),
-  Map: jest.fn().mockImplementation(() => ({
-    getLayer: () => '',
-    removeLayer: jest.fn(),
-    once: (eventName: string, handler: Function) => handler(),
-    remove: () => jest.fn(),
-    getCanvas: () => ({ clientWidth: 512, clientHeight: 512 }),
-    getCenter: () => ({ lat: 20, lng: 20 }),
-    getZoom: () => 3,
-    addControl: jest.fn(),
-    addLayer: jest.fn(),
-    dragRotate: {
-      disable: jest.fn(),
-    },
-    touchZoomRotate: {
-      disableRotation: jest.fn(),
-    },
-  })),
-  MapboxOptions: jest.fn(),
-  NavigationControl: jest.fn(),
+jest.mock('@kbn/mapbox-gl', () => ({
+  mapboxgl: {
+    setRTLTextPlugin: jest.fn(),
+    Map: jest.fn().mockImplementation(() => ({
+      getLayer: () => '',
+      removeLayer: jest.fn(),
+      once: (eventName: string, handler: Function) => handler(),
+      remove: () => jest.fn(),
+      getCanvas: () => ({ clientWidth: 512, clientHeight: 512 }),
+      getCenter: () => ({ lat: 20, lng: 20 }),
+      getZoom: () => 3,
+      addControl: jest.fn(),
+      addLayer: jest.fn(),
+      dragRotate: {
+        disable: jest.fn(),
+      },
+      touchZoomRotate: {
+        disableRotation: jest.fn(),
+      },
+    })),
+    MapboxOptions: jest.fn(),
+    NavigationControl: jest.fn(),
+  },
 }));
 
 jest.mock('./layers', () => ({
