@@ -7,20 +7,48 @@
 
 import _ from 'lodash';
 
-import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
-import type { LicenseType } from '../../../../../licensing/server';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '../';
+import type { LicenseType } from '../../../licensing/server';
 import { subFeaturePrivilegeIterator } from './sub_feature_privilege_iterator';
 
-interface IteratorOptions {
+/**
+ * Options to control feature privilege iteration.
+ */
+export interface FeaturePrivilegeIteratorOptions {
+  /**
+   * Augment each privilege definition with its sub-feature privileges.
+   */
   augmentWithSubFeaturePrivileges: boolean;
+
+  /**
+   * The current license type. Controls which sub-features are returned, as they may have different license terms than the overall feature.
+   */
   licenseType: LicenseType;
+
+  /**
+   * Optional predicate to filter the returned set of privileges.
+   */
   predicate?: (privilegeId: string, privilege: FeatureKibanaPrivileges) => boolean;
 }
 
-export function* featurePrivilegeIterator(
+/**
+ * Utility for iterating through all privileges belonging to a specific feature.
+ * Iteration can be customized in several ways:
+ * - Filter privileges with a given predicate.
+ * - Augment privileges with their respective sub-feature privileges.
+ *
+ * @param feature the feature whose privileges to iterate through.
+ * @param options options to control iteration.
+ */
+export type FeaturePrivilegeIterator = (
   feature: KibanaFeature,
-  options: IteratorOptions
-): IterableIterator<{ privilegeId: string; privilege: FeatureKibanaPrivileges }> {
+  options: FeaturePrivilegeIteratorOptions
+) => IterableIterator<{ privilegeId: string; privilege: FeatureKibanaPrivileges }>;
+
+const featurePrivilegeIterator: FeaturePrivilegeIterator = function* featurePrivilegeIterator(
+  feature: KibanaFeature,
+  options: FeaturePrivilegeIteratorOptions
+) {
   for (const entry of Object.entries(feature.privileges ?? {})) {
     const [privilegeId, privilege] = entry;
 
@@ -37,7 +65,7 @@ export function* featurePrivilegeIterator(
       yield { privilegeId, privilege };
     }
   }
-}
+};
 
 function mergeWithSubFeatures(
   privilegeId: string,
@@ -112,3 +140,5 @@ function mergeArrays(input1: readonly string[] | undefined, input2: readonly str
   const second = input2 ?? [];
   return Array.from(new Set([...first, ...second]));
 }
+
+export { featurePrivilegeIterator };
