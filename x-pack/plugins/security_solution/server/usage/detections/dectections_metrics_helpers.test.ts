@@ -24,7 +24,7 @@ const createStubRule = (
   created_on: uuid(),
   updated_on: uuid(),
   alert_count_daily: alertCount,
-  cases_count_daily: caseCount,
+  cases_count_total: caseCount,
 });
 
 describe('Detections Usage and Metrics', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../features_tooltip/features_tooltip', () => ({
+jest.mock('./features_tooltip/features_tooltip', () => ({
   FeaturesTooltip: () => {
     return <div>mockFeaturesTooltip</div>;
   },
@@ -14,17 +14,24 @@ jest.mock('../features_tooltip/features_tooltip', () => ({
 import sinon from 'sinon';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
+import { Map as MbMap } from 'mapbox-gl';
 import { TooltipPopover } from './tooltip_popover';
 
 // mutable map state
-let mapCenter;
-let mockMbMapBounds;
+let mapCenter = [0, 0];
+
+const mockMbMapBounds = {
+  west: -180,
+  east: 180,
+  north: 90,
+  south: -90,
+};
 
 const layerId = 'tfi3f';
 
-const mockMbMapHandlers = {};
-const mockMBMap = {
-  project: (lonLatArray) => {
+const mockMbMapHandlers: { [key: string]: () => void } = {};
+const mockMBMap = ({
+  project: (lonLatArray: [number, number]) => {
     const lonDistanceFromCenter = Math.abs(lonLatArray[0] - mapCenter[0]);
     const latDistanceFromCenter = Math.abs(lonLatArray[1] - mapCenter[1]);
     return {
@@ -32,10 +39,10 @@ const mockMBMap = {
       y: latDistanceFromCenter * 100,
     };
   },
-  on: (eventName, callback) => {
+  on: (eventName: string, callback: () => void) => {
     mockMbMapHandlers[eventName] = callback;
   },
-  off: (eventName) => {
+  off: (eventName: string) => {
     delete mockMbMapHandlers[eventName];
   },
   getBounds: () => {
@@ -54,35 +61,34 @@ const mockMBMap = {
       },
     };
   },
-};
+} as unknown) as MbMap;
 
 const defaultProps = {
   mbMap: mockMBMap,
   closeTooltip: () => {},
-  layerList: [],
-  isDrawingFilter: false,
-  addFilters: () => {},
-  geoFields: [{}],
-  location: [-120, 30],
+  addFilters: async () => {},
+  location: [-120, 30] as [number, number],
   features: [
     {
       id: 1,
-      layerId: layerId,
-      geometry: {},
+      layerId,
+      mbProperties: {},
+      actions: [],
     },
   ],
   isLocked: false,
+  findLayerById: () => {
+    return undefined;
+  },
+  index: 0,
+  loadFeatureGeometry: () => {
+    return null;
+  },
 };
 
 describe('TooltipPopover', () => {
   beforeEach(() => {
     mapCenter = [0, 0];
-    mockMbMapBounds = {
-      west: -180,
-      east: 180,
-      north: 90,
-      south: -90,
-    };
   });
 
   describe('render', () => {

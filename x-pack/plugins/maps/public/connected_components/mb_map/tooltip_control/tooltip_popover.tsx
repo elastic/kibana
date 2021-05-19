@@ -5,24 +5,54 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import { LAT_INDEX, LON_INDEX } from '../../../../common/constants';
-import { FeaturesTooltip } from '../features_tooltip';
+import React, { Component, RefObject } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
+import { Map as MbMap } from 'mapbox-gl';
+import { GeoJsonProperties, Geometry } from 'geojson';
+import { Filter } from 'src/plugins/data/public';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { FeaturesTooltip } from './features_tooltip';
+import { LAT_INDEX, LON_INDEX, RawValue } from '../../../../common/constants';
+import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import { TooltipFeature } from '../../../../common/descriptor_types';
+import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
 
 const noop = () => {};
 
-export class TooltipPopover extends Component {
-  state = {
-    x: undefined,
-    y: undefined,
+interface Props {
+  addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
+  closeTooltip: () => void;
+  features: TooltipFeature[];
+  findLayerById: (layerId: string) => IVectorLayer | undefined;
+  getActionContext?: () => ActionExecutionContext;
+  getFilterActions?: () => Promise<Action[]>;
+  index: number;
+  isLocked: boolean;
+  loadFeatureGeometry: ({
+    layerId,
+    featureId,
+  }: {
+    layerId: string;
+    featureId?: string | number;
+  }) => Geometry | null;
+  location: [number, number];
+  mbMap: MbMap;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
+  renderTooltipContent?: RenderToolTipContent;
+}
+
+interface State {
+  x?: number;
+  y?: number;
+  isVisible: boolean;
+}
+
+export class TooltipPopover extends Component<Props, State> {
+  private readonly _popoverRef: RefObject<EuiPopover> = React.createRef();
+
+  state: State = {
     isVisible: true,
   };
-
-  constructor(props) {
-    super(props);
-    this._popoverRef = React.createRef();
-  }
 
   componentDidMount() {
     this._updatePopoverPosition();
@@ -55,7 +85,15 @@ export class TooltipPopover extends Component {
     });
   };
 
-  _loadFeatureProperties = async ({ layerId, featureId, mbProperties }) => {
+  _loadFeatureProperties = async ({
+    layerId,
+    featureId,
+    mbProperties,
+  }: {
+    layerId: string;
+    featureId?: string | number;
+    mbProperties?: GeoJsonProperties;
+  }) => {
     const tooltipLayer = this.props.findLayerById(layerId);
     if (!tooltipLayer) {
       return [];
@@ -67,10 +105,10 @@ export class TooltipPopover extends Component {
     }
 
     const properties = targetFeature ? targetFeature.properties : mbProperties;
-    return await tooltipLayer.getPropertiesForTooltip(properties);
+    return await tooltipLayer.getPropertiesForTooltip(properties ? properties : {});
   };
 
-  _getLayerName = async (layerId) => {
+  _getLayerName = async (layerId: string) => {
     const layer = this.props.findLayerById(layerId);
     if (!layer) {
       return null;
@@ -89,6 +127,7 @@ export class TooltipPopover extends Component {
       features: this.props.features,
       isLocked: this.props.isLocked,
       loadFeatureProperties: this._loadFeatureProperties,
+      loadFeatureGeometry: this.props.loadFeatureGeometry,
       getLayerName: this._getLayerName,
     };
 
@@ -104,7 +143,7 @@ export class TooltipPopover extends Component {
   };
 
   render() {
-    if (!this.state.isVisible) {
+    if (!this.state.isVisible || this.state.x === undefined || this.state.y === undefined) {
       return null;
     }
 

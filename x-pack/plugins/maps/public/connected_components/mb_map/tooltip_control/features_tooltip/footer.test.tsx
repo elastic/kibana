@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Footer } from './footer';
-import { ILayer } from '../../../classes/layers/layer';
+import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 const defaultProps = {
   isLocked: false,
@@ -20,7 +20,7 @@ const defaultProps = {
       getId() {
         return id;
       },
-    } as unknown) as ILayer;
+    } as unknown) as IVectorLayer;
   },
   setCurrentFeature: () => {},
 };
