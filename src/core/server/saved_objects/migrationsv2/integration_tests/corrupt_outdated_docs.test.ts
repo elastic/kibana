@@ -9,15 +9,12 @@
 import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
-import json5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
-import { search } from 'superagent';
 
 const logFilePath = Path.join(__dirname, 'migration_test_corrupt_docs_kibana.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
-const asyncReadFile = Util.promisify(Fs.readFile);
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
