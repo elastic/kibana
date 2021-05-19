@@ -29,18 +29,17 @@ import type {
   ExceptionListType,
   OsTypeArray,
   OsType,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  ExceptionBuilder,
-} from '../../../../../public/shared_imports';
+import { ExceptionBuilder } from '../../../../../public/shared_imports';
 
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
@@ -64,7 +63,7 @@ import {
   filterIndexPatterns,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
+import { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 

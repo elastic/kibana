@@ -14,3 +14,21 @@
  * @deprecated Use the ENDPOINT_LIST_ID from the kbn-securitysolution-constants.
  */
 export const ENDPOINT_LIST_ID = 'endpoint_list';
+
+/**
+ * Description of trusted apps agnostic list
+ * @deprecated Use the ENDPOINT_LIST_ID from the kbn-securitysolution-constants.
+ */
+export const ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION = 'Endpoint Security Trusted Apps List';
+
+/**
+ * ID of trusted apps agnostic list
+ * @deprecated Use the ENDPOINT_LIST_ID from the kbn-securitysolution-constants.
+ */
+export const ENDPOINT_TRUSTED_APPS_LIST_ID = 'endpoint_trusted_apps';
+
+/**
+ * Name of trusted apps agnostic list
+ * @deprecated Use the ENDPOINT_LIST_ID from the kbn-securitysolution-constants.
+ */
+export const ENDPOINT_TRUSTED_APPS_LIST_NAME = 'Endpoint Security Trusted Apps List';
