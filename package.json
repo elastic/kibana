@@ -140,6 +140,7 @@
     "@hapi/oppsy": "^2.1.2",
     "@hapi/podium": "^3.4.3",
     "@hapi/vision": "^5.5.4",
+    "@hapi/wreck": "^16.0.1",
     "@kbn/babel-code-parser": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/config-schema": "1.0.0",
@@ -279,7 +280,6 @@
     "webpack": "4.26.1",
     "webpack-merge": "4.1.4",
     "whatwg-fetch": "^3.0.0",
-    "wreck": "^14.2.0",
     "x-pack": "6.8.16",
     "yauzl": "2.7.0"
   },

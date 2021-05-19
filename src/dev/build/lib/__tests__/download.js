@@ -24,7 +24,7 @@ import { readFileSync } from 'fs';
 import del from 'del';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import Wreck from 'wreck';
+import Wreck from '@hapi/wreck';
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { download } from '../download';

@@ -19,7 +19,7 @@
 
 import { resolve as resolveUrl } from 'url';
 
-import Wreck from 'wreck';
+import Wreck from '@hapi/wreck';
 
 const get = async (url) => {
   const { payload } = await Wreck.get(url, { json: 'force' });

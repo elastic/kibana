@@ -22,7 +22,7 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import { toArray } from 'rxjs/operators';
-import wreck from 'wreck';
+import wreck from '@hapi/wreck';
 
 import { deleteIndex } from './delete_index';
 import { collectUiExports } from '../../../ui/ui_exports';
@@ -124,7 +124,12 @@ export async function isSpacesEnabled({ kibanaUrl }) {
 
 async function getKibanaStatuses({ kibanaUrl }) {
   try {
-    const { payload } = await wreck.get('/api/status', {
+    // Workaround for breaking change introduced in Wreck v15 regarding URL parsing (see https://github.com/hapijs/wreck/issues/244)
+    if (!kibanaUrl.endsWith('/')) {
+      kibanaUrl += '/';
+    }
+
+    const { payload } = await wreck.get('api/status', {
       baseUrl: kibanaUrl,
       json: true
     });

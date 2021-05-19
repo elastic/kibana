@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import Wreck from 'wreck';
+import Wreck from '@hapi/wreck';
 import expect from 'expect.js';
 import { Server } from 'hapi';
 
