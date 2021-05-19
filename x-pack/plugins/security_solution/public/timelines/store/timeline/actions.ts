@@ -40,6 +40,8 @@ export const setEventsLoading = TGridActions.setEventsLoading;
 export const clearEventsLoading = TGridActions.clearEventsLoading;
 export const setEventsDeleted = TGridActions.setEventsDeleted;
 export const clearEventsDeleted = TGridActions.clearEventsDeleted;
+export const initializeTgrid = TGridActions.initializeTgrid;
+export const setSelectAll = TGridActions.setSelectAll;
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 

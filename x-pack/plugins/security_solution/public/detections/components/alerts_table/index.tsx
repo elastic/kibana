@@ -103,7 +103,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();
-  const { initializeTimeline, setSelectAll } = useManageTimeline();
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -190,14 +189,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
   useEffect(() => {
     if (isSelectAllChecked) {
-      setSelectAll({
+      timelineActions.setSelectAll({
         id: timelineId,
         selectAll: false,
       });
     } else {
       setShowClearSelectionAction(false);
     }
-  }, [isSelectAllChecked, setSelectAll, timelineId]);
+  }, [isSelectAllChecked, timelineId]);
 
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
@@ -213,23 +212,23 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
     clearSelected!({ id: timelineId });
-    setSelectAll({
+    timelineActions.setSelectAll({
       id: timelineId,
       selectAll: false,
     });
     setShowClearSelectionAction(false);
-  }, [clearSelected, setSelectAll, setShowClearSelectionAction, timelineId]);
+  }, [clearSelected, setShowClearSelectionAction, timelineId]);
 
   // Callback for selecting all events on all pages from utility bar
   // Dispatches to stateful_body's selectAll via TimelineTypeContext props
   // as scope of response data required to actually set selectedEvents
   const selectAllOnAllPagesCallback = useCallback(() => {
-    setSelectAll({
+    timelineActions.setSelectAll({
       id: timelineId,
       selectAll: true,
     });
     setShowClearSelectionAction(true);
-  }, [setSelectAll, setShowClearSelectionAction, timelineId]);
+  }, [setShowClearSelectionAction, timelineId]);
 
   const updateAlertsStatusCallback: UpdateAlertsStatusCallback = useCallback(
     async (
@@ -310,7 +309,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const { filterManager } = useKibana().services.data.query;
 
   useEffect(() => {
-    initializeTimeline({
+    timelineActions.initializeTgrid({
       defaultModel: {
         ...alertsDefaultModel,
         columns,
@@ -324,8 +323,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       queryFields: requiredFieldsForActions,
       title: '',
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [filterManage, timelineId]);
 
   const headerFilterGroup = useMemo(
     () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,

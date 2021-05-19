@@ -19,7 +19,6 @@ import { droppableTimelineProvidersPrefix } from '../../../../common/components/
 
 import { Empty } from './empty';
 import { Providers } from './providers';
-import { useManageTimeline } from '../../manage_timeline';
 import { timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 
@@ -87,7 +86,6 @@ const getDroppableId = (id: string): string =>
  */
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const { browserFields } = useSourcererScope(SourcererScopeName.timeline);
-  const { getManageTimelineById } = useManageTimeline();
   const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
     getManageTimelineById,
     timelineId,

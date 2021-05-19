@@ -12,6 +12,7 @@ import {
   TimelineExpandedDetail,
   SortColumnTimeline,
 } from '../../../../security_solution/common/types/timeline';
+import { TimelineModel } from '../../../../security_solution/public/';
 
 export interface TGridModel {
   /** The columns displayed in the timeline */
@@ -45,3 +46,48 @@ export interface TGridModel {
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
 }
+
+export type SubsetTimelineModel = Readonly<
+  Pick<
+    TimelineModel,
+    | 'activeTab'
+    | 'prevActiveTab'
+    | 'columns'
+    | 'dataProviders'
+    | 'deletedEventIds'
+    | 'description'
+    | 'eventType'
+    | 'eventIdToNoteIds'
+    | 'excludedRowRendererIds'
+    | 'expandedDetail'
+    | 'graphEventId'
+    | 'highlightedDropAndProviderId'
+    | 'historyIds'
+    | 'indexNames'
+    | 'isFavorite'
+    | 'isLive'
+    | 'isSelectAllChecked'
+    | 'itemsPerPage'
+    | 'itemsPerPageOptions'
+    | 'kqlMode'
+    | 'kqlQuery'
+    | 'title'
+    | 'timelineType'
+    | 'templateTimelineId'
+    | 'templateTimelineVersion'
+    | 'loadingEventIds'
+    | 'noteIds'
+    | 'pinnedEventIds'
+    | 'pinnedEventsSaveObject'
+    | 'dateRange'
+    | 'selectedEventIds'
+    | 'show'
+    | 'showCheckboxes'
+    | 'sort'
+    | 'isSaving'
+    | 'isLoading'
+    | 'savedObjectId'
+    | 'version'
+    | 'status'
+  >
+>;

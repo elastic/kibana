@@ -6,6 +6,7 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
+import { FilterManager } from '../../../../../../src/plugins/data/public';
 import { TimelineNonEcsData } from '../../../../security_solution/common/search_strategy';
 import {
   ColumnHeaderOptions,
@@ -13,6 +14,7 @@ import {
   TimelineExpandedDetailType,
   TimelineTabs,
 } from '../../../../security_solution/common/types/timeline';
+import { ColumnHeaderOptions, TGridModel, SubsetTimelineModel } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
 
@@ -91,3 +93,20 @@ export const setEventsDeleted = actionCreator<{
 export const clearEventsDeleted = actionCreator<{
   id: string;
 }>('CLEAR_TIMELINE_EVENTS_DELETED');
+
+export const initializeTgrid = actionCreator<{
+  id: string;
+  documentType: string;
+  defaultModel: SubsetTimelineModel;
+  filterManager?: FilterManager;
+  footerText: string;
+  isLoading: boolean;
+  loadingText: string;
+  queryFields: string[];
+  selectAll: boolean;
+  title: string;
+  unit?: string;
+}>('INITIALIZE_TGRID');
+
+export const setIsLoading = actionCreator<{ isTgridLoading: boolean }>('SET_IS_LOADING');
+export const setSelectAll = actionCreator<{ isSelectAllSelected: boolean }>('SET_SELECT_ALL');
