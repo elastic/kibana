@@ -44,7 +44,7 @@ export const mapColumn: ExpressionFunctionDefinition<
       types: ['string', 'null'],
       help: i18n.translate('expressions.functions.mapColumn.args.idHelpText', {
         defaultMessage:
-          'An optional id of the resulting column. When no id is provided, the id will be looked up from the existing column and default to the name.',
+          'An optional id of the resulting column. When no id is provided, the id will be looked up from the existing column by the provided name argument. If no column with this name exists yet, a new column with this name and an identical id will be added to the table.',
       }),
       required: false,
       default: null,
@@ -94,7 +94,6 @@ export const mapColumn: ExpressionFunctionDefinition<
       }
       return name === args.name;
     });
-    const columnLength = columns.length;
     const columnId =
       existingColumnIndex === -1 ? args.id ?? args.name : columns[existingColumnIndex].id;
 
@@ -122,7 +121,7 @@ export const mapColumn: ExpressionFunctionDefinition<
       }
 
       if (existingColumnIndex === -1) {
-        columns[columnLength] = newColumn;
+        columns.push(newColumn);
       } else {
         columns[existingColumnIndex] = newColumn;
       }

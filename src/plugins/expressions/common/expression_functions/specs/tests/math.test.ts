@@ -36,6 +36,21 @@ describe('math', () => {
     expect(fn(testTable, { expression: 'max(price)' })).toBe(605);
   });
 
+  it('does not use the name for math', () => {
+    expect(() => fn(testTable, { expression: 'unique("in_stock label")' })).toThrow(
+      'Unknown variable'
+    );
+    expect(() => fn(testTable, { expression: 'sum("quantity label")' })).toThrow(
+      'Unknown variable'
+    );
+    expect(() => fn(testTable, { expression: 'mean("price label")' })).toThrow('Unknown variable');
+    expect(() => fn(testTable, { expression: 'min("price label")' })).toThrow('Unknown variable');
+    expect(() => fn(testTable, { expression: 'median("quantity label")' })).toThrow(
+      'Unknown variable'
+    );
+    expect(() => fn(testTable, { expression: 'max("price label")' })).toThrow('Unknown variable');
+  });
+
   describe('args', () => {
     describe('expression', () => {
       it('sets the math expression to be evaluted', () => {
