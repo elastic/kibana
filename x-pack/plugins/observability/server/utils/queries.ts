@@ -8,7 +8,7 @@
 import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { esKuery } from '../../../../../src/plugins/data/server';
 
-export function rangeQuery(start: number, end: number, field = '@timestamp'): QueryContainer[] {
+export function rangeQuery(start?: number, end?: number, field = '@timestamp'): QueryContainer[] {
   return [
     {
       range: {

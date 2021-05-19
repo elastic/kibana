@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line no-restricted-imports
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty } from 'lodash';
 import { SourcererModel, SourcererScopeName } from './model';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 

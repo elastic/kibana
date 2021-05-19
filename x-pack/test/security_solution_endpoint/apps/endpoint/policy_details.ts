@@ -285,7 +285,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
@@ -446,7 +446,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
@@ -604,7 +604,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
@@ -627,7 +627,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('when on Ingest Policy Edit Package Policy page', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/100296
+    describe.skip('when on Ingest Policy Edit Package Policy page', async () => {
       let policyInfo: PolicyTestResourceInfo;
       beforeEach(async () => {
         // Create a policy and navigate to Ingest app
@@ -636,6 +637,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id,
           policyInfo.packagePolicy.id
         );
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
       afterEach(async () => {
         if (policyInfo) {

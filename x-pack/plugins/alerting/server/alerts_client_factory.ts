@@ -13,17 +13,13 @@ import {
 } from 'src/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
 import { AlertsClient } from './alerts_client';
-import { ALERTS_FEATURE_ID } from '../common';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
-import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
-import { AlertsAuthorization } from './authorization/alerts_authorization';
-import { AlertsAuthorizationAuditLogger } from './authorization/audit_logger';
-import { Space } from '../../spaces/server';
 import { IEventLogClientService } from '../../../plugins/event_log/server';
-
+import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import { ALERTS_FEATURE_ID } from '../common';
 export interface AlertsClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -31,13 +27,12 @@ export interface AlertsClientFactoryOpts {
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
   getSpaceId: (request: KibanaRequest) => string | undefined;
-  getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actions: ActionsPluginStartContract;
-  features: FeaturesPluginStart;
   eventLog: IEventLogClientService;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  authorization: AlertingAuthorizationClientFactory;
 }
 
 export class AlertsClientFactory {
@@ -48,13 +43,12 @@ export class AlertsClientFactory {
   private securityPluginSetup?: SecurityPluginSetup;
   private securityPluginStart?: SecurityPluginStart;
   private getSpaceId!: (request: KibanaRequest) => string | undefined;
-  private getSpace!: (request: KibanaRequest) => Promise<Space | undefined>;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
   private actions!: ActionsPluginStartContract;
-  private features!: FeaturesPluginStart;
   private eventLog!: IEventLogClientService;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
+  private authorization!: AlertingAuthorizationClientFactory;
 
   public initialize(options: AlertsClientFactoryOpts) {
     if (this.isInitialized) {
@@ -63,7 +57,6 @@ export class AlertsClientFactory {
     this.isInitialized = true;
     this.logger = options.logger;
     this.getSpaceId = options.getSpaceId;
-    this.getSpace = options.getSpace;
     this.taskManager = options.taskManager;
     this.alertTypeRegistry = options.alertTypeRegistry;
     this.securityPluginSetup = options.securityPluginSetup;
@@ -71,24 +64,18 @@ export class AlertsClientFactory {
     this.spaceIdToNamespace = options.spaceIdToNamespace;
     this.encryptedSavedObjectsClient = options.encryptedSavedObjectsClient;
     this.actions = options.actions;
-    this.features = options.features;
     this.eventLog = options.eventLog;
     this.kibanaVersion = options.kibanaVersion;
+    this.authorization = options.authorization;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): AlertsClient {
-    const { securityPluginSetup, securityPluginStart, actions, eventLog, features } = this;
+    const { securityPluginSetup, securityPluginStart, actions, eventLog } = this;
     const spaceId = this.getSpaceId(request);
-    const authorization = new AlertsAuthorization({
-      authorization: securityPluginStart?.authz,
-      request,
-      getSpace: this.getSpace,
-      alertTypeRegistry: this.alertTypeRegistry,
-      features: features!,
-      auditLogger: new AlertsAuthorizationAuditLogger(
-        securityPluginSetup?.audit.getLogger(ALERTS_FEATURE_ID)
-      ),
-    });
+
+    if (!this.authorization) {
+      throw new Error('AlertingAuthorizationClientFactory is not defined');
+    }
 
     return new AlertsClient({
       spaceId,
@@ -100,7 +87,7 @@ export class AlertsClientFactory {
         excludedWrappers: ['security'],
         includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
       }),
-      authorization,
+      authorization: this.authorization.create(request, [ALERTS_FEATURE_ID]),
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
       namespace: this.spaceIdToNamespace(spaceId),
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,

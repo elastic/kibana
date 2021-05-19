@@ -22,6 +22,11 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import type {
+  ExceptionListType,
+  OsTypeArray,
+  OsType,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -33,9 +38,9 @@ import { useRuleAsync } from '../../../../detections/containers/detection_engine
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
-  ExceptionListType,
   ExceptionBuilder,
 } from '../../../../../public/shared_imports';
+
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
 import { useKibana } from '../../../lib/kibana';
@@ -53,7 +58,6 @@ import {
 import { Loader } from '../../loader';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
-import { OsTypeArray, OsType } from '../../../../../../lists/common/schemas';
 
 interface EditExceptionModalProps {
   ruleName: string;

@@ -32,3 +32,6 @@ export type Threat = t.TypeOf<typeof threat>;
 
 export const threats = t.array(threat);
 export type Threats = t.TypeOf<typeof threats>;
+
+export const threatsOrUndefined = t.union([threats, t.undefined]);
+export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
