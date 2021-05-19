@@ -103,6 +103,7 @@ exports[`LayerPanel is rendered 1`] = `
               "supportsElasticsearchFilters": [Function],
             }
           }
+          supportsFitToBounds={false}
         />
         <div>
           mockSourceSettings

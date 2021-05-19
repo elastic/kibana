@@ -72,6 +72,17 @@ describe('SchemaBaseLogic', () => {
 
   describe('listeners', () => {
     describe('loadSchema', () => {
+      it('sets dataLoading to true', () => {
+        mount({ dataLoading: false });
+
+        SchemaBaseLogic.actions.loadSchema();
+
+        expect(SchemaBaseLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          dataLoading: true,
+        });
+      });
+
       it('should make an API call and then set schema state', async () => {
         http.get.mockReturnValueOnce(Promise.resolve(MOCK_RESPONSE));
         mount();

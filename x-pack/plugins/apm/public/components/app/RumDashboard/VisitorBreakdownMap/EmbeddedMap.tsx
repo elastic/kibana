@@ -109,7 +109,6 @@ export function EmbeddedMapComponent() {
     isLocked,
     getLayerName,
     loadFeatureProperties,
-    loadFeatureGeometry,
   }: RenderTooltipContentParams) {
     const props = {
       addFilters,
@@ -117,7 +116,6 @@ export function EmbeddedMapComponent() {
       isLocked,
       getLayerName,
       loadFeatureProperties,
-      loadFeatureGeometry,
     };
 
     return <MapToolTip {...props} features={features} />;
