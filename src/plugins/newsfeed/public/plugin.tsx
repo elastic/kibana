@@ -56,7 +56,8 @@ export class NewsfeedPublicPlugin
             pathTemplate: `/${endpoint}/v{VERSION}.json`,
           },
         });
-        return this.createNewsfeedApi(core, config, endpoint);
+        const { fetchResults$ } = this.createNewsfeedApi(core, config, endpoint);
+        return fetchResults$;
       },
     };
   }
