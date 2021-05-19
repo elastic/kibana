@@ -10,12 +10,14 @@ import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';
+import { createEsQuery } from '../lib';
 
 export interface GetMonitorStatusParams {
   filters?: JsonObject;
   locations: string[];
   numTimes: number;
   timerange: { from: string; to: string };
+  status?: string;
 }
 
 export interface GetMonitorStatusResult {
@@ -43,21 +45,26 @@ export type AfterKey = Record<string, string | number | null> | undefined;
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
-> = async ({ uptimeEsClient, filters, locations, numTimes, timerange: { from, to } }) => {
+> = async ({
+  uptimeEsClient,
+  filters,
+  locations,
+  numTimes,
+  timerange: { from, to },
+  status = 'down',
+}) => {
   let afterKey: AfterKey;
-
-  const STATUS = 'down';
   let monitors: any = [];
   do {
     // today this value is hardcoded. In the future we may support
     // multiple status types for this alert, and this will become a parameter
-    const esParams = {
+    const esParams = createEsQuery({
       query: {
         bool: {
           filter: [
             {
               term: {
-                'monitor.status': STATUS,
+                'monitor.status': status,
               },
             },
             {
@@ -117,7 +124,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
           },
         },
       },
-    };
+    });
 
     /**
      * Perform a logical `and` against the selected location filters.

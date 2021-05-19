@@ -7,13 +7,19 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../common/runtime_types';
+import { GetMonitorStatusResult } from '../../lib/requests/get_monitor_status';
 
-export type UpdateUptimeAlertState = (
-  state: Record<string, any>,
-  isTriggeredNow: boolean
-) => UptimeCommonState;
+export interface UptimeMonitorStatusCustomState {
+  currentDownMonitors?: GetMonitorStatusResult[];
+}
 
-export const updateState: UpdateUptimeAlertState = (state, isTriggeredNow) => {
+export type UpdateUptimeAlertState = <CustomAlertParams extends UptimeMonitorStatusCustomState>(
+  state: Record<string, any> & CustomAlertParams,
+  isTriggeredNow: boolean,
+  customAlertState?: CustomAlertParams
+) => UptimeCommonState & Partial<Record<string, any>>;
+
+export const updateState: UpdateUptimeAlertState = (state, isTriggeredNow, customAlertState) => {
   const now = new Date().toISOString();
   const decoded = UptimeCommonStateType.decode(state);
   if (!isRight(decoded)) {
@@ -26,6 +32,7 @@ export const updateState: UpdateUptimeAlertState = (state, isTriggeredNow) => {
       lastTriggeredAt: triggerVal,
       lastCheckedAt: now,
       lastResolvedAt: undefined,
+      ...customAlertState,
     };
   }
   const {
@@ -53,5 +60,6 @@ export const updateState: UpdateUptimeAlertState = (state, isTriggeredNow) => {
     lastTriggeredAt: isTriggeredNow ? now : lastTriggeredAt,
     lastResolvedAt: !isTriggeredNow && wasTriggered ? now : lastResolvedAt,
     isTriggered: isTriggeredNow,
+    ...customAlertState,
   };
 };
