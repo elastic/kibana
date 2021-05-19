@@ -34,13 +34,13 @@ export const SwimlaneServiceConfiguration = {
 };
 
 export const SwimlaneServiceConfigurationSchema = schema.object(SwimlaneServiceConfiguration);
-// secrets definition
 
 export const SwimlaneSecretsConfiguration = {
   apiToken: schema.string(),
 };
 
 export const SwimlaneSecretsConfigurationSchema = schema.object(SwimlaneSecretsConfiguration);
+
 const SwimlaneFields = {
   alertName: schema.string(),
   alertSource: schema.nullable(schema.string()),
@@ -49,6 +49,7 @@ const SwimlaneFields = {
   comments: schema.nullable(schema.string()),
   severity: schema.nullable(schema.string()),
 };
+
 export const ExecutorSubActionCreateRecordParamsSchema = schema.object(SwimlaneFields);
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
@@ -65,8 +66,6 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
     )
   ),
 });
-
-export const ExecutorSubActionGetApplicationParamsSchema = schema.object({ id: schema.string() });
 
 export const ExecutorParamsSchema = schema.oneOf([
   schema.object({

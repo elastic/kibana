@@ -28,11 +28,7 @@ export const getBodyForEventAction = (
   const values: SwimlaneDataValues = {};
   const comments: SwimlaneDataComments = {};
 
-  for (const mappingsKey in mappingConfig) {
-    if (!Object.hasOwnProperty.call(mappingConfig, mappingsKey)) {
-      continue;
-    }
-
+  for (const mappingsKey of Object.keys(mappingConfig)) {
     const fieldMap = mappingConfig[mappingsKey];
 
     if (!fieldMap) {
@@ -45,29 +41,26 @@ export const getBodyForEventAction = (
       'Config',
       ''
     ) as keyof ExecutorSubActionCreateRecordParams;
-    if (params[paramName]) {
-      const value = params[paramName];
-      if (value) {
-        switch (fieldType) {
-          case 'comments': {
-            if (comments[id] != null) {
-              comments[id] = [
-                ...comments[id],
-                { fieldId: id, message: value, createdDate, isRichText: true },
-              ];
-            } else {
-              comments[id] = [{ fieldId: id, message: value, createdDate, isRichText: true }];
-            }
-            break;
-          }
-          case 'numeric': {
-            values[id] = +value;
-            break;
-          }
-          default: {
-            values[id] = value;
-            break;
-          }
+
+    const value = params[paramName];
+
+    if (value) {
+      switch (fieldType) {
+        case 'comments': {
+          comments[id] = [
+            ...(comments[id] != null ? comments[id] : []),
+            { fieldId: id, message: value, createdDate, isRichText: true },
+          ];
+          break;
+        }
+        case 'numeric': {
+          const number = Number(value);
+          values[id] = isNaN(number) ? 0 : number;
+          break;
+        }
+        default: {
+          values[id] = value;
+          break;
         }
       }
     }

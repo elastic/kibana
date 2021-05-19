@@ -12,7 +12,6 @@ import {
   ConfigMappingSchema,
   ExecutorParamsSchema,
   ExecutorSubActionCreateRecordParamsSchema,
-  ExecutorSubActionGetApplicationParamsSchema,
   ExecutorSubActionPushParamsSchema,
   SwimlaneSecretsConfigurationSchema,
   SwimlaneServiceConfigurationSchema,
@@ -86,10 +85,6 @@ export interface ExternalService {
 
 export type Incident = ExecutorSubActionPushParams['incident'];
 export type CreateRecordApiParams = ExecutorSubActionCreateRecordParams;
-
-export type ExecutorSubActionGetApplicationParams = TypeOf<
-  typeof ExecutorSubActionGetApplicationParamsSchema
->;
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;

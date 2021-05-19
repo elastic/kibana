@@ -43,29 +43,35 @@ export const createExternalService = (
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'Private-Token': `${secrets.apiToken}`,
-    'kbn-xsrf': 'why',
+    'kbn-xsrf': 'true',
   };
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
   const apiUrl = urlWithoutTrailingSlash.endsWith('api')
     ? urlWithoutTrailingSlash
     : urlWithoutTrailingSlash + '/api';
+
   const getPostRecordUrl = (id: string) => `${apiUrl}/app/${id}/record`;
+
   const getPostRecordIdUrl = (id: string, recordId: string) =>
     `${getPostRecordUrl(id)}/${recordId}`;
+
   const getRecordIdUrl = (id: string, recordId: string) =>
     `${urlWithoutTrailingSlash}/record/${id}/${recordId}`;
+
   const getPostCommentUrl = (id: string, recordId: string, commentFieldId: string) =>
     `${getPostRecordIdUrl(id, recordId)}/${commentFieldId}/comment`;
 
   const getCommentFieldId = (fieldMappings: MappingConfigType): string | null =>
     fieldMappings.commentsConfig?.id || null;
+
   const createRecord = async (
     params: CreateRecordParams
   ): Promise<ExternalServiceIncidentResponse> => {
     try {
       const mappingConfig = mappings as MappingConfigType;
       const data = getBodyForEventAction(appId, mappingConfig, params.incident);
+
       const res = await request({
         axios: axiosInstance,
         configurationUtilities,
@@ -92,6 +98,7 @@ export const createExternalService = (
     try {
       const mappingConfig = mappings as MappingConfigType;
       const data = getBodyForEventAction(appId, mappingConfig, params.incident, params.incidentId);
+
       const res = await request<SwimlaneRecordPayload>({
         axios: axiosInstance,
         configurationUtilities,
@@ -101,9 +108,11 @@ export const createExternalService = (
         method: 'patch',
         url: getPostRecordIdUrl(appId, params.incidentId),
       });
+
       const fieldId = mappingConfig.commentsConfig?.id;
       let potentialNewDescription: SwimlaneComment[] = [];
       let isDescriptionPosted = true;
+
       if (
         fieldId != null &&
         res.data.comments != null &&
@@ -129,6 +138,7 @@ export const createExternalService = (
         isDescriptionPosted = existingComments.some(
           ({ message }) => removeCommentFieldUpdatedInformation(`${message}`) === messageString
         );
+
         if (!isDescriptionPosted) {
           // if description has updated
           // post as comments
@@ -139,6 +149,7 @@ export const createExternalService = (
           });
         }
       }
+
       return {
         id: res.data.id,
         title: res.data.name,
@@ -158,15 +169,18 @@ export const createExternalService = (
     try {
       const mappingConfig = mappings as MappingConfigType;
       const fieldId = getCommentFieldId(mappingConfig);
+
       if (fieldId == null) {
         throw new Error(`No comment field mapped in ${i18n.NAME} connector`);
       }
+
       const data = {
         createdDate,
         fieldId,
         isRichText: true,
         message: comment.comment,
       };
+
       await request({
         axios: axiosInstance,
         configurationUtilities,
@@ -176,7 +190,11 @@ export const createExternalService = (
         method: 'post',
         url: getPostCommentUrl(appId, incidentId, fieldId),
       });
-      return { pushedDate: createdDate };
+
+      // TODO: Check if commentId and externalCommentId is needed.
+      return {
+        pushedDate: createdDate,
+      };
     } catch (error) {
       throw new Error(
         getErrorMessage(

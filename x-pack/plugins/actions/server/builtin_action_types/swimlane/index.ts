@@ -112,6 +112,7 @@ async function executor(
 
     logger.debug(`Swimlane new record id ${data.id}`);
   }
+
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 

@@ -124,7 +124,7 @@ export type ExecutorSubActionGetCapabilitiesParams = TypeOf<
   typeof ExecutorSubActionGetCapabilitiesParamsSchema
 >;
 
-export type ExecutorSubActionGetIssueTypesParams = TypeOf<
+export type ExecutorSubActionCommonFieldsParams = TypeOf<
   typeof ExecutorSubActionCommonFieldsParamsSchema
 >;
 
@@ -157,12 +157,12 @@ export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
 
 export interface GetIssueTypesHandlerArgs {
   externalService: ExternalService;
-  params: ExecutorSubActionGetIssueTypesParams;
+  params: ExecutorSubActionCommonFieldsParams;
 }
 
 export interface GetCommonFieldsHandlerArgs {
   externalService: ExternalService;
-  params: ExecutorSubActionGetIssueTypesParams;
+  params: ExecutorSubActionCommonFieldsParams;
 }
 
 export interface GetFieldsByIssueTypeHandlerArgs {

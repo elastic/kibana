@@ -13,7 +13,7 @@ import {
   SwimlanePublicConfigurationType,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../actions/server/types';
-export { SwimlanePublicConfigurationType };
+
 const normalizeJiraFields = (jiraFields: JiraGetFieldsResponse): ConnectorField[] =>
   Object.keys(jiraFields).reduce<ConnectorField[]>(
     (acc, data) =>
@@ -112,6 +112,7 @@ const getPreferredFields = (theType: string, swimlaneMappings?: SwimlaneMappings
     comments = 'work_notes';
   } else if (theType === ConnectorTypes.swimlane) {
     title = 'alertName';
+    // TODO: Where we should map the description?
     description = 'comments';
     comments = 'comments';
   }
