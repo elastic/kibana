@@ -55,6 +55,7 @@ const withCore = makeDecorator({
               },
             } as unknown) as ObservabilityPublicPluginsStart,
             observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+            ObservabilityPageTemplate: ({ children }) => <>{children}</>,
           }}
         >
           <EuiThemeProvider>
