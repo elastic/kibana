@@ -12,7 +12,6 @@ import { useHistory, useParams } from 'react-router-dom';
 import { CaseView } from '../../components/app/cases/case_view';
 
 export const CaseDetailsPage = React.memo(() => {
-  const history = useHistory();
   // const userPermissions = useGetUserCasesPermissions();
   const { detailName: caseId, subCaseId } = useParams<{
     detailName?: string;

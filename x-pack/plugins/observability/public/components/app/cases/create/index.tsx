@@ -10,17 +10,22 @@ import { EuiPanel } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
 import { useKibana } from '../../../../utils/kibana_react';
-import { getCaseDetailsUrl } from '../../../../pages/cases/links';
-import { CASES_OWNER } from '../constants';
+import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../../pages/cases/links';
+import { CASES_APP_ID, CASES_OWNER } from '../constants';
 
 export const Create = React.memo(() => {
-  const { cases } = useKibana().services;
+  const {
+    cases,
+    application: { navigateToApp },
+  } = useKibana().services;
   const history = useHistory();
   const onSuccess = useCallback(
     async ({ id }) => {
-      history.push(getCaseDetailsUrl({ id }));
+      navigateToApp(`${CASES_APP_ID}`, {
+        path: getCaseDetailsUrl({ id }),
+      });
     },
-    [history]
+    [navigateToApp]
   );
 
   const handleSetIsCancel = useCallback(() => {

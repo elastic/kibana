@@ -16,6 +16,7 @@ import { AlertsPage } from '../pages/alerts';
 import { CreateCasePage } from '../pages/cases/create_case';
 import { ExploratoryViewPage } from '../components/shared/exploratory_view';
 import { CaseDetailsPage } from '../pages/cases/case_details';
+import { ConfigureCasesPage } from '../pages/cases/configure_cases';
 import { AllCasesPage } from '../pages/cases/all_cases';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
@@ -96,14 +97,23 @@ export const routes = {
     ],
   },
   '/cases/create': {
-    handler: (routeParams: any) => {
-      return <CreateCasePage routeParams={routeParams} />;
+    handler: () => {
+      return <CreateCasePage />;
     },
-    params: {
-      path: t.partial({
-        detailName: t.string,
-      }),
+    params: {},
+    breadcrumb: [
+      {
+        text: i18n.translate('xpack.observability.cases.breadcrumb', {
+          defaultMessage: 'Cases',
+        }),
+      },
+    ],
+  },
+  '/cases/configure': {
+    handler: () => {
+      return <ConfigureCasesPage />;
     },
+    params: {},
     breadcrumb: [
       {
         text: i18n.translate('xpack.observability.cases.breadcrumb', {
