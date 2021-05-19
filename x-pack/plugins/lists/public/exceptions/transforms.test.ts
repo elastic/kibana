@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { Entry, EntryMatch, EntryNested } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListItemSchema,
+  Entry,
+  EntryMatch,
+  EntryNested,
+  ExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
-import { ExceptionListItemSchema } from '../../common/schemas/response/exception_list_item_schema';
-import { UpdateExceptionListItemSchema } from '../../common/schemas/request/update_exception_list_item_schema';
-import { CreateExceptionListItemSchema } from '../../common/schemas/request/create_exception_list_item_schema';
 import { getCreateExceptionListItemSchemaMock } from '../../common/schemas/request/create_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/request/update_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';

@@ -6,8 +6,8 @@
  */
 
 import { Dispatch, useEffect, useState } from 'react';
+import type { UpdateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { UpdateExceptionListSchema } from '../../../common/schemas';
 import { addExceptionList, updateExceptionList } from '../api';
 import { AddExceptionList, PersistHookProps } from '../types';
 

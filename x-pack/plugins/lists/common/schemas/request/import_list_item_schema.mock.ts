@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ImportListItemSchema } from './import_list_item_schema';
+import type { ImportListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getImportListItemSchemaMock = (): ImportListItemSchema => ({
   file: {},

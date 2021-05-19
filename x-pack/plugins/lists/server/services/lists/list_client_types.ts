@@ -8,31 +8,29 @@
 import { PassThrough, Readable } from 'stream';
 
 import { ElasticsearchClient } from 'kibana/server';
-import {
+import type {
   Description,
   DescriptionOrUndefined,
-  Id,
-  IdOrUndefined,
-  MetaOrUndefined,
-  Name,
-  NameOrUndefined,
-  Type,
-} from '@kbn/securitysolution-io-ts-list-types';
-import { Version, VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
-
-import {
   DeserializerOrUndefined,
   Filter,
+  Id,
+  IdOrUndefined,
   Immutable,
   ListId,
   ListIdOrUndefined,
+  MetaOrUndefined,
+  Name,
+  NameOrUndefined,
   Page,
   PerPage,
   SerializerOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
+  Type,
   _VersionOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { Version, VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+
 import { ConfigType } from '../../config';
 
 export interface ConstructorOptions {
