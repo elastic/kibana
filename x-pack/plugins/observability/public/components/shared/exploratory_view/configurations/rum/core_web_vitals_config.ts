@@ -24,6 +24,7 @@ import {
   TRANSACTION_URL,
   USER_AGENT_OS_VERSION,
   URL_FULL,
+  SERVICE_ENVIRONMENT,
 } from '../constants/elasticsearch_fieldnames';
 
 export function getCoreWebVitalsConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
@@ -83,6 +84,13 @@ export function getCoreWebVitalsConfig({ seriesId, indexPattern }: ConfigProps):
     ],
     labels: { ...FieldLabels, [SERVICE_NAME]: 'Web Application' },
     reportDefinitions: [
+      {
+        field: SERVICE_NAME,
+        required: true,
+      },
+      {
+        field: SERVICE_ENVIRONMENT,
+      },
       {
         field: 'core.web.vitals',
         custom: true,

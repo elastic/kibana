@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import styled from 'styled-components';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_storage';
 import { CustomReportField } from '../custom_report_field';
-import FieldValueSuggestions from '../../../field_value_suggestions';
 import { DataSeries, URLReportDefinition } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
 import { OperationTypeSelect } from './operation_type_select';
@@ -69,7 +68,7 @@ export function ReportDefinitionCol({
       </EuiFlexItem>
       <EuiHorizontalRule margin="xs" />
       {indexPattern &&
-        reportDefinitions.map(({ field, custom, options }) => (
+        reportDefinitions.map(({ field, custom, options, defaultValue }) => (
           <EuiFlexItem key={field}>
             {!custom ? (
               <ReportDefinitionField
@@ -97,7 +96,11 @@ export function ReportDefinitionCol({
         </EuiFlexItem>
       )}
       <EuiFlexItem>
-        <SeriesChartTypesSelect seriesId={seriesId} defaultChartType={defaultSeriesType} seriesTypes={dataViewSeries.seriesTypes} />
+        <SeriesChartTypesSelect
+          seriesId={seriesId}
+          defaultChartType={defaultSeriesType}
+          seriesTypes={dataViewSeries.seriesTypes}
+        />
       </EuiFlexItem>
     </FlexGroup>
   );
