@@ -835,7 +835,7 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields;
-    ransomware: ProtectionFields;
+    ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
     };
@@ -915,6 +915,11 @@ export interface UIPolicyConfig {
 /** Policy:  Protection fields */
 export interface ProtectionFields {
   mode: ProtectionModes;
+}
+
+/** Policy:  Supported fields */
+export interface SupportedFields {
+  supported: boolean;
 }
 
 /** Policy protection mode options */

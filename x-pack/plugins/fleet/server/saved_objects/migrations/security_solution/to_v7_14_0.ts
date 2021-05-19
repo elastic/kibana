@@ -28,6 +28,10 @@ export const migrateEndpointPackagePolicyToV7140: SavedObjectMigrationFn<
 
       policy.linux.malware = linuxMalware;
       policy.linux.popup = linuxMalwarePopup;
+
+      // This value is based on license.
+      // For the migration, we add 'true', our license watcher will correct it, if needed, when the app starts.
+      policy.windows.ransomware.supported = true;
     }
   }
 

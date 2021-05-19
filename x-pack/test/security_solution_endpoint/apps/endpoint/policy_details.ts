@@ -21,8 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
-  // Failing: See https://github.com/elastic/kibana/issues/100236
-  describe.skip('When on the Endpoint Policy Details Page', function () {
+  describe('When on the Endpoint Policy Details Page', function () {
     describe('with an invalid policy id', () => {
       it('should display an error', async () => {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');
@@ -293,7 +292,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
@@ -461,7 +460,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
@@ -626,7 +625,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
@@ -649,7 +648,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('when on Ingest Policy Edit Package Policy page', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/100296
+    describe.skip('when on Ingest Policy Edit Package Policy page', async () => {
       let policyInfo: PolicyTestResourceInfo;
       beforeEach(async () => {
         // Create a policy and navigate to Ingest app
@@ -658,6 +658,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id,
           policyInfo.packagePolicy.id
         );
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
       afterEach(async () => {
         if (policyInfo) {

@@ -284,7 +284,7 @@ describe('policy details: ', () => {
                       security: true,
                     },
                     malware: { mode: 'prevent' },
-                    ransomware: { mode: 'off' },
+                    ransomware: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,

@@ -9,12 +9,12 @@ import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
+import { Type } from '@kbn/securitysolution-io-ts-list-types';
 import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
 import {
   ListItemSchema,
   ExceptionListSchema,
   ExceptionListItemSchema,
-  Type,
 } from '../../plugins/lists/common/schemas';
 import { ListSchema } from '../../plugins/lists/common';
 import { LIST_INDEX, LIST_ITEM_URL } from '../../plugins/lists/common/constants';

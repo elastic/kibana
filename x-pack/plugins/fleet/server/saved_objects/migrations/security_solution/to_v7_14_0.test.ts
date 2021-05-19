@@ -13,6 +13,134 @@ import { migrateEndpointPackagePolicyToV7140 } from './to_v7_14_0';
 
 describe('7.14.0 Endpoint Package Policy migration', () => {
   const migration = migrateEndpointPackagePolicyToV7140;
+  it('adds supported option for ransomware on migrations', () => {
+    const doc = {
+      id: 'mock-saved-object-id',
+      attributes: {
+        name: 'Some Policy Name',
+        package: {
+          name: 'endpoint',
+          title: '',
+          version: '',
+        },
+        id: 'endpoint',
+        policy_id: '',
+        enabled: true,
+        namespace: '',
+        output_id: '',
+        revision: 0,
+        updated_at: '',
+        updated_by: '',
+        created_at: '',
+        created_by: '',
+        inputs: [
+          {
+            type: 'endpoint',
+            enabled: true,
+            streams: [],
+            config: {
+              policy: {
+                value: {
+                  windows: {
+                    ransomware: {
+                      mode: 'off',
+                    },
+                    malware: {
+                      mode: 'off',
+                    },
+                    popup: {
+                      malware: {
+                        message: '',
+                        enabled: false,
+                      },
+                      ransomware: {
+                        message: '',
+                        enabled: false,
+                      },
+                    },
+                  },
+                  linux: {
+                    events: { process: true, file: true, network: true },
+                    logging: { file: 'info' },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      type: ' nested',
+    };
+
+    expect(migration(doc, {} as SavedObjectMigrationContext)).toEqual({
+      attributes: {
+        name: 'Some Policy Name',
+        package: {
+          name: 'endpoint',
+          title: '',
+          version: '',
+        },
+        id: 'endpoint',
+        policy_id: '',
+        enabled: true,
+        namespace: '',
+        output_id: '',
+        revision: 0,
+        updated_at: '',
+        updated_by: '',
+        created_at: '',
+        created_by: '',
+        inputs: [
+          {
+            type: 'endpoint',
+            enabled: true,
+            streams: [],
+            config: {
+              policy: {
+                value: {
+                  windows: {
+                    ransomware: {
+                      mode: 'off',
+                      supported: true,
+                    },
+                    malware: {
+                      mode: 'off',
+                    },
+                    popup: {
+                      malware: {
+                        message: '',
+                        enabled: false,
+                      },
+                      ransomware: {
+                        message: '',
+                        enabled: false,
+                      },
+                    },
+                  },
+                  linux: {
+                    events: { process: true, file: true, network: true },
+                    logging: { file: 'info' },
+                    malware: {
+                      mode: 'off',
+                    },
+                    popup: {
+                      malware: {
+                        message: '',
+                        enabled: false,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      type: ' nested',
+      id: 'mock-saved-object-id',
+    });
+  });
+
   it('adds linux malware option and notification customization when windows malware is disabled', () => {
     const doc = {
       id: 'mock-saved-object-id',
@@ -101,6 +229,7 @@ describe('7.14.0 Endpoint Package Policy migration', () => {
                   windows: {
                     ransomware: {
                       mode: 'off',
+                      supported: true,
                     },
                     malware: {
                       mode: 'off',
@@ -228,6 +357,7 @@ describe('7.14.0 Endpoint Package Policy migration', () => {
                   windows: {
                     ransomware: {
                       mode: 'off',
+                      supported: true,
                     },
                     malware: {
                       mode: 'on',

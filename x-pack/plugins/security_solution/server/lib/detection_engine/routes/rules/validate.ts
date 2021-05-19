@@ -7,11 +7,11 @@
 
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 
+import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import {
   FullResponseSchema,
   fullResponseSchema,
 } from '../../../../../common/detection_engine/schemas/request';
-import { validateNonExact } from '../../../../../common/validate';
 import {
   RulesSchema,
   rulesSchema,

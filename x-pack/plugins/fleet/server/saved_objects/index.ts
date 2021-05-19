@@ -42,6 +42,7 @@ import {
   migrateSettingsToV7130,
   migrateOutputToV7130,
 } from './migrations/to_v7_13_0';
+import { migratePackagePolicyToV7140 } from './migrations/to_v7_14_0';
 
 import { migratePackagePolicyToV7140 } from './migrations/to_v7_14_0';
 
