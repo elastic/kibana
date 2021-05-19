@@ -190,7 +190,7 @@ def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, teamAssignmen
 }
 
 def prepareKibana(maxWorkers = '') {
-  notifyOnError {
+  kibanaPipeline.notifyOnError {
     withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
       runbld("./test/scripts/jenkins_code_coverage.sh", "Verify tests")
     }
