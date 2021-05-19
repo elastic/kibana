@@ -221,9 +221,7 @@ describe('migration actions', () => {
     it('rejects if there is a non-retryable error', async () => {
       expect.assertions(1);
       const task = removeWriteBlock(client, 'no_such_index');
-      await expect(task()).rejects.toMatchInlineSnapshot(
-        `[ResponseError: index_not_found_exception]`
-      );
+      await expect(task()).rejects.toThrow('index_not_found_exception');
     });
   });
 
@@ -243,7 +241,7 @@ describe('migration actions', () => {
               // Allocate 1 replica so that this index stays yellow
               number_of_replicas: '1',
               // Disable all shard allocation so that the index status is red
-              index: { settings: { routing: { allocation: { enable: 'none' } } } },
+              routing: { allocation: { enable: 'none' } },
             },
           },
         },
@@ -799,9 +797,7 @@ describe('migration actions', () => {
     it('rejects if source or target index does not exist', async () => {
       expect.assertions(2);
       let task = verifyReindex(client, 'no_such_index', 'existing_index_2');
-      await expect(task()).rejects.toMatchInlineSnapshot(
-        `[ResponseError: index_not_found_exception]`
-      );
+      await expect(task()).rejects.toThrow('index_not_found_exception');
 
       task = verifyReindex(client, 'existing_index_2', 'no_such_index');
       await expect(task()).rejects.toThrow('index_not_found_exception');
@@ -1067,10 +1063,7 @@ describe('migration actions', () => {
 
       const task = waitForPickupUpdatedMappingsTask(client, res.right.taskId, '10s');
 
-      await expect(task()).rejects.toMatchInlineSnapshot(`
-                        [Error: pickupUpdatedMappings task failed with the following error:
-                        {"type":"index_not_found_exception","reason":"no such index [no_such_index]","resource.type":"index_or_alias","resource.id":"no_such_index","index_uuid":"_na_","index":"no_such_index"}]
-                    `);
+      await expect(task()).rejects.toThrow('index_not_found_exception');
     });
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
@@ -1342,7 +1335,7 @@ describe('migration actions', () => {
       // failure
       await expect(
         createIndex(client, 'existing_index_2_alias', undefined as any)()
-      ).rejects.toMatchInlineSnapshot(`[ResponseError: invalid_index_name_exception]`);
+      ).rejects.toThrow('invalid_index_name_exception');
     });
   });
 
