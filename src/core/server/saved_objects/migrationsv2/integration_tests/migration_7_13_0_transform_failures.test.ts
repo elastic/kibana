@@ -9,14 +9,12 @@
 import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
-import json5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 
 const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures_test.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
-const asyncReadFile = Util.promisify(Fs.readFile);
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
@@ -92,39 +90,43 @@ describe('migration v2', () => {
         '7.14.0': (doc) => doc,
       },
     });
-    await expect(root.start()).rejects.toThrowError();
+    try {
+      await root.start();
+    } catch (err) {
+      const errorMessage = err.message;
+      expect(
+        errorMessage.startsWith(
+          'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: Corrupt saved object documents: '
+        )
+      ).toBeTruthy();
+      expect(
+        errorMessage.endsWith(' To allow migrations to proceed, please delete these documents.')
+      ).toBeTruthy();
 
-    const logFileContent = await asyncReadFile(logFilePath, 'utf-8');
-    const records = logFileContent
-      .split('\n')
-      .filter(Boolean)
-      .map((str) => json5.parse(str));
+      const expectedCorruptDocIds = [
+        'P2SQfHkBs3dBRGh--No5',
+        'QGSZfHkBs3dBRGh-ANoD',
+        'QWSZfHkBs3dBRGh-hNob',
+        'QmSZfHkBs3dBRGh-w9qH',
+        'Q2SZfHkBs3dBRGh-9dp2',
+        'one',
+        'two',
+      ];
+      const corruptDocIds = errorMessage
+        .split(' Corrupt saved object documents: ')[1]
+        .split(' Transformation errors')[0]
+        .split(',');
+      expect(corruptDocIds.length).toBeGreaterThan(5);
+      expect(corruptDocIds).toEqual(expectedCorruptDocIds);
 
-    const logRecordsWithTransformFailures = records.find(
-      (rec) => rec.message === '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX RESPONSE'
-    );
-    expect(logRecordsWithTransformFailures).toBeTruthy();
-    expect(logRecordsWithTransformFailures.left.type).toBe('documents_transform_failed');
-
-    const allRecords = records.filter(
-      (rec) => rec.message === '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX RESPONSE'
-    );
-    expect(allRecords.length).toBeGreaterThan(5);
-
-    const allFailures = allRecords
-      .filter((rec) => rec._tag === 'Left')
-      .map((failure) => failure.left)
-      .reduce(
-        (acc, curr) => {
-          return {
-            corruptIds: [...acc.corruptIds, ...curr.corruptDocumentIds],
-            transformErrs: [...acc.transformErrs, ...curr.transformErrors],
-          };
-        },
-        { corruptIds: [], transformErrs: [] }
-      );
-    expect(allFailures.corruptIds.length).toBeGreaterThan(5);
-    expect(allFailures.transformErrs.length).toBeGreaterThan(0);
+      const transformErrorInstances = errorMessage
+        .split(' Transformation errors: ')[1]
+        .split('Error')
+        .filter((instance: string) => !instance.startsWith('Error'));
+      expect(transformErrorInstances.length).toBeGreaterThan(0);
+      expect(transformErrorInstances[0]).toMatchInlineSnapshot(`
+      space:default: Document "default" has property "space" which belongs to a more recent version of Kibana [6.6.0]. The last known version is [undefined]`);
+    }
   });
 });
 
