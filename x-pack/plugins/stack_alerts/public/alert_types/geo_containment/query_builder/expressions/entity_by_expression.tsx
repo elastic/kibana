@@ -13,6 +13,7 @@ import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
 import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
+import {IIndexPattern} from "../../../../../../../../src/plugins/data/common";
 
 interface Props {
   errors: IErrorObject;
@@ -20,6 +21,15 @@ interface Props {
   setAlertParamsEntity: (entity: string) => void;
   indexFields: IFieldType[];
   isInvalid: boolean;
+}
+
+function getValidIndexPatternFields(fields: IFieldType[]): IFieldType[] {
+  return fields.filter((field) => {
+    const isMultiField = field.subType && !!field.subType.multi;
+    const isNotNested = !field.subType?.nested;
+    const isAggregatable = !!field.aggregatable;
+    return isMultiField && isNotNested && isAggregatable;
+  });
 }
 
 export const EntityByExpression: FunctionComponent<Props> = ({
@@ -48,7 +58,8 @@ export const EntityByExpression: FunctionComponent<Props> = ({
   });
   useEffect(() => {
     if (!_.isEqual(oldIndexFields, indexFields)) {
-      fields.current.indexFields = indexFields.filter(
+      const validIndexFields = getValidIndexPatternFields(indexFields);
+      fields.current.indexFields = validIndexFields.filter(
         (field: IFieldType) => ENTITY_TYPES.includes(field.type) && !field.name.startsWith('_')
       );
       if (!entity && fields.current.indexFields.length) {
