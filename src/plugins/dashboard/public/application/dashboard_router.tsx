@@ -9,19 +9,23 @@
 import './index.scss';
 import React from 'react';
 import { History } from 'history';
+import { Provider } from 'react-redux';
+import { first } from 'rxjs/operators';
 import { I18nProvider } from '@kbn/i18n/react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 
-import { first } from 'rxjs/operators';
-import { Provider } from 'react-redux';
 import { DashboardListing } from './listing';
+import { dashboardStateStore } from './state';
 import { DashboardApp } from './dashboard_app';
+import { DashboardNoMatch } from './listing/dashboard_no_match';
+import { KibanaContextProvider } from '../services/kibana_react';
 import { addHelpMenuToAppChrome, DashboardSessionStorage } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
-import { getDashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
+import { getDashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
 import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from '../types';
 import {
   DashboardFeatureFlagConfig,
@@ -29,18 +33,12 @@ import {
   DashboardStart,
   DashboardStartDependencies,
 } from '../plugin';
-
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
-import { KibanaContextProvider } from '../services/kibana_react';
-
 import {
   AppMountParameters,
   CoreSetup,
   PluginInitializerContext,
   ScopedHistory,
 } from '../services/core';
-import { DashboardNoMatch } from './listing/dashboard_no_match';
-import { dashboardStateStore } from './state';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -217,26 +215,32 @@ export async function mountApp({
 
   const app = (
     <I18nProvider>
-      <KibanaContextProvider services={dashboardServices}>
-        <presentationUtil.ContextProvider>
-          <HashRouter>
-            <Switch>
-              <Route
-                path={[
-                  DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                  `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
-                ]}
-                render={renderDashboard}
-              />
-              <Route exact path={DashboardConstants.LANDING_PAGE_PATH} render={renderListingPage} />
-              <Route exact path="/">
-                <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
-              </Route>
-              <Route render={renderNoMatch} />
-            </Switch>
-          </HashRouter>
-        </presentationUtil.ContextProvider>
-      </KibanaContextProvider>
+      <Provider store={dashboardStateStore}>
+        <KibanaContextProvider services={dashboardServices}>
+          <presentationUtil.ContextProvider>
+            <HashRouter>
+              <Switch>
+                <Route
+                  path={[
+                    DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                    `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                  ]}
+                  render={renderDashboard}
+                />
+                <Route
+                  exact
+                  path={DashboardConstants.LANDING_PAGE_PATH}
+                  render={renderListingPage}
+                />
+                <Route exact path="/">
+                  <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+                </Route>
+                <Route render={renderNoMatch} />
+              </Switch>
+            </HashRouter>
+          </presentationUtil.ContextProvider>
+        </KibanaContextProvider>
+      </Provider>
     </I18nProvider>
   );
 
