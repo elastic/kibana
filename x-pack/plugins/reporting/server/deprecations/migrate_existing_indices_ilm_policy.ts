@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { DeprecationsDetails, GetDeprecationsContext } from 'src/core/server';
+import { API_MIGRATE_ILM_POLICY_URL } from '../../common/constants';
 import { ReportingCore } from '../core';
 
 interface ExtraDependencies {
@@ -19,10 +20,10 @@ export const migrateExistingIndicesIlmPolicy = async (
 ): Promise<DeprecationsDetails[]> => {
   const store = await reportingCore.getStore();
   const reportingIlmPolicy = store.getIlmPolicyName();
-  const reportingIndexPrefix = store.getIndexPrefix();
+  const indexPattern = store.getReportingIndexPattern();
 
   const { body: reportingIndicesSettings } = await esClient.asInternalUser.indices.getSettings({
-    index: `${store.getIndexPrefix()}-*`,
+    index: indexPattern,
   });
 
   const someIndicesNotManagedByReportingIlm = Object.values(reportingIndicesSettings).some(
@@ -34,12 +35,13 @@ export const migrateExistingIndicesIlmPolicy = async (
       {
         level: 'warning',
         message: i18n.translate('xpack.reporting.deprecations.migrateIndexIlmPolicyActionMessage', {
-          defaultMessage: `Reporting indices can be managed by a provisioned ILM policy, ${reportingIlmPolicy}. This policy should be used to manage the lifecycle of indices. Please note, this action will target all indices prefixed with "${reportingIndexPrefix}-*".`,
+          defaultMessage: `All new reporting indices will be managed by a provisioned ILM policy: "${reportingIlmPolicy}". To manage the lifecycle of reports edit the ${reportingIlmPolicy} policy. Please note, this action will target all indices prefixed with "${indexPattern}".`,
         }),
+        documentationUrl: 'WIP', // TODO: Fix this!
         correctiveActions: {
           api: {
             method: 'PUT',
-            path: `${reportingIndexPrefix}-*/_settings`,
+            path: API_MIGRATE_ILM_POLICY_URL,
             body: {
               index: {
                 lifecycle: {

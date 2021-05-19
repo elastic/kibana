@@ -89,6 +89,7 @@ export const API_BASE_URL = '/api/reporting'; // "Generation URL" from share men
 export const API_BASE_GENERATE = `${API_BASE_URL}/generate`;
 export const API_LIST_URL = `${API_BASE_URL}/jobs`;
 export const API_DIAGNOSE_URL = `${API_BASE_URL}/diagnose`;
+export const API_MIGRATE_ILM_POLICY_URL = `${API_BASE_URL}/deprecations/migrate_ilm_policy`;
 
 // hacky endpoint: download CSV without queueing a report
 export const API_BASE_URL_V1 = '/api/reporting/v1'; //

@@ -406,7 +406,7 @@ export class ReportingStore {
     return this.ilmPolicyName;
   }
 
-  public getIndexPrefix(): string {
-    return this.indexPrefix;
+  public getReportingIndexPattern(): string {
+    return `${this.indexPrefix}-*`;
   }
 }
