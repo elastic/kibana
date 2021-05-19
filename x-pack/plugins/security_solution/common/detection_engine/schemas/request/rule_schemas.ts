@@ -7,8 +7,12 @@
 
 import * as t from 'io-ts';
 
-import { listArray } from '../types/lists';
 import {
+  actions,
+  from,
+  risk_score,
+  machine_learning_job_id,
+  risk_score_mapping,
   threat_filters,
   threat_query,
   threat_mapping,
@@ -16,14 +20,20 @@ import {
   threat_indicator_path,
   concurrent_searches,
   items_per_search,
-} from '../types/threat_mapping';
+  threats,
+  severity_mapping,
+  severity,
+  max_signals,
+  throttle,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { listArray } from '@kbn/securitysolution-io-ts-list-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
+
 import {
   id,
   index,
   filters,
   event_category_override,
-  risk_score_mapping,
-  severity_mapping,
   building_block_type,
   note,
   license,
@@ -35,25 +45,17 @@ import {
   author,
   description,
   false_positives,
-  from,
   rule_id,
   immutable,
   output_index,
   query,
-  machine_learning_job_id,
-  max_signals,
-  risk_score,
-  severity,
-  threats,
   to,
   references,
-  version,
   saved_id,
   threshold,
   anomaly_threshold,
   name,
   tags,
-  actions,
   interval,
   enabled,
   updated_at,
@@ -66,7 +68,6 @@ import {
   last_success_message,
   last_failure_at,
   last_failure_message,
-  throttle,
 } from '../common/schemas';
 
 const createSchema = <
