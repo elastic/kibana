@@ -77,7 +77,6 @@ export interface ILayer {
   getMbLayerIds(): string[];
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
-  canShowTooltip(): boolean;
   syncLayerWithMB(mbMap: MbMap): void;
   getLayerTypeIconName(): string;
   isInitialDataLoadComplete(): boolean;
@@ -98,6 +97,7 @@ export interface ILayer {
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
   isFittable(): Promise<boolean>;
+  isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
   getDescriptor(): LayerDescriptor;
@@ -131,6 +131,8 @@ export class AbstractLayer implements ILayer {
       alpha: _.get(options, 'alpha', 0.75),
       visible: _.get(options, 'visible', true),
       style: _.get(options, 'style', null),
+      includeInFitToBounds:
+        typeof options.includeInFitToBounds === 'boolean' ? options.includeInFitToBounds : true,
     };
   }
 
@@ -246,7 +248,11 @@ export class AbstractLayer implements ILayer {
   }
 
   async isFittable(): Promise<boolean> {
-    return (await this.supportsFitToBounds()) && this.isVisible();
+    return (await this.supportsFitToBounds()) && this.isVisible() && this.isIncludeInFitToBounds();
+  }
+
+  isIncludeInFitToBounds(): boolean {
+    return !!this._descriptor.includeInFitToBounds;
   }
 
   async isFilteredByGlobalTime(): Promise<boolean> {
@@ -450,10 +456,6 @@ export class AbstractLayer implements ILayer {
 
   ownsMbSourceId(mbSourceId: string): boolean {
     throw new Error('Should implement AbstractLayer#ownsMbSourceId');
-  }
-
-  canShowTooltip() {
-    return false;
   }
 
   syncLayerWithMB(mbMap: MbMap) {

@@ -12,14 +12,14 @@ import * as rulesApi from '../../../detections/containers/detection_engine/rules
 import * as listsApi from '../../../../../lists/public/exceptions/api';
 import { getExceptionListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { savedRuleMock } from '../../../detections/containers/detection_engine/rules/mock';
-import { ExceptionListType } from '../../../lists_plugin_deps';
-import { ListArray } from '../../../../common/detection_engine/schemas/types';
+import type { ExceptionListType, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   useFetchOrCreateRuleExceptionList,
   UseFetchOrCreateRuleExceptionListProps,
   ReturnUseFetchOrCreateRuleExceptionList,
 } from './use_fetch_or_create_rule_exception_list';
+import { ExceptionListSchema } from '../../../shared_imports';
 
 const mockKibanaHttpService = coreMock.createStart().http;
 jest.mock('../../../detections/containers/detection_engine/rules/api');
@@ -31,7 +31,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   let addEndpointExceptionList: jest.SpyInstance<
     ReturnType<typeof listsApi.addEndpointExceptionList>
   >;
-  let fetchExceptionListById: jest.SpyInstance<ReturnType<typeof listsApi.fetchExceptionListById>>;
+  let fetchExceptionListById: jest.SpyInstance<Promise<ExceptionListSchema>>;
   let render: (
     listType?: UseFetchOrCreateRuleExceptionListProps['exceptionListType']
   ) => RenderHookResult<
