@@ -8,14 +8,17 @@
 import { EuiButtonIcon } from '@elastic/eui';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { Query } from 'src/plugins/data/public';
 import { search } from '../../../../../../src/plugins/data/public';
 import { parseTimeShift } from '../../../../../../src/plugins/data/common';
 import { IndexPatternColumn, operationDefinitionMap } from '../operations';
-import { IndexPattern, IndexPatternLayer } from '../types';
+import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
+import { FramePublicAPI } from '../../types';
 
 // to do: get the language from uiSettings
 export const defaultFilter: Query = {
@@ -173,6 +176,8 @@ export function TimeShift({
 
   const parsedLocalValue = localValue && parseTimeShift(localValue);
   const isLocalValueInvalid = Boolean(parsedLocalValue === 'invalid');
+  const localValueTooSmall = parsedLocalValue && isValueTooSmall(parsedLocalValue);
+  const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
 
   function getSelectedOption() {
     if (!localValue) return [];
@@ -206,7 +211,19 @@ export function TimeShift({
         helpText={i18n.translate('xpack.lens.indexPattern.timeShift.help', {
           defaultMessage: 'Time shift is specified by a number followed by a time unit',
         })}
-        isInvalid={isLocalValueInvalid}
+        error={
+          (localValueTooSmall &&
+            i18n.translate('xpack.lens.indexPattern.timeShift.tooSmallHelp', {
+              defaultMessage:
+                'Time shift should to be larger than the date histogram interval. Either increase time shift or specify smaller interval in date histogram',
+            })) ||
+          (localValueNotMultiple &&
+            i18n.translate('xpack.lens.indexPattern.timeShift.noMultipleHelp', {
+              defaultMessage:
+                'Time shift should be a multiple of the date histogram interval. Either adjust time shift or date histogram interval',
+            }))
+        }
+        isInvalid={Boolean(isLocalValueInvalid || localValueTooSmall || localValueNotMultiple)}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
@@ -268,4 +285,88 @@ export function TimeShift({
       </EuiFormRow>
     </div>
   );
+}
+
+export function getTimeShiftWarningMessages(
+  state: IndexPatternPrivateState,
+  { activeData }: FramePublicAPI
+) {
+  if (!state) return;
+  const warningMessages: React.ReactNode[] = [];
+  Object.entries(state.layers).forEach(([layerId, layer]) => {
+    let dateHistogramInterval: null | moment.Duration = null;
+    const dateHistogramColumn = layer.columnOrder.find(
+      (colId) => layer.columns[colId].operationType === 'date_histogram'
+    );
+    if (!dateHistogramColumn) {
+      return;
+    }
+    if (dateHistogramColumn && activeData && activeData[layerId]) {
+      const column = activeData[layerId].columns.find((col) => col.id === dateHistogramColumn);
+      if (column) {
+        dateHistogramInterval = search.aggs.parseInterval(
+          search.aggs.getDateHistogramMetaDataByDatatableColumn(column)?.interval || ''
+        );
+      }
+    }
+    if (dateHistogramInterval === null) {
+      return;
+    }
+    const shiftInterval = dateHistogramInterval.asMilliseconds();
+    let timeShifts: number[] = [];
+    const timeShiftMap: Record<number, string[]> = {};
+    Object.entries(layer.columns).forEach(([columnId, column]) => {
+      if (column.isBucketed) return;
+      let duration: number = 0;
+      if (column.timeShift) {
+        duration = (parseTimeShift(column.timeShift) as moment.Duration).asMilliseconds();
+      }
+      timeShifts.push(duration);
+      if (!timeShiftMap[duration]) {
+        timeShiftMap[duration] = [];
+      }
+      timeShiftMap[duration].push(columnId);
+    });
+    timeShifts = uniq(timeShifts);
+
+    if (timeShifts.length < 2) {
+      return;
+    }
+
+    timeShifts.forEach((timeShift) => {
+      if (timeShift === 0) return;
+      if (timeShift < shiftInterval) {
+        timeShiftMap[timeShift].forEach((columnId) => {
+          warningMessages.push(
+            <FormattedMessage
+              key={`small-${columnId}`}
+              id="xpack.lens.indexPattern.timeShiftSmallWarning"
+              defaultMessage="{label} uses a time shift of {columnTimeShift} which is smaller than the date histogram interval of {interval}. To prevent mismatched data, use a multiple of {interval} as time shift."
+              values={{
+                label: <strong>{layer.columns[columnId].label}</strong>,
+                interval: dateHistogramInterval?.humanize(),
+                columnTimeShift: layer.columns[columnId].timeShift!,
+              }}
+            />
+          );
+        });
+      } else if (!Number.isInteger(timeShift / shiftInterval)) {
+        timeShiftMap[timeShift].forEach((columnId) => {
+          warningMessages.push(
+            <FormattedMessage
+              key={`multiple-${columnId}`}
+              id="xpack.lens.indexPattern.timeShiftMultipleWarning"
+              defaultMessage="{label} uses a time shift of {columnTimeShift} which is not a multiple of the date histogram interval of {interval}. To prevent mismatched data, use a multiple of {interval} as time shift."
+              values={{
+                label: <strong>{layer.columns[columnId].label}</strong>,
+                interval: dateHistogramInterval?.humanize(),
+                columnTimeShift: layer.columns[columnId].timeShift!,
+              }}
+            />
+          );
+        });
+      }
+    });
+  });
+  return warningMessages;
 }

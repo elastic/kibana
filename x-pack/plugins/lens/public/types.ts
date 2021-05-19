@@ -259,6 +259,10 @@ export interface Datasource<T = unknown, P = unknown> {
    * Check the internal state integrity and returns a list of missing references
    */
   checkIntegrity: (state: T) => string[];
+  /**
+   * The frame calls this function to display warnings about visualization
+   */
+  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
 }
 
 /**
