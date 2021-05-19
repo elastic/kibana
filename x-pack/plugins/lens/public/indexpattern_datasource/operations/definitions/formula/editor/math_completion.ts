@@ -6,6 +6,7 @@
  */
 
 import { uniq, startsWith } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import {
   parse,
@@ -19,6 +20,8 @@ import { IndexPattern } from '../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
 import { tinymathFunctions, groupArgsByType } from '../util';
 import type { GenericOperationDefinition } from '../..';
+import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
+import { hasFunctionFieldArgument } from '../validation';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',
@@ -212,7 +215,7 @@ function getArgumentSuggestions(
     return { list: [], type: SUGGESTION_TYPE.FIELD };
   }
 
-  if (position > 0 || operation.type === 'count') {
+  if (position > 0 || !hasFunctionFieldArgument(operation.type)) {
     const { namedArguments } = groupArgsByType(ast.args);
     const list = [];
     if (operation.filterable) {
@@ -357,7 +360,7 @@ export function getSuggestion(
         } else {
           const def = operationDefinitionMap[suggestion.label];
           kind = monaco.languages.CompletionItemKind.Constant;
-          if (suggestion.label === 'count' && 'operationParams' in def) {
+          if (!hasFunctionFieldArgument(suggestion.label) && 'operationParams' in def) {
             label = `${label}(${def
               .operationParams!.map((p) => `${p.name}=${p.type}`)
               .join(', ')})`;
@@ -413,6 +416,89 @@ export function getSuggestion(
   };
 }
 
+function getOperationTypeHelp(
+  name: string,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+) {
+  const { description, examples } = getHelpTextContent(name, operationDefinitionMap);
+  // const descriptionInMarkdown = description.replace(/\n/g, '\n\n');
+  const descriptionInMarkdown = description;
+  const examplesInMarkdown = `**${i18n.translate('xpack.lens.formulaExampleMarkdown', {
+    defaultMessage: 'Examples',
+  })}**
+
+  ${examples.map((example) => `\`${example}\``).join('\n\n')}`;
+  return {
+    value: `${descriptionInMarkdown}\n\n${examplesInMarkdown}`,
+  };
+}
+
+function getSignaturesForFunction(
+  name: string,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+) {
+  if (tinymathFunctions[name]) {
+    const stringify = getFunctionSignatureLabel(name, operationDefinitionMap);
+    const documentation = tinymathFunctions[name].help.replace(/\n/g, '\n\n');
+    return [
+      {
+        label: stringify,
+        documentation: { value: documentation },
+        parameters: tinymathFunctions[name].positionalArguments.map((arg) => ({
+          label: arg.name,
+          documentation: arg.optional
+            ? i18n.translate('xpack.lens.formula.optionalArgument', {
+                defaultMessage: 'Optional. Default value is {defaultValue}',
+                values: {
+                  defaultValue: arg.defaultValue,
+                },
+              })
+            : '',
+        })),
+      },
+    ];
+  }
+  if (operationDefinitionMap[name]) {
+    const def = operationDefinitionMap[name];
+
+    const firstParam: monaco.languages.ParameterInformation | null = hasFunctionFieldArgument(name)
+      ? {
+          label: def.input === 'field' ? 'field' : def.input === 'fullReference' ? 'function' : '',
+        }
+      : null;
+
+    const functionLabel = getFunctionSignatureLabel(name, operationDefinitionMap, firstParam);
+    const documentation = getOperationTypeHelp(name, operationDefinitionMap);
+    if ('operationParams' in def && def.operationParams) {
+      return [
+        {
+          label: functionLabel,
+          parameters: [
+            ...(firstParam ? [firstParam] : []),
+            ...def.operationParams.map((arg) => ({
+              label: `${arg.name}=${arg.type}`,
+              documentation: arg.required
+                ? i18n.translate('xpack.lens.formula.requiredArgument', {
+                    defaultMessage: 'Required',
+                  })
+                : '',
+            })),
+          ],
+          documentation,
+        },
+      ];
+    }
+    return [
+      {
+        label: functionLabel,
+        parameters: firstParam ? [firstParam] : [],
+        documentation,
+      },
+    ];
+  }
+  return [];
+}
+
 export function getSignatureHelp(
   expression: string,
   position: number,
@@ -429,73 +515,16 @@ export function getSignatureHelp(
       // reference equality is fine here because of the way the getInfo function works
       const index = tokenInfo.parent.args.findIndex((arg) => arg === tokenInfo.ast);
 
-      if (tinymathFunctions[name]) {
-        const stringify = `${name}(${tinymathFunctions[name].positionalArguments
-          .map((arg) => arg.name)
-          .join(', ')})`;
+      const signatures = getSignaturesForFunction(name, operationDefinitionMap);
+      if (signatures.length) {
         return {
           value: {
-            signatures: [
-              {
-                label: stringify,
-                parameters: tinymathFunctions[name].positionalArguments.map((arg) => ({
-                  label: arg.name,
-                  documentation: arg.optional ? 'Optional' : '',
-                })),
-              },
-            ],
+            signatures,
             activeParameter: index,
             activeSignature: 0,
           },
           dispose: () => {},
         };
-      } else if (operationDefinitionMap[name]) {
-        const def = operationDefinitionMap[name];
-
-        const firstParam: monaco.languages.ParameterInformation | null =
-          name !== 'count'
-            ? {
-                label:
-                  def.input === 'field' ? 'field' : def.input === 'fullReference' ? 'function' : '',
-              }
-            : null;
-        if ('operationParams' in def) {
-          return {
-            value: {
-              signatures: [
-                {
-                  label: `${name}(${
-                    firstParam ? firstParam.label + ', ' : ''
-                  }${def.operationParams!.map((arg) => `${arg.name}=${arg.type}`)})`,
-                  parameters: [
-                    ...(firstParam ? [firstParam] : []),
-                    ...def.operationParams!.map((arg) => ({
-                      label: `${arg.name}=${arg.type}`,
-                      documentation: arg.required ? 'Required' : '',
-                    })),
-                  ],
-                },
-              ],
-              activeParameter: index,
-              activeSignature: 0,
-            },
-            dispose: () => {},
-          };
-        } else {
-          return {
-            value: {
-              signatures: [
-                {
-                  label: `${name}(${firstParam ? firstParam.label : ''})`,
-                  parameters: firstParam ? [firstParam] : [],
-                },
-              ],
-              activeParameter: index,
-              activeSignature: 0,
-            },
-            dispose: () => {},
-          };
-        }
       }
     }
   } catch (e) {
@@ -519,37 +548,10 @@ export function getHover(
     }
 
     const name = tokenInfo.ast.name;
-
-    if (tinymathFunctions[name]) {
-      const stringify = `${name}(${tinymathFunctions[name].positionalArguments
-        .map((arg) => arg.name)
-        .join(', ')})`;
-      return { contents: [{ value: stringify }] };
-    } else if (operationDefinitionMap[name]) {
-      const def = operationDefinitionMap[name];
-
-      const firstParam: monaco.languages.ParameterInformation | null =
-        name !== 'count'
-          ? {
-              label:
-                def.input === 'field' ? 'field' : def.input === 'fullReference' ? 'function' : '',
-            }
-          : null;
-      if ('operationParams' in def) {
-        return {
-          contents: [
-            {
-              value: `${name}(${
-                firstParam ? firstParam.label + ', ' : ''
-              }${def.operationParams!.map((arg) => `${arg.name}=${arg.type}`)})`,
-            },
-          ],
-        };
-      } else {
-        return {
-          contents: [{ value: `${name}(${firstParam ? firstParam.label : ''})` }],
-        };
-      }
+    const signatures = getSignaturesForFunction(name, operationDefinitionMap);
+    if (signatures.length) {
+      const { label, documentation } = signatures[0];
+      return { contents: [{ value: label }, documentation] };
     }
   } catch (e) {
     // do nothing

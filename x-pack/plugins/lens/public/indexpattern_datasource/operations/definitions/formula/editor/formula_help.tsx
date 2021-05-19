@@ -17,12 +17,22 @@ import {
   EuiListGroup,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiMarkdownFormat,
+  EuiTitle,
 } from '@elastic/eui';
 import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { GenericOperationDefinition } from '../../index';
 import { IndexPattern } from '../../../../types';
 import { tinymathFunctions } from '../util';
 import { getPossibleFunctions } from './math_completion';
+import { hasFunctionFieldArgument } from '../validation';
+
+import type {
+  GenericOperationDefinition,
+  IndexPatternColumn,
+  OperationDefinition,
+  ParamEditorProps,
+} from '../../index';
+import type { FormulaIndexPatternColumn } from '../formula';
 
 function FormulaHelp({
   indexPattern,
@@ -65,7 +75,16 @@ function FormulaHelp({
       .sort()
       .map((key) => ({
         label: `${key}`,
-        description: <Markdown markdown={tinymathFunctions[key].help} />,
+        description: (
+          <>
+            <EuiTitle size="s">
+              <h3>{getFunctionSignatureLabel(key, operationDefinitionMap)}</h3>
+            </EuiTitle>
+            <EuiMarkdownFormat>
+              {tinymathFunctions[key].help.replace(/\n/g, '\n\n')}
+            </EuiMarkdownFormat>
+          </>
+        ),
       }))
   );
 
@@ -95,7 +114,16 @@ function FormulaHelp({
       .sort()
       .map((key) => ({
         label: key,
-        description: operationDefinitionMap[key].documentation?.description,
+        description: (
+          <>
+            <EuiTitle size="s">
+              <h3>
+                {key}({operationDefinitionMap[key].documentation?.signature})
+              </h3>
+            </EuiTitle>
+            <Markdown markdown={operationDefinitionMap[key].documentation?.description} />
+          </>
+        ),
       }))
   );
 
@@ -125,7 +153,16 @@ function FormulaHelp({
       .sort()
       .map((key) => ({
         label: key,
-        description: operationDefinitionMap[key].documentation?.description,
+        description: (
+          <>
+            <EuiTitle size="s">
+              <h3>
+                {key}({operationDefinitionMap[key].documentation?.signature})
+              </h3>
+            </EuiTitle>
+            <Markdown markdown={operationDefinitionMap[key].documentation?.description} />
+          </>
+        ),
         checked:
           selectedFunction === `${key}: ${operationDefinitionMap[key].displayName}`
             ? ('on' as const)
@@ -249,3 +286,84 @@ Use the symbols +, -, /, and * to perform basic math.
 }
 
 export const MemoizedFormulaHelp = React.memo(FormulaHelp);
+
+export function getFunctionSignatureLabel(
+  name: string,
+  operationDefinitionMap: ParamEditorProps<FormulaIndexPatternColumn>['operationDefinitionMap'],
+  firstParam?: { label: string | [number, number] } | null
+): string {
+  if (tinymathFunctions[name]) {
+    return `${name}(${tinymathFunctions[name].positionalArguments
+      .map(({ name: argName, optional, type }) => `[${argName}]${optional ? '?' : ''}: ${type}`)
+      .join(', ')})`;
+  }
+  if (operationDefinitionMap[name]) {
+    const def = operationDefinitionMap[name];
+    return `${name}(${def.documentation?.signature})`; // ${firstParam ? firstParam.label : ''})`;
+  }
+  return '';
+}
+
+function getFunctionArgumentsStringified(
+  params: Required<
+    OperationDefinition<IndexPatternColumn, 'field' | 'fullReference'>
+  >['operationParams']
+) {
+  return params
+    .map(
+      ({ name, type: argType, defaultValue = 5 }) =>
+        `${name}=${argType === 'string' ? `"${defaultValue}"` : defaultValue}`
+    )
+    .join(', ');
+}
+
+/**
+ * Get an array of strings containing all possible information about a specific
+ * operation type: examples and infos.
+ */
+export function getHelpTextContent(
+  type: string,
+  operationDefinitionMap: ParamEditorProps<FormulaIndexPatternColumn>['operationDefinitionMap']
+): { description: JSX.Element | string; examples: string[] } {
+  const definition = operationDefinitionMap[type];
+  const description = definition.documentation?.description ?? '';
+
+  // as for the time being just add examples text.
+  // Later will enrich with more information taken from the operation definitions.
+  const examples: string[] = [];
+
+  if (!hasFunctionFieldArgument(type)) {
+    // ideally this should have the same example automation as the operations below
+    examples.push(`${type}()`);
+    return { description, examples };
+  }
+  if (definition.input === 'field') {
+    const mandatoryArgs = definition.operationParams?.filter(({ required }) => required) || [];
+    if (mandatoryArgs.length === 0) {
+      examples.push(`${type}(bytes)`);
+    }
+    if (mandatoryArgs.length) {
+      const additionalArgs = getFunctionArgumentsStringified(mandatoryArgs);
+      examples.push(`${type}(bytes, ${additionalArgs})`);
+    }
+    if (definition.operationParams && mandatoryArgs.length !== definition.operationParams.length) {
+      const additionalArgs = getFunctionArgumentsStringified(definition.operationParams);
+      examples.push(`${type}(bytes, ${additionalArgs})`);
+    }
+  }
+  if (definition.input === 'fullReference') {
+    const mandatoryArgs = definition.operationParams?.filter(({ required }) => required) || [];
+    if (mandatoryArgs.length === 0) {
+      examples.push(`${type}(sum(bytes))`);
+    }
+    if (mandatoryArgs.length) {
+      const additionalArgs = getFunctionArgumentsStringified(mandatoryArgs);
+      examples.push(`${type}(sum(bytes), ${additionalArgs})`);
+    }
+    if (definition.operationParams && mandatoryArgs.length !== definition.operationParams.length) {
+      const additionalArgs = getFunctionArgumentsStringified(definition.operationParams);
+      examples.push(`${type}(sum(bytes), ${additionalArgs})`);
+    }
+  }
+  return { description, examples };
+}

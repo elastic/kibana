@@ -263,7 +263,8 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    */
   hidden?: boolean;
   documentation?: {
-    description: JSX.Element;
+    signature: string;
+    description: string;
     section: 'elasticsearch' | 'calculation';
   };
 }
@@ -277,6 +278,7 @@ interface OperationParam {
   name: string;
   type: string;
   required?: boolean;
+  defaultValue?: string | number;
 }
 
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {

@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
@@ -17,7 +16,6 @@ import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
 } from '../time_scale_utils';
-import { Markdown } from '../../../../../../../src/plugins/kibana_react/public';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
@@ -93,12 +91,11 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   filterable: true,
   documentation: {
     section: 'elasticsearch',
-    description: (
-      <Markdown
-        markdown={i18n.translate('xpack.lens.indexPattern.count.documentation', {
-          defaultMessage: `
-### count([kql]?: string, [lucene]?: string)
-
+    signature: i18n.translate('xpack.lens.indexPattern.count.signature', {
+      defaultMessage: '[kql]?: string, [lucene]?: string',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.count.documentation', {
+      defaultMessage: `
 Calculates the number of documents.
 
 Example: Calculate the number of documents: 
@@ -111,8 +108,6 @@ Example: Calculate the number of documents matching a certain filter:
 count(kql="price > 500")
 \`\`\`
       `,
-        })}
-      />
-    ),
+    }),
   },
 };
