@@ -202,10 +202,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       autoRefreshInterval: action.payload.autoRefreshInterval ?? state.autoRefreshInterval,
     };
   } else if (action.type === 'endpointIsolationStateChanged') {
-    return {
-      ...state,
-      isolateHost: action.payload,
-    };
+    return handleEndpointIsolationStateChanged(state, action);
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<EndpointState> = {
       ...state,
@@ -266,4 +263,14 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
     };
   }
   return state;
+};
+
+const handleEndpointIsolationStateChanged: ImmutableReducer<
+  EndpointState,
+  AppAction & { type: 'endpointIsolationStateChanged' }
+> = (state, action) => {
+  return {
+    ...state!,
+    isolateHost: action.payload,
+  };
 };

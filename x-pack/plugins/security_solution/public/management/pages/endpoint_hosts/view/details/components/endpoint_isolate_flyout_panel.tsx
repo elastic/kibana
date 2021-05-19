@@ -85,7 +85,7 @@ export const EndpointIsolateFlyoutPanel = memo<{
       <BackToEndpointDetailsFlyoutSubHeader endpointId={hostMeta.agent.id} />
 
       <FlyoutBodyNoTopPadding>
-        {wasSuccessful && (
+        {wasSuccessful ? (
           <EndpointIsolateSuccess
             hostName={hostMeta.host.name}
             completeButtonLabel={i18n.translate(
@@ -94,9 +94,7 @@ export const EndpointIsolateFlyoutPanel = memo<{
             )}
             onComplete={handleCancel}
           />
-        )}
-
-        {!wasSuccessful && (
+        ) : (
           <EndpointIsolateForm
             comment={formValues.comment}
             isLoading={isPending}
