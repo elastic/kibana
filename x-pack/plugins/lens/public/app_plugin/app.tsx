@@ -555,23 +555,30 @@ export function App({
     activeData?: Record<string, Datatable>;
   }) => void = React.useCallback(
     ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
+      const batchedStateToUpdate: Partial<LensAppState> = {};
+
       if (isSaveable !== appState.isSaveable) {
-        dispatchSetState({ isSaveable });
-      }
-      if (!_.isEqual(appState.persistedDoc, doc) && !_.isEqual(lastKnownDocRef.current, doc)) {
-        dispatchSetState({ lastKnownDoc: doc });
-      }
-      if (!_.isEqual(activeDataRef.current, activeData)) {
-        dispatchSetState({ activeData });
+        batchedStateToUpdate.isSaveable = isSaveable;
       }
 
-      // Update the cached index patterns if the user made a change to any of them
-      if (
+      if (!_.isEqual(appState.persistedDoc, doc) && !_.isEqual(lastKnownDocRef.current, doc)) {
+        batchedStateToUpdate.lastKnownDoc = doc;
+      }
+      if (!_.isEqual(activeDataRef.current, activeData)) {
+        batchedStateToUpdate.activeData = activeData;
+      }
+
+      if (Object.keys(batchedStateToUpdate).length) {
+        dispatchSetState(batchedStateToUpdate);
+      }
+
+      const hasIndexPatternsChanged =
         appState.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
         filterableIndexPatterns.some(
           (id) => !appState.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
-        )
-      ) {
+        );
+      // Update the cached index patterns if the user made a change to any of them
+      if (hasIndexPatternsChanged) {
         getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
           ({ indexPatterns }) => {
             if (indexPatterns) {
