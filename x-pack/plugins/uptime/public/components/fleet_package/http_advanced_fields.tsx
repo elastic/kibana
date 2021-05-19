@@ -52,6 +52,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
           defaultMessage="Advanced HTTP options"
         />
       }
+      data-test-subj="syntheticsHTTPAdvancedFieldsAccordion"
     >
       <EuiSpacer size="xl" />
       <EuiDescribedFormGroup
@@ -69,6 +70,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             defaultMessage="Configure an optional request to send to the remote host including method, body, and headers."
           />
         }
+        data-test-subj="httpAdvancedFieldsSection"
       >
         <EuiSpacer size="s" />
         <EuiFormRow
@@ -94,6 +96,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
                 configKey: ConfigKeys.USERNAME,
               })
             }
+            data-test-subj="syntheticsUsername"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -119,6 +122,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
                 configKey: ConfigKeys.PASSWORD,
               })
             }
+            data-test-subj="syntheticsPassword"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -144,6 +148,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
                 configKey: ConfigKeys.PROXY_URL,
               })
             }
+            data-test-subj="syntheticsProxyUrl"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -169,6 +174,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
                 configKey: ConfigKeys.REQUEST_METHOD_CHECK,
               })
             }
+            data-test-subj="syntheticsRequestMethod"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -199,6 +205,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
               defaultMessage="A dictionary of additional HTTP headers to send. By default the client will set the User-Agent header to identify itself."
             />
           }
+          data-test-subj="syntheticsRequestHeaders"
         >
           <HeaderField
             contentMode={
@@ -275,6 +282,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
               <EuiCode>http.response.body.headers</EuiCode>
             </>
           }
+          data-test-subj="syntheticsIndexResponseHeaders"
         >
           <EuiCheckbox
             id={'uptimeFleetIndexResponseHeaders'}
@@ -363,6 +371,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
                 configKey: ConfigKeys.RESPONSE_STATUS_CHECK,
               })
             }
+            data-test-subj="syntheticsResponseStatusCheck"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -397,6 +406,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
               defaultMessage="A list of expected response headers."
             />
           }
+          data-test-subj="syntheticsResponseHeaders"
         >
           <HeaderField
             defaultValue={fields[ConfigKeys.RESPONSE_HEADERS_CHECK]}
@@ -436,6 +446,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
                 }),
               [handleInputChange]
             )}
+            data-test-subj="syntheticsResponseBodyCheckPositive"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -464,6 +475,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
                 }),
               [handleInputChange]
             )}
+            data-test-subj="syntheticsResponseBodyCheckNegative"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
