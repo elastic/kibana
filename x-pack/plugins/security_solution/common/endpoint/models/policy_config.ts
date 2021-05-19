@@ -27,6 +27,7 @@ export const policyFactory = (): PolicyConfig => {
       },
       ransomware: {
         mode: ProtectionModes.prevent,
+        supported: true,
       },
       popup: {
         malware: {
@@ -89,6 +90,7 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.windows,
       ransomware: {
         mode: ProtectionModes.off,
+        supported: false,
       },
       popup: {
         ...policy.windows.popup,
@@ -110,6 +112,24 @@ export const policyFactoryWithoutPaidFeatures = (
           message: '',
           enabled: true,
         },
+      },
+    },
+  };
+};
+
+/**
+ * Strips paid features from an existing or new `PolicyConfig` for gold and below license
+ */
+export const policyFactoryWithSupportedFeatures = (
+  policy: PolicyConfig = policyFactory()
+): PolicyConfig => {
+  return {
+    ...policy,
+    windows: {
+      ...policy.windows,
+      ransomware: {
+        ...policy.windows.ransomware,
+        supported: true,
       },
     },
   };
