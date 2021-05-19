@@ -36,11 +36,13 @@ import {
   KibanaReactContextValue,
 } from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
-import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import { DashboardCapabilities, DashboardContainerInput } from '../../types';
+import { PresentationUtilPluginStart } from '../../services/presentation_util';
+import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
+  presentationUtil: PresentationUtilPluginStart;
   SavedObjectFinder: React.ComponentType<any>;
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];
@@ -228,7 +230,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
-          <DashboardViewport container={this} />
+          <this.services.presentationUtil.ContextProvider>
+            <DashboardViewport container={this} />
+          </this.services.presentationUtil.ContextProvider>
         </KibanaContextProvider>
       </I18nProvider>,
       dom

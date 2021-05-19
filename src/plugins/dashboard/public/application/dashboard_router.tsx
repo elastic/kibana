@@ -32,6 +32,7 @@ import {
 
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
 import { KibanaContextProvider } from '../services/kibana_react';
+
 import {
   AppMountParameters,
   CoreSetup,
@@ -84,6 +85,7 @@ export async function mountApp({
     kibanaLegacy: { dashboardConfig },
     savedObjectsTaggingOss,
     visualizations,
+    presentationUtil,
   } = pluginsStart;
 
   const spacesApi = pluginsStart.spacesOss?.isSpacesAvailable ? pluginsStart.spacesOss : undefined;
@@ -215,8 +217,8 @@ export async function mountApp({
 
   const app = (
     <I18nProvider>
-      <Provider store={dashboardStateStore}>
-        <KibanaContextProvider services={dashboardServices}>
+      <KibanaContextProvider services={dashboardServices}>
+        <presentationUtil.ContextProvider>
           <HashRouter>
             <Switch>
               <Route
@@ -233,8 +235,8 @@ export async function mountApp({
               <Route render={renderNoMatch} />
             </Switch>
           </HashRouter>
-        </KibanaContextProvider>
-      </Provider>
+        </presentationUtil.ContextProvider>
+      </KibanaContextProvider>
     </I18nProvider>
   );
 

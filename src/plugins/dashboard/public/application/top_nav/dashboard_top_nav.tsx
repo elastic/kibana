@@ -15,6 +15,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { saveDashboard } from '../lib';
 import { TopNavIds } from './top_nav_ids';
 import { EditorMenu } from './editor_menu';
+import { UI_SETTINGS } from '../../../common';
 import { SavedQuery } from '../../services/data';
 import { DashboardSaveModal } from './save_modal';
 import { showCloneModal } from './show_clone_modal';
@@ -46,10 +47,12 @@ import {
 
 import {
   AddFromLibraryButton,
+  LazyLabsFlyout,
   PrimaryActionButton,
   QuickButtonGroup,
   QuickButtonProps,
   SolutionToolbar,
+  withSuspense,
 } from '../../../../presentation_util/public';
 
 export interface DashboardTopNavState {
@@ -86,6 +89,8 @@ export interface DashboardTopNavProps {
   redirectTo: DashboardRedirect;
 }
 
+const LabsFlyout = withSuspense(LazyLabsFlyout, null);
+
 export function DashboardTopNav({
   dashboardAppState,
   embedSettings,
@@ -117,11 +122,13 @@ export function DashboardTopNav({
 
   const [mounted, setMounted] = useState(true);
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
+  const [isLabsShown, setIsLabsShown] = useState(false);
 
   const lensAlias = visualizations.getAliases().find(({ name }) => name === 'lens');
   const quickButtonVisTypes = ['markdown', 'maps'];
   const stateTransferService = embeddable.getStateTransfer();
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+  const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
   const trackUiMetric = usageCollection?.reportUiCounter.bind(
     usageCollection,
@@ -426,6 +433,12 @@ export function DashboardTopNav({
     if (share) {
       actions[TopNavIds.SHARE] = showShare;
     }
+
+    if (isLabsEnabled) {
+      actions[TopNavIds.LABS] = () => {
+        setIsLabsShown(!isLabsShown);
+      };
+    }
     return actions;
   }, [
     dispatchDashboardStateChange,
@@ -436,6 +449,8 @@ export function DashboardTopNav({
     showShare,
     runClone,
     share,
+    isLabsEnabled,
+    isLabsShown,
   ]);
 
   UseUnmount(() => {
@@ -466,9 +481,10 @@ export function DashboardTopNav({
       dashboardTopNavActions,
       {
         hideWriteControls: dashboardCapabilities.hideWriteControls,
-        isNewDashboard: !savedDashboard.id,
-        isSaveInProgress: state.isSaveInProgress,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
+        isSaveInProgress: state.isSaveInProgress,
+        isNewDashboard: !savedDashboard.id,
+        isLabsEnabled,
       }
     );
 
@@ -552,6 +568,9 @@ export function DashboardTopNav({
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
+      {isLabsEnabled && isLabsShown ? (
+        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+      ) : null}
       {dashboardState.viewMode !== ViewMode.VIEW ? (
         <>
           <EuiHorizontalRule margin="none" />
