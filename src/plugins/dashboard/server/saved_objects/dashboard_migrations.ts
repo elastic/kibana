@@ -233,5 +233,11 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.9.3': flow(migrateMatchAllQuery),
     '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
     ...Object.fromEntries(embeddableMigrations),
+
+    /**
+     * Any dashboard saved object migrations that come after this point will have to be wary of
+     * potentially overwriting embeddable migrations. An example of how to mitigate this follows:
+     */
+    // '7.x': flow(yourNewMigrationFunction, embeddableMigrations['7.x'])
   };
 };
