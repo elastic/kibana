@@ -55,10 +55,14 @@ export class GaugeVis extends Component {
 
   render() {
     const { type, value, max, color } = this.props;
+
+    // if value is empty array, no metrics to display.
+    const formattedValue = value && Array.isArray(value) && !value.length ? 1 : value;
+
     const { scale, translateX, translateY } = this.state;
     const size = 2 * Math.PI * 50;
     const sliceSize = type === 'half' ? 0.6 : 1;
-    const percent = value < max ? value / max : 1;
+    const percent = formattedValue < max ? formattedValue / max : 1;
     const styles = reactcss(
       {
         default: {
@@ -161,6 +165,6 @@ GaugeVis.propTypes = {
   max: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   metric: PropTypes.object,
   reversed: PropTypes.bool,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
   type: PropTypes.oneOf(['half', 'circle']),
 };
