@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import styled from 'styled-components';
 import {
   ExceptionListType,
+  ListSchema,
   ListOperatorTypeEnum as OperatorTypeEnum,
   OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -25,7 +26,6 @@ import { AutocompleteFieldExistsComponent } from '../autocomplete/field_value_ex
 import { AutocompleteFieldMatchComponent } from '../autocomplete/field_value_match';
 import { AutocompleteFieldMatchAnyComponent } from '../autocomplete/field_value_match_any';
 import { AutocompleteFieldListsComponent } from '../autocomplete/field_value_lists';
-import { ListSchema } from '../../../../common';
 import { getEmptyValue } from '../../../common/empty_value';
 
 import {

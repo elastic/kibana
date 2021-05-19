@@ -6,17 +6,18 @@
  */
 
 import {
+  CreateExceptionListItemSchema,
   EntryExists,
   EntryList,
   EntryMatch,
   EntryMatchAny,
   EntryNested,
+  ExceptionListItemSchema,
   ExceptionListType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../../../../common';
 import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';

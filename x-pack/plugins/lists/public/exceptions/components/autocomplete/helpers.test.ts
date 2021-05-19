@@ -6,11 +6,11 @@
  */
 
 import moment from 'moment';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
-import { ListSchema } from '../../../../common';
 
 import * as i18n from './translations';
 import {

@@ -7,12 +7,8 @@
 
 import moment from 'moment';
 
-import { entriesNested } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ExceptionListItemSchema,
-  getEntryValue,
-  getExceptionOperatorSelect,
-} from '../../../../shared_imports';
+import { entriesNested, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { getEntryValue, getExceptionOperatorSelect } from '../../../../shared_imports';
 
 import { formatOperatingSystems } from '../helpers';
 import type { FormattedEntry, BuilderEntry, DescriptionListItem } from '../types';

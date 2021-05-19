@@ -7,9 +7,8 @@
 
 import dateMath from '@elastic/datemath';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { Type } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListSchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { ListSchema } from '../../../../common';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 
 import {

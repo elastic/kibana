@@ -11,19 +11,17 @@ import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
 import {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
   ExceptionListType,
   NamespaceType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
   OsTypeArray,
   entriesNested,
+  exceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
-  exceptionListItemSchema,
-} from '../../../../common/schemas';
 import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { AndOrBadge } from '../and_or_badge';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SortFieldOrUndefined } from '../../../common/schemas';
+import { SortFieldOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getSourceWithTieBreaker = ({
   sortField,

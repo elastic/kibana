@@ -6,17 +6,18 @@
  */
 
 import type {
+  CreateExceptionListItemSchema,
   Entry,
   EntryExists,
   EntryMatch,
   EntryMatchAny,
   EntryMatchWildcard,
   EntryNested,
+  ExceptionListItemSchema,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../../../../common';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { OperatorOption } from '../autocomplete/types';
 

@@ -9,27 +9,25 @@ import uuid from 'uuid';
 import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
+  CreateExceptionListItemSchema,
   EntriesArray,
   Entry,
   EntryNested,
+  ExceptionListItemSchema,
   ExceptionListType,
+  ListSchema,
   NamespaceType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
   OsTypeArray,
+  createExceptionListItemSchema,
   entriesList,
   entriesNested,
   entry,
+  exceptionListItemSchema,
   nestedEntryItem,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
-  ListSchema,
-  createExceptionListItemSchema,
-  exceptionListItemSchema,
-} from '../../../../common/schemas';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
   EXCEPTION_OPERATORS,

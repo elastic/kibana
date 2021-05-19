@@ -27,7 +27,7 @@ import {
   filterFieldToList,
 } from './helpers';
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
-import { ListSchema } from '../../../../../lists/common';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('helpers', () => {
   // @ts-ignore

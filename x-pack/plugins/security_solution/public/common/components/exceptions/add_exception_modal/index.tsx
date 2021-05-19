@@ -29,6 +29,8 @@ import type {
   ExceptionListType,
   OsTypeArray,
   OsType,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   hasEqlSequenceQuery,
@@ -36,11 +38,7 @@ import {
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  ExceptionBuilder,
-} from '../../../../../public/shared_imports';
+import { ExceptionBuilder } from '../../../../../public/shared_imports';
 
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
