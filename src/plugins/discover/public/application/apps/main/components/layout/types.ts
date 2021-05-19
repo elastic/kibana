@@ -16,14 +16,10 @@ import { ISearchSource } from '../../../../../../../data/public';
 import { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { SavedSearchSubject } from '../../services/use_saved_search';
-import { ChartSubject } from '../../services/use_saved_search_chart';
-import { TotalHitsSubject } from '../../services/use_saved_search_total_hits';
 import { DiscoverServices } from '../../../../../build_services';
 import { SavedSearch } from '../../../../../saved_searches';
 
 export interface DiscoverLayoutProps {
-  chart$: ChartSubject;
-  hits$: TotalHitsSubject;
   indexPattern: IndexPattern;
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
   refetch$: Subject<unknown>;

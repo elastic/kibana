@@ -50,7 +50,7 @@ export function updateSearchSource({
 
   if (volatileSearchSource) {
     volatileSearchSource
-      .setField('trackTotalHits', false)
+      .setField('trackTotalHits', true)
       .setField('size', uiSettings.get(SAMPLE_SIZE_SETTING))
       .setField('sort', usedSort)
       .setField('highlightAll', true)

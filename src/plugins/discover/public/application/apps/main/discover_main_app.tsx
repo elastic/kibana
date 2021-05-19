@@ -93,7 +93,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * Data fetching logic
    */
 
-  const { refetch$, chart$, hits$, shouldSearchOnPageLoad, savedSearch$ } = useSavedSearchData({
+  const { shouldSearchOnPageLoad, savedSearch$, refetch$ } = useSavedSearchData({
     indexPattern,
     savedSearch,
     searchSessionManager,
@@ -149,12 +149,10 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
 
   return (
     <DiscoverLayoutMemoized
-      chart$={chart$}
-      hits$={hits$}
       indexPattern={indexPattern}
       indexPatternList={indexPatternList}
-      refetch$={refetch$}
       resetQuery={resetQuery}
+      refetch$={refetch$}
       navigateTo={navigateTo}
       savedSearch={savedSearch}
       savedSearch$={savedSearch$}

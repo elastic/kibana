@@ -6,41 +6,52 @@
  * Side Public License, v 1.
  */
 import { useMemo, useEffect, useRef, useCallback } from 'react';
-import { merge, Subject, BehaviorSubject, forkJoin, of } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import { merge, Subject, BehaviorSubject } from 'rxjs';
 import { debounceTime, tap, filter } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { IndexPattern, isCompleteResponse, ISearchSource } from '../../../../../../data/common';
+import {
+  IndexPattern,
+  isCompleteResponse,
+  SearchSource,
+  tabifyAggResponse,
+} from '../../../../../../data/common';
 import { SavedSearch } from '../../../../saved_searches';
 import { AppState, GetStateReturn } from './discover_state';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../../inspector/public';
 import { fetchStatuses } from '../../../components/constants';
-import { ChartSubject, useSavedSearchChart } from './use_saved_search_chart';
-import { TotalHitsSubject, useSavedSearchTotalHits } from './use_saved_search_total_hits';
-import { useSavedSearchDocuments } from './use_saved_search_documents';
-import { AutoRefreshDoneFn } from '../../../../../../data/public';
+import { AutoRefreshDoneFn, search } from '../../../../../../data/public';
 import { calcFieldCounts } from '../utils/calc_field_counts';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../../common';
 import { validateTimeRange } from '../utils/validate_time_range';
+import { updateSearchSource } from '../utils/update_search_source';
+import { SortOrder } from '../../../../saved_searches/types';
+import { applyAggsToSearchSource, getDimensions } from '../utils';
+import { buildPointSeriesData, Chart } from '../components/chart/point_series';
+import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
 
 export interface UseSavedSearch {
-  chart$: ChartSubject;
-  hits$: TotalHitsSubject;
   refetch$: Subject<unknown>;
   savedSearch$: SavedSearchSubject;
   shouldSearchOnPageLoad: () => boolean;
 }
 
-export type SavedSearchSubject = BehaviorSubject<{
+export interface SavedSearchSubjectMessage {
+  bucketInterval?: TimechartBucketInterval;
+  chartData?: Chart;
   fetchCounter?: number;
   fetchError?: Error;
   fieldCounts?: Record<string, number>;
+  hits?: number;
   inspectorAdapters?: { requests: RequestAdapter };
   rows?: ElasticSearchHit[];
   state: string;
-}>;
+}
+
+export type SavedSearchSubject = BehaviorSubject<SavedSearchSubjectMessage>;
 
 export const useSavedSearch = ({
   indexPattern,
@@ -55,7 +66,7 @@ export const useSavedSearch = ({
   indexPattern: IndexPattern;
   savedSearch: SavedSearch;
   searchSessionManager: DiscoverSearchSessionManager;
-  searchSource: ISearchSource;
+  searchSource: SearchSource;
   services: DiscoverServices;
   state: AppState;
   stateContainer: GetStateReturn;
@@ -99,25 +110,6 @@ export const useSavedSearch = ({
   });
   const refetch$ = useMemo(() => new Subject(), []);
 
-  const { fetch$: chart$, fetch: fetchChart } = useSavedSearchChart({
-    data,
-    interval: state.interval!,
-    savedSearch,
-  });
-
-  const { fetch$: hits$, fetch: fetchHits } = useSavedSearchTotalHits({
-    data,
-    savedSearch,
-  });
-
-  const { fetch: fetchDocs } = useSavedSearchDocuments({
-    services,
-    indexPattern,
-    useNewFieldsApi,
-    searchSource,
-    stateContainer,
-  });
-
   const fetchAll = useCallback(
     (reset = false) => {
       if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
@@ -144,38 +136,76 @@ export const useSavedSearch = ({
         });
       }
 
-      const fetchVars = {
-        abortController: refs.current.abortController,
-        searchSessionId: searchSessionManager.getNextSearchSessionId(),
-        inspectorAdapters,
-      };
+      const { sort } = stateContainer.appStateContainer.getState();
+      updateSearchSource({
+        volatileSearchSource: searchSource,
+        indexPattern,
+        services,
+        sort: sort as SortOrder[],
+        useNewFieldsApi,
+        showUnmappedFields: useNewFieldsApi,
+      });
+      const chartAggConfigs =
+        indexPattern.timeFieldName && !state.hideChart
+          ? applyAggsToSearchSource(searchSource, state.interval!, data)
+          : undefined;
 
-      forkJoin({
-        docs: fetchDocs(fetchVars),
-        chart: indexPattern.timeFieldName && !state.hideChart ? fetchChart(fetchVars) : of(null),
-        totalHits: fetchHits(fetchVars),
-      }).subscribe(
+      if (!chartAggConfigs) {
+        searchSource.removeField('aggs');
+      }
+
+      const searchSourceFetch$ = searchSource.fetch$({
+        abortSignal: refs.current.abortController.signal,
+        sessionId: searchSessionManager.getNextSearchSessionId(),
+        inspector: {
+          adapter: inspectorAdapters.requests,
+          title: i18n.translate('discover.inspectorRequestDataTitle', {
+            defaultMessage: 'data',
+          }),
+          description: i18n.translate('discover.inspectorRequestDescriptionDocument', {
+            defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+          }),
+        },
+      });
+
+      searchSourceFetch$.subscribe(
         (res) => {
-          if (!isCompleteResponse(res.docs)) {
+          if (!isCompleteResponse(res)) {
             return;
           }
-          const documents = res.docs.rawResponse.hits.hits;
-          if (documents) {
-            const newFieldCounts = calcFieldCounts(
-              reset ? {} : refs.current.fieldCounts,
-              documents,
-              indexPattern
-            );
+          const documents = res.rawResponse.hits.hits;
 
-            savedSearch$.next({
-              state: fetchStatuses.COMPLETE,
-              rows: documents,
-              inspectorAdapters,
-              fieldCounts: newFieldCounts,
-            });
-            refs.current.fieldCounts = newFieldCounts;
-            refs.current.fetchStatus = fetchStatuses.COMPLETE;
+          const newFieldCounts = calcFieldCounts(
+            reset ? {} : refs.current.fieldCounts,
+            documents,
+            indexPattern
+          );
+
+          const message: SavedSearchSubjectMessage = {
+            state: fetchStatuses.COMPLETE,
+            rows: documents,
+            inspectorAdapters,
+            fieldCounts: newFieldCounts,
+            hits: res.rawResponse.hits.total as number,
+          };
+
+          refs.current.fieldCounts = newFieldCounts;
+          refs.current.fetchStatus = fetchStatuses.COMPLETE;
+
+          if (chartAggConfigs) {
+            const bucketAggConfig = chartAggConfigs!.aggs[1];
+            const tabifiedData = tabifyAggResponse(chartAggConfigs, res.rawResponse);
+            const dimensions = getDimensions(chartAggConfigs, data);
+            if (!dimensions) {
+              return;
+            }
+            message.bucketInterval =
+              bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
+                ? bucketAggConfig.buckets?.getInterval()
+                : undefined;
+            message.chartData = buildPointSeriesData(tabifiedData, dimensions);
           }
+          savedSearch$.next(message);
         },
         (error) => {
           if (error instanceof Error && error.name === 'AbortError') return;
@@ -194,16 +224,17 @@ export const useSavedSearch = ({
       );
     },
     [
-      data.search,
-      fetchChart,
-      fetchDocs,
-      fetchHits,
-      indexPattern,
-      savedSearch$,
-      searchSessionManager,
-      services.toastNotifications,
-      state.hideChart,
       timefilter,
+      services,
+      stateContainer.appStateContainer,
+      searchSource,
+      indexPattern,
+      useNewFieldsApi,
+      state.hideChart,
+      state.interval,
+      data,
+      searchSessionManager,
+      savedSearch$,
     ]
   );
 
@@ -272,8 +303,6 @@ export const useSavedSearch = ({
   }, [refetch$, state.interval, state.sort, state]);
 
   return {
-    chart$,
-    hits$,
     refetch$,
     savedSearch$,
     shouldSearchOnPageLoad,

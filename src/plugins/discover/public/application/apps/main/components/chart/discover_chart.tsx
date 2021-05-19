@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { IUiSettingsClient } from 'kibana/public';
@@ -17,8 +17,6 @@ import { SavedSearch } from '../../../../../saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { TimechartBucketInterval } from '../timechart_header/timechart_header';
 import { Chart as IChart } from './point_series';
-import { ChartSubject } from '../../services/use_saved_search_chart';
-import { TotalHitsSubject } from '../../services/use_saved_search_total_hits';
 import { DiscoverHistogram } from './histogram';
 
 const TimechartHeaderMemoized = React.memo(TimechartHeader);
@@ -26,8 +24,9 @@ const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
 export function DiscoverChart({
   config,
   data,
-  chart$,
-  hits$,
+  bucketInterval,
+  chartData,
+  hits,
   isLegacy,
   resetQuery,
   savedSearch,
@@ -37,8 +36,9 @@ export function DiscoverChart({
 }: {
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
-  chart$: ChartSubject;
-  hits$: TotalHitsSubject;
+  bucketInterval: TimechartBucketInterval;
+  chartData: IChart;
+  hits: number;
   indexPattern: IndexPattern;
   isLegacy: boolean;
   resetQuery: () => void;
@@ -47,9 +47,6 @@ export function DiscoverChart({
   stateContainer: GetStateReturn;
   timefield?: string;
 }) {
-  const [bucketInterval, setBucketInverval] = useState<TimechartBucketInterval | undefined>();
-  const [chartData, setChartData] = useState<undefined | IChart>(undefined);
-
   const toggleHideChart = useCallback(() => {
     const newState = { ...state, hideChart: !state.hideChart };
     stateContainer.setAppState(newState);
@@ -74,19 +71,6 @@ export function DiscoverChart({
     },
     [data]
   );
-  useEffect(() => {
-    const subscription = chart$.subscribe({
-      next: (next) => {
-        if (next.bucketInterval) {
-          setBucketInverval(next.bucketInterval);
-        }
-        if (next.data) {
-          setChartData(next.data);
-        }
-      },
-    });
-    return () => subscription.unsubscribe();
-  }, [chart$]);
 
   return (
     <EuiFlexGroup direction="column" alignItems="stretch" gutterSize="none" responsive={false}>
@@ -97,7 +81,7 @@ export function DiscoverChart({
             className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
           >
             <HitsCounter
-              hits$={hits$}
+              hits={hits}
               showResetButton={!!(savedSearch && savedSearch.id)}
               onResetQuery={resetQuery}
             />

@@ -42,8 +42,9 @@ import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
-import { InspectorSession, RequestAdapter } from '../../../../../../../inspector/public';
+import { InspectorSession } from '../../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
+import { SavedSearchSubjectMessage } from '../../services/use_saved_search';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -52,8 +53,6 @@ const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 
 export function DiscoverLayout({
-  chart$,
-  hits$,
   indexPattern,
   indexPatternList,
   navigateTo,
@@ -82,14 +81,7 @@ export function DiscoverLayout({
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
 
-  const [fetchState, setFetchState] = useState<{
-    state: string;
-    fetchCounter: number;
-    inspectorAdapters?: { requests: RequestAdapter };
-    fieldCounts: Record<string, number>;
-    fetchError?: Error;
-    rows: ElasticSearchHit[];
-  }>({
+  const [fetchState, setFetchState] = useState<SavedSearchSubjectMessage>({
     state: savedSearch$.getValue().state,
     fetchCounter: 0,
     fieldCounts: {},
@@ -102,7 +94,8 @@ export function DiscoverLayout({
       if (
         (next.state && next.state !== fetchState.state) ||
         (next.fetchCounter && next.fetchCounter !== fetchState.fetchCounter) ||
-        (next.rows && next.rows !== fetchState.rows)
+        (next.rows && next.rows !== fetchState.rows) ||
+        (next.chartData && next.chartData !== fetchState.chartData)
       ) {
         setFetchState({ ...fetchState, ...next });
       }
@@ -133,7 +126,7 @@ export function DiscoverLayout({
     [useNewFieldsApi]
   );
 
-  const resultState = useMemo(() => getResultState(fetchStatus, rows), [fetchStatus, rows]);
+  const resultState = useMemo(() => getResultState(fetchStatus, rows!), [fetchStatus, rows]);
 
   const updateQuery = useCallback(
     (_payload, isUpdate?: boolean) => {
@@ -275,8 +268,8 @@ export function DiscoverLayout({
               <SidebarMemoized
                 config={config}
                 columns={columns}
-                fieldCounts={fetchState.fieldCounts}
-                hits={rows}
+                fieldCounts={fetchState.fieldCounts!}
+                hits={rows!}
                 indexPatternList={indexPatternList}
                 indexPatterns={indexPatterns}
                 onAddField={onAddColumn}
@@ -344,10 +337,11 @@ export function DiscoverLayout({
                   >
                     <EuiFlexItem grow={false}>
                       <DiscoverChartMemoized
-                        chart$={chart$}
                         config={config}
+                        chartData={fetchState.chartData!}
+                        bucketInterval={fetchState.bucketInterval!}
                         data={data}
-                        hits$={hits$}
+                        hits={fetchState.hits!}
                         indexPattern={indexPattern}
                         isLegacy={isLegacy}
                         state={state}
