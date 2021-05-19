@@ -12,10 +12,10 @@ import {
   ExceptionListItemSchema,
   getEntryValue,
   getExceptionOperatorSelect,
-} from '../../../../lists_plugin_deps';
+} from '../../../../shared_imports';
 
 import { formatOperatingSystems } from '../helpers';
-import { FormattedEntry, BuilderEntry, DescriptionListItem } from '../types';
+import type { FormattedEntry, BuilderEntry, DescriptionListItem } from '../types';
 import * as i18n from '../translations';
 
 /**

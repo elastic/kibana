@@ -95,6 +95,9 @@ export const sampleAreaVis = {
           color: '#E7664C',
         },
         labels: {},
+        palette: {
+          name: 'default',
+        },
       },
     },
     editorConfig: {
@@ -255,6 +258,9 @@ export const sampleAreaVis = {
       width: 1,
       style: 'full',
       color: '#E7664C',
+    },
+    palette: {
+      name: 'default',
     },
     labels: {},
     dimensions: {
