@@ -8,6 +8,12 @@
 import type { KibanaFeature, SubFeaturePrivilegeConfig } from '../../common';
 import type { LicenseType } from '../../../licensing/server';
 
+/**
+ * Utility for iterating through all sub-feature privileges belonging to a specific feature.
+ *
+ * @param feature the feature whose sub-feature privileges to iterate through.
+ * @param licenseType the current license.
+ */
 export type SubFeaturePrivilegeIterator = (
   feature: KibanaFeature,
   licenseType: LicenseType
