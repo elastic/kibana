@@ -39,7 +39,6 @@ export const EntityByExpression: FunctionComponent<Props> = ({
   indexFields,
   isInvalid,
 }) => {
-
   const usePrevious = <T extends unknown>(value: T): T | undefined => {
     const ref = useRef<T>();
     useEffect(() => {
