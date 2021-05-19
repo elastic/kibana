@@ -43,34 +43,36 @@ export type SavedSearchSubject = BehaviorSubject<{
 }>;
 
 export const useSavedSearch = ({
-  services,
-  searchSessionManager,
-  state,
   indexPattern,
   savedSearch,
+  searchSessionManager,
   searchSource,
+  services,
+  state,
   stateContainer,
   useNewFieldsApi,
 }: {
-  services: DiscoverServices;
-  searchSessionManager: DiscoverSearchSessionManager;
-  state: AppState;
   indexPattern: IndexPattern;
   savedSearch: SavedSearch;
+  searchSessionManager: DiscoverSearchSessionManager;
   searchSource: ISearchSource;
+  services: DiscoverServices;
+  state: AppState;
   stateContainer: GetStateReturn;
   useNewFieldsApi: boolean;
 }): UseSavedSearch => {
+  const { data, filterManager, timefilter, uiSettings } = services;
+
   const shouldSearchOnPageLoad = useCallback(() => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
-      services.uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
+      uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch.id !== undefined ||
-      services.timefilter.getRefreshInterval().pause === false ||
+      timefilter.getRefreshInterval().pause === false ||
       searchSessionManager.hasSearchSessionIdInURL()
     );
-  }, [services.uiSettings, savedSearch.id, searchSessionManager, services.timefilter]);
+  }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
 
   const savedSearch$: SavedSearchSubject = useMemo(
     () =>
@@ -79,19 +81,23 @@ export const useSavedSearch = ({
       }),
     [shouldSearchOnPageLoad]
   );
-  const cache = useRef({
+
+  const refs = useRef<{
+    abortController?: AbortController;
+    appState: AppState;
+    // handler emitted by `timefilter.getAutoRefreshFetch$()`
+    // to notify when data completed loading and to start a new autorefresh loop
+    autoRefreshDoneCb?: AutoRefreshDoneFn;
+    fetchCounter: number;
+    fetchStatus: string;
+    fieldCounts: Record<string, number>;
+  }>({
     fetchCounter: 0,
     fieldCounts: {},
     appState: state,
     fetchStatus: shouldSearchOnPageLoad() ? fetchStatuses.LOADING : fetchStatuses.UNINITIALIZED,
   });
-  const abortControllerRef = useRef<AbortController | undefined>();
-  const { data, filterManager, timefilter } = services;
   const refetch$ = useMemo(() => new Subject(), []);
-
-  // handler emitted by `timefilter.getAutoRefreshFetch$()`
-  // to notify when data completed loading and to start a new autorefresh loop
-  const autoRefreshDoneCb = useRef<undefined | AutoRefreshDoneFn>(undefined);
 
   const { fetch$: chart$, fetch: fetchChart } = useSavedSearchChart({
     data,
@@ -114,24 +120,23 @@ export const useSavedSearch = ({
 
   const fetchAll = useCallback(
     (resetFieldCounts = false) => {
-      if (!validateTimeRange(services.timefilter.getTime(), services.toastNotifications)) {
+      if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
         return Promise.reject();
       }
       const inspectorAdapters = { requests: new RequestAdapter() };
-      cache.current.fetchStatus = fetchStatuses.LOADING;
 
-      if (abortControllerRef.current) abortControllerRef.current.abort();
-      abortControllerRef.current = new AbortController();
-      const searchSessionId = searchSessionManager.getNextSearchSessionId();
+      if (refs.current.abortController) refs.current.abortController.abort();
+      refs.current.abortController = new AbortController();
 
+      refs.current.fetchStatus = fetchStatuses.LOADING;
       savedSearch$.next({
         state: fetchStatuses.LOADING,
-        fetchCounter: ++cache.current.fetchCounter,
+        fetchCounter: ++refs.current.fetchCounter,
       });
 
       const fetchVars = {
-        abortController: abortControllerRef.current,
-        searchSessionId,
+        abortController: refs.current.abortController,
+        searchSessionId: searchSessionManager.getNextSearchSessionId(),
         inspectorAdapters,
       };
 
@@ -143,12 +148,13 @@ export const useSavedSearch = ({
               totalHits: fetchHits(fetchVars),
             })
           : forkJoin({ docs: fetchDocs(fetchVars), totalHits: fetchHits(fetchVars) });
+
       fetches$.subscribe(
         (res) => {
           const documents = res.docs.rawResponse.hits.hits;
           if (documents) {
             const newFieldCounts = calcFieldCounts(
-              resetFieldCounts ? {} : cache.current.fieldCounts,
+              resetFieldCounts ? {} : refs.current.fieldCounts,
               documents,
               indexPattern
             );
@@ -159,13 +165,14 @@ export const useSavedSearch = ({
               inspectorAdapters,
               fieldCounts: newFieldCounts,
             });
-            cache.current.fieldCounts = newFieldCounts;
+            refs.current.fieldCounts = newFieldCounts;
+            refs.current.fetchStatus = fetchStatuses.COMPLETE;
           }
         },
         (error) => {
           if (error instanceof Error && error.name === 'AbortError') return;
-          cache.current.fetchStatus = fetchStatuses.ERROR;
-          services.data.search.showError(error);
+          data.search.showError(error);
+          refs.current.fetchStatus = fetchStatuses.ERROR;
           savedSearch$.next({
             state: fetchStatuses.ERROR,
             inspectorAdapters,
@@ -173,22 +180,22 @@ export const useSavedSearch = ({
           });
         },
         () => {
-          autoRefreshDoneCb.current?.();
-          autoRefreshDoneCb.current = undefined;
+          refs.current.autoRefreshDoneCb?.();
+          refs.current.autoRefreshDoneCb = undefined;
         }
       );
     },
     [
-      services.timefilter,
-      services.toastNotifications,
-      services.data.search,
-      searchSessionManager,
-      savedSearch$,
-      indexPattern,
-      state.hideChart,
-      fetchDocs,
+      data.search,
       fetchChart,
+      fetchDocs,
       fetchHits,
+      indexPattern,
+      savedSearch$,
+      searchSessionManager,
+      services.toastNotifications,
+      state.hideChart,
+      timefilter,
     ]
   );
 
@@ -199,9 +206,9 @@ export const useSavedSearch = ({
       timefilter.getFetch$(),
       timefilter.getAutoRefreshFetch$().pipe(
         tap((done) => {
-          autoRefreshDoneCb.current = done;
+          refs.current.autoRefreshDoneCb = done;
         }),
-        filter(() => cache.current.fetchStatus !== fetchStatuses.LOADING)
+        filter(() => refs.current.fetchStatus !== fetchStatuses.LOADING)
       ),
       data.query.queryString.getUpdates$(),
       searchSessionManager.newSearchSessionIdFromURL$
@@ -234,23 +241,24 @@ export const useSavedSearch = ({
     fetchAll,
   ]);
 
+  /**
+   * Track state changes that should trigger a fetch
+   */
   useEffect(() => {
     let triggerFetch = false;
     let resetFieldCounts = false;
-    if (state.hideChart !== cache.current.appState.hideChart && !state.hideChart) {
+    if (state.hideChart !== refs.current.appState.hideChart && !state.hideChart) {
+      triggerFetch = true;
+    } else if (state.interval !== refs.current.appState.interval) {
+      triggerFetch = true;
+    } else if (!isEqual(state.sort, refs.current.appState.sort)) {
       triggerFetch = true;
     }
-    if (state.interval !== cache.current.appState.interval) {
-      triggerFetch = true;
-    }
-    if (!isEqual(state.sort, cache.current.appState.sort)) {
-      triggerFetch = true;
-    }
-    if (!isEqual(state.index, cache.current.appState.index)) {
+    if (!isEqual(state.index, refs.current.appState.index)) {
       triggerFetch = true;
       resetFieldCounts = true;
     }
-    cache.current.appState = state;
+    refs.current.appState = state;
     if (triggerFetch) {
       refetch$.next(resetFieldCounts);
     }
