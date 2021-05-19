@@ -207,12 +207,14 @@ export function registerSnapshotsRoutes({
           await clusterClient.asCurrentUser.snapshot
             .delete({ snapshot, repository })
             .then(() => response.itemsDeleted.push({ snapshot, repository }))
-            .catch((e) =>
+            .catch((e) => {
               response.errors.push({
                 id: { snapshot, repository },
-                error: wrapEsError(e),
+                // error: wrapEsError(e),
+                // TODO: Test that we're still surfacing other errors correctly
+                error: handleEsError({ error: e, response: res }),
               })
-            );
+            });
         }
 
         return res.ok({ body: response });

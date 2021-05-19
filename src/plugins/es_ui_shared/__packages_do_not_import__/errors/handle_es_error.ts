@@ -27,6 +27,16 @@ export const handleEsError = ({
   response,
   handleCustomError,
 }: EsErrorHandlerParams): IKibanaResponse => {
+  // Handle timeout errors due to the ES request exceeding the `elasticsearch.requestTimeout` Kibana setting.
+  if (error.name === 'TimeoutError') {
+    return response.customError({
+      statusCode: 408,
+      body: {
+        message: 'Request to Elasticsearch timed out',
+      },
+    });
+  }
+  
   // error.name is slightly better in terms of performance, since all errors now have name property
   if (error.name === 'ResponseError') {
     // The consumer may sometimes want to provide a custom response

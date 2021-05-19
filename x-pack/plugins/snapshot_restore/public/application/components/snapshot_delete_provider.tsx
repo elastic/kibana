@@ -31,6 +31,23 @@ type OnSuccessCallback = (
   snapshotsDeleted: Array<{ snapshot: string; repository: string }>
 ) => void;
 
+const extractErrorDetails = (errorResponse: any): string => {
+  const {
+    error: {
+      status,
+      payload: {
+        message,
+      }
+    },
+    id: {
+      repository,
+      snapshot,
+    }
+  } = errorResponse;
+
+  return `${status} error with snapshot ${snapshot} in repository ${repository} - ${message}`;
+};
+
 export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
   const { i18n } = useServices();
   const toastNotifications = useToastNotifications();
@@ -91,20 +108,45 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
       // `error` is generic server error
       // `data.errors` are specific errors with removing particular snapshot(s)
       if (error || (errors && errors.length)) {
+        // TODO: Test how generic "error" is surfaced
         const hasMultipleErrors =
           (errors && errors.length > 1) || (error && snapshotsToDelete.length > 1);
-        const errorMessage = hasMultipleErrors
-          ? i18n.translate('xpack.snapshotRestore.deleteSnapshot.errorMultipleNotificationTitle', {
-              defaultMessage: 'Error deleting {count} snapshots',
-              values: {
-                count: (errors && errors.length) || snapshotsToDelete.length,
-              },
-            })
-          : i18n.translate('xpack.snapshotRestore.deleteSnapshot.errorSingleNotificationTitle', {
-              defaultMessage: "Error deleting snapshot '{name}'",
-              values: { name: (errors && errors[0].id.snapshot) || snapshotsToDelete[0].snapshot },
-            });
-        toastNotifications.addDanger(errorMessage);
+      
+        let errorMessage;
+        let errorDetails = i18n.translate('xpack.snapshotRestore.errorDetailsUnavailableMessage', {
+          defaultMessage: 'Error details unavailable',
+        });
+
+        if (hasMultipleErrors) {
+          errorMessage = i18n.translate('xpack.snapshotRestore.deleteSnapshot.errorMultipleNotificationTitle', {
+            defaultMessage: 'Error deleting {count} snapshots',
+            values: {
+              count: (errors && errors.length) || snapshotsToDelete.length,
+            },
+          });
+
+          errorDetails = errors?.reduce((accum: string[], errorResponse: any, index: number) => {
+            return accum.concat(`${index + 1 }: ${extractErrorDetails(errorResponse)}`);
+          }, []).join('\n');
+        } else {
+          errorMessage = i18n.translate('xpack.snapshotRestore.deleteSnapshot.errorSingleNotificationTitle', {
+            defaultMessage: "Error deleting snapshot '{name}'",
+            values: { name: (errors && errors[0].id.snapshot) || snapshotsToDelete[0].snapshot },
+          });
+
+          if (errors) {
+            errorDetails = extractErrorDetails(errors[0]);
+          }
+        }
+
+        const adaptedError = new Error(errorMessage);
+        adaptedError.stack = errorDetails;
+
+        toastNotifications.addError(adaptedError, {
+          title: i18n.translate('xpack.snapshotRestore.errorModalTitle', {
+            defaultMessage: 'Snapshot and Restore error',
+          }),
+        });
       }
     });
   };
