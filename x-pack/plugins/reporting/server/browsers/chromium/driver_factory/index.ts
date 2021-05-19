@@ -76,8 +76,8 @@ export class HeadlessChromiumDriverFactory {
 
       let browser: puppeteer.Browser;
       let page: puppeteer.Page;
-      let devTools: puppeteer.CDPSession;
-      let startMetrics: Metrics;
+      let devTools: puppeteer.CDPSession | undefined;
+      let startMetrics: Metrics | undefined;
 
       try {
         browser = await puppeteer.launch({
@@ -117,15 +117,19 @@ export class HeadlessChromiumDriverFactory {
       const childProcess = {
         async kill() {
           try {
-            const endMetrics = await devTools.send('Performance.getMetrics');
-            const { cpu, cpuInPercentage, memory, memoryInMegabytes } = getMetrics(
-              startMetrics,
-              endMetrics
-            );
+            if (devTools && startMetrics) {
+              const endMetrics = await devTools.send('Performance.getMetrics');
+              const { cpu, cpuInPercentage, memory, memoryInMegabytes } = getMetrics(
+                startMetrics,
+                endMetrics
+              );
 
-            apm.currentTransaction?.setLabel('cpu', cpu, false);
-            apm.currentTransaction?.setLabel('memory', memory, false);
-            logger.debug(`Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`);
+              apm.currentTransaction?.setLabel('cpu', cpu, false);
+              apm.currentTransaction?.setLabel('memory', memory, false);
+              logger.debug(
+                `Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`
+              );
+            }
           } catch (error) {
             logger.error(error);
           }
