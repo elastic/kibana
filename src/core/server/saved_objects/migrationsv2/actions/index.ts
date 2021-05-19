@@ -868,7 +868,6 @@ export const createIndex = (
           // started
           timeout: DEFAULT_TIMEOUT,
           body: {
-            // @ts-expect-error @elastic-elasticsearch types don't support nested properties
             mappings,
             aliases: aliasesObject,
             settings: {
@@ -963,7 +962,6 @@ export const updateAndPickupMappings = (
       .putMapping({
         index,
         timeout: DEFAULT_TIMEOUT,
-        // @ts-expect-error @elastic-elasticsearch types don't support nested properties
         body: mappings,
       })
       .then((res) => {

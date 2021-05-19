@@ -97,9 +97,17 @@ export interface SavedObjectsMappingProperties {
  *
  * @public
  */
-export type SavedObjectsFieldMapping =
-  | SavedObjectsCoreFieldMapping
-  | SavedObjectsComplexFieldMapping;
+export type SavedObjectsFieldMapping = estypes.MappingProperty & {
+  /**
+   * The dynamic property of the mapping, either `false` or `'strict'`. If
+   * unspecified `dynamic: 'strict'` will be inherited from the top-level
+   * index mappings.
+   *
+   * Note: To limit the number of mapping fields Saved Object types should
+   * *never* use `dynamic: true`.
+   */
+  dynamic?: false | 'strict';
+};
 
 /** @internal */
 export interface IndexMapping {
@@ -114,42 +122,4 @@ export interface IndexMappingMeta {
   // with each key being a root-level mapping property, and each value being
   // the md5 hash of that mapping's value when the index was created.
   migrationMappingPropertyHashes?: { [k: string]: string };
-}
-
-/**
- * See {@link SavedObjectsFieldMapping} for documentation.
- *
- * @public
- */
-export type SavedObjectsCoreFieldMapping = estypes.MappingProperty & {
-  /**
-   * The dynamic property of the mapping, either `false` or `'strict'`. If
-   * unspecified `dynamic: 'strict'` will be inherited from the top-level
-   * index mappings.
-   *
-   * Note: To limit the number of mapping fields Saved Object types should
-   * *never* use `dynamic: true`.
-   */
-  dynamic?: false | 'strict';
-};
-
-/**
- * See {@link SavedObjectsFieldMapping} for documentation.
- *
- * @public
- */
-export interface SavedObjectsComplexFieldMapping {
-  /**
-   * The dynamic property of the mapping, either `false` or `'strict'`. If
-   * unspecified `dynamic: 'strict'` will be inherited from the top-level
-   * index mappings.
-   *
-   * Note: To limit the number of mapping fields Saved Object types should
-   * *never* use `dynamic: true`.
-   */
-  dynamic?: false | 'strict';
-  enabled?: boolean;
-  doc_values?: boolean;
-  type?: string;
-  properties: SavedObjectsMappingProperties;
 }

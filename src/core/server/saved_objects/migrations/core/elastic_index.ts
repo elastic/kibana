@@ -256,7 +256,6 @@ export async function createIndex(
   mappings?: IndexMapping
 ) {
   await client.indices.create({
-    // @ts-expect-error @elastic-elasticsearch types don't support nested properties
     body: { mappings, settings },
     index,
   });
@@ -279,7 +278,6 @@ export async function convertToAlias(
   script?: string
 ) {
   await client.indices.create({
-    // @ts-expect-error @elastic-elasticsearch types don't support nested properties
     body: { mappings: info.mappings, settings },
     index: info.indexName,
   });
