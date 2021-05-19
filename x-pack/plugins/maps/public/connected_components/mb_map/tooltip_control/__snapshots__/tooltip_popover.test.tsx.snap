@@ -24,7 +24,7 @@ exports[`TooltipPopover render should render tooltip popover 1`] = `
   style={
     Object {
       "pointerEvents": "none",
-      "transform": "translate(NaNpx, 2987px)",
+      "transform": "translate(11987px, 2987px)",
     }
   }
 >
@@ -42,14 +42,17 @@ exports[`TooltipPopover render should render tooltip popover 1`] = `
       features={
         Array [
           Object {
-            "geometry": Object {},
+            "actions": Array [],
             "id": 1,
             "layerId": "tfi3f",
+            "mbProperties": Object {},
           },
         ]
       }
+      findLayerById={[Function]}
       getLayerName={[Function]}
       isLocked={false}
+      loadFeatureGeometry={[Function]}
       loadFeatureProperties={[Function]}
     />
   </EuiText>
@@ -80,7 +83,7 @@ exports[`TooltipPopover render should render tooltip popover with custom tooltip
   style={
     Object {
       "pointerEvents": "none",
-      "transform": "translate(NaNpx, 2987px)",
+      "transform": "translate(11987px, 2987px)",
     }
   }
 >
@@ -90,14 +93,16 @@ exports[`TooltipPopover render should render tooltip popover with custom tooltip
     features={
       Array [
         Object {
-          "geometry": Object {},
+          "actions": Array [],
           "id": 1,
           "layerId": "tfi3f",
+          "mbProperties": Object {},
         },
       ]
     }
     getLayerName={[Function]}
     isLocked={false}
+    loadFeatureGeometry={[Function]}
     loadFeatureProperties={[Function]}
   >
     Custom tooltip content
