@@ -13,7 +13,6 @@ import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
 import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
-import {IIndexPattern} from "../../../../../../../../src/plugins/data/common";
 
 interface Props {
   errors: IErrorObject;
@@ -23,12 +22,13 @@ interface Props {
   isInvalid: boolean;
 }
 
+const ENTITY_TYPES = ['string', 'number', 'ip'];
 function getValidIndexPatternFields(fields: IFieldType[]): IFieldType[] {
   return fields.filter((field) => {
-    const isMultiField = field.subType && !!field.subType.multi;
-    const isNotNested = !field.subType?.nested;
+    const isSpecifiedSupportedField = ENTITY_TYPES.includes(field.type);
+    const hasLeadingUnderscore = field.name.startsWith('_');
     const isAggregatable = !!field.aggregatable;
-    return isMultiField && isNotNested && isAggregatable;
+    return isSpecifiedSupportedField && isAggregatable && !hasLeadingUnderscore;
   });
 }
 
@@ -39,8 +39,6 @@ export const EntityByExpression: FunctionComponent<Props> = ({
   indexFields,
   isInvalid,
 }) => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const ENTITY_TYPES = ['string', 'number', 'ip'];
 
   const usePrevious = <T extends unknown>(value: T): T | undefined => {
     const ref = useRef<T>();
@@ -58,15 +56,12 @@ export const EntityByExpression: FunctionComponent<Props> = ({
   });
   useEffect(() => {
     if (!_.isEqual(oldIndexFields, indexFields)) {
-      const validIndexFields = getValidIndexPatternFields(indexFields);
-      fields.current.indexFields = validIndexFields.filter(
-        (field: IFieldType) => ENTITY_TYPES.includes(field.type) && !field.name.startsWith('_')
-      );
+      fields.current.indexFields = getValidIndexPatternFields(indexFields);
       if (!entity && fields.current.indexFields.length) {
         setAlertParamsEntity(fields.current.indexFields[0].name);
       }
     }
-  }, [ENTITY_TYPES, indexFields, oldIndexFields, setAlertParamsEntity, entity]);
+  }, [indexFields, oldIndexFields, setAlertParamsEntity, entity]);
 
   const indexPopover = (
     <EuiFormRow id="entitySelect" fullWidth error={errors.index}>
