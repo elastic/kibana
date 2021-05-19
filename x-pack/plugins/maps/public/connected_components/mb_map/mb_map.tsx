@@ -17,8 +17,7 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 
-// @ts-expect-error
-import mapboxgl from '@kbn/mapbox-gl';
+import { mapboxgl } from '@kbn/mapbox-gl';
 
 import { DrawFilterControl } from './draw_control';
 import { ScaleControl } from './scale_control';

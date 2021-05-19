@@ -11,8 +11,7 @@ import type { Map, Style, MapboxOptions } from 'mapbox-gl';
 
 import { View, parse } from 'vega';
 
-// @ts-expect-error
-import mapboxgl from '@kbn/mapbox-gl';
+import { mapboxgl } from '@kbn/mapbox-gl';
 
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';

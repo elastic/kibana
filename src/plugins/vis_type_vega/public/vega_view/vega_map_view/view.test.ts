@@ -30,7 +30,7 @@ import {
 import { initVegaLayer, initTmsRasterLayer } from './layers';
 
 // @ts-expect-error
-import mapboxgl from '@kbn/mapbox-gl';
+import { mapboxgl } from '@kbn/mapbox-gl';
 
 jest.mock('mapbox-gl/dist/mapbox-gl-csp', () => ({
   setRTLTextPlugin: jest.fn(),

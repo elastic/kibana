@@ -17,5 +17,4 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
-// eslint-disable-next-line import/no-default-export
-export default mapboxgl;
+export { mapboxgl };
