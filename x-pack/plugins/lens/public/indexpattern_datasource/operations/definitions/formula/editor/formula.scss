@@ -10,12 +10,17 @@
     flex: 1;
     min-height: 0;
   }
+
+  & > * + * {
+    border-top: $euiBorderThin;
+  }
 }
 
 .lnsFormula__editor {
   border-bottom: $euiBorderThin;
 
   .lnsIndexPatternDimensionEditor-isFullscreen & {
+    border-bottom: none;
     display: flex;
     flex-direction: column;
   }
