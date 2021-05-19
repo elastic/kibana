@@ -337,7 +337,7 @@ export const getHeatmapVisualization = ({
                     function: HEATMAP_GRID_FUNCTION,
                     arguments: {
                       // grid
-                      strokeWidth: [0],
+                      strokeWidth: [1],
                       // cells
                       isCellLabelVisible: [false],
                       // Y-axis
