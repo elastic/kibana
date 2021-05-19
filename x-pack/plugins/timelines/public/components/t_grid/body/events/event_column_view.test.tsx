@@ -13,7 +13,7 @@ import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import * as i18n from '../translations';
 
 import { EventColumnView } from './event_column_view';
-import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
+import { TestCellRenderer } from '../../../../mock/cell_renderer';
 import { defaultControlColumn } from '../control_columns';
 import { useShallowEqualSelector } from '../../../../hooks/use_selector';
 import {
@@ -63,7 +63,7 @@ describe('EventColumnView', () => {
     onRowSelected: jest.fn(),
     onUnPinEvent: jest.fn(),
     refetch: jest.fn(),
-    renderCellValue: DefaultCellRenderer,
+    renderCellValue: TestCellRenderer,
     selectedEventIds: {},
     showCheckboxes: false,
     showNotes: false,

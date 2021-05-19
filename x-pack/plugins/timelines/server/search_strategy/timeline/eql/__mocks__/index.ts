@@ -6,7 +6,7 @@
  */
 
 import { EqlSearchStrategyResponse } from '../../../../../../../../src/plugins/data/common';
-import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
+import { EqlSearchResponse } from '../../../../../../security_solution/common/detection_engine/types';
 
 export const sequenceResponse = ({
   rawResponse: {

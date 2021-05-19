@@ -8,7 +8,8 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../mock';
+import { TestProviders } from '../../../mock';
+
 import { Subtitle } from './index';
 
 describe('Subtitle', () => {

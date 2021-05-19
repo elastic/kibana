@@ -18,6 +18,7 @@ import { mockTimelineModel } from '../../../../../security_solution/public/commo
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { defaultHeaders, mockBrowserFields, mockTimelineData, TestProviders } from '../../../mock';
 import { TimelineTabs } from '../../../../../security_solution/common/types/timeline';
+import { TestCellRenderer } from '../../../mock/cell_renderer';
 
 const mockSort: Sort[] = [
   {
@@ -72,7 +73,7 @@ describe('Body', () => {
     id: 'timeline-test',
     isSelectAllChecked: false,
     loadingEventIds: [],
-    renderCellValue: DefaultCellRenderer,
+    renderCellValue: TestCellRenderer,
     rowRenderers: defaultRowRenderers,
     selectedEventIds: {},
     setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],

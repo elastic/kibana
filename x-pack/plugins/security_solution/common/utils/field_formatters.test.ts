@@ -7,7 +7,10 @@
 
 import { EventHit, EventSource } from '../search_strategy';
 import { getDataFromFieldsHits, getDataFromSourceHits, getDataSafety } from './field_formatters';
-import { eventDetailsFormattedFields, eventHit } from './mock_event_details';
+import {
+  eventDetailsFormattedFields,
+  eventHit,
+} from '../../../../../packages/kbn-securitysolution-t-grid/src/mock/mock_event_details';
 
 describe('Events Details Helpers', () => {
   const fields: EventHit['fields'] = eventHit.fields;

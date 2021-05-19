@@ -14,6 +14,7 @@ import { defaultHeaders } from '../column_headers/default_headers';
 
 import { DataDrivenColumns } from '.';
 import { mockTimelineData } from '../../../../mock/mock_timeline_data';
+import { TestCellRenderer } from '../../../../mock/cell_renderer';
 
 describe('Columns', () => {
   const headersSansTimestamp = defaultHeaders.filter((h) => h.id !== '@timestamp');
@@ -30,7 +31,7 @@ describe('Columns', () => {
         ecsData={mockTimelineData[0].ecs}
         hasRowRenderers={false}
         notesCount={0}
-        renderCellValue={DefaultCellRenderer}
+        renderCellValue={TestCellRenderer}
         timelineId="test"
         columnValues={'abc def'}
         showCheckboxes={false}

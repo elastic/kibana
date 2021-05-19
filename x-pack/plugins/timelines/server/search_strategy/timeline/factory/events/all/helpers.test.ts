@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { eventHit } from '../../../../../../common/utils/mock_event_details';
-import { EventHit } from '../../../../../../common/search_strategy';
+import { eventHit } from '../../../../../../../../../packages/kbn-securitysolution-t-grid/src/mock/mock_event_details';
+import { EventHit } from '../../../../../../../security_solution/common/search_strategy';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { buildObjectForFieldPath, formatTimelineData } from './helpers';
 
