@@ -99,12 +99,33 @@
 .lnsFormula__docsNav {
   @include euiYScroll;
   background: $euiColorLightestShade;
+}
+
+.lnsFormula__docsNavGroup {
   padding: $euiSizeS;
+
+  & + & {
+    border-top: $euiBorderThin;
+  }
+}
+
+.lnsFormula__docsNavGroupLink {
+  font-weight: inherit;
 }
 
 .lnsFormula__docsText {
   @include euiYScroll;
   padding: $euiSize;
+}
+
+.lnsFormula__docsTextGroup,
+.lnsFormula__docsTextItem {
+  margin-top: $euiSizeXXL;
+}
+
+.lnsFormula__docsTextGroup {
+  border-top: $euiBorderThin;
+  padding-top: $euiSizeXXL;
 }
 
 .lnsFormulaOverflow {

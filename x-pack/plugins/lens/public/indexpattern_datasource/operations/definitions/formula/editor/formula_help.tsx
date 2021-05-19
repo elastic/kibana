@@ -10,13 +10,12 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPopoverTitle,
   EuiText,
   EuiListGroupItem,
-  EuiSelectableOption,
   EuiListGroup,
-  EuiHorizontalRule,
-  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { GenericOperationDefinition } from '../../index';
@@ -34,7 +33,7 @@ function FormulaHelp({
   isFullscreen: boolean;
 }) {
   const [selectedFunction, setSelectedFunction] = useState<string | undefined>();
-  const scrollTargets = useRef<Record<string, HTMLDivElement>>({});
+  const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
   useEffect(() => {
     if (selectedFunction && scrollTargets.current[selectedFunction]) {
@@ -42,24 +41,28 @@ function FormulaHelp({
     }
   }, [selectedFunction]);
 
-  const helpItems: Array<EuiSelectableOption & { description?: JSX.Element }> = [];
+  const helpGroups: Array<{
+    label: string;
+    description?: JSX.Element;
+    items: Array<{ label: string; description?: JSX.Element }>;
+  }> = [];
 
-  helpItems.push({
+  helpGroups.push({
     label: i18n.translate('xpack.lens.formulaDocumentation.mathSection', {
       defaultMessage: 'Math',
     }),
-    isGroupLabel: true,
     description: (
-      <EuiText>
+      <EuiText size="s">
         {i18n.translate('xpack.lens.formulaDocumentation.mathSectionDescription', {
           defaultMessage:
             'These functions will be executed for reach row of the resulting table using single values from the same row calculated using other functions.',
         })}
       </EuiText>
     ),
+    items: [],
   });
 
-  helpItems.push(
+  helpGroups[0].items.push(
     ...getPossibleFunctions(indexPattern)
       .filter((key) => key in tinymathFunctions)
       .sort()
@@ -69,23 +72,23 @@ function FormulaHelp({
       }))
   );
 
-  helpItems.push({
+  helpGroups.push({
     label: i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSection', {
       defaultMessage: 'Elasticsearch',
     }),
-    isGroupLabel: true,
     description: (
-      <EuiText>
+      <EuiText size="s">
         {i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSectionDescription', {
           defaultMessage:
             'These functions will be executed on the raw documents for each row of the resulting table, aggregating all documents matching the break down dimensions into a single value.',
         })}
       </EuiText>
     ),
+    items: [],
   });
 
   // Es aggs
-  helpItems.push(
+  helpGroups[1].items.push(
     ...getPossibleFunctions(indexPattern)
       .filter(
         (key) =>
@@ -99,23 +102,23 @@ function FormulaHelp({
       }))
   );
 
-  helpItems.push({
+  helpGroups.push({
     label: i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSection', {
       defaultMessage: 'Column-wise calculation',
     }),
-    isGroupLabel: true,
     description: (
-      <EuiText>
+      <EuiText size="s">
         {i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSectionDescription', {
           defaultMessage:
             'These functions will be executed for reach row of the resulting table, using data from cells from other rows as well as the current value.',
         })}
       </EuiText>
     ),
+    items: [],
   });
 
   // Calculations aggs
-  helpItems.push(
+  helpGroups[2].items.push(
     ...getPossibleFunctions(indexPattern)
       .filter(
         (key) =>
@@ -143,35 +146,40 @@ function FormulaHelp({
 
       <EuiFlexGroup className="lnsFormula__docsContent" gutterSize="none" responsive={false}>
         <EuiFlexItem className="lnsFormula__docsNav" grow={1}>
-          <EuiListGroup>
-            {helpItems.map((helpItem) => {
-              if (helpItem.isGroupLabel) {
-                return (
-                  <EuiListGroupItem
-                    key={helpItem.label}
-                    label={helpItem.label}
-                    size="m"
-                    color="text"
-                    onClick={() => {
-                      setSelectedFunction(helpItem.label);
-                    }}
-                  />
-                );
-              } else {
-                return (
-                  <EuiListGroupItem
-                    key={helpItem.label}
-                    label={helpItem.label}
-                    size="s"
-                    color="text"
-                    onClick={() => {
-                      setSelectedFunction(helpItem.label);
-                    }}
-                  />
-                );
-              }
-            })}
-          </EuiListGroup>
+          {helpGroups.map((helpGroup, index) => {
+            return (
+              <nav className="lnsFormula__docsNavGroup" key={helpGroup.label}>
+                <EuiTitle size="xxs">
+                  <h6>
+                    <EuiLink
+                      className="lnsFormula__docsNavGroupLink"
+                      color="text"
+                      onClick={() => {
+                        setSelectedFunction(helpGroup.label);
+                      }}
+                    >
+                      {helpGroup.label}
+                    </EuiLink>
+                  </h6>
+                </EuiTitle>
+
+                <EuiListGroup gutterSize="none">
+                  {helpGroups[index].items.map((helpItem) => {
+                    return (
+                      <EuiListGroupItem
+                        key={helpItem.label}
+                        label={helpItem.label}
+                        size="s"
+                        onClick={() => {
+                          setSelectedFunction(helpItem.label);
+                        }}
+                      />
+                    );
+                  })}
+                </EuiListGroup>
+              </nav>
+            );
+          })}
         </EuiFlexItem>
 
         <EuiFlexItem className="lnsFormula__docsText" grow={2}>
@@ -215,30 +223,38 @@ Use the symbols +, -, /, and * to perform basic math.
                   'Text is in markdown. Do not translate function names or field names like sum(bytes)',
               })}
             />
-            <EuiSpacer />
-            {helpItems.map((item, index) => {
+
+            {helpGroups.map((helpGroup, index) => {
               return (
-                <div
-                  key={index}
+                <section
+                  className="lnsFormula__docsTextGroup"
+                  key={helpGroup.label}
                   ref={(el) => {
                     if (el) {
-                      scrollTargets.current[item.label] = el;
+                      scrollTargets.current[helpGroup.label] = el;
                     }
                   }}
                 >
-                  {item.isGroupLabel ? (
-                    <React.Fragment>
-                      <h2>{item.label}</h2>
-                      {item.description}
-                      <EuiSpacer />
-                    </React.Fragment>
-                  ) : (
-                    <React.Fragment>
-                      {item.description}
-                      {helpItems.length - 1 !== index && <EuiHorizontalRule />}
-                    </React.Fragment>
-                  )}
-                </div>
+                  <h2>{helpGroup.label}</h2>
+
+                  {helpGroup.description}
+
+                  {helpGroups[index].items.map((helpItem) => {
+                    return (
+                      <article
+                        className="lnsFormula__docsTextItem"
+                        key={helpItem.label}
+                        ref={(el) => {
+                          if (el) {
+                            scrollTargets.current[helpItem.label] = el;
+                          }
+                        }}
+                      >
+                        {helpItem.description}
+                      </article>
+                    );
+                  })}
+                </section>
               );
             })}
           </EuiText>
