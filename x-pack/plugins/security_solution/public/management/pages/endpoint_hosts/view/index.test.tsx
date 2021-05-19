@@ -876,11 +876,11 @@ describe('when on the endpoint list page', () => {
   });
 
   describe('when the more actions column is opened', () => {
+    const generator = new EndpointDocGenerator('seed');
     let hostInfo: HostInfo;
     let agentId: string;
     let agentPolicyId: string;
-    const generator = new EndpointDocGenerator('seed');
-    let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
+    let renderResult: ReturnType<AppContextTestRender['render']>;
 
     const mockEndpointListApi = () => {
       const { hosts, query_strategy_version: queryStrategyVersion } = mockEndpointResultList();
@@ -902,19 +902,12 @@ describe('when on the endpoint list page', () => {
       });
     };
 
-    beforeEach(() => {
+    beforeEach(async () => {
       mockEndpointListApi();
 
       reactTestingLibrary.act(() => {
         history.push('/endpoints');
       });
-
-      renderAndWaitForData = async () => {
-        const renderResult = render();
-        await middlewareSpy.waitForAction('serverReturnedEndpointList');
-        await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
-        return renderResult;
-      };
 
       coreStart.application.getUrlForApp.mockImplementation((appName) => {
         switch (appName) {
@@ -925,19 +918,27 @@ describe('when on the endpoint list page', () => {
         }
         return appName;
       });
+
+      renderResult = render();
+      await middlewareSpy.waitForAction('serverReturnedEndpointList');
+      await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
+
+      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
+
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
     });
 
     afterEach(() => {
       jest.clearAllMocks();
     });
 
+    it('navigates to the Host Details Isolate flyout', async () => {});
+
     it('navigates to the Security Solution Host Details page', async () => {
-      const renderResult = await renderAndWaitForData();
-      // open the endpoint actions menu
-      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
-      reactTestingLibrary.act(() => {
-        reactTestingLibrary.fireEvent.click(endpointActionsButton);
-      });
+      // await renderAndWaitForData();
+      // await openRowActionMenu();
 
       const hostLink = await renderResult.findByTestId('hostLink');
       expect(hostLink.getAttribute('href')).toEqual(
@@ -945,21 +946,15 @@ describe('when on the endpoint list page', () => {
       );
     });
     it('navigates to the Ingest Agent Policy page', async () => {
-      const renderResult = await renderAndWaitForData();
-      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
-      reactTestingLibrary.act(() => {
-        reactTestingLibrary.fireEvent.click(endpointActionsButton);
-      });
+      // await renderAndWaitForData();
+      // await openRowActionMenu();
 
       const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
       expect(agentPolicyLink.getAttribute('href')).toEqual(`/app/fleet#/policies/${agentPolicyId}`);
     });
     it('navigates to the Ingest Agent Details page', async () => {
-      const renderResult = await renderAndWaitForData();
-      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
-      reactTestingLibrary.act(() => {
-        reactTestingLibrary.fireEvent.click(endpointActionsButton);
-      });
+      // await renderAndWaitForData();
+      // await openRowActionMenu();
 
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
       expect(agentDetailsLink.getAttribute('href')).toEqual(`/app/fleet#/fleet/agents/${agentId}`);
