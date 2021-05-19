@@ -14,12 +14,18 @@ import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../../shared/flash_messages';
 import { Loading } from '../../../../shared/loading';
+import { SchemaAddFieldModal } from '../../../../shared/schema';
 
+import { SchemaCallouts, SchemaTable, EmptyState } from '../components';
 import { SchemaLogic } from '../schema_logic';
 
 export const Schema: React.FC = () => {
-  const { loadSchema } = useActions(SchemaLogic);
-  const { dataLoading } = useValues(SchemaLogic);
+  const { loadSchema, updateSchema, addSchemaField, openModal, closeModal } = useActions(
+    SchemaLogic
+  );
+  const { dataLoading, isUpdating, hasSchema, hasSchemaChanged, isModalOpen } = useValues(
+    SchemaLogic
+  );
 
   useEffect(() => {
     loadSchema();
@@ -38,13 +44,24 @@ export const Schema: React.FC = () => {
           { defaultMessage: 'Add new fields or change the types of existing ones.' }
         )}
         rightSideItems={[
-          <EuiButton fill>
+          <EuiButton
+            fill
+            disabled={!hasSchemaChanged}
+            isLoading={isUpdating}
+            onClick={() => updateSchema()}
+            data-test-subj="updateSchemaButton"
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.schema.updateSchemaButtonLabel',
               { defaultMessage: 'Update types' }
             )}
           </EuiButton>,
-          <EuiButton color="secondary">
+          <EuiButton
+            color="secondary"
+            disabled={isUpdating}
+            onClick={openModal}
+            data-test-subj="addSchemaFieldModalButton"
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.schema.createSchemaFieldButtonLabel',
               { defaultMessage: 'Create a schema field' }
@@ -53,7 +70,13 @@ export const Schema: React.FC = () => {
         ]}
       />
       <FlashMessages />
-      <EuiPageContentBody>TODO</EuiPageContentBody>
+      <EuiPageContentBody>
+        <SchemaCallouts />
+        {hasSchema ? <SchemaTable /> : <EmptyState />}
+        {isModalOpen && (
+          <SchemaAddFieldModal addNewField={addSchemaField} closeAddFieldModal={closeModal} />
+        )}
+      </EuiPageContentBody>
     </>
   );
 };

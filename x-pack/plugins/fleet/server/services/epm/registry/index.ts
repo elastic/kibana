@@ -74,8 +74,6 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
   if (params) {
     if (params.category) {
       url.searchParams.set('category', params.category);
@@ -85,10 +83,7 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
     }
   }
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
-    url.searchParams.set('kibana.version', kibanaVersion);
-  }
+  setKibanaVersion(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
@@ -142,6 +137,16 @@ export async function fetchFile(filePath: string): Promise<Response> {
   return getResponse(`${registryUrl}${filePath}`);
 }
 
+function setKibanaVersion(url: URL) {
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+  const kibanaBranch = appContextService.getKibanaBranch();
+
+  // on master, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'master') {
+    url.searchParams.set('kibana.version', kibanaVersion);
+  }
+}
+
 export async function fetchCategories(
   params?: GetCategoriesRequest['query']
 ): Promise<CategorySummaryList> {
@@ -155,6 +160,8 @@ export async function fetchCategories(
       url.searchParams.set('include_policy_templates', params.include_policy_templates.toString());
     }
   }
+
+  setKibanaVersion(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }

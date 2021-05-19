@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { ExceptionListType, NamespaceType } from '@kbn/securitysolution-io-ts-utils';
-
-import {
+import type {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
+  ExceptionListType,
+  NamespaceType,
   Page,
   PerPage,
   TotalOrUndefined,
   UpdateExceptionListItemSchema,
   UpdateExceptionListSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
 import { HttpStart, NotificationsStart } from '../../../../../src/core/public';
 
 export interface FilterExceptionsOptions {

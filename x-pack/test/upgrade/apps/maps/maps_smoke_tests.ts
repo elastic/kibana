@@ -117,7 +117,7 @@ export default function ({
             'ecommerce_map',
             updateBaselines
           );
-          expect(percentDifference).to.be.lessThan(0.02);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
         });
       });
 
@@ -141,7 +141,7 @@ export default function ({
             'flights_map',
             updateBaselines
           );
-          expect(percentDifference).to.be.lessThan(0.02);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
         });
       });
 
@@ -166,7 +166,7 @@ export default function ({
             'web_logs_map',
             updateBaselines
           );
-          expect(percentDifference).to.be.lessThan(0.02);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
         });
       });
     });

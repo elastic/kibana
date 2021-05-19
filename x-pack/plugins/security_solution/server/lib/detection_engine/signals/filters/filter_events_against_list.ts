@@ -6,9 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { entriesList } from '@kbn/securitysolution-io-ts-utils';
+import { entriesList, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { hasLargeValueList } from '../../../../../common/detection_engine/utils';
 import { FilterEventsAgainstListOptions } from './types';
 import { filterEvents } from './filter_events';

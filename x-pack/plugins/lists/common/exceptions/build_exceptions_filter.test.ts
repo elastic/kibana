@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { EntryMatchAny } from '@kbn/securitysolution-io-ts-utils';
+import type {
+  EntryMatchAny,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { getEntryMatchExcludeMock, getEntryMatchMock } from '../schemas/types/entry_match.mock';
 import {
@@ -19,7 +22,6 @@ import {
   getEntryNestedMock,
 } from '../schemas/types/entry_nested.mock';
 import { getExceptionListItemSchemaMock } from '../schemas/response/exception_list_item_schema.mock';
-import { ExceptionListItemSchema } from '../schemas';
 
 import {
   buildExceptionFilter,
