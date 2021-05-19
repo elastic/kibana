@@ -20795,7 +20795,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.activateTitle": "已激活",
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.gap": "上一缺口 (如果有) ",
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.indexingTimes": "索引时间 (ms)",
-    "xpack.securitySolution.detectionEngine.rules.allRules.columns.lastLookBackDate": "最后回查日期",
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.lastResponseTitle": "上次响应",
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.lastRunTitle": "上次运行",
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.lastUpdateTitle": "上次更新时间",
