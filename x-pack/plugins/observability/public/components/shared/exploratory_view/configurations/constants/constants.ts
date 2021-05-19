@@ -109,3 +109,4 @@ export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
 export const FILTER_RECORDS = 'FILTER_RECORDS';
+export const OPERATION_COLUMN = 'operation';
