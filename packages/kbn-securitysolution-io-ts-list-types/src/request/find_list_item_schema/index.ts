@@ -7,16 +7,14 @@
  */
 
 import * as t from 'io-ts';
-import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
 
-import {
-  cursor,
-  filter,
-  list_id,
-  sort_field,
-  sort_order,
-  RequiredKeepUndefined,
-} from '../../common';
+import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
+import { filter } from '../../common/filter';
+import { cursor } from '../../common/cursor';
+import { sort_field } from '../../common/sort_field';
+import { sort_order } from '../../common/sort_order';
+import { list_id } from '../../common/list_id';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 
 export const findListItemSchema = t.intersection([
   t.exact(t.type({ list_id })),

@@ -8,7 +8,9 @@
 
 import * as t from 'io-ts';
 
-import { page, per_page, total } from '../../common';
+import { page } from '../../common/page';
+import { per_page } from '../../common/per_page';
+import { total } from '../../common/total';
 import { exceptionListItemSchema } from '../exception_list_item_schema';
 
 export const foundExceptionListItemSchema = t.exact(

@@ -8,8 +8,11 @@
 
 import * as t from 'io-ts';
 
-import { cursor, page, per_page, total } from '../../common';
 import { listSchema } from '../list_schema';
+import { cursor } from '../../common/cursor';
+import { page } from '../../common/page';
+import { per_page } from '../../common/per_page';
+import { total } from '../../common/total';
 
 export const foundListSchema = t.exact(
   t.type({

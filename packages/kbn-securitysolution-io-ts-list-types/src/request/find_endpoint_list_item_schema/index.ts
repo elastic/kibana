@@ -9,7 +9,10 @@
 import * as t from 'io-ts';
 import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
 
-import { filter, sort_field, sort_order, RequiredKeepUndefined } from '../../common';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import { filter } from '../../common/filter';
+import { sort_field } from '../../common/sort_field';
+import { sort_order } from '../../common/sort_order';
 
 export const findEndpointListItemSchema = t.exact(
   t.partial({

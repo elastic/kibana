@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 export * from './entries';
-export * from './entry_match';
-export * from './entry_match_any';
-export * from './entry_match_wildcard';
-export * from './entry_nested';
 export * from './non_empty_nested_entries_array';
