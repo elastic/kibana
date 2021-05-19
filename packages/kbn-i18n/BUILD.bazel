@@ -85,10 +85,10 @@ ts_project(
   deps = DEPS,
   allow_js = True,
   declaration = True,
-  declaration_dir = "types",
+  declaration_dir = "target_types",
   declaration_map = True,
   incremental = True,
-  out_dir = "node",
+  out_dir = "target_node",
   source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
@@ -102,38 +102,16 @@ ts_project(
   allow_js = True,
   declaration = False,
   incremental = True,
-  out_dir = "web",
+  out_dir = "target_web",
   source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig_browser",
 )
 
-filegroup(
-  name = "tsc_types",
-  srcs = [":tsc"],
-  output_group = "types",
-)
-
-filegroup(
-  name = "target_files",
-  srcs = [
-    ":tsc",
-    ":tsc_browser",
-    ":tsc_types",
-  ],
-)
-
-pkg_npm(
-  name = "target",
-  deps = [
-    ":target_files",
-  ],
-)
-
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = [":target"] + DEPS,
+  deps = [":tsc", ":tsc_browser"] + DEPS,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

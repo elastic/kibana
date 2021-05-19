@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Language } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   Filter,
   IIndexPattern,
@@ -17,7 +18,7 @@ import {
 } from '../../../lists/common/schemas';
 import { ESBoolQuery } from '../typed_json';
 import { buildExceptionFilter } from '../shared_imports';
-import { Query, Language, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
+import { Query, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
 
 export const getQueryFilter = (
   query: Query,

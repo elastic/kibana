@@ -16,11 +16,11 @@ import * as buildFilterHelpers from '../../../detections/components/alerts_table
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/update_exception_list_item_schema.mock';
-import {
+import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../lists_plugin_deps';
+} from '../../../shared_imports';
 import {
   useAddOrUpdateException,
   UseAddOrUpdateExceptionProps,
