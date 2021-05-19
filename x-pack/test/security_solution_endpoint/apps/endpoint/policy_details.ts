@@ -21,8 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
-  // Failing: See https://github.com/elastic/kibana/issues/100236
-  describe.skip('When on the Endpoint Policy Details Page', function () {
+  describe('When on the Endpoint Policy Details Page', function () {
     describe('with an invalid policy id', () => {
       it('should display an error', async () => {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');
@@ -637,6 +636,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id,
           policyInfo.packagePolicy.id
         );
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
       afterEach(async () => {
         if (policyInfo) {

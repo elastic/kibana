@@ -8,8 +8,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { FeatureProperties } from './feature_properties';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
-import { ITooltipProperty } from '../../../classes/tooltips/tooltip_property';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public';
+import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 
 class MockTooltipProperty {

@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Header } from './header';
-import { ILayer } from '../../../classes/layers/layer';
+import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 const layerMock = ({
   getDisplayName: async () => {
@@ -19,7 +19,7 @@ const layerMock = ({
       icon: <span>mockIcon</span>,
     };
   },
-} as unknown) as ILayer;
+} as unknown) as IVectorLayer;
 
 const defaultProps = {
   findLayerById: (layerId: string) => {

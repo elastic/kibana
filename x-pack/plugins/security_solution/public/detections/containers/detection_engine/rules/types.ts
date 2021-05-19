@@ -270,7 +270,7 @@ export interface RuleInfoStatus {
   last_success_at: string | null;
   last_failure_message: string | null;
   last_success_message: string | null;
-  last_look_back_date: string | null | undefined;
+  last_look_back_date: string | null | undefined; // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
   gap: string | null | undefined;
   bulk_create_time_durations: string[] | null | undefined;
   search_after_time_durations: string[] | null | undefined;
