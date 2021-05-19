@@ -10,31 +10,10 @@ import { TransformSavedObjectDocumentError } from './transform_saved_object_docu
 describe('TransformSavedObjectDocumentError', () => {
   it('is a special error', () => {
     const originalError = new Error('Dang diggity!');
-    const err = new TransformSavedObjectDocumentError(
-      'failedTransform',
-      'failedDoc',
-      originalError
-    );
+    const err = new TransformSavedObjectDocumentError(originalError);
     expect(err).toBeInstanceOf(TransformSavedObjectDocumentError);
     expect(err.stack).not.toBeNull();
     expect(err.originalError).toBe(originalError);
-  });
-  it('constructs an special error message', () => {
-    const originalError = new Error('Dang diggity!');
-    const err = new TransformSavedObjectDocumentError(
-      'failedTransform',
-      'failedDoc',
-      originalError
-    );
     expect(err.message).toMatchInlineSnapshot(`"Dang diggity!"`);
-  });
-  it('handles undefined namespace', () => {
-    const originalError = new Error('Dang diggity!');
-    const err = new TransformSavedObjectDocumentError(
-      'failedTransform',
-      'failedDoc',
-      originalError
-    );
-    expect(err.failedTransform).toMatchInlineSnapshot(`"failedTransform"`);
   });
 });
