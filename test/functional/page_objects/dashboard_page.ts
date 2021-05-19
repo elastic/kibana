@@ -277,6 +277,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async clickQuickSave() {
+      await this.expectQuickSaveButtonEnabled();
       log.debug('clickQuickSave');
       await testSubjects.click('dashboardQuickSaveMenuItem');
     }
@@ -628,6 +629,15 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     }
     public async expectExistsQuickSaveOption() {
       await testSubjects.existOrFail('dashboardQuickSaveMenuItem');
+    }
+
+    public async expectQuickSaveButtonEnabled() {
+      log.debug('expectQuickSaveButtonEnabled');
+      const quickSaveButton = await testSubjects.find('dashboardQuickSaveMenuItem');
+      const isDisabled = await quickSaveButton.getAttribute('disabled');
+      if (isDisabled) {
+        throw new Error('Quick save button disabled');
+      }
     }
 
     public async getNotLoadedVisualizations(vizList: string[]) {
