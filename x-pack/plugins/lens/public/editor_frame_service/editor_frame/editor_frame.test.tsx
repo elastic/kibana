@@ -7,7 +7,7 @@
 
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
-import { makeConfigureStore, getPreloadedState } from '../../state_management/index';
+import { makeConfigureStore, getPreloadedState, setState } from '../../state_management/index';
 import { Provider } from 'react-redux';
 
 // Tests are executed in a jsdom environment who does not have sizing methods,
@@ -74,7 +74,6 @@ function getDefaultProps() {
     onChange: jest.fn(),
     dateRange: { fromDate: '', toDate: '' },
     query: { query: '', language: 'lucene' },
-    filters: [],
     core: coreMock.createStart(),
     plugins: {
       uiActions: uiActionsPluginMock.createStartContract(),
@@ -84,7 +83,6 @@ function getDefaultProps() {
     },
     palettes: chartPluginMock.createPaletteRegistry(),
     showNoDataPopover: jest.fn(),
-    searchSessionId: 'sessionId',
   };
   (defaultProps.plugins.data.query.timefilter.timefilter
     .getTimeUpdate$ as jest.Mock).mockReturnValue({ subscribe: jest.fn((l) => l) });
@@ -97,6 +95,14 @@ function getDefaultProps() {
       return [];
     });
 
+  defaultProps.plugins.data.query.queryString.getQuery = jest.fn().mockImplementation(() => {
+    return {
+      language: 'lucene',
+      query: '',
+    };
+  });
+
+  defaultProps.plugins.data.search.session.start = jest.fn().mockImplementation(() => 'sessionId');
   return defaultProps;
 }
 
@@ -167,7 +173,7 @@ describe('editor_frame', () => {
         wrappingComponent,
       } as unknown) as ReactWrapper);
     });
-    return instance;
+    return { instance, lensStore };
   };
 
   describe('initialization', () => {
@@ -467,7 +473,7 @@ describe('editor_frame', () => {
         initialVisualizationId: 'testVis',
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = await mountWithProvider(props)!;
+      instance = (await mountWithProvider(props)).instance;
 
       instance.update();
 
@@ -513,7 +519,7 @@ describe('editor_frame', () => {
         },
       };
 
-      instance = await mountWithProvider(props)!;
+      instance = (await mountWithProvider(props)).instance;
 
       instance.update();
 
@@ -880,7 +886,7 @@ describe('editor_frame', () => {
         initialVisualizationId: 'testVis',
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = await mountWithProvider(props);
+      instance = (await mountWithProvider(props)).instance;
 
       // necessary to flush elements to dom synchronously
       instance.update();
@@ -1116,7 +1122,7 @@ describe('editor_frame', () => {
         initialVisualizationId: 'testVis',
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = await mountWithProvider(props);
+      instance = (await mountWithProvider(props)).instance;
 
       // TODO why is this necessary?
       instance.update();
@@ -1165,7 +1171,7 @@ describe('editor_frame', () => {
         initialVisualizationId: 'testVis2',
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = await mountWithProvider(props);
+      instance = (await mountWithProvider(props)).instance;
 
       // TODO why is this necessary?
       instance.update();
@@ -1226,7 +1232,7 @@ describe('editor_frame', () => {
         initialVisualizationId: 'testVis',
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = await mountWithProvider(props);
+      instance = (await mountWithProvider(props)).instance;
 
       // TODO why is this necessary?
       instance.update();
@@ -1298,7 +1304,7 @@ describe('editor_frame', () => {
         initialVisualizationId: 'testVis2',
         ExpressionRenderer: expressionRendererMock,
       } as EditorFrameProps;
-      instance = await mountWithProvider(props);
+      instance = (await mountWithProvider(props)).instance;
       // TODO why is this necessary?
       instance.update();
 
@@ -1401,7 +1407,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       } as EditorFrameProps;
 
-      instance = await mountWithProvider(props);
+      instance = (await mountWithProvider(props)).instance;
 
       // TODO why is this necessary?
       instance.update();
@@ -1541,13 +1547,17 @@ describe('editor_frame', () => {
         onChange,
       };
 
-      instance = await mountWithProvider(props);
+      const { instance: el, lensStore } = await mountWithProvider(props);
+      instance = el;
 
       expect(onChange).toHaveBeenCalledTimes(2);
 
       mockDatasource.toExpression.mockReturnValue('data expression');
       mockVisualization.toExpression.mockReturnValue('vis expression');
       instance.setProps({ query: { query: 'new query', language: 'lucene' } });
+
+      lensStore.dispatch(setState({ query: { query: 'new query', language: 'lucene' } }));
+
       instance.update();
 
       expect(onChange).toHaveBeenCalledTimes(3);
@@ -1595,7 +1605,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
         onChange,
       };
-      instance = await mountWithProvider(props);
+      instance = (await mountWithProvider(props)).instance;
 
       expect(onChange).toHaveBeenCalledTimes(2);
 

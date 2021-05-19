@@ -20,7 +20,7 @@ import {
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
-import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
+import { Query, Filter, IFieldFormat } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
 import {
@@ -49,8 +49,6 @@ export interface EditorFrameProps {
   doc?: Document;
   dateRange: DateRange;
   query: Query;
-  savedQuery?: SavedQuery;
-  searchSessionId: string;
   initialContext?: VisualizeFieldContext;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates

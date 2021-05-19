@@ -20,7 +20,7 @@ import { Document } from '../../persistence/saved_object_store';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { getSavedObjectFormat } from './save';
 import { generateId } from '../../id_generator';
-import { Query, SavedQuery } from '../../../../../../src/plugins/data/public';
+import { Query } from '../../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { EditorFrameStartPlugins } from '../service';
 import { initializeDatasources, createDatasourceLayers } from './state_helpers';
@@ -53,8 +53,6 @@ export interface EditorFrameProps {
     toDate: string;
   };
   query: Query;
-  savedQuery?: SavedQuery;
-  searchSessionId: string;
   onChange: (arg: {
     filterableIndexPatterns: string[];
     doc: Document;
@@ -71,7 +69,9 @@ export function EditorFrame(props: EditorFrameProps) {
   //   [dispatchLens]
   // );
 
-  const { filters } = useLensSelector((state) => state.app);
+  const { filters, searchSessionId, savedQuery } = useLensSelector((state) => state.app);
+
+  const query = props.query;
 
   const [state, dispatch] = useReducer(reducer, props, getInitialState);
   const [visualizeTriggerFieldContext, setVisualizeTriggerFieldContext] = useState(
@@ -124,9 +124,9 @@ export function EditorFrame(props: EditorFrameProps) {
     datasourceLayers,
     activeData: state.activeData,
     dateRange: props.dateRange,
-    query: props.query,
+    query,
     filters,
-    searchSessionId: props.searchSessionId,
+    searchSessionId,
     availablePalettes: props.palettes,
 
     addNewLayer() {
@@ -266,9 +266,9 @@ export function EditorFrame(props: EditorFrameProps) {
       state.datasourceStates,
       state.visualization,
       state.activeData,
-      props.query,
+      query,
       filters,
-      props.savedQuery,
+      savedQuery,
       state.title,
     ]
   );
@@ -339,7 +339,7 @@ export function EditorFrame(props: EditorFrameProps) {
             }
             dispatch={dispatch}
             core={props.core}
-            query={props.query}
+            query={query}
             dateRange={props.dateRange}
             filters={filters}
             showNoDataPopover={props.showNoDataPopover}

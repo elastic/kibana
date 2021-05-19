@@ -354,8 +354,6 @@ describe('Lens App', () => {
               "language": "kuery",
               "query": "",
             },
-            "savedQuery": undefined,
-            "searchSessionId": "sessionId-1",
             "showNoDataPopover": [Function],
           },
           Object {},
@@ -1426,7 +1424,7 @@ describe('Lens App', () => {
     });
 
     it('updates the searchSessionId when the active saved query is cleared', () => {
-      const { component, frame, services } = mountWith({});
+      const { component, services, lensStore } = mountWith({});
       act(() =>
         component.find(TopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
@@ -1443,12 +1441,11 @@ describe('Lens App', () => {
       component.update();
       act(() => component.find(TopNavMenu).prop('onClearSavedQuery')!());
       component.update();
-      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
-        expect.objectContaining({
-          searchSessionId: `sessionId-2`,
+      expect(lensStore.getState()).toEqual({
+        app: expect.objectContaining({
+          searchSessionId: `sessionId-4`,
         }),
-        {}
-      );
+      });
     });
 
     const mockUpdate = {

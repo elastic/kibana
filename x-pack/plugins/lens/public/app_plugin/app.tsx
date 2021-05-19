@@ -30,7 +30,6 @@ import {
   esFilters,
   exporters,
   Query,
-  SavedQuery,
   syncQueryStateWithUrl,
 } from '../../../../../src/plugins/data/public';
 import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
@@ -656,8 +655,6 @@ export function App({
             showNoDataPopover={showNoDataPopover}
             initialContext={initialContext}
             query={appState.query}
-            searchSessionId={appState.searchSessionId}
-            savedQuery={appState.savedQuery}
             persistedDoc={appState.persistedDoc}
             onChange={onChange}
           />
@@ -694,8 +691,6 @@ export function App({
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
   query,
-  searchSessionId,
-  savedQuery,
   persistedDoc,
   resolvedDateRange,
   onError,
@@ -704,9 +699,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   onChange,
 }: {
   editorFrame: EditorFrameInstance;
-  searchSessionId: string;
   query: Query;
-  savedQuery?: SavedQuery;
   persistedDoc?: Document | undefined;
   resolvedDateRange: { fromDate: string; toDate: string };
   onError: (e: { message: string }) => Toast;
@@ -723,10 +716,8 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   return (
     <EditorFrameContainer
       doc={persistedDoc}
-      searchSessionId={searchSessionId}
       dateRange={resolvedDateRange}
       query={query}
-      savedQuery={savedQuery}
       onError={onError}
       showNoDataPopover={showNoDataPopover}
       initialContext={initialContext}

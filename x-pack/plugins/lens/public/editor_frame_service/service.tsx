@@ -139,11 +139,9 @@ export class EditorFrameService {
           onError,
           dateRange,
           query,
-          savedQuery,
           onChange,
           showNoDataPopover,
           initialContext,
-          searchSessionId,
         }) => {
           return (
             <div className="lnsApp__frame">
@@ -164,11 +162,9 @@ export class EditorFrameService {
                 doc={doc}
                 dateRange={dateRange}
                 query={query}
-                savedQuery={savedQuery}
                 onChange={onChange}
                 showNoDataPopover={showNoDataPopover}
                 initialContext={initialContext}
-                searchSessionId={searchSessionId}
               />
             </div>
           );
