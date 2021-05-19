@@ -106,7 +106,7 @@ export interface DetectionRuleMetric {
   created_on: string;
   updated_on: string;
   alert_count_daily: number;
-  cases_count_daily: number;
+  cases_count_total: number;
 }
 
 export interface DetectionRuleAdoption {
