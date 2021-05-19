@@ -39,6 +39,7 @@ import {
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 import { MemoizedFormulaHelp } from './formula_help';
+import { trackUiEvent } from '../../../../../lens_ui_telemetry';
 
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
@@ -508,6 +509,7 @@ export function FormulaEditor({
                   <EuiButtonEmpty
                     onClick={() => {
                       toggleFullscreen();
+                      trackUiEvent('toggle_formula_fullscreen');
                     }}
                     iconType={isFullscreen ? 'bolt' : 'fullScreen'}
                     size="xs"
