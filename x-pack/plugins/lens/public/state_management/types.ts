@@ -9,6 +9,7 @@ import { Filter, IndexPattern, Query, SavedQuery } from '../../../../../src/plug
 import { Document } from '../persistence';
 
 import { TableInspectorAdapter } from '../editor_frame_service/types';
+import { DateRange } from '../../common';
 
 export interface LensAppState {
   persistedDoc?: Document;
@@ -26,6 +27,7 @@ export interface LensAppState {
   filters: Filter[];
   savedQuery?: SavedQuery;
   searchSessionId: string;
+  resolvedDateRange: DateRange;
 }
 
 export type DispatchSetState = (

@@ -36,7 +36,6 @@ describe('editor_frame state management', () => {
           charts: chartPluginMock.createStartContract(),
         },
         palettes: chartPluginMock.createPaletteRegistry(),
-        dateRange: { fromDate: 'now-7d', toDate: 'now' },
         showNoDataPopover: jest.fn(),
       };
     });

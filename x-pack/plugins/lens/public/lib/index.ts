@@ -5,4 +5,15 @@
  * 2.0.
  */
 
+import { TimefilterContract } from 'src/plugins/data/public';
+
 export * from './get_all_index_patterns';
+
+export const getResolvedDateRange = function (timefilter: TimefilterContract) {
+  const { from, to } = timefilter.getTime();
+  const { min, max } = timefilter.calculateBounds({
+    from,
+    to,
+  });
+  return { fromDate: min?.toISOString() || from, toDate: max?.toISOString() || to };
+};

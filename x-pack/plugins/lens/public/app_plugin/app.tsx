@@ -32,7 +32,6 @@ import {
   LensByReferenceInput,
   LensEmbeddableInput,
 } from '../editor_frame_service/embeddable/embeddable';
-import { useTimeRange } from './time_range';
 import { EditorFrameInstance } from '../types';
 import {
   setState as setAppState,
@@ -103,13 +102,6 @@ export function App({
     appState.indexPatternsForTopNav,
     appState.searchSessionId,
   ]);
-
-  const { resolvedDateRange } = useTimeRange(
-    data,
-    lastKnownDoc,
-    dispatchSetState,
-    appState.searchSessionId
-  );
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -513,7 +505,6 @@ export function App({
         {(!appState.isAppLoading || appState.persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}
-            resolvedDateRange={resolvedDateRange}
             onError={onError}
             showNoDataPopover={showNoDataPopover}
             initialContext={initialContext}
@@ -553,7 +544,6 @@ export function App({
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
   persistedDoc,
-  resolvedDateRange,
   onError,
   showNoDataPopover,
   initialContext,
@@ -561,7 +551,6 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
 }: {
   editorFrame: EditorFrameInstance;
   persistedDoc?: Document | undefined;
-  resolvedDateRange: { fromDate: string; toDate: string };
   onError: (e: { message: string }) => Toast;
   showNoDataPopover: () => void;
   initialContext: VisualizeFieldContext | undefined;
@@ -576,7 +565,6 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   return (
     <EditorFrameContainer
       doc={persistedDoc}
-      dateRange={resolvedDateRange}
       onError={onError}
       showNoDataPopover={showNoDataPopover}
       initialContext={initialContext}

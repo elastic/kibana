@@ -40,6 +40,7 @@ import {
   getPreloadedState,
   LensRootStore,
 } from '../state_management';
+import { getResolvedDateRange } from '../lib';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
@@ -189,7 +190,7 @@ export async function mountApp(
           ? data.query.filterManager.getGlobalFilters()
           : data.query.filterManager.getFilters(),
         searchSessionId: data.search.session.start(),
-
+        resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
         isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
         isAppLoading: Boolean(initialInput),
       });

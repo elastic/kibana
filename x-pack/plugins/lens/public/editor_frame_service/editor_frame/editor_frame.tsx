@@ -29,13 +29,7 @@ import {
   switchToSuggestion,
 } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import {
-  // setState as setAppState,
-  useLensSelector,
-  // useLensDispatch,
-  // LensAppState,
-  // DispatchSetState,
-} from '../../state_management';
+import { useLensSelector } from '../../state_management';
 export interface EditorFrameProps {
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
@@ -46,10 +40,6 @@ export interface EditorFrameProps {
   onError: (e: { message: string }) => void;
   core: CoreStart;
   plugins: EditorFrameStartPlugins;
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
   onChange: (arg: {
     filterableIndexPatterns: string[];
     doc: Document;
@@ -60,15 +50,14 @@ export interface EditorFrameProps {
 }
 
 export function EditorFrame(props: EditorFrameProps) {
-  // const dispatchLens = useLensDispatch();
-  // const dispatchSetState: DispatchSetState = useCallback(
-  //   (state: Partial<LensAppState>) => dispatchLens(setAppState(state)),
-  //   [dispatchLens]
-  // );
-
-  const { filters, searchSessionId, savedQuery, query, persistedDoc: doc } = useLensSelector(
-    (state) => state.app
-  );
+  const {
+    filters,
+    searchSessionId,
+    savedQuery,
+    query,
+    persistedDoc: doc,
+    resolvedDateRange: dateRange,
+  } = useLensSelector((state) => state.app);
   const [state, dispatch] = useReducer(reducer, { ...props, doc }, getInitialState);
   const [visualizeTriggerFieldContext, setVisualizeTriggerFieldContext] = useState(
     props.initialContext
@@ -119,7 +108,7 @@ export function EditorFrame(props: EditorFrameProps) {
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
     activeData: state.activeData,
-    dateRange: props.dateRange,
+    dateRange,
     query,
     filters,
     searchSessionId,
@@ -336,7 +325,7 @@ export function EditorFrame(props: EditorFrameProps) {
             dispatch={dispatch}
             core={props.core}
             query={query}
-            dateRange={props.dateRange}
+            dateRange={dateRange}
             filters={filters}
             showNoDataPopover={props.showNoDataPopover}
             dropOntoWorkspace={dropOntoWorkspace}

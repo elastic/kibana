@@ -12,6 +12,7 @@ export const initialState: LensAppState = {
   searchSessionId: '',
   filters: [],
   query: { language: 'kuery', query: '' },
+  resolvedDateRange: { fromDate: '', toDate: '' },
 
   indexPatternsForTopNav: [],
   isSaveable: false,
@@ -28,23 +29,6 @@ export const appSlice = createSlice({
         ...state,
         ...payload,
       };
-    },
-    setStateM: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
-      return {
-        ...state,
-        ...payload,
-      };
-    },
-    startSession: (state, { payload }: PayloadAction<{ id: string }>) => {
-      state.searchSessionId = payload.id;
-    },
-    setFilters: (state, { payload }) => {
-      state.filters = payload.filters;
-      state.searchSessionId = payload.id;
-    },
-    setQuery: (state, { payload }) => {
-      state.query = payload.query;
-      state.searchSessionId = payload.id;
     },
     navigateAway: (state) => state,
   },

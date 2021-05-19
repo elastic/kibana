@@ -54,6 +54,10 @@ import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/pu
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
+import moment from 'moment';
+import { Observable } from 'rxjs';
+import { getResolvedDateRange } from '../../lib';
+import { TimefilterContract } from 'src/plugins/data/public';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -65,6 +69,36 @@ function generateSuggestion(state = {}): DatasourceSuggestion {
       changeType: 'unchanged',
     },
     keptLayerIds: ['first'],
+  };
+}
+
+function createMockTimefilter() {
+  const unsubscribe = jest.fn();
+
+  let timeFilter = { from: 'now-7d', to: 'now' };
+  let subscriber: () => void;
+  return {
+    getTime: jest.fn(() => timeFilter),
+    setTime: jest.fn((newTimeFilter) => {
+      timeFilter = newTimeFilter;
+      if (subscriber) {
+        subscriber();
+      }
+    }),
+    getTimeUpdate$: () => ({
+      subscribe: ({ next }: { next: () => void }) => {
+        subscriber = next;
+        return unsubscribe;
+      },
+    }),
+    calculateBounds: jest.fn(() => ({
+      min: moment('2021-01-10T04:00:00.000Z'),
+      max: moment('2021-01-10T08:00:00.000Z'),
+    })),
+    getBounds: jest.fn(() => timeFilter),
+    getRefreshInterval: () => {},
+    getRefreshIntervalDefaults: () => {},
+    getAutoRefreshFetch$: () => new Observable(),
   };
 }
 
@@ -89,8 +123,9 @@ function getDefaultProps() {
     palettes: chartPluginMock.createPaletteRegistry(),
     showNoDataPopover: jest.fn(),
   };
-  (defaultProps.plugins.data.query.timefilter.timefilter
-    .getTimeUpdate$ as jest.Mock).mockReturnValue({ subscribe: jest.fn((l) => l) });
+
+  defaultProps.plugins.data.query.timefilter.timefilter = (createMockTimefilter() as unknown) as TimefilterContract;
+
   defaultProps.plugins.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
     return [];
   });
@@ -108,6 +143,7 @@ function getDefaultProps() {
   });
 
   defaultProps.plugins.data.search.session.start = jest.fn().mockImplementation(() => 'sessionId');
+
   return defaultProps;
 }
 
@@ -165,6 +201,7 @@ describe('editor_frame', () => {
         filters: props.plugins.data.query.filterManager.getGlobalFilters(),
         searchSessionId: props.plugins.data.search.session.start(),
         isLinkedToOriginatingApp: false,
+        resolvedDateRange: getResolvedDateRange(props.plugins.data.query.timefilter.timefilter),
         ...storePreloadedState,
       }),
       {
@@ -327,7 +364,6 @@ describe('editor_frame', () => {
         initialDatasourceId: 'testDatasource',
         initialVisualizationId: 'testVis',
         ExpressionRenderer: expressionRendererMock,
-        dateRange: { fromDate: 'now-7d', toDate: 'now' },
       };
       await act(async () => {
         mountWithProvider(props);
@@ -340,7 +376,7 @@ describe('editor_frame', () => {
         removeLayers: expect.any(Function),
         query: { query: '', language: 'lucene' },
         filters: [],
-        dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        dateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
         availablePalettes: props.palettes,
         searchSessionId: 'sessionId',
       });
@@ -1570,7 +1606,6 @@ describe('editor_frame', () => {
 
       mockDatasource.toExpression.mockReturnValue('data expression');
       mockVisualization.toExpression.mockReturnValue('vis expression');
-      // instance.setProps({ query: { query: 'new query', language: 'lucene' } });
       await act(async () => {
         lensStore.dispatch(setState({ query: { query: 'new query', language: 'lucene' } }));
       });

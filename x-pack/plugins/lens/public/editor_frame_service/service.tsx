@@ -134,14 +134,7 @@ export class EditorFrameService {
       const palettes = await plugins.charts.palettes.getPalettes();
 
       return {
-        EditorFrameContainer: ({
-          doc,
-          onError,
-          dateRange,
-          onChange,
-          showNoDataPopover,
-          initialContext,
-        }) => {
+        EditorFrameContainer: ({ doc, onError, onChange, showNoDataPopover, initialContext }) => {
           return (
             <div className="lnsApp__frame">
               <EditorFrame
@@ -158,7 +151,6 @@ export class EditorFrameService {
                 plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
                 palettes={palettes}
-                dateRange={dateRange}
                 onChange={onChange}
                 showNoDataPopover={showNoDataPopover}
                 initialContext={initialContext}

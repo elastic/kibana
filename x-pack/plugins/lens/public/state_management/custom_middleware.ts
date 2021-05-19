@@ -7,7 +7,8 @@
 
 import { delay, finalize, switchMap, tap } from 'rxjs/operators';
 import _, { debounce } from 'lodash';
-import { Dispatch, Action } from '@reduxjs/toolkit';
+import { Dispatch, PayloadAction } from '@reduxjs/toolkit';
+import moment from 'moment';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
 import {
@@ -15,6 +16,13 @@ import {
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { setState, LensGetState, LensDispatch } from '.';
+import { LensAppState } from './types';
+import { getResolvedDateRange } from '../lib';
+
+function containsDynamicMath(dateMathString: string) {
+  return dateMathString.includes('now');
+}
+const TIME_LAG_PERCENTAGE_LIMIT = 0.02;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const customMiddleware = (data: DataPublicPluginStart) => (store: any) => {
@@ -23,9 +31,17 @@ export const customMiddleware = (data: DataPublicPluginStart) => (store: any) =>
     store.getState,
     store.dispatch
   );
-  return (next: Dispatch) => <A extends Action>(action: A) => {
+  return (next: Dispatch) => <A extends PayloadAction<LensAppState>>(action: A) => {
     if (action.type === 'app/navigateAway') {
       unsubscribeFromExternalContext();
+    }
+    // if document was modified or sessionId check if too much time passed to update searchSessionId
+    if (
+      action.type === 'app/setState' &&
+      action.payload?.lastKnownDoc &&
+      !_.isEqual(action.payload?.lastKnownDoc, store.getState().app.lastKnownDoc)
+    ) {
+      updateTimeRange(data, store.getState, store.dispatch);
     }
     next(action);
   };
@@ -44,11 +60,11 @@ function subscribeToExternalContext(
     const filters = _.isEqual(getState().app.filters, globalFilters)
       ? null
       : { filters: globalFilters };
-
     dispatch(
       setState({
         searchSessionId,
         ...filters,
+        resolvedDateRange: getResolvedDateRange(queryService.timefilter.timefilter),
       })
     );
   };
@@ -97,4 +113,38 @@ function subscribeToExternalContext(
     autoRefreshSubscription.unsubscribe();
     sessionSubscription.unsubscribe();
   };
+}
+
+function updateTimeRange(data: DataPublicPluginStart, dispatch: LensDispatch) {
+  const timefilter = data.query.timefilter.timefilter;
+  const unresolvedTimeRange = timefilter.getTime();
+  if (
+    !containsDynamicMath(unresolvedTimeRange.from) &&
+    !containsDynamicMath(unresolvedTimeRange.to)
+  ) {
+    return;
+  }
+
+  const { min, max } = timefilter.getBounds();
+
+  if (!min || !max) {
+    // bounds not fully specified, bailing out
+    return;
+  }
+
+  // calculate length of currently configured range in ms
+  const timeRangeLength = moment.duration(max.diff(min)).asMilliseconds();
+
+  // calculate lag of managed "now" for date math
+  const nowDiff = Date.now() - data.nowProvider.get().valueOf();
+
+  // if the lag is signifcant, start a new session to clear the cache
+  if (nowDiff > timeRangeLength * TIME_LAG_PERCENTAGE_LIMIT) {
+    dispatch(
+      setState({
+        searchSessionId: data.search.session.start(),
+        resolvedDateRange: getResolvedDateRange(timefilter),
+      })
+    );
+  }
 }
