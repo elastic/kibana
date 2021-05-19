@@ -21,3 +21,5 @@ export const threat_subtechnique = t.type({
 });
 
 export const threat_subtechniques = t.array(threat_subtechnique);
+
+export type ThreatSubtechnique = t.TypeOf<typeof threat_subtechnique>;
