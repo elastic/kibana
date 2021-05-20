@@ -6,11 +6,11 @@
  */
 
 import { Dispatch, useEffect, useState } from 'react';
-
-import {
+import type {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
 import { addExceptionListItem, updateExceptionListItem } from '../api';
 import { transformNewItemOutput, transformOutput } from '../transforms';
 import { PersistHookProps } from '../types';
