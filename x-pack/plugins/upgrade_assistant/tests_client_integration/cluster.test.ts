@@ -26,6 +26,8 @@ describe('Cluster tab', () => {
           level: 'critical',
           message:
             'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
+          details:
+            'model snapshot [%s] for job [%s] supports minimum version [%s] and needs to be at least [%s]',
           url: 'doc_url',
           correctiveAction: {
             type: 'mlSnapshot',

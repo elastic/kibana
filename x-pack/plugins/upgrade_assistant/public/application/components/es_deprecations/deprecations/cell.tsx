@@ -86,6 +86,8 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
           <FixMlSnapshotsButton
             jobId={correctiveAction.jobId}
             snapshotId={correctiveAction.snapshotId}
+            // There will only ever be a single item for the cluster deprecations list, so we can use the index to access the first one
+            description={items[0]?.body}
           />
         </EuiFlexItem>
       )}

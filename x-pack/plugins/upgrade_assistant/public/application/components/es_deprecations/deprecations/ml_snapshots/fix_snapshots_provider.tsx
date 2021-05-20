@@ -7,7 +7,6 @@
 
 import React, { useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -21,13 +20,20 @@ import {
   EuiPortal,
   EuiTitle,
   EuiText,
-  EuiCode,
 } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
 
 interface Props {
   children: (
-    fixSnapshotsPrompt: ({ jobId, snapshotId }: { jobId: string; snapshotId: string }) => void
+    fixSnapshotsPrompt: ({
+      jobId,
+      snapshotId,
+      description,
+    }: {
+      jobId: string;
+      snapshotId: string;
+      description: string;
+    }) => void
   ) => React.ReactNode;
 }
 
@@ -53,22 +59,11 @@ const i18nTexts = {
   flyoutTitle: i18n.translate('xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.title', {
     defaultMessage: 'Upgrade or delete model snapshot',
   }),
-  primaryFlyoutDescription: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.primaryDescription',
+  secondaryFlyoutDescription: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.secondaryDescription',
     {
-      defaultMessage:
-        'Over time, older snapshot formats are deprecated and removed. Anomaly detection jobs support only snapshots that are from the current or previous major version.',
+      defaultMessage: 'Upgrade or delete your model snapshot to resolve.',
     }
-  ),
-  getSecondaryFlyoutDescription: ({ jobId, snapshotId }: { jobId: string; snapshotId: string }) => (
-    <FormattedMessage
-      id="xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.secondaryDescription"
-      defaultMessage="Please upgrade or delete snapshot {snapshotId} for job {jobId}."
-      values={{
-        snapshotId: <EuiCode>{snapshotId}</EuiCode>,
-        jobId: <EuiCode>{jobId}</EuiCode>,
-      }}
-    />
   ),
   upgradeSuccessNotificationText: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.upgradeSuccessNotificationText',
@@ -103,6 +98,7 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
 
   const jobId = useRef<string | undefined>(undefined);
   const snapshotId = useRef<string | undefined>(undefined);
+  const description = useRef<string | undefined>(undefined);
 
   const { api, notifications } = useAppContext();
 
@@ -147,13 +143,16 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
   const fixSnapshotsPrompt = ({
     jobId: currentJobId,
     snapshotId: currentSnapshotId,
+    description: currentDescription,
   }: {
     jobId: string;
     snapshotId: string;
+    description: string;
   }) => {
     setIsFlyoutOpen(true);
     jobId.current = currentJobId;
     snapshotId.current = currentSnapshotId;
+    description.current = currentDescription;
   };
 
   return (
@@ -176,13 +175,8 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
               <EuiText>
-                <p>{i18nTexts.primaryFlyoutDescription}</p>
-                <p>
-                  {i18nTexts.getSecondaryFlyoutDescription({
-                    jobId: jobId.current!,
-                    snapshotId: snapshotId.current!,
-                  })}
-                </p>
+                <p>{description.current!}</p>
+                <p>{i18nTexts.secondaryFlyoutDescription}</p>
               </EuiText>
             </EuiFlyoutBody>
             <EuiFlyoutFooter>

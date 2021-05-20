@@ -30,9 +30,14 @@ const i18nTexts = {
 interface Props {
   snapshotId: string;
   jobId: string;
+  description: string;
 }
 
-export const FixMlSnapshotsButton: React.FunctionComponent<Props> = ({ snapshotId, jobId }) => {
+export const FixMlSnapshotsButton: React.FunctionComponent<Props> = ({
+  snapshotId,
+  jobId,
+  description,
+}) => {
   return (
     <FixSnapshotsProvider>
       {(fixSnapshotsPrompt) => {
@@ -40,7 +45,7 @@ export const FixMlSnapshotsButton: React.FunctionComponent<Props> = ({ snapshotI
           <EuiButton
             size="s"
             data-test-subj="fixMlSnapshotsButton"
-            onClick={() => fixSnapshotsPrompt({ snapshotId, jobId })}
+            onClick={() => fixSnapshotsPrompt({ snapshotId, jobId, description })}
           >
             {i18nTexts.fixButtonLabel}
           </EuiButton>

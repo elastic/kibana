@@ -105,6 +105,8 @@ const getCorrectiveAction = (message: string) => {
   }
 
   if (requiresMlAction) {
+    // This logic is brittle, as we are expecting the message to be in a particular format to extract the snapshot ID and job ID
+    // Implementing https://github.com/elastic/elasticsearch/issues/73089 in ES should address this concern
     const regex = /(?<=\[).*?(?=\])/g;
     const matches = message.match(regex);
 
