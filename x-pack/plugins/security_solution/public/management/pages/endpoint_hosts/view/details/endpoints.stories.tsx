@@ -84,6 +84,7 @@ export default {
 
 export const Tabs = () => (
   <EndpointDetailsFlyoutTabs
+    show="details"
     tabs={[
       {
         id: 'overview',

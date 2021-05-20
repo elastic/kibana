@@ -18,7 +18,7 @@ import {
   MetadataQueryStrategyVersions,
   HostStatus,
 } from '../../../../../common/endpoint/types';
-import { EndpointState, EndpointIndexUIQueryParams } from '../types';
+import { EndpointState, EndpointIndexUIQueryParams, FlyoutVersion } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
   MANAGEMENT_DEFAULT_PAGE,
@@ -214,7 +214,7 @@ export const uiQueryParams: (
 
         if (value !== undefined) {
           if (key === 'show') {
-            if (value === 'policy_response' || value === 'details') {
+            if (value === 'policy_response' || value === 'details' || value === 'activity-log') {
               data[key] = value;
             }
           } else {
@@ -239,10 +239,10 @@ export const hasSelectedEndpoint: (state: Immutable<EndpointState>) => boolean =
 );
 
 /** What policy details panel view to show */
-export const showView: (state: EndpointState) => 'policy_response' | 'details' = createSelector(
+export const showView: (state: EndpointState) => FlyoutVersion = createSelector(
   uiQueryParams,
   (searchParams) => {
-    return searchParams.show === 'policy_response' ? 'policy_response' : 'details';
+    return searchParams.show || 'details';
   }
 );
 

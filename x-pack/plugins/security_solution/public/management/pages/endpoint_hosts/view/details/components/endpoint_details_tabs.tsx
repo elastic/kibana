@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-
+import { FlyoutVersion } from '../../../types';
 export enum EndpointDetailsTabsTypes {
   overview = 'overview',
   activityLog = 'activity-log',
@@ -44,10 +44,18 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   }
 `;
 
-export const EndpointDetailsFlyoutTabs = ({ tabs }: { tabs: EndpointDetailsTabs[] }) => {
-  const [selectedTabId, setSelectedTabId] = useState<EndpointDetailsTabsId>(
-    EndpointDetailsTabsTypes.overview
-  );
+export const EndpointDetailsFlyoutTabs = ({
+  show,
+  tabs,
+}: {
+  show: FlyoutVersion;
+  tabs: EndpointDetailsTabs[];
+}) => {
+  const [selectedTabId, setSelectedTabId] = useState<EndpointDetailsTabsId>(() => {
+    return show === 'details'
+      ? EndpointDetailsTabsTypes.overview
+      : EndpointDetailsTabsTypes.activityLog;
+  });
 
   const handleTabClick = useCallback(
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EndpointDetailsTabsId),

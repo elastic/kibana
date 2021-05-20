@@ -106,6 +106,28 @@ export const EndpointDetailsFlyout = memo(() => {
   const hostStatus = useEndpointSelector(hostStatusInfo);
   const show = useEndpointSelector(showView);
 
+  const tabs = [
+    {
+      id: EndpointDetailsTabsTypes.overview,
+      name: i18.OVERVIEW,
+      content:
+        hostDetails === undefined ? (
+          contentLoadingMarkup
+        ) : (
+          <EndpointDetails details={hostDetails} policyInfo={policyInfo} hostStatus={hostStatus} />
+        ),
+    },
+    {
+      id: EndpointDetailsTabsTypes.activityLog,
+      name: i18.ACTIVITY_LOG,
+      content:
+        activityLog === undefined ? (
+          contentLoadingMarkup
+        ) : (
+          <EndpointActivityLog endpointActions={activityLog} />
+        ),
+    },
+  ];
   const hostList = useEndpointSelector(listData);
   const pageCount = hostList.length;
 
@@ -169,46 +191,18 @@ export const EndpointDetailsFlyout = memo(() => {
           </EuiToolTip>
         )}
       </EuiFlyoutHeader>
-      {show === 'details' && (
+      {show !== 'policy_response' ? (
         <>
           <DetailsFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EndpointDetailsFlyoutTabs
-                  tabs={[
-                    {
-                      id: EndpointDetailsTabsTypes.overview,
-                      name: i18.OVERVIEW,
-                      content:
-                        hostDetails === undefined ? (
-                          contentLoadingMarkup
-                        ) : (
-                          <EndpointDetails
-                            details={hostDetails}
-                            policyInfo={policyInfo}
-                            hostStatus={hostStatus}
-                          />
-                        ),
-                    },
-                    {
-                      id: EndpointDetailsTabsTypes.activityLog,
-                      name: i18.ACTIVITY_LOG,
-                      content:
-                        activityLog === undefined ? (
-                          contentLoadingMarkup
-                        ) : (
-                          <EndpointActivityLog endpointActions={activityLog} />
-                        ),
-                    },
-                  ]}
-                />
+                <EndpointDetailsFlyoutTabs show={show} tabs={tabs} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </DetailsFlyoutBody>
         </>
-      )}
-      {show === 'policy_response' && !!hostDetails && (
-        <PolicyResponseFlyoutPanel hostMeta={hostDetails} />
+      ) : (
+        !!hostDetails && <PolicyResponseFlyoutPanel hostMeta={hostDetails} />
       )}
 
       <EuiFlyoutFooter>
