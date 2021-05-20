@@ -294,7 +294,7 @@ export function getTimeShiftWarningMessages(
   if (!state) return;
   const warningMessages: React.ReactNode[] = [];
   Object.entries(state.layers).forEach(([layerId, layer]) => {
-    let dateHistogramInterval: null | moment.Duration = null;
+    let dateHistogramInterval: null | string = null;
     const dateHistogramColumn = layer.columnOrder.find(
       (colId) => layer.columns[colId].operationType === 'date_histogram'
     );
@@ -304,15 +304,14 @@ export function getTimeShiftWarningMessages(
     if (dateHistogramColumn && activeData && activeData[layerId]) {
       const column = activeData[layerId].columns.find((col) => col.id === dateHistogramColumn);
       if (column) {
-        dateHistogramInterval = search.aggs.parseInterval(
-          search.aggs.getDateHistogramMetaDataByDatatableColumn(column)?.interval || ''
-        );
+        dateHistogramInterval =
+          search.aggs.getDateHistogramMetaDataByDatatableColumn(column)?.interval || null;
       }
     }
     if (dateHistogramInterval === null) {
       return;
     }
-    const shiftInterval = dateHistogramInterval.asMilliseconds();
+    const shiftInterval = search.aggs.parseInterval(dateHistogramInterval)!.asMilliseconds();
     let timeShifts: number[] = [];
     const timeShiftMap: Record<number, string[]> = {};
     Object.entries(layer.columns).forEach(([columnId, column]) => {
@@ -344,8 +343,8 @@ export function getTimeShiftWarningMessages(
               defaultMessage="{label} uses a time shift of {columnTimeShift} which is smaller than the date histogram interval of {interval}. To prevent mismatched data, use a multiple of {interval} as time shift."
               values={{
                 label: <strong>{layer.columns[columnId].label}</strong>,
-                interval: dateHistogramInterval?.humanize(),
-                columnTimeShift: layer.columns[columnId].timeShift!,
+                interval: <strong>{dateHistogramInterval}</strong>,
+                columnTimeShift: <strong>{layer.columns[columnId].timeShift}</strong>,
               }}
             />
           );
@@ -359,7 +358,7 @@ export function getTimeShiftWarningMessages(
               defaultMessage="{label} uses a time shift of {columnTimeShift} which is not a multiple of the date histogram interval of {interval}. To prevent mismatched data, use a multiple of {interval} as time shift."
               values={{
                 label: <strong>{layer.columns[columnId].label}</strong>,
-                interval: dateHistogramInterval?.humanize(),
+                interval: dateHistogramInterval,
                 columnTimeShift: layer.columns[columnId].timeShift!,
               }}
             />
