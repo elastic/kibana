@@ -315,7 +315,7 @@ describe('utils', () => {
             gap: null,
             bulk_create_time_durations: [],
             search_after_time_durations: [],
-            last_look_back_date: null,
+            last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
           },
           failures: [],
         },
@@ -333,7 +333,7 @@ describe('utils', () => {
             gap: null,
             bulk_create_time_durations: [],
             search_after_time_durations: [],
-            last_look_back_date: null,
+            last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
           },
           failures: [],
         },
@@ -349,7 +349,7 @@ describe('utils', () => {
             gap: null,
             bulk_create_time_durations: [],
             search_after_time_durations: [],
-            last_look_back_date: null,
+            last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
           },
           failures: [
             {
@@ -363,7 +363,7 @@ describe('utils', () => {
               gap: null,
               bulk_create_time_durations: [],
               search_after_time_durations: [],
-              last_look_back_date: null,
+              last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
             },
             {
               alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
@@ -376,7 +376,7 @@ describe('utils', () => {
               gap: null,
               bulk_create_time_durations: [],
               search_after_time_durations: [],
-              last_look_back_date: null,
+              last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
             },
           ],
         },
