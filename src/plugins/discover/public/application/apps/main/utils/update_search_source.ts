@@ -60,7 +60,10 @@ export function updateSearchSource({
       .setPreferredSearchStrategyId('default');
 
     if (indexPatternsUtils.isDefault(indexPattern)) {
-      volatileSearchSource.setField('filter', services.timefilter.createFilter(indexPattern));
+      volatileSearchSource.setField(
+        'filter',
+        data.query.timefilter.timefilter.createFilter(indexPattern)
+      );
     }
 
     if (useNewFieldsApi) {

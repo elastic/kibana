@@ -10,6 +10,8 @@ import { dataPluginMock } from '../../../data/public/mocks';
 import { coreMock } from '../../../../core/public/mocks';
 import { DEFAULT_COLUMNS_SETTING } from '../../common';
 import { savedSearchMock } from './saved_search';
+import { UI_SETTINGS } from '../../../data/common';
+const dataPlugin = dataPluginMock.createStartContract();
 
 export const discoverServiceMock = ({
   core: coreMock.createStart(),
@@ -18,7 +20,7 @@ export const discoverServiceMock = ({
       search: '',
     },
   }),
-  data: dataPluginMock.createStartContract(),
+  data: dataPlugin,
   capabilities: {
     visualize: {
       show: true,
@@ -27,11 +29,14 @@ export const discoverServiceMock = ({
       save: false,
     },
   },
+  filterManager: dataPlugin.query.filterManager,
   uiSettings: {
     get: (key: string) => {
       if (key === 'fields:popularLimit') {
         return 5;
       } else if (key === DEFAULT_COLUMNS_SETTING) {
+        return [];
+      } else if (key === UI_SETTINGS.META_FIELDS) {
         return [];
       }
     },

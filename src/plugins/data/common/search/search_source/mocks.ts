@@ -45,6 +45,10 @@ export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {
 export const createSearchSourceMock = (fields?: SearchSourceFields) =>
   new SearchSource(fields, {
     getConfig: uiSettingsServiceMock.createStartContract().get,
-    search: jest.fn(),
+    search: jest
+      .fn()
+      .mockReturnValue(
+        of({ rawResponse: { hits: { hits: [], total: 0 } }, isPartial: false, isRunning: false })
+      ),
     onResponse: jest.fn().mockImplementation((req, res) => res),
   });

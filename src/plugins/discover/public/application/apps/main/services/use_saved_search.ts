@@ -72,7 +72,8 @@ export const useSavedSearch = ({
   stateContainer: GetStateReturn;
   useNewFieldsApi: boolean;
 }): UseSavedSearch => {
-  const { data, filterManager, timefilter, uiSettings } = services;
+  const { data, filterManager, uiSettings } = services;
+  const timefilter = data.query.timefilter.timefilter;
 
   const shouldSearchOnPageLoad = useCallback(() => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
