@@ -6,20 +6,19 @@
 **_Visualize your data with dashboards._**
 
 The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<index-patterns, index patterns>> into a collection of panels 
-that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. Configure each panel to display your data in a chart, table, map, and more, 
-then compare the panels side-by-side to identify the patterns and connections in your data. 
+that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. 
 
 [role="screenshot"]
 image:images/Dashboard_example.png[Example dashboard]
 
-Dashboards support many types of panels, and provide several editors that you can use to create panels.
+Panels display your data in charts, tables, maps, and more, which allow you to compare your data side-by-side to identify patterns and connections. Dashboards support several editors you can use to create panels, and support many types of panels to display your data.
 
 [cols="2"]
 |===
 
-| <<create-panels-with-editors,Visualization editors>>
-| Use the *Lens*, *TSVB*, *Vega*, and *Timelion* editors to create visualizations of your data, or create *Aggregation based* visualizations using {es} <<aggregation-reference,aggregations>>. 
-*Lens* is recommended for most users.
+| <<create-panels-with-editors,Editors>>
+| Use the *Lens*, *TSVB*, *Vega*, and *Timelion* editors to create visualizations of your data, or create *Aggregation based* visualizations using {es} aggregations. 
+*Lens* is the recommended editor.
 
 | <<maps,Maps>>
 | Create beautiful displays of your geographical data.
@@ -79,94 +78,67 @@ Begin with an empty dashboard, or open an existing dashboard.
 [[add-panels]]
 === Add panels
 
-To add panels to the dashboard, you can use one of the editors to create a new panel, 
-add an existing panel from the *Visualize Library*, add a table of live streaming logs, or the add the results from a machine learning anomaly detection job.
+Create and add panels of your data to the dashboard, or add existing panels from the library. 
 
-[float]
-[[create-panels-with-lens]]
-==== Create panels
+* *Create visualization* &mdash; Opens *Lens*, the recommended editor to create visualizations of your data.
 
-To create panels, choose the panel type you want to add, configure the panel, then add the panel to the dashboard. 
+* *All types* &mdash; Select the editor to create the panel, or select the panel type you want to add to the dashboard.
 
-. On the dashboard, choose one of the following options:
-
-* Click *Create visualization* to open *Lens*, the recommended visualization editor. 
-
-* Click *More types*, then select the panel type you want to add.
-
-. Configure the panel options.
-
-. To add the panel to the dashboard, choose one of the following options:
-
-* To add the panel to the dashboard without saving to the *Visualize Library*, click *Save and return*. 
-+
-To add a title to the panel, click *No Title*, enter the *Panel title*, then click *Save*.
-
-* To save the panel to the *Visualize Library*, click *Save to Library*, configure the options, then click *Save and return*.
-+
-When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the header.
-
-[float]
-[[add-panels-from-the-library]]
-==== Add panels from the library
-
-Add your search results from <<save-your-search,*Discover*>>, or add panels from the *Visualize Library*.
-
-. On the dashboard, click *Add from library*.
-
-. On the *Add from library* flyout, click the panels you want to add to the dashboard.
-
-. To close the list, click *X*.
+* *Add from library* &mdash; Add panels from the *Visualize Library*, including search results from <<save-your-search,*Discover*>>. The search results from *Discover* are not aggregated.
 +
 When a panel contains a saved query, both queries are applied.
-
-. To make changes to the panel, open the panel menu, then select the following options:
-
-* *Edit visualization* &mdash; Opens an editor so that you can change the panel. 
-+
-To make changes to the panel without changing the original version, open the panel menu, then click *More > Unlink from library*.
-
-* *Edit panel title* &mdash; Opens the *Customize panel* window to change the *Panel title* and to display the panel title.
-
-TIP: The search results from *Discover* are not aggregated.
 
 [[tsvb]]
 
 [float]
-[[arrange-panels]]
-[[moving-containers]]
-[[resizing-containers]]
-=== Arrange the panels
+[[save-panels]]
+=== Save and add panels
 
-To compare the data in the panels, reorganize or remove the panels on the dashboard.
+{kib} provides you with several options to save and add the panels to the dashboard.
 
-. From the toolbar, click *Edit*, then use the following options:
+* *Save to Library* &mdash; Saves the panel in the *Visualize Library* so that others can view and use the panel. 
++
+When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
 
-* To move, click and hold the panel header, then drag to the new location.
+* *Save and return* &mdash; Adds the panel to the dashboard without saving to the *Visualize Library* or adding a panel title. When you're ready, you can add a panel title and save the panel to the *Visulize Library* later.
 
-* To resize, click the resize control, then drag to the new dimensions.
+To add a panel title:
 
-* To maximize the panel to fullscreen, open the panel menu, then click *More > Maximize panel*.
+. In the panel header, click *No Title*.
 
-* To delete, open the panel menu, then click *More > Delete from dashboard*.
+. Select *Show panel title*.
 
-. To save your changes, click *Save* in the toolbar.
+. Enter the *Panel title*. 
+
+To save the panel to the *Visualize Library*:
+
+. Open the panel menu, then select *More > Save to library*.
+
+. Enter the panel title, then click *Save*.
 
 [float]
-[[apply-design-options]]
-=== Apply design options
+[[edit-panels]]
+=== Edit panels
 
-Apply a set of design options to the entire dashboard.
+To make changes to the panel, use the panel menu options.
 
-. From the toolbar, click *Edit > Options*.
+. In the toolbar, click *Edit*.
 
-. Select the following options:
+. Open the panel menu, then use the following options:
 
-* *Use margins between panels* &mdash; Specifies a margin of space between each panel.
+* *Edit lens* &mdash; Opens *Lens* so you can make changes to the visualization. 
 
-* *Show panel titles* &mdash; Specifies the appearance of titles in the header of each panel.
+* *Edit visualization* &mdash; Opens the editor so you can make changes to the panel. 
++
+To make changes without changing the original version, open the panel menu, then click *More > Unlink from library*.
 
-* *Sync color pallettes across panels* &mdash; Specifies whether the color pallette is applied to all panels.
+* *Edit panel title* &mdash; Opens the *Customize panel* window to change the *Panel title*.
+
+* *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
+
+* *More > Delete from dashboard* &mdash; Removes the panel from the dashboard. 
++
+If you want to use the panel later, make sure that you save the panel to the *Visualize Library*.  
 
 [float]
 [[search-or-filter-your-data]]
@@ -175,7 +147,43 @@ Apply a set of design options to the entire dashboard.
 {kib} supports several ways to search your data and apply {es} filters. You can combine the filters with any panel
 filter to display the data want to you see.
 
-For more information, refer to <<kibana-concepts-analysts,{kib} concepts>>.
+For more information about {kib} and {es} filters, refer to <<kibana-concepts-analysts,{kib} concepts>>.
+
+To apply a panel-level time filter:
+
+. Open the panel menu, then select *More > Customize time range*.
+
+. Enter the time range you want to view, then click *Add to panel*.
+
+[float]
+[[arrange-panels]]
+[[moving-containers]]
+[[resizing-containers]]
+=== Arrange panels
+
+To compare the data side-by-side, move and arrange the panels.
+
+In the toolbar, click *Edit*, then use the following options:
+
+* To move, click and hold the panel header, then drag to the new location.
+
+* To resize, click the resize control, then drag to the new dimensions.
+
+* To maximize to fullscreen, open the panel menu, then click *More > Maximize panel*.
+
+[float]
+[[apply-design-options]]
+=== Apply design options
+
+Apply a set of design options to the entire dashboard.
+
+In the toolbar, click *Edit > Options*, then use the following options:
+
+* *Use margins between panels* &mdash; Specifies a margin of space between each panel.
+
+* *Show panel titles* &mdash; Specifies the appearance of titles in the header of each panel.
+
+* *Sync color pallettes across panels* &mdash; Specifies whether the color pallette is applied to all panels.
 
 [float]
 [[clone-panels]]
@@ -188,16 +196,13 @@ dashboard.
 
 To clone a panel:
 
-. From the toolbar, click *Edit*. 
+. In the toolbar, click *Edit*.
 
 . Open the panel menu, then select *Clone panel*. 
 +
-[role="screenshot"]
-image:images/clone_panel.gif[clone panel]
-+
 When cloned panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the header.
 
-To copy panels to another dashboard:
+To copy a panel to another dashboard:
 
 . Open the panel menu, then select *More > Copy to dashboard*.
 
@@ -207,67 +212,39 @@ To copy panels to another dashboard:
 [[explore-the-underlying-data]]
 === Explore the underlying documents
 
-View the underlying documents in a panel, or in a data series. 
+View the underlying documents in a panel, or in a data series. *Explore underlying data* is supported only for visualization panels with a single index pattern.
 
-. In kibana.yml, add the following:
-+
-["source","yml"]
------------
-xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled: true
------------
+To view the underlying documents in the panel, open the panel menu, then click *Explore underlying data*.
 
-TIP: *Explore underlying data* is supported only for visualization panels with a single index pattern.
+The documents open in *Discover*, with the same time range and filters as the panel.
 
-To view the underlying documents in the panel: 
-
-. Open the panel menu.
-
-. Click *Explore underlying data*.
-+
-*Discover* opens with the same time range and filters as the panel.
-+
 [role="screenshot"]
 image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
 
-To view the underlying documents in a data series:
+To view the underlying documents in a data series, open the dashboard, then click on the data series in the panel that you want to view. 
 
-. In kibana.yml, add the following:
-+
-["source","yml"]
------------
-xpack.discoverEnhanced.actions.exploreDataInChart.enabled: true
------------
-
-. Open the dashboard, then click on the data series you want to view. 
-+
 [role="screenshot"]
 image::images/explore_data_in_chart.png[Explore underlying data from chart]
 
 [float]
 [[download-csv]]
-=== Download the panel data
+=== Download panel data
 
 Download panel data in a CSV file. You can download most panels in a CSV file, but there is a shortcut available
 for *Lens* panels.
 
-[role="xpack"]
-To download *Lens* panel data in a CSV file:
-
-. Open the *Lens* panel menu.
-
-. Select *More > Download as CSV*.
-+
-[role="screenshot"]
-image::images/download_csv_context_menu.png[Download as CSV from panel context menu]
-
-Each layer produces a single CSV file with columns.
+When you download *Lens* panel data, each layer produces a single CSV file with columns.
 When you download multiple layers, the file names combine the visualization and layer index names.
 
-To download all other panel data in a CSV file:
+[role="xpack"]
+To download *Lens* panel data, open the *Lens* panel menu, then select *More > Download as CSV*.
+
+To download all other panel data: 
 
 . Open the panel menu, then select *Inspect*.
 
 . Click *Download CSV*, then select the CSV type from the dropdown:
+
 * *Formatted CSV* &mdash; Contains human-readable dates and numbers.
 
 * *Unformatted* &mdash; Best used for computer use.
@@ -276,39 +253,16 @@ To download all other panel data in a CSV file:
 image:images/Dashboard_inspect.png[Inspect in dashboard]
 
 [float]
-[[save-the-dashboard]]
-=== Save the dashboard
-
-When you're finished making changes, save the dashboard.
-
-From the toolbar, choose one of the following options:
-
-* *Save as* &mdash; Opens the *Save dashboard* window, which allows you to specify the title and dashboard options.
-
-* *Save* &mdash; Allows you to save the changes you've made to an existing dashboard.
-
-* *Switch to view mode* &mdash; Allows you to exit *Edit* mode without saving your changes, or you can discard the changes you've made. All dashboards with unsaved changes display *Unsaved changes* in the toolbar.
-
-[float]
 [[share-the-dashboard]]
-=== Share the dashboard
+=== Share dashboards
 
-To share the dashboard with a larger audience, click *Share* in the toolbar, then choose one of the following options:
-
-* *Embed code* &mdash; Embed a fully interactive dashboard as an iframe on a web page. To access embedded dashboards, you can require users to
-log in using their {kib} credentials, via reverse proxy, or enable <<anonymous-access-and-embedding, anonymous access>>.
-
-* *Permalinks* &mdash; Share a direct link to a {kib} dashboard. User authentication is required.
-
-* *PDF Reports* &mdash; Generate a PDF report. For more information, refer to <<reporting-getting-started,Reporting>>.
-
-* *PNG Reports* &mdash; Generate a PNG report. For more information, refer to <<reporting-getting-started,Reporting>>.
+To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information, refer to <<reporting-getting-started,Reporting>>.
 
 [float]
 [[import-dashboards]]
 === Export the dashboard
 
-To automate {kib}, you can export dashboards as JSON using the <<dashboard-api,import and export dashboard APIs>>. It is important to export dashboards with all references needed.
+To automate {kib}, you can export dashboards as JSON using the <<dashboard-api,import and export dashboard APIs>>. It is important to export dashboards with all necessary references.
 
 --
 include::tutorial-create-a-dashboard-of-lens-panels.asciidoc[]

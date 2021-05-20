@@ -54,9 +54,9 @@ TIP: *Other* can equal more than 100% by a small amount.
 
 [float]
 [[create-the-visualization-panel]]
-==== Create the visualization panel
+==== Create visualizations
 
-Drag and drop the fields on to the visualization builder, then 
+Drag and drop the fields on to the visualization builder, then customize the visualization.
 
 . Drag and drop the fields on to the visualization builder.
 
@@ -75,7 +75,7 @@ image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels m
 
 [float]
 [[drag-and-drop-keyboard-navigation]]
-===== Create visualization panels with keyboard navigation
+===== Create visualizations with keyboard navigation
 
 *Lens* has a fully accessible, continuously improved drag and drop system, which allows you to use a keyboard instead of a mouse.
 
