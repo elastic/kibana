@@ -8,8 +8,8 @@
 import './share_mode_control.scss';
 
 import {
+  EuiButtonGroup,
   EuiCallOut,
-  EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -40,36 +40,27 @@ interface Props {
   enableSpaceAgnosticBehavior: boolean;
 }
 
-function createLabel({
-  title,
-  text,
-  disabled,
-  tooltip,
-}: {
-  title: string;
-  text: string;
-  disabled: boolean;
-  tooltip?: string;
-}) {
-  return (
-    <>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiText>{title}</EuiText>
-        </EuiFlexItem>
-        {tooltip && (
-          <EuiFlexItem grow={false}>
-            <EuiIconTip content={tooltip} position="left" type="iInCircle" />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <EuiText color={disabled ? undefined : 'subdued'} size="s">
-        {text}
-      </EuiText>
-    </>
-  );
-}
+const buttonGroupLegend = i18n.translate(
+  'xpack.spaces.shareToSpace.shareModeControl.buttonGroupLegend',
+  { defaultMessage: 'Choose how this is shared' }
+);
+
+const shareToAllSpacesId = 'shareToAllSpacesId';
+const shareToAllSpacesButtonLabel = i18n.translate(
+  'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.buttonLabel',
+  { defaultMessage: 'All spaces' }
+);
+
+const shareToExplicitSpacesId = 'shareToExplicitSpacesId';
+const shareToExplicitSpacesButtonLabel = i18n.translate(
+  'xpack.spaces.shareToSpace.shareModeControl.shareToExplicitSpaces.buttonLabel',
+  { defaultMessage: 'Select spaces' }
+);
+
+const cannotChangeTooltip = i18n.translate(
+  'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.cannotChangeTooltip',
+  { defaultMessage: 'You need additional privileges to change this option.' }
+);
 
 export const ShareModeControl = (props: Props) => {
   const {
@@ -90,50 +81,9 @@ export const ShareModeControl = (props: Props) => {
 
   const { selectedSpaceIds } = shareOptions;
   const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
-  const shareToAllSpaces = {
-    id: 'shareToAllSpaces',
-    title: i18n.translate('xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.title', {
-      defaultMessage: 'All spaces',
-    }),
-    text: i18n.translate('xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.text', {
-      defaultMessage: 'Make {objectNoun} available in all current and future spaces.',
-      values: { objectNoun },
-    }),
-    ...(!canShareToAllSpaces && {
-      tooltip: isGlobalControlChecked
-        ? i18n.translate(
-            'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.cannotUncheckTooltip',
-            { defaultMessage: 'You need additional privileges to change this option.' }
-          )
-        : i18n.translate(
-            'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.cannotCheckTooltip',
-            { defaultMessage: 'You need additional privileges to use this option.' }
-          ),
-    }),
-    disabled: !canShareToAllSpaces,
-  };
-  const shareToExplicitSpaces = {
-    id: 'shareToExplicitSpaces',
-    title: i18n.translate(
-      'xpack.spaces.shareToSpace.shareModeControl.shareToExplicitSpaces.title',
-      { defaultMessage: 'Select spaces' }
-    ),
-    text: i18n.translate('xpack.spaces.shareToSpace.shareModeControl.shareToExplicitSpaces.text', {
-      defaultMessage: 'Make {objectNoun} available in selected spaces only.',
-      values: { objectNoun },
-    }),
-    disabled: !canShareToAllSpaces && isGlobalControlChecked,
-  };
-
-  const toggleShareOption = (allSpaces: boolean) => {
-    const updatedSpaceIds = allSpaces
-      ? [ALL_SPACES_ID, ...selectedSpaceIds]
-      : selectedSpaceIds.filter((id) => id !== ALL_SPACES_ID);
-    onChange(updatedSpaceIds);
-  };
 
   const getPrivilegeWarning = () => {
-    if (!shareToExplicitSpaces.disabled) {
+    if (canShareToAllSpaces || !isGlobalControlChecked) {
       return null;
     }
 
@@ -180,28 +130,65 @@ export const ShareModeControl = (props: Props) => {
     <>
       {getPrivilegeWarning()}
 
-      <EuiCheckableCard
-        id={shareToExplicitSpaces.id}
-        label={createLabel(shareToExplicitSpaces)}
-        checked={!isGlobalControlChecked}
-        onChange={() => toggleShareOption(false)}
-        disabled={shareToExplicitSpaces.disabled}
-      >
-        <SelectableSpacesControl
-          spaces={spaces}
-          shareOptions={shareOptions}
-          onChange={onChange}
-          enableCreateNewSpaceLink={enableCreateNewSpaceLink}
-          enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
-        />
-      </EuiCheckableCard>
+      <EuiButtonGroup
+        type="single"
+        idSelected={isGlobalControlChecked ? shareToAllSpacesId : shareToExplicitSpacesId}
+        options={[
+          { id: shareToExplicitSpacesId, label: shareToExplicitSpacesButtonLabel },
+          { id: shareToAllSpacesId, label: shareToAllSpacesButtonLabel },
+        ]}
+        onChange={(optionId: string) => {
+          const updatedSpaceIds =
+            optionId === shareToAllSpacesId
+              ? [ALL_SPACES_ID, ...selectedSpaceIds]
+              : selectedSpaceIds.filter((id) => id !== ALL_SPACES_ID);
+          onChange(updatedSpaceIds);
+        }}
+        legend={buttonGroupLegend}
+        color="secondary"
+        isFullWidth={true}
+        isDisabled={!canShareToAllSpaces}
+      />
+
       <EuiSpacer size="s" />
-      <EuiCheckableCard
-        id={shareToAllSpaces.id}
-        label={createLabel(shareToAllSpaces)}
-        checked={isGlobalControlChecked}
-        onChange={() => toggleShareOption(true)}
-        disabled={shareToAllSpaces.disabled}
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiText
+            color="subdued"
+            textAlign="center"
+            size="s"
+            data-test-subj="share-mode-control-description"
+          >
+            {isGlobalControlChecked
+              ? i18n.translate('xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.text', {
+                  defaultMessage: 'Make {objectNoun} available in all current and future spaces.',
+                  values: { objectNoun },
+                })
+              : i18n.translate(
+                  'xpack.spaces.shareToSpace.shareModeControl.shareToExplicitSpaces.text',
+                  {
+                    defaultMessage: 'Make {objectNoun} available in selected spaces only.',
+                    values: { objectNoun },
+                  }
+                )}
+          </EuiText>
+        </EuiFlexItem>
+        {!canShareToAllSpaces && (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip content={cannotChangeTooltip} position="left" type="iInCircle" />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <SelectableSpacesControl
+        spaces={spaces}
+        shareOptions={shareOptions}
+        onChange={onChange}
+        enableCreateNewSpaceLink={enableCreateNewSpaceLink}
+        enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
       />
     </>
   );

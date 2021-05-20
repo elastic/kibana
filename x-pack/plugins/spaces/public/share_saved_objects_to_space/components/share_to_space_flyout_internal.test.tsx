@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import type { EuiCheckableCardProps } from '@elastic/eui';
-import {
-  EuiCallOut,
-  EuiCheckableCard,
-  EuiIconTip,
-  EuiLoadingSpinner,
-  EuiSelectable,
-} from '@elastic/eui';
+import { EuiCallOut, EuiIconTip, EuiLoadingSpinner, EuiSelectable } from '@elastic/eui';
 import Boom from '@hapi/boom';
 import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
@@ -430,25 +423,13 @@ describe('ShareToSpaceFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  describe('correctly renders checkable cards', () => {
-    function getCheckableCardProps(
-      wrapper: ReactWrapper<React.PropsWithChildren<EuiCheckableCardProps>>
-    ) {
-      const iconTip = wrapper.find(EuiIconTip);
+  describe('correctly renders share mode control', () => {
+    function getDescriptionAndWarning(wrapper: ReactWrapper) {
+      const descriptionNode = findTestSubject(wrapper, 'share-mode-control-description');
+      const iconTipNode = wrapper.find(ShareModeControl).find(EuiIconTip);
       return {
-        checked: wrapper.prop('checked'),
-        disabled: wrapper.prop('disabled'),
-        ...(iconTip.length > 0 && { tooltip: iconTip.prop('content') as string }),
-      };
-    }
-    function getCheckableCards<T>(wrapper: ReactWrapper<T, never>) {
-      return {
-        explicitSpacesCard: getCheckableCardProps(
-          wrapper.find('#shareToExplicitSpaces').find(EuiCheckableCard)
-        ),
-        allSpacesCard: getCheckableCardProps(
-          wrapper.find('#shareToAllSpaces').find(EuiCheckableCard)
-        ),
+        description: descriptionNode.text(),
+        isPrivilegeTooltipDisplayed: iconTipNode.length > 0,
       };
     }
 
@@ -458,27 +439,23 @@ describe('ShareToSpaceFlyout', () => {
       it('and the object is not shared to all spaces', async () => {
         const namespaces = ['my-active-space'];
         const { wrapper } = await setup({ canShareToAllSpaces, namespaces });
-        const shareModeControl = wrapper.find(ShareModeControl);
-        const checkableCards = getCheckableCards(shareModeControl);
+        const { description, isPrivilegeTooltipDisplayed } = getDescriptionAndWarning(wrapper);
 
-        expect(checkableCards).toEqual({
-          explicitSpacesCard: { checked: true, disabled: false },
-          allSpacesCard: { checked: false, disabled: false },
-        });
-        expect(shareModeControl.find(EuiCallOut)).toHaveLength(0); // "Additional privileges required" callout
+        expect(description).toMatchInlineSnapshot(
+          `"Make object available in selected spaces only."`
+        );
+        expect(isPrivilegeTooltipDisplayed).toBe(false);
       });
 
       it('and the object is shared to all spaces', async () => {
         const namespaces = [ALL_SPACES_ID];
         const { wrapper } = await setup({ canShareToAllSpaces, namespaces });
-        const shareModeControl = wrapper.find(ShareModeControl);
-        const checkableCards = getCheckableCards(shareModeControl);
+        const { description, isPrivilegeTooltipDisplayed } = getDescriptionAndWarning(wrapper);
 
-        expect(checkableCards).toEqual({
-          explicitSpacesCard: { checked: false, disabled: false },
-          allSpacesCard: { checked: true, disabled: false },
-        });
-        expect(shareModeControl.find(EuiCallOut)).toHaveLength(0); // "Additional privileges required" callout
+        expect(description).toMatchInlineSnapshot(
+          `"Make object available in all current and future spaces."`
+        );
+        expect(isPrivilegeTooltipDisplayed).toBe(false);
       });
     });
 
@@ -488,35 +465,23 @@ describe('ShareToSpaceFlyout', () => {
       it('and the object is not shared to all spaces', async () => {
         const namespaces = ['my-active-space'];
         const { wrapper } = await setup({ canShareToAllSpaces, namespaces });
-        const shareModeControl = wrapper.find(ShareModeControl);
-        const checkableCards = getCheckableCards(shareModeControl);
+        const { description, isPrivilegeTooltipDisplayed } = getDescriptionAndWarning(wrapper);
 
-        expect(checkableCards).toEqual({
-          explicitSpacesCard: { checked: true, disabled: false },
-          allSpacesCard: {
-            checked: false,
-            disabled: true,
-            tooltip: 'You need additional privileges to use this option.',
-          },
-        });
-        expect(shareModeControl.find(EuiCallOut)).toHaveLength(0); // "Additional privileges required" callout
+        expect(description).toMatchInlineSnapshot(
+          `"Make object available in selected spaces only."`
+        );
+        expect(isPrivilegeTooltipDisplayed).toBe(true);
       });
 
       it('and the object is shared to all spaces', async () => {
         const namespaces = [ALL_SPACES_ID];
         const { wrapper } = await setup({ canShareToAllSpaces, namespaces });
-        const shareModeControl = wrapper.find(ShareModeControl);
-        const checkableCards = getCheckableCards(shareModeControl);
+        const { description, isPrivilegeTooltipDisplayed } = getDescriptionAndWarning(wrapper);
 
-        expect(checkableCards).toEqual({
-          explicitSpacesCard: { checked: false, disabled: true },
-          allSpacesCard: {
-            checked: true,
-            disabled: true,
-            tooltip: 'You need additional privileges to change this option.',
-          },
-        });
-        expect(shareModeControl.find(EuiCallOut)).toHaveLength(1); // "Additional privileges required" callout
+        expect(description).toMatchInlineSnapshot(
+          `"Make object available in all current and future spaces."`
+        );
+        expect(isPrivilegeTooltipDisplayed).toBe(true);
       });
     });
   });
