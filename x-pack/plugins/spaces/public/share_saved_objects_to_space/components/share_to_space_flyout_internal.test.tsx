@@ -12,6 +12,7 @@ import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import type { SavedObjectReferenceWithContext } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
@@ -20,6 +21,7 @@ import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/com
 import { getSpacesContextProviderWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { NoSpacesAvailable } from './no_spaces_available';
+import { RelativesControl } from './relatives_control';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ShareModeControl } from './share_mode_control';
 import { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
@@ -34,6 +36,7 @@ interface SetupOpts {
   enableCreateNewSpaceLink?: boolean;
   behaviorContext?: 'within-space' | 'outside-space';
   mockFeatureId?: string; // optional feature ID to use for the SpacesContext
+  additionalShareableReferences?: SavedObjectReferenceWithContext[];
 }
 
 const setup = async (opts: SetupOpts = {}) => {
@@ -86,6 +89,19 @@ const setup = async (opts: SetupOpts = {}) => {
     icon: 'dashboard',
     title: 'foo',
   };
+
+  mockSpacesManager.getShareableReferences.mockResolvedValue({
+    objects: [
+      {
+        // this is the result for the saved object target; by default, it has no references
+        type: savedObjectToShare.type,
+        id: savedObjectToShare.id,
+        spaces: savedObjectToShare.namespaces,
+        inboundReferences: [],
+      },
+      ...(opts.additionalShareableReferences ?? []),
+    ],
+  });
 
   const { getStartServices } = coreMock.createSetup();
   const startServices = coreMock.createStart();
@@ -677,6 +693,33 @@ describe('ShareToSpaceFlyout', () => {
         expectNeedAdditionalPrivileges(options[3], { spaceId: 'space-4', checked: false });
         expectInactiveSpace(options[4], { spaceId: 'my-active-space', checked: true });
       });
+    });
+  });
+
+  describe('footer', () => {
+    it('does not show a description of relatives (references) if there are none', async () => {
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
+      const { wrapper } = await setup({ namespaces });
+
+      const relativesControl = wrapper.find(RelativesControl);
+      expect(relativesControl.isEmptyRender()).toBe(true);
+    });
+
+    it('shows a description of filtered relatives (references)', async () => {
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
+      const { wrapper } = await setup({
+        namespaces,
+        additionalShareableReferences: [
+          // the saved object target is already included in the mock results by default; it will not be counted
+          { type: 'foo', id: '1', spaces: [], inboundReferences: [] }, // this will not be counted because spaces is empty (it may not be a shareable type)
+          { type: 'foo', id: '2', spaces: namespaces, inboundReferences: [], isMissing: true }, // this will not be counted because isMissing === true
+          { type: 'foo', id: '3', spaces: namespaces, inboundReferences: [] }, // this will be counted
+        ],
+      });
+
+      const relativesControl = wrapper.find(RelativesControl);
+      expect(relativesControl.isEmptyRender()).toBe(false);
+      expect(relativesControl.text()).toMatchInlineSnapshot(`"1 related object will also change."`);
     });
   });
 });

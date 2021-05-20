@@ -24,7 +24,7 @@ import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ToastsStart } from 'src/core/public';
+import type { SavedObjectReferenceWithContext, ToastsStart } from 'src/core/public';
 import type {
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
@@ -37,6 +37,7 @@ import type { SpacesManager } from '../../spaces_manager';
 import type { ShareToSpaceTarget } from '../../types';
 import type { ShareOptions } from '../types';
 import { DEFAULT_OBJECT_NOUN } from './constants';
+import { RelativesControl } from './relatives_control';
 import { ShareToSpaceForm } from './share_to_space_form';
 
 // No need to wrap LazyCopyToSpaceFlyout in an error boundary, because the ShareToSpaceFlyoutInternal component itself is only ever used in
@@ -154,13 +155,14 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   const [canShareToAllSpaces, setCanShareToAllSpaces] = useState<boolean>(false);
   const [showMakeCopy, setShowMakeCopy] = useState<boolean>(false);
 
-  const [{ isLoading, spaces }, setSpacesState] = useState<{
+  const [{ isLoading, spaces, referenceGraph }, setSpacesState] = useState<{
     isLoading: boolean;
     spaces: ShareToSpaceTarget[];
-  }>({ isLoading: true, spaces: [] });
+    referenceGraph: SavedObjectReferenceWithContext[];
+  }>({ isLoading: true, spaces: [], referenceGraph: [] });
   useEffect(() => {
     const { type, id } = savedObjectTarget;
-    const getShareableReferences = spacesManager.getShareableReferences([{ type, id }]); // NOTE: not used yet, this is just included so you can see the request/response in Dev Tools
+    const getShareableReferences = spacesManager.getShareableReferences([{ type, id }]);
     const getPermissions = spacesManager.getShareSavedObjectPermissions(type);
     Promise.all([shareToSpacesDataPromise, getShareableReferences, getPermissions])
       .then(([shareToSpacesData, shareableReferences, permissions]) => {
@@ -176,6 +178,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
         setSpacesState({
           isLoading: false,
           spaces: [...shareToSpacesData.spacesMap].map(([, spaceTarget]) => spaceTarget),
+          referenceGraph: shareableReferences.objects,
         });
       })
       .catch((e) => {
@@ -337,6 +340,11 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
+        <RelativesControl
+          savedObjectTarget={savedObjectTarget}
+          referenceGraph={referenceGraph}
+          isDisabled={isStartShareButtonDisabled}
+        />
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
