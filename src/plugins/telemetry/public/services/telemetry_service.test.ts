@@ -256,4 +256,15 @@ describe('TelemetryService', () => {
       expect(mockFetch).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('shouldSendTelemetry', () => {
+    it('does not send telemetry if screenshotMode is true', () => {
+      const telemetryService = mockTelemetryService({
+        isScreenshotMode: true,
+        config: { optIn: true },
+      });
+
+      expect(telemetryService.canSendTelemetry()).toBe(false);
+    });
+  });
 });

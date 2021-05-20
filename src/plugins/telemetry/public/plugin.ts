@@ -17,6 +17,8 @@ import type {
   ApplicationStart,
 } from 'src/core/public';
 
+import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {
   TelemetrySavedObjectAttributes,
@@ -76,6 +78,10 @@ export interface TelemetryPluginStart {
   };
 }
 
+interface TelemetryPluginSetupDependencies {
+  screenshotMode: ScreenshotModePluginSetup;
+}
+
 /**
  * Public-exposed configuration
  */
@@ -113,11 +119,15 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.config = initializerContext.config.get();
   }
 
-  public setup({ http, notifications }: CoreSetup): TelemetryPluginSetup {
+  public setup(
+    { http, notifications }: CoreSetup,
+    { screenshotMode }: TelemetryPluginSetupDependencies
+  ): TelemetryPluginSetup {
     const config = this.config;
     const currentKibanaVersion = this.currentKibanaVersion;
     this.telemetryService = new TelemetryService({
       config,
+      isScreenshotMode: screenshotMode.isScreenshotMode(),
       http,
       notifications,
       currentKibanaVersion,
