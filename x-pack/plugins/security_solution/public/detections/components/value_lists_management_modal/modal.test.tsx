@@ -10,7 +10,9 @@ import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
-import { exportList, useDeleteList, useFindLists, ListSchema } from '../../../shared_imports';
+import { exportList, useDeleteList, useFindLists } from '../../../shared_imports';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import { TestProviders } from '../../../common/mock';
 import { ValueListsModal } from './modal';
 

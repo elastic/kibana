@@ -6,10 +6,10 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { fetchExceptionListsItemsByListIds } from '../api';
 import { FilterExceptionsOptions, Pagination, UseExceptionListProps } from '../types';
-import { ExceptionListItemSchema } from '../../../common/schemas';
 import { getIdsAndNamespaces } from '../utils';
 import { transformInput } from '../transforms';
 
