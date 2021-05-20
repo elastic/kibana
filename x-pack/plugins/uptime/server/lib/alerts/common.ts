@@ -10,7 +10,7 @@ import { UptimeCommonState, UptimeCommonStateType } from '../../../common/runtim
 import { GetMonitorStatusResult } from '../../lib/requests/get_monitor_status';
 
 export interface UptimeMonitorStatusCustomState {
-  currentDownMonitors?: GetMonitorStatusResult[];
+  currentDownMonitors?: GetMonitorStatusResult;
 }
 
 export type UpdateUptimeAlertState = <CustomAlertParams extends UptimeMonitorStatusCustomState>(

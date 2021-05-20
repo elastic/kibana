@@ -117,8 +117,8 @@ describe('status check alert', () => {
   });
 
   const mockMonitorAlertState = (
-    monitor: GetMonitorStatusResult,
-    currentDownMonitors: GetMonitorStatusResult[],
+    monitor: GetMonitorStatusResult[0],
+    currentDownMonitors: GetMonitorStatusResult,
     date = defaultDateString
   ) => ({
     currentDownMonitors,
@@ -198,7 +198,7 @@ describe('status check alert', () => {
     });
 
     it('triggers when monitors are down and provides expected state', async () => {
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: jest.Mock<GetMonitorStatusResult> = jest.fn();
 
       mockGetter.mockReturnValue(mockDownMonitors);
       const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });
@@ -268,7 +268,7 @@ describe('status check alert', () => {
     });
 
     it('persists alert when no documents are found', async () => {
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: jest.Mock<GetMonitorStatusResult> = jest.fn();
 
       mockGetter.mockImplementation((params) => {
         return params.status !== 'up' ? mockDownMonitors : [];
@@ -322,7 +322,7 @@ describe('status check alert', () => {
     });
 
     it('persists alert when there is a mix of up and down documents', async () => {
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: jest.Mock<GetMonitorStatusResult> = jest.fn();
 
       mockGetter.mockImplementation((params) => {
         return params.status !== 'up' ? mockDownMonitors : [];
@@ -375,7 +375,7 @@ describe('status check alert', () => {
     });
 
     it('resolves alert only when monitors are up', async () => {
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: jest.Mock<GetMonitorStatusResult> = jest.fn();
 
       mockGetter.mockImplementation((params) => {
         return params.status !== 'up' ? mockDownMonitors : [];
@@ -425,7 +425,7 @@ describe('status check alert', () => {
     it('supports 7.7 alert format', async () => {
       const date = '7.7 date';
       toISOStringSpy.mockImplementation(() => date);
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: jest.Mock<GetMonitorStatusResult> = jest.fn();
 
       mockGetter.mockReturnValue(mockDownMonitors);
       const { server, libs, plugins } = bootstrapDependencies({
@@ -523,7 +523,7 @@ describe('status check alert', () => {
 
     it('supports 7.8 alert format', async () => {
       expect.assertions(7);
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: jest.Mock<GetMonitorStatusResult> = jest.fn();
 
       mockGetter.mockReturnValueOnce(mockDownMonitors);
       const { server, libs, plugins } = bootstrapDependencies({
@@ -1057,7 +1057,7 @@ describe('status check alert', () => {
     it('supports availability checks', async () => {
       expect.assertions(8);
       toISOStringSpy.mockImplementation(() => 'availability test');
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: jest.Mock<GetMonitorStatusResult> = jest.fn();
       mockGetter.mockReturnValue([]);
       const mockAvailability: jest.Mock<GetMonitorAvailabilityResult[]> = jest.fn();
       mockAvailability.mockReturnValue([
@@ -1559,7 +1559,7 @@ describe('status check alert', () => {
   });
 
   describe('uniqueMonitorIds', () => {
-    let downItems: GetMonitorStatusResult[];
+    let downItems: GetMonitorStatusResult;
     let availItems: GetMonitorAvailabilityResult[];
     beforeEach(() => {
       downItems = [

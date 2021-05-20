@@ -7,26 +7,18 @@
 
 import { JsonObject } from 'src/plugins/kibana_utils/public';
 import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { PromiseType } from 'utility-types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';
-import { createEsQuery } from '../lib';
+import { createEsQuery, UptimeESClient } from '../lib';
 
-export interface GetMonitorStatusParams {
+export type GetMonitorStatusParams = {
   filters?: JsonObject;
   locations: string[];
   numTimes: number;
   timerange: { from: string; to: string };
   status?: string;
-}
-
-export interface GetMonitorStatusResult {
-  monitorId: string;
-  status: string;
-  location: string;
-  count: number;
-  monitorInfo: Ping;
-}
+} & { uptimeEsClient: UptimeESClient };
 
 const getLocationClause = (locations: string[]) => ({
   bool: {
@@ -42,20 +34,19 @@ const getLocationClause = (locations: string[]) => ({
 
 export type AfterKey = Record<string, string | number | null> | undefined;
 
-export const getMonitorStatus: UMElasticsearchQueryFn<
-  GetMonitorStatusParams,
-  GetMonitorStatusResult[]
-> = async ({
+export type GetMonitorStatusResult = PromiseType<ReturnType<typeof getMonitorStatus>>;
+
+export const getMonitorStatus = async ({
   uptimeEsClient,
   filters,
   locations,
   numTimes,
   timerange: { from, to },
   status = 'down',
-}) => {
+}: GetMonitorStatusParams) => {
   let afterKey: AfterKey;
-  let monitors: any = [];
-  do {
+
+  const getListOfMonitors = async () => {
     const esParams = createEsQuery({
       query: {
         bool: {
@@ -135,16 +126,26 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
       body: esParams,
     });
 
-    afterKey = result?.aggregations?.monitors?.after_key as AfterKey;
+    const afterKeyN = result?.aggregations?.monitors?.after_key;
+    return { monitors: result?.aggregations?.monitors?.buckets || [], afterKey: afterKeyN };
+  };
 
-    monitors = monitors.concat(result?.aggregations?.monitors?.buckets || []);
-  } while (afterKey !== undefined);
+  const result = await getListOfMonitors();
+  afterKey = result.afterKey;
 
-  return monitors
+  const allMonitors = result.monitors;
+
+  while (afterKey !== undefined) {
+    const { monitors: moreMonitors, afterKey: afterKeyT } = await getListOfMonitors();
+    afterKey = afterKeyT;
+    allMonitors.concat(moreMonitors);
+  }
+
+  return allMonitors
     .filter((monitor: any) => monitor?.doc_count >= numTimes)
-    .map(({ key, doc_count: count, fields }: any) => ({
+    .map(({ key, doc_count: count, fields }) => ({
       ...key,
       count,
-      monitorInfo: fields?.hits?.hits?.[0]?._source,
+      monitorInfo: fields?.hits?.hits?.[0]?._source as Ping,
     }));
 };
