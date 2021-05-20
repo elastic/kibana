@@ -9,6 +9,10 @@ import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
+import type {
+  ExceptionListTypeEnum,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -20,11 +24,10 @@ import { allExceptionItemsReducer, State, ViewerModalName } from './reducer';
 import {
   useExceptionListItems,
   ExceptionListIdentifiers,
-  ExceptionListTypeEnum,
-  ExceptionListItemSchema,
   UseExceptionListItemsSuccess,
   useApi,
-} from '../../../../../public/lists_plugin_deps';
+} from '../../../../../public/shared_imports';
+
 import { ExceptionsViewerPagination } from './exceptions_pagination';
 import { ExceptionsViewerUtility } from './exceptions_utility';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
