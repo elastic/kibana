@@ -111,7 +111,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = [":tsc", ":tsc_browser"] + DEPS,
+  deps = DEPS + [":tsc", ":tsc_browser"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
