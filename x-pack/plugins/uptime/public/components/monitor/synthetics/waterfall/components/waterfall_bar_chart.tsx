@@ -19,6 +19,7 @@ import {
   TooltipInfo,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { BAR_HEIGHT } from './constants';
 import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
@@ -43,7 +44,19 @@ const Tooltip = (tooltipInfo: TooltipInfo) => {
     return relevantItems.length ? (
       <WaterfallChartTooltip>
         <EuiFlexGroup direction="column" gutterSize="none">
-          {sidebarItem && <EuiText>{`${sidebarItem.offsetIndex} ${sidebarItem.url}`}</EuiText>}
+          {sidebarItem && (
+            <EuiText>
+              <FormattedMessage
+                id="xpack.uptime.synthetics.waterfall.tooltipHeading"
+                defaultMessage={`{index}. {url}`}
+                description="Simply formats a URL with its index in a numbered list."
+                values={{
+                  index: sidebarItem.offsetIndex,
+                  url: sidebarItem.url,
+                }}
+              />
+            </EuiText>
+          )}
           {relevantItems.map((item, index) => {
             return (
               <EuiFlexItem key={index}>{renderTooltipItem(item.config.tooltipProps)}</EuiFlexItem>
