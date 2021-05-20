@@ -26,7 +26,7 @@ import {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { Version } from '@kbn/securitysolution-io-ts-types';
 
-import { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AnomalyThresholdOrUndefined,
   Description,

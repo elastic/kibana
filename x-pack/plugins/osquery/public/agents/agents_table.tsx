@@ -9,7 +9,7 @@ import { find } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiComboBox, EuiHealth, EuiHighlight, EuiSpacer } from '@elastic/eui';
 
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useAllAgents } from './use_all_agents';
 import { useAgentGroups } from './use_agent_groups';
 import { useOsqueryPolicies } from './use_osquery_policies';
