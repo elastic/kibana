@@ -6,16 +6,16 @@
  */
 
 import { Language } from '@kbn/securitysolution-io-ts-alerting-types';
+import type {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   Filter,
   IIndexPattern,
   buildEsQuery,
   EsQueryConfig,
 } from '../../../../../src/plugins/data/common';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '../../../lists/common/schemas';
 import { ESBoolQuery } from '../typed_json';
 import { buildExceptionFilter } from '../shared_imports';
 import { Query, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
