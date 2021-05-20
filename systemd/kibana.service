@@ -40,7 +40,7 @@ ExecStart=/usr/local/kibana-7.5.2-linux-x64/bin/kibana
 
 ExecStartPost=/usr/bin/python /usr/local/kibana-7.5.2-linux-x64/scripts/configureKibana.py
 ExecStartPost=/usr/bin/bash scripts/kibana-post-start.sh
-ExecStartPost=/usr/bin/python scripts/removeOldKibanaIndices.py
+#ExecStartPost=/usr/bin/python scripts/removeOldKibanaIndices.py
 
 TimeoutStopSec=30
 
