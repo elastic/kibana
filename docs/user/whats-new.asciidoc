@@ -1,27 +1,195 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-This section summarizes the most important changes in this release. For previous
-releases, refer to:
+coming::[7.13.0]
 
-* {kibana-ref-all}/7.11/whats-new.html[7.11]
-* {kibana-ref-all}/7.10/whats-new.html[7.10]
-* {kibana-ref-all}/7.9/whats-new.html[7.9]
-* {kibana-ref-all}/7.8/whats-new.html[7.8]
-* {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7]
-* {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6]
-* {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5]
-* {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4]
-* {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3]
-* {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
-* {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1]
-* {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check out the <<release-notes, release notes>>.
 
-For the full list of changes in {minor-version}, refer to the <<release-notes>>.
+Other versions: {kibana-ref-all}/7.12/whats-new.html[7.12] | {kibana-ref-all}/7.11/whats-new.html[7.11] | {kibana-ref-all}/7.10/whats-new.html[7.10] |
+{kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
+{kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
+{kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
+| {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
+
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+
+[float]
+[[runtime-fields-7-13]]
+=== Runtime fields in Discover and Lens
+
+*Discover*, *Lens*, and *Index patterns* allow you to create and edit runtime fields
+right inside of the application. The ability to use runtime fields allows you
+to create fields on the fly, backed by Painless scripting, giving your fields the
+punch they need to stand out in analysis and visualizations.
+For example, you can combine two fields into one or extract portions of fields.
+The runtime fields you create are part of the index pattern from that point forward,
+and you can use them anywhere the index pattern is available.
+Refer to {kibana-ref}/managing-index-patterns.html#runtime-fields[Explore your data with runtime fields] for more information.
+
+[role="screenshot"]
+image::user/images/highlights-runtime-fields.png[Create field form showing Painless script]
+
+[float]
+[[dashboard-toolbar-7-13]]
+=== Dashboard&mdash;new toolbar and better drilldowns
+
+Because *Lens* is the quickest and easiest way to create visualization panels,
+*Lens* now opens by default when you click *Create visualization* on the dashboard.
+To make it easy to open the other visualization editors and tools,
+or add your saved visualizations with a single-click, use the new dashboard toolbar.
+To learn more, refer to {kibana-ref}/dashboard.html[Dashboard].
+
+[role="screenshot"]
+image::user/images/highlights-dashboard.png[New toolbar in Dashboard]
+
+Also in 7.13, you are no longer required to manually create drilldowns with
+functionality that you’ve already configured. You can copy drilldowns,
+then apply them to other panels on a dashboard, making it faster to
+create an interactive experience between multiple dashboards.
+To learn more, refer to {kibana-ref}/drilldowns.html[Create custom dashboard actions].
+
+[float]
+[[alerting-7-13]]
+=== Alerting&mdash;Index connector and new terminology
+
+This release introduces a preconfigured Index connector, which allows you to index your alert history
+into Elasticsearch. To do this, set the new `xpack.actions.preconfiguredAlertHistoryEsIndex`
+{kibana-ref}/alert-action-settings-kb.html[action setting] to `true`. You can capture the alert and its context,
+index it, and use the index and Kibana’s visualization capabilities to power custom alert history views,
+built for your use case. For more information, watch
+https://www.elastic.co/webinars/getting-started-with-alerting-for-the-elastic-stack[this webinar].
+
+[role="screenshot"]
+image::user/images/highlights-alerting-history.png[Rules and connectors management page]
+
+You'll find new terminology for *Alerting* in the UI and the {kibana-ref}/alerts-api.html[API]:
+
+* The main Alerting management page
+was renamed *Rules and Connectors*.
+* *Instances* changed
+to *Alerts* in the *Rules* details page.
+* The feature privilege in *Stack Management > Roles*
+changed to *Stack Rules*.
+
++
+[role="screenshot"]
+image::user/images/highlights-rules-connectors.png[Rules and connectors management page]
+
+*Rules and Connectors* was tweaked for usability&mdash;you can sort rules by name or status.
+
+[role="screenshot"]
+image::user/images/highlights-rules-list-sort.png[Sorting in Rules and connectors page]
+
+[float]
+[[lens-7-13]]
+=== Lens&mdash;table improvements, metric filters, & more
+
+Data tables in *Lens* now allow you to pivot row data into columns. When your data tables
+are dense with information, you can display them horizontally instead. To help with spacing,
+you can also align the values in each column.
+
+[role="screenshot"]
+image::user/images/highlights-lens-table.png[Apply filters to field metric in Lens]
+
+You can now apply filters to each field metric, adding even more capabilities to compare your data.
+
+[role="screenshot"]
+image::user/images/highlights-lens-filters.png[Apply filters to field metric in Lens]
+
+
+The 7.13 release also includes a few smaller tweaks:
+
+* The visualization menu is organized into sections to help you navigate all the ways you can visualize your data.
+* Making cosmetic changes to your visualization? *Lens* quickly renders the changes without refreshing the data.
+* Dragging and dropping a field on top of another field? In addition to the default replace option, you can also choose to swap and duplicate.
+
+To learn more, refer to {kibana-ref}/lens.html[Lens].
+
+[float]
+[[ems-7-13]]
+=== Elastic Maps Server generally available
+
+With the GA release, the default deployment of *Elastic Maps Server*
+now includes a more detailed set of vector tiles
+(up to zoom-level 8).
+No need to download the entire planetary dataset unless you need street-level detail on your maps.
+
+[role="screenshot"]
+image::user/images/highlights-ems.png[Elastic Maps Server zoom levels]
+
+[float]
+[[maps-enhancements-7-13]]
+=== Maps&mdash;improved layers, tooltips, & more
+
+*Maps* adds many enhancements for working with your geospatial data.
+You can now toggle the visibility of a layer from a quick action when hovering over a layer.
+
+[role="screenshot"]
+image::user/images/highlights-maps.png[Toggle visibility of a layer when hovering over a layer name]
+
+In addition:
+
+* Tooltips include the layer name.
+* Interactive spatial filters work with geo_points (and already worked with geo_shapes).
+* The file size limit for GeoJSON uploads is now 1GB.
+* The scaling option for “Top hits” is in its own layer card, making it easier for anyone to
+create a layer showing the most relevant or recent documents.
+
+To learn more, refer to {kibana-ref}/maps.html[Maps].
+
+[float]
+[[ml-7-13]]
+=== Machine Learning&mdash;embeddable charts and job validation
+
+Following on from embeddable swim lanes, Machine Learning now allows you to embed
+anomaly charts in dashboards.
+You can add the charts to a dashboard directly from the
+*Anomaly Explorer*, selecting the jobs of interest and the number of charts to
+show in the panel. This allows you to view anomalies alongside
+the source data in your dashboards. The following example displays anomalies
+from the Machine Learning Apache access logs module, which uses both the swim lane and anomaly chart embeddables.
+
+[role="screenshot"]
+image::user/images/highlights-ml-embeddable-charts.png[Embeddable charts in Machine Learning]
+
+Creating a data frame analytics job has flexible configuration options, which can
+impact the time and resources needed to run the job and the quality of
+predictions that the trained model makes on new data.
+To help you create a job, the wizard now has a validation step that
+checks properties, such as the dependent variable, training percent, and fields included for analysis.
+Warnings appear if the selected configuration is likely to lead to the job taking a
+large amount of time or resources to complete.
+
+[role="screenshot"]
+image::user/images/highlights-ml-job-validation.png[Data frame analytics job validation]
+
+[float]
+[[discover-7-13]]
+=== Discover&mdash;preview of new document table
+
+*Discover* has a new table layout, now in technology preview.
+To enable this feature, go to the *Discover* section of {kibana-ref}/advanced-options.html[*Advanced Settings*].
+Benefits of the new document table include:
+
+* Changeable column widths
+* Sortable columns with drag and drop
+* Full screen mode
+* Improved sorting
+* Document selection and export to clipboard
+* Expanded documents view in a flyout, with navigation to previous and next documents
+
+[role="screenshot"]
+image::user/images/highlights-discover.png[Discover app showing expanded documents in a flyout]
+
+
+
+
 
 // end::notable-highlights[]
