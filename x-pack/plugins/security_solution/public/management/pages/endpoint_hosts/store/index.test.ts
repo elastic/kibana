@@ -65,7 +65,7 @@ describe('EndpointList store concerns', () => {
         endpointsTotalError: undefined,
         queryStrategyVersion: undefined,
         policyVersionInfo: undefined,
-        isolateHost: {
+        isolationRequestState: {
           type: 'UninitialisedResourceState',
         },
       });
