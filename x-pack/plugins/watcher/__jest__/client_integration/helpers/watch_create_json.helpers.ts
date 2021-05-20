@@ -6,10 +6,10 @@
  */
 
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { WatchEdit } from '../../../public/application/sections/watch_edit/components/watch_edit';
+import { registerRouter } from '../../../public/application/lib/navigation';
+import { ROUTES, WATCH_TYPES } from '../../../common/constants';
 import { withAppContext } from './app_context.mock';
-import { WatchEdit } from '../../public/application/sections/watch_edit/components/watch_edit';
-import { registerRouter } from '../../public/application/lib/navigation';
-import { ROUTES, WATCH_TYPES } from '../../common/constants';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
