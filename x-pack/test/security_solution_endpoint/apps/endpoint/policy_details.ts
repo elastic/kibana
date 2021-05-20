@@ -261,6 +261,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
                 advanced: { agent: { connection_delay: 'true' } },
+                malware: { mode: 'prevent' },
+                popup: {
+                  malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                },
               },
               mac: {
                 events: { file: false, network: true, process: true },
@@ -285,7 +292,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
@@ -422,6 +429,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 advanced: { agent: { connection_delay: 'true' } },
+                malware: { mode: 'prevent' },
+                popup: {
+                  malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                },
               },
               mac: {
                 events: { file: true, network: true, process: true },
@@ -446,7 +460,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
@@ -580,6 +594,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               linux: {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
+                malware: { mode: 'prevent' },
+                popup: {
+                  malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                },
               },
               mac: {
                 events: { file: true, network: true, process: true },
@@ -604,7 +625,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
@@ -627,7 +648,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('when on Ingest Policy Edit Package Policy page', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/100296
+    describe.skip('when on Ingest Policy Edit Package Policy page', async () => {
       let policyInfo: PolicyTestResourceInfo;
       beforeEach(async () => {
         // Create a policy and navigate to Ingest app

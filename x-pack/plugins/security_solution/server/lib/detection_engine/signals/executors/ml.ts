@@ -7,6 +7,7 @@
 
 import { KibanaRequest, Logger } from 'src/core/server';
 import { SavedObject } from 'src/core/types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -14,7 +15,6 @@ import {
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { SetupPlugins } from '../../../../plugin';
 import { MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { RefreshTypes } from '../../types';

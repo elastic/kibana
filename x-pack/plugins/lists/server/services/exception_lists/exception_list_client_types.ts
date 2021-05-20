@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import {
+import type {
   CreateCommentsArray,
   Description,
   DescriptionOrUndefined,
@@ -15,17 +15,28 @@ import {
   ExceptionListItemTypeOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
+  FilterOrUndefined,
   Id,
   IdOrUndefined,
+  Immutable,
+  ItemId,
+  ItemIdOrUndefined,
+  ListId,
+  ListIdOrUndefined,
   MetaOrUndefined,
   Name,
   NameOrUndefined,
   NamespaceType,
   NamespaceTypeArray,
   OsTypeArray,
+  PageOrUndefined,
+  PerPageOrUndefined,
+  SortFieldOrUndefined,
+  SortOrderOrUndefined,
   Tags,
   TagsOrUndefined,
   UpdateCommentsArray,
+  _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EmptyStringArrayDecoded,
@@ -33,20 +44,6 @@ import {
   Version,
   VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-types';
-
-import {
-  FilterOrUndefined,
-  Immutable,
-  ItemId,
-  ItemIdOrUndefined,
-  ListId,
-  ListIdOrUndefined,
-  PageOrUndefined,
-  PerPageOrUndefined,
-  SortFieldOrUndefined,
-  SortOrderOrUndefined,
-  _VersionOrUndefined,
-} from '../../../common/schemas';
 
 export interface ConstructorOptions {
   user: string;
