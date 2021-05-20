@@ -45,7 +45,7 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   queryStrategyVersion: undefined,
   policyVersionInfo: undefined,
   hostStatus: undefined,
-  isolateHost: createUninitialisedResourceState(),
+  isolationRequestState: createUninitialisedResourceState(),
 };
 
 /* eslint-disable-next-line complexity */
@@ -271,6 +271,6 @@ const handleEndpointIsolationStateChanged: ImmutableReducer<
 > = (state, action) => {
   return {
     ...state!,
-    isolateHost: action.payload,
+    isolationRequestState: action.payload,
   };
 };

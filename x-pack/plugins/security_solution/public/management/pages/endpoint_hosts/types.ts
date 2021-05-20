@@ -85,7 +85,7 @@ export interface EndpointState {
   /** The status of the host, which is mapped to the Elastic Agent status in Fleet */
   hostStatus?: HostStatus;
   /* Host isolation state */
-  isolateHost: AsyncResourceState<HostIsolationResponse>;
+  isolationRequestState: AsyncResourceState<HostIsolationResponse>;
 }
 
 /**

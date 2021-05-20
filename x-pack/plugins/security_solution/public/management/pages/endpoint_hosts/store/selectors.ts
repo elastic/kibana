@@ -308,8 +308,8 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
 
 export const getCurrentIsolationState = (
   state: Immutable<EndpointState>
-): EndpointState['isolateHost'] => {
-  return state.isolateHost;
+): EndpointState['isolationRequestState'] => {
+  return state.isolationRequestState;
 };
 
 export const getIsIsolationRequestPending: (

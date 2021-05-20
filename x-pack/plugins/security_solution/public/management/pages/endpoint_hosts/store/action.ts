@@ -141,7 +141,7 @@ type IsolateEndpointHost = Action<'isolateEndpointHost'> & {
 };
 
 type EndpointIsolationStateChange = Action<'endpointIsolationStateChanged'> & {
-  payload: EndpointState['isolateHost'];
+  payload: EndpointState['isolationRequestState'];
 };
 
 export type EndpointAction =
