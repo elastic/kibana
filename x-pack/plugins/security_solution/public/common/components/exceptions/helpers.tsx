@@ -22,18 +22,19 @@ import {
   OsTypeArray,
   ExceptionListType,
   ListOperatorTypeEnum as OperatorTypeEnum,
-} from '@kbn/securitysolution-io-ts-list-types';
-
-import * as i18n from './translations';
-import { AlertData, ExceptionsBuilderExceptionItem, Flattened } from './types';
-import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import {
   getOperatorType,
   getNewExceptionItem,
   addIdToEntries,
-} from '../../../shared_imports';
+  ExceptionsBuilderExceptionItem,
+} from '@kbn/securitysolution-list-utils';
+import * as i18n from './translations';
+import { AlertData, Flattened } from './types';
 
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { Ecs } from '../../../../common/ecs';
