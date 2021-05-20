@@ -10,9 +10,10 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import _, { get, isUndefined, assign, includes } from 'lodash';
+import { get, isUndefined, assign, includes, gt, gte, lt, lte, isEqual } from 'lodash';
 import { Gauge } from '../../../visualizations/views/gauge';
 import { getLastValueOrEmpty } from '../../../../../common/last_value_utils';
+const OPERATORS = { gt, gte, lt, lte, eq: isEqual };
 
 function getColors(props) {
   const { model, visData } = props;
@@ -26,7 +27,7 @@ function getColors(props) {
         // This comparison is necessary for preventing from comparing null/empty array values
         // with numeric rules.
         const shouldOperate = typeof value === typeof rule.value;
-        if (shouldOperate && _[rule.operator](value, rule.value)) {
+        if (shouldOperate && OPERATORS[rule.operator](value, rule.value)) {
           gauge = rule.gauge;
           text = rule.text;
         }

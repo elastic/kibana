@@ -88,7 +88,7 @@ export const colorRulesOperatorsList: ColorRulesOperator[] = [
   {
     translateNameId: 'visTypeTimeseries.colorRules.emptyLabel',
     defaultName: 'empty',
-    method: 'isEqual',
+    method: 'eq',
     value: EMPTY_VALUE,
     isValueConstant: true,
   },

@@ -15,7 +15,7 @@ import { replaceVars } from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { sortBy, first, get, gt, gte, lt, lte, isEqual } from 'lodash';
-const OPERATORS = { gt, gte, lt, lte, isEqual };
+const OPERATORS = { gt, gte, lt, lte, eq: isEqual };
 
 function sortByDirection(data, direction, fn) {
   if (direction === 'desc') {

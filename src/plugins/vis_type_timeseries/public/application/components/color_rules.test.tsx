@@ -100,7 +100,6 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
 
     it('should handle render of value field if not empty operator is selected by default', () => {
       collectionActions.handleChange = jest.fn();
-
       const wrapper = mountWithIntl(<ColorRules {...notEmptyColorRuleProps} />);
       const numberInput = findTestSubject(wrapper, 'colorRuleValue');
       expect(numberInput.exists()).toBeTruthy();
