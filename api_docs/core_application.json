@@ -1736,14 +1736,14 @@
                 "plugin": "dashboard",
                 "link": {
                   "path": "src/plugins/dashboard/public/application/dashboard_router.tsx",
-                  "lineNumber": 55
+                  "lineNumber": 56
                 }
               },
               {
                 "plugin": "dashboard",
                 "link": {
                   "path": "src/plugins/dashboard/public/plugin.tsx",
-                  "lineNumber": 305
+                  "lineNumber": 298
                 }
               },
               {

@@ -258,37 +258,53 @@
                 "section": "def-server.SavedObjectsUpdateResponse",
                 "text": "SavedObjectsUpdateResponse"
               },
-              "<T>>; addToNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+              "<T>>; collectMultiNamespaceReferences: (objects: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsAddToNamespacesOptions",
-                "text": "SavedObjectsAddToNamespacesOptions"
+                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
               },
-              ") => Promise<",
+              "[], options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsAddToNamespacesResponse",
-                "text": "SavedObjectsAddToNamespacesResponse"
+                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
               },
-              ">; deleteFromNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+              " | undefined) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteFromNamespacesOptions",
-                "text": "SavedObjectsDeleteFromNamespacesOptions"
+                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
               },
-              ") => Promise<",
+              ">; updateObjectsSpaces: (objects: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteFromNamespacesResponse",
-                "text": "SavedObjectsDeleteFromNamespacesResponse"
+                "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
+                "text": "SavedObjectsUpdateObjectsSpacesObject"
+              },
+              "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
+                "text": "SavedObjectsUpdateObjectsSpacesOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
+                "text": "SavedObjectsUpdateObjectsSpacesResponse"
               },
               ">; bulkUpdate: <T = unknown>(objects: ",
               {
@@ -362,7 +378,7 @@
                 "section": "def-server.SavedObjectsClosePointInTimeResponse",
                 "text": "SavedObjectsClosePointInTimeResponse"
               },
-              ">; createPointInTimeFinder: (findOptions: Pick<",
+              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -386,7 +402,7 @@
                 "section": "def-server.ISavedObjectsPointInTimeFinder",
                 "text": "ISavedObjectsPointInTimeFinder"
               },
-              "; errors: typeof ",
+              "<T, A>; errors: typeof ",
               {
                 "pluginId": "core",
                 "scope": "server",

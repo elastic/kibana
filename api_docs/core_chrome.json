@@ -698,7 +698,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/types.ts",
-                  "lineNumber": 27
+                  "lineNumber": 25
                 },
                 "deprecated": false
               }
@@ -2584,7 +2584,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/types.ts",
-                  "lineNumber": 27
+                  "lineNumber": 25
                 },
                 "deprecated": false
               }

@@ -2360,7 +2360,7 @@
             "label": "operationType",
             "description": [],
             "signature": [
-              "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | undefined"
+              "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"math\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | \"formula\" | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
@@ -3464,7 +3464,7 @@
         "label": "rangeQuery",
         "description": [],
         "signature": [
-          "(start: number, end: number, field: string) => ",
+          "(start: number | undefined, end: number | undefined, field: string) => ",
           "QueryContainer",
           "[]"
         ],
@@ -3482,14 +3482,14 @@
             "label": "start",
             "description": [],
             "signature": [
-              "number"
+              "number | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
               "lineNumber": 11
             },
             "deprecated": false,
-            "isRequired": true
+            "isRequired": false
           },
           {
             "parentPluginId": "observability",
@@ -3499,14 +3499,14 @@
             "label": "end",
             "description": [],
             "signature": [
-              "number"
+              "number | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/utils/queries.ts",
               "lineNumber": 11
             },
             "deprecated": false,
-            "isRequired": true
+            "isRequired": false
           },
           {
             "parentPluginId": "observability",

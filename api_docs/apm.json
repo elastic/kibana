@@ -309,7 +309,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 269
+              "lineNumber": 270
             },
             "deprecated": false,
             "children": [
@@ -331,7 +331,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 269
+                  "lineNumber": 270
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -351,7 +351,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 288
+              "lineNumber": 289
             },
             "deprecated": false,
             "children": [],
@@ -1480,18 +1480,14 @@
           "<\"GET /api/apm/observability_overview/has_rum_data\", ",
           "PartialC",
           "<{ query: ",
-          "IntersectionC",
-          "<[",
-          "TypeC",
+          "PartialC",
           "<{ uiFilters: ",
           "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ start: ",
+          "; start: ",
           "Type",
           "<number, string, unknown>; end: ",
           "Type",
-          "<number, string, unknown>; }>]>; }>, ",
+          "<number, string, unknown>; }>; }>, ",
           {
             "pluginId": "apm",
             "scope": "server",

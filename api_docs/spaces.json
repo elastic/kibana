@@ -1210,14 +1210,14 @@
                 "plugin": "reporting",
                 "link": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 264
+                  "lineNumber": 271
                 }
               },
               {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 192
+                  "lineNumber": 194
                 }
               },
               {
@@ -1369,14 +1369,14 @@
                 "plugin": "security",
                 "link": {
                   "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts",
-                  "lineNumber": 784
+                  "lineNumber": 1000
                 }
               },
               {
                 "plugin": "security",
                 "link": {
                   "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts",
-                  "lineNumber": 811
+                  "lineNumber": 1027
                 }
               },
               {
@@ -2030,28 +2030,28 @@
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 262
+                "lineNumber": 269
               }
             },
             {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 284
+                "lineNumber": 291
               }
             },
             {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/server/core.ts",
-                "lineNumber": 296
+                "lineNumber": 303
               }
             },
             {
               "plugin": "securitySolution",
               "link": {
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 192
+                "lineNumber": 194
               }
             },
             {

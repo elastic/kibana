@@ -2183,7 +2183,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, id: string, withPackagePolicies?: boolean) => Promise<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, id: string, withPackagePolicies?: boolean) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -2356,37 +2356,53 @@
                     "section": "def-server.SavedObjectsUpdateResponse",
                     "text": "SavedObjectsUpdateResponse"
                   },
-                  "<T>>; addToNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+                  "<T>>; collectMultiNamespaceReferences: (objects: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsAddToNamespacesOptions",
-                    "text": "SavedObjectsAddToNamespacesOptions"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
                   },
-                  ") => Promise<",
+                  "[], options?: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsAddToNamespacesResponse",
-                    "text": "SavedObjectsAddToNamespacesResponse"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
                   },
-                  ">; deleteFromNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+                  " | undefined) => Promise<",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsDeleteFromNamespacesOptions",
-                    "text": "SavedObjectsDeleteFromNamespacesOptions"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
                   },
-                  ") => Promise<",
+                  ">; updateObjectsSpaces: (objects: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsDeleteFromNamespacesResponse",
-                    "text": "SavedObjectsDeleteFromNamespacesResponse"
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
+                    "text": "SavedObjectsUpdateObjectsSpacesObject"
+                  },
+                  "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
+                    "text": "SavedObjectsUpdateObjectsSpacesOptions"
+                  },
+                  " | undefined) => Promise<",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
+                    "text": "SavedObjectsUpdateObjectsSpacesResponse"
                   },
                   ">; bulkUpdate: <T = unknown>(objects: ",
                   {
@@ -2460,7 +2476,7 @@
                     "section": "def-server.SavedObjectsClosePointInTimeResponse",
                     "text": "SavedObjectsClosePointInTimeResponse"
                   },
-                  ">; createPointInTimeFinder: (findOptions: Pick<",
+                  ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -2484,7 +2500,7 @@
                     "section": "def-server.ISavedObjectsPointInTimeFinder",
                     "text": "ISavedObjectsPointInTimeFinder"
                   },
-                  "; errors: typeof ",
+                  "<T, A>; errors: typeof ",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -2544,7 +2560,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, options: Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; }) => Promise<{ items: ",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, options: Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; }) => Promise<{ items: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -2717,37 +2733,53 @@
                     "section": "def-server.SavedObjectsUpdateResponse",
                     "text": "SavedObjectsUpdateResponse"
                   },
-                  "<T>>; addToNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+                  "<T>>; collectMultiNamespaceReferences: (objects: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsAddToNamespacesOptions",
-                    "text": "SavedObjectsAddToNamespacesOptions"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
                   },
-                  ") => Promise<",
+                  "[], options?: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsAddToNamespacesResponse",
-                    "text": "SavedObjectsAddToNamespacesResponse"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
                   },
-                  ">; deleteFromNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+                  " | undefined) => Promise<",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsDeleteFromNamespacesOptions",
-                    "text": "SavedObjectsDeleteFromNamespacesOptions"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
                   },
-                  ") => Promise<",
+                  ">; updateObjectsSpaces: (objects: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsDeleteFromNamespacesResponse",
-                    "text": "SavedObjectsDeleteFromNamespacesResponse"
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
+                    "text": "SavedObjectsUpdateObjectsSpacesObject"
+                  },
+                  "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
+                    "text": "SavedObjectsUpdateObjectsSpacesOptions"
+                  },
+                  " | undefined) => Promise<",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
+                    "text": "SavedObjectsUpdateObjectsSpacesResponse"
                   },
                   ">; bulkUpdate: <T = unknown>(objects: ",
                   {
@@ -2821,7 +2853,7 @@
                     "section": "def-server.SavedObjectsClosePointInTimeResponse",
                     "text": "SavedObjectsClosePointInTimeResponse"
                   },
-                  ">; createPointInTimeFinder: (findOptions: Pick<",
+                  ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -2845,7 +2877,7 @@
                     "section": "def-server.ISavedObjectsPointInTimeFinder",
                     "text": "ISavedObjectsPointInTimeFinder"
                   },
-                  "; errors: typeof ",
+                  "<T, A>; errors: typeof ",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -2895,7 +2927,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Promise<string>"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Promise<string>"
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
@@ -3060,37 +3092,53 @@
                     "section": "def-server.SavedObjectsUpdateResponse",
                     "text": "SavedObjectsUpdateResponse"
                   },
-                  "<T>>; addToNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+                  "<T>>; collectMultiNamespaceReferences: (objects: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsAddToNamespacesOptions",
-                    "text": "SavedObjectsAddToNamespacesOptions"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
                   },
-                  ") => Promise<",
+                  "[], options?: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsAddToNamespacesResponse",
-                    "text": "SavedObjectsAddToNamespacesResponse"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
                   },
-                  ">; deleteFromNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+                  " | undefined) => Promise<",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsDeleteFromNamespacesOptions",
-                    "text": "SavedObjectsDeleteFromNamespacesOptions"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
                   },
-                  ") => Promise<",
+                  ">; updateObjectsSpaces: (objects: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsDeleteFromNamespacesResponse",
-                    "text": "SavedObjectsDeleteFromNamespacesResponse"
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
+                    "text": "SavedObjectsUpdateObjectsSpacesObject"
+                  },
+                  "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
+                    "text": "SavedObjectsUpdateObjectsSpacesOptions"
+                  },
+                  " | undefined) => Promise<",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
+                    "text": "SavedObjectsUpdateObjectsSpacesResponse"
                   },
                   ">; bulkUpdate: <T = unknown>(objects: ",
                   {
@@ -3164,7 +3212,7 @@
                     "section": "def-server.SavedObjectsClosePointInTimeResponse",
                     "text": "SavedObjectsClosePointInTimeResponse"
                   },
-                  ">; createPointInTimeFinder: (findOptions: Pick<",
+                  ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -3188,7 +3236,7 @@
                     "section": "def-server.ISavedObjectsPointInTimeFinder",
                     "text": "ISavedObjectsPointInTimeFinder"
                   },
-                  "; errors: typeof ",
+                  "<T, A>; errors: typeof ",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -3222,7 +3270,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, id: string, options?: { standalone: boolean; } | undefined) => Promise<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, id: string, options?: { standalone: boolean; } | undefined) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -3395,37 +3443,53 @@
                     "section": "def-server.SavedObjectsUpdateResponse",
                     "text": "SavedObjectsUpdateResponse"
                   },
-                  "<T>>; addToNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+                  "<T>>; collectMultiNamespaceReferences: (objects: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsAddToNamespacesOptions",
-                    "text": "SavedObjectsAddToNamespacesOptions"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
                   },
-                  ") => Promise<",
+                  "[], options?: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsAddToNamespacesResponse",
-                    "text": "SavedObjectsAddToNamespacesResponse"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
                   },
-                  ">; deleteFromNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+                  " | undefined) => Promise<",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsDeleteFromNamespacesOptions",
-                    "text": "SavedObjectsDeleteFromNamespacesOptions"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
                   },
-                  ") => Promise<",
+                  ">; updateObjectsSpaces: (objects: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsDeleteFromNamespacesResponse",
-                    "text": "SavedObjectsDeleteFromNamespacesResponse"
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
+                    "text": "SavedObjectsUpdateObjectsSpacesObject"
+                  },
+                  "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
+                    "text": "SavedObjectsUpdateObjectsSpacesOptions"
+                  },
+                  " | undefined) => Promise<",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
+                    "text": "SavedObjectsUpdateObjectsSpacesResponse"
                   },
                   ">; bulkUpdate: <T = unknown>(objects: ",
                   {
@@ -3499,7 +3563,7 @@
                     "section": "def-server.SavedObjectsClosePointInTimeResponse",
                     "text": "SavedObjectsClosePointInTimeResponse"
                   },
-                  ">; createPointInTimeFinder: (findOptions: Pick<",
+                  ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -3523,7 +3587,7 @@
                     "section": "def-server.ISavedObjectsPointInTimeFinder",
                     "text": "ISavedObjectsPointInTimeFinder"
                   },
-                  "; errors: typeof ",
+                  "<T, A>; errors: typeof ",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -4278,7 +4342,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, pkgName: string, datasetPath: string) => Promise<string | undefined>"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, pkgName: string, datasetPath: string) => Promise<string | undefined>"
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
@@ -4302,7 +4366,7 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
@@ -4534,7 +4598,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, pkgName: string) => Promise<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, pkgName: string) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -4566,7 +4630,7 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",

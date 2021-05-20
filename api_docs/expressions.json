@@ -3549,8 +3549,7 @@
             "section": "def-common.ExpressionsInspectorAdapter",
             "text": "ExpressionsInspectorAdapter"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/expressions/common/util/expressions_inspector_adapter.ts",
@@ -3644,7 +3643,7 @@
             "section": "def-common.ExpressionsService",
             "text": "ExpressionsService"
           },
-          ", \"getType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"registerType\" | \"run\" | \"fork\">, ",
+          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -3727,7 +3726,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"registerType\" | \"run\" | \"fork\">"
+              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "source": {
               "path": "src/plugins/expressions/public/plugin.ts",
@@ -3871,7 +3870,7 @@
             "section": "def-common.ExpressionsService",
             "text": "ExpressionsService"
           },
-          ", \"getType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"registerType\" | \"run\" | \"fork\">, ",
+          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -3954,7 +3953,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"registerType\" | \"run\" | \"fork\">"
+              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "source": {
               "path": "src/plugins/expressions/public/plugin.ts",
@@ -5154,7 +5153,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"registerType\" | \"run\" | \"fork\">"
+              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -5963,8 +5962,7 @@
             "section": "def-common.TablesAdapter",
             "text": "TablesAdapter"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/expressions/common/util/tables_adapter.ts",
@@ -11955,7 +11953,23 @@
           "section": "def-common.ExpressionType",
           "text": "ExpressionType"
         },
-        " | undefined; readonly getFunction: (name: string) => ",
+        " | undefined; readonly registerType: (typeDefinition: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.AnyExpressionTypeDefinition",
+          "text": "AnyExpressionTypeDefinition"
+        },
+        " | (() => ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.AnyExpressionTypeDefinition",
+          "text": "AnyExpressionTypeDefinition"
+        },
+        ")) => void; readonly getFunction: (name: string) => ",
         {
           "pluginId": "expressions",
           "scope": "common",
@@ -12026,22 +12040,6 @@
           "docId": "kibExpressionsPluginApi",
           "section": "def-common.AnyExpressionRenderDefinition",
           "text": "AnyExpressionRenderDefinition"
-        },
-        ")) => void; readonly registerType: (typeDefinition: ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionTypeDefinition",
-          "text": "AnyExpressionTypeDefinition"
-        },
-        " | (() => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionTypeDefinition",
-          "text": "AnyExpressionTypeDefinition"
         },
         ")) => void; readonly run: <Input, Output>(ast: string | ",
         {
@@ -15460,7 +15458,7 @@
             "section": "def-common.ExpressionsService",
             "text": "ExpressionsService"
           },
-          ", \"getType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"registerType\" | \"run\" | \"fork\">, ",
+          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -15565,7 +15563,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"registerType\" | \"run\" | \"fork\">"
+              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "source": {
               "path": "src/plugins/expressions/server/plugin.ts",
@@ -15709,7 +15707,7 @@
             "section": "def-common.ExpressionsService",
             "text": "ExpressionsService"
           },
-          ", \"getType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"registerType\" | \"run\" | \"fork\">, ",
+          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -15814,7 +15812,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"registerType\" | \"run\" | \"fork\">"
+              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "source": {
               "path": "src/plugins/expressions/server/plugin.ts",
@@ -21466,7 +21464,23 @@
           "section": "def-common.ExpressionType",
           "text": "ExpressionType"
         },
-        " | undefined; readonly getFunction: (name: string) => ",
+        " | undefined; readonly registerType: (typeDefinition: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.AnyExpressionTypeDefinition",
+          "text": "AnyExpressionTypeDefinition"
+        },
+        " | (() => ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.AnyExpressionTypeDefinition",
+          "text": "AnyExpressionTypeDefinition"
+        },
+        ")) => void; readonly getFunction: (name: string) => ",
         {
           "pluginId": "expressions",
           "scope": "common",
@@ -21537,22 +21551,6 @@
           "docId": "kibExpressionsPluginApi",
           "section": "def-common.AnyExpressionRenderDefinition",
           "text": "AnyExpressionRenderDefinition"
-        },
-        ")) => void; readonly registerType: (typeDefinition: ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionTypeDefinition",
-          "text": "AnyExpressionTypeDefinition"
-        },
-        " | (() => ",
-        {
-          "pluginId": "expressions",
-          "scope": "common",
-          "docId": "kibExpressionsPluginApi",
-          "section": "def-common.AnyExpressionTypeDefinition",
-          "text": "AnyExpressionTypeDefinition"
         },
         ")) => void; readonly run: <Input, Output>(ast: string | ",
         {
@@ -24895,8 +24893,7 @@
             "section": "def-common.ExpressionsInspectorAdapter",
             "text": "ExpressionsInspectorAdapter"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/expressions/common/util/expressions_inspector_adapter.ts",
@@ -26046,7 +26043,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"registerType\" | \"run\" | \"fork\">"
+              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -26855,8 +26852,7 @@
             "section": "def-common.TablesAdapter",
             "text": "TablesAdapter"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/expressions/common/util/tables_adapter.ts",
@@ -34693,7 +34689,23 @@
             "section": "def-common.ExpressionType",
             "text": "ExpressionType"
           },
-          " | undefined; readonly getFunction: (name: string) => ",
+          " | undefined; readonly registerType: (typeDefinition: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.AnyExpressionTypeDefinition",
+            "text": "AnyExpressionTypeDefinition"
+          },
+          " | (() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.AnyExpressionTypeDefinition",
+            "text": "AnyExpressionTypeDefinition"
+          },
+          ")) => void; readonly getFunction: (name: string) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -34764,22 +34776,6 @@
             "docId": "kibExpressionsPluginApi",
             "section": "def-common.AnyExpressionRenderDefinition",
             "text": "AnyExpressionRenderDefinition"
-          },
-          ")) => void; readonly registerType: (typeDefinition: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.AnyExpressionTypeDefinition",
-            "text": "AnyExpressionTypeDefinition"
-          },
-          " | (() => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.AnyExpressionTypeDefinition",
-            "text": "AnyExpressionTypeDefinition"
           },
           ")) => void; readonly run: <Input, Output>(ast: string | ",
           {

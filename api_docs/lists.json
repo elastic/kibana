@@ -315,45 +315,6 @@
       },
       {
         "parentPluginId": "lists",
-        "id": "def-public.addExceptionListItemWithValidation",
-        "type": "Function",
-        "tags": [],
-        "label": "addExceptionListItemWithValidation",
-        "description": [],
-        "signature": [
-          "({ http, listItem, signal, }: ",
-          "AddExceptionListItemProps",
-          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/public/exceptions/api.ts",
-          "lineNumber": 109
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lists",
-            "id": "def-public.addExceptionListItemWithValidation.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  http,\n  listItem,\n  signal,\n}",
-            "description": [],
-            "signature": [
-              "AddExceptionListItemProps"
-            ],
-            "source": {
-              "path": "x-pack/plugins/lists/public/exceptions/api.ts",
-              "lineNumber": 109
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
         "id": "def-public.addExceptionListWithValidation",
         "type": "Function",
         "tags": [],
@@ -481,7 +442,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lists/public/exceptions/transforms.ts",
-          "lineNumber": 41
+          "lineNumber": 40
         },
         "deprecated": false,
         "children": [
@@ -497,7 +458,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/transforms.ts",
-              "lineNumber": 42
+              "lineNumber": 41
             },
             "deprecated": false,
             "isRequired": true
@@ -520,7 +481,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lists/public/exceptions/transforms.ts",
-          "lineNumber": 36
+          "lineNumber": 35
         },
         "deprecated": false,
         "children": [
@@ -536,7 +497,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/transforms.ts",
-              "lineNumber": 37
+              "lineNumber": 36
             },
             "deprecated": false,
             "isRequired": true
@@ -545,45 +506,6 @@
         "returnComment": [
           "The exceptionItem transformed from the output"
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-public.updateExceptionListItemWithValidation",
-        "type": "Function",
-        "tags": [],
-        "label": "updateExceptionListItemWithValidation",
-        "description": [],
-        "signature": [
-          "({ http, listItem, signal, }: ",
-          "UpdateExceptionListItemProps",
-          ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/public/exceptions/api.ts",
-          "lineNumber": 195
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lists",
-            "id": "def-public.updateExceptionListItemWithValidation.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  http,\n  listItem,\n  signal,\n}",
-            "description": [],
-            "signature": [
-              "UpdateExceptionListItemProps"
-            ],
-            "source": {
-              "path": "x-pack/plugins/lists/public/exceptions/api.ts",
-              "lineNumber": 195
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -931,113 +853,6 @@
       },
       {
         "parentPluginId": "lists",
-        "id": "def-public.useIsMounted",
-        "type": "Function",
-        "tags": [],
-        "label": "useIsMounted",
-        "description": [
-          "\n"
-        ],
-        "signature": [
-          "() => GetIsMounted"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/public/common/hooks/use_is_mounted.ts",
-          "lineNumber": 16
-        },
-        "deprecated": false,
-        "children": [],
-        "returnComment": [
-          "A {@link GetIsMounted} getter function returning whether the component is currently mounted"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-public.usePersistExceptionItem",
-        "type": "Function",
-        "tags": [],
-        "label": "usePersistExceptionItem",
-        "description": [
-          "\nHook for creating or updating ExceptionListItem\n"
-        ],
-        "signature": [
-          "({ http, onError, }: ",
-          "PersistHookProps",
-          ") => ",
-          "ReturnPersistExceptionItem"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/public/exceptions/hooks/persist_exception_item.ts",
-          "lineNumber": 35
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lists",
-            "id": "def-public.usePersistExceptionItem.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  http,\n  onError,\n}",
-            "description": [],
-            "signature": [
-              "PersistHookProps"
-            ],
-            "source": {
-              "path": "x-pack/plugins/lists/public/exceptions/hooks/persist_exception_item.ts",
-              "lineNumber": 35
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-public.usePersistExceptionList",
-        "type": "Function",
-        "tags": [],
-        "label": "usePersistExceptionList",
-        "description": [
-          "\nHook for creating or updating ExceptionList\n"
-        ],
-        "signature": [
-          "({ http, onError, }: ",
-          "PersistHookProps",
-          ") => ",
-          "ReturnPersistExceptionList"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/public/exceptions/hooks/persist_exception_list.ts",
-          "lineNumber": 31
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lists",
-            "id": "def-public.usePersistExceptionList.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  http,\n  onError,\n}",
-            "description": [],
-            "signature": [
-              "PersistHookProps"
-            ],
-            "source": {
-              "path": "x-pack/plugins/lists/public/exceptions/hooks/persist_exception_list.ts",
-              "lineNumber": 31
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
         "id": "def-public.useReadListIndex",
         "type": "Function",
         "tags": [],
@@ -1150,7 +965,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-          "lineNumber": 41
+          "lineNumber": 42
         },
         "deprecated": false,
         "children": [
@@ -1163,7 +978,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 42
+              "lineNumber": 43
             },
             "deprecated": false
           }
@@ -1179,7 +994,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-          "lineNumber": 125
+          "lineNumber": 126
         },
         "deprecated": false,
         "children": [
@@ -1195,7 +1010,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 126
+              "lineNumber": 127
             },
             "deprecated": false
           },
@@ -1211,7 +1026,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 127
+              "lineNumber": 128
             },
             "deprecated": false
           },
@@ -1227,7 +1042,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 128
+              "lineNumber": 129
             },
             "deprecated": false
           },
@@ -1243,7 +1058,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 129
+              "lineNumber": 130
             },
             "deprecated": false
           },
@@ -1259,7 +1074,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 130
+              "lineNumber": 131
             },
             "deprecated": false
           }
@@ -1275,7 +1090,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-          "lineNumber": 62
+          "lineNumber": 63
         },
         "deprecated": false,
         "children": [
@@ -1288,7 +1103,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 63
+              "lineNumber": 64
             },
             "deprecated": false
           },
@@ -1301,7 +1116,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 64
+              "lineNumber": 65
             },
             "deprecated": false
           },
@@ -1317,7 +1132,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 65
+              "lineNumber": 66
             },
             "deprecated": false
           },
@@ -1333,7 +1148,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 66
+              "lineNumber": 67
             },
             "deprecated": false
           }
@@ -1349,7 +1164,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-          "lineNumber": 28
+          "lineNumber": 29
         },
         "deprecated": false,
         "children": [
@@ -1362,7 +1177,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 29
+              "lineNumber": 30
             },
             "deprecated": false
           },
@@ -1375,7 +1190,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 30
+              "lineNumber": 31
             },
             "deprecated": false
           },
@@ -1391,7 +1206,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 31
+              "lineNumber": 32
             },
             "deprecated": false
           }
@@ -1407,7 +1222,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-          "lineNumber": 45
+          "lineNumber": 46
         },
         "deprecated": false,
         "children": [
@@ -1423,7 +1238,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 46
+              "lineNumber": 47
             },
             "deprecated": false
           },
@@ -1445,7 +1260,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             },
             "deprecated": false
           }
@@ -1461,7 +1276,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-          "lineNumber": 120
+          "lineNumber": 121
         },
         "deprecated": false,
         "children": [
@@ -1477,7 +1292,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 121
+              "lineNumber": 122
             },
             "deprecated": false
           },
@@ -1499,7 +1314,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/public/exceptions/types.ts",
-              "lineNumber": 122
+              "lineNumber": 123
             },
             "deprecated": false
           }
@@ -1523,7 +1338,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lists/public/shared_exports.ts",
-          "lineNumber": 41
+          "lineNumber": 36
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3502,7 +3317,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-          "lineNumber": 121
+          "lineNumber": 118
         },
         "deprecated": false,
         "children": [
@@ -3518,7 +3333,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 122
+              "lineNumber": 119
             },
             "deprecated": false
           },
@@ -3534,7 +3349,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 123
+              "lineNumber": 120
             },
             "deprecated": false
           },
@@ -3547,7 +3362,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 124
+              "lineNumber": 121
             },
             "deprecated": false
           },
@@ -3560,7 +3375,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 125
+              "lineNumber": 122
             },
             "deprecated": false
           },
@@ -3576,7 +3391,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 126
+              "lineNumber": 123
             },
             "deprecated": false
           },
@@ -3589,7 +3404,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 127
+              "lineNumber": 124
             },
             "deprecated": false
           },
@@ -3605,7 +3420,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 128
+              "lineNumber": 125
             },
             "deprecated": false
           },
@@ -3618,7 +3433,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 129
+              "lineNumber": 126
             },
             "deprecated": false
           },
@@ -3634,7 +3449,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 130
+              "lineNumber": 127
             },
             "deprecated": false
           },
@@ -3650,7 +3465,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 131
+              "lineNumber": 128
             },
             "deprecated": false
           },
@@ -3666,7 +3481,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 132
+              "lineNumber": 129
             },
             "deprecated": false
           }
@@ -3702,7 +3517,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, user: string) => ",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, user: string) => ",
               {
                 "pluginId": "lists",
                 "scope": "server",
@@ -3874,37 +3689,53 @@
                     "section": "def-server.SavedObjectsUpdateResponse",
                     "text": "SavedObjectsUpdateResponse"
                   },
-                  "<T>>; addToNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+                  "<T>>; collectMultiNamespaceReferences: (objects: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsAddToNamespacesOptions",
-                    "text": "SavedObjectsAddToNamespacesOptions"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
                   },
-                  ") => Promise<",
+                  "[], options?: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsAddToNamespacesResponse",
-                    "text": "SavedObjectsAddToNamespacesResponse"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
                   },
-                  ">; deleteFromNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+                  " | undefined) => Promise<",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsDeleteFromNamespacesOptions",
-                    "text": "SavedObjectsDeleteFromNamespacesOptions"
+                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                    "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
                   },
-                  ") => Promise<",
+                  ">; updateObjectsSpaces: (objects: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsDeleteFromNamespacesResponse",
-                    "text": "SavedObjectsDeleteFromNamespacesResponse"
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
+                    "text": "SavedObjectsUpdateObjectsSpacesObject"
+                  },
+                  "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
+                    "text": "SavedObjectsUpdateObjectsSpacesOptions"
+                  },
+                  " | undefined) => Promise<",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
+                    "text": "SavedObjectsUpdateObjectsSpacesResponse"
                   },
                   ">; bulkUpdate: <T = unknown>(objects: ",
                   {
@@ -3978,7 +3809,7 @@
                     "section": "def-server.SavedObjectsClosePointInTimeResponse",
                     "text": "SavedObjectsClosePointInTimeResponse"
                   },
-                  ">; createPointInTimeFinder: (findOptions: Pick<",
+                  ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -4002,7 +3833,7 @@
                     "section": "def-server.ISavedObjectsPointInTimeFinder",
                     "text": "ISavedObjectsPointInTimeFinder"
                   },
-                  "; errors: typeof ",
+                  "<T, A>; errors: typeof ",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -4197,7 +4028,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-          "lineNumber": 147
+          "lineNumber": 144
         },
         "deprecated": false,
         "children": [
@@ -4213,7 +4044,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 148
+              "lineNumber": 145
             },
             "deprecated": false
           },
@@ -4229,7 +4060,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 149
+              "lineNumber": 146
             },
             "deprecated": false
           },
@@ -4245,7 +4076,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 150
+              "lineNumber": 147
             },
             "deprecated": false
           },
@@ -4261,7 +4092,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 151
+              "lineNumber": 148
             },
             "deprecated": false
           },
@@ -4277,7 +4108,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 152
+              "lineNumber": 149
             },
             "deprecated": false
           },
@@ -4293,7 +4124,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 153
+              "lineNumber": 150
             },
             "deprecated": false
           },
@@ -4309,7 +4140,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 154
+              "lineNumber": 151
             },
             "deprecated": false
           },
@@ -4325,7 +4156,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 155
+              "lineNumber": 152
             },
             "deprecated": false
           },
@@ -4341,7 +4172,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 156
+              "lineNumber": 153
             },
             "deprecated": false
           },
@@ -4357,7 +4188,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 157
+              "lineNumber": 154
             },
             "deprecated": false
           },
@@ -4373,7 +4204,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 158
+              "lineNumber": 155
             },
             "deprecated": false
           },
@@ -4389,7 +4220,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
-              "lineNumber": 159
+              "lineNumber": 156
             },
             "deprecated": false
           }
@@ -4412,7 +4243,7 @@
         "label": "buildExceptionFilter",
         "description": [],
         "signature": [
-          "({ lists, excludeExceptions, chunkSize, }: { lists: (({ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }) | { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; })[]; excludeExceptions: boolean; chunkSize: number; }) => ",
+          "({ lists, excludeExceptions, chunkSize, }: { lists: ({ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | ({ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }))[]; excludeExceptions: boolean; chunkSize: number; }) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -4424,7 +4255,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lists/common/exceptions/build_exceptions_filter.ts",
-          "lineNumber": 68
+          "lineNumber": 69
         },
         "deprecated": false,
         "children": [
@@ -4437,7 +4268,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lists/common/exceptions/build_exceptions_filter.ts",
-              "lineNumber": 72
+              "lineNumber": 73
             },
             "deprecated": false,
             "children": [
@@ -4449,11 +4280,11 @@
                 "label": "lists",
                 "description": [],
                 "signature": [
-                  "(({ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }) | { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; })[]"
+                  "({ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | ({ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }))[]"
                 ],
                 "source": {
                   "path": "x-pack/plugins/lists/common/exceptions/build_exceptions_filter.ts",
-                  "lineNumber": 73
+                  "lineNumber": 74
                 },
                 "deprecated": false
               },
@@ -4466,7 +4297,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/lists/common/exceptions/build_exceptions_filter.ts",
-                  "lineNumber": 74
+                  "lineNumber": 75
                 },
                 "deprecated": false
               },
@@ -4479,7 +4310,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/lists/common/exceptions/build_exceptions_filter.ts",
-                  "lineNumber": 75
+                  "lineNumber": 76
                 },
                 "deprecated": false
               }
@@ -4491,162 +4322,8 @@
       }
     ],
     "interfaces": [],
-    "enums": [
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.ExceptionListTypeEnum",
-        "type": "Enum",
-        "tags": [],
-        "label": "ExceptionListTypeEnum",
-        "description": [],
-        "signature": [
-          "ExceptionListTypeEnum"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/exception_list/index.d.ts",
-          "lineNumber": 14
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.ListOperatorEnum",
-        "type": "Enum",
-        "tags": [],
-        "label": "ListOperatorEnum",
-        "description": [],
-        "signature": [
-          "ListOperatorEnum"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/list_operator/index.d.ts",
-          "lineNumber": 7
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.ListOperatorTypeEnum",
-        "type": "Enum",
-        "tags": [],
-        "label": "ListOperatorTypeEnum",
-        "description": [],
-        "signature": [
-          "ListOperatorTypeEnum"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/list_operator/index.d.ts",
-          "lineNumber": 11
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.Comment",
-        "type": "Type",
-        "tags": [],
-        "label": "Comment",
-        "description": [],
-        "signature": [
-          "{ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; }"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/comment/index.d.ts",
-          "lineNumber": 21
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.CommentsArray",
-        "type": "Type",
-        "tags": [],
-        "label": "CommentsArray",
-        "description": [],
-        "signature": [
-          "({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/comment/index.d.ts",
-          "lineNumber": 20
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.CreateComment",
-        "type": "Type",
-        "tags": [],
-        "label": "CreateComment",
-        "description": [],
-        "signature": [
-          "{ comment: string; }"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/create_comment/index.d.ts",
-          "lineNumber": 5
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.CreateCommentsArray",
-        "type": "Type",
-        "tags": [],
-        "label": "CreateCommentsArray",
-        "description": [],
-        "signature": [
-          "{ comment: string; }[]"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/create_comment/index.d.ts",
-          "lineNumber": 9
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.CreateExceptionListItemSchema",
-        "type": "Type",
-        "tags": [],
-        "label": "CreateExceptionListItemSchema",
-        "description": [],
-        "signature": [
-          "{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/common/schemas/request/create_exception_list_item_schema.ts",
-          "lineNumber": 51
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.CreateExceptionListSchema",
-        "type": "Type",
-        "tags": [],
-        "label": "CreateExceptionListSchema",
-        "description": [],
-        "signature": [
-          "{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/common/schemas/request/create_exception_list_schema.ts",
-          "lineNumber": 47
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "lists",
         "id": "def-common.ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION",
@@ -4744,142 +4421,6 @@
       },
       {
         "parentPluginId": "lists",
-        "id": "def-common.EntriesArray",
-        "type": "Type",
-        "tags": [],
-        "label": "EntriesArray",
-        "description": [],
-        "signature": [
-          "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entries/index.d.ts",
-          "lineNumber": 191
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.Entry",
-        "type": "Type",
-        "tags": [],
-        "label": "Entry",
-        "description": [],
-        "signature": [
-          "{ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; }"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entries/index.d.ts",
-          "lineNumber": 79
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.EntryExists",
-        "type": "Type",
-        "tags": [],
-        "label": "EntryExists",
-        "description": [],
-        "signature": [
-          "{ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; }"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entries_exist/index.d.ts",
-          "lineNumber": 12
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.EntryList",
-        "type": "Type",
-        "tags": [],
-        "label": "EntryList",
-        "description": [],
-        "signature": [
-          "{ field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; }"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entries_list/index.d.ts",
-          "lineNumber": 40
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.EntryMatch",
-        "type": "Type",
-        "tags": [],
-        "label": "EntryMatch",
-        "description": [],
-        "signature": [
-          "{ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; }"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entry_match/index.d.ts",
-          "lineNumber": 13
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.EntryMatchAny",
-        "type": "Type",
-        "tags": [],
-        "label": "EntryMatchAny",
-        "description": [],
-        "signature": [
-          "{ field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; }"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entry_match_any/index.d.ts",
-          "lineNumber": 13
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.EntryMatchWildcard",
-        "type": "Type",
-        "tags": [],
-        "label": "EntryMatchWildcard",
-        "description": [],
-        "signature": [
-          "{ field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; }"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entry_match_wildcard/index.d.ts",
-          "lineNumber": 13
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.EntryNested",
-        "type": "Type",
-        "tags": [],
-        "label": "EntryNested",
-        "description": [],
-        "signature": [
-          "{ entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; }"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entry_nested/index.d.ts",
-          "lineNumber": 37
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
         "id": "def-common.EXCEPTION_LIST_ITEM_URL",
         "type": "string",
         "tags": [],
@@ -4913,891 +4454,8 @@
         },
         "deprecated": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.ExceptionListItemSchema",
-        "type": "Type",
-        "tags": [],
-        "label": "ExceptionListItemSchema",
-        "description": [],
-        "signature": [
-          "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.ts",
-          "lineNumber": 56
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.ExceptionListSchema",
-        "type": "Type",
-        "tags": [],
-        "label": "ExceptionListSchema",
-        "description": [],
-        "signature": [
-          "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.ts",
-          "lineNumber": 54
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.ExceptionListType",
-        "type": "Type",
-        "tags": [],
-        "label": "ExceptionListType",
-        "description": [],
-        "signature": [
-          "\"endpoint\" | \"detection\" | \"endpoint_events\""
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/exception_list/index.d.ts",
-          "lineNumber": 12
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.ListOperator",
-        "type": "Type",
-        "tags": [],
-        "label": "ListOperator",
-        "description": [],
-        "signature": [
-          "\"excluded\" | \"included\""
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/list_operator/index.d.ts",
-          "lineNumber": 6
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.ListSchema",
-        "type": "Type",
-        "tags": [],
-        "label": "ListSchema",
-        "description": [],
-        "signature": [
-          "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/common/schemas/response/list_schema.ts",
-          "lineNumber": 50
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.NamespaceType",
-        "type": "Type",
-        "tags": [],
-        "label": "NamespaceType",
-        "description": [],
-        "signature": [
-          "\"single\" | \"agnostic\""
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/default_namespace/index.d.ts",
-          "lineNumber": 6
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.NestedEntriesArray",
-        "type": "Type",
-        "tags": [],
-        "label": "NestedEntriesArray",
-        "description": [],
-        "signature": [
-          "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/non_empty_nested_entries_array/index.d.ts",
-          "lineNumber": 62
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.OsTypeArray",
-        "type": "Type",
-        "tags": [],
-        "label": "OsTypeArray",
-        "description": [],
-        "signature": [
-          "(\"windows\" | \"linux\" | \"macos\")[]"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/os_type/index.d.ts",
-          "lineNumber": 9
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.Type",
-        "type": "Type",
-        "tags": [],
-        "label": "Type",
-        "description": [],
-        "signature": [
-          "\"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\""
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/type/index.d.ts",
-          "lineNumber": 56
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.UpdateExceptionListItemSchema",
-        "type": "Type",
-        "tags": [],
-        "label": "UpdateExceptionListItemSchema",
-        "description": [],
-        "signature": [
-          "{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]; name: string; type: \"simple\"; } & { _version?: string | undefined; comments?: ({ comment: string; } & { id?: string | undefined; })[] | undefined; id?: string | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/common/schemas/request/update_exception_list_item_schema.ts",
-          "lineNumber": 52
-        },
-        "deprecated": false,
-        "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.comment",
-        "type": "Object",
-        "tags": [],
-        "label": "comment",
-        "description": [],
-        "signature": [
-          "IntersectionC",
-          "<[",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ comment: ",
-          "Type",
-          "<string, string, unknown>; created_at: ",
-          "StringC",
-          "; created_by: ",
-          "StringC",
-          "; id: ",
-          "Type",
-          "<string, string, unknown>; }>>, ",
-          "ExactC",
-          "<",
-          "PartialC",
-          "<{ updated_at: ",
-          "StringC",
-          "; updated_by: ",
-          "StringC",
-          "; }>>]>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/comment/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.createExceptionListItemSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "createExceptionListItemSchema",
-        "description": [],
-        "signature": [
-          "IntersectionC",
-          "<[",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ description: ",
-          "StringC",
-          "; entries: ",
-          "Type",
-          "<({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[], ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"binary\" | \"short\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[], unknown>; list_id: ",
-          "Type",
-          "<string, string, unknown>; name: ",
-          "StringC",
-          "; type: ",
-          "KeyofC",
-          "<{ simple: null; }>; }>>, ",
-          "ExactC",
-          "<",
-          "PartialC",
-          "<{ comments: ",
-          "Type",
-          "<{ comment: string; }[], { comment: string; }[], unknown>; item_id: ",
-          "Type",
-          "<string, string | undefined, unknown>; meta: ",
-          "ObjectC",
-          "; namespace_type: ",
-          "Type",
-          "<\"single\" | \"agnostic\", \"single\" | \"agnostic\" | undefined, unknown>; os_types: ",
-          "UnionC",
-          "<[",
-          "Type",
-          "<(\"windows\" | \"linux\" | \"macos\")[], (\"windows\" | \"linux\" | \"macos\")[] | undefined, unknown>, ",
-          "UndefinedC",
-          "]>; tags: ",
-          "Type",
-          "<string[], string[] | undefined, unknown>; }>>]>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/common/schemas/request/create_exception_list_item_schema.ts",
-          "lineNumber": 29
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.entriesExists",
-        "type": "Object",
-        "tags": [],
-        "label": "entriesExists",
-        "description": [],
-        "signature": [
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ exists: null; }>; }>>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entries_exist/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.entriesList",
-        "type": "Object",
-        "tags": [],
-        "label": "entriesList",
-        "description": [],
-        "signature": [
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; list: ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ id: ",
-          "Type",
-          "<string, string, unknown>; type: ",
-          "KeyofC",
-          "<{ binary: null; boolean: null; byte: null; date: null; date_nanos: null; date_range: null; double: null; double_range: null; float: null; float_range: null; geo_point: null; geo_shape: null; half_float: null; integer: null; integer_range: null; ip: null; ip_range: null; keyword: null; long: null; long_range: null; shape: null; short: null; text: null; }>; }>>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ list: null; }>; }>>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entries_list/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.entriesMatch",
-        "type": "Object",
-        "tags": [],
-        "label": "entriesMatch",
-        "description": [],
-        "signature": [
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ match: null; }>; value: ",
-          "Type",
-          "<string, string, unknown>; }>>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entry_match/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.entriesMatchAny",
-        "type": "Object",
-        "tags": [],
-        "label": "entriesMatchAny",
-        "description": [],
-        "signature": [
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ match_any: null; }>; value: ",
-          "Type",
-          "<string[], string[], unknown>; }>>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entry_match_any/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.entriesMatchWildcard",
-        "type": "Object",
-        "tags": [],
-        "label": "entriesMatchWildcard",
-        "description": [],
-        "signature": [
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ wildcard: null; }>; value: ",
-          "Type",
-          "<string, string, unknown>; }>>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entry_match_wildcard/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.entriesNested",
-        "type": "Object",
-        "tags": [],
-        "label": "entriesNested",
-        "description": [],
-        "signature": [
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ entries: ",
-          "Type",
-          "<({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[], ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[], unknown>; field: ",
-          "Type",
-          "<string, string, unknown>; type: ",
-          "KeyofC",
-          "<{ nested: null; }>; }>>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entry_nested/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.entry",
-        "type": "Object",
-        "tags": [],
-        "label": "entry",
-        "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ match: null; }>; value: ",
-          "Type",
-          "<string, string, unknown>; }>>, ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ match_any: null; }>; value: ",
-          "Type",
-          "<string[], string[], unknown>; }>>, ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; list: ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ id: ",
-          "Type",
-          "<string, string, unknown>; type: ",
-          "KeyofC",
-          "<{ binary: null; boolean: null; byte: null; date: null; date_nanos: null; date_range: null; double: null; double_range: null; float: null; float_range: null; geo_point: null; geo_shape: null; half_float: null; integer: null; integer_range: null; ip: null; ip_range: null; keyword: null; long: null; long_range: null; shape: null; short: null; text: null; }>; }>>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ list: null; }>; }>>, ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ exists: null; }>; }>>, ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ wildcard: null; }>; value: ",
-          "Type",
-          "<string, string, unknown>; }>>]>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/entries/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.exceptionListItemSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "exceptionListItemSchema",
-        "description": [],
-        "signature": [
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ _version: ",
-          "UnionC",
-          "<[",
-          "StringC",
-          ", ",
-          "UndefinedC",
-          "]>; comments: ",
-          "ArrayC",
-          "<",
-          "IntersectionC",
-          "<[",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ comment: ",
-          "Type",
-          "<string, string, unknown>; created_at: ",
-          "StringC",
-          "; created_by: ",
-          "StringC",
-          "; id: ",
-          "Type",
-          "<string, string, unknown>; }>>, ",
-          "ExactC",
-          "<",
-          "PartialC",
-          "<{ updated_at: ",
-          "StringC",
-          "; updated_by: ",
-          "StringC",
-          "; }>>]>>; created_at: ",
-          "StringC",
-          "; created_by: ",
-          "StringC",
-          "; description: ",
-          "StringC",
-          "; entries: ",
-          "ArrayC",
-          "<",
-          "UnionC",
-          "<[",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ match: null; }>; value: ",
-          "Type",
-          "<string, string, unknown>; }>>, ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ match_any: null; }>; value: ",
-          "Type",
-          "<string[], string[], unknown>; }>>, ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; list: ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ id: ",
-          "Type",
-          "<string, string, unknown>; type: ",
-          "KeyofC",
-          "<{ binary: null; boolean: null; byte: null; date: null; date_nanos: null; date_range: null; double: null; double_range: null; float: null; float_range: null; geo_point: null; geo_shape: null; half_float: null; integer: null; integer_range: null; ip: null; ip_range: null; keyword: null; long: null; long_range: null; shape: null; short: null; text: null; }>; }>>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ list: null; }>; }>>, ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ exists: null; }>; }>>, ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ entries: ",
-          "Type",
-          "<({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[], ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[], unknown>; field: ",
-          "Type",
-          "<string, string, unknown>; type: ",
-          "KeyofC",
-          "<{ nested: null; }>; }>>, ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ wildcard: null; }>; value: ",
-          "Type",
-          "<string, string, unknown>; }>>]>>; id: ",
-          "Type",
-          "<string, string, unknown>; item_id: ",
-          "Type",
-          "<string, string, unknown>; list_id: ",
-          "Type",
-          "<string, string, unknown>; meta: ",
-          "UnionC",
-          "<[",
-          "ObjectC",
-          ", ",
-          "UndefinedC",
-          "]>; name: ",
-          "StringC",
-          "; namespace_type: ",
-          "Type",
-          "<\"single\" | \"agnostic\", \"single\" | \"agnostic\" | undefined, unknown>; os_types: ",
-          "Type",
-          "<(\"windows\" | \"linux\" | \"macos\")[], (\"windows\" | \"linux\" | \"macos\")[] | undefined, unknown>; tags: ",
-          "Type",
-          "<string[], string[] | undefined, unknown>; tie_breaker_id: ",
-          "StringC",
-          "; type: ",
-          "KeyofC",
-          "<{ simple: null; }>; updated_at: ",
-          "StringC",
-          "; updated_by: ",
-          "StringC",
-          "; }>>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.ts",
-          "lineNumber": 33
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.exceptionListType",
-        "type": "Object",
-        "tags": [],
-        "label": "exceptionListType",
-        "description": [],
-        "signature": [
-          "KeyofC",
-          "<{ detection: null; endpoint: null; endpoint_events: null; }>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/exception_list/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.listOperator",
-        "type": "Object",
-        "tags": [],
-        "label": "listOperator",
-        "description": [],
-        "signature": [
-          "KeyofC",
-          "<{ excluded: null; included: null; }>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/list_operator/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.listSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "listSchema",
-        "description": [],
-        "signature": [
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ _version: ",
-          "UnionC",
-          "<[",
-          "StringC",
-          ", ",
-          "UndefinedC",
-          "]>; created_at: ",
-          "StringC",
-          "; created_by: ",
-          "StringC",
-          "; description: ",
-          "StringC",
-          "; deserializer: ",
-          "UnionC",
-          "<[",
-          "StringC",
-          ", ",
-          "UndefinedC",
-          "]>; id: ",
-          "Type",
-          "<string, string, unknown>; immutable: ",
-          "BooleanC",
-          "; meta: ",
-          "UnionC",
-          "<[",
-          "ObjectC",
-          ", ",
-          "UndefinedC",
-          "]>; name: ",
-          "StringC",
-          "; serializer: ",
-          "UnionC",
-          "<[",
-          "StringC",
-          ", ",
-          "UndefinedC",
-          "]>; tie_breaker_id: ",
-          "StringC",
-          "; type: ",
-          "KeyofC",
-          "<{ binary: null; boolean: null; byte: null; date: null; date_nanos: null; date_range: null; double: null; double_range: null; float: null; float_range: null; geo_point: null; geo_shape: null; half_float: null; integer: null; integer_range: null; ip: null; ip_range: null; keyword: null; long: null; long_range: null; shape: null; short: null; text: null; }>; updated_at: ",
-          "StringC",
-          "; updated_by: ",
-          "StringC",
-          "; version: ",
-          "NumberC",
-          "; }>>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/lists/common/schemas/response/list_schema.ts",
-          "lineNumber": 30
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.namespaceType",
-        "type": "Object",
-        "tags": [],
-        "label": "namespaceType",
-        "description": [],
-        "signature": [
-          "KeyofC",
-          "<{ agnostic: null; single: null; }>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/default_namespace/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.nestedEntryItem",
-        "type": "Object",
-        "tags": [],
-        "label": "nestedEntryItem",
-        "description": [],
-        "signature": [
-          "UnionC",
-          "<[",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ match: null; }>; value: ",
-          "Type",
-          "<string, string, unknown>; }>>, ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ match_any: null; }>; value: ",
-          "Type",
-          "<string[], string[], unknown>; }>>, ",
-          "ExactC",
-          "<",
-          "TypeC",
-          "<{ field: ",
-          "Type",
-          "<string, string, unknown>; operator: ",
-          "KeyofC",
-          "<{ excluded: null; included: null; }>; type: ",
-          "KeyofC",
-          "<{ exists: null; }>; }>>]>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/non_empty_nested_entries_array/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.osType",
-        "type": "Object",
-        "tags": [],
-        "label": "osType",
-        "description": [],
-        "signature": [
-          "KeyofC",
-          "<{ linux: null; macos: null; windows: null; }>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/os_type/index.d.ts",
-          "lineNumber": 2
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lists",
-        "id": "def-common.osTypeArray",
-        "type": "Object",
-        "tags": [],
-        "label": "osTypeArray",
-        "description": [],
-        "signature": [
-          "Type",
-          "<(\"windows\" | \"linux\" | \"macos\")[], (\"windows\" | \"linux\" | \"macos\")[] | undefined, unknown>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/securitysolution-io-ts-list-types/target/os_type/index.d.ts",
-          "lineNumber": 8
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

@@ -445,7 +445,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/server/plugin.ts",
-          "lineNumber": 131
+          "lineNumber": 133
         },
         "deprecated": false,
         "children": [
@@ -461,7 +461,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 146
+              "lineNumber": 148
             },
             "deprecated": false,
             "children": [
@@ -484,7 +484,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 146
+                  "lineNumber": 148
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -524,7 +524,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 158
+              "lineNumber": 160
             },
             "deprecated": false,
             "children": [
@@ -557,7 +557,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 158
+                  "lineNumber": 160
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -574,7 +574,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 158
+                  "lineNumber": 160
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -604,7 +604,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 343
+              "lineNumber": 345
             },
             "deprecated": false,
             "children": [
@@ -626,7 +626,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 343
+                  "lineNumber": 345
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -643,7 +643,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 343
+                  "lineNumber": 345
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -663,7 +663,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 417
+              "lineNumber": 420
             },
             "deprecated": false,
             "children": [],
@@ -747,7 +747,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 107
+        "lineNumber": 109
       },
       "deprecated": false,
       "children": [],
@@ -763,7 +763,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 110
+        "lineNumber": 112
       },
       "deprecated": false,
       "children": [],
@@ -773,613 +773,10 @@
   },
   "common": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.addIdToItem",
-        "type": "Function",
-        "tags": [],
-        "label": "addIdToItem",
-        "description": [],
-        "signature": [
-          "<T>(item: NotArray<T>) => T"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/add_remove_id_to_item.ts",
-          "lineNumber": 20
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.addIdToItem.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "item",
-            "description": [],
-            "signature": [
-              "NotArray<T>"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/add_remove_id_to_item.ts",
-              "lineNumber": 20
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.DefaultArray",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "DefaultArray",
-        "description": [
-          "\nTypes the DefaultArray<C> as:\n  - If undefined, then a default array will be set\n  - If an array is sent in, then the array will be validated to ensure all elements are type C"
-        ],
-        "signature": [
-          "<C extends ",
-          "Mixed",
-          ">(codec: C) => ",
-          "Type",
-          "<",
-          "TypeOf",
-          "<C>[], ",
-          "TypeOf",
-          "<C>[] | undefined, unknown>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_array.ts",
-          "lineNumber": 17
-        },
-        "deprecated": true,
-        "references": [],
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.DefaultArray.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "codec",
-            "description": [],
-            "signature": [
-              "C"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_array.ts",
-              "lineNumber": 17
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.exactCheck",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "exactCheck",
-        "description": [
-          "\nGiven an original object and a decoded object this will return an error\nif and only if the original object has additional keys that the decoded\nobject does not have. If the original decoded already has an error, then\nthis will return the error as is and not continue.\n\nNOTE: You MUST use t.exact(...) for this to operate correctly as your schema\nneeds to remove additional keys before the compare\n\nYou might not need this in the future if the below issue is solved:\nhttps://github.com/gcanti/io-ts/issues/322\n"
-        ],
-        "signature": [
-          "<T>(original: unknown, decoded: ",
-          "Either",
-          "<",
-          "Errors",
-          ", T>) => ",
-          "Either",
-          "<",
-          "Errors",
-          ", T>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/exact_check.ts",
-          "lineNumber": 30
-        },
-        "deprecated": true,
-        "references": [],
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.exactCheck.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "original",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/exact_check.ts",
-              "lineNumber": 31
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.exactCheck.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "decoded",
-            "description": [],
-            "signature": [
-              "Either",
-              "<",
-              "Errors",
-              ", T>"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/exact_check.ts",
-              "lineNumber": 32
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.foldLeftRight",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "foldLeftRight",
-        "description": [],
-        "signature": [
-          "<T>(ma: ",
-          "Either",
-          "<",
-          "Errors",
-          ", unknown>) => Message<unknown>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-          "lineNumber": 38
-        },
-        "deprecated": true,
-        "references": [],
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.ma",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ma",
-            "description": [],
-            "signature": [
-              "Left",
-              "<E> | ",
-              "Right",
-              "<A>"
-            ],
-            "source": {
-              "path": "node_modules/fp-ts/lib/Either.d.ts",
-              "lineNumber": 228
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.formatErrors",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "formatErrors",
-        "description": [],
-        "signature": [
-          "(errors: ",
-          "Errors",
-          ") => string[]"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/format_errors.ts",
-          "lineNumber": 14
-        },
-        "deprecated": true,
-        "references": [],
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.formatErrors.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "errors",
-            "description": [],
-            "signature": [
-              "Errors"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/format_errors.ts",
-              "lineNumber": 14
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.getPaths",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "getPaths",
-        "description": [
-          "\nConvenience utility to keep the error message handling within tests to be\nvery concise."
-        ],
-        "signature": [
-          "<A>(validation: ",
-          "Either",
-          "<",
-          "Errors",
-          ", A>) => string[]"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-          "lineNumber": 46
-        },
-        "deprecated": true,
-        "references": [],
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.getPaths.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "validation",
-            "description": [],
-            "signature": [
-              "Either",
-              "<",
-              "Errors",
-              ", A>"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-              "lineNumber": 46
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.removeExternalLinkText",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "removeExternalLinkText",
-        "description": [
-          "\nConvenience utility to remove text appended to links by EUI"
-        ],
-        "signature": [
-          "(str: string) => string"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-          "lineNumber": 60
-        },
-        "deprecated": true,
-        "references": [],
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.removeExternalLinkText.$1",
-            "type": "string",
-            "tags": [],
-            "label": "str",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-              "lineNumber": 60
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.removeIdFromItem",
-        "type": "Function",
-        "tags": [],
-        "label": "removeIdFromItem",
-        "description": [
-          "\nThis is to reverse the id you added to your arrays for ReactJS keys."
-        ],
-        "signature": [
-          "<T>(item: NotArray<T>) => T | Pick<T & { id?: string | undefined; }, Exclude<keyof T, \"id\">>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/add_remove_id_to_item.ts",
-          "lineNumber": 33
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.removeIdFromItem.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "item",
-            "description": [],
-            "signature": [
-              "NotArray<T>"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/add_remove_id_to_item.ts",
-              "lineNumber": 34
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.validate",
-        "type": "Function",
-        "tags": [],
-        "label": "validate",
-        "description": [],
-        "signature": [
-          "<T extends ",
-          "Mixed",
-          ">(obj: object, schema: T) => [",
-          "TypeOf",
-          "<T> | null, string | null]"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/validate.ts",
-          "lineNumber": 15
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.validate.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "obj",
-            "description": [],
-            "signature": [
-              "object"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/validate.ts",
-              "lineNumber": 16
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.validate.$2",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "schema",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/validate.ts",
-              "lineNumber": 17
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.validateEither",
-        "type": "Function",
-        "tags": [],
-        "label": "validateEither",
-        "description": [],
-        "signature": [
-          "<T extends ",
-          "Mixed",
-          ", A extends unknown>(schema: T, obj: A) => ",
-          "Either",
-          "<Error, A>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/validate.ts",
-          "lineNumber": 42
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.validateEither.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "schema",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/validate.ts",
-              "lineNumber": 43
-            },
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.validateEither.$2",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "obj",
-            "description": [],
-            "signature": [
-              "A"
-            ],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/validate.ts",
-              "lineNumber": 44
-            },
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.DefaultVersionNumberDecoded",
-        "type": "Type",
-        "tags": [],
-        "label": "DefaultVersionNumberDecoded",
-        "description": [],
-        "signature": [
-          "number"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_version_number.ts",
-          "lineNumber": 25
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
-    "objects": [
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.DefaultStringArray",
-        "type": "Object",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "DefaultStringArray",
-        "description": [
-          "\nTypes the DefaultStringArray as:\n  - If undefined, then a default array will be set\n  - If an array is sent in, then the array will be validated to ensure all elements are a string"
-        ],
-        "signature": [
-          "Type",
-          "<string[], string[] | undefined, unknown>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_string_array.ts",
-          "lineNumber": 17
-        },
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.DefaultUuid",
-        "type": "Object",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "DefaultUuid",
-        "description": [
-          "\nTypes the DefaultUuid as:\n  - If null or undefined, then a default string uuid.v4() will be\n    created otherwise it will be checked just against an empty string"
-        ],
-        "signature": [
-          "Type",
-          "<string, string | undefined, unknown>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_uuid.ts",
-          "lineNumber": 20
-        },
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.DefaultVersionNumber",
-        "type": "Object",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "DefaultVersionNumber",
-        "description": [
-          "\nTypes the DefaultVersionNumber as:\n  - If null or undefined, then a default of the number 1 will be used"
-        ],
-        "signature": [
-          "Type",
-          "<number, number | undefined, unknown>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_version_number.ts",
-          "lineNumber": 17
-        },
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.NonEmptyString",
-        "type": "Object",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "NonEmptyString",
-        "description": [
-          "\nTypes the NonEmptyString as:\n  - A string that is not empty"
-        ],
-        "signature": [
-          "Type",
-          "<string, string, unknown>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/non_empty_string.ts",
-          "lineNumber": 16
-        },
-        "deprecated": true,
-        "references": [],
-        "initialIsOpen": false
-      }
-    ]
+    "misc": [],
+    "objects": []
   }
 }

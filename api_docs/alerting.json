@@ -1105,7 +1105,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
-          "lineNumber": 132
+          "lineNumber": 140
         },
         "deprecated": false,
         "children": [
@@ -1118,7 +1118,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
-              "lineNumber": 133
+              "lineNumber": 141
             },
             "deprecated": false
           },
@@ -1131,7 +1131,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
-              "lineNumber": 134
+              "lineNumber": 142
             },
             "deprecated": false
           },
@@ -1144,7 +1144,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
-              "lineNumber": 135
+              "lineNumber": 143
             },
             "deprecated": false
           },
@@ -1168,7 +1168,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
-              "lineNumber": 136
+              "lineNumber": 144
             },
             "deprecated": false
           }
@@ -1184,7 +1184,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/plugin.ts",
-          "lineNumber": 84
+          "lineNumber": 85
         },
         "deprecated": false,
         "children": [
@@ -1208,7 +1208,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 85
+              "lineNumber": 86
             },
             "deprecated": false,
             "children": [
@@ -1231,7 +1231,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/plugin.ts",
-                  "lineNumber": 93
+                  "lineNumber": 94
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1251,7 +1251,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/plugin.ts",
-          "lineNumber": 104
+          "lineNumber": 105
         },
         "deprecated": false,
         "children": [
@@ -1269,7 +1269,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 105
+              "lineNumber": 106
             },
             "deprecated": false,
             "returnComment": [],
@@ -1303,7 +1303,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 106
+              "lineNumber": 107
             },
             "deprecated": false,
             "children": [
@@ -1326,7 +1326,60 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/plugin.ts",
-                  "lineNumber": 106
+                  "lineNumber": 107
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.PluginStartContract.getAlertingAuthorizationWithRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlertingAuthorizationWithRequest",
+            "description": [],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => Pick<",
+              "AlertingAuthorization",
+              ", \"ensureAuthorized\" | \"getFindAuthorizationFilter\" | \"filterByRuleTypeAuthorization\">"
+            ],
+            "source": {
+              "path": "x-pack/plugins/alerting/server/plugin.ts",
+              "lineNumber": 108
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.PluginStartContract.getAlertingAuthorizationWithRequest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/alerting/server/plugin.ts",
+                  "lineNumber": 109
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1354,7 +1407,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 107
+              "lineNumber": 111
             },
             "deprecated": false,
             "returnComment": [],

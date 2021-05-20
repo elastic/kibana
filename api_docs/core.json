@@ -1112,7 +1112,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 213
+          "lineNumber": 206
         },
         "deprecated": false,
         "children": [
@@ -1136,7 +1136,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 215
+              "lineNumber": 208
             },
             "deprecated": false
           },
@@ -1160,7 +1160,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 217
+              "lineNumber": 210
             },
             "deprecated": false
           },
@@ -1184,7 +1184,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 219
+              "lineNumber": 212
             },
             "deprecated": false
           },
@@ -1208,7 +1208,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 221
+              "lineNumber": 214
             },
             "deprecated": false
           },
@@ -1232,7 +1232,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 223
+              "lineNumber": 216
             },
             "deprecated": false
           },
@@ -1252,7 +1252,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 230
+              "lineNumber": 223
             },
             "deprecated": true,
             "references": []
@@ -1279,7 +1279,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 234
+              "lineNumber": 227
             },
             "deprecated": false,
             "returnComment": [],
@@ -1299,7 +1299,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 258
+          "lineNumber": 251
         },
         "deprecated": false,
         "children": [
@@ -1323,7 +1323,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 260
+              "lineNumber": 253
             },
             "deprecated": false
           },
@@ -1347,7 +1347,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 262
+              "lineNumber": 255
             },
             "deprecated": false
           },
@@ -1371,7 +1371,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 264
+              "lineNumber": 257
             },
             "deprecated": false
           },
@@ -1395,7 +1395,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 266
+              "lineNumber": 259
             },
             "deprecated": false
           },
@@ -1419,7 +1419,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 268
+              "lineNumber": 261
             },
             "deprecated": false
           },
@@ -1443,7 +1443,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 270
+              "lineNumber": 263
             },
             "deprecated": false
           },
@@ -1467,7 +1467,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 272
+              "lineNumber": 265
             },
             "deprecated": false
           },
@@ -1491,7 +1491,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 274
+              "lineNumber": 267
             },
             "deprecated": false
           },
@@ -1515,7 +1515,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 276
+              "lineNumber": 269
             },
             "deprecated": false
           },
@@ -1539,7 +1539,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 278
+              "lineNumber": 271
             },
             "deprecated": false
           },
@@ -1563,7 +1563,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 280
+              "lineNumber": 273
             },
             "deprecated": false
           },
@@ -1583,7 +1583,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 287
+              "lineNumber": 280
             },
             "deprecated": true,
             "references": [
@@ -2266,38 +2266,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-public.ImageValidation",
-        "type": "Interface",
-        "tags": [],
-        "label": "ImageValidation",
-        "description": [],
-        "source": {
-          "path": "src/core/types/ui_settings.ts",
-          "lineNumber": 131
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-public.ImageValidation.maxSize",
-            "type": "Object",
-            "tags": [],
-            "label": "maxSize",
-            "description": [],
-            "signature": [
-              "{ length: number; description: string; }"
-            ],
-            "source": {
-              "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 132
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-public.IUiSettingsClient",
         "type": "Interface",
         "tags": [],
@@ -2425,7 +2393,7 @@
             "signature": [
               "() => Readonly<Record<string, Pick<",
               "UiSettingsParams",
-              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"validation\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\"> & ",
+              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\"> & ",
               "UserProvidedValues",
               "<any>>>"
             ],
@@ -5055,6 +5023,126 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-public.SavedObjectReferenceWithContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectReferenceWithContext",
+        "description": [
+          "\nA returned input object or one of its references, with additional context.\n"
+        ],
+        "source": {
+          "path": "src/core/server/saved_objects/service/lib/collect_multi_namespace_references.ts",
+          "lineNumber": 66
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectReferenceWithContext.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type of the referenced object"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/lib/collect_multi_namespace_references.ts",
+              "lineNumber": 68
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectReferenceWithContext.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "The ID of the referenced object"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/lib/collect_multi_namespace_references.ts",
+              "lineNumber": 70
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectReferenceWithContext.spaces",
+            "type": "Array",
+            "tags": [],
+            "label": "spaces",
+            "description": [
+              "The space(s) that the referenced object exists in"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/lib/collect_multi_namespace_references.ts",
+              "lineNumber": 72
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectReferenceWithContext.inboundReferences",
+            "type": "Array",
+            "tags": [],
+            "label": "inboundReferences",
+            "description": [
+              "\nReferences to this object; note that this does not contain _all inbound references everywhere for this object_, it only contains\ninbound references for the scope of this operation"
+            ],
+            "signature": [
+              "{ type: string; id: string; name: string; }[]"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/lib/collect_multi_namespace_references.ts",
+              "lineNumber": 77
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectReferenceWithContext.isMissing",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isMissing",
+            "description": [
+              "Whether or not this object or reference is missing"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/lib/collect_multi_namespace_references.ts",
+              "lineNumber": 86
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectReferenceWithContext.spacesWithMatchingAliases",
+            "type": "Array",
+            "tags": [],
+            "label": "spacesWithMatchingAliases",
+            "description": [
+              "The space(s) that legacy URL aliases matching this type/id exist in"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/lib/collect_multi_namespace_references.ts",
+              "lineNumber": 88
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-public.SavedObjectsBaseOptions",
         "type": "Interface",
         "tags": [],
@@ -5083,6 +5171,47 @@
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
               "lineNumber": 164
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.SavedObjectsCollectMultiNamespaceReferencesResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsCollectMultiNamespaceReferencesResponse",
+        "description": [
+          "\nThe response when object references are collected.\n"
+        ],
+        "source": {
+          "path": "src/core/server/saved_objects/service/lib/collect_multi_namespace_references.ts",
+          "lineNumber": 96
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsCollectMultiNamespaceReferencesResponse.objects",
+            "type": "Array",
+            "tags": [],
+            "label": "objects",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectReferenceWithContext",
+                "text": "SavedObjectReferenceWithContext"
+              },
+              "[]"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/lib/collect_multi_namespace_references.ts",
+              "lineNumber": 97
             },
             "deprecated": false
           }
@@ -6435,97 +6564,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-public.StringValidationRegex",
-        "type": "Interface",
-        "tags": [],
-        "label": "StringValidationRegex",
-        "description": [
-          "\nStringValidation with regex object"
-        ],
-        "source": {
-          "path": "src/core/types/ui_settings.ts",
-          "lineNumber": 114
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-public.StringValidationRegex.regex",
-            "type": "Object",
-            "tags": [],
-            "label": "regex",
-            "description": [],
-            "signature": [
-              "RegExp"
-            ],
-            "source": {
-              "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 115
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.StringValidationRegex.message",
-            "type": "string",
-            "tags": [],
-            "label": "message",
-            "description": [],
-            "source": {
-              "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 116
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-public.StringValidationRegexString",
-        "type": "Interface",
-        "tags": [],
-        "label": "StringValidationRegexString",
-        "description": [
-          "\nStringValidation as regex string"
-        ],
-        "source": {
-          "path": "src/core/types/ui_settings.ts",
-          "lineNumber": 123
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-public.StringValidationRegexString.regexString",
-            "type": "string",
-            "tags": [],
-            "label": "regexString",
-            "description": [],
-            "source": {
-              "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 124
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.StringValidationRegexString.message",
-            "type": "string",
-            "tags": [],
-            "label": "message",
-            "description": [],
-            "source": {
-              "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 125
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-public.ToastOptions",
         "type": "Interface",
         "tags": [],
@@ -6798,27 +6836,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.UiSettingsParams.validation",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "validation",
-            "description": [],
-            "signature": [
-              "ImageValidation",
-              " | ",
-              "StringValidationRegex",
-              " | ",
-              "StringValidationRegexString",
-              " | undefined"
-            ],
-            "source": {
-              "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 81
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-public.UiSettingsParams.schema",
             "type": "Object",
             "tags": [],
@@ -6830,7 +6847,7 @@
             ],
             "source": {
               "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 86
+              "lineNumber": 80
             },
             "deprecated": false
           },
@@ -6852,7 +6869,7 @@
             ],
             "source": {
               "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 92
+              "lineNumber": 86
             },
             "deprecated": true,
             "references": [
@@ -6860,7 +6877,7 @@
                 "plugin": "advancedSettings",
                 "link": {
                   "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts",
-                  "lineNumber": 69
+                  "lineNumber": 55
                 }
               }
             ]
@@ -6915,7 +6932,7 @@
         ],
         "source": {
           "path": "src/core/types/ui_settings.ts",
-          "lineNumber": 142
+          "lineNumber": 102
         },
         "deprecated": false,
         "children": [
@@ -6931,7 +6948,7 @@
             ],
             "source": {
               "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 143
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -6947,7 +6964,7 @@
             ],
             "source": {
               "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 144
+              "lineNumber": 104
             },
             "deprecated": false
           }
@@ -7187,7 +7204,7 @@
         ],
         "source": {
           "path": "src/core/public/types.ts",
-          "lineNumber": 27
+          "lineNumber": 25
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -7264,19 +7281,13 @@
         "signature": [
           "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: ",
           "UiCounterMetricType",
-          "; name: string; } | undefined; validation?: ",
-          "ImageValidation",
-          " | ",
-          "StringValidationRegex",
-          " | ",
-          "StringValidationRegexString",
-          " | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          "; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
           " | undefined; }"
         ],
         "source": {
           "path": "src/core/types/ui_settings.ts",
-          "lineNumber": 102
+          "lineNumber": 96
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -7416,28 +7427,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 244
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-public.StringValidation",
-        "type": "Type",
-        "tags": [],
-        "label": "StringValidation",
-        "description": [
-          "\nAllows regex objects or a regex string"
-        ],
-        "signature": [
-          "StringValidationRegex",
-          " | ",
-          "StringValidationRegexString"
-        ],
-        "source": {
-          "path": "src/core/types/ui_settings.ts",
-          "lineNumber": 108
+          "lineNumber": 237
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -7903,7 +7893,7 @@
         ],
         "source": {
           "path": "src/core/public/types.ts",
-          "lineNumber": 35
+          "lineNumber": 33
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -9422,21 +9412,21 @@
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/query_signals_route.ts",
-                  "lineNumber": 51
+                  "lineNumber": 52
                 }
               },
               {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts",
-                  "lineNumber": 58
+                  "lineNumber": 60
                 }
               },
               {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.ts",
-                  "lineNumber": 39
+                  "lineNumber": 41
                 }
               },
               {
@@ -12848,6 +12838,22 @@
               "lineNumber": 181
             },
             "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchStatusMeta.nodesInfoRequestError",
+            "type": "Object",
+            "tags": [],
+            "label": "nodesInfoRequestError",
+            "description": [],
+            "signature": [
+              "Error | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/types.ts",
+              "lineNumber": 182
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -12924,7 +12930,7 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/types.ts",
-          "lineNumber": 188
+          "lineNumber": 189
         },
         "deprecated": false,
         "children": [
@@ -12942,7 +12948,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 190
+              "lineNumber": 191
             },
             "deprecated": false
           }
@@ -13140,37 +13146,53 @@
                 "section": "def-server.SavedObjectsUpdateResponse",
                 "text": "SavedObjectsUpdateResponse"
               },
-              "<T>>; addToNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+              "<T>>; collectMultiNamespaceReferences: (objects: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsAddToNamespacesOptions",
-                "text": "SavedObjectsAddToNamespacesOptions"
+                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
               },
-              ") => Promise<",
+              "[], options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsAddToNamespacesResponse",
-                "text": "SavedObjectsAddToNamespacesResponse"
+                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
               },
-              ">; deleteFromNamespaces: (type: string, id: string, namespaces: string[], options?: ",
+              " | undefined) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteFromNamespacesOptions",
-                "text": "SavedObjectsDeleteFromNamespacesOptions"
+                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
               },
-              ") => Promise<",
+              ">; updateObjectsSpaces: (objects: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteFromNamespacesResponse",
-                "text": "SavedObjectsDeleteFromNamespacesResponse"
+                "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
+                "text": "SavedObjectsUpdateObjectsSpacesObject"
+              },
+              "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
+                "text": "SavedObjectsUpdateObjectsSpacesOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
+                "text": "SavedObjectsUpdateObjectsSpacesResponse"
               },
               ">; bulkUpdate: <T = unknown>(objects: ",
               {
@@ -13244,7 +13266,7 @@
                 "section": "def-server.SavedObjectsClosePointInTimeResponse",
                 "text": "SavedObjectsClosePointInTimeResponse"
               },
-              ">; createPointInTimeFinder: (findOptions: Pick<",
+              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -13268,7 +13290,7 @@
                 "section": "def-server.ISavedObjectsPointInTimeFinder",
                 "text": "ISavedObjectsPointInTimeFinder"
               },
-              "; errors: typeof ",
+              "<T, A>; errors: typeof ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -15418,38 +15440,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.ImageValidation",
-        "type": "Interface",
-        "tags": [],
-        "label": "ImageValidation",
-        "description": [],
-        "source": {
-          "path": "src/core/types/ui_settings.ts",
-          "lineNumber": 131
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ImageValidation.maxSize",
-            "type": "Object",
-            "tags": [],
-            "label": "maxSize",
-            "description": [],
-            "signature": [
-              "{ length: number; description: string; }"
-            ],
-            "source": {
-              "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 132
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.IndexSettingsDeprecationInfo",
         "type": "Interface",
         "tags": [
@@ -15603,7 +15593,7 @@
         ],
         "source": {
           "path": "src/core/server/ui_settings/types.ts",
-          "lineNumber": 30
+          "lineNumber": 27
         },
         "deprecated": false,
         "children": [
@@ -15619,11 +15609,11 @@
             "signature": [
               "() => Readonly<Record<string, Pick<",
               "UiSettingsParams",
-              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"validation\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\">>>"
+              "<unknown>, \"type\" | \"options\" | \"description\" | \"name\" | \"order\" | \"value\" | \"category\" | \"metric\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\">>>"
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 34
+              "lineNumber": 31
             },
             "deprecated": false,
             "returnComment": [],
@@ -15643,7 +15633,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 38
+              "lineNumber": 35
             },
             "deprecated": false,
             "returnComment": [],
@@ -15657,7 +15647,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/ui_settings/types.ts",
-                  "lineNumber": 38
+                  "lineNumber": 35
                 },
                 "deprecated": false
               }
@@ -15677,7 +15667,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 42
+              "lineNumber": 39
             },
             "deprecated": false,
             "returnComment": [],
@@ -15699,7 +15689,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 46
+              "lineNumber": 43
             },
             "deprecated": false,
             "returnComment": [],
@@ -15719,7 +15709,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 50
+              "lineNumber": 47
             },
             "deprecated": false,
             "returnComment": [],
@@ -15736,7 +15726,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/ui_settings/types.ts",
-                  "lineNumber": 50
+                  "lineNumber": 47
                 },
                 "deprecated": false
               }
@@ -15756,7 +15746,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 54
+              "lineNumber": 51
             },
             "deprecated": false,
             "returnComment": [],
@@ -15770,7 +15760,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/ui_settings/types.ts",
-                  "lineNumber": 54
+                  "lineNumber": 51
                 },
                 "deprecated": false
               },
@@ -15786,7 +15776,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/ui_settings/types.ts",
-                  "lineNumber": 54
+                  "lineNumber": 51
                 },
                 "deprecated": false
               }
@@ -15806,7 +15796,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 58
+              "lineNumber": 55
             },
             "deprecated": false,
             "returnComment": [],
@@ -15820,7 +15810,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/ui_settings/types.ts",
-                  "lineNumber": 58
+                  "lineNumber": 55
                 },
                 "deprecated": false
               }
@@ -15840,7 +15830,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 62
+              "lineNumber": 59
             },
             "deprecated": false,
             "returnComment": [],
@@ -15857,7 +15847,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/ui_settings/types.ts",
-                  "lineNumber": 62
+                  "lineNumber": 59
                 },
                 "deprecated": false
               }
@@ -15877,7 +15867,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 66
+              "lineNumber": 63
             },
             "deprecated": false,
             "returnComment": [],
@@ -15891,7 +15881,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/ui_settings/types.ts",
-                  "lineNumber": 66
+                  "lineNumber": 63
                 },
                 "deprecated": false
               }
@@ -15911,7 +15901,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 70
+              "lineNumber": 67
             },
             "deprecated": false,
             "returnComment": [],
@@ -15925,7 +15915,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/ui_settings/types.ts",
-                  "lineNumber": 70
+                  "lineNumber": 67
                 },
                 "deprecated": false
               }
@@ -18485,14 +18475,14 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/types.ts",
-              "lineNumber": 53
+              "lineNumber": 55
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/types.ts",
-              "lineNumber": 110
+              "lineNumber": 111
             }
           }
         ],
@@ -19372,6 +19362,22 @@
             "source": {
               "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
               "lineNumber": 51
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.NodesVersionCompatibility.nodesInfoRequestError",
+            "type": "Object",
+            "tags": [],
+            "label": "nodesInfoRequestError",
+            "description": [],
+            "signature": [
+              "Error | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+              "lineNumber": 52
             },
             "deprecated": false
           }
@@ -20635,7 +20641,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; typeRegistry: Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; typeRegistry: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -20659,7 +20665,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; getExporter: (client: Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; getExporter: (client: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -20667,7 +20673,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -20683,7 +20689,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -21695,97 +21701,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.StringValidationRegex",
-        "type": "Interface",
-        "tags": [],
-        "label": "StringValidationRegex",
-        "description": [
-          "\nStringValidation with regex object"
-        ],
-        "source": {
-          "path": "src/core/types/ui_settings.ts",
-          "lineNumber": 114
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.StringValidationRegex.regex",
-            "type": "Object",
-            "tags": [],
-            "label": "regex",
-            "description": [],
-            "signature": [
-              "RegExp"
-            ],
-            "source": {
-              "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 115
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.StringValidationRegex.message",
-            "type": "string",
-            "tags": [],
-            "label": "message",
-            "description": [],
-            "source": {
-              "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 116
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.StringValidationRegexString",
-        "type": "Interface",
-        "tags": [],
-        "label": "StringValidationRegexString",
-        "description": [
-          "\nStringValidation as regex string"
-        ],
-        "source": {
-          "path": "src/core/types/ui_settings.ts",
-          "lineNumber": 123
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.StringValidationRegexString.regexString",
-            "type": "string",
-            "tags": [],
-            "label": "regexString",
-            "description": [],
-            "source": {
-              "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 124
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.StringValidationRegexString.message",
-            "type": "string",
-            "tags": [],
-            "label": "message",
-            "description": [],
-            "source": {
-              "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 125
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.UiSettingsParams",
         "type": "Interface",
         "tags": [],
@@ -22022,27 +21937,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.UiSettingsParams.validation",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "validation",
-            "description": [],
-            "signature": [
-              "ImageValidation",
-              " | ",
-              "StringValidationRegex",
-              " | ",
-              "StringValidationRegexString",
-              " | undefined"
-            ],
-            "source": {
-              "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 81
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-server.UiSettingsParams.schema",
             "type": "Object",
             "tags": [],
@@ -22054,7 +21948,7 @@
             ],
             "source": {
               "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 86
+              "lineNumber": 80
             },
             "deprecated": false
           },
@@ -22076,7 +21970,7 @@
             ],
             "source": {
               "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 92
+              "lineNumber": 86
             },
             "deprecated": true,
             "references": [
@@ -22084,7 +21978,7 @@
                 "plugin": "advancedSettings",
                 "link": {
                   "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts",
-                  "lineNumber": 69
+                  "lineNumber": 55
                 }
               }
             ]
@@ -22101,7 +21995,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/ui_settings/types.ts",
-          "lineNumber": 83
+          "lineNumber": 80
         },
         "deprecated": false,
         "children": [
@@ -22121,7 +22015,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 101
+              "lineNumber": 98
             },
             "deprecated": false,
             "children": [
@@ -22139,7 +22033,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/ui_settings/types.ts",
-                  "lineNumber": 101
+                  "lineNumber": 98
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -22159,7 +22053,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/ui_settings/types.ts",
-          "lineNumber": 105
+          "lineNumber": 102
         },
         "deprecated": false,
         "children": [
@@ -22181,7 +22075,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => ",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -22192,7 +22086,7 @@
             ],
             "source": {
               "path": "src/core/server/ui_settings/types.ts",
-              "lineNumber": 120
+              "lineNumber": 117
             },
             "deprecated": false,
             "children": [
@@ -22212,11 +22106,11 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
                 "source": {
                   "path": "src/core/server/ui_settings/types.ts",
-                  "lineNumber": 120
+                  "lineNumber": 117
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -22242,7 +22136,7 @@
         ],
         "source": {
           "path": "src/core/types/ui_settings.ts",
-          "lineNumber": 142
+          "lineNumber": 102
         },
         "deprecated": false,
         "children": [
@@ -22258,7 +22152,7 @@
             ],
             "source": {
               "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 143
+              "lineNumber": 103
             },
             "deprecated": false
           },
@@ -22274,7 +22168,7 @@
             ],
             "source": {
               "path": "src/core/types/ui_settings.ts",
-              "lineNumber": 144
+              "lineNumber": 104
             },
             "deprecated": false
           }
@@ -24251,19 +24145,13 @@
         "signature": [
           "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: ",
           "UiCounterMetricType",
-          "; name: string; } | undefined; validation?: ",
-          "ImageValidation",
-          " | ",
-          "StringValidationRegex",
-          " | ",
-          "StringValidationRegexString",
-          " | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          "; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
           " | undefined; }"
         ],
         "source": {
           "path": "src/core/types/ui_settings.ts",
-          "lineNumber": 102
+          "lineNumber": 96
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -24348,7 +24236,7 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/types.ts",
-          "lineNumber": 200
+          "lineNumber": 201
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -24418,27 +24306,6 @@
         "source": {
           "path": "src/core/server/index.ts",
           "lineNumber": 510
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.StringValidation",
-        "type": "Type",
-        "tags": [],
-        "label": "StringValidation",
-        "description": [
-          "\nAllows regex objects or a regex string"
-        ],
-        "signature": [
-          "StringValidationRegex",
-          " | ",
-          "StringValidationRegexString"
-        ],
-        "source": {
-          "path": "src/core/types/ui_settings.ts",
-          "lineNumber": 108
         },
         "deprecated": false,
         "initialIsOpen": false

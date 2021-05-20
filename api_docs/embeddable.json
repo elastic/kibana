@@ -10248,7 +10248,7 @@
       ],
       "source": {
         "path": "src/plugins/embeddable/server/plugin.ts",
-        "lineNumber": 27
+        "lineNumber": 28
       },
       "deprecated": false,
       "children": [
@@ -10280,7 +10280,7 @@
           ],
           "source": {
             "path": "src/plugins/embeddable/server/plugin.ts",
-            "lineNumber": 28
+            "lineNumber": 29
           },
           "deprecated": false,
           "returnComment": [],
@@ -10312,7 +10312,7 @@
               ],
               "source": {
                 "path": "src/plugins/embeddable/server/plugin.ts",
-                "lineNumber": 28
+                "lineNumber": 29
               },
               "deprecated": false
             }
@@ -10346,7 +10346,7 @@
           ],
           "source": {
             "path": "src/plugins/embeddable/server/plugin.ts",
-            "lineNumber": 29
+            "lineNumber": 30
           },
           "deprecated": false,
           "returnComment": [],
@@ -10378,11 +10378,29 @@
               ],
               "source": {
                 "path": "src/plugins/embeddable/server/plugin.ts",
-                "lineNumber": 29
+                "lineNumber": 30
               },
               "deprecated": false
             }
           ]
+        },
+        {
+          "parentPluginId": "embeddable",
+          "id": "def-server.EmbeddableSetup.getMigrationVersions",
+          "type": "Function",
+          "tags": [],
+          "label": "getMigrationVersions",
+          "description": [],
+          "signature": [
+            "() => string[]"
+          ],
+          "source": {
+            "path": "src/plugins/embeddable/server/plugin.ts",
+            "lineNumber": 31
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
         }
       ],
       "lifecycle": "setup",
@@ -10415,7 +10433,7 @@
       ],
       "source": {
         "path": "src/plugins/embeddable/server/plugin.ts",
-        "lineNumber": 32
+        "lineNumber": 34
       },
       "deprecated": false,
       "lifecycle": "start",

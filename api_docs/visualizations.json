@@ -574,8 +574,7 @@
             "section": "def-public.PersistedState",
             "text": "PersistedState"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",

@@ -1159,14 +1159,14 @@
             "plugin": "alerting",
             "link": {
               "path": "x-pack/plugins/alerting/server/alerts_client_factory.test.ts",
-              "lineNumber": 24
+              "lineNumber": 23
             }
           },
           {
             "plugin": "alerting",
             "link": {
               "path": "x-pack/plugins/alerting/server/alerts_client_factory.test.ts",
-              "lineNumber": 90
+              "lineNumber": 98
             }
           }
         ],
@@ -1307,6 +1307,13 @@
                 }
               },
               {
+                "plugin": "cases",
+                "link": {
+                  "path": "x-pack/plugins/cases/server/plugin.ts",
+                  "lineNumber": 89
+                }
+              },
+              {
                 "plugin": "ml",
                 "link": {
                   "path": "x-pack/plugins/ml/server/routes/annotations.ts",
@@ -1324,14 +1331,14 @@
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts",
-                  "lineNumber": 43
+                  "lineNumber": 45
                 }
               },
               {
                 "plugin": "securitySolution",
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts",
-                  "lineNumber": 44
+                  "lineNumber": 45
                 }
               },
               {
@@ -1339,13 +1346,6 @@
                 "link": {
                   "path": "x-pack/plugins/beats_management/server/lib/adapters/framework/kibana_framework_adapter.ts",
                   "lineNumber": 44
-                }
-              },
-              {
-                "plugin": "cases",
-                "link": {
-                  "path": "x-pack/plugins/cases/server/plugin.ts",
-                  "lineNumber": 83
                 }
               },
               {
