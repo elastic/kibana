@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { getExecuteDetails } from '../__fixtures__';
-import { defaultWatch } from '../public/application/models/watch';
+import { getExecuteDetails } from '../../__fixtures__';
+import { defaultWatch } from '../../public/application/models/watch';
 import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
 import { WatchCreateJsonTestBed } from './helpers/watch_create_json.helpers';
 import { WATCH } from './helpers/jest_constants';

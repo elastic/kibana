@@ -6,8 +6,8 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { indexSettingDeprecations } from '../common/constants';
-import { MIGRATION_DEPRECATION_LEVEL } from '../common/types';
+import { indexSettingDeprecations } from '../../common/constants';
+import { MIGRATION_DEPRECATION_LEVEL } from '../../common/types';
 
 import { IndicesTestBed, setupIndicesPage, setupEnvironment } from './helpers';
 

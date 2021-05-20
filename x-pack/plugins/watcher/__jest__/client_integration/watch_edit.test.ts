@@ -10,16 +10,16 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
 import { getRandomString } from '@kbn/test/jest';
 
-import { getWatch } from '../__fixtures__';
-import { defaultWatch } from '../public/application/models/watch';
+import { getWatch } from '../../__fixtures__';
+import { defaultWatch } from '../../public/application/models/watch';
 import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
 import { WatchEditTestBed } from './helpers/watch_edit.helpers';
 import { WATCH } from './helpers/jest_constants';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-jest.mock('../public/application/lib/api', () => {
-  const original = jest.requireActual('../public/application/lib/api');
+jest.mock('../../public/application/lib/api', () => {
+  const original = jest.requireActual('../../public/application/lib/api');
 
   return {
     ...original,

@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { DeprecationsOverview } from '../../public/application/components/overview';
+import { DeprecationsOverview } from '../../../public/application/components/overview';
 import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
