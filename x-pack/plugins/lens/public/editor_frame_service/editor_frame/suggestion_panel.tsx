@@ -188,7 +188,7 @@ export function SuggestionPanel({
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
     activeDatasourceId ? datasourceStates[activeDatasourceId] : null
   );
-  const { suggestions, currentStateExpression, currentStateError } = useMemo(
+  const { currentStateError, suggestions, currentStateExpression } = useMemo(
     () => {
       const newSuggestions = missingIndexPatterns.length
         ? []
@@ -267,6 +267,17 @@ export function SuggestionPanel({
     ]
   );
 
+  const suggestionsRef = useRef(suggestions);
+  suggestionsRef.current = suggestions;
+  const [localSuggestions, setLocalSuggestions] = useState<typeof suggestions>([]);
+
+  useEffect(() => {
+    if (frame.activeData && localSuggestions !== suggestionsRef.current) {
+      setLocalSuggestions(suggestionsRef.current);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frame.activeData]);
+
   const context: ExecutionContextSearch = useMemo(
     () => ({
       query: frame.query,
@@ -311,7 +322,7 @@ export function SuggestionPanel({
     return null;
   }
 
-  if (suggestions.length === 0) {
+  if (localSuggestions.length === 0) {
     return null;
   }
 
@@ -384,7 +395,7 @@ export function SuggestionPanel({
             showTitleAsLabel
           />
         )}
-        {suggestions.map((suggestion, index) => {
+        {localSuggestions.map((suggestion, index) => {
           return (
             <SuggestionPreview
               preview={{
