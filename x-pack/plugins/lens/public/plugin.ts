@@ -16,6 +16,7 @@ import {
   VisualizationsStart,
 } from '../../../../src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
@@ -54,6 +55,7 @@ import {
   EmbeddableComponentProps,
   getEmbeddableComponent,
 } from './editor_frame_service/embeddable/embeddable_component';
+import { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -273,7 +275,11 @@ export class LensPlugin {
         const { visualizationTypes } = await import('./xy_visualization/types');
         return visualizationTypes;
       },
-      openVisualizationSaveModal: () => {},
+      openLensSaveModal: async () => {
+        const { mountSaveModal } = await import('./async_services');
+
+        return mountSaveModal();
+      },
     };
   }
 

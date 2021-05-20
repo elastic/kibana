@@ -108,7 +108,7 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
             isDisabled={!lens.canUseEditor() || lensAttributes === null}
             onClick={() => {
               if (lensAttributes) {
-                setIsSaveOpen(true);
+                lens.openLensSaveModal();
               }
             }}
           >

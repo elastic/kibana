@@ -8,7 +8,7 @@
 import React from 'react';
 import { SaveModal } from './save_modal';
 import { LensAppServices } from './types';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useKibana, toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import type { SaveProps } from './app';
 import { Document } from '../persistence';
 
@@ -23,8 +23,7 @@ export interface SaveModalContainerProps {
   onClose: () => void;
 }
 
-// eslint-disable-next-line import/no-default-export
-export default function SaveModalContainer({
+export function SaveModalContainer({
   lastKnownDoc,
   returnToOriginSwitchLabel,
   onSave,
@@ -63,3 +62,10 @@ export default function SaveModalContainer({
     />
   );
 }
+
+export async function mountSaveModal() {
+  toMountPoint(<SaveModalContainer />);
+}
+
+// eslint-disable-next-line import/no-default-export
+export default SaveModalContainer;
