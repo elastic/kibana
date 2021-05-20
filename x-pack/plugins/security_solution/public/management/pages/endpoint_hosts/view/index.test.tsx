@@ -28,7 +28,7 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
-import { KibanaServices, useToasts } from '../../../../common/lib/kibana';
+import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
 import { hostIsolationHttpMocks } from '../../../../common/lib/host_isolation/mocks';
 import { fireEvent } from '@testing-library/dom';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
@@ -81,7 +81,11 @@ describe('when on the endpoint list page', () => {
     reactTestingLibrary.act(() => {
       history.push('/endpoints');
     });
+
+    // Because `.../common/lib/kibana` was mocked, we need to alter these hooks (which are jest.MockFunctions)
+    // to use services that we have in our test `mockedContext`
     (useToasts as jest.Mock).mockReturnValue(coreStart.notifications.toasts);
+    (useKibana as jest.Mock).mockReturnValue({ services: mockedContext.startServices });
   });
 
   it('should NOT display timeline', async () => {
