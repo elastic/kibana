@@ -4,33 +4,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
 <SectionPanel
   data-test-subj="enabled-features-panel"
   description="Customize visible features"
-  title={
-    <span>
-      <FormattedMessage
-        defaultMessage="Features"
-        id="xpack.spaces.management.enabledSpaceFeatures.enabledFeaturesSectionMessage"
-        values={Object {}}
-      />
-       
-      <EuiText
-        color="danger"
-        size="s"
-        style={
-          Object {
-            "display": "inline-block",
-          }
-        }
-      >
-        <em>
-          <FormattedMessage
-            defaultMessage="(no features visible)"
-            id="xpack.spaces.management.enabledSpaceFeatures.noFeaturesEnabledMessage"
-            values={Object {}}
-          />
-        </em>
-      </EuiText>
-    </span>
-  }
+  title="Features"
 >
   <EuiFlexGroup>
     <EuiFlexItem>
@@ -54,7 +28,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
       >
         <p>
           <FormattedMessage
-            defaultMessage="The feature is hidden in the UI, but is not disabled."
+            defaultMessage="Hidden features will be obscured from the user interface, but will not be disabled. If you wish to secure access to features, manage security roles."
             id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
             values={Object {}}
           />

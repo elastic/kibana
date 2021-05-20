@@ -36,7 +36,7 @@ describe('EnabledFeatures', () => {
 
   it(`renders as expected`, () => {
     expect(
-      shallowWithIntl<EnabledFeatures>(
+      shallowWithIntl(
         <EnabledFeatures
           features={features}
           space={{

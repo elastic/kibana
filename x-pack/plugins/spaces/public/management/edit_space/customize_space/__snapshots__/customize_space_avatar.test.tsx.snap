@@ -7,60 +7,130 @@ exports[`renders without crashing 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
+    fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    label="Initials (2 max)"
+    label="Avatar type"
     labelType="label"
   >
-    <EuiFieldText
-      data-test-subj="spaceLetterInitial"
-      disabled={false}
-      inputRef={[Function]}
-      name="spaceInitials"
-      onChange={[Function]}
-      value=""
-    />
+    <EuiKeyPadMenu
+      aria-labelledby="rg1_label"
+      aria-owns="avatar_type_initials avatar_type_image"
+      role="radiogroup"
+    >
+      <EuiKeyPadMenuItem
+        aria-checked={true}
+        id="avatar_type_initials"
+        label="Initials"
+        onClick={[Function]}
+        role="radio"
+        style={
+          Object {
+            "border": "1px solid #006bb4",
+            "color": "#006bb4",
+          }
+        }
+      >
+        <InitialsIcon />
+      </EuiKeyPadMenuItem>
+      <EuiKeyPadMenuItem
+        aria-checked={false}
+        id="avatar_type_image"
+        label="Image"
+        onClick={[Function]}
+        role="radio"
+        style={
+          Object {
+            "border": "1px solid #d3dae6",
+            "color": undefined,
+            "marginLeft": "8px",
+          }
+        }
+      >
+        <EuiIcon
+          size="l"
+          type="image"
+        />
+      </EuiKeyPadMenuItem>
+    </EuiKeyPadMenu>
   </EuiFormRow>
-  <EuiSpacer
-    size="m"
-  />
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
+    fullWidth={true}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    isInvalid={false}
-    label="Color"
     labelType="label"
   >
-    <EuiColorPicker
-      color="#DA8B45"
-      isInvalid={false}
-      onChange={[Function]}
-    />
-  </EuiFormRow>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Custom image"
-    labelType="label"
-  >
-    <EuiFilePicker
-      accept="image/svg+xml,image/jpeg,image/png,image/gif"
-      compressed={false}
-      data-test-subj="uploadCustomImageFile"
-      display="default"
-      initialPromptText="Select image file"
-      onChange={[Function]}
-    />
+    <EuiFlexGroup
+      gutterSize="m"
+    >
+      <EuiFlexItem>
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          error="Enter initials."
+          fullWidth={true}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          helpText="Enter a maximum of two characters."
+          isInvalid={true}
+          label="Initials"
+          labelType="label"
+        >
+          <EuiFieldText
+            data-test-subj="spaceLetterInitial"
+            fullWidth={true}
+            isInvalid={true}
+            name="spaceInitials"
+            onChange={[Function]}
+            value=""
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          error="Select a color."
+          fullWidth={true}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          isInvalid={true}
+          label="Color"
+          labelType="label"
+        >
+          <EuiColorPicker
+            color=""
+            fullWidth={true}
+            isInvalid={true}
+            onChange={[Function]}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiSpacer
+          size="m"
+        />
+        <EuiSpacer
+          size="xs"
+        />
+        <EuiAvatar
+          color={null}
+          name="?"
+          size="l"
+          style={
+            Object {
+              "background": "#d3dae6",
+              "color": "#6a717d",
+            }
+          }
+          type="space"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiFormRow>
 </form>
 `;

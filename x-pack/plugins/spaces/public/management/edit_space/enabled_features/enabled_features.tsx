@@ -6,8 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { ReactNode } from 'react';
-import React, { Component, Fragment } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -15,7 +15,6 @@ import type { ApplicationStart } from 'src/core/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
 import type { KibanaFeatureConfig } from '../../../../../features/public';
-import { getEnabledFeatures } from '../../lib/feature_utils';
 import { SectionPanel } from '../section_panel';
 import { FeatureTable } from './feature_table';
 
@@ -26,114 +25,42 @@ interface Props {
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
-export class EnabledFeatures extends Component<Props, {}> {
-  public render() {
-    const description = i18n.translate(
+export const EnabledFeatures: FunctionComponent<Props> = (props) => (
+  <SectionPanel
+    title={i18n.translate('xpack.spaces.management.manageSpacePage.customizeVisibleFeatures', {
+      defaultMessage: 'Features',
+    })}
+    description={i18n.translate(
       'xpack.spaces.management.manageSpacePage.customizeVisibleFeatures',
       {
         defaultMessage: 'Customize visible features',
       }
-    );
-
-    return (
-      <SectionPanel
-        title={this.getPanelTitle()}
-        description={description}
-        data-test-subj="enabled-features-panel"
-      >
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h3>
-                <FormattedMessage
-                  id="xpack.spaces.management.enabledSpaceFeatures.enableFeaturesInSpaceMessage"
-                  defaultMessage="Set feature visibility for this space"
-                />
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            {this.getDescription()}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <FeatureTable
-              features={this.props.features}
-              space={this.props.space}
-              onChange={this.props.onChange}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </SectionPanel>
-    );
-  }
-
-  private getPanelTitle = () => {
-    const featureCount = this.props.features.length;
-    const enabledCount = getEnabledFeatures(this.props.features, this.props.space).length;
-
-    let details: null | ReactNode = null;
-
-    if (enabledCount === featureCount) {
-      details = (
-        <EuiText size={'s'} style={{ display: 'inline-block' }}>
-          <em>
+    )}
+    data-test-subj="enabled-features-panel"
+  >
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h3>
             <FormattedMessage
-              id="xpack.spaces.management.enabledSpaceFeatures.allFeaturesEnabledMessage"
-              defaultMessage="(all features visible)"
+              id="xpack.spaces.management.enabledSpaceFeatures.enableFeaturesInSpaceMessage"
+              defaultMessage="Set feature visibility for this space"
             />
-          </em>
-        </EuiText>
-      );
-    } else if (enabledCount === 0) {
-      details = (
-        <EuiText color="danger" size={'s'} style={{ display: 'inline-block' }}>
-          <em>
-            <FormattedMessage
-              id="xpack.spaces.management.enabledSpaceFeatures.noFeaturesEnabledMessage"
-              defaultMessage="(no features visible)"
-            />
-          </em>
-        </EuiText>
-      );
-    } else {
-      details = (
-        <EuiText size={'s'} style={{ display: 'inline-block' }}>
-          <em>
-            <FormattedMessage
-              id="xpack.spaces.management.enabledSpaceFeatures.someFeaturesEnabledMessage"
-              defaultMessage="({enabledCount} / {featureCount} features visible)"
-              values={{
-                enabledCount,
-                featureCount,
-              }}
-            />
-          </em>
-        </EuiText>
-      );
-    }
-
-    return (
-      <span>
-        <FormattedMessage
-          id="xpack.spaces.management.enabledSpaceFeatures.enabledFeaturesSectionMessage"
-          defaultMessage="Features"
-        />{' '}
-        {details}
-      </span>
-    );
-  };
-
-  private getDescription = () => {
-    return (
-      <Fragment>
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
               id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
-              defaultMessage="The feature is hidden in the UI, but is not disabled."
+              defaultMessage="Hidden features will be obscured from the user interface, but will not be disabled. If you wish to secure access to features, manage security roles."
             />
           </p>
         </EuiText>
-      </Fragment>
-    );
-  };
-}
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <FeatureTable features={props.features} space={props.space} onChange={props.onChange} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </SectionPanel>
+);

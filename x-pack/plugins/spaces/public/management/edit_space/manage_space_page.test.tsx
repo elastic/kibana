@@ -98,8 +98,9 @@ describe('ManageSpacePage', () => {
       id: 'new-space-name',
       name: 'New Space Name',
       description: 'some description',
-      color: undefined,
-      initials: undefined,
+      initials: 'NS',
+      color: '#AA6556',
+      imageUrl: '',
       disabledFeatures: [],
     });
   });
@@ -163,6 +164,7 @@ describe('ManageSpacePage', () => {
       description: 'some description',
       color: '#aabbcc',
       initials: 'AB',
+      imageUrl: '',
       disabledFeatures: ['feature-1'],
     });
   });

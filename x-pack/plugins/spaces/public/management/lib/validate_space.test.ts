@@ -9,13 +9,13 @@ import { SpaceValidator } from './validate_space';
 
 let validator: SpaceValidator;
 
-describe('validateSpaceName', () => {
-  beforeEach(() => {
-    validator = new SpaceValidator({
-      shouldValidate: true,
-    });
+beforeEach(() => {
+  validator = new SpaceValidator({
+    shouldValidate: true,
   });
+});
 
+describe('validateSpaceName', () => {
   test('it allows a name with special characters', () => {
     const space = {
       id: '',
@@ -128,6 +128,96 @@ describe('validateURLIdentifier', () => {
     };
 
     expect(validator.validateURLIdentifier(space)).toEqual({ isInvalid: false });
+  });
+});
+
+describe('validateAvatarInitials', () => {
+  it('it allows valid initials', () => {
+    const space = {
+      initials: 'foo',
+    };
+
+    expect(validator.validateAvatarInitials(space)).toHaveProperty('isInvalid', false);
+  });
+
+  it('it requires a non-empty value', () => {
+    const space = {
+      initials: '',
+    };
+
+    expect(validator.validateAvatarInitials(space)).toHaveProperty('isInvalid', true);
+  });
+
+  it('it does not validate image avatars', () => {
+    const space = {
+      avatarType: 'image' as 'image',
+      initials: '',
+    };
+
+    expect(validator.validateAvatarInitials(space)).toHaveProperty('isInvalid', false);
+  });
+});
+
+describe('validateAvatarColor', () => {
+  it('it allows valid colors', () => {
+    const space = {
+      color: '#000000',
+    };
+
+    expect(validator.validateAvatarColor(space)).toHaveProperty('isInvalid', false);
+  });
+
+  it('it requires a non-empty value', () => {
+    const space = {
+      color: '',
+    };
+
+    expect(validator.validateAvatarColor(space)).toHaveProperty('isInvalid', true);
+  });
+
+  it('it requires a valid hex code', () => {
+    const space = {
+      color: 'red',
+    };
+
+    expect(validator.validateAvatarColor(space)).toHaveProperty('isInvalid', true);
+  });
+
+  it('it does not validate image avatars', () => {
+    const space = {
+      avatarType: 'image' as 'image',
+      color: '',
+    };
+
+    expect(validator.validateAvatarColor(space)).toHaveProperty('isInvalid', false);
+  });
+});
+
+describe('validateAvatarImage', () => {
+  it('it allows valid image url', () => {
+    const space = {
+      avatarType: 'image' as 'image',
+      imageUrl: 'foo',
+    };
+
+    expect(validator.validateAvatarImage(space)).toHaveProperty('isInvalid', false);
+  });
+
+  it('it requires a non-empty value', () => {
+    const space = {
+      avatarType: 'image' as 'image',
+      imageUrl: '',
+    };
+
+    expect(validator.validateAvatarImage(space)).toHaveProperty('isInvalid', true);
+  });
+
+  it('it does not validate non-image avatars', () => {
+    const space = {
+      imageUrl: '',
+    };
+
+    expect(validator.validateAvatarImage(space)).toHaveProperty('isInvalid', false);
   });
 });
 

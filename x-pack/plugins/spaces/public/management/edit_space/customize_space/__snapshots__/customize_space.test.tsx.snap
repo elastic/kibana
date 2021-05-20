@@ -1,0 +1,133 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders correctly 1`] = `
+<SectionPanel
+  description="General"
+  title="General"
+>
+  <EuiDescribedFormGroup
+    description="Give your space a name and description for easy identification."
+    fullWidth={true}
+    title={
+      <EuiTitle
+        size="xs"
+      >
+        <h3>
+          <FormattedMessage
+            defaultMessage="Describe this space"
+            id="xpack.spaces.management.manageSpacePage.customizeSpacePanelDescription"
+            values={Object {}}
+          />
+        </h3>
+      </EuiTitle>
+    }
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      error="Name is required."
+      fullWidth={true}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      isInvalid={true}
+      label="Name"
+      labelType="label"
+    >
+      <EuiFieldText
+        data-test-subj="addSpaceName"
+        fullWidth={true}
+        isInvalid={true}
+        name="name"
+        onChange={[Function]}
+        value=""
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      data-test-subj="optionalDescription"
+      describedByIds={Array []}
+      display="row"
+      fullWidth={true}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      helpText="The description appears on the space selection screen."
+      isInvalid={false}
+      label="Description"
+      labelType="label"
+    >
+      <EuiTextArea
+        data-test-subj="descriptionSpaceText"
+        fullWidth={true}
+        isInvalid={false}
+        name="description"
+        onChange={[Function]}
+        rows={2}
+        value=""
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      error="URL identifier is required."
+      fullWidth={true}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <FormattedMessage
+          defaultMessage="The URL identifier can't be changed once created."
+          id="xpack.spaces.management.spaceIdentifier.kibanaURLForSpaceIdentifierDescription"
+          values={Object {}}
+        />
+      }
+      isInvalid={true}
+      label={
+        <FormattedMessage
+          defaultMessage="URL identifier"
+          id="xpack.spaces.management.spaceIdentifier.urlIdentifierTitle"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiFieldText
+        data-test-subj="spaceURLDisplay"
+        fullWidth={true}
+        isInvalid={true}
+        onChange={[Function]}
+        value=""
+      />
+    </EuiFormRow>
+  </EuiDescribedFormGroup>
+  <EuiDescribedFormGroup
+    description="Choose how you wish your space’s avatar to appear across Kibana."
+    fullWidth={true}
+    title={
+      <EuiTitle
+        size="xs"
+      >
+        <h3>
+          <FormattedMessage
+            defaultMessage="Customize avatar for this space"
+            id="xpack.spaces.management.manageSpacePage.avatarTitle"
+            values={Object {}}
+          />
+        </h3>
+      </EuiTitle>
+    }
+  >
+    <CustomizeSpaceAvatar
+      onChange={[Function]}
+      space={
+        Object {
+          "id": "",
+          "name": "",
+        }
+      }
+      validator={
+        SpaceValidator {
+          "shouldValidate": true,
+        }
+      }
+    />
+  </EuiDescribedFormGroup>
+</SectionPanel>
+`;

@@ -80,6 +80,7 @@ export const spacesManagementApp = Object.freeze({
               text: i18n.translate('xpack.spaces.management.createSpaceBreadcrumb', {
                 defaultMessage: 'Create',
               }),
+              href: '/create',
             },
           ]);
 
