@@ -895,15 +895,18 @@ describe('when on the endpoint list page', () => {
       const confirmIsolateAndWaitForApiResponse = async (
         typeOfResponse: 'success' | 'failure' = 'success'
       ) => {
-        const isolateResponseAction = middlewareSpy.waitForAction('endpointIsolationStateChanged', {
-          validate(action) {
-            if (typeOfResponse === 'failure') {
-              return isFailedResourceState(action.payload);
-            }
+        const isolateResponseAction = middlewareSpy.waitForAction(
+          'endpointIsolationRequestStateChange',
+          {
+            validate(action) {
+              if (typeOfResponse === 'failure') {
+                return isFailedResourceState(action.payload);
+              }
 
-            return isLoadedResourceState(action.payload);
-          },
-        });
+              return isLoadedResourceState(action.payload);
+            },
+          }
+        );
 
         await act(async () => {
           fireEvent.click(renderResult.getByTestId('hostIsolateConfirmButton'));

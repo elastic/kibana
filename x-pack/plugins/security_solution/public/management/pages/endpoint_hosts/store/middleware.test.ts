@@ -134,7 +134,7 @@ describe('endpoint list middleware', () => {
     const getKibanaServicesMock = KibanaServices.get as jest.Mock;
     const dispatchIsolateEndpointHost = () => {
       dispatch({
-        type: 'isolateEndpointHost',
+        type: 'endpointIsolationRequest',
         payload: hostIsolationRequestBodyMock(),
       });
     };
@@ -146,7 +146,7 @@ describe('endpoint list middleware', () => {
     });
 
     it('should set Isolation state to loading', async () => {
-      const loadingDispatched = waitForAction('endpointIsolationStateChanged', {
+      const loadingDispatched = waitForAction('endpointIsolationRequestStateChange', {
         validate(action) {
           return isLoadingResourceState(action.payload);
         },
@@ -162,7 +162,7 @@ describe('endpoint list middleware', () => {
     });
 
     it('should set Isolation state to loaded if api is successful', async () => {
-      const loadedDispatched = waitForAction('endpointIsolationStateChanged', {
+      const loadedDispatched = waitForAction('endpointIsolationRequestStateChange', {
         validate(action) {
           return isLoadedResourceState(action.payload);
         },
@@ -176,7 +176,7 @@ describe('endpoint list middleware', () => {
 
     it('should set Isolation to Failed if api failed', async () => {
       const apiError = new Error('oh oh');
-      const failedDispatched = waitForAction('endpointIsolationStateChanged', {
+      const failedDispatched = waitForAction('endpointIsolationRequestStateChange', {
         validate(action) {
           return isFailedResourceState(action.payload);
         },

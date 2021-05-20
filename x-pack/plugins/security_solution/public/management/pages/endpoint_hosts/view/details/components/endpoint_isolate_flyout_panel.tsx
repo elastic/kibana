@@ -57,7 +57,7 @@ export const EndpointIsolateFlyoutPanel = memo<{
 
   const handleConfirm: EndpointIsolatedFormProps['onConfirm'] = useCallback(() => {
     dispatch({
-      type: 'isolateEndpointHost',
+      type: 'endpointIsolationRequest',
       payload: {
         endpoint_ids: [hostMeta.agent.id],
         comment: formValues.comment,

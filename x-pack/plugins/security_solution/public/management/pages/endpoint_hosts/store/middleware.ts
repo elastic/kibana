@@ -349,7 +349,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     }
 
     // Isolate Host
-    if (action.type === 'isolateEndpointHost') {
+    if (action.type === 'endpointIsolationRequest') {
       return handleIsolateEndpointHost(store, action);
     }
   };
@@ -455,7 +455,7 @@ const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
 
 const handleIsolateEndpointHost = async (
   { getState, dispatch }: EndpointPageStore,
-  action: Immutable<AppAction & { type: 'isolateEndpointHost' }>
+  action: Immutable<AppAction & { type: 'endpointIsolationRequest' }>
 ) => {
   const state = getState();
 
@@ -464,7 +464,7 @@ const handleIsolateEndpointHost = async (
   }
 
   dispatch({
-    type: 'endpointIsolationStateChanged',
+    type: 'endpointIsolationRequestStateChange',
     // Ignore will be fixed with when AsyncResourceState is refactored (#830)
     // @ts-ignore
     payload: createLoadingResourceState(getCurrentIsolationRequestState(state)),
@@ -475,12 +475,12 @@ const handleIsolateEndpointHost = async (
     const response = await isolateHost(action.payload as HostIsolationRequestBody);
 
     dispatch({
-      type: 'endpointIsolationStateChanged',
+      type: 'endpointIsolationRequestStateChange',
       payload: createLoadedResourceState<HostIsolationResponse>(response),
     });
   } catch (error) {
     dispatch({
-      type: 'endpointIsolationStateChanged',
+      type: 'endpointIsolationRequestStateChange',
       payload: createFailedResourceState<HostIsolationResponse>(error.body ?? error),
     });
   }

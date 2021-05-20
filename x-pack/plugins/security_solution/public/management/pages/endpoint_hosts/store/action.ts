@@ -136,11 +136,11 @@ interface ServerFailedToReturnEndpointsTotal {
   payload: ServerApiError;
 }
 
-type IsolateEndpointHost = Action<'isolateEndpointHost'> & {
+type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
   payload: HostIsolationRequestBody;
 };
 
-type EndpointIsolationStateChange = Action<'endpointIsolationStateChanged'> & {
+type EndpointIsolationRequestStateChange = Action<'endpointIsolationRequestStateChange'> & {
   payload: EndpointState['isolationRequestState'];
 };
 
@@ -168,5 +168,5 @@ export type EndpointAction =
   | ServerReturnedEndpointsTotal
   | ServerFailedToReturnAgenstWithEndpointsTotal
   | ServerFailedToReturnEndpointsTotal
-  | IsolateEndpointHost
-  | EndpointIsolationStateChange;
+  | EndpointIsolationRequest
+  | EndpointIsolationRequestStateChange;
