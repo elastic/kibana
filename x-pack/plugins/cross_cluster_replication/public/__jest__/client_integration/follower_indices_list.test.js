@@ -380,7 +380,7 @@ describe('<FollowerIndicesList />', () => {
         await actions.clickFollowerIndexAt(0);
         expect(exists('followerIndexDetail.shardsStatsSection')).toBe(true);
 
-        const codeBlocks = component.find('EuiCodeBlock');
+        const codeBlocks = find('shardsStats');
 
         expect(codeBlocks.length).toBe(index1.shards.length);
         codeBlocks.forEach((codeBlock, i) => {
