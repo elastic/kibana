@@ -21,13 +21,6 @@ export { useReadListIndex } from './lists/hooks/use_read_list_index';
 export { useCreateListIndex } from './lists/hooks/use_create_list_index';
 export { useReadListPrivileges } from './lists/hooks/use_read_list_privileges';
 export {
-  getEntryValue,
-  getExceptionOperatorSelect,
-  getOperatorType,
-  getNewExceptionItem,
-  addIdToEntries,
-} from './exceptions/components/builder/helpers';
-export {
   fetchExceptionListById,
   addExceptionList,
   addEndpointExceptionList,

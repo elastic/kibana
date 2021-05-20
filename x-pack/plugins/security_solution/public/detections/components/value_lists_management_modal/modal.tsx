@@ -20,13 +20,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import {
-  ListSchema,
-  exportList,
-  useFindLists,
-  useDeleteList,
-  useCursor,
-} from '../../../shared_imports';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { exportList, useFindLists, useDeleteList, useCursor } from '../../../shared_imports';
+
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
