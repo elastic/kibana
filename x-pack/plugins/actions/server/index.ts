@@ -8,7 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
 import { ActionsPlugin } from './plugin';
-import { configSchema, ActionsConfig } from './config';
+import { configSchema, ActionsConfig, CustomHostSettings } from './config';
 import { ActionsClient as ActionsClientClass } from './actions_client';
 import { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
 
@@ -57,7 +57,23 @@ export const plugin = (initContext: PluginInitializerContext) => new ActionsPlug
 
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.actions.whitelistedHosts', 'xpack.actions.allowedHosts'),
+    unused('xpack.actions.proxyRejectUnauthorizedCertificates'),
+    unused('xpack.actions.rejectUnauthorized'),
+    (settings, fromPath, addDeprecation) => {
+      const customHostSettings = settings?.xpack?.actions?.customHostSettings ?? [];
+      if (
+        customHostSettings.find(
+          (customHostSchema: CustomHostSettings) =>
+            !!customHostSchema.tls && !!customHostSchema.tls.rejectUnauthorized
+        )
+      ) {
+        addDeprecation({
+          message:
+            '`xpack.actions.customHostSettings[<index>].tls.rejectUnauthorized` is deprecated and is no longer used',
+        });
+      }
+    },
   ],
 };
