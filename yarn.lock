@@ -1684,7 +1684,12 @@
   resolved "https://registry.yarnpkg.com/@types/graphql/-/graphql-0.13.4.tgz#55ae9c29f0fd6b85ee536f5c72b4769d5c5e06b1"
   integrity sha512-B4yel4ro2nTb3v0pYO8vO6SjgvFJSrwUY+IO6TUSLdOSB+gQFslylrhRCHxvXMIhxB71mv5PEE9dAX+24S8sew==
 
-"@types/hapi@^17.0.18":
+"@types/hapi__boom@^7.4.1":
+  version "7.4.1"
+  resolved "https://registry.yarnpkg.com/@types/hapi__boom/-/hapi__boom-7.4.1.tgz#06439d7637245dcbe6dd6548d2a91f2c1243d80b"
+  integrity sha512-x/ZK824GomII7Yoei/nMoB46NQcSfGe0iVpZK3uUivxIAfUUSzRvu8RQO7ZkKapIgzgshHZc+GR+z/BQ8l2VLg==
+
+"@types/hapi__hapi@npm:@types/hapi@17.0.18":
   version "17.0.18"
   resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-17.0.18.tgz#f855fe18766aa2592a3a689c3e6eabe72989ff1a"
   integrity sha512-sRoDjz1iVOCxTqq+EepzDQI773k2PjboHpvMpp524278grosStxZ5+oooVjNLJZj1iZIbiLeeR5/ZeIRgVXsCg==
@@ -1697,11 +1702,6 @@
     "@types/node" "*"
     "@types/podium" "*"
     "@types/shot" "*"
-
-"@types/hapi__boom@^7.4.1":
-  version "7.4.1"
-  resolved "https://registry.yarnpkg.com/@types/hapi__boom/-/hapi__boom-7.4.1.tgz#06439d7637245dcbe6dd6548d2a91f2c1243d80b"
-  integrity sha512-x/ZK824GomII7Yoei/nMoB46NQcSfGe0iVpZK3uUivxIAfUUSzRvu8RQO7ZkKapIgzgshHZc+GR+z/BQ8l2VLg==
 
 "@types/hapi__hoek@^6.2.0":
   version "6.2.0"

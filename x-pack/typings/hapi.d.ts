@@ -9,7 +9,7 @@ import '@hapi/hapi';
 import { CloudPlugin } from 'x-pack/plugins/cloud';
 import { XPackMainPlugin } from 'x-pack/plugins/xpack_main/xpack_main';
 
-declare module 'hapi' {
+declare module '@hapi/hapi' {
   interface PluginProperties {
     cloud?: CloudPlugin;
     xpack_main: XPackMainPlugin;
