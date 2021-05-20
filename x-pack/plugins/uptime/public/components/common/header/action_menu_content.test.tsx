@@ -10,7 +10,7 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { ActionMenuContent } from './action_menu_content';
 
-describe('ActionMenu', () => {
+describe('ActionMenuContent', () => {
   it('renders alerts dropdown', async () => {
     const { getByLabelText, getByText } = render(<ActionMenuContent />);
 
@@ -29,7 +29,6 @@ describe('ActionMenu', () => {
     const settingsAnchor = getByLabelText('Navigate to the Uptime settings page');
     expect(settingsAnchor.getAttribute('href')).toBe('/settings');
     expect(getByText('Settings'));
-    expect(true).toBe(true);
   });
 
   it('renders exploratory view link', () => {
