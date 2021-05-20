@@ -28,7 +28,7 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
-import { KibanaServices } from '../../../../common/lib/kibana';
+import { KibanaServices, useToasts } from '../../../../common/lib/kibana';
 import { hostIsolationHttpMocks } from '../../../../common/lib/host_isolation/mocks';
 import { fireEvent } from '@testing-library/dom';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
@@ -81,6 +81,7 @@ describe('when on the endpoint list page', () => {
     reactTestingLibrary.act(() => {
       history.push('/endpoints');
     });
+    (useToasts as jest.Mock).mockReturnValue(coreStart.notifications.toasts);
   });
 
   it('should NOT display timeline', async () => {
@@ -979,7 +980,7 @@ describe('when on the endpoint list page', () => {
         });
       });
 
-      it.skip('should show error toast if isolate fails', async () => {
+      it('should show error toast if isolate fails', async () => {
         isolateApiMock.responseProvider.isolateHost.mockImplementation(() => {
           throw new Error('oh oh. something went wrong');
         });
@@ -987,7 +988,9 @@ describe('when on the endpoint list page', () => {
         coreStart.http.post.mockRejectedValue(new Error('oh oh. something went wrong'));
         await confirmIsolateAndWaitForApiResponse('failure');
 
-        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({});
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          'oh oh. something went wrong'
+        );
       });
     });
   });
