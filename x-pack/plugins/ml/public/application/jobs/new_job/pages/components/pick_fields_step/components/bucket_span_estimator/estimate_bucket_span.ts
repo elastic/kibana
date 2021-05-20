@@ -46,11 +46,10 @@ export function useEstimateBucketSpan() {
     indicesOptions: jobCreator.datafeedConfig.indices_options,
   };
 
-  if (
-    (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) &&
-    jobCreator.splitField !== null
-  ) {
+  if (isMultiMetricJobCreator(jobCreator) && jobCreator.splitField !== null) {
     data.splitField = jobCreator.splitField.id;
+  } else if (isPopulationJobCreator(jobCreator) && jobCreator.populationField !== null) {
+    data.splitField = jobCreator.populationField.id;
   } else if (isAdvancedJobCreator(jobCreator)) {
     jobCreator.richDetectors.some((d) => {
       if (d.partitionField !== null) {

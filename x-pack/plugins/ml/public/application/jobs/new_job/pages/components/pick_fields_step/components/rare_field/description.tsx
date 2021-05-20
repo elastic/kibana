@@ -12,7 +12,7 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.splitField.title', {
-    defaultMessage: 'Split field',
+    defaultMessage: 'Rare field',
   });
   return (
     <EuiDescribedFormGroup

@@ -51,6 +51,9 @@ function getWizardUrlFromCloningJob(createdBy: string | undefined, job: Job, dat
     case CREATED_BY_LABEL.CATEGORIZATION:
       page = JOB_TYPE.CATEGORIZATION;
       break;
+    case CREATED_BY_LABEL.RARE:
+      page = JOB_TYPE.RARE;
+      break;
     default:
       page = JOB_TYPE.ADVANCED;
       break;

@@ -14,40 +14,43 @@ import {
   filterCategoryFields,
 } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Description } from './description';
-import { MultiMetricJobCreator } from '../../../../../common/job_creator';
+import { PopulationJobCreator } from '../../../../../common/job_creator';
 
-export const SplitFieldSelector: FC = () => {
+export const PopulationFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const jobCreator = jc as MultiMetricJobCreator;
+  const jobCreator = jc as PopulationJobCreator;
 
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
   const categoryFields = useMemo(
     () => [...newJobCapsService.categoryFields, ...runtimeCategoryFields],
     []
   );
-  const [splitField, setSplitField] = useState(jobCreator.splitField);
+  const [populationField, setPopulationField] = useState(jobCreator.populationField);
 
   useEffect(() => {
-    jobCreator.setSplitField(splitField);
+    jobCreator.setPopulationField(populationField);
     // add the split field to the influencers
-    if (splitField !== null && jobCreator.influencers.includes(splitField.name) === false) {
-      jobCreator.addInfluencer(splitField.name);
+    if (
+      populationField !== null &&
+      jobCreator.influencers.includes(populationField.name) === false
+    ) {
+      jobCreator.addInfluencer(populationField.name);
     }
     jobCreatorUpdate();
-  }, [splitField]);
+  }, [populationField]);
 
   useEffect(() => {
-    setSplitField(jobCreator.splitField);
+    setPopulationField(jobCreator.populationField);
   }, [jobCreatorUpdated]);
 
   return (
     <Description>
       <SplitFieldSelect
         fields={categoryFields}
-        changeHandler={setSplitField}
-        selectedField={splitField}
-        isClearable={true}
-        testSubject="mlMultiMetricSplitFieldSelect"
+        changeHandler={setPopulationField}
+        selectedField={populationField}
+        isClearable={false}
+        testSubject="mlPopulationSplitFieldSelect"
       />
     </Description>
   );

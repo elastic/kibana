@@ -7,47 +7,46 @@
 
 import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
 
-import { SplitFieldSelect } from '../split_field_select';
+import { RareFieldSelect } from './rare_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
   newJobCapsService,
   filterCategoryFields,
 } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Description } from './description';
-import { MultiMetricJobCreator } from '../../../../../common/job_creator';
+import { RareJobCreator, isRareJobCreator } from '../../../../../common/job_creator';
 
-export const SplitFieldSelector: FC = () => {
+export const RareFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const jobCreator = jc as MultiMetricJobCreator;
+  const jobCreator = jc as RareJobCreator;
 
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
   const categoryFields = useMemo(
     () => [...newJobCapsService.categoryFields, ...runtimeCategoryFields],
     []
   );
-  const [splitField, setSplitField] = useState(jobCreator.splitField);
+  const [rareField, setRareField] = useState(jobCreator.rareField);
 
   useEffect(() => {
-    jobCreator.setSplitField(splitField);
+    jobCreator.setRareField(rareField);
     // add the split field to the influencers
-    if (splitField !== null && jobCreator.influencers.includes(splitField.name) === false) {
-      jobCreator.addInfluencer(splitField.name);
+    if (rareField !== null && jobCreator.influencers.includes(rareField.name) === false) {
+      jobCreator.addInfluencer(rareField.name);
     }
     jobCreatorUpdate();
-  }, [splitField]);
+  }, [rareField]);
 
   useEffect(() => {
-    setSplitField(jobCreator.splitField);
+    setRareField(jobCreator.rareField);
   }, [jobCreatorUpdated]);
 
   return (
     <Description>
-      <SplitFieldSelect
+      <RareFieldSelect
         fields={categoryFields}
-        changeHandler={setSplitField}
-        selectedField={splitField}
-        isClearable={true}
-        testSubject="mlMultiMetricSplitFieldSelect"
+        changeHandler={setRareField}
+        selectedField={rareField}
+        testSubject="mlRareFieldSelect"
       />
     </Description>
   );

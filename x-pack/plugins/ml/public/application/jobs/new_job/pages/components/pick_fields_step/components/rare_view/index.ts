@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { SplitFieldSelector } from './split_field';
+export { RareView } from './rare_view';
+export { RARE_DETECTOR_TYPE } from './metric_selection';

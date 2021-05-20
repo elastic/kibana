@@ -11,16 +11,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 export const Description: FC = memo(({ children }) => {
-  const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.splitField.title', {
-    defaultMessage: 'Split field',
+  const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.populationField.title', {
+    defaultMessage: 'Population field',
   });
   return (
     <EuiDescribedFormGroup
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
-          id="xpack.ml.newJob.wizard.pickFieldsStep.splitField.description"
-          defaultMessage="Select a field to partition analysis by. Each value of this field will be modeled independently individually."
+          id="xpack.ml.newJob.wizard.pickFieldsStep.populationField.description"
+          defaultMessage="All values in the selected field will be modeled together as a population. This analysis type is recommended for high cardinality data."
         />
       }
     >

@@ -15,6 +15,7 @@ import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';
 import { AdvancedView } from './components/advanced_view';
 import { CategorizationView } from './components/categorization_view';
+import { RareView } from './components/rare_view';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import {
   isSingleMetricJobCreator,
@@ -22,6 +23,7 @@ import {
   isPopulationJobCreator,
   isCategorizationJobCreator,
   isAdvancedJobCreator,
+  isRareJobCreator,
 } from '../../../common/job_creator';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
@@ -50,6 +52,9 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           )}
           {isCategorizationJobCreator(jobCreator) && (
             <CategorizationView isActive={isCurrentStep} setCanProceed={setNextActive} />
+          )}
+          {isRareJobCreator(jobCreator) && (
+            <RareView isActive={isCurrentStep} setCanProceed={setNextActive} />
           )}
           <WizardNav
             previous={() =>

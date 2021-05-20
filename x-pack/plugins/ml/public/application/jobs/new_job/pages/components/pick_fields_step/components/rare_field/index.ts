@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SplitFieldSelector } from './split_field';
+export { RareFieldSelector } from './rare_field';

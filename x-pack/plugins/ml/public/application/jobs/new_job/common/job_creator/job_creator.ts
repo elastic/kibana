@@ -394,6 +394,9 @@ export class JobCreator {
     // change the detector to be a non-zer or non-null count or sum.
     // note, the aggregations will always be a standard count or sum and not a non-null or non-zero version
     this._detectors.forEach((d, i) => {
+      if (this._aggs[i] === undefined) {
+        return;
+      }
       switch (this._aggs[i].id) {
         case ML_JOB_AGGREGATION.COUNT:
           d.function = this._sparseData

@@ -28,6 +28,7 @@ import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
 import { LinkCard } from '../../../../components/link_card';
 import { CategorizationIcon } from './categorization_job_icon';
+import { RareIcon } from './rare_job_icon';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 
@@ -175,6 +176,22 @@ export const Page: FC = () => {
         defaultMessage: 'Group log messages into categories and detect anomalies within them.',
       }),
       id: 'mlJobTypeLinkCategorizationJob',
+    },
+    {
+      onClick: () => navigateToPath(`/jobs/new_job/rare${getUrlParams()}`),
+      icon: {
+        type: RareIcon,
+        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.rareAriaLabel', {
+          defaultMessage: 'Rare job',
+        }),
+      },
+      title: i18n.translate('xpack.ml.newJob.wizard.jobType.rareTitle', {
+        defaultMessage: 'Rare',
+      }),
+      description: i18n.translate('xpack.ml.newJob.wizard.jobType.rareDescription', {
+        defaultMessage: 'Detect rare things.',
+      }),
+      id: 'mlJobTypeLinkrareJob',
     },
   ];
 

@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { SplitFieldSelector } from './split_field';
+import React, { FC, useContext, useEffect, useState } from 'react';
+
+export const RareDetectorsSummary: FC = () => {
+  return null;
+};

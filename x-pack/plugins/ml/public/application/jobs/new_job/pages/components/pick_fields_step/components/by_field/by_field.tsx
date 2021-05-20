@@ -8,14 +8,14 @@
 import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { SplitFieldSelect } from './split_field_select';
+import { SplitFieldSelect } from '../split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field } from '../../../../../../../../../common/types/fields';
 import {
   newJobCapsService,
   filterCategoryFields,
 } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { MultiMetricJobCreator, PopulationJobCreator } from '../../../../../common/job_creator';
+import { PopulationJobCreator } from '../../../../../common/job_creator';
 
 interface Props {
   detectorIndex: number;
@@ -69,18 +69,18 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
   );
 };
 
-// remove the split (over) field from the by field options
+// remove the population (over) field from the by field options
 function useFilteredCategoryFields(
   allCategoryFields: Field[],
-  jobCreator: MultiMetricJobCreator | PopulationJobCreator,
+  jobCreator: PopulationJobCreator,
   jobCreatorUpdated: number
 ) {
   const [fields, setFields] = useState(allCategoryFields);
 
   useEffect(() => {
-    const sf = jobCreator.splitField;
-    if (sf !== null) {
-      setFields(allCategoryFields.filter((f) => f.name !== sf.name));
+    const pf = jobCreator.populationField;
+    if (pf !== null) {
+      setFields(allCategoryFields.filter((f) => f.name !== pf.name));
     } else {
       setFields(allCategoryFields);
     }
