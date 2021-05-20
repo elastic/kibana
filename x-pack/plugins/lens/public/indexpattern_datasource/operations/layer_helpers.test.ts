@@ -390,6 +390,42 @@ describe('state_helpers', () => {
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
     });
 
+    it('should not change order of metrics and references on inserting new buckets', () => {
+      const layer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            label: 'Cumulative sum of count of records',
+            dataType: 'number',
+            isBucketed: false,
+
+            // Private
+            operationType: 'cumulative_sum',
+            references: ['col2'],
+          },
+          col2: {
+            label: 'Count of records',
+            dataType: 'document',
+            isBucketed: false,
+
+            // Private
+            operationType: 'count',
+            sourceField: 'Records',
+          },
+        },
+      };
+      expect(
+        insertNewColumn({
+          layer,
+          indexPattern,
+          columnId: 'col3',
+          op: 'filters',
+          visualizationGroups: [],
+        })
+      ).toEqual(expect.objectContaining({ columnOrder: ['col3', 'col1', 'col2'] }));
+    });
+
     it('should insert both incomplete states if the aggregation does not support the field', () => {
       expect(
         insertNewColumn({

@@ -850,7 +850,10 @@ function addBucket(
   visualizationGroups: VisualizationDimensionGroupConfig[],
   targetGroup?: string
 ): IndexPatternLayer {
-  const [buckets, metrics, references] = getExistingColumnGroups(layer);
+  const [buckets, metrics] = _.partition(
+    layer.columnOrder,
+    (colId) => layer.columns[colId].isBucketed
+  );
 
   const oldDateHistogramIndex = layer.columnOrder.findIndex(
     (columnId) => layer.columns[columnId].operationType === 'date_histogram'
@@ -864,12 +867,11 @@ function addBucket(
       addedColumnId,
       ...buckets.slice(oldDateHistogramIndex, buckets.length),
       ...metrics,
-      ...references,
     ];
   } else {
     // Insert the new bucket after existing buckets. Users will see the same data
     // they already had, with an extra level of detail.
-    updatedColumnOrder = [...buckets, addedColumnId, ...metrics, ...references];
+    updatedColumnOrder = [...buckets, addedColumnId, ...metrics];
   }
   updatedColumnOrder = reorderByGroups(
     visualizationGroups,
