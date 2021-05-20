@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
+import React from 'react';
+import { of } from 'rxjs';
+import { createNavigationRegistry } from '../../../services/navigation_registry';
 import { createLazyObservabilityPageTemplate } from './lazy_page_template';
 import { ObservabilityPageTemplate } from './page_template';
-import { createNavigationRegistry } from '../../../services/navigation_registry';
 import { ObservabilitySideNav } from './side_nav';
-import { of } from 'rxjs';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -28,16 +29,16 @@ navigationRegistry.registerSections(
       label: 'Test A',
       sortKey: 100,
       entries: [
-        { label: 'Url A', app: 'TestA', path: '/url-a' },
-        { label: 'Url B', app: 'TestA', path: '/url-b' },
+        { label: 'Section A Url A', app: 'TestA', path: '/url-a' },
+        { label: 'Section A Url B', app: 'TestA', path: '/url-b' },
       ],
     },
     {
       label: 'Test B',
       sortKey: 200,
       entries: [
-        { label: 'Url A', app: 'TestB', path: '/url-a' },
-        { label: 'Url B', app: 'TestB', path: '/url-b' },
+        { label: 'Section B Url A', app: 'TestB', path: '/url-a' },
+        { label: 'Section B Url B', app: 'TestB', path: '/url-b' },
       ],
     },
   ])
@@ -48,7 +49,7 @@ describe('Page template', () => {
     const LazyObservabilityPageTemplate = createLazyObservabilityPageTemplate({
       currentAppId$: of('Test app ID'),
       getUrlForApp: () => '/test-url',
-      navigateToApp: async (appId) => {},
+      navigateToApp: async () => {},
       navigationSections$: navigationRegistry.sections$,
     });
 
@@ -62,7 +63,7 @@ describe('Page template', () => {
         <div>Test structure</div>
       </LazyObservabilityPageTemplate>
     );
-    expect(component).toMatchSnapshot();
+    expect(component.exists('lazy')).toBe(true);
   });
 
   it('Utilises the KibanaPageTemplate for rendering', () => {
@@ -70,7 +71,7 @@ describe('Page template', () => {
       <ObservabilityPageTemplate
         currentAppId$={of('Test app ID')}
         getUrlForApp={() => '/test-url'}
-        navigateToApp={async (appId) => {}}
+        navigateToApp={async () => {}}
         navigationSections$={navigationRegistry.sections$}
         pageHeader={{
           pageTitle: 'Test title',
@@ -80,20 +81,21 @@ describe('Page template', () => {
         <div>Test structure</div>
       </ObservabilityPageTemplate>
     );
-    expect(component).toMatchSnapshot();
+    expect(component.is('KibanaPageTemplate'));
   });
 
   it('Handles outputting the registered navigation structures within a side nav', () => {
-    // TODO: Try to improve this. useObservable inside this component will always use a [] initial value, so the first render
-    // (and test result) isn't very useful.
-    const component = shallow(
+    const { container } = render(
       <ObservabilitySideNav
         currentAppId$={of('Test app ID')}
         getUrlForApp={() => '/test-url'}
-        navigateToApp={async (appId) => {}}
+        navigateToApp={async () => {}}
         navigationSections$={navigationRegistry.sections$}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toHaveTextContent('Section A Url A');
+    expect(container).toHaveTextContent('Section A Url B');
+    expect(container).toHaveTextContent('Section B Url A');
+    expect(container).toHaveTextContent('Section B Url B');
   });
 });
