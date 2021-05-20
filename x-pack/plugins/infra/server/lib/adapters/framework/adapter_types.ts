@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Lifecycle, ResponseToolkit, RouteOptions } from '@hapi/hapi';
 import { SearchResponse } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
-import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
 import { Legacy } from 'kibana';
 
 import { JsonObject } from '../../../../common/typed_json';

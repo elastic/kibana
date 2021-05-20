@@ -5,7 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import { get } from 'lodash';
 
 import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';

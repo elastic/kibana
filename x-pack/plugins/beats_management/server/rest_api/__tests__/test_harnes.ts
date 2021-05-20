@@ -5,9 +5,9 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { readFile } from 'fs';
 // @ts-ignore
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
+import { readFile } from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
 import { BeatTag, CMBeat } from '../../../common/domain_types';

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from '@hapi/hapi';
 import { i18n } from '@kbn/i18n';
-import { Server } from 'hapi';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
 import { initServerWithKibana } from './server';

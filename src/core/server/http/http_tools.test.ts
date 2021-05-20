@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request, ResponseToolkit } from 'hapi';
+import { Request, ResponseToolkit } from '@hapi/hapi';
 import Joi from 'joi';
 import { defaultValidationErrorHandler, HapiValidationError } from './http_tools';
 

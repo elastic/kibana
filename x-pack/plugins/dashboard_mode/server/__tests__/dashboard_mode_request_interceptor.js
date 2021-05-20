@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import Chance from 'chance';
 
 import { createDashboardModeRequestInterceptor } from '../dashboard_mode_request_interceptor';

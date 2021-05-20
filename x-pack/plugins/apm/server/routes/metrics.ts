@@ -5,7 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getAllMetricsChartData } from '../lib/metrics/get_all_metrics_chart_data';
