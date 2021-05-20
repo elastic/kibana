@@ -10,7 +10,7 @@ import './app.scss';
 import _ from 'lodash';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Toast } from 'kibana/public';
+import { ChromeStart, NotificationsStart, Toast } from 'kibana/public';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { Datatable } from 'src/plugins/expressions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -43,13 +43,252 @@ import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
 import { getLensTopNavConfig } from './lens_top_nav';
 import { Document } from '../persistence';
-import { SaveModal } from './save_modal';
 import {
   LensByReferenceInput,
   LensEmbeddableInput,
 } from '../editor_frame_service/embeddable/embeddable';
 import { useTimeRange } from './time_range';
 import { EditorFrameInstance } from '../types';
+import SaveModalContainer from './save_modal_container';
+import { LensAttributeService } from '../lens_attribute_service';
+
+export const getLastKnownDoc = async ({
+  initialInput,
+  attributeService,
+  data,
+  persistedDoc,
+  notifications,
+  chrome,
+}: {
+  initialInput: LensEmbeddableInput;
+  attributeService: LensAttributeService;
+  persistedDoc?: Document;
+  data: DataPublicPluginStart;
+  notifications: NotificationsStart;
+  chrome: ChromeStart;
+}) => {
+  return new Promise((resolve, reject) => {
+    attributeService
+      .unwrapAttributes(initialInput)
+      .then((attributes) => {
+        if (!initialInput) {
+          resolve(null);
+        }
+        const doc = {
+          ...initialInput,
+          ...attributes,
+          type: LENS_EMBEDDABLE_TYPE,
+        };
+
+        if (attributeService.inputIsRefType(initialInput)) {
+          chrome.recentlyAccessed.add(
+            getFullPath(initialInput.savedObjectId),
+            attributes.title,
+            initialInput.savedObjectId
+          );
+        }
+        const indexPatternIds = _.uniq(
+          doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
+        );
+        getAllIndexPatterns(indexPatternIds, data.indexPatterns)
+          .then(({ indexPatterns }) => {
+            // Don't overwrite any pinned filters
+            data.query.filterManager.setAppFilters(
+              injectFilterReferences(doc.state.filters, doc.references)
+            );
+            resolve({
+              isLoading: false,
+              ...(!_.isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
+              lastKnownDoc: doc,
+              query: doc.state.query,
+              indexPatternsForTopNav: indexPatterns,
+            });
+          })
+          .catch((e) => {
+            reject();
+          });
+      })
+      .catch((e) => {
+        reject();
+        notifications.toasts.addDanger(
+          i18n.translate('xpack.lens.app.docLoadingError', {
+            defaultMessage: 'Error loading saved document',
+          })
+        );
+      });
+  });
+};
+
+export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
+  returnToOrigin: boolean;
+  dashboardId?: string | null;
+  onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
+  newDescription?: string;
+  newTags?: string[];
+};
+
+export const runSaveLensVisualization = async (
+  props: {
+    lastKnownDoc?: Document;
+    getIsByValueMode: () => boolean;
+    persistedDoc?: Document;
+    setIsSaveModalVisible: () => void;
+  } & Pick<
+    LensAppProps,
+    'redirectToOrigin' | 'redirectTo' | 'redirectToDashboard' | 'onAppLeave' | 'initialInput'
+  > &
+    LensAppServices,
+  saveProps: SaveProps,
+  options: { saveToLibrary: boolean }
+) => {
+  return new Promise(async (resolve, reject) => {
+    const {
+      chrome,
+      initialInput,
+      lastKnownDoc,
+      persistedDoc,
+      savedObjectsClient,
+      overlays,
+      notifications,
+      stateTransfer,
+      attributeService,
+      savedObjectsTagging,
+      redirectToDashboard,
+      getIsByValueMode,
+      redirectToOrigin,
+      onAppLeave,
+      setIsSaveModalVisible,
+      redirectTo,
+    } = props;
+    if (!lastKnownDoc) {
+      return;
+    }
+
+    const tagsIds =
+      persistedDoc && savedObjectsTagging
+        ? savedObjectsTagging.ui.getTagIdsFromReferences(persistedDoc.references)
+        : [];
+
+    let references = lastKnownDoc.references;
+    if (savedObjectsTagging) {
+      references = savedObjectsTagging.ui.updateTagsReferences(
+        references,
+        saveProps.newTags || tagsIds
+      );
+    }
+
+    const docToSave = {
+      ...getLastKnownDocWithoutPinnedFilters(lastKnownDoc)!,
+      description: saveProps.newDescription,
+      title: saveProps.newTitle,
+      references,
+    };
+
+    // Required to serialize filters in by value mode until
+    // https://github.com/elastic/kibana/issues/77588 is fixed
+    if (getIsByValueMode()) {
+      docToSave.state.filters.forEach((filter) => {
+        if (typeof filter.meta.value === 'function') {
+          delete filter.meta.value;
+        }
+      });
+    }
+
+    const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
+    const originalSavedObjectId = (originalInput as LensByReferenceInput)?.savedObjectId;
+    if (options.saveToLibrary) {
+      try {
+        await checkForDuplicateTitle(
+          {
+            id: originalSavedObjectId,
+            title: docToSave.title,
+            copyOnSave: saveProps.newCopyOnSave,
+            lastSavedTitle: lastKnownDoc.title,
+            getEsType: () => 'lens',
+            getDisplayName: () =>
+              i18n.translate('xpack.lens.app.saveModalType', {
+                defaultMessage: 'Lens visualization',
+              }),
+          },
+          saveProps.isTitleDuplicateConfirmed,
+          saveProps.onTitleDuplicate,
+          {
+            savedObjectsClient,
+            overlays,
+          }
+        );
+      } catch (e) {
+        // ignore duplicate title failure, user notified in save modal
+        return;
+      }
+    }
+    try {
+      const newInput = (await attributeService.wrapAttributes(
+        docToSave,
+        options.saveToLibrary,
+        originalInput
+      )) as LensEmbeddableInput;
+
+      if (saveProps.returnToOrigin && redirectToOrigin) {
+        // disabling the validation on app leave because the document has been saved.
+        onAppLeave((actions) => {
+          return actions.default();
+        });
+        redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
+        return;
+      } else if (saveProps.dashboardId && redirectToDashboard) {
+        // disabling the validation on app leave because the document has been saved.
+        onAppLeave((actions) => {
+          return actions.default();
+        });
+        redirectToDashboard(newInput, saveProps.dashboardId);
+        return;
+      }
+
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
+          defaultMessage: `Saved '{visTitle}'`,
+          values: {
+            visTitle: docToSave.title,
+          },
+        })
+      );
+
+      if (
+        attributeService.inputIsRefType(newInput) &&
+        newInput.savedObjectId !== originalSavedObjectId
+      ) {
+        chrome.recentlyAccessed.add(
+          getFullPath(newInput.savedObjectId),
+          docToSave.title,
+          newInput.savedObjectId
+        );
+
+        setIsSaveModalVisible();
+        // remove editor state so the connection is still broken after reload
+        stateTransfer.clearEditorState(APP_ID);
+
+        redirectTo(newInput.savedObjectId);
+        resolve({ isLinkedToOriginatingApp: false });
+        return;
+      }
+
+      const newDoc = {
+        ...docToSave,
+        ...newInput,
+      };
+
+      resolve({ persistedDoc: newDoc, lastKnownDoc: newDoc, isLinkedToOriginatingApp: false });
+
+      setIsSaveModalVisible();
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.dir(e);
+      trackUiEvent('save_failed');
+      setIsSaveModalVisible();
+    }
+  });
+};
 
 export function App({
   history,
@@ -63,23 +302,22 @@ export function App({
   setHeaderActionMenu,
   initialContext,
 }: LensAppProps) {
+  const lensAppServices = useKibana<LensAppServices>().services;
+
   const {
     data,
     chrome,
-    overlays,
     navigation,
     uiSettings,
     application,
-    stateTransfer,
     notifications,
     attributeService,
-    savedObjectsClient,
     savedObjectsTagging,
     getOriginatingAppName,
 
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
-  } = useKibana<LensAppServices>().services;
+  } = lensAppServices;
 
   const startSession = useCallback(() => data.search.session.start(), [data.search.session]);
 
@@ -325,214 +563,64 @@ export function App({
       return;
     }
 
-    setState((s) => ({ ...s, isLoading: true }));
-    attributeService
-      .unwrapAttributes(initialInput)
-      .then((attributes) => {
-        if (!initialInput) {
-          return;
-        }
-        const doc = {
-          ...initialInput,
-          ...attributes,
-          type: LENS_EMBEDDABLE_TYPE,
-        };
-
-        if (attributeService.inputIsRefType(initialInput)) {
-          chrome.recentlyAccessed.add(
-            getFullPath(initialInput.savedObjectId),
-            attributes.title,
-            initialInput.savedObjectId
-          );
-        }
-        const indexPatternIds = _.uniq(
-          doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
-        );
-        getAllIndexPatterns(indexPatternIds, data.indexPatterns)
-          .then(({ indexPatterns }) => {
-            // Don't overwrite any pinned filters
-            data.query.filterManager.setAppFilters(
-              injectFilterReferences(doc.state.filters, doc.references)
-            );
-            setState((s) => ({
-              ...s,
-              isLoading: false,
-              ...(!_.isEqual(state.persistedDoc, doc) ? { persistedDoc: doc } : null),
-              lastKnownDoc: doc,
-              query: doc.state.query,
-              indexPatternsForTopNav: indexPatterns,
-            }));
-          })
-          .catch((e) => {
-            setState((s) => ({ ...s, isLoading: false }));
-            redirectTo();
-          });
-      })
-      .catch((e) => {
+    getLastKnownDoc({
+      initialInput,
+      attributeService,
+      data,
+      chrome,
+      notifications,
+      persistedDoc: state.persistedDoc,
+    }).then(
+      (newState) => {
+        setState((s) => ({ ...s, ...(newState as LensAppState) }));
+      },
+      () => {
         setState((s) => ({ ...s, isLoading: false }));
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.lens.app.docLoadingError', {
-            defaultMessage: 'Error loading saved document',
-          })
-        );
-
         redirectTo();
-      });
+      }
+    );
+
+    setState((s) => ({ ...s, isLoading: true }));
   }, [
     notifications,
-    data.indexPatterns,
     data.query.filterManager,
     initialInput,
     attributeService,
     redirectTo,
     chrome.recentlyAccessed,
     state.persistedDoc,
+    data,
+    chrome,
   ]);
 
-  const tagsIds =
-    state.persistedDoc && savedObjectsTagging
-      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
-      : [];
-
-  const runSave = async (
-    saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
-      returnToOrigin: boolean;
-      dashboardId?: string | null;
-      onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
-      newDescription?: string;
-      newTags?: string[];
-    },
-    options: { saveToLibrary: boolean }
-  ) => {
-    if (!lastKnownDoc) {
-      return;
-    }
-
-    let references = lastKnownDoc.references;
-    if (savedObjectsTagging) {
-      references = savedObjectsTagging.ui.updateTagsReferences(
-        references,
-        saveProps.newTags || tagsIds
-      );
-    }
-
-    const docToSave = {
-      ...getLastKnownDocWithoutPinnedFilters(lastKnownDoc)!,
-      description: saveProps.newDescription,
-      title: saveProps.newTitle,
-      references,
-    };
-
-    // Required to serialize filters in by value mode until
-    // https://github.com/elastic/kibana/issues/77588 is fixed
-    if (getIsByValueMode()) {
-      docToSave.state.filters.forEach((filter) => {
-        if (typeof filter.meta.value === 'function') {
-          delete filter.meta.value;
-        }
-      });
-    }
-
-    const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
-    const originalSavedObjectId = (originalInput as LensByReferenceInput)?.savedObjectId;
-    if (options.saveToLibrary) {
-      try {
-        await checkForDuplicateTitle(
-          {
-            id: originalSavedObjectId,
-            title: docToSave.title,
-            copyOnSave: saveProps.newCopyOnSave,
-            lastSavedTitle: lastKnownDoc.title,
-            getEsType: () => 'lens',
-            getDisplayName: () =>
-              i18n.translate('xpack.lens.app.saveModalType', {
-                defaultMessage: 'Lens visualization',
-              }),
-          },
-          saveProps.isTitleDuplicateConfirmed,
-          saveProps.onTitleDuplicate,
-          {
-            savedObjectsClient,
-            overlays,
-          }
-        );
-      } catch (e) {
-        // ignore duplicate title failure, user notified in save modal
-        return;
-      }
-    }
-    try {
-      const newInput = (await attributeService.wrapAttributes(
-        docToSave,
-        options.saveToLibrary,
-        originalInput
-      )) as LensEmbeddableInput;
-
-      if (saveProps.returnToOrigin && redirectToOrigin) {
-        // disabling the validation on app leave because the document has been saved.
-        onAppLeave((actions) => {
-          return actions.default();
-        });
-        redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
-        return;
-      } else if (saveProps.dashboardId && redirectToDashboard) {
-        // disabling the validation on app leave because the document has been saved.
-        onAppLeave((actions) => {
-          return actions.default();
-        });
-        redirectToDashboard(newInput, saveProps.dashboardId);
-        return;
-      }
-
-      notifications.toasts.addSuccess(
-        i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
-          defaultMessage: `Saved '{visTitle}'`,
-          values: {
-            visTitle: docToSave.title,
-          },
-        })
-      );
-
-      if (
-        attributeService.inputIsRefType(newInput) &&
-        newInput.savedObjectId !== originalSavedObjectId
-      ) {
-        chrome.recentlyAccessed.add(
-          getFullPath(newInput.savedObjectId),
-          docToSave.title,
-          newInput.savedObjectId
-        );
+  const runSave = (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
+    runSaveLensVisualization(
+      {
+        lastKnownDoc,
+        getIsByValueMode,
+        savedObjectsTagging,
+        initialInput,
+        redirectToDashboard,
+        redirectToOrigin,
+        setIsSaveModalVisible: () => {
+          setIsSaveModalVisible(false);
+        },
+        persistedDoc: state.persistedDoc,
+        onAppLeave,
+        redirectTo,
+        ...lensAppServices,
+      },
+      saveProps,
+      options
+    ).then(
+      (newState) => {
         setState((s) => ({
           ...s,
-          isLinkedToOriginatingApp: false,
+          ...(newState as LensAppState),
         }));
-
-        setIsSaveModalVisible(false);
-        // remove editor state so the connection is still broken after reload
-        stateTransfer.clearEditorState(APP_ID);
-
-        redirectTo(newInput.savedObjectId);
-        return;
-      }
-
-      const newDoc = {
-        ...docToSave,
-        ...newInput,
-      };
-      setState((s) => ({
-        ...s,
-        persistedDoc: newDoc,
-        lastKnownDoc: newDoc,
-        isLinkedToOriginatingApp: false,
-      }));
-
-      setIsSaveModalVisible(false);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.dir(e);
-      trackUiEvent('save_failed');
-      setIsSaveModalVisible(false);
-    }
+      },
+      () => {}
+    );
   };
 
   const lastKnownDocRef = useRef(state.lastKnownDoc);
@@ -713,13 +801,10 @@ export function App({
           />
         )}
       </div>
-      <SaveModal
+      <SaveModalContainer
         isVisible={isSaveModalVisible}
         originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
         savingToLibraryPermitted={savingToLibraryPermitted}
-        allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
-        savedObjectsTagging={savedObjectsTagging}
-        tagsIds={tagsIds}
         onSave={runSave}
         onClose={() => {
           setIsSaveModalVisible(false);

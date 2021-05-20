@@ -10,19 +10,22 @@
     "licensing",
     "home",
     "usageCollection",
-    "lens"
+    "lens",
+    "savedObjectsTagging"
   ],
   "requiredPlugins": [
     "data",
     "alerting",
     "ruleRegistry",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "presentationUtil"
   ],
   "ui": true,
   "server": true,
   "requiredBundles": [
     "data",
     "kibanaReact",
-    "kibanaUtils"
+    "kibanaUtils",
+    "lens"
   ]
 }

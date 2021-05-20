@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { ExploratoryView } from './exploratory_view';
@@ -20,6 +20,7 @@ import {
 } from '../../../../../../../src/plugins/kibana_utils/public/';
 import { UrlStorageContextProvider } from './hooks/use_url_storage';
 import { useTrackPageview } from '../../..';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export function ExploratoryViewPage() {
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });

@@ -246,6 +246,7 @@ export class LensPlugin {
     );
 
     return {
+      attributeService: this.attributeService,
       EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
       navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => {
         // for openInNewTab, we set the time range in url via getEditPath below
@@ -272,6 +273,7 @@ export class LensPlugin {
         const { visualizationTypes } = await import('./xy_visualization/types');
         return visualizationTypes;
       },
+      openVisualizationSaveModal: () => {},
     };
   }
 

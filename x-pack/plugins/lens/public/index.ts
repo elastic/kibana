@@ -56,4 +56,7 @@ export type {
 } from './indexpattern_datasource/types';
 export { LensPublicStart } from './plugin';
 
+export { SavedModalLazy } from './app_plugin/shared/saved_modal_lazy';
+export { getLastKnownDoc, runSaveLensVisualization } from './app_plugin/app';
+
 export const plugin = () => new LensPlugin();
