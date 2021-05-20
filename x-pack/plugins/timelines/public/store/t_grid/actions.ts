@@ -14,7 +14,6 @@ import {
   TimelineExpandedDetailType,
   TimelineTabs,
 } from '../../../../security_solution/common/types/timeline';
-import { ColumnHeaderOptions, TGridModel, SubsetTimelineModel } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
 
@@ -94,19 +93,22 @@ export const clearEventsDeleted = actionCreator<{
   id: string;
 }>('CLEAR_TIMELINE_EVENTS_DELETED');
 
-export const initializeTgrid = actionCreator<{
+export const initializeTGrid = actionCreator<{
   id: string;
-  documentType: string;
-  defaultModel: SubsetTimelineModel;
+  documentType?: string;
   filterManager?: FilterManager;
-  footerText: string;
-  isLoading: boolean;
-  loadingText: string;
-  queryFields: string[];
-  selectAll: boolean;
-  title: string;
+  footerText?: string;
+  isLoading?: boolean;
+  loadingText?: string;
+  queryFields?: string[];
+  selectAll?: boolean;
+  title?: string;
   unit?: string;
 }>('INITIALIZE_TGRID');
 
-export const setIsLoading = actionCreator<{ isTgridLoading: boolean }>('SET_IS_LOADING');
-export const setSelectAll = actionCreator<{ isSelectAllSelected: boolean }>('SET_SELECT_ALL');
+export const setTGridIsLoading = actionCreator<{ id: string; isTGridLoading: boolean }>(
+  'SET_TGRID_IS_LOADING'
+);
+export const setTGridSelectAll = actionCreator<{ id: string; selectAll: boolean }>(
+  'SET_TGRID_SELECT_ALL'
+);

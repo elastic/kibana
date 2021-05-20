@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EuiDataGridColumn } from '@elastic/eui';
+import { FilterManager } from '../../../../../../src/plugins/data/public';
 import { TimelineNonEcsData } from '../../../../security_solution/common/search_strategy';
 import {
   ColumnHeaderOptions,
@@ -12,11 +14,13 @@ import {
   TimelineExpandedDetail,
   SortColumnTimeline,
 } from '../../../../security_solution/common/types/timeline';
-import { TimelineModel } from '../../../../security_solution/public/';
 
 export interface TGridModel {
   /** The columns displayed in the timeline */
-  columns: ColumnHeaderOptions[];
+  columns: Array<
+    Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
+      ColumnHeaderOptions
+  >;
   /** Events to not be rendered **/
   deletedEventIds: string[];
   /** A list of Ids of excluded Row Renderers */
@@ -46,6 +50,21 @@ export interface TGridModel {
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
   version: string | null;
+  // TODO clean up old manage timeline context to see if we need to move it to its own store
+  documentType: string;
+  defaultColumns: Array<
+    Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
+      ColumnHeaderOptions
+  >;
+  filterManager?: FilterManager;
+  footerText: string;
+  loadingText: string;
+  isTGridLoading: boolean;
+  queryFields: string[];
+  selectAll: boolean;
+  title: string;
+  unit?: (n: number) => string;
+  // END
 }
 
 export type SubsetTGridModel = Readonly<

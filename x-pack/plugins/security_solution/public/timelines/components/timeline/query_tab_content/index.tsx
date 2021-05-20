@@ -17,7 +17,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
@@ -34,7 +34,6 @@ import { TimelineHeader } from '../header';
 import { calculateTotalPages, combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
 import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
-import { useManageTimeline } from '../../manage_timeline';
 import {
   ControlColumnProps,
   KueryFilterQueryKind,
@@ -181,6 +180,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   timerangeKind,
   updateEventTypeAndIndexesName,
 }) => {
+  const dispatch = useDispatch();
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
   const {
@@ -232,13 +232,14 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     type: columnType,
   }));
 
-  const { initializeTimeline, setIsTimelineLoading } = useManageTimeline();
   useEffect(() => {
-    initializeTimeline({
-      filterManager,
-      id: timelineId,
-    });
-  }, [initializeTimeline, filterManager, timelineId]);
+    dispatch(
+      timelineActions.initializeTGrid({
+        filterManager,
+        id: timelineId,
+      })
+    );
+  }, [filterManager, timelineId, dispatch]);
 
   const [
     isQueryLoading,
@@ -271,8 +272,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
 
   useEffect(() => {
-    setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
-  }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
+    dispatch(
+      timelineActions.setTGridIsLoading({
+        id: timelineId,
+        isTGridLoading: isQueryLoading || loadingSourcerer,
+      })
+    );
+  }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
   const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
   const trailingControlColumns: ControlColumnProps[] = [];

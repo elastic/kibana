@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { isString, noop } from 'lodash/fp';
+import { isString } from 'lodash/fp';
 import {
   AppError,
   isAppError,
@@ -14,7 +14,12 @@ import {
   isSecurityAppError,
 } from '@kbn/securitysolution-t-grid';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { ErrorToastOptions, ToastsStart, Toast } from '../../../../../src/core/public';
+import {
+  ErrorToastOptions,
+  ToastsStart,
+  Toast,
+  NotificationsStart,
+} from '../../../../../src/core/public';
 import { IEsError, isEsError } from '../../../../../src/plugins/data/public';
 
 export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning'> & {
@@ -30,11 +35,9 @@ export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning'> & {
  * Kibana error toaster model so that the network error message will be shown rather than a stack trace.
  */
 export const useAppToasts = (): UseAppToasts => {
-  const toasts = useKibana().services.notifications?.toasts ?? {
-    addError: noop,
-    addSuccess: noop,
-    addWarning: noop,
-  };
+  const { toasts } = useKibana<{
+    notifications: NotificationsStart;
+  }>().services.notifications;
   const addError = useRef(toasts?.addError.bind(toasts)).current;
   const addSuccess = useRef(toasts?.addSuccess.bind(toasts)).current;
   const addWarning = useRef(toasts?.addWarning.bind(toasts)).current;

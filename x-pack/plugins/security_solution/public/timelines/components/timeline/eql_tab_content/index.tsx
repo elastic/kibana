@@ -17,7 +17,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
@@ -31,7 +31,6 @@ import { RowRenderer } from '../body/renderers/row_renderer';
 import { Footer, footerHeight } from '../footer';
 import { calculateTotalPages } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
-import { useManageTimeline } from '../../manage_timeline';
 import {
   ControlColumnProps,
   TimelineEventsType,
@@ -171,6 +170,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   timerangeKind,
   updateEventTypeAndIndexesName,
 }) => {
+  const dispatch = useDispatch();
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
   const { portalNode: eqlEventsCountPortalNode } = useEqlEventsCountPortal();
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
@@ -197,12 +197,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     return [...columnFields, ...requiredFieldsForActions];
   };
 
-  const { initializeTimeline, setIsTimelineLoading } = useManageTimeline();
   useEffect(() => {
-    initializeTimeline({
-      id: timelineId,
-    });
-  }, [initializeTimeline, timelineId]);
+    dispatch(
+      timelineActions.initializeTGrid({
+        id: timelineId,
+      })
+    );
+  }, [dispatch, timelineId]);
 
   const [
     isQueryLoading,
@@ -235,8 +236,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
 
   useEffect(() => {
-    setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
-  }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
+    dispatch(
+      timelineActions.setTGridIsLoading({
+        id: timelineId,
+        isTGridLoading: isQueryLoading || loadingSourcerer,
+      })
+    );
+  }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
   const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
   const trailingControlColumns: ControlColumnProps[] = [];
@@ -390,7 +396,6 @@ const makeMapStateToProps = () => {
   };
   return mapStateToProps;
 };
-
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   updateEventTypeAndIndexesName: (newEventType: TimelineEventsType, newIndexNames: string[]) => {
     dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));

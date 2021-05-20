@@ -86,10 +86,8 @@ const getDroppableId = (id: string): string =>
  */
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const { browserFields } = useSourcererScope(SourcererScopeName.timeline);
-  const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
-    getManageTimelineById,
-    timelineId,
-  ]);
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { isLoading } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const dataProviders = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).dataProviders

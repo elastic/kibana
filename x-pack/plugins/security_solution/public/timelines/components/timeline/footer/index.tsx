@@ -30,8 +30,8 @@ import { EVENTS_COUNT_BUTTON_CLASS_NAME } from '../helpers';
 
 import * as i18n from './translations';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
-import { useManageTimeline } from '../../manage_timeline';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 
@@ -261,11 +261,10 @@ export const FooterComponent = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
 
-  const { getManageTimelineById } = useManageTimeline();
-  const { documentType, loadingText, footerText } = useMemo(() => getManageTimelineById(id), [
-    getManageTimelineById,
-    id,
-  ]);
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { documentType, loadingText, footerText } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, id)
+  );
 
   const handleChangePageClick = useCallback(
     (nextPage: number) => {

@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
-import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
+import { EventsTrGroup, EventsTrSupplement } from '../../styles';
 import { OnRowSelected } from '../../types';
 import { isEventBuildingBlockType, getEventType, isEvenEqlSequence } from '../helpers';
 import { EventColumnView } from './event_column_view';
@@ -24,14 +24,14 @@ import {
   ControlColumnProps,
   RowRenderer,
   TimelineExpandedDetailType,
-  TimelineId,
   TimelineTabs,
 } from '../../../../../../security_solution/common/types/timeline';
 import {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../security_solution/common/search_strategy';
-import { tGridActions } from '../../../../store/t_grid';
+import { tGridActions, tGridSelectors } from '../../../../store/t_grid';
+import { useDeepEqualSelector } from '../../../../hooks/use_selector';
 
 interface Props {
   actionsColumnWidth: number;
@@ -54,13 +54,6 @@ interface Props {
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
 }
-
-const EventsTrSupplementContainerWrapper = React.memo(({ children }) => {
-  const width = useEventDetailsWidthContext();
-  return <EventsTrSupplementContainer width={width}>{children}</EventsTrSupplementContainer>;
-});
-
-EventsTrSupplementContainerWrapper.displayName = 'EventsTrSupplementContainerWrapper';
 
 const StatefulEventComponent: React.FC<Props> = ({
   actionsColumnWidth,
@@ -87,9 +80,9 @@ const StatefulEventComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({ timelineID: timelineId, tabType });
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getTGrid = useMemo(() => tGridSelectors.getTGridByIdSelector(), []);
   const expandedDetail = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
+    (state) => getTGrid(state, timelineId).expandedDetail ?? {}
   );
   const hostName = useMemo(() => {
     const hostNameArr = getMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
@@ -206,9 +199,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           trailingControlColumns={trailingControlColumns}
         />
 
-        <EventsTrSupplementContainerWrapper>
-          {RowRendererContent}
-        </EventsTrSupplementContainerWrapper>
+        <div>{RowRendererContent}</div>
       </EventsTrGroup>
     </StatefulEventContext.Provider>
   );

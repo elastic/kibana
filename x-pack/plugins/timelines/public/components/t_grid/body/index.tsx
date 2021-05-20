@@ -18,10 +18,10 @@ import {
   onKeyDownFocusHandler,
 } from '@kbn/securitysolution-t-grid';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
-import { ControlColumnProps } from './control_columns';
 import {
   CellValueElementProps,
   ColumnHeaderOptions,
+  ControlColumnProps,
   RowRenderer,
   RowRendererId,
   TimelineId,
@@ -41,6 +41,8 @@ import { BrowserFields } from '../../../../../security_solution/common/search_st
 import { OnRowSelected, OnSelectAll } from '../types';
 import { tGridActions } from '../../../types';
 import { TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import { plainRowRenderer } from './renderers/plain_row_renderer';
 
 interface OwnProps {
   activePage: number;
@@ -98,11 +100,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = [],
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
-    const { getManageTimelineById } = useManageTimeline();
-    const { queryFields, selectAll } = useMemo(() => getManageTimelineById(id), [
-      getManageTimelineById,
-      id,
-    ]);
+    const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
+    const { queryFields, selectAll } = useDeepEqualSelector((state) =>
+      getManageTimeline(state, id)
+    );
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
@@ -300,7 +301,7 @@ const makeMapStateToProps = () => {
 
   const getTGrid = tGridSelectors.getTGridByIdSelector();
   const mapStateToProps = (state: TimelineState, { browserFields, id }: OwnProps) => {
-    const timeline: TGridModel = getTGrid(state, id) ?? timelineDefaults;
+    const timeline: TGridModel = getTGrid(state, id);
     const {
       columns,
       excludedRowRendererIds,

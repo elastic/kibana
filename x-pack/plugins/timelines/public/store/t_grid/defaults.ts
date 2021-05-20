@@ -15,6 +15,7 @@ import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
 } from '../../components/t_grid/body/constants';
 import { SubsetTGridModel } from './model';
+import * as i18n from './translations';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';
 
@@ -85,3 +86,16 @@ export const tGridDefaults: SubsetTGridModel = {
   // savedObjectId: null,
   // version: null,
 };
+
+export const getTGridManageDefaults = (id: string) => ({
+  defaultColumns: defaultHeaders,
+  loadingText: i18n.LOADING_EVENTS,
+  footerText: i18n.TOTAL_COUNT_OF_EVENTS,
+  documentType: i18n.TOTAL_COUNT_OF_EVENTS,
+  selectAll: false,
+  id,
+  isLoading: false,
+  queryFields: [],
+  title: i18n.EVENTS,
+  unit: (n: number) => i18n.UNIT(n),
+});

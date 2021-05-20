@@ -34,7 +34,7 @@ export interface ActionProps {
   rowIndex: number;
   refetch?: () => void;
   onRuleChange?: () => void;
-  showNotes: boolean;
+  showNotes?: boolean;
   tabType?: TimelineTabs;
   timelineId: string;
   toggleShowNotes?: () => void;

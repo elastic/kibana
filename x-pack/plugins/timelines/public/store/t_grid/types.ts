@@ -28,11 +28,11 @@ export const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 /** The state of all timelines is stored here */
 export interface TimelineState {
   timelineById: TimelineById;
-  autoSavedWarningMsg: AutoSavedWarningMsg;
-  showCallOutUnauthorizedMsg: boolean;
-  insertTimeline: InsertTimeline | null;
-  isTgridLoading: boolean;
-  isSelectAllSelected: boolean;
+  // autoSavedWarningMsg: AutoSavedWarningMsg;
+  // showCallOutUnauthorizedMsg: boolean;
+  // insertTimeline: InsertTimeline | null;
+  // isTgridLoading: boolean;
+  // isSelectAllSelected: boolean;
 }
 
 export enum TimelineId {

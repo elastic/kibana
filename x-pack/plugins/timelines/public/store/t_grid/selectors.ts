@@ -4,12 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { getOr } from 'lodash/fp';
 import { createSelector } from 'reselect';
 import { TGridModel } from '.';
+import { tGridDefaults, getTGridManageDefaults } from './defaults';
 
-import { TimelineState } from './types';
+const getDefaultTgrid = (id: string) => ({ ...tGridDefaults, ...getTGridManageDefaults(id) });
+export const selectTGridById = (state: unknown, timelineId: string): TGridModel =>
+  getOr(getDefaultTgrid(timelineId), ['timelineById', timelineId], state);
 
-export const selectTGridById = (state: TimelineState, timelineId: string): TGridModel =>
-  state.timelineById[timelineId];
+export const getTGridByIdSelector = () => createSelector(selectTGridById, (tGrid) => tGrid);
 
-export const getTGridByIdSelector = () => createSelector(selectTGridById, (timeline) => timeline);
+export const getManageTimelineById = () =>
+  createSelector(
+    selectTGridById,
+    ({
+      documentType,
+      defaultColumns,
+      isLoading,
+      filterManager,
+      footerText,
+      loadingText,
+      queryFields,
+      selectAll,
+      title,
+      unit,
+    }) => ({
+      documentType,
+      defaultColumns,
+      isLoading,
+      filterManager,
+      footerText,
+      loadingText,
+      queryFields,
+      selectAll,
+      title,
+      unit,
+    })
+  );

@@ -8,7 +8,7 @@
 import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
@@ -22,8 +22,6 @@ import { inputsSelectors, State, inputsModel } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { useManageTimeline } from '../../../timelines/components/manage_timeline';
-
 import { updateAlertStatusAction } from './actions';
 import {
   requiredFieldsForActions,
@@ -92,6 +90,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   timelineId,
   to,
 }) => {
+  const dispatch = useDispatch();
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const {
@@ -189,14 +188,16 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
   useEffect(() => {
     if (isSelectAllChecked) {
-      timelineActions.setSelectAll({
-        id: timelineId,
-        selectAll: false,
-      });
+      dispatch(
+        timelineActions.setTGridSelectAll({
+          id: timelineId,
+          selectAll: false,
+        })
+      );
     } else {
       setShowClearSelectionAction(false);
     }
-  }, [isSelectAllChecked, timelineId]);
+  }, [dispatch, isSelectAllChecked, timelineId]);
 
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
@@ -212,23 +213,27 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
     clearSelected!({ id: timelineId });
-    timelineActions.setSelectAll({
-      id: timelineId,
-      selectAll: false,
-    });
+    dispatch(
+      timelineActions.setTGridSelectAll({
+        id: timelineId,
+        selectAll: false,
+      })
+    );
     setShowClearSelectionAction(false);
-  }, [clearSelected, setShowClearSelectionAction, timelineId]);
+  }, [clearSelected, dispatch, timelineId]);
 
   // Callback for selecting all events on all pages from utility bar
   // Dispatches to stateful_body's selectAll via TimelineTypeContext props
   // as scope of response data required to actually set selectedEvents
   const selectAllOnAllPagesCallback = useCallback(() => {
-    timelineActions.setSelectAll({
-      id: timelineId,
-      selectAll: true,
-    });
+    dispatch(
+      timelineActions.setTGridSelectAll({
+        id: timelineId,
+        selectAll: true,
+      })
+    );
     setShowClearSelectionAction(true);
-  }, [setShowClearSelectionAction, timelineId]);
+  }, [dispatch, timelineId]);
 
   const updateAlertsStatusCallback: UpdateAlertsStatusCallback = useCallback(
     async (
@@ -309,21 +314,20 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const { filterManager } = useKibana().services.data.query;
 
   useEffect(() => {
-    timelineActions.initializeTgrid({
-      defaultModel: {
-        ...alertsDefaultModel,
-        columns,
-      },
-      documentType: i18n.ALERTS_DOCUMENT_TYPE,
-      filterManager,
-      footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-      id: timelineId,
-      loadingText: i18n.LOADING_ALERTS,
-      selectAll: false,
-      queryFields: requiredFieldsForActions,
-      title: '',
-    });
-  }, [filterManage, timelineId]);
+    dispatch(
+      timelineActions.initializeTGrid({
+        defaultColumns: columns,
+        documentType: i18n.ALERTS_DOCUMENT_TYPE,
+        filterManager,
+        footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+        id: timelineId,
+        loadingText: i18n.LOADING_ALERTS,
+        selectAll: false,
+        queryFields: requiredFieldsForActions,
+        title: '',
+      })
+    );
+  }, [dispatch, filterManager, timelineId]);
 
   const headerFilterGroup = useMemo(
     () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,

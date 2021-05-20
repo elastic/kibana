@@ -7,7 +7,7 @@
 import { CoreSetup, Plugin, PluginInitializerContext } from '../../../../src/core/public';
 import { TimelinesPluginSetup, TimelineProps } from './types';
 import { getTimelineLazy } from './methods';
-import { tGridActions, getReduxDeps } from './store/t_grid';
+import { tGridActions, getReduxDeps, tGridSelectors } from './store/t_grid';
 import { initialTGridState, tGridReducer } from './store/t_grid/reducer';
 
 export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
@@ -28,6 +28,7 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
           actions: tGridActions,
           initialState: initialTGridState,
           reducer: tGridReducer,
+          selectors: tGridSelectors,
         };
       },
       getCreatedTgridStore: (type: TimelineProps['type']) => {

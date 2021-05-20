@@ -13,10 +13,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { timelineSelectors } from '../../store/timeline';
 import { OnUpdateColumns } from '../timeline/events';
 
 import {
@@ -27,7 +29,6 @@ import {
 } from './helpers';
 
 import * as i18n from './translations';
-import { useManageTimeline } from '../manage_timeline';
 
 const CountsFlexGroup = styled(EuiFlexGroup)`
   margin-top: 5px;
@@ -101,13 +102,13 @@ const TitleRow = React.memo<{
   onOutsideClick: () => void;
   onUpdateColumns: OnUpdateColumns;
 }>(({ id, onOutsideClick, onUpdateColumns }) => {
-  const { getManageTimelineById } = useManageTimeline();
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, id));
 
   const handleResetColumns = useCallback(() => {
-    const timeline = getManageTimelineById(id);
-    onUpdateColumns(timeline.defaultModel.columns);
+    onUpdateColumns(defaultColumns);
     onOutsideClick();
-  }, [id, onUpdateColumns, onOutsideClick, getManageTimelineById]);
+  }, [onUpdateColumns, onOutsideClick, defaultColumns]);
 
   return (
     <EuiFlexGroup

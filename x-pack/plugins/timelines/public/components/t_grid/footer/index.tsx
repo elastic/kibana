@@ -29,11 +29,10 @@ import { EVENTS_COUNT_BUTTON_CLASS_NAME } from '../helpers';
 
 import * as i18n from './translations';
 import { OnChangePage } from '../types';
-import { tGridActions } from '../../../store/t_grid';
+import { tGridActions, tGridSelectors } from '../../../store/t_grid';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
-
-FixedWidthLastUpdatedContainer.displayName = 'FixedWidthLastUpdatedContainer';
 
 const FixedWidthLastUpdated = styled.div<{ compact?: boolean }>`
   width: ${({ compact }) => (!compact ? 200 : 25)}px;
@@ -242,11 +241,10 @@ export const FooterComponent = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
 
-  const { getManageTimelineById } = useManageTimeline();
-  const { documentType, loadingText, footerText } = useMemo(() => getManageTimelineById(id), [
-    getManageTimelineById,
-    id,
-  ]);
+  const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
+  const { documentType, loadingText, footerText } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, id)
+  );
 
   const handleChangePageClick = useCallback(
     (nextPage: number) => {

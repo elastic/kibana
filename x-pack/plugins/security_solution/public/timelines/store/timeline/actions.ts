@@ -24,7 +24,7 @@ import {
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
-import { TGridActions } from '../../../../../timelines/public';
+import { tGridActions } from '../../../../../timelines/public';
 export const {
   applyDeltaToColumnWidth,
   upsertColumn,
@@ -41,26 +41,10 @@ export const {
   clearEventsLoading,
   setEventsDeleted,
   clearEventsDeleted,
-  initializeTgrid,
-  setSelectAll,
-} = TGridActions;
-// export const applyDeltaToColumnWidth = TGridActions.applyDeltaToColumnWidth;
-// export const upsertColumn = TGridActions.upsertColumn;
-// export const toggleDetailPanel = TGridActions.toggleDetailPanel;
-// export const removeColumn = TGridActions.removeColumn;
-// export const updateIsLoading = TGridActions.updateIsLoading;
-// export const updateColumns = TGridActions.updateColumns;
-// export const updateItemsPerPage = TGridActions.updateItemsPerPage;
-// export const updateItemsPerPageOptions = TGridActions.updateItemsPerPageOptions;
-// export const updateSort = TGridActions.updateSort;
-// export const setSelected = TGridActions.setSelected;
-// export const clearSelected = TGridActions.clearSelected;
-// export const setEventsLoading = TGridActions.setEventsLoading;
-// export const clearEventsLoading = TGridActions.clearEventsLoading;
-// export const setEventsDeleted = TGridActions.setEventsDeleted;
-// export const clearEventsDeleted = TGridActions.clearEventsDeleted;
-// export const initializeTgrid = TGridActions.initializeTgrid;
-// export const setSelectAll = TGridActions.setSelectAll;
+  initializeTGrid,
+  setTGridIsLoading,
+  setTGridSelectAll,
+} = tGridActions;
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 

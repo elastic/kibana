@@ -136,7 +136,7 @@ const TgridActionTdCell = ({
   onRuleChange,
   selectedEventIds,
   showCheckboxes,
-  showNotes,
+  showNotes = false,
   tabType,
   timelineId,
   toggleShowNotes,

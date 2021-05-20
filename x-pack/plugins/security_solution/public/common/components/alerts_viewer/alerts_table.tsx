@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
@@ -69,20 +70,23 @@ const AlertsTableComponent: React.FC<Props> = ({
   startDate,
   pageFilters = [],
 }) => {
+  const dispatch = useDispatch();
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
   const { filterManager } = useKibana().services.data.query;
 
   useEffect(() => {
-    timelineActions.initializeTgrid({
-      id: timelineId,
-      documentType: i18n.ALERTS_DOCUMENT_TYPE,
-      filterManager,
-      defaultModel: alertsDefaultModel,
-      footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-      title: i18n.ALERTS_TABLE_TITLE,
-      unit: i18n.UNIT,
-    });
-  }, [filterManager, timelineId]);
+    dispatch(
+      timelineActions.initializeTGrid({
+        id: timelineId,
+        documentType: i18n.ALERTS_DOCUMENT_TYPE,
+        filterManager,
+        defaultModel: alertsDefaultModel,
+        footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+        title: i18n.ALERTS_TABLE_TITLE,
+        unit: (n: number) => i18n.UNIT(n),
+      })
+    );
+  }, [dispatch, filterManager, timelineId]);
 
   return (
     <StatefulEventsViewer

@@ -11,52 +11,7 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-
 import { Direction } from '../../../../../security_solution/common/search_strategy';
-import {
-  BrowserFields,
-  DocValueFields,
-} from '../../../../../security_solution/public/common/containers/source';
-import { useTimelineEvents } from '../../../../../security_solution/public/timelines/containers';
-import {
-  ColumnHeaderOptions,
-  KqlMode,
-} from '../../../../../security_solution/public/timelines/store/timeline/model';
-import { HeaderSection } from '../header_section';
-import { defaultHeaders } from '../../../../../security_solution/public/timelines/components/timeline/body/column_headers/default_headers';
-import { Sort } from '../body/sort';
-import { StatefulBody } from '../body';
-import { DataProvider } from '../../../../../security_solution/public/timelines/components/timeline/data_providers/data_provider';
-import {
-  Footer,
-  footerHeight,
-} from '../../../../../security_solution/public/timelines/components/timeline/footer';
-import {
-  calculateTotalPages,
-  combineQueries,
-  resolverIsShowing,
-} from '../../../../../security_solution/public/timelines/components/timeline/helpers';
-import { TimelineRefetch } from '../../../../../security_solution/public/timelines/components/timeline/refetch_timeline';
-import { EventDetailsWidthProvider } from '../../../../../security_solution/public/common/components/events_viewer/event_details_width_context';
-import * as i18n from '../../../../../security_solution/public/common/components/events_viewer/translations';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../../../../security_solution/public/common/store';
-import { useManageTimeline } from '../../../../../security_solution/public/timelines/components/manage_timeline';
-import { ExitFullScreen } from '../../../../../security_solution/public/common/components/exit_full_screen';
-import { TimelineId, TimelineTabs } from '../../../../../security_solution/common/types/timeline';
-import { RowRenderer } from '../../../../../security_solution/public/timelines/components/timeline/body/renderers/row_renderer';
-import { GraphOverlay } from '../../../../../security_solution/public/timelines/components/graph_overlay';
-import { CellValueElementProps } from '../../../../../security_solution/public/timelines/components/timeline/cell_rendering';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../../../security_solution/public/timelines/components/timeline/styles';
-import {
-  defaultControlColumn,
-  ControlColumnProps,
-} from '../../../../../security_solution/public/timelines/components/timeline/body/control_columns';
 import { CoreStart } from '../../../../../../../src/core/public';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
@@ -194,17 +149,17 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
   //  END
-  const titleWithExitFullScreen = useMemo(
-    () => (
-      <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
-        <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ExitFullScreen fullScreen={globalFullScreen} setFullScreen={setGlobalFullScreen} />
-        </EuiFlexItem>
-      </TitleFlexGroup>
-    ),
-    [globalFullScreen, justTitle, setGlobalFullScreen]
-  );
+  // const titleWithExitFullScreen = useMemo(
+  //   () => (
+  //     <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
+  //       <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
+  //       <EuiFlexItem grow={false}>
+  //         <ExitFullScreen fullScreen={globalFullScreen} setFullScreen={setGlobalFullScreen} />
+  //       </EuiFlexItem>
+  //     </TitleFlexGroup>
+  //   ),
+  //   [globalFullScreen, justTitle, setGlobalFullScreen]
+  // );
 
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(uiSettings),
@@ -306,7 +261,8 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               id={!resolverIsShowing(graphEventId) ? id : undefined}
               height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
               subtitle={utilityBar ? undefined : subtitle}
-              title={globalFullScreen ? titleWithExitFullScreen : justTitle}
+              title={justTitle}
+              // title={globalFullScreen ? titleWithExitFullScreen : justTitle}
             >
               {HeaderSectionContent}
             </HeaderSection>
@@ -317,13 +273,13 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              <TimelineRefetch
+              {/* <TimelineRefetch
                 id={id}
                 inputId="global"
                 inspect={inspect}
                 loading={loading}
                 refetch={refetch}
-              />
+              /> */}
 
               {graphEventId && <GraphOverlay isEventViewer={true} timelineId={id} />}
               <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
@@ -335,7 +291,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     id={id}
                     isEventViewer={true}
                     onRuleChange={onRuleChange}
-                    refetch={refetch}
+                    // refetch={refetch}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
                     sort={sort}

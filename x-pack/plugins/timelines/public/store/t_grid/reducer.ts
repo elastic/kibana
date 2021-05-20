@@ -11,12 +11,12 @@ import {
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
-  initializeTgrid,
+  initializeTGrid,
   removeColumn,
   setEventsDeleted,
   setEventsLoading,
-  setIsLoading,
-  setSelectAll,
+  setTGridIsLoading,
+  setTGridSelectAll,
   setSelected,
   toggleDetailPanel,
   updateColumns,
@@ -46,14 +46,6 @@ import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
 
 export const initialTGridState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
-  autoSavedWarningMsg: {
-    timelineId: null,
-    newTimelineModel: null,
-  },
-  showCallOutUnauthorizedMsg: false,
-  insertTimeline: null,
-  isTgridLoading: false,
-  isSelectAllSelected: false,
 };
 
 /** The reducer for all timeline actions  */
@@ -189,7 +181,7 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       timelineById: state.timelineById,
     }),
   }))
-  .case(initializeTgrid, (state, { id, ...timelineProps }) => ({
+  .case(initializeTGrid, (state, { id, ...timelineProps }) => ({
     ...state,
     timelineById: getInitializeTgrid({
       id,
@@ -197,12 +189,24 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       ...timelineProps,
     }),
   }))
-  .case(setIsLoading, (state, { isTgridLoading }) => ({
+  .case(setTGridIsLoading, (state, { id, isTGridLoading }) => ({
     ...state,
-    isTgridLoading,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isTGridLoading,
+      },
+    },
   }))
-  .case(setSelectAll, (state, { isSelectAllSelected }) => ({
+  .case(setTGridSelectAll, (state, { id, selectAll }) => ({
     ...state,
-    isSelectAllSelected,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        selectAll,
+      },
+    },
   }))
   .build();

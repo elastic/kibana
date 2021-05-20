@@ -13,9 +13,8 @@ import { Sort } from '../../sort';
 import { Actions } from '../actions';
 import { getNewSortDirectionOnClick } from './helpers';
 import { HeaderContent } from './header_content';
-import { useManageTimeline } from '../../../../manage_timeline';
-import { tGridActions } from '../../../../../store/t_grid';
-
+import { tGridActions, tGridSelectors } from '../../../../../store/t_grid';
+import { useDeepEqualSelector } from '../../../../../hooks/use_selector';
 interface Props {
   header: ColumnHeaderOptions;
   sort: Sort[];
@@ -67,12 +66,8 @@ export const HeaderComponent: React.FC<Props> = ({ header, sort, timelineId }) =
     [dispatch, timelineId]
   );
 
-  const { getManageTimelineById } = useManageTimeline();
-
-  const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
-    getManageTimelineById,
-    timelineId,
-  ]);
+  const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
+  const { isLoading } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId ?? ''));
   const showSortingCapability = !(header.subType && header.subType.nested);
 
   return (

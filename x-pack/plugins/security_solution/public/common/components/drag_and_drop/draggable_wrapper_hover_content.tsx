@@ -30,11 +30,12 @@ import { StatefulTopN } from '../top_n';
 
 import { allowTopN } from './helpers';
 import * as i18n from './translations';
-import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
+import { timelineSelectors } from '../../../timelines/store/timeline';
 
 export const AdditionalContent = styled.div`
   padding: 2px;
@@ -109,16 +110,16 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
     kibana.services.data.query.filterManager,
   ]);
-  const { getTimelineFilterManager } = useManageTimeline();
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { filterManager: activeFilterMananager } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId ?? '')
+  );
   const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   const filterManager = useMemo(
-    () =>
-      timelineId === TimelineId.active
-        ? getTimelineFilterManager(TimelineId.active)
-        : filterManagerBackup,
-    [timelineId, getTimelineFilterManager, filterManagerBackup]
+    () => (timelineId === TimelineId.active ? activeFilterMananager : filterManagerBackup),
+    [timelineId, activeFilterMananager, filterManagerBackup]
   );
 
   //  Regarding data from useManageTimeline:
