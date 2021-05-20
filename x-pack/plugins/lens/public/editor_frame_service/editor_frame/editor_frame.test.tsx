@@ -12,6 +12,7 @@ import {
   getPreloadedState,
   setState,
   LensAppState,
+  LensRootStore,
 } from '../../state_management/index';
 import { Provider } from 'react-redux';
 
@@ -209,8 +210,8 @@ describe('editor_frame', () => {
       }
     );
 
-    const origDispatch = lensStore.dispatch
-    lensStore.dispatch = jest.fn(origDispatch)
+    const origDispatch = lensStore.dispatch;
+    lensStore.dispatch = jest.fn(origDispatch);
 
     const wrappingComponent: React.FC<{
       children: React.ReactNode;
@@ -673,8 +674,9 @@ describe('editor_frame', () => {
         setDatasourceState(updatedState);
       });
 
+      // TODO: temporary regression
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(9);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -749,8 +751,9 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
+      // TODO: temporary regression, selectors will help
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(9);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -1522,41 +1525,45 @@ describe('editor_frame', () => {
         onChange,
       };
 
+      let lensStore: LensRootStore = {} as LensRootStore;
       await act(async () => {
-        mountWithProvider(props);
-        expect(onChange).toHaveBeenCalledTimes(0);
+        const mounted = await mountWithProvider(props);
+        lensStore = mounted.lensStore;
+        expect(lensStore.dispatch).toHaveBeenCalledTimes(0);
         resolver({});
       });
 
-      expect(onChange).toHaveBeenCalledTimes(2);
-      expect(onChange).toHaveBeenNthCalledWith(1, {
-        filterableIndexPatterns: ['1'],
-        doc: {
-          id: undefined,
-          description: undefined,
-          references: [
-            {
-              id: '1',
-              name: 'index-pattern-0',
-              type: 'index-pattern',
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
+      expect(lensStore.dispatch).toHaveBeenNthCalledWith(1, {
+        payload: {
+          indexPatternsForTopNav: [{}],
+          lastKnownDoc: {
+            savedObjectId: undefined,
+            description: undefined,
+            references: [
+              {
+                id: '1',
+                name: 'index-pattern-0',
+                type: 'index-pattern',
+              },
+            ],
+            state: {
+              visualization: null, // Not yet loaded
+              datasourceStates: { testDatasource: {} },
+              query: { query: '', language: 'lucene' },
+              filters: [],
             },
-          ],
-          state: {
-            visualization: null, // Not yet loaded
-            datasourceStates: { testDatasource: {} },
-            query: { query: '', language: 'lucene' },
-            filters: [],
+            title: '',
+            type: 'lens',
+            visualizationType: 'testVis',
           },
-          title: '',
-          type: 'lens',
-          visualizationType: 'testVis',
         },
-        isSaveable: false,
+        type: 'app/onChangeFromEditorFrame',
       });
-      expect(onChange).toHaveBeenLastCalledWith(
-        {
-          filterableIndexPatterns: ['1'],
-          doc: {
+      expect(lensStore.dispatch).toHaveBeenLastCalledWith({
+        payload: {
+          indexPatternsForTopNav: [{}],
+          lastKnownDoc: {
             references: [
               {
                 id: '1',
@@ -1565,7 +1572,7 @@ describe('editor_frame', () => {
               },
             ],
             description: undefined,
-            id: undefined,
+            savedObjectId: undefined,
             state: {
               visualization: { initialState: true }, // Now loaded
               datasourceStates: { testDatasource: {} },
@@ -1576,16 +1583,9 @@ describe('editor_frame', () => {
             type: 'lens',
             visualizationType: 'testVis',
           },
-          isSaveable: false,
         },
-        {
-          activeData: undefined,
-          indexPatternsForTopNav: [],
-          isSaveable: false,
-          lastKnownDoc: undefined,
-          persistedDoc: undefined,
-        }
-      );
+        type: 'app/onChangeFromEditorFrame',
+      });
     });
 
     it('should send back a persistable document when the state changes', async () => {
@@ -1614,7 +1614,7 @@ describe('editor_frame', () => {
       const { instance: el, lensStore } = await mountWithProvider(props);
       instance = el;
 
-      expect(onChange).toHaveBeenCalledTimes(2);
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
 
       mockDatasource.toExpression.mockReturnValue('data expression');
       mockVisualization.toExpression.mockReturnValue('vis expression');
@@ -1624,14 +1624,20 @@ describe('editor_frame', () => {
 
       instance.update();
 
-      expect(onChange).toHaveBeenCalledTimes(3);
-      expect(onChange).toHaveBeenNthCalledWith(
-        3,
-        {
-          activeData: undefined,
-          filterableIndexPatterns: [],
-          doc: {
-            id: undefined,
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(4);
+      expect(lensStore.dispatch).toHaveBeenNthCalledWith(3, {
+        payload: {
+          query: {
+            language: 'lucene',
+            query: 'new query',
+          },
+        },
+        type: 'app/setState',
+      });
+      expect(lensStore.dispatch).toHaveBeenNthCalledWith(4, {
+        payload: {
+          lastKnownDoc: {
+            savedObjectId: undefined,
             references: [],
             state: {
               datasourceStates: { testDatasource: { datasource: '' } },
@@ -1645,14 +1651,8 @@ describe('editor_frame', () => {
           },
           isSaveable: true,
         },
-        {
-          activeData: undefined,
-          indexPatternsForTopNav: [],
-          isSaveable: false,
-          lastKnownDoc: undefined,
-          persistedDoc: undefined,
-        }
-      );
+        type: 'app/onChangeFromEditorFrame',
+      });
     });
 
     it('should call onChange when the datasource makes an internal state change', async () => {
@@ -1679,9 +1679,11 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
         onChange,
       };
-      instance = (await mountWithProvider(props)).instance;
+      const mounted = await mountWithProvider(props);
+      instance = mounted.instance;
+      const { lensStore } = mounted;
 
-      expect(onChange).toHaveBeenCalledTimes(2);
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
 
       await act(async () => {
         (instance.find(FrameLayout).prop('dataPanel') as ReactElement)!.props.dispatch({
@@ -1693,7 +1695,7 @@ describe('editor_frame', () => {
         });
       });
 
-      expect(onChange).toHaveBeenCalledTimes(3);
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(3);
     });
   });
 });

@@ -7,7 +7,10 @@
 
 import React, { useEffect, useReducer, useState, useCallback } from 'react';
 import { CoreStart } from 'kibana/public';
+import _ from 'lodash';
 import { PaletteRegistry } from 'src/plugins/charts/public';
+import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import { getAllIndexPatterns } from '../../lib';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { Datasource, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
@@ -30,12 +33,14 @@ import {
 } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import {
-  setState as setAppState,
   useLensSelector,
   useLensDispatch,
   LensAppState,
   DispatchSetState,
+  onChangeFromEditorFrame,
 } from '../../state_management';
+import { TableInspectorAdapter } from '../types';
+
 export interface EditorFrameProps {
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
@@ -46,11 +51,6 @@ export interface EditorFrameProps {
   onError: (e: { message: string }) => void;
   core: CoreStart;
   plugins: EditorFrameStartPlugins;
-  onChange: (arg: {
-    filterableIndexPatterns: string[];
-    doc: Document;
-    isSaveable: boolean;
-  }) => void;
   showNoDataPopover: () => void;
   initialContext?: VisualizeFieldContext;
 }
@@ -233,6 +233,68 @@ export function EditorFrame(props: EditorFrameProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allLoaded]);
 
+  const getStateToUpdate: (
+    arg: {
+      filterableIndexPatterns: string[];
+      doc: Document;
+      isSaveable: boolean;
+      activeData?: TableInspectorAdapter;
+    },
+    oldState: {
+      isSaveable: boolean;
+      indexPatternsForTopNav: IndexPattern[];
+      persistedDoc?: Document;
+      lastKnownDoc?: Document;
+      activeData?: TableInspectorAdapter;
+    }
+  ) => Promise<Partial<LensAppState> | undefined> = async (
+    {
+      filterableIndexPatterns,
+      doc,
+      isSaveable: incomingIsSaveable,
+      activeData: incomingActiveData,
+    },
+    prevState
+  ) => {
+    const batchedStateToUpdate: Partial<LensAppState> = {};
+
+    if (incomingIsSaveable !== prevState.isSaveable) {
+      batchedStateToUpdate.isSaveable = incomingIsSaveable;
+    }
+
+    if (!_.isEqual(prevState.persistedDoc, doc) && !_.isEqual(prevState.lastKnownDoc, doc)) {
+      batchedStateToUpdate.lastKnownDoc = doc;
+    }
+    if (!_.isEqual(prevState.activeData, incomingActiveData)) {
+      batchedStateToUpdate.activeData = incomingActiveData;
+    }
+    const hasIndexPatternsChanged =
+      prevState.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
+      filterableIndexPatterns.some(
+        (id) => !prevState.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
+      );
+    // Update the cached index patterns if the user made a change to any of them
+    if (hasIndexPatternsChanged) {
+      const { indexPatterns } = await getAllIndexPatterns(
+        filterableIndexPatterns,
+        props.plugins.data.indexPatterns
+      );
+      if (indexPatterns) {
+        batchedStateToUpdate.indexPatternsForTopNav = indexPatterns;
+      }
+    }
+    if (Object.keys(batchedStateToUpdate).length) {
+      return batchedStateToUpdate;
+    }
+  };
+
+  // Frame loader (app or embeddable) is expected to call this when it loads and updates
+  // This should be replaced with a top-down state
+  const onChange = React.useCallback(
+    (batchedStateToUpdate) => dispatchChange(batchedStateToUpdate),
+    [dispatchChange]
+  );
+
   // The frame needs to call onChange every time its internal state changes
   useEffect(
     () => {
@@ -245,27 +307,30 @@ export function EditorFrame(props: EditorFrameProps) {
         return;
       }
 
-      props.onChange(
-        getSavedObjectFormat({
-          activeDatasources: Object.keys(state.datasourceStates).reduce(
-            (datasourceMap, datasourceId) => ({
-              ...datasourceMap,
-              [datasourceId]: props.datasourceMap[datasourceId],
-            }),
-            {}
-          ),
-          visualization: activeVisualization,
-          state,
-          framePublicAPI,
-        }),
-        {
-          isSaveable,
-          persistedDoc,
-          indexPatternsForTopNav,
-          lastKnownDoc,
-          activeData,
+      const savedObjectFormat = getSavedObjectFormat({
+        activeDatasources: Object.keys(state.datasourceStates).reduce(
+          (datasourceMap, datasourceId) => ({
+            ...datasourceMap,
+            [datasourceId]: props.datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        visualization: activeVisualization,
+        state,
+        framePublicAPI,
+      });
+
+      getStateToUpdate(savedObjectFormat, {
+        isSaveable,
+        persistedDoc,
+        indexPatternsForTopNav,
+        lastKnownDoc,
+        activeData,
+      }).then((batchedStateToUpdate) => {
+        if (batchedStateToUpdate) {
+          onChange(batchedStateToUpdate);
         }
-      );
+      });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [

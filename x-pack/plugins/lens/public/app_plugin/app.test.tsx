@@ -348,7 +348,6 @@ describe('Lens App', () => {
           Object {
             "doc": undefined,
             "initialContext": undefined,
-            "onChange": [Function],
             "onError": [Function],
             "showNoDataPopover": [Function],
           },
@@ -629,7 +628,7 @@ describe('Lens App', () => {
           },
         } as jest.ResolvedValue<Document>);
 
-        const { frame, component } = mountWith({ services, props });
+        const { frame, component, lensStore } = mountWith({ services, props });
 
         if (initialSavedObjectId) {
           expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
@@ -637,15 +636,14 @@ describe('Lens App', () => {
           expect(services.attributeService.unwrapAttributes).not.toHaveBeenCalled();
         }
 
-        const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-
-        act(() =>
-          onChange({
-            filterableIndexPatterns: [],
-            doc: { savedObjectId: initialSavedObjectId, ...lastKnownDoc } as Document,
-            isSaveable: true,
-          })
-        );
+        act(() => {
+          lensStore.dispatch(
+            setState({
+              isSaveable: true,
+              lastKnownDoc: { savedObjectId: initialSavedObjectId, ...lastKnownDoc } as Document,
+            })
+          );
+        });
 
         component.update();
         expect(getButton(component).disableButton).toEqual(false);

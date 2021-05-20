@@ -12,7 +12,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Toast } from 'kibana/public';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
-import { Datatable } from 'src/plugins/expressions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
 import {
   createKbnUrlStateStorage,
@@ -39,7 +38,6 @@ import {
   useLensDispatch,
   LensAppState,
   DispatchSetState,
-  onChangeFromEditorFrame,
 } from '../state_management';
 
 import { getAllIndexPatterns } from '../lib';
@@ -76,11 +74,6 @@ export function App({
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = useCallback(
     (state: Partial<LensAppState>) => dispatch(setAppState(state)),
-    [dispatch]
-  );
-
-  const dispatchChange: DispatchSetState = useCallback(
-    (state: Partial<LensAppState>) => dispatch(onChangeFromEditorFrame(state)),
     [dispatch]
   );
 
@@ -436,59 +429,6 @@ export function App({
     appState.isSaveable && application.capabilities.visualize.save
   );
 
-  const onChange: (
-    newState: {
-      filterableIndexPatterns: string[];
-      doc: Document;
-      isSaveable: boolean;
-      activeData?: Record<string, Datatable>;
-    },
-    oldState: {
-      isSaveable: boolean;
-      lastKnownDoc: Document;
-      persistedDoc: Document;
-      activeData?: Record<string, Datatable>;
-      indexPatternsForTopNav: IndexPattern[];
-    }
-  ) => void = React.useCallback(
-    ({ filterableIndexPatterns, doc, isSaveable, activeData }, prevState) => {
-      const batchedStateToUpdate: Partial<LensAppState> = {};
-
-      if (isSaveable !== prevState.isSaveable) {
-        batchedStateToUpdate.isSaveable = isSaveable;
-      }
-
-      if (!_.isEqual(prevState.persistedDoc, doc) && !_.isEqual(prevState.lastKnownDoc, doc)) {
-        batchedStateToUpdate.lastKnownDoc = doc;
-      }
-      if (!_.isEqual(prevState.activeData, activeData)) {
-        batchedStateToUpdate.activeData = activeData;
-      }
-
-      if (Object.keys(batchedStateToUpdate).length) {
-        dispatchChange(batchedStateToUpdate);
-      }
-
-      const hasIndexPatternsChanged =
-        prevState.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
-        filterableIndexPatterns.some(
-          (id) => !prevState.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
-        );
-      // Update the cached index patterns if the user made a change to any of them
-      if (hasIndexPatternsChanged) {
-        getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
-          ({ indexPatterns }) => {
-            if (indexPatterns) {
-              // console.log('rest', { indexPatternsForTopNav: indexPatterns });
-              dispatchChange({ indexPatternsForTopNav: indexPatterns });
-            }
-          }
-        );
-      }
-    },
-    [data.indexPatterns, dispatchChange]
-  );
-
   return (
     <>
       <div className="lnsApp">
@@ -509,7 +449,6 @@ export function App({
             showNoDataPopover={showNoDataPopover}
             initialContext={initialContext}
             persistedDoc={appState.persistedDoc}
-            onChange={onChange}
           />
         )}
       </div>
@@ -547,19 +486,12 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   onError,
   showNoDataPopover,
   initialContext,
-  onChange,
 }: {
   editorFrame: EditorFrameInstance;
   persistedDoc?: Document | undefined;
   onError: (e: { message: string }) => Toast;
   showNoDataPopover: () => void;
   initialContext: VisualizeFieldContext | undefined;
-  onChange: (newState: {
-    filterableIndexPatterns: string[];
-    doc: Document;
-    isSaveable: boolean;
-    activeData?: Record<string, Datatable>;
-  }) => void;
 }) {
   const { EditorFrameContainer } = editorFrame;
   return (
@@ -568,7 +500,6 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
       onError={onError}
       showNoDataPopover={showNoDataPopover}
       initialContext={initialContext}
-      onChange={onChange}
     />
   );
 });

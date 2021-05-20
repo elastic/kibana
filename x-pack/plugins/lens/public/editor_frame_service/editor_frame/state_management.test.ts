@@ -27,7 +27,6 @@ describe('editor_frame state management', () => {
         initialDatasourceId: 'testDatasource',
         initialVisualizationId: 'testVis',
         ExpressionRenderer: createExpressionRendererMock(),
-        onChange: jest.fn(),
         core: coreMock.createStart(),
         plugins: {
           uiActions: uiActionsPluginMock.createStartContract(),
