@@ -260,6 +260,7 @@ export const getHeatmapRenderer = (dependencies: {
             onSelectRange={onSelectRange}
             timeZone={dependencies.timeZone}
             formatFactory={formatFactory}
+            chartsThemeService={dependencies.chartsThemeService}
           />
         }
       </I18nProvider>,

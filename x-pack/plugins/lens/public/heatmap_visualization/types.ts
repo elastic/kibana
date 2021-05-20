@@ -14,6 +14,7 @@ import {
   LEGEND_FUNCTION,
   LENS_HEATMAP_RENDERER,
 } from './constants';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 export type ChartShapes = typeof CHART_SHAPES[keyof typeof CHART_SHAPES];
 
@@ -54,6 +55,7 @@ export interface HeatmapExpressionProps {
 export type HeatmapRenderProps = HeatmapExpressionProps & {
   timeZone: string;
   formatFactory: FormatFactory;
+  chartsThemeService: ChartsPluginSetup['theme'];
   onClickValue: (data: LensFilterEvent['data']) => void;
   onSelectRange: (data: LensBrushEvent['data']) => void;
 };

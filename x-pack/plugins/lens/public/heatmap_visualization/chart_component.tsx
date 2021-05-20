@@ -38,10 +38,12 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   args,
   timeZone,
   formatFactory,
+  chartsThemeService,
   onClickValue,
   onSelectRange,
 }) => {
-  const isDarkTheme = false;
+  const chartTheme = chartsThemeService.useChartsTheme();
+  const isDarkTheme = chartsThemeService.useDarkMode();
 
   const table = Object.values(data.tables)[0];
 
@@ -170,8 +172,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     onBrushEnd,
     grid: {
       stroke: {
-        width: args.gridConfig.strokeWidth ?? 1,
-        color: args.gridConfig.strokeColor ?? '#D3DAE6',
+        width:
+          args.gridConfig.strokeWidth ?? chartTheme.axes?.gridLine?.horizontal?.strokeWidth ?? 1,
+        color:
+          args.gridConfig.strokeColor ?? chartTheme.axes?.gridLine?.horizontal?.stroke ?? '#D3DAE6',
       },
       cellHeight: {
         max: 'fill',
@@ -184,14 +188,13 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         visible: args.gridConfig.isCellLabelVisible ?? false,
       },
       border: {
-        stroke: '#D3DAE6',
         strokeWidth: 0,
       },
     },
     yAxisLabel: {
       visible: args.gridConfig.isYAxisLabelVisible,
       // eui color subdued
-      fill: `#6a717d`,
+      fill: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
       padding: 8,
       name: yAxisColumn?.name,
       ...(yAxisColumn
@@ -203,7 +206,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     xAxisLabel: {
       visible: args.gridConfig.isXAxisLabelVisible,
       // eui color subdued
-      fill: `#98A2B3`,
+      fill: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
       formatter: (v: number | string) => xValuesFormatter.convert(v),
       name: xAxisColumn.name,
     },
