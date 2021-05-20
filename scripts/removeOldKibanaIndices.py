@@ -11,8 +11,7 @@ for indexData in content.split(" "):
       kibanaIndices.append(indexData)
 
 kibanaIndices = sorted(kibanaIndices, key=lambda index: int(index.split("_")[1]))
-print >>logFile, "Removing .kibana_1 index and current index {} from list to delete.".format(kibanaIndices[-1])
-kibanaIndices.remove(".kibana_1")
+print >>logFile, "Removing current index {} from list to delete.".format(kibanaIndices[-1])
 kibanaIndices = kibanaIndices[:-1]
 print >>logFile, "Deleting indices: {}".format(kibanaIndices)
 
