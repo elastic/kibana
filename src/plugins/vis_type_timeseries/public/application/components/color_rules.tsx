@@ -19,8 +19,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
+import { fatalErrorsServiceMock } from 'src/core/public/mocks';
 import { AddDeleteButtons } from './add_delete_buttons';
 import { collectionActions } from './lib/collection_actions';
+import { EMPTY_VALUE } from '../../../common/last_value_utils';
 import { ColorPicker, ColorPickerProps } from './color_picker';
 import { TimeseriesVisParams } from '../../types';
 
@@ -48,7 +50,8 @@ interface ColorRulesOperator {
   translateNameId: string;
   defaultName: string;
   method: string;
-  defaultValue?: unknown;
+  value?: unknown;
+  isValueConstant?: boolean;
 }
 
 const defaultSecondaryName = i18n.translate(
@@ -86,7 +89,8 @@ const colorRulesOperatorsList: ColorRulesOperator[] = [
     translateNameId: 'visTypeTimeseries.colorRules.emptyLabel',
     defaultName: 'empty',
     method: 'isEqual',
-    defaultValue: [],
+    value: EMPTY_VALUE,
+    isValueConstant: true,
   },
 ];
 
@@ -119,7 +123,7 @@ export class ColorRules extends Component<ColorRulesProps> {
       const selectedOperator: ColorRulesOperator | void = colorRulesOperatorsList.find(
         (operator) => options[0]?.value === operator.method
       );
-      const value = (selectedOperator && selectedOperator.defaultValue) ?? null;
+      const value = (selectedOperator && selectedOperator.value) ?? null;
       collectionActions.handleChange(this.props, {
         ...item,
         operator: options[0]?.value,
@@ -144,7 +148,7 @@ export class ColorRules extends Component<ColorRulesProps> {
       (operator) => model.operator === operator.method
     );
 
-    const showValueSelectorField = selectedOperator && selectedOperator.defaultValue ? false : true;
+    const showValueSelectorField = (selectedOperator && !selectedOperator.isValueConstant) ?? false;
     const labelStyle = { marginBottom: 0 };
 
     let secondary;

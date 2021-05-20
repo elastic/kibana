@@ -10,9 +10,11 @@ import {
   getLastValue,
   getLastValueOrDefault,
   getLastValueOrEmpty,
+  isEmptyValue,
   DEFAULT_VALUE,
   EMPTY_VALUE,
-} from './get_last_value';
+} from './last_value_utils';
+import { clone } from 'lodash';
 
 describe('getLastValue(data)', () => {
   test('should return undefined ', () => {
@@ -102,5 +104,19 @@ describe('getLastValueOrEmpty(data)', () => {
 
     data = [[1, undefined]];
     expect(getLastValueOrEmpty(data)).toBe(EMPTY_VALUE);
+  });
+});
+
+describe('isEmptyValue(value)', () => {
+  test('should return true if is equal to the empty value', () => {
+    // if empty value will change, no need to rewrite test for passing it.
+    const emptyValue =
+      typeof EMPTY_VALUE === 'object' && EMPTY_VALUE != null ? clone(EMPTY_VALUE) : EMPTY_VALUE;
+    expect(isEmptyValue(emptyValue)).toBe(true);
+  });
+
+  test('should return the last value', () => {
+    const notEmptyValue = [...Array(10).keys()];
+    expect(isEmptyValue(notEmptyValue)).toBe(false);
   });
 });

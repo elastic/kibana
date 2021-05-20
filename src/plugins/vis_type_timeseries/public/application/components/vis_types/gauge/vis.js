@@ -12,7 +12,7 @@ import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import _, { get, isUndefined, assign, includes } from 'lodash';
 import { Gauge } from '../../../visualizations/views/gauge';
-import { getLastValueOrEmpty } from '../../../../../common/get_last_value';
+import { getLastValueOrEmpty } from '../../../../../common/last_value_utils';
 
 function getColors(props) {
   const { model, visData } = props;

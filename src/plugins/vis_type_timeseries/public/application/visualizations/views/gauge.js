@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { isBackgroundInverted, isBackgroundDark } from '../../lib/set_is_reversed';
-import { getLastValueOrEmpty } from '../../../../common/get_last_value';
+import { getLastValueOrEmpty } from '../../../../common/last_value_utils';
 import { getValueBy } from '../lib/get_value_by';
 import { GaugeVis } from './gauge_vis';
 import reactcss from 'reactcss';

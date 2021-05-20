@@ -12,6 +12,7 @@ import _ from 'lodash';
 import reactcss from 'reactcss';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 import { COLORS } from '../constants/chart';
+import { isEmptyValue } from '../../../../common/last_value_utils';
 
 export class GaugeVis extends Component {
   constructor(props) {
@@ -57,7 +58,7 @@ export class GaugeVis extends Component {
     const { type, value, max, color } = this.props;
 
     // if value is empty array, no metrics to display.
-    const formattedValue = value && Array.isArray(value) && !value.length ? 1 : value;
+    const formattedValue = isEmptyValue(value) ? 1 : value;
 
     const { scale, translateX, translateY } = this.state;
     const size = 2 * Math.PI * 50;

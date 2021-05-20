@@ -8,7 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { getLastValueOrEmpty } from '../../../../common/get_last_value';
+import { getLastValueOrEmpty, isEmptyValue } from '../../../../common/last_value_utils';
 import { labelDateFormatter } from '../../components/lib/label_date_formatter';
 import { emptyLabel } from '../../../../common/empty_label';
 import reactcss from 'reactcss';
@@ -97,9 +97,8 @@ export class TopN extends Component {
       const renderMode = TopN.getRenderMode(min, max);
       const key = `${item.id || item.label}`;
       const lastValue = getLastValueOrEmpty(item.data);
-      const isEmptyResult = lastValue && Array.isArray(lastValue) && !lastValue.length;
       // if result is empty, all bar need to be colored.
-      const lastValueFormatted = isEmptyResult ? 1 : lastValue;
+      const lastValueFormatted = isEmptyValue(lastValue) ? 1 : lastValue;
       const formatter = item.tickFormatter || this.props.tickFormatter;
       const isPositiveValue = lastValue >= 0;
 

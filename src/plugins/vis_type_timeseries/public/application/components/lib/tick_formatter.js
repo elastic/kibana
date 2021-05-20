@@ -8,7 +8,11 @@
 
 import handlebars from 'handlebars/dist/handlebars';
 import { isNumber, isEqual } from 'lodash';
-import { DEFAULT_VALUE, EMPTY_VALUE, DISPLAY_EMPTY_VALUE } from '../../../../common/get_last_value';
+import {
+  isEmptyValue,
+  DEFAULT_VALUE,
+  DISPLAY_EMPTY_VALUE,
+} from '../../../../common/last_value_utils';
 import { inputFormats, outputFormats, isDuration } from '../lib/durations';
 import { getFieldFormats } from '../../../services';
 
@@ -42,7 +46,7 @@ export const createTickFormatter = (format = '0,0.[00]', template, getConfig = n
       return val;
     }
 
-    if (isEqual(val, EMPTY_VALUE)) {
+    if (isEmptyValue(val)) {
       return DISPLAY_EMPTY_VALUE;
     }
 

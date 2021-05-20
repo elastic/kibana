@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isArray, last } from 'lodash';
+import { isArray, last, isEqual } from 'lodash';
 
 export const DEFAULT_VALUE = '-';
 export const EMPTY_VALUE = [];
@@ -27,3 +27,5 @@ export const getLastValueOrDefault = (data, defaultValue = DEFAULT_VALUE) => {
 };
 
 export const getLastValueOrEmpty = (data) => getLastValueOrDefault(data, EMPTY_VALUE);
+
+export const isEmptyValue = (value) => isEqual(value, EMPTY_VALUE);

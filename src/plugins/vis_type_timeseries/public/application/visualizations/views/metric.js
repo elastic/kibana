@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import reactcss from 'reactcss';
 
-import { getLastValueOrEmpty } from '../../../../common/get_last_value';
+import { getLastValueOrEmpty } from '../../../../common/last_value_utils';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 
 export class Metric extends Component {
