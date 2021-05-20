@@ -12,7 +12,6 @@ import { ObservabilityPageTemplate } from './page_template';
 import { createNavigationRegistry } from '../../../services/navigation_registry';
 import { ObservabilitySideNav } from './side_nav';
 import { of } from 'rxjs';
-import { skip } from 'rxjs/operators';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -45,12 +44,6 @@ navigationRegistry.registerSections(
 );
 
 describe('Page template', () => {
-  beforeAll((done) => {
-    // Skip the first default value
-    navigationRegistry.sections$.pipe(skip(1)).subscribe((data) => {
-      done();
-    });
-  });
   it('Provides a working lazy wrapper', () => {
     const LazyObservabilityPageTemplate = createLazyObservabilityPageTemplate({
       currentAppId$: of('Test app ID'),

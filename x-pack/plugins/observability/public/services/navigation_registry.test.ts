@@ -7,10 +7,11 @@
 
 import { createNavigationRegistry } from './navigation_registry';
 import { of } from 'rxjs';
-import { skip } from 'rxjs/operators';
+import { skip, take } from 'rxjs/operators';
+import { firstValueFrom } from '@kbn/std';
 
 describe('Navigation registry', () => {
-  it('Allows the registration of, and access to, navigation sections', (done) => {
+  it('Allows the registration of, and access to, navigation sections', async () => {
     const navigationRegistry = createNavigationRegistry();
 
     navigationRegistry.registerSections(
@@ -35,42 +36,41 @@ describe('Navigation registry', () => {
     );
 
     // Skip the default value from startWith
-    navigationRegistry.sections$.pipe(skip(1)).subscribe((data) => {
-      expect(data).toEqual([
-        {
-          label: 'Test A',
-          sortKey: 100,
-          entries: [
-            {
-              label: 'Url A',
-              app: 'TestA',
-              path: '/url-a',
-            },
-            {
-              label: 'Url B',
-              app: 'TestA',
-              path: '/url-b',
-            },
-          ],
-        },
-        {
-          label: 'Test B',
-          sortKey: 200,
-          entries: [
-            {
-              label: 'Url A',
-              app: 'TestB',
-              path: '/url-a',
-            },
-            {
-              label: 'Url B',
-              app: 'TestB',
-              path: '/url-b',
-            },
-          ],
-        },
-      ]);
-      done();
-    });
+    const sections = await firstValueFrom(navigationRegistry.sections$); // .pipe(skip(1)));
+
+    expect(sections).toEqual([
+      {
+        label: 'Test A',
+        sortKey: 100,
+        entries: [
+          {
+            label: 'Url A',
+            app: 'TestA',
+            path: '/url-a',
+          },
+          {
+            label: 'Url B',
+            app: 'TestA',
+            path: '/url-b',
+          },
+        ],
+      },
+      {
+        label: 'Test B',
+        sortKey: 200,
+        entries: [
+          {
+            label: 'Url A',
+            app: 'TestB',
+            path: '/url-a',
+          },
+          {
+            label: 'Url B',
+            app: 'TestB',
+            path: '/url-b',
+          },
+        ],
+      },
+    ]);
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { map, scan, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { map, scan, shareReplay, switchMap } from 'rxjs/operators';
 
 export interface NavigationSection {
   label: string | undefined;
@@ -41,7 +41,6 @@ export const createNavigationRegistry = (): NavigationRegistry => {
     map((registeredSections) =>
       registeredSections.flat().sort((first, second) => first.sortKey - second.sortKey)
     ),
-    startWith([]),
     shareReplay(1)
   );
 
