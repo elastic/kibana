@@ -14,6 +14,7 @@ import { isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
 import { SortResults } from '@elastic/elasticsearch/api/types';
+import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   TimestampOverrideOrUndefined,
   Privilege,
@@ -26,8 +27,6 @@ import {
   parseDuration,
 } from '../../../../../alerting/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
 import {
   BulkResponseErrorAggregation,
   SignalHit,
