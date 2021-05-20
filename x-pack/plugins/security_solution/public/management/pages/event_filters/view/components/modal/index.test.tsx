@@ -13,10 +13,10 @@ import { ThemeProvider } from 'styled-components';
 import { createGlobalNoMiddlewareStore, ecsEventMock } from '../../../test_utils';
 import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
 import { MODAL_TITLE, MODAL_SUBTITLE, ACTIONS_CONFIRM, ACTIONS_CANCEL } from './translations';
-import {
+import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
-} from '../../../../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 jest.mock('../form');
 jest.mock('../../hooks', () => {
