@@ -21,9 +21,9 @@ import { FlyoutBodyNoTopPadding } from './flyout_body_no_top_padding';
 import { getEndpointDetailsPath } from '../../../../../common/routing';
 import { useEndpointSelector } from '../../hooks';
 import {
-  getEndpointIsolateError,
+  getIsolationRequestError,
   getIsIsolationRequestPending,
-  getWasEndpointIsolated,
+  getWasIsolationRequestSuccessful,
   uiQueryParams,
 } from '../../../store/selectors';
 import { AppAction } from '../../../../../../common/store/actions';
@@ -38,8 +38,8 @@ export const EndpointIsolateFlyoutPanel = memo<{
 
   const { show, ...queryParams } = useEndpointSelector(uiQueryParams);
   const isPending = useEndpointSelector(getIsIsolationRequestPending);
-  const wasSuccessful = useEndpointSelector(getWasEndpointIsolated);
-  const isolateError = useEndpointSelector(getEndpointIsolateError);
+  const wasSuccessful = useEndpointSelector(getWasIsolationRequestSuccessful);
+  const isolateError = useEndpointSelector(getIsolationRequestError);
 
   const [formValues, setFormValues] = useState<
     Parameters<EndpointIsolatedFormProps['onChange']>[0]

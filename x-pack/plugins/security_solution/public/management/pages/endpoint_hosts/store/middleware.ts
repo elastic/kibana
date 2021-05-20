@@ -26,7 +26,7 @@ import {
   searchBarQuery,
   isTransformEnabled,
   getIsIsolationRequestPending,
-  getCurrentIsolationState,
+  getCurrentIsolationRequestState,
 } from './selectors';
 import { EndpointState, PolicyIds } from '../types';
 import {
@@ -467,7 +467,7 @@ const handleIsolateEndpointHost = async (
     type: 'endpointIsolationStateChanged',
     // Ignore will be fixed with when AsyncResourceState is refactored (#830)
     // @ts-ignore
-    payload: createLoadingResourceState(getCurrentIsolationState(state)),
+    payload: createLoadingResourceState(getCurrentIsolationRequestState(state)),
   });
 
   try {

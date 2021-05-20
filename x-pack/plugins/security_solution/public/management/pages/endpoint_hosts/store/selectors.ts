@@ -306,7 +306,7 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
   }
 );
 
-export const getCurrentIsolationState = (
+export const getCurrentIsolationRequestState = (
   state: Immutable<EndpointState>
 ): EndpointState['isolationRequestState'] => {
   return state.isolationRequestState;
@@ -314,19 +314,19 @@ export const getCurrentIsolationState = (
 
 export const getIsIsolationRequestPending: (
   state: Immutable<EndpointState>
-) => boolean = createSelector(getCurrentIsolationState, (isolateHost) =>
+) => boolean = createSelector(getCurrentIsolationRequestState, (isolateHost) =>
   isLoadingResourceState(isolateHost)
 );
 
-export const getWasEndpointIsolated: (
+export const getWasIsolationRequestSuccessful: (
   state: Immutable<EndpointState>
-) => boolean = createSelector(getCurrentIsolationState, (isolateHost) =>
+) => boolean = createSelector(getCurrentIsolationRequestState, (isolateHost) =>
   isLoadedResourceState(isolateHost)
 );
 
-export const getEndpointIsolateError: (
+export const getIsolationRequestError: (
   state: Immutable<EndpointState>
-) => ServerApiError | undefined = createSelector(getCurrentIsolationState, (isolateHost) => {
+) => ServerApiError | undefined = createSelector(getCurrentIsolationRequestState, (isolateHost) => {
   if (isFailedResourceState(isolateHost)) {
     return isolateHost.error;
   }
