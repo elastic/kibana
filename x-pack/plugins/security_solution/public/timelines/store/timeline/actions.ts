@@ -41,6 +41,8 @@ export const {
   clearEventsLoading,
   setEventsDeleted,
   clearEventsDeleted,
+  initializeTgrid,
+  setSelectAll,
 } = TGridActions;
 // export const applyDeltaToColumnWidth = TGridActions.applyDeltaToColumnWidth;
 // export const upsertColumn = TGridActions.upsertColumn;
@@ -57,6 +59,8 @@ export const {
 // export const clearEventsLoading = TGridActions.clearEventsLoading;
 // export const setEventsDeleted = TGridActions.setEventsDeleted;
 // export const clearEventsDeleted = TGridActions.clearEventsDeleted;
+// export const initializeTgrid = TGridActions.initializeTgrid;
+// export const setSelectAll = TGridActions.setSelectAll;
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 

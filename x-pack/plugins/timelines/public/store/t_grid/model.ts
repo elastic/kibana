@@ -12,6 +12,7 @@ import {
   TimelineExpandedDetail,
   SortColumnTimeline,
 } from '../../../../security_solution/common/types/timeline';
+import { TimelineModel } from '../../../../security_solution/public/';
 
 export interface TGridModel {
   /** The columns displayed in the timeline */

@@ -11,9 +11,12 @@ import {
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
+  initializeTgrid,
   removeColumn,
   setEventsDeleted,
   setEventsLoading,
+  setIsLoading,
+  setSelectAll,
   setSelected,
   toggleDetailPanel,
   updateColumns,
@@ -26,6 +29,7 @@ import {
 
 import {
   applyDeltaToTimelineColumnWidth,
+  getInitializeTgrid,
   removeTimelineColumn,
   setDeletedTimelineEvents,
   setLoadingTimelineEvents,
@@ -48,6 +52,8 @@ export const initialTGridState: TimelineState = {
   },
   showCallOutUnauthorizedMsg: false,
   insertTimeline: null,
+  isTgridLoading: false,
+  isSelectAllSelected: false,
 };
 
 /** The reducer for all timeline actions  */
@@ -182,5 +188,21 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       itemsPerPageOptions,
       timelineById: state.timelineById,
     }),
+  }))
+  .case(initializeTgrid, (state, { id, ...timelineProps }) => ({
+    ...state,
+    timelineById: getInitializeTgrid({
+      id,
+      timelineById: state.timelineById,
+      ...timelineProps,
+    }),
+  }))
+  .case(setIsLoading, (state, { isTgridLoading }) => ({
+    ...state,
+    isTgridLoading,
+  }))
+  .case(setSelectAll, (state, { isSelectAllSelected }) => ({
+    ...state,
+    isSelectAllSelected,
   }))
   .build();

@@ -127,6 +127,27 @@ export const removeTimelineColumn = ({
   };
 };
 
+interface InitializeTgridParams {
+  id: string;
+  timelineById: TimelineById;
+}
+
+export const getInitializeTgrid = ({
+  id,
+  timelineById,
+  ...timelineProps
+}: InitializeTgridParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      ...timelineProps,
+    },
+  };
+};
+
 interface ApplyDeltaToTimelineColumnWidth {
   id: string;
   columnId: string;

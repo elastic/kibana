@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
-
+import React, { useEffect, useMemo, useCallback } from 'react';
+import { timelineActions } from '../../../timelines/store/timeline';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { alertsDefaultModel } from './default_headers';
-import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import * as i18n from './translations';
@@ -72,10 +71,9 @@ const AlertsTableComponent: React.FC<Props> = ({
 }) => {
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
   const { filterManager } = useKibana().services.data.query;
-  const { initializeTimeline } = useManageTimeline();
 
   useEffect(() => {
-    initializeTimeline({
+    timelineActions.initializeTgrid({
       id: timelineId,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
       filterManager,
@@ -84,8 +82,7 @@ const AlertsTableComponent: React.FC<Props> = ({
       title: i18n.ALERTS_TABLE_TITLE,
       unit: i18n.UNIT,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [filterManager, timelineId]);
 
   return (
     <StatefulEventsViewer

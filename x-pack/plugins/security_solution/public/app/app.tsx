@@ -21,7 +21,6 @@ import { GlobalToaster, ManageGlobalToaster } from '../common/components/toaster
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
 import { State } from '../common/store';
 
-import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
 import { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
@@ -42,23 +41,21 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, onAppLeav
     <EuiErrorBoundary>
       <i18n.Context>
         <ManageGlobalToaster>
-          <ManageGlobalTimeline>
-            <ReduxStoreProvider store={store}>
-              <EuiThemeProvider darkMode={darkMode}>
-                <MlCapabilitiesProvider>
-                  <UserPrivilegesProvider>
-                    <ManageUserInfo>
-                      <PageRouter history={history} onAppLeave={onAppLeave}>
-                        {children}
-                      </PageRouter>
-                    </ManageUserInfo>
-                  </UserPrivilegesProvider>
-                </MlCapabilitiesProvider>
-              </EuiThemeProvider>
-              <ErrorToastDispatcher />
-              <GlobalToaster />
-            </ReduxStoreProvider>
-          </ManageGlobalTimeline>
+          <ReduxStoreProvider store={store}>
+            <EuiThemeProvider darkMode={darkMode}>
+              <MlCapabilitiesProvider>
+                <UserPrivilegesProvider>
+                  <ManageUserInfo>
+                    <PageRouter history={history} onAppLeave={onAppLeave}>
+                      {children}
+                    </PageRouter>
+                  </ManageUserInfo>
+                </UserPrivilegesProvider>
+              </MlCapabilitiesProvider>
+            </EuiThemeProvider>
+            <ErrorToastDispatcher />
+            <GlobalToaster />
+          </ReduxStoreProvider>
         </ManageGlobalToaster>
       </i18n.Context>
     </EuiErrorBoundary>

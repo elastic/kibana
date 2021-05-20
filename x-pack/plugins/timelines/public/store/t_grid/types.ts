@@ -31,6 +31,8 @@ export interface TimelineState {
   autoSavedWarningMsg: AutoSavedWarningMsg;
   showCallOutUnauthorizedMsg: boolean;
   insertTimeline: InsertTimeline | null;
+  isTgridLoading: boolean;
+  isSelectAllSelected: boolean;
 }
 
 export enum TimelineId {
