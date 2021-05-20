@@ -14,7 +14,7 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import {
+import type {
   MachineLearningJobIdOrUndefined,
   From,
   FromOrUndefined,
@@ -42,9 +42,9 @@ import {
   MaxSignalsOrUndefined,
   MaxSignals,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
+import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
 
-import { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {

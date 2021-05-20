@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-export type {
-  ListSchema,
-  ExceptionListSchema,
-  ExceptionListItemSchema,
-  CreateExceptionListSchema,
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-} from './schemas';
-
 export { buildExceptionFilter } from './exceptions';
 
 export {
