@@ -7,7 +7,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 
-import { List } from '@kbn/securitysolution-io-ts-list-types';
+import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { HttpStart } from '../../../../../../../../src/core/public';
 import { patchRule } from './api';
 
