@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './share_mode_control.scss';
-
 import {
   EuiButtonGroup,
   EuiCallOut,
@@ -152,44 +150,52 @@ export const ShareModeControl = (props: Props) => {
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiText
-            color="subdued"
-            textAlign="center"
-            size="s"
-            data-test-subj="share-mode-control-description"
-          >
-            {isGlobalControlChecked
-              ? i18n.translate('xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.text', {
-                  defaultMessage: 'Make {objectNoun} available in all current and future spaces.',
-                  values: { objectNoun },
-                })
-              : i18n.translate(
-                  'xpack.spaces.shareToSpace.shareModeControl.shareToExplicitSpaces.text',
-                  {
-                    defaultMessage: 'Make {objectNoun} available in selected spaces only.',
-                    values: { objectNoun },
-                  }
-                )}
-          </EuiText>
-        </EuiFlexItem>
-        {!canShareToAllSpaces && (
-          <EuiFlexItem grow={false}>
-            <EuiIconTip content={cannotChangeTooltip} position="left" type="iInCircle" />
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiText
+              color="subdued"
+              textAlign="center"
+              size="s"
+              data-test-subj="share-mode-control-description"
+            >
+              {isGlobalControlChecked
+                ? i18n.translate(
+                    'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.text',
+                    {
+                      defaultMessage:
+                        'Make {objectNoun} available in all current and future spaces.',
+                      values: { objectNoun },
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.spaces.shareToSpace.shareModeControl.shareToExplicitSpaces.text',
+                    {
+                      defaultMessage: 'Make {objectNoun} available in selected spaces only.',
+                      values: { objectNoun },
+                    }
+                  )}
+            </EuiText>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+          {!canShareToAllSpaces && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={cannotChangeTooltip} position="left" type="iInCircle" />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
 
       <EuiSpacer size="m" />
 
-      <SelectableSpacesControl
-        spaces={spaces}
-        shareOptions={shareOptions}
-        onChange={onChange}
-        enableCreateNewSpaceLink={enableCreateNewSpaceLink}
-        enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
-      />
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <SelectableSpacesControl
+          spaces={spaces}
+          shareOptions={shareOptions}
+          onChange={onChange}
+          enableCreateNewSpaceLink={enableCreateNewSpaceLink}
+          enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
+        />
+      </EuiFlexGroup>
     </>
   );
 };

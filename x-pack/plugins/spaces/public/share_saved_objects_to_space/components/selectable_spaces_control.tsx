@@ -17,7 +17,6 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiSelectable,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
@@ -144,8 +143,7 @@ export const SelectableSpacesControl = (props: Props) => {
       docLinks!
     ).getKibanaPrivilegesDocUrl();
     return (
-      <>
-        <EuiSpacer size="xs" />
+      <EuiFlexItem grow={false} className="spcShareToSpace__bottomLabel">
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.spaces.shareToSpace.unknownSpacesLabel.text"
@@ -162,12 +160,16 @@ export const SelectableSpacesControl = (props: Props) => {
             }}
           />
         </EuiText>
-      </>
+      </EuiFlexItem>
     );
   };
   const getNoSpacesAvailable = () => {
     if (enableCreateNewSpaceLink && spaces.length < 2) {
-      return <NoSpacesAvailable application={application!} />;
+      return (
+        <EuiFlexItem grow={false} className="spcShareToSpace__bottomLabel">
+          <NoSpacesAvailable application={application!} />
+        </EuiFlexItem>
+      );
     }
     return null;
   };
@@ -192,46 +194,52 @@ export const SelectableSpacesControl = (props: Props) => {
   );
   const hiddenSpaces = hiddenCount ? <EuiText size="xs">{hiddenSpacesLabel}</EuiText> : null;
   return (
-    <EuiFormRow
-      label={selectSpacesLabel}
-      labelAppend={
-        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">{selectedSpacesLabel}</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{hiddenSpaces}</EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      fullWidth
-    >
-      <>
-        <Suspense fallback={<EuiLoadingSpinner />}>
-          <EuiSelectable
-            options={options}
-            onChange={(newOptions) => updateSelectedSpaces(newOptions as SpaceOption[])}
-            listProps={{
-              bordered: true,
-              rowHeight: ROW_HEIGHT,
-              className: 'spcShareToSpace__spacesList',
-              'data-test-subj': 'sts-form-space-selector',
-            }}
-            height={ROW_HEIGHT * 3.5}
-            searchable={options.length > 6}
-          >
-            {(list, search) => {
-              return (
-                <>
-                  {search}
-                  {list}
-                </>
-              );
-            }}
-          </EuiSelectable>
-        </Suspense>
+    <>
+      <EuiFormRow
+        label={selectSpacesLabel}
+        labelAppend={
+          <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">{selectedSpacesLabel}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{hiddenSpaces}</EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        fullWidth
+      >
+        <></>
+      </EuiFormRow>
+
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <EuiSelectable
+              options={options}
+              onChange={(newOptions) => updateSelectedSpaces(newOptions as SpaceOption[])}
+              listProps={{
+                bordered: true,
+                rowHeight: ROW_HEIGHT,
+                className: 'spcShareToSpace__spacesList',
+                'data-test-subj': 'sts-form-space-selector',
+              }}
+              height="full"
+              searchable={options.length > 6}
+            >
+              {(list, search) => {
+                return (
+                  <>
+                    {search}
+                    {list}
+                  </>
+                );
+              }}
+            </EuiSelectable>
+          </Suspense>
+        </EuiFlexItem>
         {getUnknownSpacesLabel()}
         {getNoSpacesAvailable()}
-      </>
-    </EuiFormRow>
+      </EuiFlexGroup>
+    </>
   );
 };
 

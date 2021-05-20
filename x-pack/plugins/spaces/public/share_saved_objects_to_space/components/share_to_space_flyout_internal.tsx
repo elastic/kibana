@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import './share_to_space_flyout_internal.scss';
+
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -320,24 +321,31 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          {savedObjectTarget.icon && (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={savedObjectTarget.icon} />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <EuiText>
-              <p>{savedObjectTarget.title}</p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
 
-        <EuiHorizontalRule margin="m" />
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        className="spcShareToSpace__flyoutBodyWrapper"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            {savedObjectTarget.icon && (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={savedObjectTarget.icon} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              <EuiText>
+                <p>{savedObjectTarget.title}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiSpacer size="m" />
 
         {getFlyoutBody()}
-      </EuiFlyoutBody>
+      </EuiFlexGroup>
 
       <EuiFlyoutFooter>
         <RelativesControl

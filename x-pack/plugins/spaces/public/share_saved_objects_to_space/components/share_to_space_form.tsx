@@ -77,7 +77,7 @@ export const ShareToSpaceForm = (props: Props) => {
   ) : null;
 
   return (
-    <div data-test-subj="share-to-space-form">
+    <>
       {createCopyCallout}
 
       <ShareModeControl
@@ -89,6 +89,6 @@ export const ShareToSpaceForm = (props: Props) => {
         enableCreateNewSpaceLink={enableCreateNewSpaceLink}
         enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
       />
-    </div>
+    </>
   );
 };
