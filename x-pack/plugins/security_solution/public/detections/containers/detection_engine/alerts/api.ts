@@ -14,7 +14,6 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../../common/constants';
-import { ISOLATE_HOST_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   BasicSignals,
