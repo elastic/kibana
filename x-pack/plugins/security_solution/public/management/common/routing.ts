@@ -68,7 +68,9 @@ export const getEndpointDetailsPath = (
     EndpointDetailsUrlProps,
   search?: string
 ) => {
-  const { name, ...queryParams } = props;
+  const { name, show, ...rest } = props;
+
+  const queryParams: EndpointDetailsUrlProps = { ...rest };
 
   switch (props.name) {
     case 'endpointIsolate':
@@ -77,8 +79,6 @@ export const getEndpointDetailsPath = (
     case 'endpointPolicyResponse':
       queryParams.show = 'policy_response';
       break;
-    default:
-      queryParams.show = undefined;
   }
 
   const urlQueryParams = querystringStringify<EndpointDetailsUrlProps, typeof queryParams>(

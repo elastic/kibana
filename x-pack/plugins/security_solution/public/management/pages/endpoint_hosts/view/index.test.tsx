@@ -911,12 +911,13 @@ describe('when on the endpoint list page', () => {
       let renderResult: ReturnType<AppContextTestRender['render']>;
 
       beforeEach(async () => {
-        isolateApiMock = hostIsolationHttpMocks(coreStart.http);
         getKibanaServicesMock.mockReturnValue(coreStart);
         reactTestingLibrary.act(() => {
           history.push('/endpoints?selected_endpoint=1&show=isolate');
         });
         renderResult = await renderAndWaitForData();
+        coreStart.http.post.mockReset();
+        isolateApiMock = hostIsolationHttpMocks(coreStart.http);
       });
 
       it('should show the isolate form', () => {
@@ -943,7 +944,7 @@ describe('when on the endpoint list page', () => {
 
         expect((await changeUrlAction).payload).toMatchObject({
           pathname: '/endpoints',
-          search: '?page_index=0&page_size=10&selected_endpoint=1&show=',
+          search: '?page_index=0&page_size=10&selected_endpoint=1',
         });
       });
 
@@ -956,7 +957,7 @@ describe('when on the endpoint list page', () => {
 
         expect((await changeUrlAction).payload).toMatchObject({
           pathname: '/endpoints',
-          search: '?page_index=0&page_size=10&selected_endpoint=1&show=',
+          search: '?page_index=0&page_size=10&selected_endpoint=1',
         });
       });
 
@@ -976,7 +977,7 @@ describe('when on the endpoint list page', () => {
 
         expect((await changeUrlAction).payload).toMatchObject({
           pathname: '/endpoints',
-          search: '?page_index=0&page_size=10&selected_endpoint=1&show=',
+          search: '?page_index=0&page_size=10&selected_endpoint=1',
         });
       });
 
@@ -984,8 +985,9 @@ describe('when on the endpoint list page', () => {
         isolateApiMock.responseProvider.isolateHost.mockImplementation(() => {
           throw new Error('oh oh. something went wrong');
         });
-        coreStart.http.post.mockReset();
-        coreStart.http.post.mockRejectedValue(new Error('oh oh. something went wrong'));
+
+        // coreStart.http.post.mockReset();
+        // coreStart.http.post.mockRejectedValue(new Error('oh oh. something went wrong'));
         await confirmIsolateAndWaitForApiResponse('failure');
 
         expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(

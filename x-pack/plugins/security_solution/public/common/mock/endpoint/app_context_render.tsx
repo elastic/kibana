@@ -20,6 +20,7 @@ import { managementMiddlewareFactory } from '../../../management/store/middlewar
 import { createKibanaContextProviderMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { PLUGIN_ID } from '../../../../../fleet/common';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -87,7 +88,7 @@ const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeatu
  */
 export const createAppRootMockRenderer = (): AppContextTestRender => {
   const history = createMemoryHistory<never>();
-  const coreStart = coreMock.createStart({ basePath: '/mock' });
+  const coreStart = createCoreStartMock();
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
   const { storage } = createSecuritySolutionStorageMock();
@@ -137,4 +138,20 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     render,
     setExperimentalFlag,
   };
+};
+
+const createCoreStartMock = (): ReturnType<typeof coreMock.createStart> => {
+  const coreStart = coreMock.createStart({ basePath: '/mock' });
+
+  // Mock the certain APP Ids returned by `application.getUrlForApp()`
+  coreStart.application.getUrlForApp.mockImplementation((appId) => {
+    switch (appId) {
+      case PLUGIN_ID:
+        return '/app/fleet';
+      default:
+        return `${appId} not mocked!`;
+    }
+  });
+
+  return coreStart;
 };
