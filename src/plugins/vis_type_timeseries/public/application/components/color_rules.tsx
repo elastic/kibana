@@ -46,7 +46,7 @@ interface ColorRule {
   text?: string;
 }
 
-interface ColorRulesOperator {
+export interface ColorRulesOperator {
   translateNameId: string;
   defaultName: string;
   method: string;
@@ -64,7 +64,7 @@ const defaultPrimaryName = i18n.translate('visTypeTimeseries.colorRules.defaultP
   defaultMessage: 'background',
 });
 
-const colorRulesOperatorsList: ColorRulesOperator[] = [
+export const colorRulesOperatorsList: ColorRulesOperator[] = [
   {
     translateNameId: 'visTypeTimeseries.colorRules.greaterThanLabel',
     defaultName: '> greater than',

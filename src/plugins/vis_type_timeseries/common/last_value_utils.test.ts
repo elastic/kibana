@@ -10,10 +10,6 @@ import { getLastValue, getLastValueOrEmpty, isEmptyValue, EMPTY_VALUE } from './
 import { clone } from 'lodash';
 
 describe('getLastValue(data)', () => {
-  test('should return undefined ', () => {
-    expect(getLastValue()).toBeUndefined();
-  });
-
   test('should return data, if data is not an array', () => {
     const data = 'foo';
     expect(getLastValue(data)).toBe(data);
@@ -61,10 +57,7 @@ describe('getLastValueOrEmpty(data)', () => {
   });
 
   test(`should return empty array, if second array is empty or it's last element is null/undefined (default)`, () => {
-    let data = [[1, null]];
-    expect(getLastValueOrEmpty(data)).toBe(EMPTY_VALUE);
-
-    data = [[1, undefined]];
+    const data = [[1, null]];
     expect(getLastValueOrEmpty(data)).toBe(EMPTY_VALUE);
   });
 });
