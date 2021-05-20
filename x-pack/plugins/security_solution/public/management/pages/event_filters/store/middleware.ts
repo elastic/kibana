@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { transformNewItemOutput, transformOutput } from '@kbn/securitysolution-list-hooks';
 import { AppAction } from '../../../../common/store/actions';
 import {
   ImmutableMiddleware,
@@ -14,13 +20,6 @@ import {
 
 import { EventFiltersHttpService } from '../service';
 
-import {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
-  transformNewItemOutput,
-  transformOutput,
-  UpdateExceptionListItemSchema,
-} from '../../../../shared_imports';
 import {
   getCurrentListPageDataState,
   getCurrentLocation,

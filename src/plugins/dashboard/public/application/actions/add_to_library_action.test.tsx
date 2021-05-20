@@ -14,6 +14,7 @@ import { CoreStart } from 'kibana/public';
 
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { getStubPluginServices } from '../../../../presentation_util/public';
 
 import {
   EmbeddableInput,
@@ -63,6 +64,7 @@ beforeEach(async () => {
     uiActions: {} as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreStart.http,
+    presentationUtil: getStubPluginServices(),
   };
 
   container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
