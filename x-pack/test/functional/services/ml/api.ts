@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test/types/ftr';
+import { ProvidedType } from '@kbn/test';
 import { Calendar } from '../../../../plugins/ml/server/models/calendar/index';
 import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';

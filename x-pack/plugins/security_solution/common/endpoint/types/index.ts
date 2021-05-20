@@ -835,7 +835,7 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields;
-    ransomware: ProtectionFields;
+    ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
     };
@@ -878,6 +878,13 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
+    malware: ProtectionFields;
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
     logging: {
       file: string;
     };
@@ -902,12 +909,17 @@ export interface UIPolicyConfig {
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'events' | 'advanced'>;
+  linux: Pick<PolicyConfig['linux'], 'malware' | 'events' | 'popup' | 'advanced'>;
 }
 
 /** Policy:  Protection fields */
 export interface ProtectionFields {
   mode: ProtectionModes;
+}
+
+/** Policy:  Supported fields */
+export interface SupportedFields {
+  supported: boolean;
 }
 
 /** Policy protection mode options */

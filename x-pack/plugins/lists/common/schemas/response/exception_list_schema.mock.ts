@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   DATE_NOW,
   DESCRIPTION,
@@ -25,8 +27,6 @@ import {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_NAME,
 } from '../../constants';
-
-import { ExceptionListSchema } from './exception_list_schema';
 
 export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   _version: _VERSION,
