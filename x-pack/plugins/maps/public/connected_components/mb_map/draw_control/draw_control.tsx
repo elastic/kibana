@@ -55,6 +55,7 @@ export class DrawControl extends Component<Props> {
     displayControlsDefault: false,
     modes: mbDrawModes,
   });
+  private _drawFunction: ((event: { features: Feature[] }) => void) | null = null;
 
   componentWillReceiveProps() {
     this._syncDrawControl();
@@ -62,6 +63,7 @@ export class DrawControl extends Component<Props> {
 
   componentDidMount() {
     this._isMounted = true;
+    this._drawFunction = this.props.onDraw(this._mbDrawControl);
     this._syncDrawControl();
   }
 
@@ -97,7 +99,9 @@ export class DrawControl extends Component<Props> {
 
     this.props.mbMap.getCanvas().style.cursor = '';
     this.props.mbMap.off('draw.modechange', this._onModeChange);
-    this.props.mbMap.off('draw.create', this.props.onDraw);
+    if (this._drawFunction !== null) {
+      this.props.mbMap.off('draw.create', this._drawFunction);
+    }
     if (this.props.onFeaturesSelected) {
       this.props.mbMap.off('draw.selectionchange', this.props.onFeaturesSelected);
     }
@@ -115,7 +119,9 @@ export class DrawControl extends Component<Props> {
       this._mbDrawControlAdded = true;
       this.props.mbMap.getCanvas().style.cursor = 'crosshair';
       this.props.mbMap.on('draw.modechange', this._onModeChange);
-      this.props.mbMap.on('draw.create', this.props.onDraw(this._mbDrawControl));
+      if (this._drawFunction !== null) {
+        this.props.mbMap.on('draw.create', this._drawFunction);
+      }
       if (this.props.onFeaturesSelected) {
         this.props.mbMap.on(
           'draw.selectionchange',

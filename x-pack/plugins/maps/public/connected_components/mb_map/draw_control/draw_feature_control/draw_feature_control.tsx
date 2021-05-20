@@ -48,7 +48,6 @@ export class DrawFeatureControl extends Component<Props, {}> {
       e.features.forEach((feature: Feature) => {
         const { geometry } = geoJSONReader.read(feature);
         if (!geometry.isSimple() || !geometry.isValid()) {
-          mbDrawControl.delete(feature.id);
           throw new Error(
             i18n.translate('xpack.maps.drawFeatureControl.invalidGeometry', {
               defaultMessage: `Invalid geometry detected`,
@@ -75,8 +74,10 @@ export class DrawFeatureControl extends Component<Props, {}> {
       );
     } finally {
       this.props.disableDrawState();
-      if (mbDrawControl) {
+      try {
         mbDrawControl.deleteAll();
+      } catch (_e) {
+        // Fail silently. Always works, but sometimes produces an upstream error in the draw tool
       }
     }
   };

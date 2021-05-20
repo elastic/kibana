@@ -18,10 +18,12 @@ import {
   FIT_TO_DATA_LABEL,
   EDIT_FEATURES_LABEL,
 } from '../action_labels';
+import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
-  enableLayerEditing: (layerId: string) => void;
+  enableShapeEditing: (layerId: string) => void;
+  enablePointEditing: (layerId: string) => void;
   displayName: string;
   layerSettings: () => void;
   escapedDisplayName: string;
@@ -127,9 +129,14 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           icon: <EuiIcon type="pencil" size="m" />,
           'data-test-subj': 'editLayerButton',
           toolTipContent: null,
-          onClick: () => {
+          onClick: async () => {
             this._closePopover();
-            this.props.enableLayerEditing(this.props.layer.getId());
+            const supportedShapeTypes = await (this.props.layer.getSource() as ESSearchSource).getSupportedShapeTypes();
+            if (supportedShapeTypes.length === 1) {
+              this.props.enablePointEditing(this.props.layer.getId());
+            } else {
+              this.props.enableShapeEditing(this.props.layer.getId());
+            }
           },
         });
       }

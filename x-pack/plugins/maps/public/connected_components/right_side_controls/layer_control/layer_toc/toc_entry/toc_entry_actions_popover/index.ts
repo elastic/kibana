@@ -41,10 +41,13 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     toggleVisible: (layerId: string) => {
       dispatch(toggleLayerVisible(layerId));
     },
-    enableLayerEditing: (layerId: string) => {
+    enableShapeEditing: (layerId: string) => {
       dispatch(updateEditLayer(layerId));
-      // TODO: Determine points vs. shapes
       dispatch(setDrawMode(DRAW_MODE.DRAW_SHAPES));
+    },
+    enablePointEditing: (layerId: string) => {
+      dispatch(updateEditLayer(layerId));
+      dispatch(setDrawMode(DRAW_MODE.DRAW_POINTS));
     },
   };
 }
