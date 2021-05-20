@@ -167,18 +167,20 @@ a|`xpack.actions.`
 `proxyRejectUnauthorizedCertificates` {ess-icon}
   | Deprecated. Use <<action-config-proxy-verification-mode,`xpack.actions.tls.proxyVerificationMode`>> instead. Set to `false` to bypass certificate validation for the proxy, if using a proxy for actions. Default: `true`.
 
-a|[[action-config-proxy-verification-mode]]`xpack.actions[n]`
+|[[action-config-proxy-verification-mode]]
+`xpack.actions[n]`
 `.tls.proxyVerificationMode` {ess-icon}
 | Controls the verification for the proxy server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the proxy server. Valid values are `full`, `certificate`, and `none`. 
 Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
 
 | `xpack.actions.rejectUnauthorized` {ess-icon}
-  | Deprecated. Use <<action-config-verification-mode,`xpack.actions.tls.verificationMode`>> instead*. Set to `false` to bypass certificate validation for actions. Default: `true`. +
+  | Deprecated. Use <<action-config-verification-mode,`xpack.actions.tls.verificationMode`>> instead. Set to `false` to bypass certificate validation for actions. Default: `true`. +
   +
   As an alternative to setting `xpack.actions.rejectUnauthorized`, you can use the setting
   `xpack.actions.customHostSettings` to set TLS options for specific servers.
 
-a|[[action-config-verification-mode]]`xpack.actions[n]`
+|[[action-config-verification-mode]]
+`xpack.actions[n]`
 `.tls.verificationMode` {ess-icon}
 | Controls the verification for the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`. 
   Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>. +
