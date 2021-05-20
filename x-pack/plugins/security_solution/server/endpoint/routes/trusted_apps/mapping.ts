@@ -13,11 +13,10 @@ import type {
   EntryMatchWildcard,
   EntryNested,
   NestedEntriesArray,
+  OsType,
+  ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { ExceptionListItemSchema } from '../../../../../lists/common';
-
-import type { OsType } from '../../../../../lists/common/schemas';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 import type {
   CreateExceptionListItemOptions,

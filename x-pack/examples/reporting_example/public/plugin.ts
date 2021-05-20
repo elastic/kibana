@@ -16,7 +16,7 @@ import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { SetupDeps, StartDeps } from './types';
 
 export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
-  public setup(core: CoreSetup, { developerExamples, ...depsSetup }: SetupDeps): void {
+  public setup(core: CoreSetup, { developerExamples, screenshotMode }: SetupDeps): void {
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -30,7 +30,7 @@ export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
           unknown
         ];
         // Render the application
-        return renderApp(coreStart, { ...depsSetup, ...depsStart }, params);
+        return renderApp(coreStart, { ...depsStart, screenshotMode }, params);
       },
     });
 
