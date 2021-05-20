@@ -29,8 +29,12 @@ import {
   sendGetFleetAgentsWithEndpoint,
 } from '../../policy/store/services/ingest';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
-import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTION_LOG_ROUTE,
+  metadataCurrentIndexPattern,
+} from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
+import { resolvePathVariables } from '../../../common/utils';
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
@@ -316,7 +320,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       // call the activity log api
       try {
         const activityLog = await coreStart.http.get<EndpointAction[]>(
-          `/api/endpoint/action_log/${selectedAgent(getState())}`
+          resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, { agent_id: selectedAgent(getState()) })
         );
         dispatch({
           type: 'serverReturnedEndpointDetailsActivityLog',
