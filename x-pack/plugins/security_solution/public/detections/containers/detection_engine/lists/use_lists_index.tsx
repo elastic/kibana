@@ -7,7 +7,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 
-import { useReadListIndex, useCreateListIndex } from '../../../../shared_imports';
+import { useReadListIndex, useCreateListIndex } from '@kbn/securitysolution-list-hooks';
 import { useHttp, useKibana } from '../../../../common/lib/kibana';
 import { isSecurityAppError } from '../../../../common/utils/api';
 import * as i18n from './translations';

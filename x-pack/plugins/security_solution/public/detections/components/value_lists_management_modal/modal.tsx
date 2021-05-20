@@ -21,7 +21,9 @@ import {
 } from '@elastic/eui';
 
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { exportList, useFindLists, useDeleteList, useCursor } from '../../../shared_imports';
+import { useFindLists, useDeleteList, useCursor } from '@kbn/securitysolution-list-hooks';
+
+import { exportList } from '@kbn/securitysolution-list-api';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
