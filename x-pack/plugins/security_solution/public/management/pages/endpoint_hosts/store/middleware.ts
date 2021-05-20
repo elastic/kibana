@@ -281,7 +281,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
       try {
         const response = await coreStart.http.get<HostInfo>(
-          resolvePathVariables(HOST_METADATA_GET_API, { id: selectedEndpoint })
+          resolvePathVariables(HOST_METADATA_GET_API, { id: selectedEndpoint as string })
         );
         dispatch({
           type: 'serverReturnedEndpointDetails',

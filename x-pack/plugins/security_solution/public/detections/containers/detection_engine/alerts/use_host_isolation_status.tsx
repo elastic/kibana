@@ -24,7 +24,7 @@ export const useHostIsolationStatus = ({
 }: {
   agentId: string;
 }): HostIsolationStatusResponse => {
-  const [isIsolated, setIsIsolated] = useState<Maybe<boolean>>();
+  const [isIsolated, setIsIsolated] = useState<boolean>();
   const [loading, setLoading] = useState(false);
 
   const { addError } = useAppToasts();
@@ -37,7 +37,7 @@ export const useHostIsolationStatus = ({
       try {
         const metadataResponse = await getHostMetadata({ agentId });
         if (isMounted) {
-          setIsIsolated(metadataResponse.metadata.Endpoint.configuration.isolation);
+          setIsIsolated(Boolean(metadataResponse.metadata.Endpoint.configuration.isolation));
         }
       } catch (error) {
         addError(error.message, { title: ISOLATION_STATUS_FAILURE });
