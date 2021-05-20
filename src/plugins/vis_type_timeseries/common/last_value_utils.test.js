@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  getLastValue,
-  getLastValueOrDefault,
-  getLastValueOrEmpty,
-  isEmptyValue,
-  DEFAULT_VALUE,
-  EMPTY_VALUE,
-} from './last_value_utils';
+import { getLastValue, getLastValueOrEmpty, isEmptyValue, EMPTY_VALUE } from './last_value_utils';
 import { clone } from 'lodash';
 
 describe('getLastValue(data)', () => {
@@ -53,37 +46,6 @@ describe('getLastValue(data)', () => {
         [2, undefined],
       ])
     ).toBeNull();
-  });
-});
-
-describe('getLastValueOrDefault(data)', () => {
-  test('should return the default value', () => {
-    expect(getLastValueOrDefault()).toBe(DEFAULT_VALUE);
-  });
-
-  test('should return the passed default value', () => {
-    const defVal = 'DEFAULT';
-    expect(getLastValueOrDefault(undefined, defVal)).toBe(defVal);
-  });
-
-  test('should return the last value', () => {
-    const lastValue = 10;
-    const data = [[1, lastValue]];
-    expect(getLastValueOrDefault(data)).toBe(lastValue);
-  });
-
-  test(`should return default value, if second array is empty or it's last element is null/undefined (default)`, () => {
-    const data = [[1, null]];
-    expect(getLastValueOrDefault(data)).toBe(DEFAULT_VALUE);
-  });
-
-  test(`should return passed default value, if second array is empty or it's last element is null/undefined (default)`, () => {
-    let data = [[1, null]];
-    const defVal = 'DEFAULT';
-    expect(getLastValueOrDefault(data, defVal)).toBe(defVal);
-
-    data = [[1, undefined]];
-    expect(getLastValueOrDefault(data, defVal)).toBe(defVal);
   });
 });
 

@@ -148,7 +148,7 @@ export class ColorRules extends Component<ColorRulesProps> {
       (operator) => model.operator === operator.method
     );
 
-    const showValueSelectorField = (selectedOperator && !selectedOperator.isValueConstant) ?? false;
+    const hideValueSelectorField = (selectedOperator && selectedOperator.isValueConstant) ?? false;
     const labelStyle = { marginBottom: 0 };
 
     let secondary;
@@ -232,7 +232,7 @@ export class ColorRules extends Component<ColorRulesProps> {
             fullWidth
           />
         </EuiFlexItem>
-        {showValueSelectorField && (
+        {!hideValueSelectorField && (
           <EuiFlexItem>
             <EuiFieldNumber
               aria-label={i18n.translate('visTypeTimeseries.colorRules.valueAriaLabel', {

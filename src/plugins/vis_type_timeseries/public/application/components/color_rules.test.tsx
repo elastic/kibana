@@ -57,6 +57,7 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
       expect((collectionActions.handleChange as jest.Mock).mock.calls[0][1].operator).toEqual('gt');
 
       const numberInput = findTestSubject(wrapper, 'colorRuleValue');
+
       numberInput.simulate('change', { target: { value: '123' } });
       expect((collectionActions.handleChange as jest.Mock).mock.calls[1][1].value).toEqual(123);
     });
