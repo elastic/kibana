@@ -39,6 +39,7 @@ import {
   navigateAway,
   getPreloadedState,
   LensRootStore,
+  setState,
 } from '../state_management';
 import { getResolvedDateRange } from '../lib';
 
@@ -169,8 +170,19 @@ export async function mountApp(
     data.query.filterManager.setAppFilters([]);
   }
 
-  let lensStore: LensRootStore;
+  const preloadedState = getPreloadedState({
+    query: data.query.queryString.getQuery(),
+    // Do not use app-specific filters from previous app,
+    // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
+    filters: !initialContext
+      ? data.query.filterManager.getGlobalFilters()
+      : data.query.filterManager.getFilters(),
+    searchSessionId: data.search.session.start(),
+    resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+    isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
+  });
 
+  const lensStore: LensRootStore = makeConfigureStore(preloadedState, { data });
   // const featureFlagConfig = await getByValueFeatureFlag();
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
@@ -182,20 +194,8 @@ export async function mountApp(
       );
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
-      const preloadedState = getPreloadedState({
-        query: data.query.queryString.getQuery(),
-        // Do not use app-specific filters from previous app,
-        // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-        filters: !initialContext
-          ? data.query.filterManager.getGlobalFilters()
-          : data.query.filterManager.getFilters(),
-        searchSessionId: data.search.session.start(),
-        resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
-        isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
-        isAppLoading: Boolean(initialInput),
-      });
 
-      lensStore = makeConfigureStore(preloadedState, { data });
+      lensStore.dispatch(setState({ isAppLoading: Boolean(initialInput) }));
 
       return (
         <Provider store={lensStore}>

@@ -97,8 +97,6 @@ export function App({
   }, [
     setIndicateNoData,
     indicateNoData,
-    appState.query,
-    appState.filters,
     appState.indexPatternsForTopNav,
     appState.searchSessionId,
   ]);
