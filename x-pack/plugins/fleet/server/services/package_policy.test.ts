@@ -293,6 +293,7 @@ describe('Package policy service', () => {
               dataset: 'package.dataset1',
               type: 'logs',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
             },
           ],
           policy_templates: [
