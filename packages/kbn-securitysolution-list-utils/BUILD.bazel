@@ -31,11 +31,13 @@ SRC_DEPS = [
   "//packages/kbn-i18n",
   "//packages/kbn-securitysolution-io-ts-list-types",
   "//packages/kbn-securitysolution-utils",
+  "@npm//lodash",
   "@npm//tslib",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/jest",
+  "@npm//@types/lodash",
   "@npm//@types/node",
 ]
 
