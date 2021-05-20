@@ -471,7 +471,7 @@ const handleIsolateEndpointHost = async (
   });
 
   try {
-    // Cast needed below due to the valeu of payload being `Immutable<>`
+    // Cast needed below due to the value of payload being `Immutable<>`
     const response = await isolateHost(action.payload as HostIsolationRequestBody);
 
     dispatch({
