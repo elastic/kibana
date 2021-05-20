@@ -1262,7 +1262,7 @@
             "label": "health",
             "description": [],
             "signature": [
-              "ClusterStatus"
+              "\"green\" | \"yellow\" | \"red\""
             ],
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
@@ -1491,7 +1491,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "HealthFromEs"
+              "\"GREEN\" | \"YELLOW\" | \"RED\""
             ],
             "source": {
               "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
