@@ -101,9 +101,15 @@ export const CustomStops = ({
                 const shouldSort = Number(stop) > nextStopValue || prevStopValue > Number(stop);
                 const isFocusStillInContent =
                   (e.currentTarget as Node)?.contains(e.relatedTarget as Node) || popoverInFocus;
-                if (shouldSort && !isFocusStillInContent) {
+                const hasInvalidColor = !isValidColor(color);
+                if ((shouldSort && !isFocusStillInContent) || hasInvalidColor) {
+                  // replace invalid color with previous valid one
+                  const lastValidColor = hasInvalidColor ? colorStops[index].color : color;
+                  const localColorStopsCopy = localColorStops.map((item, i) =>
+                    i === index ? { color: lastValidColor, stop } : item
+                  );
                   setLocalColorStops(
-                    [...localColorStops].sort(
+                    localColorStopsCopy.sort(
                       ({ stop: stopA }, { stop: stopB }) => Number(stopA) - Number(stopB)
                     )
                   );
