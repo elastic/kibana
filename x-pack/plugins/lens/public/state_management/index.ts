@@ -19,7 +19,7 @@ export const reducer = {
   app: appSlice.reducer,
 };
 
-export const { setState, navigateAway } = appSlice.actions;
+export const { setState, navigateAway, onChangeFromEditorFrame } = appSlice.actions;
 
 export const getPreloadedState = (initializedState: Partial<LensAppState>) => {
   const state = {

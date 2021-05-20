@@ -28,6 +28,7 @@ import {
   FilterManager,
   IFieldType,
   IIndexPattern,
+  IndexPattern,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
@@ -628,13 +629,7 @@ describe('Lens App', () => {
           },
         } as jest.ResolvedValue<Document>);
 
-        let frame: jest.Mocked<EditorFrameInstance> = {} as jest.Mocked<EditorFrameInstance>;
-        let component: ReactWrapper = {} as ReactWrapper;
-        await act(async () => {
-          const { frame: newFrame, component: newComponent } = mountWith({ services, props });
-          frame = newFrame;
-          component = newComponent;
-        });
+        const { frame, component } = mountWith({ services, props });
 
         if (initialSavedObjectId) {
           expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
@@ -651,6 +646,7 @@ describe('Lens App', () => {
             isSaveable: true,
           })
         );
+
         component.update();
         expect(getButton(component).disableButton).toEqual(false);
         await act(async () => {
@@ -668,31 +664,31 @@ describe('Lens App', () => {
             visualize: { save: false, saveQuery: false, show: true },
           },
         };
-        const { component, frame } = mountWith({ services });
+        const { component, lensStore } = mountWith({ services });
         expect(getButton(component).disableButton).toEqual(true);
-        const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-        act(() =>
-          onChange({
-            filterableIndexPatterns: [],
-            doc: ({ savedObjectId: 'will save this' } as unknown) as Document,
-            isSaveable: true,
-          })
-        );
+        act(() => {
+          lensStore.dispatch(
+            setState({
+              lastKnownDoc: ({ savedObjectId: 'will save this' } as unknown) as Document,
+              isSaveable: true,
+            })
+          );
+        });
         component.update();
         expect(getButton(component).disableButton).toEqual(true);
       });
 
       it('shows a save button that is enabled when the frame has provided its state and does not show save and return or save as', async () => {
-        const { component, frame } = mountWith({});
+        const { component, lensStore } = mountWith({});
         expect(getButton(component).disableButton).toEqual(true);
-        const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-        act(() =>
-          onChange({
-            filterableIndexPatterns: [],
-            doc: ({ savedObjectId: 'will save this' } as unknown) as Document,
-            isSaveable: true,
-          })
-        );
+        act(() => {
+          lensStore.dispatch(
+            setState({
+              isSaveable: true,
+              lastKnownDoc: ({ savedObjectId: 'will save this' } as unknown) as Document,
+            })
+          );
+        });
         component.update();
         expect(getButton(component).disableButton).toEqual(false);
 
@@ -861,15 +857,16 @@ describe('Lens App', () => {
         services.attributeService.wrapAttributes = jest
           .fn()
           .mockRejectedValue({ message: 'failed' });
-        const { component, props, frame } = mountWith({ services });
-        const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-        act(() =>
-          onChange({
-            filterableIndexPatterns: [],
-            doc: ({ id: undefined } as unknown) as Document,
-            isSaveable: true,
-          })
-        );
+        const { component, props, lensStore } = mountWith({ services });
+        act(() => {
+          lensStore.dispatch(
+            setState({
+              isSaveable: true,
+              lastKnownDoc: ({ id: undefined } as unknown) as Document,
+            })
+          );
+        });
+
         component.update();
 
         await act(async () => {
@@ -939,15 +936,16 @@ describe('Lens App', () => {
         services.attributeService.wrapAttributes = jest
           .fn()
           .mockReturnValue(Promise.resolve({ savedObjectId: '123' }));
-        const { component, frame } = mountWith({ services });
-        const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-        await act(async () =>
-          onChange({
-            filterableIndexPatterns: [],
-            doc: ({ savedObjectId: '123' } as unknown) as Document,
-            isSaveable: true,
-          })
-        );
+        const { component, lensStore } = mountWith({ services });
+        await act(async () => {
+          lensStore.dispatch(
+            setState({
+              isSaveable: true,
+              lastKnownDoc: ({ savedObjectId: '123' } as unknown) as Document,
+            })
+          );
+        });
+
         component.update();
         await act(async () => {
           component.setProps({ initialInput: { savedObjectId: '123' } });
@@ -973,15 +971,16 @@ describe('Lens App', () => {
       });
 
       it('does not show the copy button on first save', async () => {
-        const { component, frame } = mountWith({});
-        const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-        await act(async () =>
-          onChange({
-            filterableIndexPatterns: [],
-            doc: ({} as unknown) as Document,
-            isSaveable: true,
-          })
-        );
+        const { component, lensStore } = mountWith({});
+        await act(async () => {
+          lensStore.dispatch(
+            setState({
+              isSaveable: true,
+              lastKnownDoc: ({} as unknown) as Document,
+            })
+          );
+        });
+
         component.update();
         await act(async () => getButton(component).run(component.getDOMNode()));
         component.update();
@@ -1000,31 +999,31 @@ describe('Lens App', () => {
     }
 
     it('should be disabled when no data is available', async () => {
-      const { component, frame } = mountWith({});
-      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-      await act(async () =>
-        onChange({
-          filterableIndexPatterns: [],
-          doc: ({} as unknown) as Document,
-          isSaveable: true,
-        })
-      );
+      const { component, lensStore } = mountWith({});
+      await act(async () => {
+        lensStore.dispatch(
+          setState({
+            isSaveable: true,
+            lastKnownDoc: ({} as unknown) as Document,
+          })
+        );
+      });
       component.update();
       expect(getButton(component).disableButton).toEqual(true);
     });
 
     it('should disable download when not saveable', async () => {
-      const { component, frame } = mountWith({});
-      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
+      const { component, lensStore } = mountWith({});
 
-      await act(async () =>
-        onChange({
-          filterableIndexPatterns: [],
-          doc: ({} as unknown) as Document,
-          isSaveable: false,
-          activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
-        })
-      );
+      await act(async () => {
+        lensStore.dispatch(
+          setState({
+            lastKnownDoc: ({} as unknown) as Document,
+            isSaveable: false,
+            activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
+          })
+        );
+      });
 
       component.update();
       expect(getButton(component).disableButton).toEqual(true);
@@ -1040,16 +1039,16 @@ describe('Lens App', () => {
         },
       };
 
-      const { component, frame } = mountWith({ services });
-      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-      await act(async () =>
-        onChange({
-          filterableIndexPatterns: [],
-          doc: ({} as unknown) as Document,
-          isSaveable: true,
-          activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
-        })
-      );
+      const { component, lensStore } = mountWith({ services });
+      await act(async () => {
+        lensStore.dispatch(
+          setState({
+            lastKnownDoc: ({} as unknown) as Document,
+            isSaveable: true,
+            activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
+          })
+        );
+      });
       component.update();
       expect(getButton(component).disableButton).toEqual(false);
     });
@@ -1079,20 +1078,21 @@ describe('Lens App', () => {
     });
 
     it('updates the index patterns when the editor frame is changed', async () => {
-      const { component, frame } = mountWith({});
+      const { component, lensStore } = mountWith({});
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           indexPatterns: [],
         }),
         {}
       );
-      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
       await act(async () => {
-        onChange({
-          filterableIndexPatterns: ['1'],
-          doc: ({ id: undefined } as unknown) as Document,
-          isSaveable: true,
-        });
+        lensStore.dispatch(
+          setState({
+            indexPatternsForTopNav: [{ id: '1' }] as IndexPattern[],
+            lastKnownDoc: ({} as unknown) as Document,
+            isSaveable: true,
+          })
+        );
       });
       component.update();
       expect(TopNavMenu).toHaveBeenCalledWith(
@@ -1103,11 +1103,13 @@ describe('Lens App', () => {
       );
       // Do it again to verify that the dirty checking is done right
       await act(async () => {
-        onChange({
-          filterableIndexPatterns: ['2'],
-          doc: ({ id: undefined } as unknown) as Document,
-          isSaveable: true,
-        });
+        lensStore.dispatch(
+          setState({
+            indexPatternsForTopNav: [{ id: '2' }] as IndexPattern[],
+            lastKnownDoc: ({} as unknown) as Document,
+            isSaveable: true,
+          })
+        );
       });
       component.update();
       expect(TopNavMenu).toHaveBeenLastCalledWith(
@@ -1500,18 +1502,19 @@ describe('Lens App', () => {
           visualize: { save: false, saveQuery: false, show: true },
         },
       };
-      const { component, frame, props } = mountWith({ services });
-      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-      act(() =>
-        onChange({
-          filterableIndexPatterns: [],
-          doc: ({
-            savedObjectId: undefined,
-            references: [],
-          } as unknown) as Document,
-          isSaveable: true,
-        })
-      );
+      const { component, props, lensStore } = mountWith({ services });
+      act(() => {
+        lensStore.dispatch(
+          setState({
+            indexPatternsForTopNav: [] as IndexPattern[],
+            lastKnownDoc: ({
+              savedObjectId: undefined,
+              references: [],
+            } as unknown) as Document,
+            isSaveable: true,
+          })
+        );
+      });
       component.update();
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
@@ -1520,15 +1523,15 @@ describe('Lens App', () => {
     });
 
     it('should confirm when leaving with an unsaved doc', () => {
-      const { component, frame, props } = mountWith({});
-      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-      act(() =>
-        onChange({
-          filterableIndexPatterns: [],
-          doc: ({ savedObjectId: undefined, state: {} } as unknown) as Document,
-          isSaveable: true,
-        })
-      );
+      const { component, lensStore, props } = mountWith({});
+      act(() => {
+        lensStore.dispatch(
+          setState({
+            lastKnownDoc: ({ savedObjectId: undefined, state: {} } as unknown) as Document,
+            isSaveable: true,
+          })
+        );
+      });
       component.update();
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
@@ -1537,21 +1540,21 @@ describe('Lens App', () => {
     });
 
     it('should confirm when leaving with unsaved changes to an existing doc', async () => {
-      const { component, frame, props } = mountWith({});
+      const { component, lensStore, props } = mountWith({});
       await act(async () => {
         component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
       });
-      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-      act(() =>
-        onChange({
-          filterableIndexPatterns: [],
-          doc: ({
-            savedObjectId: defaultSavedObjectId,
-            references: [],
-          } as unknown) as Document,
-          isSaveable: true,
-        })
-      );
+      act(() => {
+        lensStore.dispatch(
+          setState({
+            lastKnownDoc: ({
+              savedObjectId: defaultSavedObjectId,
+              references: [],
+            } as unknown) as Document,
+            isSaveable: true,
+          })
+        );
+      });
       component.update();
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
@@ -1560,18 +1563,18 @@ describe('Lens App', () => {
     });
 
     it('should not confirm when changes are saved', async () => {
-      const { component, frame, props } = mountWith({});
+      const { component, lensStore, props } = mountWith({});
       await act(async () => {
         component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
       });
-      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-      act(() =>
-        onChange({
-          filterableIndexPatterns: [],
-          doc: defaultDoc,
-          isSaveable: true,
-        })
-      );
+      act(() => {
+        lensStore.dispatch(
+          setState({
+            lastKnownDoc: defaultDoc,
+            isSaveable: true,
+          })
+        );
+      });
       component.update();
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
@@ -1580,18 +1583,21 @@ describe('Lens App', () => {
     });
 
     it('should confirm when the latest doc is invalid', async () => {
-      const { component, frame, props } = mountWith({});
+      const { component, lensStore, props } = mountWith({});
       await act(async () => {
         component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
       });
-      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
-      act(() =>
-        onChange({
-          filterableIndexPatterns: [],
-          doc: ({ savedObjectId: defaultSavedObjectId, references: [] } as unknown) as Document,
-          isSaveable: true,
-        })
-      );
+      act(() => {
+        lensStore.dispatch(
+          setState({
+            lastKnownDoc: ({
+              savedObjectId: defaultSavedObjectId,
+              references: [],
+            } as unknown) as Document,
+            isSaveable: true,
+          })
+        );
+      });
       component.update();
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });

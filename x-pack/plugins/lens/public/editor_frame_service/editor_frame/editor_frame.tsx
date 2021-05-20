@@ -29,7 +29,13 @@ import {
   switchToSuggestion,
 } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { useLensSelector } from '../../state_management';
+import {
+  setState as setAppState,
+  useLensSelector,
+  useLensDispatch,
+  LensAppState,
+  DispatchSetState,
+} from '../../state_management';
 export interface EditorFrameProps {
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
@@ -55,10 +61,19 @@ export function EditorFrame(props: EditorFrameProps) {
     searchSessionId,
     savedQuery,
     query,
-    persistedDoc: doc,
+    persistedDoc,
+    indexPatternsForTopNav,
+    lastKnownDoc,
+    activeData,
+    isSaveable,
     resolvedDateRange: dateRange,
   } = useLensSelector((state) => state.app);
-  const [state, dispatch] = useReducer(reducer, { ...props, doc }, getInitialState);
+  const [state, dispatch] = useReducer(reducer, { ...props, doc: persistedDoc }, getInitialState);
+  const dispatchLens = useLensDispatch();
+  const dispatchChange: DispatchSetState = useCallback(
+    (s: Partial<LensAppState>) => dispatchLens(onChangeFromEditorFrame(s)),
+    [dispatchLens]
+  );
   const [visualizeTriggerFieldContext, setVisualizeTriggerFieldContext] = useState(
     props.initialContext
   );
@@ -79,7 +94,7 @@ export function EditorFrame(props: EditorFrameProps) {
         initializeDatasources(
           props.datasourceMap,
           state.datasourceStates,
-          doc?.references,
+          persistedDoc?.references,
           visualizeTriggerFieldContext,
           { isFullEditor: true }
         )
@@ -158,19 +173,19 @@ export function EditorFrame(props: EditorFrameProps) {
 
   useEffect(
     () => {
-      if (doc) {
+      if (persistedDoc) {
         dispatch({
           type: 'VISUALIZATION_LOADED',
           doc: {
-            ...doc,
+            ...persistedDoc,
             state: {
-              ...doc.state,
-              visualization: doc.visualizationType
-                ? props.visualizationMap[doc.visualizationType].initialize(
+              ...persistedDoc.state,
+              visualization: persistedDoc.visualizationType
+                ? props.visualizationMap[persistedDoc.visualizationType].initialize(
                     framePublicAPI,
-                    doc.state.visualization
+                    persistedDoc.state.visualization
                   )
-                : doc.state.visualization,
+                : persistedDoc.state.visualization,
             },
           },
         });
@@ -182,7 +197,7 @@ export function EditorFrame(props: EditorFrameProps) {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [doc]
+    [persistedDoc]
   );
 
   // Initialize visualization as soon as all datasources are ready
@@ -203,7 +218,7 @@ export function EditorFrame(props: EditorFrameProps) {
 
   // Get suggestions for visualize field when all datasources are ready
   useEffect(() => {
-    if (allLoaded && visualizeTriggerFieldContext && !doc) {
+    if (allLoaded && visualizeTriggerFieldContext && !persistedDoc) {
       applyVisualizeFieldSuggestions({
         datasourceMap: props.datasourceMap,
         datasourceStates: state.datasourceStates,
@@ -242,7 +257,14 @@ export function EditorFrame(props: EditorFrameProps) {
           visualization: activeVisualization,
           state,
           framePublicAPI,
-        })
+        }),
+        {
+          isSaveable,
+          persistedDoc,
+          indexPatternsForTopNav,
+          lastKnownDoc,
+          activeData,
+        }
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

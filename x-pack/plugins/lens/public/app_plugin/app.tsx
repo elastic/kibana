@@ -8,7 +8,7 @@
 import './app.scss';
 
 import _ from 'lodash';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Toast } from 'kibana/public';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
@@ -39,6 +39,7 @@ import {
   useLensDispatch,
   LensAppState,
   DispatchSetState,
+  onChangeFromEditorFrame,
 } from '../state_management';
 
 import { getAllIndexPatterns } from '../lib';
@@ -75,6 +76,11 @@ export function App({
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = useCallback(
     (state: Partial<LensAppState>) => dispatch(setAppState(state)),
+    [dispatch]
+  );
+
+  const dispatchChange: DispatchSetState = useCallback(
+    (state: Partial<LensAppState>) => dispatch(onChangeFromEditorFrame(state)),
     [dispatch]
   );
 
@@ -426,65 +432,61 @@ export function App({
     }
   };
 
-  const lastKnownDocRef = useRef(appState.lastKnownDoc);
-  lastKnownDocRef.current = appState.lastKnownDoc;
-
-  const activeDataRef = useRef(appState.activeData);
-  activeDataRef.current = appState.activeData;
-
   const savingToLibraryPermitted = Boolean(
     appState.isSaveable && application.capabilities.visualize.save
   );
 
-  const onChange: (newState: {
-    filterableIndexPatterns: string[];
-    doc: Document;
-    isSaveable: boolean;
-    activeData?: Record<string, Datatable>;
-  }) => void = React.useCallback(
-    ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
+  const onChange: (
+    newState: {
+      filterableIndexPatterns: string[];
+      doc: Document;
+      isSaveable: boolean;
+      activeData?: Record<string, Datatable>;
+    },
+    oldState: {
+      isSaveable: boolean;
+      lastKnownDoc: Document;
+      persistedDoc: Document;
+      activeData?: Record<string, Datatable>;
+      indexPatternsForTopNav: IndexPattern[];
+    }
+  ) => void = React.useCallback(
+    ({ filterableIndexPatterns, doc, isSaveable, activeData }, prevState) => {
       const batchedStateToUpdate: Partial<LensAppState> = {};
 
-      if (isSaveable !== appState.isSaveable) {
+      if (isSaveable !== prevState.isSaveable) {
         batchedStateToUpdate.isSaveable = isSaveable;
       }
 
-      if (!_.isEqual(appState.persistedDoc, doc) && !_.isEqual(lastKnownDocRef.current, doc)) {
+      if (!_.isEqual(prevState.persistedDoc, doc) && !_.isEqual(prevState.lastKnownDoc, doc)) {
         batchedStateToUpdate.lastKnownDoc = doc;
       }
-      if (!_.isEqual(activeDataRef.current, activeData)) {
+      if (!_.isEqual(prevState.activeData, activeData)) {
         batchedStateToUpdate.activeData = activeData;
       }
 
       if (Object.keys(batchedStateToUpdate).length) {
-        dispatchSetState(batchedStateToUpdate);
+        dispatchChange(batchedStateToUpdate);
       }
 
       const hasIndexPatternsChanged =
-        appState.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
+        prevState.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
         filterableIndexPatterns.some(
-          (id) => !appState.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
+          (id) => !prevState.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
         );
       // Update the cached index patterns if the user made a change to any of them
       if (hasIndexPatternsChanged) {
         getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
           ({ indexPatterns }) => {
             if (indexPatterns) {
-              dispatchSetState({ indexPatternsForTopNav: indexPatterns });
+              // console.log('rest', { indexPatternsForTopNav: indexPatterns });
+              dispatchChange({ indexPatternsForTopNav: indexPatterns });
             }
           }
         );
       }
     },
-    [
-      appState.isSaveable,
-      appState.persistedDoc,
-      lastKnownDocRef,
-      activeDataRef,
-      data.indexPatterns,
-      appState.indexPatternsForTopNav,
-      dispatchSetState,
-    ]
+    [data.indexPatterns, dispatchChange]
   );
 
   return (

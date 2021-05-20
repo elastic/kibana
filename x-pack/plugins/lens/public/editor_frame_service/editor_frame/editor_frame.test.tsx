@@ -209,6 +209,9 @@ describe('editor_frame', () => {
       }
     );
 
+    const origDispatch = lensStore.dispatch
+    lensStore.dispatch = jest.fn(origDispatch)
+
     const wrappingComponent: React.FC<{
       children: React.ReactNode;
     }> = ({ children }) => <Provider store={lensStore}>{children}</Provider>;
@@ -1550,30 +1553,39 @@ describe('editor_frame', () => {
         },
         isSaveable: false,
       });
-      expect(onChange).toHaveBeenLastCalledWith({
-        filterableIndexPatterns: ['1'],
-        doc: {
-          references: [
-            {
-              id: '1',
-              name: 'index-pattern-0',
-              type: 'index-pattern',
+      expect(onChange).toHaveBeenLastCalledWith(
+        {
+          filterableIndexPatterns: ['1'],
+          doc: {
+            references: [
+              {
+                id: '1',
+                name: 'index-pattern-0',
+                type: 'index-pattern',
+              },
+            ],
+            description: undefined,
+            id: undefined,
+            state: {
+              visualization: { initialState: true }, // Now loaded
+              datasourceStates: { testDatasource: {} },
+              query: { query: '', language: 'lucene' },
+              filters: [],
             },
-          ],
-          description: undefined,
-          id: undefined,
-          state: {
-            visualization: { initialState: true }, // Now loaded
-            datasourceStates: { testDatasource: {} },
-            query: { query: '', language: 'lucene' },
-            filters: [],
+            title: '',
+            type: 'lens',
+            visualizationType: 'testVis',
           },
-          title: '',
-          type: 'lens',
-          visualizationType: 'testVis',
+          isSaveable: false,
         },
-        isSaveable: false,
-      });
+        {
+          activeData: undefined,
+          indexPatternsForTopNav: [],
+          isSaveable: false,
+          lastKnownDoc: undefined,
+          persistedDoc: undefined,
+        }
+      );
     });
 
     it('should send back a persistable document when the state changes', async () => {
@@ -1613,24 +1625,34 @@ describe('editor_frame', () => {
       instance.update();
 
       expect(onChange).toHaveBeenCalledTimes(3);
-      expect(onChange).toHaveBeenNthCalledWith(3, {
-        activeData: undefined,
-        filterableIndexPatterns: [],
-        doc: {
-          id: undefined,
-          references: [],
-          state: {
-            datasourceStates: { testDatasource: { datasource: '' } },
-            visualization: { initialState: true },
-            query: { query: 'new query', language: 'lucene' },
-            filters: [],
+      expect(onChange).toHaveBeenNthCalledWith(
+        3,
+        {
+          activeData: undefined,
+          filterableIndexPatterns: [],
+          doc: {
+            id: undefined,
+            references: [],
+            state: {
+              datasourceStates: { testDatasource: { datasource: '' } },
+              visualization: { initialState: true },
+              query: { query: 'new query', language: 'lucene' },
+              filters: [],
+            },
+            title: '',
+            type: 'lens',
+            visualizationType: 'testVis',
           },
-          title: '',
-          type: 'lens',
-          visualizationType: 'testVis',
+          isSaveable: true,
         },
-        isSaveable: true,
-      });
+        {
+          activeData: undefined,
+          indexPatternsForTopNav: [],
+          isSaveable: false,
+          lastKnownDoc: undefined,
+          persistedDoc: undefined,
+        }
+      );
     });
 
     it('should call onChange when the datasource makes an internal state change', async () => {

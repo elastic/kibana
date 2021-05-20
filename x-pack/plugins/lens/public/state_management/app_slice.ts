@@ -30,6 +30,12 @@ export const appSlice = createSlice({
         ...payload,
       };
     },
+    onChangeFromEditorFrame: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
+      return {
+        ...state,
+        ...payload,
+      };
+    },
     navigateAway: (state) => state,
   },
 });
