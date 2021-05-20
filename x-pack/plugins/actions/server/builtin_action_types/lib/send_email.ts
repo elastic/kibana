@@ -121,7 +121,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       );
       const nodeTLSOptions = getNodeTLSOptions(tlsSettingsFromConfig.verificationMode);
       if (!transportConfig.tls) {
-        transportConfig.tls = nodeTLSOptions;
+        transportConfig.tls = { ...tlsConfig, ...nodeTLSOptions };
       } else {
         transportConfig.tls = { ...transportConfig.tls, ...tlsConfig, ...nodeTLSOptions };
       }
