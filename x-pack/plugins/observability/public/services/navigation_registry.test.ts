@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { createNavigationRegistry } from './navigation_registry';
-import { of } from 'rxjs';
-import { skip, take } from 'rxjs/operators';
 import { firstValueFrom } from '@kbn/std';
+import { of } from 'rxjs';
+import { createNavigationRegistry } from './navigation_registry';
 
 describe('Navigation registry', () => {
   it('Allows the registration of, and access to, navigation sections', async () => {
@@ -35,8 +34,7 @@ describe('Navigation registry', () => {
       ])
     );
 
-    // Skip the default value from startWith
-    const sections = await firstValueFrom(navigationRegistry.sections$); // .pipe(skip(1)));
+    const sections = await firstValueFrom(navigationRegistry.sections$);
 
     expect(sections).toEqual([
       {
