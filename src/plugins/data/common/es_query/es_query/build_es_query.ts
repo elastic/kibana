@@ -21,7 +21,7 @@ export interface EsQueryConfig {
   dateFormatTZ?: string;
 }
 
-function removeMatchAll(filters: unknown[]) {
+function removeMatchAll<T>(filters: T[]) {
   return filters.filter(
     (filter) => !filter || typeof filter !== 'object' || !isEqual(filter, { match_all: {} })
   );
