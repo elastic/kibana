@@ -1,21 +1,28 @@
 #!/bin/groovy
 
-library 'kibana-pipeline-library'
+library 'kibana-pipeline-library@gcloud-fix-parallel'
 kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 210, checkPrChanges: true, setCommitStatus: true) {
-  slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
-    githubPr.withDefaultPrComments {
-      ciStats.trackBuild(requireSuccess: githubPr.isTrackedBranchPr()) {
-        catchError {
-          retryable.enable()
-          kibanaPipeline.allCiTasks()
+  node('flyweight') {
+    parallel([
+      one: {
+        withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
+          kibanaPipeline.bash("""
+            sleep 5
+            gcloud auth list
+            gsutil ls gs://ci-artifacts.kibana.dev/
+          """, "Test 1")
+        }
+      },
+      two: {
+        withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
+          kibanaPipeline.bash("""
+            gcloud auth list
+            gsutil ls gs://ci-artifacts.kibana.dev/
+          """, "Test 2")
         }
       }
-    }
-  }
-
-  if (params.NOTIFY_ON_FAILURE) {
-    kibanaPipeline.sendMail()
+    ])
   }
 }
