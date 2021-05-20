@@ -17,7 +17,7 @@ import type {
   ApplicationStart,
 } from 'src/core/public';
 
-import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {

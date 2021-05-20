@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { TelemetryPluginConfig } from '../plugin';
-import { ScreenshotModePluginSetup } from '../../../screenshot_mode/public';
 
 interface TelemetryServiceConstructor {
   config: TelemetryPluginConfig;
