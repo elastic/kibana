@@ -58,6 +58,23 @@ export const isCellValueSupported = (op: OperationMetadata) => {
   return !isBucketed(op) && (op.scale === 'ordinal' || op.scale === 'ratio') && isNumericMetric(op);
 };
 
+function getInitialState(): Omit<HeatmapVisualizationState, 'layerId'> {
+  return {
+    shape: CHART_SHAPES.HEATMAP,
+    legend: {
+      isVisible: true,
+      position: Position.Right,
+      type: LEGEND_FUNCTION,
+    },
+    gridConfig: {
+      type: HEATMAP_GRID_FUNCTION,
+      isCellLabelVisible: false,
+      isYAxisLabelVisible: true,
+      isXAxisLabelVisible: true,
+    },
+  };
+}
+
 export const getHeatmapVisualization = ({
   paletteService,
 }: HeatmapVisualizationDeps): Visualization<HeatmapVisualizationState> => ({
@@ -108,18 +125,7 @@ export const getHeatmapVisualization = ({
       state || {
         layerId: frame.addNewLayer(),
         title: 'Empty Heatmap chart',
-        shape: CHART_SHAPES.HEATMAP,
-        legend: {
-          isVisible: true,
-          position: Position.Right,
-          type: LEGEND_FUNCTION,
-        },
-        gridConfig: {
-          type: HEATMAP_GRID_FUNCTION,
-          isCellLabelVisible: false,
-          isYAxisLabelVisible: true,
-          isXAxisLabelVisible: true,
-        },
+        ...getInitialState(),
       }
     );
   },
@@ -356,6 +362,11 @@ export const getHeatmapVisualization = ({
   },
 
   getErrorMessages(state) {
+    if (!state.yAccessor && !state.xAccessor && !state.valueAccessor) {
+      // nothing configured yet
+      return;
+    }
+
     const errors: ReturnType<Visualization['getErrorMessages']> = [];
 
     if (!state.xAccessor) {
