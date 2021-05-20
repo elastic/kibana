@@ -17,10 +17,10 @@ import { RawAction } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { ActionTypeRegistry } from '../action_type_registry';
-
-export const ACTION_SAVED_OBJECT_TYPE = 'action';
-export const ALERT_SAVED_OBJECT_TYPE = 'alert';
-export const ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE = 'action_task_params';
+import {
+  ACTION_SAVED_OBJECT_TYPE,
+  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+} from '../constants/saved_objects';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -36,8 +36,8 @@ export function setupSavedObjects(
     management: {
       defaultSearchField: 'name',
       importableAndExportable: true,
-      getTitle(obj) {
-        return `Connector: [${obj.attributes.name}]`;
+      getTitle(savedObject: SavedObject<RawAction>) {
+        return `Connector: [${savedObject.attributes.name}]`;
       },
       onExport<RawAction>(
         context: SavedObjectsExportTransformContext,

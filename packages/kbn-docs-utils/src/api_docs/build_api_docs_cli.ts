@@ -17,6 +17,7 @@ import { ApiDeclaration, PluginApi, TypeKind } from './types';
 import { findPlugins } from './find_plugins';
 import { pathsOutsideScopes } from './build_api_declarations/utils';
 import { getPluginApiMap } from './get_plugin_api_map';
+import { writeDeprecationDoc } from './mdx/write_deprecations_doc';
 
 export interface PluginInfo {
   apiCount: number;
@@ -71,8 +72,17 @@ export function runBuildApiDocsCli() {
           }
         });
       }
+      const collectReferences = flags.references as boolean;
 
-      const { pluginApiMap, missingApiItems } = getPluginApiMap(project, plugins, log);
+      const { pluginApiMap, missingApiItems, referencedDeprecations } = getPluginApiMap(
+        project,
+        plugins,
+        log,
+        {
+          collectReferences,
+          pluginFilter: pluginFilter as string[],
+        }
+      );
 
       const reporter = CiStatsReporter.fromEnv(log);
       plugins.forEach((plugin) => {
@@ -109,12 +119,44 @@ export function runBuildApiDocsCli() {
             group: 'Non-exported public API item count',
             value: missingApiItems[id] ? Object.keys(missingApiItems[id]).length : 0,
           },
+          {
+            id,
+            group: 'References to deprecated APIs',
+            value: referencedDeprecations[id] ? referencedDeprecations[id].length : 0,
+          },
         ]);
+
+        const getLink = (d: ApiDeclaration) =>
+          `https://github.com/elastic/kibana/tree/master/${d.source.path}#L${d.source.lineNumber}`;
+
+        if (collectReferences && pluginFilter === plugin.manifest.id) {
+          if (referencedDeprecations[id] && referencedDeprecations[id].length > 0) {
+            log.info(`${referencedDeprecations[id].length} deprecated APIs used`);
+            // eslint-disable-next-line no-console
+            console.table(referencedDeprecations[id]);
+          } else {
+            log.info(`No referenced deprecations for plugin ${plugin.manifest.id}`);
+          }
+          if (pluginStats.noReferences.length > 0) {
+            // eslint-disable-next-line no-console
+            console.table(
+              pluginStats.noReferences.map((d) => ({
+                id: d.id,
+                link: getLink(d),
+              }))
+            );
+          } else {
+            log.info(`No unused APIs for plugin ${plugin.manifest.id}`);
+          }
+        } else {
+          log.info(`Not tracking refs for plugin ${plugin.manifest.id}`);
+        }
 
         if (stats) {
           const passesAllChecks =
             pluginStats.isAnyType.length === 0 &&
             pluginStats.missingComments.length === 0 &&
+            referencedDeprecations[id].length === 0 &&
             (!missingApiItems[id] || Object.keys(missingApiItems[id]).length === 0);
 
           log.info(`--- Plugin '${id}' ${passesAllChecks ? ` passes all checks ----` : '----`'}`);
@@ -122,8 +164,6 @@ export function runBuildApiDocsCli() {
           if (!passesAllChecks) {
             log.info(`${pluginStats.isAnyType.length} API items with ANY`);
 
-            const getLink = (d: ApiDeclaration) =>
-              `https://github.com/elastic/kibana/tree/master/${d.source.path}#L${d.source.lineNumber}`;
             if (stats.includes('any')) {
               // eslint-disable-next-line no-console
               console.table(
@@ -165,6 +205,7 @@ export function runBuildApiDocsCli() {
         if (apiCount > 0) {
           writePluginDocs(outputFolder, pluginApi, log);
         }
+        writeDeprecationDoc(outputFolder, referencedDeprecations, log);
       });
       if (Object.values(pathsOutsideScopes).length > 0) {
         log.warning(`Found paths outside of normal scope folders:`);
@@ -177,9 +218,11 @@ export function runBuildApiDocsCli() {
       },
       flags: {
         string: ['plugin', 'stats'],
+        boolean: ['references'],
         help: `
           --plugin             Optionally, run for only a specific plugin
           --stats              Optionally print API stats. Must be one or more of: any, comments or exports. 
+          --references         Collect references for API items
         `,
       },
     }
@@ -199,10 +242,11 @@ function getTsProject(repoPath: string) {
 interface ApiStats {
   missingComments: ApiDeclaration[];
   isAnyType: ApiDeclaration[];
+  noReferences: ApiDeclaration[];
 }
 
 function collectApiStatsForPlugin(doc: PluginApi): ApiStats {
-  const stats: ApiStats = { missingComments: [], isAnyType: [] };
+  const stats: ApiStats = { missingComments: [], isAnyType: [], noReferences: [] };
   Object.values(doc.client).forEach((def) => {
     collectStatsForApi(def, stats);
   });
@@ -227,6 +271,9 @@ function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats): void {
     doc.children.forEach((child) => {
       collectStatsForApi(child, stats);
     });
+  }
+  if (!doc.references || doc.references.length === 0) {
+    stats.noReferences.push(doc);
   }
 }
 

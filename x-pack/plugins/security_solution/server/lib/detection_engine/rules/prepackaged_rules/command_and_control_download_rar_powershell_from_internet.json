@@ -12,7 +12,7 @@
   "language": "lucene",
   "license": "Elastic License v2",
   "name": "Roshal Archive (RAR) or PowerShell File Downloaded from the Internet",
-  "note": "This activity has been observed in FIN7 campaigns.",
+  "note": "## Threat intel\n\nThis activity has been observed in FIN7 campaigns.",
   "query": "event.category:(network OR network_traffic) AND network.protocol:http AND url.path:/.*(rar|ps1)/ AND source.ip:(10.0.0.0\\/8 OR 172.16.0.0\\/12 OR 192.168.0.0\\/16)",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2017/04/fin7-phishing-lnk.html",
@@ -46,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 4
 }

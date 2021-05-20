@@ -3216,6 +3216,122 @@
             }
           }
         },
+        "resolutions": {
+          "properties": {
+            "coarse": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with coarse resolution"
+                  }
+                }
+              }
+            },
+            "fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with fine resolution"
+                  }
+                }
+              }
+            },
+            "most_fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with most_fine resolution"
+                  }
+                }
+              }
+            },
+            "super_fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with super_fine resolution"
+                  }
+                }
+              }
+            }
+          }
+        },
         "joins": {
           "properties": {
             "term": {
@@ -4441,14 +4557,20 @@
         "index_patterns": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup index patterns"
+              }
             }
           }
         },
         "saved_searches": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup saved searches"
+              }
             }
           }
         },
@@ -4457,12 +4579,30 @@
             "saved_searches": {
               "properties": {
                 "total": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the visualizations that are based on rollup saved searches"
+                  }
+                },
+                "lens_total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
+                  }
                 }
               }
             },
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the visualizations that are based on rollup index patterns"
+              }
+            },
+            "lens_total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the lens visualizations that are based on rollup index patterns"
+              }
             }
           }
         }
@@ -4838,10 +4978,10 @@
                           "description": "The number of daily alerts generated by a rule"
                         }
                       },
-                      "cases_count_daily": {
+                      "cases_count_total": {
                         "type": "long",
                         "_meta": {
-                          "description": "The number of daily cases generated by a rule"
+                          "description": "The number of total cases generated by a rule"
                         }
                       }
                     }

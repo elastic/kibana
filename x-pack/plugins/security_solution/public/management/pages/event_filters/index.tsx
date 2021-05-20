@@ -19,4 +19,3 @@ export const EventFiltersContainer = () => {
     </Switch>
   );
 };
-export { EventFiltersService } from './types';

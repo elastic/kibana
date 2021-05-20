@@ -6,18 +6,29 @@
  * Side Public License, v 1.
  */
 
+import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { estypes } from '@elastic/elasticsearch';
 import { ControlState } from './state_action_machine';
 import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '..';
+import { TransformErrorObjects } from '../migrations/core';
+import {
+  DocumentsTransformFailed,
+  DocumentsTransformSuccess,
+} from '../migrations/core/migrate_raw_docs';
 
 export type MigrationLogLevel = 'error' | 'info';
 
 export interface MigrationLog {
   level: MigrationLogLevel;
   message: string;
+}
+
+export interface Progress {
+  processed: number | undefined;
+  total: number | undefined;
 }
 
 export interface BaseState extends ControlState {
@@ -175,6 +186,9 @@ export interface ReindexSourceToTempRead extends PostInitState {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 
 export interface ReindexSourceToTempClosePit extends PostInitState {
@@ -187,6 +201,17 @@ export interface ReindexSourceToTempIndex extends PostInitState {
   readonly outdatedDocuments: SavedObjectsRawDoc[];
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
+}
+
+export interface ReindexSourceToTempIndexBulk extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK';
+  readonly transformedDocs: SavedObjectsRawDoc[];
+  readonly sourceIndexPitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+  readonly progress: Progress;
 }
 
 export type SetTempWriteBlock = PostInitState & {
@@ -233,6 +258,9 @@ export interface OutdatedDocumentsSearchRead extends PostInitState {
   readonly pitId: string;
   readonly lastHitSortValue: number[] | undefined;
   readonly hasTransformedDocs: boolean;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 
 export interface OutdatedDocumentsSearchClosePit extends PostInitState {
@@ -249,12 +277,26 @@ export interface OutdatedDocumentsRefresh extends PostInitState {
 }
 
 export interface OutdatedDocumentsTransform extends PostInitState {
-  /** Transform a batch of outdated documents to their latest version and write them to the target index */
+  /** Transform a batch of outdated documents to their latest version*/
   readonly controlState: 'OUTDATED_DOCUMENTS_TRANSFORM';
   readonly pitId: string;
   readonly outdatedDocuments: SavedObjectsRawDoc[];
   readonly lastHitSortValue: number[] | undefined;
   readonly hasTransformedDocs: boolean;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
+}
+export interface TransformedDocumentsBulkIndex extends PostInitState {
+  /**
+   * Write the up-to-date transformed documents to the target index
+   */
+  readonly controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX';
+  readonly transformedDocs: SavedObjectsRawDoc[];
+  readonly lastHitSortValue: number[] | undefined;
+  readonly hasTransformedDocs: boolean;
+  readonly pitId: string;
+  readonly progress: Progress;
 }
 
 export interface MarkVersionIndexReady extends PostInitState {
@@ -339,7 +381,7 @@ export interface LegacyDeleteState extends LegacyBaseState {
   readonly controlState: 'LEGACY_DELETE';
 }
 
-export type State =
+export type State = Readonly<
   | FatalState
   | InitState
   | DoneState
@@ -351,6 +393,7 @@ export type State =
   | ReindexSourceToTempRead
   | ReindexSourceToTempClosePit
   | ReindexSourceToTempIndex
+  | ReindexSourceToTempIndexBulk
   | SetTempWriteBlock
   | CloneTempToSource
   | UpdateTargetMappingsState
@@ -363,11 +406,13 @@ export type State =
   | OutdatedDocumentsRefresh
   | MarkVersionIndexReady
   | MarkVersionIndexReadyConflict
+  | TransformedDocumentsBulkIndex
   | LegacyCreateReindexTargetState
   | LegacySetWriteBlockState
   | LegacyReindexState
   | LegacyReindexWaitForTaskState
-  | LegacyDeleteState;
+  | LegacyDeleteState
+>;
 
 export type AllControlStates = State['controlState'];
 /**
@@ -376,4 +421,6 @@ export type AllControlStates = State['controlState'];
  */
 export type AllActionStates = Exclude<AllControlStates, 'FATAL' | 'DONE'>;
 
-export type TransformRawDocs = (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;
+export type TransformRawDocs = (
+  rawDocs: SavedObjectsRawDoc[]
+) => TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess>;

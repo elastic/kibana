@@ -7,27 +7,27 @@
 
 import uuid from 'uuid';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
-
-import {
-  SavedObjectType,
-  exceptionListAgnosticSavedObjectType,
-  exceptionListSavedObjectType,
-} from '../../../common/types';
-import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
 import {
   CommentsArray,
   CreateComment,
   CreateCommentsArray,
   ExceptionListItemSchema,
   ExceptionListSchema,
-  ExceptionListSoSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   NamespaceType,
+  NamespaceTypeArray,
   UpdateCommentsArrayOrUndefined,
   exceptionListItemType,
   exceptionListType,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import {
+  SavedObjectType,
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+} from '../../../common/types';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 export const getSavedObjectType = ({
   namespaceType,

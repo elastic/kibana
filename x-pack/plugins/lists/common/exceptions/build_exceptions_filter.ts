@@ -6,8 +6,6 @@
  */
 
 import { chunk } from 'lodash/fp';
-
-import { Filter } from '../../../../../src/plugins/data/common';
 import {
   CreateExceptionListItemSchema,
   EntryExists,
@@ -19,9 +17,11 @@ import {
   entriesMatch,
   entriesMatchAny,
   entriesNested,
-} from '../schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
 
-import { BooleanFilter, NestedFilter } from './types';
+import type { Filter } from '../../../../../src/plugins/data/common';
+
+import type { BooleanFilter, NestedFilter } from './types';
 import { hasLargeValueList } from './utils';
 
 type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists;

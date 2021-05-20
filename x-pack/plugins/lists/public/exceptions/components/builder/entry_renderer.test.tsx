@@ -9,7 +9,6 @@ import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/dom';
-
 import {
   doesNotExistOperator,
   existsOperator,
@@ -19,7 +18,8 @@ import {
   isNotOperator,
   isOneOfOperator,
   isOperator,
-} from '../autocomplete/operators';
+} from '@kbn/securitysolution-list-utils';
+
 import {
   fields,
   getField,
@@ -228,6 +228,7 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isInListOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        allowLargeValueLists
         autocompleteService={autocompleteStartMock}
         entry={{
           correspondingKeywordField: undefined,
@@ -264,6 +265,7 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isNotInListOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        allowLargeValueLists
         autocompleteService={autocompleteStartMock}
         entry={{
           correspondingKeywordField: undefined,

@@ -33,22 +33,17 @@ export { ERROR_CODE } from '../../../../src/plugins/es_ui_shared/static/forms/he
 
 export {
   exportList,
-  useIsMounted,
   useCursor,
   useApi,
   useAsync,
   useExceptionListItems,
   useExceptionLists,
-  usePersistExceptionItem,
-  usePersistExceptionList,
   useFindLists,
   useDeleteList,
   useImportList,
   useCreateListIndex,
   useReadListIndex,
   useReadListPrivileges,
-  addExceptionListItem,
-  updateExceptionListItem,
   fetchExceptionListById,
   addExceptionList,
   ExceptionListFilter,
@@ -60,4 +55,5 @@ export {
   withOptionalSignal,
   ExceptionBuilder,
   transformNewItemOutput,
+  transformOutput,
 } from '../../lists/public';

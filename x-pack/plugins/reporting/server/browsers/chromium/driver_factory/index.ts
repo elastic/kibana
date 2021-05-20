@@ -15,6 +15,7 @@ import * as Rx from 'rxjs';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { getChromiumDisconnectedError } from '../';
+import { ReportingCore } from '../../..';
 import { BROWSER_TYPE } from '../../../../common/constants';
 import { durationToNumber } from '../../../../common/schema_utils';
 import { CaptureConfig } from '../../../../server/types';
@@ -32,11 +33,14 @@ export class HeadlessChromiumDriverFactory {
   private browserConfig: BrowserConfig;
   private userDataDir: string;
   private getChromiumArgs: (viewport: ViewportConfig) => string[];
+  private core: ReportingCore;
 
-  constructor(binaryPath: string, captureConfig: CaptureConfig, logger: LevelLogger) {
+  constructor(core: ReportingCore, binaryPath: string, logger: LevelLogger) {
+    this.core = core;
     this.binaryPath = binaryPath;
-    this.captureConfig = captureConfig;
-    this.browserConfig = captureConfig.browser.chromium;
+    const config = core.getConfig();
+    this.captureConfig = config.get('capture');
+    this.browserConfig = this.captureConfig.browser.chromium;
 
     if (this.browserConfig.disableSandbox) {
       logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
@@ -89,7 +93,7 @@ export class HeadlessChromiumDriverFactory {
         const versionInfo = await client.send('Browser.getVersion');
         logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
 
-        await page.emulateTimezone(browserTimezone ?? null);
+        await page.emulateTimezone(browserTimezone);
 
         // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
         // All waitFor methods have their own timeout config passed in to them
@@ -138,7 +142,7 @@ export class HeadlessChromiumDriverFactory {
       this.getProcessLogger(browser, logger).subscribe();
 
       // HeadlessChromiumDriver: object to "drive" a browser page
-      const driver = new HeadlessChromiumDriver(page, {
+      const driver = new HeadlessChromiumDriver(this.core, page, {
         inspect: !!this.browserConfig.inspect,
         networkPolicy: this.captureConfig.networkPolicy,
       });
@@ -173,7 +177,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const pageRequestFailed$ = Rx.fromEvent<puppeteer.Request>(page, 'requestfailed').pipe(
+    const pageRequestFailed$ = Rx.fromEvent<puppeteer.HTTPRequest>(page, 'requestfailed').pipe(
       map((req) => {
         const failure = req.failure && req.failure();
         if (failure) {

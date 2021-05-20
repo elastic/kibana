@@ -22,198 +22,228 @@
     "interfaces": [],
     "enums": [
       {
+        "parentPluginId": "snapshotRestore",
         "id": "def-common.REPOSITORY_TYPES",
         "type": "Enum",
-        "label": "REPOSITORY_TYPES",
         "tags": [],
+        "label": "REPOSITORY_TYPES",
         "description": [],
         "source": {
           "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
           "lineNumber": 25
         },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "snapshotRestore",
         "id": "def-common.API_BASE_PATH",
         "type": "string",
+        "tags": [],
         "label": "API_BASE_PATH",
         "description": [],
+        "signature": [
+          "\"/api/snapshot_restore/\""
+        ],
         "source": {
           "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
           "lineNumber": 23
         },
-        "signature": [
-          "\"/api/snapshot_restore/\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "snapshotRestore",
         "id": "def-common.APP_REQUIRED_CLUSTER_PRIVILEGES",
         "type": "Array",
+        "tags": [],
         "label": "APP_REQUIRED_CLUSTER_PRIVILEGES",
         "description": [],
+        "signature": [
+          "string[]"
+        ],
         "source": {
           "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
           "lineNumber": 55
         },
-        "signature": [
-          "string[]"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "snapshotRestore",
         "id": "def-common.APP_RESTORE_INDEX_PRIVILEGES",
         "type": "Array",
+        "tags": [],
         "label": "APP_RESTORE_INDEX_PRIVILEGES",
         "description": [],
+        "signature": [
+          "string[]"
+        ],
         "source": {
           "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
           "lineNumber": 59
         },
-        "signature": [
-          "string[]"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "snapshotRestore",
         "id": "def-common.APP_SLM_CLUSTER_PRIVILEGES",
         "type": "Array",
+        "tags": [],
         "label": "APP_SLM_CLUSTER_PRIVILEGES",
         "description": [],
+        "signature": [
+          "string[]"
+        ],
         "source": {
           "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
           "lineNumber": 60
         },
-        "signature": [
-          "string[]"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "snapshotRestore",
         "id": "def-common.DEFAULT_REPOSITORY_TYPES",
         "type": "Array",
+        "tags": [],
         "label": "DEFAULT_REPOSITORY_TYPES",
         "description": [],
+        "signature": [
+          "RepositoryType",
+          "[]"
+        ],
         "source": {
           "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
           "lineNumber": 36
         },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "snapshotRestore",
+        "id": "def-common.PLUGIN_REPOSITORY_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "PLUGIN_REPOSITORY_TYPES",
+        "description": [],
         "signature": [
           "RepositoryType",
           "[]"
         ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.PLUGIN_REPOSITORY_TYPES",
-        "type": "Array",
-        "label": "PLUGIN_REPOSITORY_TYPES",
-        "description": [],
         "source": {
           "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
           "lineNumber": 41
         },
-        "signature": [
-          "RepositoryType",
-          "[]"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
+        "parentPluginId": "snapshotRestore",
         "id": "def-common.PLUGIN",
         "type": "Object",
         "tags": [],
+        "label": "PLUGIN",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 13
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "snapshotRestore",
             "id": "def-common.PLUGIN.id",
             "type": "string",
+            "tags": [],
             "label": "id",
             "description": [],
             "source": {
               "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
               "lineNumber": 14
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "snapshotRestore",
             "id": "def-common.PLUGIN.minimumLicenseType",
             "type": "string",
+            "tags": [],
             "label": "minimumLicenseType",
             "description": [],
+            "signature": [
+              "\"basic\""
+            ],
             "source": {
               "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
               "lineNumber": 15
             },
-            "signature": [
-              "\"basic\""
-            ]
+            "deprecated": false
           },
           {
+            "parentPluginId": "snapshotRestore",
             "id": "def-common.PLUGIN.getI18nName",
             "type": "Function",
-            "children": [
-              {
-                "id": "def-common.PLUGIN.getI18nName.$1",
-                "type": "Any",
-                "label": "i18n",
-                "isRequired": true,
-                "signature": [
-                  "any"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-                  "lineNumber": 16
-                }
-              }
-            ],
+            "tags": [],
+            "label": "getI18nName",
+            "description": [],
             "signature": [
               "(i18n: any) => string"
             ],
-            "description": [],
-            "label": "getI18nName",
             "source": {
               "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
               "lineNumber": 16
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "snapshotRestore",
+                "id": "def-common.PLUGIN.getI18nName.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "i18n",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+                  "lineNumber": 16
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
-        "description": [],
-        "label": "PLUGIN",
-        "source": {
-          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-          "lineNumber": 13
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "snapshotRestore",
         "id": "def-common.REPOSITORY_PLUGINS_MAP",
         "type": "Object",
         "tags": [],
+        "label": "REPOSITORY_PLUGINS_MAP",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+          "lineNumber": 48
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "snapshotRestore",
             "id": "def-common.REPOSITORY_PLUGINS_MAP.repositorys3",
             "type": "string",
+            "tags": [],
             "label": "'repository-s3'",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 49
-            },
             "signature": [
               {
                 "pluginId": "snapshotRestore",
@@ -223,18 +253,20 @@
                 "text": "REPOSITORY_TYPES"
               },
               ".s3"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.REPOSITORY_PLUGINS_MAP.repositoryhdfs",
-            "type": "string",
-            "label": "'repository-hdfs'",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 50
+              "lineNumber": 49
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "snapshotRestore",
+            "id": "def-common.REPOSITORY_PLUGINS_MAP.repositoryhdfs",
+            "type": "string",
+            "tags": [],
+            "label": "'repository-hdfs'",
+            "description": [],
             "signature": [
               {
                 "pluginId": "snapshotRestore",
@@ -244,18 +276,20 @@
                 "text": "REPOSITORY_TYPES"
               },
               ".hdfs"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.REPOSITORY_PLUGINS_MAP.repositoryazure",
-            "type": "string",
-            "label": "'repository-azure'",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 51
+              "lineNumber": 50
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "snapshotRestore",
+            "id": "def-common.REPOSITORY_PLUGINS_MAP.repositoryazure",
+            "type": "string",
+            "tags": [],
+            "label": "'repository-azure'",
+            "description": [],
             "signature": [
               {
                 "pluginId": "snapshotRestore",
@@ -265,18 +299,20 @@
                 "text": "REPOSITORY_TYPES"
               },
               ".azure"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.REPOSITORY_PLUGINS_MAP.repositorygcs",
-            "type": "string",
-            "label": "'repository-gcs'",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 52
+              "lineNumber": 51
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "snapshotRestore",
+            "id": "def-common.REPOSITORY_PLUGINS_MAP.repositorygcs",
+            "type": "string",
+            "tags": [],
+            "label": "'repository-gcs'",
+            "description": [],
             "signature": [
               {
                 "pluginId": "snapshotRestore",
@@ -286,85 +322,94 @@
                 "text": "REPOSITORY_TYPES"
               },
               ".gcs"
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 52
+            },
+            "deprecated": false
           }
         ],
-        "description": [],
-        "label": "REPOSITORY_PLUGINS_MAP",
-        "source": {
-          "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-          "lineNumber": 48
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "snapshotRestore",
         "id": "def-common.TIME_UNITS",
         "type": "Object",
         "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.TIME_UNITS.DAY",
-            "type": "string",
-            "label": "DAY",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 63
-            },
-            "signature": [
-              "\"d\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TIME_UNITS.HOUR",
-            "type": "string",
-            "label": "HOUR",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 64
-            },
-            "signature": [
-              "\"h\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TIME_UNITS.MINUTE",
-            "type": "string",
-            "label": "MINUTE",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 65
-            },
-            "signature": [
-              "\"m\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.TIME_UNITS.SECOND",
-            "type": "string",
-            "label": "SECOND",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-              "lineNumber": 66
-            },
-            "signature": [
-              "\"s\""
-            ]
-          }
-        ],
-        "description": [],
         "label": "TIME_UNITS",
+        "description": [],
         "source": {
           "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
           "lineNumber": 62
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "snapshotRestore",
+            "id": "def-common.TIME_UNITS.DAY",
+            "type": "string",
+            "tags": [],
+            "label": "DAY",
+            "description": [],
+            "signature": [
+              "\"d\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 63
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "snapshotRestore",
+            "id": "def-common.TIME_UNITS.HOUR",
+            "type": "string",
+            "tags": [],
+            "label": "HOUR",
+            "description": [],
+            "signature": [
+              "\"h\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 64
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "snapshotRestore",
+            "id": "def-common.TIME_UNITS.MINUTE",
+            "type": "string",
+            "tags": [],
+            "label": "MINUTE",
+            "description": [],
+            "signature": [
+              "\"m\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 65
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "snapshotRestore",
+            "id": "def-common.TIME_UNITS.SECOND",
+            "type": "string",
+            "tags": [],
+            "label": "SECOND",
+            "description": [],
+            "signature": [
+              "\"s\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+              "lineNumber": 66
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ]

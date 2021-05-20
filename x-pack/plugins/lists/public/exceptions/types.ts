@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListItemSchema,
@@ -17,7 +17,8 @@ import {
   TotalOrUndefined,
   UpdateExceptionListItemSchema,
   UpdateExceptionListSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
 import { HttpStart, NotificationsStart } from '../../../../../src/core/public';
 
 export interface FilterExceptionsOptions {
