@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { createSearchServiceMock } from '../../../../__mocks__/search_session';
+import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 
 describe('DiscoverSearchSessionManager', () => {
-  const { history, session, searchSessionManager } = createSearchServiceMock();
+  const { history, session, searchSessionManager } = createSearchSessionMock();
 
   beforeEach(() => {
     history.push('/');

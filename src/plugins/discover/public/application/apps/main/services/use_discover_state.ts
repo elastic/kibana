@@ -32,7 +32,7 @@ export function useDiscoverState({
   history: History;
   initialIndexPattern: IndexPattern;
 }) {
-  const { uiSettings: config, data } = services;
+  const { uiSettings: config, data, filterManager } = services;
   const [indexPattern, setIndexPattern] = useState(initialIndexPattern);
   const [savedSearch, setSavedSearch] = useState(initialSavedSearch);
 
@@ -63,15 +63,14 @@ export function useDiscoverState({
   const [state, setState] = useState(appStateContainer.getState());
 
   useEffect(() => {
-    /**
-     if (stateContainer.appStateContainer.getState().index !== indexPattern.id) {
+    if (stateContainer.appStateContainer.getState().index !== indexPattern.id) {
       // used index pattern is different than the given by url/state which is invalid
       stateContainer.setAppState({ index: indexPattern.id });
-    }**/
+    }
     // sync initial app filters from state to filterManager
     const filters = appStateContainer.getState().filters;
     if (filters) {
-      services.filterManager.setAppFilters(cloneDeep(filters));
+      filterManager.setAppFilters(cloneDeep(filters));
     }
     const query = appStateContainer.getState().query;
     if (query) {
@@ -102,7 +101,8 @@ export function useDiscoverState({
     data.query,
     data.search.session,
     getPreviousAppState,
-    services.filterManager,
+    indexPattern.id,
+    filterManager,
     services.indexPatterns,
     stateContainer,
   ]);

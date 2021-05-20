@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { DiscoverServices } from '../build_services';
+import { dataPluginMock } from '../../../data/public/mocks';
 
 export const discoverServiceMock = ({
   history: () => ({
@@ -13,6 +14,7 @@ export const discoverServiceMock = ({
       search: '',
     },
   }),
+  data: dataPluginMock.createStartContract(),
   capabilities: {
     visualize: {
       show: true,
