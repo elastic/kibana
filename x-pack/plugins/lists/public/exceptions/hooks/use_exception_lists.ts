@@ -6,10 +6,10 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { fetchExceptionLists } from '../api';
 import { Pagination, UseExceptionListsProps } from '../types';
-import { ExceptionListSchema } from '../../../common/schemas';
 import { getFilters } from '../utils';
 
 export type Func = () => void;

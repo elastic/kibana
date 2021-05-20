@@ -6,15 +6,15 @@
  */
 
 import { useMemo } from 'react';
-
-import * as Api from '../api';
-import { HttpStart } from '../../../../../../src/core/public';
-import {
+import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
   UpdateExceptionListItemSchema,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import * as Api from '../api';
+import { HttpStart } from '../../../../../../src/core/public';
 import { ApiCallFindListsItemsMemoProps, ApiCallMemoProps, ApiListExportProps } from '../types';
 import { getIdsAndNamespaces } from '../utils';
 import { transformInput, transformNewItemOutput, transformOutput } from '../transforms';

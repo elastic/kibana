@@ -2101,7 +2101,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/features/server/plugin.ts",
-          "lineNumber": 33
+          "lineNumber": 41
         },
         "deprecated": false,
         "children": [
@@ -2125,7 +2125,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 34
+              "lineNumber": 42
             },
             "deprecated": false,
             "children": [
@@ -2147,7 +2147,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/features/server/plugin.ts",
-                  "lineNumber": 34
+                  "lineNumber": 42
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2175,7 +2175,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 35
+              "lineNumber": 43
             },
             "deprecated": false,
             "children": [
@@ -2197,7 +2197,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/features/server/plugin.ts",
-                  "lineNumber": 35
+                  "lineNumber": 43
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2225,7 +2225,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 41
+              "lineNumber": 49
             },
             "deprecated": false,
             "children": [],
@@ -2251,7 +2251,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 47
+              "lineNumber": 55
             },
             "deprecated": false,
             "children": [],
@@ -2270,7 +2270,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 48
+              "lineNumber": 56
             },
             "deprecated": false,
             "children": [],
@@ -2288,11 +2288,47 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 56
+              "lineNumber": 64
             },
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-server.PluginSetupContract.featurePrivilegeIterator",
+            "type": "Function",
+            "tags": [],
+            "label": "featurePrivilegeIterator",
+            "description": [
+              "\nUtility for iterating through all privileges belonging to a specific feature.\n{@see FeaturePrivilegeIterator }"
+            ],
+            "signature": [
+              "FeaturePrivilegeIterator"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/server/plugin.ts",
+              "lineNumber": 70
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-server.PluginSetupContract.subFeaturePrivilegeIterator",
+            "type": "Function",
+            "tags": [],
+            "label": "subFeaturePrivilegeIterator",
+            "description": [
+              "\nUtility for iterating through all sub-feature privileges belonging to a specific feature.\n{@see SubFeaturePrivilegeIterator }"
+            ],
+            "signature": [
+              "SubFeaturePrivilegeIterator"
+            ],
+            "source": {
+              "path": "x-pack/plugins/features/server/plugin.ts",
+              "lineNumber": 76
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2306,7 +2342,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/features/server/plugin.ts",
-          "lineNumber": 59
+          "lineNumber": 79
         },
         "deprecated": false,
         "children": [
@@ -2330,7 +2366,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 60
+              "lineNumber": 80
             },
             "deprecated": false,
             "children": [],
@@ -2356,7 +2392,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 61
+              "lineNumber": 81
             },
             "deprecated": false,
             "children": [],
