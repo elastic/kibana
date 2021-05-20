@@ -18,7 +18,7 @@ const defaultCSVParameters = {
   quote: undefined,
   separator: undefined,
   tag: undefined,
-  trim: false,
+  trim: undefined,
 };
 
 const CSV_TYPE = 'csv';
