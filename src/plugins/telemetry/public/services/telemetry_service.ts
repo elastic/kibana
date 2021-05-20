@@ -68,7 +68,7 @@ export class TelemetryService {
 
   /** Is the cluster opted-in to telemetry **/
   public get isOptedIn() {
-    return this.config.optIn;
+    return Boolean(this.config.optIn);
   }
 
   /** Changes the opt-in status **/
@@ -127,12 +127,13 @@ export class TelemetryService {
   }
 
   /** Is the cluster opted-in to telemetry **/
-  public getIsOptedIn = () => {
+  public getIsOptedIn = (): boolean => {
     return this.isOptedIn;
   };
 
+  /** Are there any blockers for sending telemetry */
   public canSendTelemetry = (): boolean => {
-    return Boolean(this.getIsOptedIn() && !this.isScreenshotMode);
+    return !this.isScreenshotMode && this.getIsOptedIn();
   };
 
   /** Fetches an unencrypted telemetry payload so we can show it to the user **/

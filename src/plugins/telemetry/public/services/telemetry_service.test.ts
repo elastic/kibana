@@ -257,7 +257,7 @@ describe('TelemetryService', () => {
     });
   });
 
-  describe('shouldSendTelemetry', () => {
+  describe('canSendTelemetry', () => {
     it('does not send telemetry if screenshotMode is true', () => {
       const telemetryService = mockTelemetryService({
         isScreenshotMode: true,
@@ -265,6 +265,15 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.canSendTelemetry()).toBe(false);
+    });
+
+    it('does send telemetry if screenshotMode is false and we are opted in', () => {
+      const telemetryService = mockTelemetryService({
+        isScreenshotMode: false,
+        config: { optIn: true },
+      });
+
+      expect(telemetryService.canSendTelemetry()).toBe(true);
     });
   });
 });
