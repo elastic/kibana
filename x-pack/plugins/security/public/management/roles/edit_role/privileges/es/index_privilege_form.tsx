@@ -320,7 +320,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
           </EuiFlexItem>
         )}
         {this.state.queryExpanded && (
-          <EuiFlexItem grow={true} style={{ minHeight: '200px' }}>
+          <EuiFlexItem>
             <EuiFormRow
               label={
                 <FormattedMessage
