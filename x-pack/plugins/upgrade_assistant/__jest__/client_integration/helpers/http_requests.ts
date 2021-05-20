@@ -6,9 +6,9 @@
  */
 
 import sinon, { SinonFakeServer } from 'sinon';
-import { API_BASE_PATH } from '../../common/constants';
-import { UpgradeAssistantStatus } from '../../common/types';
-import { ResponseError } from '../../public/application/lib/api';
+import { API_BASE_PATH } from '../../../common/constants';
+import { UpgradeAssistantStatus } from '../../../common/types';
+import { ResponseError } from '../../../public/application/lib/api';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {

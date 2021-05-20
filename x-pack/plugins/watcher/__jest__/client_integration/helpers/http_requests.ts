@@ -6,7 +6,7 @@
  */
 
 import sinon, { SinonFakeServer } from 'sinon';
-import { ROUTES } from '../../common/constants';
+import { ROUTES } from '../../../common/constants';
 
 const { API_ROOT } = ROUTES;
 
