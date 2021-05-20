@@ -8,7 +8,7 @@
 import type { DomainDeprecationDetails } from 'kibana/public';
 import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
-import { UpgradeAssistantStatus } from '../common/types';
+import { UpgradeAssistantStatus } from '../../common/types';
 
 import { OverviewTestBed, setupOverviewPage, setupEnvironment } from './helpers';
 

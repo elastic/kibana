@@ -6,7 +6,7 @@
  */
 
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { EsDeprecationsContent } from '../../public/application/components/es_deprecations';
+import { EsDeprecationsContent } from '../../../public/application/components/es_deprecations';
 import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
