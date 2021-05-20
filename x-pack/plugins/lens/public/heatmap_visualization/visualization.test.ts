@@ -6,7 +6,7 @@
  */
 
 import {
-  filterOperationsXAxis,
+  filterOperationsAxis,
   getHeatmapVisualization,
   isBucketed,
   isCellValueSupported,
@@ -105,7 +105,7 @@ describe('heatmap', () => {
             groupId: GROUP_ID.X,
             groupLabel: 'Horizontal axis',
             accessors: [{ columnId: 'x-accessor' }],
-            filterOperations: filterOperationsXAxis,
+            filterOperations: filterOperationsAxis,
             supportsMoreColumns: false,
             required: true,
             dataTestSubj: 'lnsHeatmap_xDimensionPanel',
@@ -150,7 +150,7 @@ describe('heatmap', () => {
             groupId: GROUP_ID.X,
             groupLabel: 'Horizontal axis',
             accessors: [{ columnId: 'x-accessor' }],
-            filterOperations: filterOperationsXAxis,
+            filterOperations: filterOperationsAxis,
             supportsMoreColumns: false,
             required: true,
             dataTestSubj: 'lnsHeatmap_xDimensionPanel',
@@ -368,7 +368,7 @@ describe('heatmap', () => {
                       function: HEATMAP_GRID_FUNCTION,
                       arguments: {
                         // grid
-                        strokeWidth: [0],
+                        strokeWidth: [1],
                         // cells
                         isCellLabelVisible: [false],
                         // Y-axis

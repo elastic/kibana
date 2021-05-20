@@ -52,7 +52,7 @@ const isTime = (op: OperationMetadata) => op.dataType === 'date';
 export const isBucketed = (op: OperationMetadata) => op.isBucketed && op.scale === 'ordinal';
 const isNumericMetric = (op: OperationMetadata) => op.dataType === 'number';
 
-export const filterOperationsXAxis = (op: OperationMetadata) => isTime(op) || isBucketed(op);
+export const filterOperationsAxis = (op: OperationMetadata) => isTime(op) || isBucketed(op);
 
 export const isCellValueSupported = (op: OperationMetadata) => {
   return !isBucketed(op) && (op.scale === 'ordinal' || op.scale === 'ratio') && isNumericMetric(op);
@@ -147,7 +147,7 @@ export const getHeatmapVisualization = ({
           groupId: GROUP_ID.X,
           groupLabel: getAxisName(GROUP_ID.X),
           accessors: state.xAccessor ? [{ columnId: state.xAccessor }] : [],
-          filterOperations: filterOperationsXAxis,
+          filterOperations: filterOperationsAxis,
           supportsMoreColumns: !state.xAccessor,
           required: true,
           dataTestSubj: 'lnsHeatmap_xDimensionPanel',
@@ -157,7 +157,7 @@ export const getHeatmapVisualization = ({
           groupId: GROUP_ID.Y,
           groupLabel: getAxisName(GROUP_ID.Y),
           accessors: state.yAccessor ? [{ columnId: state.yAccessor }] : [],
-          filterOperations: isBucketed,
+          filterOperations: filterOperationsAxis,
           supportsMoreColumns: !state.yAccessor,
           required: false,
           dataTestSubj: 'lnsHeatmap_yDimensionPanel',
