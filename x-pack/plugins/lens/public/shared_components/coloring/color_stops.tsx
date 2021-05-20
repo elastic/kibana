@@ -52,7 +52,7 @@ export const CustomStops = ({
       const areStopsValid = localColorStops.every(({ color, stop }, i) => {
         const numberStop = Number(stop);
         const prevNumberStop = Number(localColorStops[i - 1]?.stop ?? -Infinity);
-        return isValidColor(color) && !Number.isNaN(numberStop) && numberStop > prevNumberStop;
+        return isValidColor(color) && !Number.isNaN(numberStop) && numberStop >= prevNumberStop;
       });
       if (areStopsValid) {
         onChange(localColorStops.map(({ color, stop }) => ({ color, stop: Number(stop) })));

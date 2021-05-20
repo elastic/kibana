@@ -44,8 +44,12 @@ function getCustomPaletteConfig(
   }
 
   const referenceStops = activePalette.params.colorStops || activePalette.params.stops;
+  const fallbackStops = activePalette.params.stops;
 
-  const oldInterval = referenceStops[referenceStops.length - 1].stop - referenceStops[0].stop;
+  // what happens when user set two stops with the same value? we'll fallback to the display interval
+  const oldInterval =
+    referenceStops[referenceStops.length - 1].stop - referenceStops[0].stop ||
+    fallbackStops[fallbackStops.length - 1].stop - fallbackStops[0].stop;
 
   // full custom palette
   return {
