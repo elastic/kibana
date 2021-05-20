@@ -18,8 +18,9 @@ import {
   TickFormatter,
   TooltipInfo,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { BAR_HEIGHT } from './constants';
 import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
@@ -31,6 +32,14 @@ const getChartHeight = (data: WaterfallData): number => {
 
   return noOfXBars * BAR_HEIGHT;
 };
+
+const StyledText = euiStyled(EuiText)`
+  font-weight: bold;
+`;
+
+const StyledHorizontalRule = euiStyled(EuiHorizontalRule)`
+  background-color: ${(props) => props.theme.eui.euiColorDarkShade};
+`;
 
 const Tooltip = (tooltipInfo: TooltipInfo) => {
   const { data, renderTooltipItem, sidebarItems } = useWaterfallContext();
@@ -45,17 +54,20 @@ const Tooltip = (tooltipInfo: TooltipInfo) => {
       <WaterfallChartTooltip>
         <EuiFlexGroup direction="column" gutterSize="none">
           {sidebarItem && (
-            <EuiText>
-              <FormattedMessage
-                id="xpack.uptime.synthetics.waterfall.tooltipHeading"
-                defaultMessage={`{index}. {url}`}
-                description="Simply formats a URL with its index in a numbered list."
-                values={{
-                  index: sidebarItem.offsetIndex,
-                  url: sidebarItem.url,
-                }}
-              />
-            </EuiText>
+            <>
+              <StyledText>
+                <FormattedMessage
+                  id="xpack.uptime.synthetics.waterfall.tooltipHeading"
+                  defaultMessage={`{index}. {url}`}
+                  description="Simply formats a URL with its index in a numbered list."
+                  values={{
+                    index: sidebarItem.offsetIndex,
+                    url: sidebarItem.url,
+                  }}
+                />
+              </StyledText>
+              <StyledHorizontalRule margin="none" />
+            </>
           )}
           {relevantItems.map((item, index) => {
             return (
