@@ -7,8 +7,12 @@
  */
 import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '../../../data/public/mocks';
+import { coreMock } from '../../../../core/public/mocks';
+import { DEFAULT_COLUMNS_SETTING } from '../../common';
+import { savedSearchMock } from './saved_search';
 
 export const discoverServiceMock = ({
+  core: coreMock.createStart(),
   history: () => ({
     location: {
       search: '',
@@ -27,6 +31,8 @@ export const discoverServiceMock = ({
     get: (key: string) => {
       if (key === 'fields:popularLimit') {
         return 5;
+      } else if (key === DEFAULT_COLUMNS_SETTING) {
+        return [];
       }
     },
   },
@@ -36,4 +42,5 @@ export const discoverServiceMock = ({
       editIndexPattern: jest.fn(),
     },
   },
+  getSavedSearchById: (id?: string) => Promise.resolve(savedSearchMock),
 } as unknown) as DiscoverServices;

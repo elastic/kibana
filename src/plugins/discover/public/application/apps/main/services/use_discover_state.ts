@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { cloneDeep } from 'lodash';
 import { History } from 'history';
@@ -108,7 +107,7 @@ export function useDiscoverState({
   ]);
 
   useEffect(() => {
-    const unsubsribe = stateContainer.appStateContainer.subscribe(async (newState) => {
+    const unsubscribe = stateContainer.appStateContainer.subscribe(async (newState) => {
       // NOTE: this is also called when navigating from discover app to context app
       if (newState.index && state.index !== newState.index) {
         // in case of index pattern switch the route has currently to be reloaded, legacy
@@ -120,7 +119,7 @@ export function useDiscoverState({
       }
       setState(newState);
     });
-    return () => unsubsribe();
+    return () => unsubscribe();
   }, [config, services.indexPatterns, state.index, stateContainer.appStateContainer, setState]);
 
   const resetSavedSearch = useCallback(
@@ -133,9 +132,12 @@ export function useDiscoverState({
         savedSearch: newSavedSearch,
       });
       await stateContainer.replaceUrlAppState(newAppState);
-      setSavedSearch(newSavedSearch);
+      setState(newAppState);
+      if (savedSearch.id !== newSavedSearch.id) {
+        setSavedSearch(newSavedSearch);
+      }
     },
-    [indexPattern, services, config, data, stateContainer]
+    [services, indexPattern, config, data, stateContainer, savedSearch.id]
   );
 
   return {
