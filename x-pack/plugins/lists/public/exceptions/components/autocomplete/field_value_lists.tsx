@@ -9,9 +9,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { HttpStart } from 'kibana/public';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useFindLists } from '@kbn/securitysolution-list-hooks';
 
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
-import { useFindLists } from '../../..';
 
 import { filterFieldToList, getGenericComboBoxProps } from './helpers';
 import * as i18n from './translations';

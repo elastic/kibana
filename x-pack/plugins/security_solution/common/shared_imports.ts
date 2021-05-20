@@ -13,5 +13,4 @@ export {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_NAME,
   ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
-  buildExceptionFilter,
 } from '../../lists/common';
