@@ -6,32 +6,42 @@
  */
 
 import React from 'react';
-import { useHistory, useParams } from 'react-router-dom';
-// import { useGetUserCasesPermissions } from '../../../../security_solution/public/common/lib/kibana';
+import { useParams } from 'react-router-dom';
 
 import { CaseView } from '../../components/app/cases/case_view';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_cases_user_permissions';
+import { useKibana } from '../../utils/kibana_react';
+import { CASES_APP_ID } from '../../components/app/cases/constants';
+import { CaseCallOut, savedObjectReadOnlyErrorMessage } from '../../components/app/cases/callout';
 
 export const CaseDetailsPage = React.memo(() => {
-  // const userPermissions = useGetUserCasesPermissions();
+  const {
+    application: { navigateToApp },
+  } = useKibana().services;
+  const userPermissions = useGetUserCasesPermissions();
   const { detailName: caseId, subCaseId } = useParams<{
     detailName?: string;
     subCaseId?: string;
   }>();
-  //
-  // if (userPermissions != null && !userPermissions.read) {
-  //   history.replace(getCaseUrl(search));
-  //   return null;
-  // }
+
+  if (userPermissions != null && !userPermissions.read) {
+    navigateToApp(`${CASES_APP_ID}`);
+    return null;
+  }
 
   return caseId != null ? (
     <>
-      {/* {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (*/}
-      {/*  <CaseCallOut*/}
-      {/*    title={savedObjectReadOnlyErrorMessage.title}*/}
-      {/*    messages={[{ ...savedObjectReadOnlyErrorMessage, title: '' }]}*/}
-      {/*  />*/}
-      {/* )}*/}
-      <CaseView caseId={caseId} subCaseId={subCaseId} userCanCrud={true} />
+      {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
+        <CaseCallOut
+          title={savedObjectReadOnlyErrorMessage.title}
+          messages={[{ ...savedObjectReadOnlyErrorMessage, title: '' }]}
+        />
+      )}
+      <CaseView
+        caseId={caseId}
+        subCaseId={subCaseId}
+        userCanCrud={userPermissions?.crud ?? false}
+      />
     </>
   ) : null;
 });

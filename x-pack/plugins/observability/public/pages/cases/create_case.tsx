@@ -5,44 +5,38 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useCallback } from 'react';
 import { EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from '../../components/app/cases/translations';
 import { Create } from '../../components/app/cases/create';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
-import { getCaseUrl } from './links';
+import { CASES_APP_ID } from '../../components/app/cases/constants';
+import { useKibana } from '../../utils/kibana_react';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_cases_user_permissions';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;
 `;
 ButtonEmpty.displayName = 'ButtonEmpty';
 export const CreateCasePage = React.memo(() => {
-  const history = useHistory();
-  // const userPermissions = useGetUserCasesPermissions();
+  const userPermissions = useGetUserCasesPermissions();
+  const {
+    application: { navigateToApp },
+  } = useKibana().services;
 
-  const backOptions = useMemo(
-    () => ({
-      href: getCaseUrl(),
-      text: i18n.BACK_TO_ALL,
-    }),
-    []
-  );
   const goTo = useCallback(
     (ev) => {
       ev.preventDefault();
-      if (backOptions) {
-        history.push(backOptions.href ?? '');
-      }
+      navigateToApp(`${CASES_APP_ID}`);
     },
-    [backOptions, history]
+    [navigateToApp]
   );
 
-  // if (userPermissions != null && !userPermissions.crud) {
-  //   history.replace(getCaseUrl(search));
-  //   return null;
-  // }
+  if (userPermissions != null && !userPermissions.crud) {
+    navigateToApp(`${CASES_APP_ID}`);
+    return null;
+  }
 
   return (
     <EuiPageTemplate
@@ -50,7 +44,7 @@ export const CreateCasePage = React.memo(() => {
         pageTitle: (
           <>
             <ButtonEmpty onClick={goTo} iconType="arrowLeft" iconSide="left" flush="left">
-              {backOptions.text}
+              {i18n.BACK_TO_ALL}
             </ButtonEmpty>
             {i18n.CREATE_TITLE} <ExperimentalBadge />
           </>

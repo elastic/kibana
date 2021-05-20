@@ -8,26 +8,24 @@
 import React from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 
-// import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { AllCases } from '../../components/app/cases/all_cases';
 import * as i18n from '../../components/app/cases/translations';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 
-// import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../../components/app/cases/callout';
-// import { CaseSavedObjectNoPermissions } from './saved_object_no_permissions';
+import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../../components/app/cases/callout';
+import { CaseSavedObjectNoPermissions } from './saved_object_no_permissions';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_cases_user_permissions';
 
 export const AllCasesPage = React.memo(() => {
-  // const userPermissions = useGetUserCasesPermissions();
-
-  // userPermissions == null || userPermissions?.read ? (
-  return (
+  const userPermissions = useGetUserCasesPermissions();
+  return userPermissions == null || userPermissions?.read ? (
     <>
-      {/* {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (*/}
-      {/*  <CaseCallOut*/}
-      {/*    title={savedObjectReadOnlyErrorMessage.title}*/}
-      {/*    messages={[{ ...savedObjectReadOnlyErrorMessage, title: '' }]}*/}
-      {/*  />*/}
-      {/* )}*/}
+      {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
+        <CaseCallOut
+          title={savedObjectReadOnlyErrorMessage.title}
+          messages={[{ ...savedObjectReadOnlyErrorMessage, title: '' }]}
+        />
+      )}
       <EuiPageTemplate
         pageHeader={{
           pageTitle: (
@@ -37,14 +35,12 @@ export const AllCasesPage = React.memo(() => {
           ),
         }}
       >
-        <AllCases userCanCrud={true} />
+        <AllCases userCanCrud={userPermissions?.crud ?? false} />
       </EuiPageTemplate>
     </>
+  ) : (
+    <CaseSavedObjectNoPermissions />
   );
-  //   )
-  // : (
-  //     <CaseSavedObjectNoPermissions />
-  //   );
 });
 
 AllCasesPage.displayName = 'AllCasesPage';

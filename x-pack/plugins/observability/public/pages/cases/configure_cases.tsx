@@ -13,6 +13,7 @@ import * as i18n from '../../components/app/cases/translations';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { CASES_APP_ID, CASES_OWNER } from '../../components/app/cases/constants';
 import { useKibana } from '../../utils/kibana_react';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_cases_user_permissions';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;
@@ -22,7 +23,7 @@ function ConfigureCasesPageComponent() {
     cases,
     application: { navigateToApp },
   } = useKibana().services;
-  // const userPermissions = useGetUserCasesPermissions();
+  const userPermissions = useGetUserCasesPermissions();
 
   const goTo = useCallback(
     (ev) => {
@@ -32,10 +33,10 @@ function ConfigureCasesPageComponent() {
     [navigateToApp]
   );
 
-  // if (userPermissions != null && !userPermissions.read) {
-  //   navigateToApp(`${CASES_APP_ID}`);
-  //   return null;
-  // }
+  if (userPermissions != null && !userPermissions.read) {
+    navigateToApp(`${CASES_APP_ID}`);
+    return null;
+  }
 
   return (
     <EuiPageTemplate
@@ -51,7 +52,7 @@ function ConfigureCasesPageComponent() {
       }}
     >
       {cases.getConfigureCases({
-        userCanCrud: true, // userPermissions?.crud ?? false,
+        userCanCrud: userPermissions?.crud ?? false,
         owner: [CASES_OWNER],
       })}
     </EuiPageTemplate>

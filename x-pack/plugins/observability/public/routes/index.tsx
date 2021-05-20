@@ -80,14 +80,10 @@ export const routes = {
     ],
   },
   '/cases': {
-    handler: (routeParams: any) => {
-      return <AllCasesPage routeParams={routeParams} />;
+    handler: () => {
+      return <AllCasesPage />;
     },
-    params: {
-      path: t.partial({
-        detailName: t.string,
-      }),
-    },
+    params: {},
     breadcrumb: [
       {
         text: i18n.translate('xpack.observability.cases.breadcrumb', {
