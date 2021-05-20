@@ -14,7 +14,7 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import {
+import type {
   MachineLearningJobIdOrUndefined,
   From,
   FromOrUndefined,
@@ -42,9 +42,9 @@ import {
   MaxSignalsOrUndefined,
   MaxSignals,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
+import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
 
-import { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {
@@ -131,7 +131,7 @@ export interface IRuleStatusResponseAttributes {
   last_success_at: LastSuccessAt | null | undefined;
   last_success_message: LastSuccessMessage | null | undefined;
   status: JobStatus | null | undefined;
-  last_look_back_date: string | null | undefined;
+  last_look_back_date: string | null | undefined; // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
   gap: string | null | undefined;
   bulk_create_time_durations: string[] | null | undefined;
   search_after_time_durations: string[] | null | undefined;
