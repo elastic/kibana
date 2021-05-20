@@ -112,11 +112,7 @@ export abstract class Type<V> {
     }
 
     const { local, code, path, value } = error;
-    // `message` is only initialized once `toString` has been called (...)
-    // see https://github.com/sideway/joi/blob/master/lib/errors.js
-    const message = error.toString();
     const convertedPath = path.map((entry) => entry.toString());
-
     const context: Record<string, any> = {
       ...local,
       value,
@@ -139,6 +135,9 @@ export abstract class Type<V> {
       return new SchemaTypeError(context.message, convertedPath);
     }
 
+    // `message` is only initialized once `toString` has been called (...)
+    // see https://github.com/sideway/joi/blob/master/lib/errors.js
+    const message = error.toString();
     return new SchemaTypeError(message || code, convertedPath);
   }
 }

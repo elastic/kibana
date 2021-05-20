@@ -12,6 +12,7 @@ import { ByteSizeValue } from '../src/byte_size_value';
 declare module 'joi' {
   interface BytesSchema extends AnySchema {
     min(limit: number | string | ByteSizeValue): this;
+
     max(limit: number | string | ByteSizeValue): this;
   }
 
@@ -27,6 +28,7 @@ declare module 'joi' {
     // missing from the typedef
     // see https://github.com/sideway/joi/blob/master/lib/errors.js
     local?: Record<string, any>;
+
     toString(): string;
   }
 
@@ -37,9 +39,4 @@ declare module 'joi' {
     record: () => RecordSchema;
     stream: () => AnySchema;
   };
-
-  // Joi types don't include `schema` function even though it's supported.
-  interface ObjectSchema {
-    schema(): this;
-  }
 }
