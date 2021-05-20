@@ -257,7 +257,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           return currentUrl;
         });
 
-        await retry.tryForTime(defaultFindTimeout, async () => {
+        await retry.try(async () => {
           await this.sleep(501);
           const currentUrl = await browser.getCurrentUrl();
           log.debug('in navigateTo url = ' + currentUrl);
