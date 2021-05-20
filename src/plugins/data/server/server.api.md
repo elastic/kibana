@@ -776,7 +776,9 @@ export class IndexPattern implements IIndexPattern {
         interval?: number | undefined;
         fixed_interval?: string | undefined;
         calendar_interval?: string | undefined;
-        delay?: string | undefined;
+        delay?: string | undefined; /**
+         * Reset last saved saved object fields. used after saving
+         */
         time_zone?: string | undefined;
     }>> | undefined;
     getAsSavedObjectBody(): {
