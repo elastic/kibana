@@ -11,6 +11,10 @@ import {
   CommentsArray,
   CreateComment,
   CreateCommentsArray,
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+  FoundExceptionListItemSchema,
+  FoundExceptionListSchema,
   NamespaceType,
   NamespaceTypeArray,
   UpdateCommentsArrayOrUndefined,
@@ -23,12 +27,6 @@ import {
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,
 } from '../../../common/types';
-import {
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-  FoundExceptionListItemSchema,
-  FoundExceptionListSchema,
-} from '../../../common/schemas';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 export const getSavedObjectType = ({

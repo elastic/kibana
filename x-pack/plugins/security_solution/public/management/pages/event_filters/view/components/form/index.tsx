@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
@@ -26,7 +27,7 @@ import { Loader } from '../../../../../../common/components/loader';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { AppAction } from '../../../../../../common/store/actions';
-import { ExceptionListItemSchema, ExceptionBuilder } from '../../../../../../shared_imports';
+import { ExceptionBuilder } from '../../../../../../shared_imports';
 
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../../store/selector';
