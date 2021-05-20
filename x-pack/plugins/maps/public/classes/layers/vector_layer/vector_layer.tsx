@@ -172,10 +172,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   async isEditable(): Promise<boolean> {
-    if (!(await this.getSource().isEditable())) {
-      return false;
-    }
     if (
+      !(await this.getSource().isEditable()) ||
       (await this.isFilteredByGlobalTime()) ||
       this.isPreviewLayer() ||
       !this.isVisible() ||

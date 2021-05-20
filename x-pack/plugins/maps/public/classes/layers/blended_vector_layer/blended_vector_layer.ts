@@ -259,6 +259,10 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return false;
   }
 
+  async isEditable(): Promise<boolean> {
+    return false;
+  }
+
   async cloneDescriptor(): Promise<LayerDescriptor> {
     const clonedDescriptor = await super.cloneDescriptor();
 

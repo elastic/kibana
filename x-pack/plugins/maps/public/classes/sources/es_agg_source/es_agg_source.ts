@@ -152,4 +152,8 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
 
     return await Promise.all(promises);
   }
+
+  async isEditable(): Promise<boolean> {
+    return false;
+  }
 }

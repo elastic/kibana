@@ -247,4 +247,8 @@ export class TiledVectorLayer extends VectorLayer {
   getFeatureById(id: string | number): Feature | null {
     return null;
   }
+
+  async isEditable(): Promise<boolean> {
+    return false;
+  }
 }

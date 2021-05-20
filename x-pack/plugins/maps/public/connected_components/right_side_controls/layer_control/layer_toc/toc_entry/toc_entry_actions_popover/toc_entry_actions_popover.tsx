@@ -57,7 +57,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
 
   async _checkLayerEditable() {
     const isLayerEditable = await this.props.layer.isEditable();
-    if (!this._isMounted || isLayerEditable === this.state.isLayerEditable) {
+    if (!this._isMounted || !isLayerEditable || isLayerEditable === this.state.isLayerEditable) {
       return;
     }
     this.setState({ isLayerEditable });
@@ -120,20 +120,19 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       },
     ];
 
-    if (this.state.isLayerEditable) {
-      actionItems.push({
-        name: EDIT_FEATURES_LABEL,
-        icon: <EuiIcon type="pencil" size="m" />,
-        'data-test-subj': 'editLayerButton',
-        toolTipContent: null,
-        onClick: () => {
-          this._closePopover();
-          this.props.enableLayerEditing(this.props.layer.getId());
-        },
-      });
-    }
-
     if (!this.props.isReadOnly) {
+      if (this.state.isLayerEditable) {
+        actionItems.push({
+          name: EDIT_FEATURES_LABEL,
+          icon: <EuiIcon type="pencil" size="m" />,
+          'data-test-subj': 'editLayerButton',
+          toolTipContent: null,
+          onClick: () => {
+            this._closePopover();
+            this.props.enableLayerEditing(this.props.layer.getId());
+          },
+        });
+      }
       actionItems.push({
         disabled: this.props.isEditButtonDisabled,
         name: LAYER_SETTINGS_LABEL,
