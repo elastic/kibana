@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
-  describe.only('management', function () {
+  describe.only('management app', function () {
     before(async () => {
       await esArchiver.unload('logstash_functional');
       await esArchiver.loadIfNeeded('makelogs');
@@ -21,7 +21,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('makelogs');
     });
 
-    describe('', function () {
+    describe('management ciGroup7', function () {
       this.tags('ciGroup7');
 
       loadTestFile(require.resolve('./_create_index_pattern_wizard'));
@@ -37,7 +37,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_field_formatter'));
     });
 
-    describe('', function () {
+    describe('management ciGroup8', function () {
       this.tags('ciGroup8');
 
       loadTestFile(require.resolve('./_index_pattern_filter'));
