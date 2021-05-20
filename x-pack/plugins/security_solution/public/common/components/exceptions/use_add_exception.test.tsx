@@ -20,7 +20,8 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   useAddOrUpdateException,
   UseAddOrUpdateExceptionProps,

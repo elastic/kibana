@@ -6,8 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-
-import {
+import type {
   Filter,
   FoundListItemSchema,
   ListId,
@@ -15,7 +14,8 @@ import {
   PerPage,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
 import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import { getList } from '../lists';
 import {
