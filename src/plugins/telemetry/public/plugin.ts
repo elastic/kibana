@@ -40,6 +40,8 @@ export interface TelemetryServicePublicApis {
   getIsOptedIn: () => boolean | null;
   /** Is the user allowed to change the opt-in/out status? **/
   userCanChangeSettings: boolean;
+  /** Can phone-home telemetry calls be made? This depends on whether we have opted-in or if we are rendering a report */
+  canSendTelemetry: () => boolean;
   /** Is the cluster allowed to change the opt-in/out status? **/
   getCanChangeOptInStatus: () => boolean;
   /** Fetches an unencrypted telemetry payload so we can show it to the user **/
@@ -191,6 +193,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     return {
       getIsOptedIn: () => telemetryService.getIsOptedIn(),
       setOptIn: (optedIn) => telemetryService.setOptIn(optedIn),
+      canSendTelemetry: () => telemetryService.canSendTelemetry(),
       userCanChangeSettings: telemetryService.userCanChangeSettings,
       getCanChangeOptInStatus: () => telemetryService.getCanChangeOptInStatus(),
       fetchExample: () => telemetryService.fetchExample(),
