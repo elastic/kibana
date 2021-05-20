@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { AppAction } from '../../../../common/store/actions';
 import {
   ImmutableMiddleware,
@@ -14,13 +19,8 @@ import {
 
 import { EventFiltersHttpService } from '../service';
 
-import {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
-  transformNewItemOutput,
-  transformOutput,
-  UpdateExceptionListItemSchema,
-} from '../../../../shared_imports';
+import { transformNewItemOutput, transformOutput } from '../../../../shared_imports';
+
 import {
   getCurrentListPageDataState,
   getCurrentLocation,
@@ -254,17 +254,9 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
       dispatch({
         type: 'eventFiltersListPageDataChanged',
         payload: createLoadedResourceState({
-          query,
+          query: { ...query, filter },
           content: results,
         }),
-      });
-
-      dispatch({
-        type: 'eventFiltersListPageDataExistsChanged',
-        payload: {
-          type: 'LoadedResourceState',
-          data: Boolean(results.total),
-        },
       });
 
       // If no results were returned, then just check to make sure data actually exists for
@@ -272,6 +264,14 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
       // messages to the user
       if (results.total === 0) {
         await checkIfEventFilterDataExist(store, eventFiltersService);
+      } else {
+        dispatch({
+          type: 'eventFiltersListPageDataExistsChanged',
+          payload: {
+            type: 'LoadedResourceState',
+            data: Boolean(results.total),
+          },
+        });
       }
     } catch (error) {
       dispatch({

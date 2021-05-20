@@ -283,6 +283,14 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     yLeft: false,
     yRight: false,
   },
+  yLeftExtent: {
+    mode: 'full',
+    type: 'lens_xy_axisExtentConfig',
+  },
+  yRightExtent: {
+    mode: 'full',
+    type: 'lens_xy_axisExtentConfig',
+  },
   layers,
 });
 
@@ -677,6 +685,114 @@ describe('xy_expression', () => {
           );
 
           expect(component.find(XyEndzones).length).toEqual(0);
+        });
+      });
+    });
+
+    describe('y axis extents', () => {
+      test('it passes custom y axis extents to elastic-charts axis spec', () => {
+        const { data, args } = sampleArgs();
+
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            data={data}
+            args={{
+              ...args,
+              yLeftExtent: {
+                type: 'lens_xy_axisExtentConfig',
+                mode: 'custom',
+                lowerBound: 123,
+                upperBound: 456,
+              },
+            }}
+          />
+        );
+        expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
+          fit: false,
+          min: 123,
+          max: 456,
+        });
+      });
+
+      test('it passes fit to bounds y axis extents to elastic-charts axis spec', () => {
+        const { data, args } = sampleArgs();
+
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            data={data}
+            args={{
+              ...args,
+              yLeftExtent: {
+                type: 'lens_xy_axisExtentConfig',
+                mode: 'dataBounds',
+              },
+            }}
+          />
+        );
+        expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
+          fit: true,
+          min: undefined,
+          max: undefined,
+        });
+      });
+
+      test('it does not allow fit for area chart', () => {
+        const { data, args } = sampleArgs();
+
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            data={data}
+            args={{
+              ...args,
+              yLeftExtent: {
+                type: 'lens_xy_axisExtentConfig',
+                mode: 'dataBounds',
+              },
+              layers: [
+                {
+                  ...args.layers[0],
+                  seriesType: 'area',
+                },
+              ],
+            }}
+          />
+        );
+        expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
+          fit: false,
+        });
+      });
+
+      test('it does not allow positive lower bound for bar', () => {
+        const { data, args } = sampleArgs();
+
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            data={data}
+            args={{
+              ...args,
+              yLeftExtent: {
+                type: 'lens_xy_axisExtentConfig',
+                mode: 'custom',
+                lowerBound: 123,
+                upperBound: 456,
+              },
+              layers: [
+                {
+                  ...args.layers[0],
+                  seriesType: 'bar',
+                },
+              ],
+            }}
+          />
+        );
+        expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
+          fit: false,
+          min: undefined,
+          max: undefined,
         });
       });
     });
@@ -1761,6 +1877,14 @@ describe('xy_expression', () => {
           yLeft: false,
           yRight: false,
         },
+        yLeftExtent: {
+          mode: 'full',
+          type: 'lens_xy_axisExtentConfig',
+        },
+        yRightExtent: {
+          mode: 'full',
+          type: 'lens_xy_axisExtentConfig',
+        },
         layers: [
           {
             layerId: 'first',
@@ -1835,6 +1959,14 @@ describe('xy_expression', () => {
           yLeft: false,
           yRight: false,
         },
+        yLeftExtent: {
+          mode: 'full',
+          type: 'lens_xy_axisExtentConfig',
+        },
+        yRightExtent: {
+          mode: 'full',
+          type: 'lens_xy_axisExtentConfig',
+        },
         layers: [
           {
             layerId: 'first',
@@ -1894,6 +2026,14 @@ describe('xy_expression', () => {
           x: true,
           yLeft: false,
           yRight: false,
+        },
+        yLeftExtent: {
+          mode: 'full',
+          type: 'lens_xy_axisExtentConfig',
+        },
+        yRightExtent: {
+          mode: 'full',
+          type: 'lens_xy_axisExtentConfig',
         },
         layers: [
           {
