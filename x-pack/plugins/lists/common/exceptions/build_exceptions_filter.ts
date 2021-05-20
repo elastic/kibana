@@ -7,10 +7,12 @@
 
 import { chunk } from 'lodash/fp';
 import {
+  CreateExceptionListItemSchema,
   EntryExists,
   EntryMatch,
   EntryMatchAny,
   EntryNested,
+  ExceptionListItemSchema,
   entriesExists,
   entriesMatch,
   entriesMatchAny,
@@ -18,7 +20,6 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { Filter } from '../../../../../src/plugins/data/common';
-import type { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../schemas';
 
 import type { BooleanFilter, NestedFilter } from './types';
 import { hasLargeValueList } from './utils';
