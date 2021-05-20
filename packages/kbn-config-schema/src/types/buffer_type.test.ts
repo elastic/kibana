@@ -27,6 +27,10 @@ test('includes namespace in failure', () => {
   );
 });
 
+test('coerces strings to buffer', () => {
+  expect(schema.buffer().validate('abc')).toStrictEqual(Buffer.from('abc'));
+});
+
 describe('#defaultValue', () => {
   test('returns default when undefined', () => {
     const value = Buffer.from('Hi!');
@@ -48,9 +52,5 @@ test('returns error when not a buffer', () => {
 
   expect(() => schema.buffer().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
     `"expected value of type [Buffer] but got [Array]"`
-  );
-
-  expect(() => schema.buffer().validate('abc')).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [Buffer] but got [string]"`
   );
 });
