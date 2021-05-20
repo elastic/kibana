@@ -423,7 +423,6 @@ describe('ReportingStore', () => {
               "phases": Object {
                 "hot": Object {
                   "actions": Object {},
-                  "min_age": "0ms",
                 },
               },
             },
