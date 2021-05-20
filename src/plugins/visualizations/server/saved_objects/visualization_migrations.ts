@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
+import { cloneDeep, get, omit, has, flow, forOwn, last } from 'lodash';
+import uuid from 'uuid';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 
@@ -981,6 +982,81 @@ const removeDefaultIndexPatternAndTimeFieldFromTSVBModel: SavedObjectMigrationFn
   return doc;
 };
 
+const addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules: SavedObjectMigrationFn<
+  any,
+  any
+> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    if (visState && visState.type === 'metrics') {
+      const params: any = get(visState, 'params') || {};
+      const {
+        bar_color_rules: barColorRules = [],
+        background_color_rules: backgroundColorRules = [],
+        gauge_color_rules: gaugeColorRules = [],
+      } = params;
+
+      const compareWithEqualMethods = ['lte', 'gte'];
+      const emptyRule = {
+        value: [],
+        operator: 'eq',
+      };
+
+      const getRulesWithComparingToZero = (rules: any[] = []) =>
+        last(
+          rules.filter(
+            (rule) => compareWithEqualMethods.indexOf(rule.operator) !== -1 && rule.value === 0
+          )
+        );
+
+      const convertRuleToEmpty = ({ id, ...rest }: any = {}) => ({
+        ...rest,
+        ...emptyRule,
+        id: uuid.v4(),
+      });
+
+      const convertToArrayOfEmtpyRules = (rule: any) => (rule ? [convertRuleToEmpty(rule)] : []);
+
+      const lastBarRule = getRulesWithComparingToZero(barColorRules) ?? null;
+      const lastBackgroundRule = getRulesWithComparingToZero(backgroundColorRules) ?? null;
+      const lastGaugeRule = getRulesWithComparingToZero(gaugeColorRules) ?? null;
+
+      const barEmptyRules = convertToArrayOfEmtpyRules(lastBarRule);
+      const backgroundEmptyRules = convertToArrayOfEmtpyRules(lastBackgroundRule);
+      const gaugeEmptyRules = convertToArrayOfEmtpyRules(lastGaugeRule);
+
+      const colorRules = {
+        bar_color_rules: [...barColorRules, ...barEmptyRules],
+        background_color_rules: [...backgroundColorRules, ...backgroundEmptyRules],
+        gauge_color_rules: [...gaugeColorRules, ...gaugeEmptyRules],
+      };
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify({
+            ...visState,
+            params: {
+              ...params,
+              ...colorRules,
+            },
+          }),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -1021,4 +1097,5 @@ export const visualizationSavedObjectTypeMigrations = {
     hideTSVBLastValueIndicator,
     removeDefaultIndexPatternAndTimeFieldFromTSVBModel
   ),
+  '7.13.1': flow(addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules),
 };
