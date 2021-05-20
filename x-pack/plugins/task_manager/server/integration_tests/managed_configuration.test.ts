@@ -47,6 +47,9 @@ describe('managed configuration', () => {
         },
         custom: {},
       },
+      ephemeral_tasks: {
+        enabled: true,
+      },
     });
     logger = context.logger.get('taskManager');
 

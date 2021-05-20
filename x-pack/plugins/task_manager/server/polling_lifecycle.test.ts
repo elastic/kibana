@@ -54,6 +54,9 @@ describe('TaskPollingLifecycle', () => {
         },
         custom: {},
       },
+      ephemeral_tasks: {
+        enabled: true,
+      },
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
