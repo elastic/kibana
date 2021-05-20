@@ -25,7 +25,6 @@ export const hostIsolationRequestBodyMock = (): HostIsolationRequestBody => {
 export const hostIsolationResponseMock = (): HostIsolationResponse => {
   return {
     action: '111-222-333-444',
-    message: 'done',
   };
 };
 

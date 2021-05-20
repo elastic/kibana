@@ -28,5 +28,4 @@ export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.
 
 export interface HostIsolationResponse {
   action?: string;
-  message?: string;
 }
