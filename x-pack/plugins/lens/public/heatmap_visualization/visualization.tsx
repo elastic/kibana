@@ -104,9 +104,7 @@ export const getHeatmapVisualization = ({
     delete newState.valueAccessor;
     delete newState.xAccessor;
     delete newState.yAccessor;
-    return {
-      ...state,
-    };
+    return newState;
   },
 
   switchVisualizationType: (visualizationTypeId, state) => {
