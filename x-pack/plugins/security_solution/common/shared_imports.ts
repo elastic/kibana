@@ -6,12 +6,6 @@
  */
 
 export {
-  ListSchema,
-  ExceptionListSchema,
-  ExceptionListItemSchema,
-  CreateExceptionListSchema,
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   EXCEPTION_LIST_URL,

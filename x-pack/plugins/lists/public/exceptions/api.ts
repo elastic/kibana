@@ -8,15 +8,6 @@
 import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
-
-import { toError, toPromise } from '../common/fp_utils';
-import {
-  ENDPOINT_LIST_URL,
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_NAMESPACE,
-  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
-  EXCEPTION_LIST_URL,
-} from '../../common/constants';
 import {
   CreateEndpointListSchema,
   ExceptionListItemSchema,
@@ -28,7 +19,16 @@ import {
   exceptionListSchema,
   foundExceptionListItemSchema,
   foundExceptionListSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { toError, toPromise } from '../common/fp_utils';
+import {
+  ENDPOINT_LIST_URL,
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_NAMESPACE,
+  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+  EXCEPTION_LIST_URL,
+} from '../../common/constants';
 
 import {
   AddEndpointExceptionListProps,
