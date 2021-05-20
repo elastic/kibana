@@ -204,7 +204,30 @@
             "path": "src/plugins/dev_tools/public/plugin.ts",
             "lineNumber": 32
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "devTools",
+              "id": "def-public.devTool",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "devTool",
+              "description": [
+                "The dev tools descriptor"
+              ],
+              "signature": [
+                "Pick<",
+                "DevToolApp",
+                ", \"title\" | \"id\" | \"order\" | \"mount\" | \"tooltipContent\" | \"enableRouting\"> & { disabled?: boolean | undefined; }"
+              ],
+              "source": {
+                "path": "src/plugins/dev_tools/public/plugin.ts",
+                "lineNumber": 32
+              },
+              "deprecated": false
+            }
+          ]
         }
       ],
       "lifecycle": "setup",
