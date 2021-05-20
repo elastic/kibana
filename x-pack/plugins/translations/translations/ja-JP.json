@@ -104,7 +104,6 @@
     "advancedSettings.field.deprecationClickAreaLabel": "クリックすると {settingName} のサポート終了に関するドキュメントが表示されます。",
     "advancedSettings.field.helpText": "この設定は Kibana サーバーにより上書きされ、変更することはできません。",
     "advancedSettings.field.imageChangeErrorMessage": "画像を保存できませんでした",
-    "advancedSettings.field.imageTooLargeErrorMessage": "画像が大きすぎます。最大サイズは {maxSizeDescription} です",
     "advancedSettings.field.invalidIconLabel": "無効",
     "advancedSettings.field.offLabel": "オフ",
     "advancedSettings.field.onLabel": "オン",
