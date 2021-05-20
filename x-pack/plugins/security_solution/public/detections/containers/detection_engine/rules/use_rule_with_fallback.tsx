@@ -6,8 +6,8 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
+import { isNotFoundError } from '@kbn/securitysolution-t-grid';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { isNotFoundError } from '../../../../common/utils/api';
 import { useAsync, withOptionalSignal } from '../../../../shared_imports';
 import { useQueryAlerts } from '../alerts/use_query';
 import { fetchRuleById } from './api';

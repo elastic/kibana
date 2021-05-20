@@ -44,4 +44,24 @@ export interface TGridModel {
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
+  version: string | null;
 }
+
+export type SubsetTGridModel = Readonly<
+  Pick<
+    TGridModel,
+    | 'columns'
+    | 'deletedEventIds'
+    | 'excludedRowRendererIds'
+    | 'expandedDetail'
+    | 'loadingEventIds'
+    | 'indexNames'
+    | 'isSelectAllChecked'
+    | 'itemsPerPage'
+    | 'itemsPerPageOptions'
+    | 'selectedEventIds'
+    | 'showCheckboxes'
+    | 'sort'
+    | 'isLoading'
+  >
+>;

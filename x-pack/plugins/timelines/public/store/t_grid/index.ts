@@ -8,6 +8,8 @@ import { createStore } from 'redux';
 export * from './model';
 import * as tGridActions from './actions';
 export * as tGridActions from './actions';
+export * as tGridSelectors from './selectors';
+export * from './types';
 import { TimelineProps, ReduxDeps } from '../../types';
 import { initialTGridState, tGridReducer } from './reducer';
 

@@ -40,7 +40,7 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { BrowserFields } from '../../../../../security_solution/common/search_strategy/index_fields';
 import { OnRowSelected, OnSelectAll } from '../types';
 import { tGridActions } from '../../../types';
-import { TGridModel } from '../../../store/t_grid';
+import { TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 
 interface OwnProps {
   activePage: number;
@@ -298,9 +298,9 @@ const makeMapStateToProps = () => {
     browserFields: BrowserFields
   ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
-    const timeline: TGridModel = getTimeline(state, id) ?? timelineDefaults;
+  const getTGrid = tGridSelectors.getTGridByIdSelector();
+  const mapStateToProps = (state: TimelineState, { browserFields, id }: OwnProps) => {
+    const timeline: TGridModel = getTGrid(state, id) ?? timelineDefaults;
     const {
       columns,
       excludedRowRendererIds,

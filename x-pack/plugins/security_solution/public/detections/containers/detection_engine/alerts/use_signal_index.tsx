@@ -6,11 +6,10 @@
  */
 
 import { useEffect, useState } from 'react';
-
+import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
-import { isSecurityAppError } from '../../../../common/utils/api';
 import { useAlertsPrivileges } from './use_alerts_privileges';
 
 type Func = () => Promise<void>;
