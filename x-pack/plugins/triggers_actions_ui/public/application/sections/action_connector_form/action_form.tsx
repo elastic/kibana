@@ -124,7 +124,7 @@ export const ActionForm = ({
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTypesMessage',
+            'xpack.triggersActionsUI.sections.actionForm.unableToLoadConnectorTypesMessage',
             { defaultMessage: 'Unable to load connector types' }
           ),
         });
@@ -145,7 +145,7 @@ export const ActionForm = ({
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
+            'xpack.triggersActionsUI.sections.actionForm.unableToLoadActionsMessage',
             {
               defaultMessage: 'Unable to load connectors',
             }
@@ -193,7 +193,7 @@ export const ActionForm = ({
   function addActionType(actionTypeModel: ActionTypeModel) {
     if (!defaultActionGroupId) {
       toasts!.addDanger({
-        title: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unableToAddAction', {
+        title: i18n.translate('xpack.triggersActionsUI.sections.actionForm.unableToAddAction', {
           defaultMessage: 'Unable to add action, because default action group is not defined',
         }),
       });
@@ -291,7 +291,7 @@ export const ActionForm = ({
   return isLoadingConnectors ? (
     <SectionLoading>
       <FormattedMessage
-        id="xpack.triggersActionsUI.sections.alertForm.loadingConnectorsDescription"
+        id="xpack.triggersActionsUI.sections.actionForm.loadingConnectorsDescription"
         defaultMessage="Loading connectors…"
       />
     </SectionLoading>
@@ -301,7 +301,7 @@ export const ActionForm = ({
         <h4>
           <FormattedMessage
             defaultMessage="Actions"
-            id="xpack.triggersActionsUI.sections.alertForm.actionSectionsTitle"
+            id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
           />
         </h4>
       </EuiTitle>
@@ -401,7 +401,7 @@ export const ActionForm = ({
                 <h5>
                   <FormattedMessage
                     defaultMessage="Select a connector type"
-                    id="xpack.triggersActionsUI.sections.alertForm.selectConnectorTypeTitle"
+                    id="xpack.triggersActionsUI.sections.actionForm.selectConnectorTypeTitle"
                   />
                 </h5>
               </EuiTitle>
@@ -431,7 +431,7 @@ export const ActionForm = ({
             {isLoadingActionTypes ? (
               <SectionLoading>
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.loadingConnectorTypesDescription"
+                  id="xpack.triggersActionsUI.sections.actionForm.loadingConnectorTypesDescription"
                   defaultMessage="Loading connector types…"
                 />
               </SectionLoading>
@@ -449,7 +449,7 @@ export const ActionForm = ({
               onClick={() => setIsAddActionPanelOpen(true)}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertForm.addActionButtonLabel"
+                id="xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel"
                 defaultMessage="Add action"
               />
             </EuiButton>

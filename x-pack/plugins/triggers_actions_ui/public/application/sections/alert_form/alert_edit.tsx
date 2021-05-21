@@ -23,12 +23,7 @@ import {
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeRegistryContract,
-  Alert,
-  AlertFlyoutCloseReason,
-  AlertTypeRegistryContract,
-} from '../../../types';
+import { Alert, AlertEditProps, AlertFlyoutCloseReason } from '../../../types';
 import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
@@ -38,17 +33,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConfirmAlertClose } from './confirm_alert_close';
 import { hasAlertChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
-
-export interface AlertEditProps<MetaData = Record<string, any>> {
-  initialAlert: Alert;
-  alertTypeRegistry: AlertTypeRegistryContract;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: AlertFlyoutCloseReason) => void;
-  /** @deprecated use `onSave` as a callback after an alert is saved*/
-  reloadAlerts?: () => Promise<void>;
-  onSave?: () => Promise<void>;
-  metadata?: MetaData;
-}
 
 export const AlertEdit = ({
   initialAlert,

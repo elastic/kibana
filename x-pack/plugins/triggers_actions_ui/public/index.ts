@@ -7,14 +7,6 @@
 
 import { Plugin } from './plugin';
 
-export { AlertAdd } from './application/sections/alert_form';
-export {
-  AlertEdit,
-  AlertConditions,
-  AlertConditionsGroup,
-  ActionGroupWithCondition,
-} from './application/sections';
-
 export type {
   AlertAction,
   Alert,
@@ -31,13 +23,8 @@ export type {
   AlertTypeParams,
 } from './types';
 
-export {
-  ActionForm,
-  ConnectorAddFlyout,
-  ConnectorEditFlyout,
-} from './application/sections/action_connector_form';
+export { ActionForm } from './application/sections/action_connector_form';
 
-export { loadActionTypes } from './application/lib/action_connector_api';
 export * from './common';
 
 export function plugin() {
@@ -47,6 +34,6 @@ export function plugin() {
 export { Plugin };
 export * from './plugin';
 
-export { TIME_UNITS } from './application/constants';
+export type { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from '../public/application/app';

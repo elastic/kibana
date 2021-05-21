@@ -30,7 +30,8 @@ import { ActionConnectorForm, getConnectorErrors } from './action_connector_form
 import { TestConnectorForm } from './test_connector_form';
 import {
   ActionConnector,
-  ActionTypeRegistryContract,
+  ConnectorEditFlyoutProps,
+  EditConectorTabs,
   UserConfiguredActionConnector,
 } from '../../../types';
 import { ConnectorReducer, createConnectorReducer } from './connector_reducer';
@@ -43,20 +44,6 @@ import {
 import './connector_edit_flyout.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
-
-export interface ConnectorEditFlyoutProps {
-  initialConnector: ActionConnector;
-  onClose: () => void;
-  tab?: EditConectorTabs;
-  reloadConnectors?: () => Promise<ActionConnector[] | void>;
-  consumer?: string;
-  actionTypeRegistry: ActionTypeRegistryContract;
-}
-
-export enum EditConectorTabs {
-  Configuration = 'configuration',
-  Test = 'test',
-}
 
 export const ConnectorEditFlyout = ({
   initialConnector,

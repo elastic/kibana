@@ -29,8 +29,8 @@ import { ActionConnectorForm, getConnectorErrors } from './action_connector_form
 import {
   ActionType,
   ActionConnector,
-  ActionTypeRegistryContract,
   UserConfiguredActionConnector,
+  ConnectorAddFlyoutProps,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
@@ -38,15 +38,6 @@ import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { createConnectorReducer, InitialConnector, ConnectorReducer } from './connector_reducer';
 import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
-
-export interface ConnectorAddFlyoutProps {
-  onClose: () => void;
-  actionTypes?: ActionType[];
-  onTestConnector?: (connector: ActionConnector) => void;
-  reloadConnectors?: () => Promise<ActionConnector[] | void>;
-  consumer?: string;
-  actionTypeRegistry: ActionTypeRegistryContract;
-}
 
 const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   onClose,

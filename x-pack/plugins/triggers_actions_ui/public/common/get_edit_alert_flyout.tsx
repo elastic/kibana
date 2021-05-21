@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { AlertEditProps } from '../application/sections/alert_form/alert_edit';
 import { AlertEdit } from '../application/sections/alert_form';
+import type { AlertEditProps } from '../types';
 
 export const getEditAlertFlyoutLazy = (props: AlertEditProps) => {
   return <AlertEdit {...props} />;

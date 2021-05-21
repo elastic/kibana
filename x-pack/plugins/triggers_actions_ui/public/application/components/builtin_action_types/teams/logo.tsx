@@ -1,7 +1,34 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="256px" height="256px" viewBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space="preserve">  <image id="image0" width="256" height="256" x="0" y="0"
-    xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+
+const Logo = () => (
+  <svg
+    version="1.1"
+    id="Layer_1"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlnsXlink="http://www.w3.org/1999/xlink"
+    x="0px"
+    y="0px"
+    width="32px"
+    height="32px"
+    viewBox="0 0 32 32"
+    enableBackground="new 0 0 32 32"
+    xmlSpace="preserve"
+  >
+    {' '}
+    <image
+      id="image0"
+      width="32"
+      height="32"
+      x="0"
+      y="0"
+      xlinkHref="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
 AAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAA
 CXBIWXMAAA7DAAAOwwHHb6hkAAAbM0lEQVR42u3deZhU9Z0u8Pf9nVNVve/sYHSiaFxiRJYnmXvj
 cp2ZaK4BTUAN6pCJA7mONzdxiUq3Wko3Ro3GubnDjEsCE0ENHQV0opkb3DNBlugljlsMM0YEFBro
@@ -127,5 +154,10 @@ luvrXtTbc4WLFkCRu/XW9toeL3O6LzgVkFMATBFgbCBfRnYC2GCAdWLMOrfEeTF5ZfUe2/NA9U8L
 IIJaWvaP60Xqs76PIwB/EsiJAkwEMIFAuUBKKEwIJXHwn70UdAqxD8A+CjoBvA9wC8AtdMwfHMff
 ctP36rbpb3illFJKKaWUUkoppZRSSimllFJKKTv+PycghAJRYdeEAAAAJXRFWHRkYXRlOmNyZWF0
 ZQAyMDIwLTExLTEyVDE5OjU3OjQ1KzAzOjAw88nh2gAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMC0x
-MS0xMlQxOTo1Nzo0NSswMzowMIKUWWYAAAAASUVORK5CYII=" />
-</svg>
+MS0xMlQxOTo1Nzo0NSswMzowMIKUWWYAAAAASUVORK5CYII="
+    />
+  </svg>
+);
+
+// eslint-disable-next-line import/no-default-export
+export { Logo as default };

@@ -26,7 +26,6 @@ import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
-import { EditConectorTabs } from '../../action_connector_form/connector_edit_flyout';
 import {
   hasDeleteActionsCapability,
   hasSaveActionsCapability,
@@ -35,7 +34,12 @@ import {
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
-import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
+import {
+  ActionConnector,
+  ActionConnectorTableItem,
+  ActionTypeIndex,
+  EditConectorTabs,
+} from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
@@ -456,7 +460,7 @@ const DeleteOperation: React.FunctionComponent<{
         <EuiBetaBadge
           data-test-subj="preConfiguredTitleMessage"
           label={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.preconfiguredTitleMessage',
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.preconfiguredTitleMessage',
             {
               defaultMessage: 'Preconfigured',
             }

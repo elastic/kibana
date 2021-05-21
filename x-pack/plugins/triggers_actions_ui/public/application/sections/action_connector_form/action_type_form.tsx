@@ -166,7 +166,7 @@ export const ActionTypeForm = ({
     isActionGroupDisabledForActionType
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
         ? i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.addNewActionConnectorActionGroup.display',
+            'xpack.triggersActionsUI.sections.actionTypeForm.addNewActionConnectorActionGroup.display',
             {
               defaultMessage: '{actionGroupName} (Not Currently Supported)',
               values: { actionGroupName },
@@ -214,7 +214,7 @@ export const ActionTypeForm = ({
                     htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
                   >
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertForm.actionRunWhenInActionGroup"
+                      id="xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenInActionGroup"
                       defaultMessage="Run when"
                     />
                   </EuiFormLabel>
@@ -248,7 +248,7 @@ export const ActionTypeForm = ({
             fullWidth
             label={
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertForm.actionIdLabel"
+                id="xpack.triggersActionsUI.sections.actionTypeForm.actionIdLabel"
                 defaultMessage="{connectorInstance} connector"
                 values={{
                   connectorInstance: actionTypesIndex
@@ -268,7 +268,7 @@ export const ActionTypeForm = ({
                 >
                   <FormattedMessage
                     defaultMessage="Add connector"
-                    id="xpack.triggersActionsUI.sections.alertForm.addNewConnectorEmptyButton"
+                    id="xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton"
                   />
                 </EuiButtonEmpty>
               ) : null
@@ -333,7 +333,7 @@ export const ActionTypeForm = ({
                     <EuiFlexItem grow={false}>
                       <FormattedMessage
                         defaultMessage="{actionConnectorName}"
-                        id="xpack.triggersActionsUI.sections.alertForm.existingAlertActionTypeEditTitle"
+                        id="xpack.triggersActionsUI.sections.actionTypeForm.existingAlertActionTypeEditTitle"
                         values={{
                           actionConnectorName: `${actionConnector.name} ${
                             actionConnector.isPreconfigured ? preconfiguredMessage : ''
@@ -353,7 +353,7 @@ export const ActionTypeForm = ({
                             type="alert"
                             color="danger"
                             content={i18n.translate(
-                              'xpack.triggersActionsUI.sections.alertForm.actionDisabledTitle',
+                              'xpack.triggersActionsUI.sections.actionTypeForm.actionDisabledTitle',
                               {
                                 defaultMessage: 'This action is disabled',
                               }
@@ -375,7 +375,7 @@ export const ActionTypeForm = ({
             color="danger"
             className="actAccordionActionForm__extraAction"
             aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
+              'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
               {
                 defaultMessage: 'Delete',
               }
