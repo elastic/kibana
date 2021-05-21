@@ -139,17 +139,66 @@ describe('Duration Format', () => {
     ],
   });
 
+  testCase({
+    inputFormat: 'seconds',
+    outputFormat: 'dynamic',
+    outputPrecision: 0,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: 600,
+        output: '10 Minutes',
+      },
+      {
+        input: 30,
+        output: '30 Seconds',
+      },
+      {
+        input: 3000,
+        output: '50 Minutes',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'milliseconds',
+    outputFormat: 'dynamic',
+    outputPrecision: 0,
+    showSuffix: true,
+    useShortSuffix: true,
+    fixtures: [
+      {
+        input: 600,
+        output: '600 ms',
+      },
+      {
+        input: 30,
+        output: '30 ms',
+      },
+      {
+        input: 3000,
+        output: '3 sec',
+      },
+      {
+        input: 300000,
+        output: '5 min',
+      },
+    ],
+  });
+
   function testCase({
     inputFormat,
     outputFormat,
     outputPrecision,
     showSuffix,
+    useShortSuffix,
     fixtures,
   }: {
     inputFormat: string;
     outputFormat: string;
     outputPrecision: number | undefined;
     showSuffix: boolean | undefined;
+    useShortSuffix: boolean | undefined;
     fixtures: any[];
   }) {
     fixtures.forEach((fixture: Record<string, any>) => {
@@ -160,7 +209,7 @@ describe('Duration Format', () => {
         outputPrecision ? `, ${outputPrecision} decimals` : ''
       }`, () => {
         const duration = new DurationFormat(
-          { inputFormat, outputFormat, outputPrecision, showSuffix },
+          { inputFormat, outputFormat, outputPrecision, showSuffix, useShortSuffix },
           jest.fn()
         );
         expect(duration.convert(input)).toBe(output);
