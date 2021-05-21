@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectAttribute, SavedObjectsClientContract } from '../../../../src/core/server';
+import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { RunNowResult, TaskManagerStartContract } from '../../task_manager/server';
 import {
   RawAction,
   ActionTypeRegistryContract,
   PreConfiguredAction,
   ActionTaskExecutorParams,
-  ActionTaskParams,
 } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
