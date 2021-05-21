@@ -137,11 +137,9 @@ describe('migration v2 with corrupt saved object documents', () => {
         '"foo:789"',
         '"foo:other"',
       ];
-      const regex = /"[^"]+"/g; // matchers for all corrupt documents
-      const docIdsPattern = errorMessage.match(regex);
-      const corruptDocIds: string[] = errorMessage.match(docIdsPattern)[0].split(',');
-      expect(corruptDocIds.length).toBeGreaterThan(5);
-      expect(corruptDocIds).toEqual(expectedCorruptDocIds);
+      for (const corruptDocId of expectedCorruptDocIds) {
+        expect(errorMessage.includes(corruptDocId)).toBeTruthy();
+      }
     }
   });
 });

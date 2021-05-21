@@ -112,22 +112,12 @@ describe('migration v2', () => {
         'one',
         'two',
       ];
-      const corruptDocIds = errorMessage
-        .split(' Corrupt saved object documents: ')[1]
-        .split(' Transformation errors')[0]
-        .split(',');
-      expect(corruptDocIds.length).toBeGreaterThan(5);
-      expect(corruptDocIds).toEqual(expectedCorruptDocIds);
-
-      const transformErrorInstances = errorMessage
-        .split(' Transformation errors: ')[1]
-        .split('Error')
-        .filter((instance: string) => !instance.startsWith('Error'));
-      expect(transformErrorInstances.length).toBeGreaterThan(0);
-      expect(transformErrorInstances[0]).toMatchInlineSnapshot(`
-        "space:default: Document \\"default\\" has property \\"space\\" which belongs to a more recent version of Kibana [6.6.0]. The last known version is [undefined]
-         "
-      `);
+      for (const corruptDocId of expectedCorruptDocIds) {
+        expect(errorMessage.includes(corruptDocId)).toBeTruthy();
+      }
+      const expectedTransformErrorMessage =
+        'Transformation errors: space:default: Document "default" has property "space" which belongs to a more recent version of Kibana [6.6.0]. The last known version is [undefined]';
+      expect(errorMessage.includes(expectedTransformErrorMessage)).toBeTruthy();
     }
   });
 });

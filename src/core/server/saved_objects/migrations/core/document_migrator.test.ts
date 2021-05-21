@@ -748,11 +748,8 @@ describe('DocumentMigrator', () => {
         migrator.migrate(_.cloneDeep(failedDoc));
         expect('Did not throw').toEqual('But it should have!');
       } catch (error) {
-        expect(error.message).toMatchInlineSnapshot(`"Dang diggity!"`);
+        expect(error.message).toBe('Dang diggity!');
         expect(error).toBeInstanceOf(TransformSavedObjectDocumentError);
-        expect(loggingSystemMock.collect(mockLoggerFactory).error[0][0]).toMatchInlineSnapshot(
-          `[Error: Dang diggity!]`
-        );
       }
     });
 
