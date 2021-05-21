@@ -53,13 +53,14 @@ function TopNVisualization(props) {
         props.getConfig
       );
       const value = getLastValueOrEmpty(item.data);
-      // This check is necessary for preventing from comparing null/empty array values
-      // with numeric rules.
       let color = item.color || seriesConfig.color;
       if (model.bar_color_rules) {
         model.bar_color_rules.forEach((rule) => {
+          // This check is necessary for preventing from comparing null values with numeric rules.
           const shouldOperate =
-            (isNull(rule.value) && OPERATORS_ALLOW_NULL[rule.operator]) || !isNull(rule.value);
+            (isNull(rule.value) && OPERATORS_ALLOW_NULL[rule.operator]) ||
+            (!isNull(rule.value) && !isNull(value));
+
           if (shouldOperate && rule.operator && rule.bar_color) {
             if (OPERATORS[rule.operator](value, rule.value)) {
               color = rule.bar_color;

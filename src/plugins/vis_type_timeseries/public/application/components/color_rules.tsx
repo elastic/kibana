@@ -117,10 +117,10 @@ export class ColorRules extends Component<ColorRulesProps> {
 
   handleOperatorChange = (item: ColorRule) => {
     return (options: Array<EuiComboBoxOptionOption<string>>) => {
-      const selectedOperator: ColorRulesOperator | void = colorRulesOperatorsList.find(
+      const selectedOperator = colorRulesOperatorsList.find(
         (operator) => options[0]?.value === operator.method
       );
-      const value = (selectedOperator && selectedOperator.value) ?? null;
+      const value = selectedOperator?.value ?? null;
       collectionActions.handleChange(this.props, {
         ...item,
         operator: options[0]?.value,
@@ -141,11 +141,11 @@ export class ColorRules extends Component<ColorRulesProps> {
     const selectedOperatorOption = operatorOptions.find(
       (option) => model.operator === option.value
     );
-    const selectedOperator: ColorRulesOperator | void = colorRulesOperatorsList.find(
+    const selectedOperator = colorRulesOperatorsList.find(
       (operator) => model.operator === operator.method
     );
 
-    const hideValueSelectorField = (selectedOperator && selectedOperator.isValueConstant) ?? false;
+    const hideValueSelectorField = selectedOperator?.isValueConstant ?? false;
     const labelStyle = { marginBottom: 0 };
 
     let secondary;

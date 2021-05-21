@@ -27,10 +27,11 @@ function getColors(props) {
     model.gauge_color_rules.forEach((rule) => {
       if (rule.operator) {
         const value = getLastValueOrEmpty(series[0]?.data);
-        // This check is necessary for preventing from comparing null/empty array values
-        // with numeric rules.
+        // This check is necessary for preventing from comparing null values with numeric rules.
         const shouldOperate =
-          (isNull(rule.value) && OPERATORS_ALLOW_NULL[rule.operator]) || !isNull(rule.value);
+          (isNull(rule.value) && OPERATORS_ALLOW_NULL[rule.operator]) ||
+          (!isNull(rule.value) && !isNull(value));
+
         if (shouldOperate && OPERATORS[rule.operator](value, rule.value)) {
           gauge = rule.gauge;
           text = rule.text;
