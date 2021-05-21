@@ -1,6 +1,6 @@
 import requests
 
-logFile = open('/var/log/probe/KibanaStartup.log', 'w')
+logFile = open('/var/log/probe/KibanaStartup.log', 'w+')
 
 res = requests.get('http://localhost:9200/_cat/indices/.kibana_*')
 content = res.content
