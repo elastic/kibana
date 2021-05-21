@@ -1006,14 +1006,14 @@ const addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules: SavedObje
 
       const compareWithEqualMethods = ['lte', 'gte'];
       const emptyRule = {
-        value: [],
-        operator: 'eq',
+        operator: 'empty',
+        value: null,
       };
 
       const getRulesWithComparingToZero = (rules: any[] = []) =>
         last(
           rules.filter(
-            (rule) => compareWithEqualMethods.indexOf(rule.operator) !== -1 && rule.value === 0
+            (rule) => compareWithEqualMethods.includes(rule.operator) && rule.value === 0
           )
         );
 
@@ -1023,21 +1023,36 @@ const addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules: SavedObje
         id: uuid.v4(),
       });
 
-      const convertToArrayOfEmtpyRules = (rule: any) => (rule ? [convertRuleToEmpty(rule)] : []);
-
       const lastBarRule = getRulesWithComparingToZero(barColorRules) ?? null;
       const lastBackgroundRule = getRulesWithComparingToZero(backgroundColorRules) ?? null;
       const lastGaugeRule = getRulesWithComparingToZero(gaugeColorRules) ?? null;
 
-      const barEmptyRules = convertToArrayOfEmtpyRules(lastBarRule);
-      const backgroundEmptyRules = convertToArrayOfEmtpyRules(lastBackgroundRule);
-      const gaugeEmptyRules = convertToArrayOfEmtpyRules(lastGaugeRule);
-
       const colorRules = {
-        bar_color_rules: [...barColorRules, ...barEmptyRules],
-        background_color_rules: [...backgroundColorRules, ...backgroundEmptyRules],
-        gauge_color_rules: [...gaugeColorRules, ...gaugeEmptyRules],
+        bar_color_rules: barColorRules,
+        background_color_rules: backgroundColorRules,
+        gauge_color_rules: gaugeColorRules,
       };
+
+      if (lastBarRule) {
+        colorRules.bar_color_rules = [
+          ...colorRules.bar_color_rules,
+          convertRuleToEmpty(lastBarRule),
+        ];
+      }
+
+      if (lastBackgroundRule) {
+        colorRules.background_color_rules = [
+          ...colorRules.background_color_rules,
+          convertRuleToEmpty(lastBackgroundRule),
+        ];
+      }
+
+      if (lastGaugeRule) {
+        colorRules.gauge_color_rules = [
+          ...colorRules.gauge_color_rules,
+          convertRuleToEmpty(lastGaugeRule),
+        ];
+      }
 
       return {
         ...doc,
