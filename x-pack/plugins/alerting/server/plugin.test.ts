@@ -214,6 +214,7 @@ describe('Alerting Plugin', () => {
           interval: '5m',
           removalDelay: '1h',
         },
+        maxEphemeralActionsPerAlert: 100,
       });
       const plugin = new AlertingPlugin(context);
 

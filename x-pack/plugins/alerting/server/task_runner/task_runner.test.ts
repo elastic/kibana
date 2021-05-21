@@ -98,6 +98,8 @@ describe('Task Runner', () => {
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     alertTypeRegistry,
     kibanaBaseUrl: 'https://localhost:5601',
+    supportsEphemeralTasks: true,
+    maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
   };
 
   const mockedAlertTypeSavedObject: Alert<AlertTypeParams> = {
