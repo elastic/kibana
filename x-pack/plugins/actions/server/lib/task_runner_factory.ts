@@ -20,7 +20,7 @@ import {
 } from '../../../../../src/core/server';
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
-import { ConcreteTaskInstance, RunContext } from '../../../task_manager/server';
+import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { ActionTypeDisabledError } from './errors';
 import {
