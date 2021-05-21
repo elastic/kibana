@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import './context_app_legacy.scss';
 import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
-import { DOC_TABLE_LEGACY } from '../../../../common';
+import { DOC_HIDE_TIME_COLUMN_SETTING, DOC_TABLE_LEGACY } from '../../../../common';
 import { ContextErrorMessage } from '../context_error_message';
 import {
   DocTableLegacy,
@@ -22,15 +22,16 @@ import { LoadingStatus } from '../../angular/context_app_state';
 import { ActionBar, ActionBarProps } from '../../angular/context/components/action_bar/action_bar';
 import { TopNavMenuProps } from '../../../../../navigation/public';
 import { DiscoverGrid, DiscoverGridProps } from '../discover_grid/discover_grid';
-import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { getServices, SortDirection } from '../../../kibana_services';
 import { GetStateReturn, AppState } from '../../angular/context_state';
 import { useDataGridColumns } from '../../helpers/use_data_grid_columns';
+import { EsHitRecord, EsHitRecordList } from '../../angular/context/api/context';
 
 export interface ContextAppProps {
   topNavMenu: React.ComponentType<TopNavMenuProps>;
   columns: string[];
-  hits: ElasticSearchHit[];
+  hits: EsHitRecordList;
   indexPattern: IndexPattern;
   appState: AppState;
   stateContainer: GetStateReturn;
@@ -75,7 +76,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     minimumVisibleRows,
     useNewFieldsApi,
   } = renderProps;
-  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
+  const [expandedDoc, setExpandedDoc] = useState<EsHitRecord | undefined>(undefined);
   const isAnchorLoaded = anchorStatus === LoadingStatus.LOADED;
   const isFailed = anchorStatus === LoadingStatus.FAILED;
   const allRowsLoaded =
@@ -128,9 +129,10 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       sampleSize: 0,
       sort: sorting,
       isSortEnabled: false,
-      showTimeCol: !config.get('doc_table:hideTimeColumn', false) && !!indexPattern.timeFieldName,
+      showTimeCol: !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
       services,
       useNewFieldsApi,
+      isPaginationEnabled: false,
       setExpandedDoc,
       onFilter: filter,
       onAddColumn,

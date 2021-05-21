@@ -18,9 +18,7 @@ export interface AngularDirective {
 
 export type AngularScope = IScope;
 
-export type ElasticSearchHit<T = unknown> = estypes.SearchResponse<T>['hits']['hits'][number] & {
-  isAnchor?: boolean;
-};
+export type ElasticSearchHit<T = unknown> = estypes.SearchResponse<T>['hits']['hits'][number];
 
 export interface FieldMapping {
   filterable?: boolean;

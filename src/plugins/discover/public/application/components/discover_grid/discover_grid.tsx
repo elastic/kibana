@@ -135,6 +135,10 @@ export interface DiscoverGridProps {
    * How the data is fetched
    */
   useNewFieldsApi: boolean;
+  /**
+   * Manage pagination control
+   */
+  isPaginationEnabled?: boolean;
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -162,8 +166,9 @@ export const DiscoverGrid = ({
   settings,
   showTimeCol,
   sort,
-  isSortEnabled = true,
   useNewFieldsApi,
+  isSortEnabled = true,
+  isPaginationEnabled = true,
 }: DiscoverGridProps) => {
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -215,14 +220,16 @@ export const DiscoverGrid = ({
     const onChangePage = (pageIndex: number) =>
       setPagination((paginationData) => ({ ...paginationData, pageIndex }));
 
-    return {
-      onChangeItemsPerPage,
-      onChangePage,
-      pageIndex: pagination.pageIndex > pageCount - 1 ? 0 : pagination.pageIndex,
-      pageSize: pagination.pageSize,
-      pageSizeOptions: pageSizeArr,
-    };
-  }, [pagination, pageCount]);
+    return isPaginationEnabled
+      ? {
+          onChangeItemsPerPage,
+          onChangePage,
+          pageIndex: pagination.pageIndex > pageCount - 1 ? 0 : pagination.pageIndex,
+          pageSize: pagination.pageSize,
+          pageSizeOptions: pageSizeArr,
+        }
+      : undefined;
+  }, [pagination, pageCount, isPaginationEnabled]);
 
   /**
    * Sorting

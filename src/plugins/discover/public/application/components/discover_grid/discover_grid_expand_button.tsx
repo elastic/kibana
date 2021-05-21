@@ -12,6 +12,7 @@ import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
 import themeLight from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
+import { EsHitRecord } from '../../angular/context/api/context';
 /**
  * Button to expand a given row
  */
@@ -19,7 +20,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   const { expanded, setExpanded, rows, isDarkMode } = useContext(DiscoverGridContext);
   const current = rows[rowIndex];
   useEffect(() => {
-    if (current.isAnchor) {
+    if ((current as EsHitRecord).isAnchor) {
       setCellProps({
         className: 'dscDiscoverGrid__cell--highlight',
       });

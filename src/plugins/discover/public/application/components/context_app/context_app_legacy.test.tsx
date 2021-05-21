@@ -17,8 +17,8 @@ import { ActionBar } from '../../angular/context/components/action_bar/action_ba
 import { ContextErrorMessage } from '../context_error_message';
 import { TopNavMenuMock } from './__mocks__/top_nav_menu';
 import { AppState, GetStateReturn } from '../../angular/context_state';
-import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { SortDirection } from 'src/plugins/data/common';
+import { EsHitRecordList } from '../../angular/context/api/context';
 
 jest.mock('../../../kibana_services', () => {
   return {
@@ -59,7 +59,7 @@ describe('ContextAppLegacy test', () => {
   const defaultProps = {
     columns: ['_source'],
     filter: () => {},
-    hits: ([hit] as unknown) as ElasticSearchHit[],
+    hits: ([hit] as unknown) as EsHitRecordList,
     sorting: [['order_date', 'desc']] as Array<[string, SortDirection]>,
     minimumVisibleRows: 5,
     indexPattern,
@@ -78,6 +78,7 @@ describe('ContextAppLegacy test', () => {
     successorStatus: 'loaded',
     topNavMenu: TopNavMenuMock,
     useNewFieldsApi: false,
+    isPaginationEnabled: false,
   };
   const topNavProps = {
     appName: 'context',

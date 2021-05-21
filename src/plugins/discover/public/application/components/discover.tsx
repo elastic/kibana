@@ -34,7 +34,11 @@ import { esFilters, IndexPatternField, search } from '../../../../data/public';
 import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverProps } from './types';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
-import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  DOC_TABLE_LEGACY,
+  SEARCH_FIELDS_FROM_SOURCE,
+} from '../../../common';
 import { popularizeField } from '../helpers/popularize_field';
 import { DocViewFilterFn } from '../doc_views/doc_views_types';
 import { DiscoverGrid } from './discover_grid/discover_grid';
@@ -429,7 +433,7 @@ export function Discover({
                               searchTitle={opts.savedSearch.lastSavedTitle}
                               setExpandedDoc={setExpandedDoc}
                               showTimeCol={
-                                !config.get('doc_table:hideTimeColumn', false) &&
+                                !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
                                 !!indexPattern.timeFieldName
                               }
                               services={services}

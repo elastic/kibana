@@ -9,7 +9,7 @@
 import { EsQuerySortValue, SortDirection } from '../../../../../../data/public';
 import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
 import { fetchAnchorProvider } from './anchor';
-import { EsHitRecord } from './context';
+import { EsHitRecord, EsHitRecordList } from './context';
 
 describe('context app', function () {
   let fetchAnchor: (
@@ -22,9 +22,7 @@ describe('context app', function () {
 
   describe('function fetchAnchor', function () {
     beforeEach(() => {
-      searchSourceStub = createSearchSourceStub([
-        { _id: 'hit1', fields: [], sort: [], _source: {} },
-      ]);
+      searchSourceStub = createSearchSourceStub(([{ _id: 'hit1' }] as unknown) as EsHitRecordList);
       fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub);
     });
 
@@ -147,9 +145,7 @@ describe('context app', function () {
 
   describe('useNewFields API', () => {
     beforeEach(() => {
-      searchSourceStub = createSearchSourceStub([
-        { _id: 'hit1', fields: [], sort: [], _source: {} },
-      ]);
+      searchSourceStub = createSearchSourceStub(([{ _id: 'hit1' }] as unknown) as EsHitRecordList);
       fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub, true);
     });
 

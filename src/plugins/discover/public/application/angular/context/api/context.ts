@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { Filter, IndexPatternsContract, IndexPattern } from 'src/plugins/data/public';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
@@ -16,15 +17,11 @@ import { getEsQuerySort } from './utils/get_es_query_sort';
 import { getServices } from '../../../../kibana_services';
 
 export type SurrDocType = 'successors' | 'predecessors';
-export interface EsHitRecord {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fields: Record<string, any>;
-  sort: number[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _source: Record<string, any>;
-  _id: string;
+export type EsHitRecord = Required<estypes.SearchResponse['hits']['hits'][number]> & {
+  sort: Array<number | string>;
+  _source: Record<string, string | number>;
   isAnchor?: boolean;
-}
+};
 export type EsHitRecordList = EsHitRecord[];
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
@@ -71,7 +68,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
     const timeValueMillis =
       nanos !== '' ? convertIsoToMillis(anchor.fields[timeField][0]) : anchor.sort[0];
 
-    const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis, type, sortDir);
+    const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis as number, type, sortDir);
     let documents: EsHitRecordList = [];
 
     for (const interval of intervals) {
