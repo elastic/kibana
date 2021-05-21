@@ -13,16 +13,18 @@ import { ElasticsearchResponse } from '../../../..//common/types/es';
 
 interface ESResponse {
   aggregations?: {
-    types?: {
-      buckets?: Array<{
-        key: string;
-      }>;
+    nest?: {
+      types?: {
+        buckets?: Array<{
+          key: string;
+        }>;
+      };
     };
   };
 }
 
 export function handleResponse(response: ESResponse) {
-  return response.aggregations?.types?.buckets?.map((type) => type.key);
+  return response.aggregations?.nest?.types?.buckets?.map((type) => type.key);
 }
 
 export async function getAlertTypes(
@@ -54,14 +56,21 @@ export async function getAlertTypes(
     index: kbnIndexPattern,
     size: 0,
     ignoreUnavailable: true,
-    filterPath: ['aggregations.types.buckets'],
+    filterPath: ['aggregations.nest.types.buckets'],
     body: {
       query: mergedQuery,
       aggs: {
-        types: {
-          terms: {
-            field: 'kibana_stats.task_manager.drift.by_type.alertType',
-            size: 1000, // TODO: how to paginate properly here
+        nest: {
+          nested: {
+            path: 'kibana_stats.task_manager.drift.by_type',
+          },
+          aggs: {
+            types: {
+              terms: {
+                field: 'kibana_stats.task_manager.drift.by_type.alertType',
+                size: 1000, // TODO: how to paginate properly here
+              },
+            },
           },
         },
       },

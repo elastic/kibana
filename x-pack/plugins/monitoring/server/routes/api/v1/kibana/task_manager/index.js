@@ -6,4 +6,4 @@
  */
 
 export { alertTypesRoute } from './alert_types';
-export { taskManagerInstanceRoute } from './instance';
+export { taskManagerInstanceRoute } from './task_manager';

@@ -71,30 +71,49 @@ export function taskManagerInstanceRoute(server: any, npRoute: RouteDependencies
           }
         );
 
-        const metricSet = alertTypes?.map((alertType) => {
-          const metric = new KibanaTaskManagerMetric({
-            ...kibanaMetrics.kibana_task_manager_drift_p50_per_alert_type_opts,
-            by_alert_type: alertType,
-          });
-          if (alertType.includes('monitoring_alert_jvm_memory_usage')) {
-            metric.debug = true;
-          }
-          return {
-            keys: [`kibana_task_manager_drift_p50`],
-            metric,
-            filters: [
+        const metrics: { [key: string]: any } = {};
+
+        await Promise.all(
+          (alertTypes ?? []).map(async (alertType) => {
+            const metricSet = [
               {
-                term: {
-                  'kibana_stats.task_manager.drift.by_type.alertType': alertType,
+                keys: ['kibana_task_manager_single_drift_p50'],
+                name: 'kibana_task_manager',
+              },
+            ];
+            const filters = [
+              {
+                nested: {
+                  path: 'kibana_stats.task_manager.drift.by_type',
+                  query: {
+                    term: {
+                      'kibana_stats.task_manager.drift.by_type.alertType': alertType,
+                    },
+                  },
                 },
               },
-            ],
-            name: `kibana_task_manager_${alertType}`,
-          };
-        });
+            ];
+            const result = await getMetrics(legacyRequest, kbnIndexPattern, metricSet, filters);
+            metrics[`kibana_task_manager_${alertType}`] = [
+              {
+                ...result.kibana_task_manager[0],
+                metric: {
+                  ...result.kibana_task_manager[0].metric,
+                  label: result.kibana_task_manager[0].metric.label.replace(
+                    '[alertType]',
+                    alertType
+                  ),
+                  description: result.kibana_task_manager[0].metric.label.replace(
+                    '[alertType]',
+                    alertType
+                  ),
+                },
+              },
+            ];
+          })
+        );
 
-        const [metrics, kibanaSummary] = await Promise.all([
-          getMetrics(legacyRequest, kbnIndexPattern, metricSet, [], { alertTypes }),
+        const [kibanaSummary] = await Promise.all([
           getKibanaInfo(legacyRequest, kbnIndexPattern, {
             clusterUuid: request.params.clusterUuid,
             kibanaUuid: request.params.kibanaUuid,

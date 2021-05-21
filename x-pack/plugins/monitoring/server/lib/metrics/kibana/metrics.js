@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { KibanaEventsRateClusterMetric, KibanaMetric, KibanaTaskManagerMetric } from './classes';
-import { LARGE_FLOAT, SMALL_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
+import {
+  KibanaEventsRateClusterMetric,
+  KibanaMetric,
+  KibanaTaskManagerMetric,
+  KibanaSingleTaskManagerMetric,
+} from './classes';
+import {
+  LARGE_FLOAT,
+  SMALL_FLOAT,
+  LARGE_BYTES,
+  LARGE_ABBREVIATED,
+} from '../../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 
 const clientResponseTimeTitle = i18n.translate(
@@ -264,14 +274,15 @@ export const metrics = {
         defaultMessage: 'P50 drift for [alertType]',
       }
     ),
-    format: SMALL_FLOAT,
+    format: LARGE_ABBREVIATED,
     metricAgg: 'max',
     units: '',
     limit: {
       max: 5,
     },
   }),
-  kibana_task_manager_drift_p50_per_alert_type_opts: {
+  kibana_task_manager_single_drift_p50: new KibanaSingleTaskManagerMetric({
+    // debug: true,
     field: 'kibana_stats.task_manager.drift.by_type.stat.p50',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Label', {
       defaultMessage: 'P50 drift for [alertType]',
@@ -282,11 +293,29 @@ export const metrics = {
         defaultMessage: 'P50 drift for [alertType]',
       }
     ),
-    format: SMALL_FLOAT,
+    format: LARGE_ABBREVIATED,
     metricAgg: 'max',
     units: '',
     limit: {
       max: 5,
     },
-  },
+  }),
+  // kibana_task_manager_drift_p50_per_alert_type_opts: {
+  //   field: 'kibana_stats.task_manager.drift.by_type.stat.p50',
+  //   label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Label', {
+  //     defaultMessage: 'P50 drift for [alertType]',
+  //   }),
+  //   description: i18n.translate(
+  //     'xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Description',
+  //     {
+  //       defaultMessage: 'P50 drift for [alertType]',
+  //     }
+  //   ),
+  //   format: SMALL_FLOAT,
+  //   metricAgg: 'max',
+  //   units: '',
+  //   limit: {
+  //     max: 5,
+  //   },
+  // },
 };
