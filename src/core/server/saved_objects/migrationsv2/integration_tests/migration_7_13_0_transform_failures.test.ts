@@ -45,19 +45,21 @@ describe('migration v2', () => {
       settings: {
         es: {
           license: 'basic',
-          // example of original 'bar' SO:
+          // example of original 'foo' SO with corrupt id:
+          // _id: one
           // {
-          //  type: 'bar',
-          //  bar: {
-          // name: 'Mary', // may be missing
-          // surname: 'Doe, // may be missing
-          // age: 25, // may be missing
-          // old: false // may be missing
-          // },
-          //  migrationVersion: {
-          //    bar: '7.13.0',
+          //  foo: {
+          //    name: 'one',
           //  },
+          //  type: 'foo',
+          //  references: [],
+          //  migrationVersion: {
+          //    foo: '7.13.0',
+          //  },
+          // "coreMigrationVersion": "7.13.0",
+          // "updated_at": "2021-05-16T18:16:45.450Z"
           // },
+
           // SO that will fail transformation:
           // {
           //  type: 'space',
@@ -68,7 +70,7 @@ describe('migration v2', () => {
           dataArchive: Path.join(
             __dirname,
             'archives',
-            '7.13.0_with_corrupt_and_transform_failures_docs.zip'
+            '7_13_corrupt_and_transform_failures_docs.zip'
           ),
         },
       },
@@ -108,9 +110,9 @@ describe('migration v2', () => {
         'QGSZfHkBs3dBRGh-ANoD',
         'QWSZfHkBs3dBRGh-hNob',
         'QmSZfHkBs3dBRGh-w9qH',
-        'Q2SZfHkBs3dBRGh-9dp2',
         'one',
         'two',
+        'Q2SZfHkBs3dBRGh-9dp2',
       ];
       for (const corruptDocId of expectedCorruptDocIds) {
         expect(errorMessage.includes(corruptDocId)).toBeTruthy();
