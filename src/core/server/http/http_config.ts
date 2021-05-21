@@ -84,9 +84,8 @@ const configSchema = schema.object(
         }
       },
     }),
-    host: schema.string({
+    host: schema.oneOf([schema.string({ hostname: true }), schema.literal('0')], {
       defaultValue: 'localhost',
-      hostname: true,
     }),
     maxPayload: schema.byteSize({
       defaultValue: '1048576b',
@@ -217,13 +216,7 @@ export class HttpConfig implements IHttpConfig {
     rawExternalUrlConfig: ExternalUrlConfig
   ) {
     this.autoListen = rawHttpConfig.autoListen;
-    // TODO: Consider dropping support for '0' in v8.0.0. This value is passed
-    // to hapi, which validates it. Prior to hapi v20, '0' was considered a
-    // valid host, however the validation logic internally in hapi was
-    // re-written for v20 and hapi no longer considers '0' a valid host. For
-    // details, see:
-    // https://github.com/elastic/kibana/issues/86716#issuecomment-749623781
-    this.host = rawHttpConfig.host === '0' ? '0.0.0.0' : rawHttpConfig.host;
+    this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;
     const { securityResponseHeaders, disableEmbedding } = parseRawSecurityResponseHeadersConfig(

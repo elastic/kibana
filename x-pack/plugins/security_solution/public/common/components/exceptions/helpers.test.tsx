@@ -32,6 +32,7 @@ import {
   ListOperatorTypeEnum as OperatorTypeEnum,
   EntriesArray,
   OsTypeArray,
+  ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -39,7 +40,6 @@ import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/ent
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
 import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/common';
 
 jest.mock('uuid', () => ({

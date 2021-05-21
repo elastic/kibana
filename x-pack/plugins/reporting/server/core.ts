@@ -8,6 +8,7 @@
 import Hapi from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { first, map, take } from 'rxjs/operators';
+import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import {
   BasePath,
   IClusterClient,
@@ -39,6 +40,7 @@ export interface ReportingInternalSetup {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
+  screenshotMode: ScreenshotModePluginSetup;
   logger: LevelLogger;
 }
 
@@ -215,6 +217,11 @@ export class ReportingCore {
     const config = this.getConfig();
     const { browserDriverFactory } = await this.getPluginStartDeps();
     return screenshotsObservableFactory(config.get('capture'), browserDriverFactory);
+  }
+
+  public getEnableScreenshotMode() {
+    const { screenshotMode } = this.getPluginSetupDeps();
+    return screenshotMode.setScreenshotModeEnabled;
   }
 
   /*
