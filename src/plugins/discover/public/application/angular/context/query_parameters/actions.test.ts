@@ -10,6 +10,7 @@ import { getQueryParameterActions } from './actions';
 import { FilterManager, SortDirection } from '../../../../../../data/public';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { ContextAppState, LoadingStatus, QueryParameters } from '../../context_app_state';
+import { EsHitRecord } from '../api/context';
 const setupMock = coreMock.createSetup();
 
 let state: ContextAppState;
@@ -39,7 +40,7 @@ beforeEach(() => {
     },
     rows: {
       all: [],
-      anchor: { isAnchor: true, fields: [], sort: [], _source: [], _id: '' },
+      anchor: ({ isAnchor: true, fields: [], sort: [], _id: '' } as unknown) as EsHitRecord,
       predecessors: [],
       successors: [],
     },

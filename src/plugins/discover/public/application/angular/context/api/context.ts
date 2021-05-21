@@ -17,11 +17,17 @@ import { getEsQuerySort } from './utils/get_es_query_sort';
 import { getServices } from '../../../../kibana_services';
 
 export type SurrDocType = 'successors' | 'predecessors';
-export type EsHitRecord = Required<estypes.SearchResponse['hits']['hits'][number]> & {
-  sort: Array<number | string>;
-  _source: Record<string, string | number>;
+export type EsHitRecord = Required<
+  Pick<
+    estypes.SearchResponse['hits']['hits'][number],
+    '_id' | 'fields' | 'sort' | '_index' | '_version'
+  >
+> & {
+  _source?: Record<string, unknown>;
+  _score?: number;
   isAnchor?: boolean;
 };
+
 export type EsHitRecordList = EsHitRecord[];
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
