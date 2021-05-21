@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import expect from '@kbn/expect';
+import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   CreateRulesSchema,
   EqlCreateSchema,
@@ -24,7 +25,6 @@ import {
 } from '../../../lists_api_integration/utils';
 import { RulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';
 import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
-import { CreateExceptionListItemSchema } from '../../../../plugins/lists/common';
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,

@@ -11,14 +11,19 @@ import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 import { AutocompleteStart } from 'src/plugins/data/public';
 import { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  BuilderEntry,
+  ExceptionsBuilderExceptionItem,
+  FormattedBuilderEntry,
+  getFormattedBuilderEntries,
+  getUpdatedEntriesOnDelete,
+} from '@kbn/securitysolution-list-utils';
 
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
-import { BuilderEntry, ExceptionsBuilderExceptionItem, FormattedBuilderEntry } from './types';
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
 import { BuilderEntryItem } from './entry_renderer';
-import { getFormattedBuilderEntries, getUpdatedEntriesOnDelete } from './helpers';
 
 const MyBeautifulLine = styled(EuiFlexItem)`
   &:after {
