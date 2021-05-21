@@ -14,8 +14,11 @@ import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { replaceVars } from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { sortBy, first, get, gt, gte, lt, lte, isEqual } from 'lodash';
-const OPERATORS = { gt, gte, lt, lte, eq: isEqual };
+import { sortBy, first, get, gt, gte, lt, lte, isNull } from 'lodash';
+const OPERATORS = { gt, gte, lt, lte, empty: isNull };
+const OPERATORS_ALLOW_NULL = {
+  empty: true,
+};
 
 function sortByDirection(data, direction, fn) {
   if (direction === 'desc') {
@@ -50,13 +53,14 @@ function TopNVisualization(props) {
         props.getConfig
       );
       const value = getLastValueOrEmpty(item.data);
-      // This comparison is necessary for preventing from comparing null/empty array values
+      // This check is necessary for preventing from comparing null/empty array values
       // with numeric rules.
       let color = item.color || seriesConfig.color;
       if (model.bar_color_rules) {
         model.bar_color_rules.forEach((rule) => {
-          const shouldOperate = typeof value === typeof rule.value;
-          if (shouldOperate && rule.operator && rule.value != null && rule.bar_color) {
+          const shouldOperate =
+            (isNull(rule.value) && OPERATORS_ALLOW_NULL[rule.operator]) || !isNull(rule.value);
+          if (shouldOperate && rule.operator && rule.bar_color) {
             if (OPERATORS[rule.operator](value, rule.value)) {
               color = rule.bar_color;
             }

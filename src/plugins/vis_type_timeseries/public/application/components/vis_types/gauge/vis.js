@@ -10,10 +10,13 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { get, isUndefined, assign, includes, gt, gte, lt, lte, isEqual } from 'lodash';
+import { get, isUndefined, assign, includes, gt, gte, lt, lte, isNull } from 'lodash';
 import { Gauge } from '../../../visualizations/views/gauge';
 import { getLastValueOrEmpty } from '../../../../../common/last_value_utils';
-const OPERATORS = { gt, gte, lt, lte, eq: isEqual };
+const OPERATORS = { gt, gte, lt, lte, empty: isNull };
+const OPERATORS_ALLOW_NULL = {
+  empty: true,
+};
 
 function getColors(props) {
   const { model, visData } = props;
@@ -22,11 +25,12 @@ function getColors(props) {
   let gauge;
   if (model.gauge_color_rules) {
     model.gauge_color_rules.forEach((rule) => {
-      if (rule.operator && rule.value != null) {
-        const value = (series[0] && getLastValueOrEmpty(series[0].data)) ?? 0;
-        // This comparison is necessary for preventing from comparing null/empty array values
+      if (rule.operator) {
+        const value = getLastValueOrEmpty(series[0]?.data);
+        // This check is necessary for preventing from comparing null/empty array values
         // with numeric rules.
-        const shouldOperate = typeof value === typeof rule.value;
+        const shouldOperate =
+          (isNull(rule.value) && OPERATORS_ALLOW_NULL[rule.operator]) || !isNull(rule.value);
         if (shouldOperate && OPERATORS[rule.operator](value, rule.value)) {
           gauge = rule.gauge;
           text = rule.text;

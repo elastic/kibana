@@ -19,10 +19,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { fatalErrorsServiceMock } from 'src/core/public/mocks';
 import { AddDeleteButtons } from './add_delete_buttons';
 import { collectionActions } from './lib/collection_actions';
-import { EMPTY_VALUE } from '../../../common/last_value_utils';
 import { ColorPicker, ColorPickerProps } from './color_picker';
 import { TimeseriesVisParams } from '../../types';
 
@@ -88,8 +86,7 @@ export const colorRulesOperatorsList: ColorRulesOperator[] = [
   {
     translateNameId: 'visTypeTimeseries.colorRules.emptyLabel',
     defaultName: 'empty',
-    method: 'eq',
-    value: EMPTY_VALUE,
+    method: 'empty',
     isValueConstant: true,
   },
 ];

@@ -100,14 +100,13 @@ export class TopN extends Component {
       // if result is empty, all bar need to be colored.
       const lastValueFormatted = isEmptyValue(lastValue) ? 1 : lastValue;
       const formatter = item.tickFormatter || this.props.tickFormatter;
-      const isPositiveValue = lastValue >= 0;
+      const isPositiveValue = lastValueFormatted >= 0;
 
       const intervalLength = TopN.calcDomain(renderMode, min, max);
       // if both are 0, the division returns NaN causing unexpected behavior.
       // For this it defaults to 0
       const width = 100 * (Math.abs(lastValueFormatted) / intervalLength) || 0;
       const label = item.labelFormatted ? labelDateFormatter(item.labelFormatted) : item.label;
-
       const styles = reactcss(
         {
           default: {
@@ -152,7 +151,7 @@ export class TopN extends Component {
 
     const intervalSettings = this.props.series.reduce(
       (acc, series, index) => {
-        const value = getLastValueOrEmpty(series.data);
+        const value = getLastValueOrEmpty(series.data) ?? 1;
 
         return {
           min: !index || value < acc.min ? value : acc.min,

@@ -61,7 +61,7 @@ export class Gauge extends Component {
   render() {
     const { metric, type } = this.props;
     const { scale, translateX, translateY } = this.state;
-    const value = metric && getLastValueOrEmpty(metric.data);
+    const value = getLastValueOrEmpty(metric?.data);
     const max = (metric && getValueBy('max', metric.data)) || 1;
     const formatter =
       (metric && (metric.tickFormatter || metric.formatter)) ||

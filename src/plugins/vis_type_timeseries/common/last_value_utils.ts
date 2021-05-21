@@ -8,14 +8,12 @@
 
 import { isArray, last, isEqual } from 'lodash';
 
-export const EMPTY_VALUE = [];
+export const EMPTY_VALUE = null;
 export const DISPLAY_EMPTY_VALUE = '-';
 
-type ExtractValueFn<T> = (data: T[] | void) => T | null;
-const extractValue: ExtractValueFn<unknown> = (data) => (data && data[1]) ?? null;
+const extractValue = (data: unknown[] | void) => (data && data[1]) ?? null;
 
-type GetLastValueFn<T> = (data: T | T[] | T[][] | void) => T | null;
-export const getLastValue: GetLastValueFn<unknown> = (data) => {
+export const getLastValue = (data: unknown) => {
   if (!isArray(data)) {
     return data;
   }
@@ -23,9 +21,6 @@ export const getLastValue: GetLastValueFn<unknown> = (data) => {
   return extractValue(last(data));
 };
 
-type GetLastValueOrEmptyFn<T, U> = (data: T[][] | void) => T | U;
-export const getLastValueOrEmpty: GetLastValueOrEmptyFn<unknown, []> = (data) =>
-  getLastValue(data) ?? EMPTY_VALUE;
+export const getLastValueOrEmpty = (data: unknown) => getLastValue(data) ?? EMPTY_VALUE;
 
-type IsEmptyValueFn = (value: unknown) => boolean;
-export const isEmptyValue: IsEmptyValueFn = (value) => isEqual(value, EMPTY_VALUE);
+export const isEmptyValue = (value: unknown) => isEqual(value, EMPTY_VALUE);

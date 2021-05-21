@@ -21,10 +21,10 @@ import {
 
 describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js', () => {
   const emptyRule: ColorRulesOperator = colorRulesOperatorsList.filter(
-    (operator) => operator.defaultName === 'empty'
+    (operator) => operator.method === 'empty'
   )[0];
   const notEmptyRule: ColorRulesOperator = colorRulesOperatorsList.filter(
-    (operator) => operator.defaultName !== 'empty'
+    (operator) => operator.method !== 'empty'
   )[0];
 
   const getColorRulesProps = (gaugeColorRules: unknown = []) => ({
