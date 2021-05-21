@@ -31,7 +31,12 @@ import { getEndpointDetailsPath } from '../../../common/routing';
 import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
 import { hostIsolationHttpMocks } from '../../../../common/lib/host_isolation/mocks';
 import { fireEvent } from '@testing-library/dom';
-import { isFailedResourceState, isLoadedResourceState } from '../../../state';
+import {
+  isFailedResourceState,
+  isLoadedResourceState,
+  isUninitialisedResourceState,
+} from '../../../state';
+import { getCurrentIsolationRequestState } from '../store/selectors';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -1000,6 +1005,31 @@ describe('when on the endpoint list page', () => {
         expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
           'oh oh. something went wrong'
         );
+      });
+
+      it('should reset isolation state and show form again', async () => {
+        // ensures that after the host isolation has been successful, if user navigates away from the panel
+        // (`show` is NOT `isolate`), then the state should be reset so that the form show up again the next
+        // time `isolate host` is clicked
+        await confirmIsolateAndWaitForApiResponse();
+        expect(renderResult.getByTestId('hostIsolateSuccessMessage')).not.toBeNull();
+
+        // Close flyout
+        const changeUrlAction = middlewareSpy.waitForAction('userChangedUrl');
+        act(() => {
+          fireEvent.click(renderResult.getByTestId('euiFlyoutCloseButton'));
+        });
+
+        expect((await changeUrlAction).payload).toMatchObject({
+          pathname: '/endpoints',
+          search: '?page_index=0&page_size=10',
+        });
+
+        expect(
+          isUninitialisedResourceState(
+            getCurrentIsolationRequestState(store.getState().management.endpoints)
+          )
+        ).toBe(true);
       });
     });
   });
