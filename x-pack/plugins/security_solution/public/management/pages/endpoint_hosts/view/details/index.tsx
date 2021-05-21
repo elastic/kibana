@@ -22,7 +22,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useEndpointSelector } from '../hooks';
-import { urlFromQueryParams } from '../url_from_query_params';
 import {
   uiQueryParams,
   detailsData,
@@ -46,6 +45,7 @@ import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/comp
 import { EndpointIsolateFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpoint_details_flyout_subheader';
 import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
+import { getEndpointListPath } from '../../../../common/routing';
 
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -63,7 +63,13 @@ export const EndpointDetailsFlyout = memo(() => {
   const show = useEndpointSelector(showView);
 
   const handleFlyoutClose = useCallback(() => {
-    history.push(urlFromQueryParams(queryParamsWithoutSelectedEndpoint));
+    const { show: _show, ...urlSearchParams } = queryParamsWithoutSelectedEndpoint;
+    history.push(
+      getEndpointListPath({
+        name: 'endpointList',
+        ...urlSearchParams,
+      })
+    );
   }, [history, queryParamsWithoutSelectedEndpoint]);
 
   useEffect(() => {

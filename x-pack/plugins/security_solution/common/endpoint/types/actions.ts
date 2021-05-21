@@ -27,5 +27,5 @@ export interface EndpointAction {
 export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
 
 export interface HostIsolationResponse {
-  action?: string;
+  action: string;
 }

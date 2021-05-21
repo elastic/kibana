@@ -43,12 +43,15 @@ const querystringStringify = <ExpectedType, ArgType>(
 type EndpointDetailsUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint'> &
   Required<Pick<EndpointIndexUIQueryParams, 'selected_endpoint'>>;
 
+/** URL search params that are only applicable to the list page */
+type EndpointListUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint' | 'show'>;
+
 export const getEndpointListPath = (
-  props: { name: 'default' | 'endpointList' } & EndpointIndexUIQueryParams,
+  props: { name: 'default' | 'endpointList' } & EndpointListUrlProps,
   search?: string
 ) => {
   const { name, ...queryParams } = props;
-  const urlQueryParams = querystringStringify<EndpointIndexUIQueryParams, typeof queryParams>(
+  const urlQueryParams = querystringStringify<EndpointListUrlProps, typeof queryParams>(
     queryParams
   );
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;

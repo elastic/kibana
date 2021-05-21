@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { isOnEndpointPage, hasSelectedEndpoint } from './selectors';
+import {
+  isOnEndpointPage,
+  hasSelectedEndpoint,
+  uiQueryParams,
+  getCurrentIsolationRequestState,
+} from './selectors';
 import { EndpointState } from '../types';
 import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
-import { createUninitialisedResourceState } from '../../../state';
+import { createUninitialisedResourceState, isUninitialisedResourceState } from '../../../state';
 
 export const initialEndpointListState: Immutable<EndpointState> = {
   hosts: [],
@@ -213,16 +218,29 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
     const isCurrentlyOnDetailsPage = isOnEndpointPage(newState) && hasSelectedEndpoint(newState);
     const wasPreviouslyOnDetailsPage = isOnEndpointPage(state) && hasSelectedEndpoint(state);
 
+    const stateUpdates: Partial<EndpointState> = {
+      location: action.payload,
+      error: undefined,
+      detailsError: undefined,
+      policyResponseError: undefined,
+    };
+
+    // Reset `isolationRequestState` if needed
+    if (
+      uiQueryParams(newState).show !== 'isolate' &&
+      !isUninitialisedResourceState(getCurrentIsolationRequestState(newState))
+    ) {
+      stateUpdates.isolationRequestState = createUninitialisedResourceState();
+    }
+
     // if on the endpoint list page for the first time, return new location and load list
     if (isCurrentlyOnListPage) {
       if (!wasPreviouslyOnListPage) {
         return {
           ...state,
-          location: action.payload,
+          ...stateUpdates,
           loading: true,
           policyItemsLoading: true,
-          error: undefined,
-          detailsError: undefined,
         };
       }
     } else if (isCurrentlyOnDetailsPage) {
@@ -230,24 +248,18 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       if (wasPreviouslyOnDetailsPage || wasPreviouslyOnListPage) {
         return {
           ...state,
-          location: action.payload,
+          ...stateUpdates,
           detailsLoading: true,
           policyResponseLoading: true,
-          error: undefined,
-          detailsError: undefined,
-          policyResponseError: undefined,
         };
       } else {
         // if previous page was not endpoint list or endpoint details, load both list and details
         return {
           ...state,
-          location: action.payload,
+          ...stateUpdates,
           loading: true,
           detailsLoading: true,
           policyResponseLoading: true,
-          error: undefined,
-          detailsError: undefined,
-          policyResponseError: undefined,
           policyItemsLoading: true,
         };
       }
@@ -255,13 +267,11 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
     // otherwise we are not on a endpoint list or details page
     return {
       ...state,
-      location: action.payload,
-      error: undefined,
-      detailsError: undefined,
-      policyResponseError: undefined,
+      ...stateUpdates,
       endpointsExist: true,
     };
   }
+
   return state;
 };
 
