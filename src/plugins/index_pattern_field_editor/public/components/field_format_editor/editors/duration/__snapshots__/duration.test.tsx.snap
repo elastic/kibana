@@ -223,6 +223,27 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       onChange={[Function]}
     />
   </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      disabled={true}
+      label={
+        <FormattedMessage
+          defaultMessage="Use short suffix"
+          id="indexPatternFieldEditor.duration.showSuffixLabel.short"
+          values={Object {}}
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
   <FormatEditorSamples
     sampleType="text"
     samples={
