@@ -1158,14 +1158,7 @@ describe('migrations v2 model', () => {
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL if no outdated documents to transform and we have failed document migrations', () => {
         const corruptDocumentIdsCarriedOver = ['a:somethingelse'];
         const originalTransformError = new Error('something went wrong');
-        const transFormErr = new TransformSavedObjectDocumentError(
-          '123',
-          'vis',
-          undefined,
-          'randomvis: 7.12.0',
-          'failedDoc',
-          originalTransformError
-        );
+        const transFormErr = new TransformSavedObjectDocumentError(originalTransformError);
         const transformationErrors = [
           { rawId: 'bob:tail', err: transFormErr },
         ] as TransformErrorObjects[];
@@ -1184,7 +1177,7 @@ describe('migrations v2 model', () => {
         expect(newState.reason.includes('Migrations failed. Reason:')).toBe(true);
         expect(newState.reason.includes('Corrupt saved object documents: ')).toBe(true);
         expect(newState.reason.includes('Transformation errors: ')).toBe(true);
-        expect(newState.reason.includes('randomvis: 7.12.0')).toBe(true);
+        expect(newState.reason.includes('bob:tail')).toBe(true);
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
     });
@@ -1229,14 +1222,7 @@ describe('migrations v2 model', () => {
       const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
       const corruptDocumentIds = ['a:somethingelse'];
       const originalTransformError = new Error('Dang diggity!');
-      const transFormErr = new TransformSavedObjectDocumentError(
-        'id',
-        'type',
-        'namespace',
-        'failedTransform',
-        'failedDoc',
-        originalTransformError
-      );
+      const transFormErr = new TransformSavedObjectDocumentError(originalTransformError);
       const transformationErrors = [
         { rawId: 'bob:tail', err: transFormErr },
       ] as TransformErrorObjects[];
