@@ -23,7 +23,11 @@ export type {
   AlertTypeParams,
 } from './types';
 
-export { ActionForm } from './application/sections/action_connector_form';
+export {
+  ActionForm,
+  ConnectorAddFlyout,
+  ConnectorEditFlyout,
+} from './application/sections/action_connector_form';
 
 export * from './common';
 
