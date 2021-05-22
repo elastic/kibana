@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export type { COMPARATORS, builtInComparators } from './comparators';
-export type { AGGREGATION_TYPES, builtInAggregationTypes } from './aggregation_types';
+export { COMPARATORS, builtInComparators } from './comparators';
+export { AGGREGATION_TYPES, builtInAggregationTypes } from './aggregation_types';
 export { builtInGroupByTypes } from './group_by_types';
 
 export const VIEW_LICENSE_OPTIONS_LINK = 'https://www.elastic.co/subscriptions';
