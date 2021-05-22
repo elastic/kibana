@@ -12,6 +12,7 @@ import { FieldMapping, FieldMappingProps } from './field_mapping';
 import { mappings } from './__mock__';
 import { TestProviders } from '../../common/mock';
 import { FieldMappingRowStatic } from './field_mapping_row_static';
+jest.mock('../../common/lib/kibana');
 
 describe('FieldMappingRow', () => {
   let wrapper: ReactWrapper;

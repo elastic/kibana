@@ -12,6 +12,7 @@ import { EuiSuperSelect } from '@elastic/eui';
 import { ConnectorsDropdown, Props } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
+jest.mock('../../common/lib/kibana');
 
 describe('ConnectorsDropdown', () => {
   let wrapper: ReactWrapper;

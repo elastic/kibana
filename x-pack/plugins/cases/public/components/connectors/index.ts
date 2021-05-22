@@ -19,7 +19,6 @@ import {
 
 export { getActionType as getCaseConnectorUi } from './case';
 
-export * from './config';
 export * from './types';
 
 interface GetCaseConnectorsReturn {

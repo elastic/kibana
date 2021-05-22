@@ -25,6 +25,13 @@ jest.mock('../../common/lib/kibana', () => {
       services: {
         notifications: {},
         http: {},
+        triggersActionsUi: {
+          actionTypeRegistry: {
+            get: jest.fn().mockReturnValue({
+              actionTypeTitle: 'test',
+            }),
+          },
+        },
       },
     }),
   };

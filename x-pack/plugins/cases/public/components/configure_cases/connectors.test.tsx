@@ -13,7 +13,10 @@ import { TestProviders } from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors } from './__mock__';
 import { ConnectorTypes } from '../../../common';
+import { useKibana } from '../../common/lib/kibana';
+jest.mock('../../common/lib/kibana');
 
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
   const onChangeConnector = jest.fn();
@@ -32,6 +35,9 @@ describe('Connectors', () => {
 
   beforeAll(() => {
     wrapper = mount(<Connectors {...props} />, { wrappingComponent: TestProviders });
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: 'test',
+    });
   });
 
   test('it shows the connectors from group', () => {

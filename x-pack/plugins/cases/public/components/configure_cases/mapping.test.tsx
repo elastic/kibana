@@ -11,6 +11,7 @@ import { mount } from 'enzyme';
 import { TestProviders } from '../../common/mock';
 import { Mapping, MappingProps } from './mapping';
 import { mappings } from './__mock__';
+jest.mock('../../common/lib/kibana');
 
 describe('Mapping', () => {
   const props: MappingProps = {
