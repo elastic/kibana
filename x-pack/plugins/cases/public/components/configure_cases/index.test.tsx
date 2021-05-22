@@ -14,8 +14,6 @@ import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 import {
   ActionConnector,
-  ConnectorAddFlyout,
-  ConnectorEditFlyout,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../../../triggers_actions_ui/public';
 import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';

@@ -14,7 +14,17 @@ import {
 
 export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => '8.0.0') };
 export const useKibana = jest.fn().mockReturnValue({
-  services: createStartServicesMock(),
+  services: {
+    ...createStartServicesMock(),
+    triggersActionsUi: {
+      actionTypeRegistry: {
+        has: jest.fn(),
+        register: jest.fn(),
+        get: jest.fn(),
+        list: jest.fn(),
+      },
+    },
+  },
 });
 
 export const useHttp = jest.fn().mockReturnValue(createStartServicesMock().http);

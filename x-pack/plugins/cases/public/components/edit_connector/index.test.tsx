@@ -16,6 +16,23 @@ import { waitFor } from '@testing-library/react';
 import { caseUserActions } from '../../containers/mock';
 
 jest.mock('../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form');
+jest.mock('../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        notifications: {},
+        http: {},
+        triggersActionsUi: {
+          actionTypeRegistry: {
+            get: jest.fn().mockReturnValue({
+              actionTypeTitle: 'test',
+            }),
+          },
+        },
+      },
+    }),
+  };
+});
 
 const onSubmit = jest.fn();
 const defaultProps = {
