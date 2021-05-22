@@ -71,6 +71,15 @@ export const policyFactory = (): PolicyConfig => {
         file: true,
         network: true,
       },
+      malware: {
+        mode: ProtectionModes.prevent,
+      },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
+      },
       logging: {
         file: 'info',
       },
@@ -108,6 +117,16 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.mac,
       popup: {
         ...policy.mac.popup,
+        malware: {
+          message: '',
+          enabled: true,
+        },
+      },
+    },
+    linux: {
+      ...policy.linux,
+      popup: {
+        ...policy.linux.popup,
         malware: {
           message: '',
           enabled: true,

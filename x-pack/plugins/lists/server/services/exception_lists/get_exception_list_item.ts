@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { IdOrUndefined, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  IdOrUndefined,
+  ItemIdOrUndefined,
+  NamespaceType,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '../../../../../../src/core/server/';
-import { ExceptionListItemSchema, ItemIdOrUndefined } from '../../../common/schemas';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { getSavedObjectType, transformSavedObjectToExceptionListItem } from './utils';

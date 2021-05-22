@@ -6,14 +6,14 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-
-import { ENDPOINT_LIST_ID } from '../../../common/constants';
-import {
+import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { ENDPOINT_LIST_ID } from '../../../common/constants';
 
 import {
   ConstructorOptions,
