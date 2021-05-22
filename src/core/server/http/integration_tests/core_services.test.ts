@@ -405,7 +405,7 @@ describe('http service', () => {
 
       const { body } = await kbnTestServer.request.get(root, '/new-platform/').expect(400);
 
-      expect(body.message).toMatch('[Response Error]: error_reason');
+      expect(body.message).toMatch('[error_type]: error_reason');
     });
   });
 });
