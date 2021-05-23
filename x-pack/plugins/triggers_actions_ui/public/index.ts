@@ -29,6 +29,10 @@ export {
   ConnectorEditFlyout,
 } from './application/sections/action_connector_form';
 
+export type { ActionGroupWithCondition } from './application/sections';
+
+export { AlertConditions, AlertConditionsGroup } from './application/sections';
+
 export * from './common';
 
 export function plugin() {
@@ -37,6 +41,8 @@ export function plugin() {
 
 export { Plugin };
 export * from './plugin';
+
+export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 
 export type { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
