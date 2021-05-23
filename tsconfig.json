@@ -16,7 +16,6 @@
     "x-pack/mocks.ts",
     "x-pack/typings/**/*",
     "x-pack/tasks/**/*",
-    "x-pack/plugins/lists/**/*",
     "x-pack/plugins/security_solution/**/*"
   ],
   "exclude": [
