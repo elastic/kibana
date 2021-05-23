@@ -46,7 +46,7 @@ pageLoadAssetSize:
   lens: 96624
   licenseManagement: 41817
   licensing: 29004
-  lists: 200000
+  lists: 22900
   logstash: 53548
   management: 46112
   maps: 80000
@@ -68,7 +68,7 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 95864
   securityOss: 30806
-  securitySolution: 187863
+  securitySolution: 76000
   share: 99061
   snapshotRestore: 79032
   spaces: 57868
@@ -110,3 +110,4 @@ pageLoadAssetSize:
   mapsEms: 26072
   timelines: 28613
   cases: 162385
+  screenshotMode: 17856

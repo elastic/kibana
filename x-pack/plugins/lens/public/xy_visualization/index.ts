@@ -42,6 +42,7 @@ export class XyVisualization {
         tickLabelsConfig,
         gridlinesConfig,
         axisTitlesVisibilityConfig,
+        axisExtentConfig,
         layerConfig,
         xyChart,
         getXyChartRenderer,
@@ -52,6 +53,7 @@ export class XyVisualization {
       expressions.registerFunction(() => legendConfig);
       expressions.registerFunction(() => yAxisConfig);
       expressions.registerFunction(() => tickLabelsConfig);
+      expressions.registerFunction(() => axisExtentConfig);
       expressions.registerFunction(() => gridlinesConfig);
       expressions.registerFunction(() => axisTitlesVisibilityConfig);
       expressions.registerFunction(() => layerConfig);
