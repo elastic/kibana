@@ -39,7 +39,7 @@ import * as columnActions from '../angular/doc_table/actions/columns';
 import { getSortForSearchSource } from '../angular/doc_table';
 import { handleSourceColumnState } from '../angular/helpers';
 
-interface SearchProps {
+interface SearchProps extends SavedSearch {
   columns?: string[];
   settings?: DiscoverGridSettings;
   description?: string;
@@ -77,7 +77,6 @@ export class SavedSearchEmbeddable
   private inspectorAdapters: Adapters;
   private panelTitle: string = '';
   private filtersSearchSource?: ISearchSource;
-  private searchInstance?: JQLite;
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterManager: FilterManager;
@@ -89,7 +88,7 @@ export class SavedSearchEmbeddable
   private prevQuery?: Query;
   private prevSearchSessionId?: string;
   private searchProps: SearchProps;
-  private columns;
+
   reload(): void {}
 
   private node?: HTMLElement;
@@ -206,7 +205,7 @@ export class SavedSearchEmbeddable
 
   private initializeSearchEmbeddableProps() {
     const { searchSource, columns } = this.savedSearch;
-    debugger;
+
     const indexPattern = searchSource.getField('index');
 
     if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
@@ -237,7 +236,6 @@ export class SavedSearchEmbeddable
       onResize: () => {},
       showTimeCol: true,
       ariaLabelledBy: 'documentsAriaLabel',
-      className: 'dscDiscoverGrid',
     };
 
     const timeRangeSearchSource = searchSource.create();
@@ -253,7 +251,7 @@ export class SavedSearchEmbeddable
 
     this.searchProps = props;
 
-    this.pushContainerStateParamsToProps(props, {forceFetch: true});
+    this.pushContainerStateParamsToProps(props, { forceFetch: true });
 
     props.setSortOrder = (sort: SortOrder[]) => {
       this.updateInput({ sort });
@@ -286,8 +284,6 @@ export class SavedSearchEmbeddable
     if (this.savedSearch.grid) {
       props.settings = this.savedSearch.grid;
     }
-
-    return props;
   }
 
   private async pushContainerStateParamsToProps(
@@ -307,9 +303,7 @@ export class SavedSearchEmbeddable
       { columns: this.input.columns || this.savedSearch.columns },
       this.services.core.uiSettings
     ).columns;
-    if (!this.columns || (this.columns.length === 0 && searchProps.columns.length > 0)) {
-      this.columns = searchProps.columns;
-    }
+
     const savedSearchSort =
       this.savedSearch.sort && this.savedSearch.sort.length
         ? this.savedSearch.sort
@@ -349,12 +343,11 @@ export class SavedSearchEmbeddable
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = domNode;
-    await this.rerenderComponent(this.node);
   }
 
   private async rerenderComponent(domNode: HTMLElement) {
+    this.searchProps.useLegacyTable = this.services.uiSettings.get('doc_table:legacy');
     await this.pushContainerStateParamsToProps(this.searchProps);
-    this.searchProps.columns = this.columns;
     ReactDOM.render(
       <SavedSearchEmbeddableComponent
         {...this.searchProps}

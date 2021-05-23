@@ -11,6 +11,7 @@ import { withEmbeddableSubscription } from '../../../../embeddable/public';
 import { SearchInput, SearchOutput } from './types';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { DiscoverGridEmbeddable } from '../components/create_discover_grid_directive';
+import { DiscoverDocTableEmbeddable } from '../angular/doc_table/create_doc_table_react';
 
 interface Props {
   input: SearchInput;
@@ -24,8 +25,11 @@ export function SavedSearchEmbeddableComponentInner({
   embeddable,
   props,
 }: Props) {
-  debugger;
-  return <DiscoverGridEmbeddable {...props} />;
+  const { useLegacyTable } = props;
+  if (useLegacyTable) {
+    return <DiscoverDocTableEmbeddable {...props} className="panel-content" />;
+  }
+  return <DiscoverGridEmbeddable {...props} className="dscDiscoverGrid" />;
 }
 
 export const SavedSearchEmbeddableComponent = withEmbeddableSubscription<
