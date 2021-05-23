@@ -98,6 +98,7 @@
     { "path": "./x-pack/plugins/saved_objects_tagging/tsconfig.json" },
     { "path": "./x-pack/plugins/searchprofiler/tsconfig.json" },
     { "path": "./x-pack/plugins/security/tsconfig.json" },
+    { "path": "./x-pack/plugins/security_solution/tsconfig.json" },
     { "path": "./x-pack/plugins/snapshot_restore/tsconfig.json" },
     { "path": "./x-pack/plugins/spaces/tsconfig.json" },
     { "path": "./x-pack/plugins/stack_alerts/tsconfig.json" },

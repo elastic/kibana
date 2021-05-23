@@ -79,6 +79,7 @@
     { "path": "../plugins/runtime_fields/tsconfig.json" },
     { "path": "../plugins/saved_objects_tagging/tsconfig.json" },
     { "path": "../plugins/security/tsconfig.json" },
+    { "path": "../plugins/security_solution/tsconfig.json" },
     { "path": "../plugins/snapshot_restore/tsconfig.json" },
     { "path": "../plugins/spaces/tsconfig.json" },
     { "path": "../plugins/stack_alerts/tsconfig.json" },
