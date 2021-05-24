@@ -138,7 +138,7 @@ export const createExternalService = (
         url: getPostRecordIdUrl(appId, params.incidentId),
       });
 
-      const fieldId = mappingConfig.commentsConfig?.id;
+      const fieldId = getCommentFieldId(mappingConfig);
       let potentialNewDescription: SwimlaneComment[] = [];
       let isDescriptionPosted = true;
 

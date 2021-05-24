@@ -5,53 +5,11 @@
  * 2.0.
  */
 
-import { MappingConfigType } from './types';
 import { getBodyForEventAction, removeUnsafeFields } from './helpers';
+import { mappings } from './mocks';
 
 describe('Create Record Mapping', () => {
-  let mappingConfig: MappingConfigType;
   const appId = '45678';
-
-  beforeAll(() => {
-    mappingConfig = {
-      alertSourceConfig: {
-        id: 'adnjls',
-        name: 'Alert Source',
-        key: 'alert-source',
-        fieldType: 'text',
-      },
-      severityConfig: {
-        id: 'adnlas',
-        name: 'Severity',
-        key: 'severity',
-        fieldType: 'text',
-      },
-      alertNameConfig: {
-        id: 'adnfls',
-        name: 'Alert Name',
-        key: 'alert-name',
-        fieldType: 'text',
-      },
-      caseIdConfig: {
-        id: 'a6sst',
-        name: 'Case Id',
-        key: 'case-id-name',
-        fieldType: 'text',
-      },
-      caseNameConfig: {
-        id: 'a6fst',
-        name: 'Case Name',
-        key: 'case-name',
-        fieldType: 'text',
-      },
-      commentsConfig: {
-        id: 'a6fdf',
-        name: 'Comments',
-        key: 'comments',
-        fieldType: 'text',
-      },
-    };
-  });
 
   test('Mapping is Successful', () => {
     const params = {
@@ -63,13 +21,13 @@ describe('Create Record Mapping', () => {
       comments: 'This is a comment',
       externalId: null,
     };
-    const data = getBodyForEventAction(appId, mappingConfig, params);
-    expect(data?.values?.[mappingConfig.alertSourceConfig?.id ?? 0]).toEqual(params.alertSource);
-    expect(data?.values?.[mappingConfig.alertNameConfig.id]).toEqual(params.alertName);
-    expect(data?.values?.[mappingConfig.caseNameConfig?.id ?? 0]).toEqual(params.caseName);
-    expect(data?.values?.[mappingConfig.caseIdConfig?.id ?? 0]).toEqual(params.caseId);
-    expect(data?.values?.[mappingConfig.commentsConfig?.id ?? 0]).toEqual(params.comments);
-    expect(data?.values?.[mappingConfig?.severityConfig?.id ?? 0]).toEqual(params.severity);
+    const data = getBodyForEventAction(appId, mappings, params);
+    expect(data?.values?.[mappings.alertSourceConfig?.id ?? 0]).toEqual(params.alertSource);
+    expect(data?.values?.[mappings.alertNameConfig.id]).toEqual(params.alertName);
+    expect(data?.values?.[mappings.caseNameConfig?.id ?? 0]).toEqual(params.caseName);
+    expect(data?.values?.[mappings.caseIdConfig?.id ?? 0]).toEqual(params.caseId);
+    expect(data?.values?.[mappings.commentsConfig?.id ?? 0]).toEqual(params.comments);
+    expect(data?.values?.[mappings?.severityConfig?.id ?? 0]).toEqual(params.severity);
   });
 });
 

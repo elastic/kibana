@@ -47,15 +47,17 @@ export const useGetApplication = ({
         connectorId: action.id,
       });
 
-      setIsLoading(false);
-
       if (!isCancelledRef.current) {
-        toastNotifications.addDanger({
-          title: i18n.SW_GET_APPLICATION_API_ERROR,
-        });
+        setIsLoading(false);
+        if (response.status && response.status === 'error') {
+          toastNotifications.addDanger({
+            title: i18n.SW_GET_APPLICATION_API_ERROR,
+            text: `${response.serviceMessage ?? response.message}`,
+          });
+        } else {
+          return response.data;
+        }
       }
-
-      return response;
     } catch (error) {
       if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {

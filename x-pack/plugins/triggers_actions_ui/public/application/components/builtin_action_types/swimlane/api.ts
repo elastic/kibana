@@ -6,8 +6,10 @@
  */
 
 import { HttpSetup } from 'kibana/public';
+import { ActionTypeExecutorResult } from '../../../../../../actions/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { GetApplicationResponse } from '../../../../../../actions/server/builtin_action_types/swimlane/types';
 import { BASE_ACTION_API_PATH } from '../../../constants';
-import { SwimlaneFieldMappingConfig } from './types';
 
 export async function getApplication({
   http,
@@ -17,7 +19,7 @@ export async function getApplication({
   http: HttpSetup;
   signal: AbortSignal;
   connectorId: string;
-}): Promise<{ fields: SwimlaneFieldMappingConfig[] }> {
+}): Promise<ActionTypeExecutorResult<GetApplicationResponse>> {
   return await http.post(
     `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
     {
