@@ -129,11 +129,10 @@ Calculates the rate of an ever increasing counter. This function will only yield
 If the value does get smaller, it will interpret this as a counter reset. To get most precise results, \`counter_rate\` should be calculated on the \`max\` of a field.
 
 This calculation will be done separately for separate series defined by filters or top values dimensions.
+It uses the current interval when used in Formula.
 
 Example: Visualize the rate of bytes received over time by a memcached server:
-\`\`\`
-counter_rate(max(memcached.stats.read.bytes))
-\`\`\`
+${'`counter_rate(max(memcached.stats.read.bytes))`'}
       `,
     }),
   },

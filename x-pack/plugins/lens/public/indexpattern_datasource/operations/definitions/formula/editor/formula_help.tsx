@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -18,7 +18,6 @@ import {
   EuiMarkdownFormat,
   EuiTitle,
 } from '@elastic/eui';
-import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { IndexPattern } from '../../../../types';
 import { tinymathFunctions } from '../util';
 import { getPossibleFunctions } from './math_completion';
@@ -50,6 +49,20 @@ function FormulaHelp({
     }
   }, [selectedFunction]);
 
+  const tinymathFns = useMemo(() => {
+    return getPossibleFunctions(indexPattern)
+      .filter((key) => key in tinymathFunctions)
+      .sort()
+      .map((key) => {
+        const [description, examples] = tinymathFunctions[key].help.split(`\`\`\``);
+        return {
+          label: key,
+          description: description.replace(/\n/g, '\n\n'),
+          examples: examples ? `\`\`\`${examples}\`\`\`` : '',
+        };
+      });
+  }, [indexPattern]);
+
   const helpGroups: Array<{
     label: string;
     description?: JSX.Element;
@@ -72,22 +85,19 @@ function FormulaHelp({
   });
 
   helpGroups[0].items.push(
-    ...getPossibleFunctions(indexPattern)
-      .filter((key) => key in tinymathFunctions)
-      .sort()
-      .map((key) => ({
-        label: `${key}`,
+    ...tinymathFns.map(({ label, description, examples }) => {
+      return {
+        label,
         description: (
           <>
             <EuiTitle size="s">
-              <h3>{getFunctionSignatureLabel(key, operationDefinitionMap)}</h3>
+              <h3>{getFunctionSignatureLabel(label, operationDefinitionMap)}</h3>
             </EuiTitle>
-            <EuiMarkdownFormat>
-              {tinymathFunctions[key].help.replace(/\n/g, '\n\n')}
-            </EuiMarkdownFormat>
+            <EuiMarkdownFormat>{`${description}${examples}`}</EuiMarkdownFormat>
           </>
         ),
-      }))
+      };
+    })
   );
 
   helpGroups.push({
@@ -105,9 +115,11 @@ function FormulaHelp({
     items: [],
   });
 
+  const availableFunctions = getPossibleFunctions(indexPattern);
+
   // Es aggs
   helpGroups[1].items.push(
-    ...getPossibleFunctions(indexPattern)
+    ...availableFunctions
       .filter(
         (key) =>
           key in operationDefinitionMap &&
@@ -123,7 +135,11 @@ function FormulaHelp({
                 {key}({operationDefinitionMap[key].documentation?.signature})
               </h3>
             </EuiTitle>
-            <Markdown markdown={operationDefinitionMap[key].documentation?.description} />
+            {operationDefinitionMap[key].documentation?.description ? (
+              <EuiMarkdownFormat>
+                {operationDefinitionMap[key].documentation!.description}
+              </EuiMarkdownFormat>
+            ) : null}
           </>
         ),
       }))
@@ -146,7 +162,7 @@ function FormulaHelp({
 
   // Calculations aggs
   helpGroups[2].items.push(
-    ...getPossibleFunctions(indexPattern)
+    ...availableFunctions
       .filter(
         (key) =>
           key in operationDefinitionMap &&
@@ -162,7 +178,11 @@ function FormulaHelp({
                 {key}({operationDefinitionMap[key].documentation?.signature})
               </h3>
             </EuiTitle>
-            <Markdown markdown={operationDefinitionMap[key].documentation?.description} />
+            {operationDefinitionMap[key].documentation?.description ? (
+              <EuiMarkdownFormat>
+                {operationDefinitionMap[key].documentation!.description}
+              </EuiMarkdownFormat>
+            ) : null}
           </>
         ),
         checked:
@@ -219,10 +239,9 @@ function FormulaHelp({
         </EuiFlexItem>
 
         <EuiFlexItem className="lnsFormula__docsText" grow={2}>
-          <EuiText size="s">
-            <Markdown
-              markdown={i18n.translate('xpack.lens.formulaDocumentation', {
-                defaultMessage: `
+          <EuiMarkdownFormat>
+            {i18n.translate('xpack.lens.formulaDocumentation', {
+              defaultMessage: `
 ## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
@@ -255,45 +274,46 @@ Math functions can take positional arguments, like pow(count(), 3) is the same a
 
 Use the symbols +, -, /, and * to perform basic math.
                   `,
-                description:
-                  'Text is in markdown. Do not translate function names or field names like sum(bytes)',
-              })}
-            />
-
-            {helpGroups.map((helpGroup, index) => {
-              return (
-                <section
-                  className="lnsFormula__docsTextGroup"
-                  key={helpGroup.label}
-                  ref={(el) => {
-                    if (el) {
-                      scrollTargets.current[helpGroup.label] = el;
-                    }
-                  }}
-                >
-                  <h2>{helpGroup.label}</h2>
-
-                  {helpGroup.description}
-
-                  {helpGroups[index].items.map((helpItem) => {
-                    return (
-                      <article
-                        className="lnsFormula__docsTextItem"
-                        key={helpItem.label}
-                        ref={(el) => {
-                          if (el) {
-                            scrollTargets.current[helpItem.label] = el;
-                          }
-                        }}
-                      >
-                        {helpItem.description}
-                      </article>
-                    );
-                  })}
-                </section>
-              );
+              description:
+                'Text is in markdown. Do not translate function names or field names like sum(bytes)',
             })}
-          </EuiText>
+          </EuiMarkdownFormat>
+
+          {helpGroups.map((helpGroup, index) => {
+            return (
+              <section
+                className="lnsFormula__docsTextGroup"
+                key={helpGroup.label}
+                ref={(el) => {
+                  if (el) {
+                    scrollTargets.current[helpGroup.label] = el;
+                  }
+                }}
+              >
+                <EuiTitle size="xxs">
+                  <h2>{helpGroup.label}</h2>
+                </EuiTitle>
+
+                {helpGroup.description}
+
+                {helpGroups[index].items.map((helpItem) => {
+                  return (
+                    <article
+                      className="lnsFormula__docsTextItem"
+                      key={helpItem.label}
+                      ref={(el) => {
+                        if (el) {
+                          scrollTargets.current[helpItem.label] = el;
+                        }
+                      }}
+                    >
+                      {helpItem.description}
+                    </article>
+                  );
+                })}
+              </section>
+            );
+          })}
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
@@ -314,7 +334,14 @@ export function getFunctionSignatureLabel(
   }
   if (operationDefinitionMap[name]) {
     const def = operationDefinitionMap[name];
-    return `${name}(${def.documentation?.signature})`; // ${firstParam ? firstParam.label : ''})`;
+    let extraArgs = '';
+    if (def.filterable) {
+      extraArgs += hasFunctionFieldArgument(name) || 'operationParams' in def ? ',' : '';
+      extraArgs += i18n.translate('xpack.lens.formula.kqlExtraArguments', {
+        defaultMessage: '[kql]?: string, [lucene]?: string',
+      });
+    }
+    return `${name}(${def.documentation?.signature}${extraArgs})`;
   }
   return '';
 }
@@ -339,45 +366,53 @@ function getFunctionArgumentsStringified(
 export function getHelpTextContent(
   type: string,
   operationDefinitionMap: ParamEditorProps<FormulaIndexPatternColumn>['operationDefinitionMap']
-): { description: JSX.Element | string; examples: string[] } {
+): { description: string; examples: string[] } {
   const definition = operationDefinitionMap[type];
   const description = definition.documentation?.description ?? '';
 
   // as for the time being just add examples text.
   // Later will enrich with more information taken from the operation definitions.
   const examples: string[] = [];
-
-  if (!hasFunctionFieldArgument(type)) {
-    // ideally this should have the same example automation as the operations below
-    examples.push(`${type}()`);
-    return { description, examples };
-  }
-  if (definition.input === 'field') {
-    const mandatoryArgs = definition.operationParams?.filter(({ required }) => required) || [];
-    if (mandatoryArgs.length === 0) {
-      examples.push(`${type}(bytes)`);
+  // If the description already contain examples skip it
+  if (!/Example/.test(description)) {
+    if (!hasFunctionFieldArgument(type)) {
+      // ideally this should have the same example automation as the operations below
+      examples.push(`${type}()`);
+      return { description, examples };
     }
-    if (mandatoryArgs.length) {
-      const additionalArgs = getFunctionArgumentsStringified(mandatoryArgs);
-      examples.push(`${type}(bytes, ${additionalArgs})`);
+    if (definition.input === 'field') {
+      const mandatoryArgs = definition.operationParams?.filter(({ required }) => required) || [];
+      if (mandatoryArgs.length === 0) {
+        examples.push(`${type}(bytes)`);
+      }
+      if (mandatoryArgs.length) {
+        const additionalArgs = getFunctionArgumentsStringified(mandatoryArgs);
+        examples.push(`${type}(bytes, ${additionalArgs})`);
+      }
+      if (
+        definition.operationParams &&
+        mandatoryArgs.length !== definition.operationParams.length
+      ) {
+        const additionalArgs = getFunctionArgumentsStringified(definition.operationParams);
+        examples.push(`${type}(bytes, ${additionalArgs})`);
+      }
     }
-    if (definition.operationParams && mandatoryArgs.length !== definition.operationParams.length) {
-      const additionalArgs = getFunctionArgumentsStringified(definition.operationParams);
-      examples.push(`${type}(bytes, ${additionalArgs})`);
-    }
-  }
-  if (definition.input === 'fullReference') {
-    const mandatoryArgs = definition.operationParams?.filter(({ required }) => required) || [];
-    if (mandatoryArgs.length === 0) {
-      examples.push(`${type}(sum(bytes))`);
-    }
-    if (mandatoryArgs.length) {
-      const additionalArgs = getFunctionArgumentsStringified(mandatoryArgs);
-      examples.push(`${type}(sum(bytes), ${additionalArgs})`);
-    }
-    if (definition.operationParams && mandatoryArgs.length !== definition.operationParams.length) {
-      const additionalArgs = getFunctionArgumentsStringified(definition.operationParams);
-      examples.push(`${type}(sum(bytes), ${additionalArgs})`);
+    if (definition.input === 'fullReference') {
+      const mandatoryArgs = definition.operationParams?.filter(({ required }) => required) || [];
+      if (mandatoryArgs.length === 0) {
+        examples.push(`${type}(sum(bytes))`);
+      }
+      if (mandatoryArgs.length) {
+        const additionalArgs = getFunctionArgumentsStringified(mandatoryArgs);
+        examples.push(`${type}(sum(bytes), ${additionalArgs})`);
+      }
+      if (
+        definition.operationParams &&
+        mandatoryArgs.length !== definition.operationParams.length
+      ) {
+        const additionalArgs = getFunctionArgumentsStringified(definition.operationParams);
+        examples.push(`${type}(sum(bytes), ${additionalArgs})`);
+      }
     }
   }
   return { description, examples };

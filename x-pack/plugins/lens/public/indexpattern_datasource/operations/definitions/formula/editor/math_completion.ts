@@ -276,8 +276,11 @@ function getArgumentSuggestions(
       ) {
         possibleOperationNames.push(
           ...a.operations
-            .filter((o) =>
-              operation.requiredReferences.some((requirement) => requirement.input.includes(o.type))
+            .filter(
+              (o) =>
+                operation.requiredReferences.some((requirement) =>
+                  requirement.input.includes(o.type)
+                ) && !o.hidden
             )
             .map((o) => o.operationType)
         );
@@ -350,27 +353,13 @@ export function getSuggestion(
       insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
       if (typeof suggestion !== 'string') {
         if ('text' in suggestion) break;
+        label = getFunctionSignatureLabel(suggestion.label, operationDefinitionMap);
         const tinymathFunction = tinymathFunctions[suggestion.label];
         if (tinymathFunction) {
-          label = `${label}(${tinymathFunction.positionalArguments
-            .map(({ name }) => name)
-            .join(', ')})`;
           detail = 'TinyMath';
           kind = monaco.languages.CompletionItemKind.Method;
         } else {
-          const def = operationDefinitionMap[suggestion.label];
           kind = monaco.languages.CompletionItemKind.Constant;
-          if (!hasFunctionFieldArgument(suggestion.label) && 'operationParams' in def) {
-            label = `${label}(${def
-              .operationParams!.map((p) => `${p.name}=${p.type}`)
-              .join(', ')})`;
-          } else if ('operationParams' in def) {
-            label = `${label}(expression, ${def
-              .operationParams!.map((p) => `${p.name}=${p.type}`)
-              .join(', ')})`;
-          } else {
-            label = `${label}(expression)`;
-          }
           detail = 'Elasticsearch';
           // Always put ES functions first
           sortText = `0${label}`;
@@ -420,16 +409,19 @@ function getOperationTypeHelp(
   name: string,
   operationDefinitionMap: Record<string, GenericOperationDefinition>
 ) {
-  const { description, examples } = getHelpTextContent(name, operationDefinitionMap);
-  // const descriptionInMarkdown = description.replace(/\n/g, '\n\n');
-  const descriptionInMarkdown = description;
-  const examplesInMarkdown = `**${i18n.translate('xpack.lens.formulaExampleMarkdown', {
-    defaultMessage: 'Examples',
-  })}**
+  const { description: descriptionInMarkdown, examples } = getHelpTextContent(
+    name,
+    operationDefinitionMap
+  );
+  const examplesInMarkdown = examples.length
+    ? `\n\n**${i18n.translate('xpack.lens.formulaExampleMarkdown', {
+        defaultMessage: 'Examples',
+      })}**
 
-  ${examples.map((example) => `\`${example}\``).join('\n\n')}`;
+  ${examples.map((example) => `\`${example}\``).join('\n\n')}`
+    : '';
   return {
-    value: `${descriptionInMarkdown}\n\n${examplesInMarkdown}`,
+    value: `${descriptionInMarkdown}${examplesInMarkdown}`,
   };
 }
 
@@ -519,7 +511,12 @@ export function getSignatureHelp(
       if (signatures.length) {
         return {
           value: {
-            signatures,
+            // remove the documentation
+            signatures: signatures.map(({ documentation, ...signature }) => ({
+              ...signature,
+              // extract only the first section (usually few lines)
+              documentation: { value: documentation.value.split('\n\n')[0] },
+            })),
             activeParameter: index,
             activeSignature: 0,
           },

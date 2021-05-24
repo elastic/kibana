@@ -130,9 +130,7 @@ Subtracts the first number from the second number.
 Also works with ${'`-`'} symbol
 
 Example: Calculate the range of a field
-\`\`\`
-subtract(max(bytes), min(bytes))
-\`\`\`
+${'`subtract(max(bytes), min(bytes))`'}
     `,
   },
   multiply: {
@@ -151,14 +149,10 @@ Multiplies two numbers.
 Also works with ${'`*`'} symbol.
 
 Example: Calculate price after current tax rate
-\`\`\`
-sum(bytes) * last_value(tax_rate)
-\`\`\`
+${'`sum(bytes) * last_value(tax_rate)`'}
 
 Example: Calculate price after constant tax rate
-\`\`\`
-multiply(sum(price), 1.2)
-\`\`\`
+${'`multiply(sum(price), 1.2)`'}
     `,
   },
   divide: {
@@ -177,9 +171,7 @@ Divides the first number by the second number.
 Also works with ${'`/`'} symbol
 
 Example: Calculate profit margin 
-\`\`\`
-sum(profit) / sum(revenue)
-\`\`\`
+${'`sum(profit) / sum(revenue)`'}
 
 Example: ${'`divide(sum(bytes), 2)`'}
     `,
@@ -208,9 +200,7 @@ Example: Calculate average distance to sea level ${'`abs(average(altitude))`'}
 Cube root of value.
 
 Example: Calculate side length from volume
-\`\`\`
-cbrt(last_value(volume))
-\`\`\`
+${'`cbrt(last_value(volume))`'}
     `,
   },
   ceil: {
@@ -225,9 +215,7 @@ cbrt(last_value(volume))
 Ceiling of value, rounds up.
 
 Example: Round up price to the next dollar 
-\`\`\`
-ceil(sum(price))
-\`\`\`
+${'`ceil(sum(price))`'}
     `,
   },
   clamp: {
@@ -270,9 +258,7 @@ clamp(
 Calculates the cube of a number.
 
 Example: Calculate volume from side length
-\`\`\`
-cube(last_value(length))
-\`\`\`
+${'`cube(last_value(length))`'}
     `,
   },
   exp: {
@@ -301,9 +287,7 @@ ${'`exp(last_value(duration))`'}
 For positive values, takes the floor. For negative values, takes the ceiling.
 
 Example: Rounding towards zero
-\`\`\`
-fix(sum(profit))
-\`\`\`
+${'`fix(sum(profit))`'}
     `,
   },
   floor: {
@@ -317,9 +301,7 @@ fix(sum(profit))
 Round down to nearest integer value
 
 Example: Round down a price
-\`\`\`
-floor(sum(price))
-\`\`\`
+${'`floor(sum(price))`'}
     `,
   },
   log: {
@@ -370,9 +352,7 @@ log(sum(bytes), 2)
 Remainder after dividing the function by a number
 
 Example: Calculate last three digits of a value
-\`\`\`
-mod(sum(price), 1000)
-\`\`\`
+${'`mod(sum(price), 1000)`'}
     `,
   },
   pow: {
@@ -390,9 +370,7 @@ mod(sum(price), 1000)
 Raises the value to a certain power. The second argument is required
 
 Example: Calculate volume based on side length
-\`\`\`
-pow(last_value(length), 3)
-\`\`\`
+${'`pow(last_value(length), 3)`'}
     `,
   },
   round: {
@@ -429,9 +407,7 @@ round(sum(bytes), 2)
 Square root of a positive value only
 
 Example: Calculate side length based on area
-\`\`\`
-sqrt(last_value(area))
-\`\`\`
+${'`sqrt(last_value(area))`'}
     `,
   },
   square: {
@@ -445,9 +421,7 @@ sqrt(last_value(area))
 Raise the value to the 2nd power
 
 Example: Calculate area based on side length
-\`\`\`
-square(last_value(length))
-\`\`\`
+${'`square(last_value(length))`'}
     `,
   },
 };

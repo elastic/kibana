@@ -131,21 +131,17 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     documentation: {
       section: 'elasticsearch',
       signature: i18n.translate('xpack.lens.indexPattern.metric.signature', {
-        defaultMessage: 'field: string, [kql]?: string, [lucene]?: string',
+        defaultMessage: 'field: string',
       }),
       description: i18n.translate('xpack.lens.indexPattern.metric.documentation', {
         defaultMessage: `
 Returns the {metric} of a field. This function only works for number fields.
 
 Example: Get the {metric} of price:
-\`\`\`
-{metric}(price)
-\`\`\`
+${'`{metric}(price)`'}
 
 Example: Get the {metric} of price for orders from the UK:
-\`\`\`
-{metric}(price, kql="location:UK")
-\`\`\`
+${"`{metric}(price, kql='location:UK')`"}
       `,
         values: {
           metric: type,
