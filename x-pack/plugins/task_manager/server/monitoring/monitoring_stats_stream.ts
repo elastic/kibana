@@ -78,6 +78,7 @@ export function createAggregators(
       elasticsearchAndSOAvailability$,
       config.monitored_aggregated_stats_refresh_rate,
       config.poll_interval,
+      config.max_workers,
       logger
     )
   );

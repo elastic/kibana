@@ -31,8 +31,20 @@ export interface WorkloadStat extends JsonObject {
   count: number;
   task_types: TaskTypeStat;
   schedule: Array<[string, number]>;
+  non_recurring: number;
+  owner_ids: number;
   overdue: number;
   estimated_schedule_density: number[];
+  capacity_estimation: {
+    buckets: {
+      per_minute: number;
+      per_hour: number;
+      per_day: number;
+    };
+    avg_per_minute: number;
+    minutes_to_drain: number;
+    min_required_kibana: number;
+  };
 }
 
 export interface WorkloadAggregation {
@@ -101,6 +113,7 @@ export function createWorkloadAggregator(
   elasticsearchAndSOAvailability$: Observable<boolean>,
   refreshInterval: number,
   pollInterval: number,
+  maxWorkers: number,
   logger: Logger
 ): AggregatedStatProvider<WorkloadStat> {
   // calculate scheduleDensity going two refreshIntervals or 1 minute into into the future
@@ -109,6 +122,8 @@ export function createWorkloadAggregator(
     Math.max(Math.round(60000 / pollInterval), Math.round((refreshInterval * 2) / pollInterval)),
     MAX_SHCEDULE_DENSITY_BUCKETS
   );
+
+  const capacityPerMinute = Math.round(((60 * 1000) / pollInterval) * maxWorkers);
 
   return combineLatest([timer(0, refreshInterval), elasticsearchAndSOAvailability$]).pipe(
     filter(([, areElasticsearchAndSOAvailable]) => areElasticsearchAndSOAvailable),
@@ -125,6 +140,14 @@ export function createWorkloadAggregator(
           },
           schedule: {
             terms: { field: 'task.schedule.interval' },
+          },
+          nonRecurringTasks: {
+            missing: { field: 'task.schedule' },
+          },
+          ownerIds: {
+            cardinality: {
+              field: 'task.ownerId',
+            },
           },
           idleTasks: {
             filter: {
@@ -184,12 +207,50 @@ export function createWorkloadAggregator(
       }
 
       const taskTypes = aggregations.taskType.buckets;
-      const schedules = aggregations.schedule.buckets;
+      const nonRecurring = aggregations.nonRecurringTasks.doc_count;
+      const ownerIds = aggregations.ownerIds.value;
 
       const {
         overdue: { doc_count: overdue },
         scheduleDensity: { buckets: [scheduleDensity] = [] } = {},
       } = aggregations.idleTasks;
+
+      const { schedules, cadence } = aggregations.schedule.buckets.reduce(
+        (accm, schedule) => {
+          const parsedSchedule = {
+            interval: schedule.key as string,
+            asSeconds: parseIntervalAsSecond(schedule.key as string),
+            count: schedule.doc_count,
+          };
+          accm.schedules.push(parsedSchedule);
+          if (parsedSchedule.asSeconds <= 60) {
+            accm.cadence.perMinute +=
+              parsedSchedule.count * Math.round(60 / parsedSchedule.asSeconds);
+          } else if (parsedSchedule.asSeconds <= 3600) {
+            accm.cadence.perHour +=
+              parsedSchedule.count * Math.round(3600 / parsedSchedule.asSeconds);
+          } else {
+            accm.cadence.perDay +=
+              parsedSchedule.count * Math.round((3600 * 24) / parsedSchedule.asSeconds);
+          }
+          return accm;
+        },
+        {
+          cadence: {
+            perMinute: 0,
+            perHour: 0,
+            perDay: 0,
+          },
+          schedules: [] as Array<{
+            interval: string;
+            asSeconds: number;
+            count: number;
+          }>,
+        }
+      );
+
+      const averagePerMinute =
+        cadence.perMinute + Math.round(cadence.perHour / 60) + Math.round(cadence.perDay / 24 / 60);
 
       const summary: WorkloadStat = {
         count,
@@ -199,19 +260,27 @@ export function createWorkloadAggregator(
             status: mapValues(keyBy(status.buckets, 'key'), 'doc_count'),
           };
         }),
+        non_recurring: nonRecurring,
+        owner_ids: ownerIds,
         schedule: schedules
-          .sort(
-            (scheduleLeft, scheduleRight) =>
-              parseIntervalAsSecond(scheduleLeft.key as string) -
-              parseIntervalAsSecond(scheduleRight.key as string)
-          )
-          .map((schedule) => [schedule.key as string, schedule.doc_count]),
+          .sort((scheduleLeft, scheduleRight) => scheduleLeft.asSeconds - scheduleRight.asSeconds)
+          .map((schedule) => [schedule.interval, schedule.count]),
         overdue,
         estimated_schedule_density: padBuckets(
           scheduleDensityBuckets,
           pollInterval,
           scheduleDensity
         ),
+        capacity_estimation: {
+          buckets: {
+            per_minute: cadence.perMinute,
+            per_hour: cadence.perHour,
+            per_day: cadence.perDay,
+          },
+          avg_per_minute: averagePerMinute,
+          minutes_to_drain: Math.ceil(nonRecurring / averagePerMinute),
+          min_required_kibana: Math.ceil(averagePerMinute / capacityPerMinute),
+        },
       };
       return {
         key: 'workload',
@@ -368,6 +437,12 @@ export interface WorkloadAggregationResponse {
   taskType: TaskTypeAggregation;
   schedule: ScheduleAggregation;
   idleTasks: IdleTasksAggregation;
+  nonRecurringTasks: {
+    doc_count: number;
+  };
+  ownerIds: {
+    value: number;
+  };
   [otherAggs: string]: estypes.Aggregate;
 }
 export interface TaskTypeAggregation extends estypes.FiltersAggregate {

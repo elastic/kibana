@@ -61,6 +61,12 @@ describe('Workload Statistics Aggregator', () => {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
           },
+          nonRecurringTasks: {
+            doc_count: 13,
+          },
+          ownerIds: {
+            value: 1,
+          },
           // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
           // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
           // @ts-expect-error
@@ -94,6 +100,7 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       10,
       3000,
+      10,
       loggingSystemMock.create().get()
     );
 
@@ -112,6 +119,14 @@ describe('Workload Statistics Aggregator', () => {
             schedule: {
               terms: {
                 field: 'task.schedule.interval',
+              },
+            },
+            nonRecurringTasks: {
+              missing: { field: 'task.schedule' },
+            },
+            ownerIds: {
+              cardinality: {
+                field: 'task.ownerId',
               },
             },
             idleTasks: {
@@ -238,6 +253,12 @@ describe('Workload Statistics Aggregator', () => {
             },
           ],
         },
+        nonRecurringTasks: {
+          doc_count: 13,
+        },
+        ownerIds: {
+          value: 1,
+        },
         // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
         // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
         // @ts-expect-error
@@ -264,6 +285,7 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       10,
       3000,
+      10,
       loggingSystemMock.create().get()
     );
 
@@ -294,6 +316,7 @@ describe('Workload Statistics Aggregator', () => {
       availability$,
       10,
       3000,
+      10,
       loggingSystemMock.create().get()
     );
 
@@ -330,6 +353,7 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       10,
       3000,
+      10,
       loggingSystemMock.create().get()
     );
 
@@ -353,6 +377,7 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       10,
       3000,
+      10,
       loggingSystemMock.create().get()
     );
 
@@ -381,6 +406,7 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       60 * 1000,
       3000,
+      10,
       loggingSystemMock.create().get()
     );
 
@@ -419,6 +445,7 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       15 * 60 * 1000,
       3000,
+      10,
       loggingSystemMock.create().get()
     );
 
@@ -469,7 +496,7 @@ describe('Workload Statistics Aggregator', () => {
         )
       );
     const logger = loggingSystemMock.create().get();
-    const workloadAggregator = createWorkloadAggregator(taskStore, of(true), 10, 3000, logger);
+    const workloadAggregator = createWorkloadAggregator(taskStore, of(true), 10, 3000, 10, logger);
 
     return new Promise<void>((resolve, reject) => {
       workloadAggregator.pipe(take(2), bufferCount(2)).subscribe((results) => {
@@ -496,6 +523,121 @@ describe('Workload Statistics Aggregator', () => {
     });
   });
 
+  test('returns an estimate of the workload by task type', async () => {
+    // poll every 3 seconds
+    const pollingIntervalInSeconds = 3;
+    // with 10 workers at most
+    const maxWorkers = 10;
+
+    const taskStore = taskStoreMock.create({});
+    taskStore.aggregate.mockResolvedValue(
+      asApiResponse({
+        hits: {
+          hits: [],
+          max_score: 0,
+          total: { value: 4, relation: 'eq' },
+        },
+        took: 1,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          skipped: 1,
+          failed: 0,
+        },
+        aggregations: {
+          schedule: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              // repeats each cycle
+              {
+                key: `${pollingIntervalInSeconds}s`,
+                doc_count: 1,
+              },
+              {
+                key: `10s`, // 6 times per minute
+                doc_count: 20,
+              },
+              {
+                key: `60s`, // 1 times per minute
+                doc_count: 10,
+              },
+              {
+                key: '15m', // 4 times per hour
+                doc_count: 90,
+              },
+              {
+                key: '720m', // 2 times per day
+                doc_count: 10,
+              },
+              {
+                key: '3h', // 8 times per day
+                doc_count: 100,
+              },
+            ],
+          },
+          taskType: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+          nonRecurringTasks: {
+            doc_count: 13,
+          },
+          ownerIds: {
+            value: 3,
+          },
+          // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
+          // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
+          // @ts-expect-error
+          idleTasks: {
+            doc_count: 13,
+            overdue: {
+              doc_count: 6,
+            },
+            scheduleDensity: {
+              buckets: [
+                mockHistogram(0, 7 * 3000 + 500, 60 * 1000, 3000, [2, 2, 5, 0, 0, 0, 0, 0, 0, 1]),
+              ],
+            },
+          },
+        },
+      })
+    );
+
+    const workloadAggregator = createWorkloadAggregator(
+      taskStore,
+      of(true),
+      10,
+      pollingIntervalInSeconds * 1000,
+      maxWorkers,
+      loggingSystemMock.create().get()
+    );
+
+    const perMinuteCapacityOfCurrentKibana = maxWorkers * (60 / pollingIntervalInSeconds);
+
+    return new Promise<void>((resolve) => {
+      workloadAggregator.pipe(first()).subscribe((result) => {
+        expect(result.key).toEqual('workload');
+
+        expect(result.value).toMatchObject({
+          capacity_estimation: {
+            buckets: {
+              per_minute: 150,
+              per_hour: 360,
+              per_day: 820,
+            },
+            avg_per_minute: 157,
+            minutes_to_drain: 1,
+            min_required_kibana: Math.ceil(157 / perMinuteCapacityOfCurrentKibana),
+          },
+        });
+        resolve();
+      });
+    });
+  });
+
   test('recovery after errors occurrs at the next interval', async () => {
     const refreshInterval = 1000;
 
@@ -506,6 +648,7 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       refreshInterval,
       3000,
+      10,
       logger
     );
 

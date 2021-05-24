@@ -27,7 +27,19 @@ interface MonitoringStats {
         task_types: Record<string, object>;
         schedule: Array<[string, number]>;
         overdue: number;
+        non_recurring: number;
+        owner_ids: number;
         estimated_schedule_density: number[];
+        capacity_estimation: {
+          buckets: {
+            per_minute: number;
+            per_hour: number;
+            per_day: number;
+          };
+          avg_per_minute: number;
+          minutes_to_drain: number;
+          min_required_kibana: number;
+        };
       };
     };
     runtime: {
@@ -38,6 +50,7 @@ interface MonitoringStats {
         load: Record<string, object>;
         execution: {
           duration: Record<string, Record<string, object>>;
+          persistence: Record<string, number>;
           result_frequency_percent_as_number: Record<string, Record<string, object>>;
         };
         polling: {
@@ -161,6 +174,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(typeof workload.overdue).to.eql('number');
 
+      expect(typeof workload.non_recurring).to.eql('number');
+      expect(typeof workload.owner_ids).to.eql('number');
+
+      expect(typeof workload.capacity_estimation.buckets.per_minute).to.eql('number');
+      expect(typeof workload.capacity_estimation.buckets.per_hour).to.eql('number');
+      expect(typeof workload.capacity_estimation.buckets.per_day).to.eql('number');
+      expect(typeof workload.capacity_estimation.avg_per_minute).to.eql('number');
+      expect(typeof workload.capacity_estimation.minutes_to_drain).to.eql('number');
+      expect(typeof workload.capacity_estimation.min_required_kibana).to.eql('number');
+
       expect(Array.isArray(workload.estimated_schedule_density)).to.eql(true);
 
       // test run with the default poll_interval of 3s and a monitored_aggregated_stats_refresh_rate of 5s,
@@ -219,6 +242,10 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof execution.duration.sampleTask.p90).to.eql('number');
       expect(typeof execution.duration.sampleTask.p95).to.eql('number');
       expect(typeof execution.duration.sampleTask.p99).to.eql('number');
+
+      expect(typeof execution.persistence.ephemeral).to.eql('number');
+      expect(typeof execution.persistence.non_recurring).to.eql('number');
+      expect(typeof execution.persistence.recurring).to.eql('number');
 
       expect(typeof execution.result_frequency_percent_as_number.sampleTask.Success).to.eql(
         'number'
