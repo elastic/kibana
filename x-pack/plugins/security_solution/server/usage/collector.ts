@@ -44,16 +44,6 @@ export const registerCollector: RegisterCollector = ({
     type: 'security_solution',
     schema: {
       detections: {
-        detection_rules: {
-          custom: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
-          },
-          elastic: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
-          },
-        },
         ml_jobs: {
           custom: {
             enabled: { type: 'long' },
@@ -423,7 +413,7 @@ export const registerCollector: RegisterCollector = ({
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
       const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
       const [detections, detectionMetrics, endpoints] = await Promise.allSettled([
-        fetchDetectionsUsage(kibanaIndex, esClient, ml, savedObjectsClient),
+        fetchDetectionsUsage(ml, savedObjectsClient),
         fetchDetectionsMetrics(kibanaIndex, signalsIndex, esClient, ml, savedObjectsClient),
         getEndpointTelemetryFromFleet(savedObjectsClient, endpointAppContext, esClient),
       ]);

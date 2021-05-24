@@ -6,12 +6,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
-import {
-  getMlJobsUsage,
-  getRulesUsage,
-  initialRulesUsage,
-  initialMlJobsUsage,
-} from './detections_usage_helpers';
+import { getMlJobsUsage, initialMlJobsUsage } from './detections_usage_helpers';
 import {
   getMlJobMetrics,
   getDetectionRuleMetrics,
@@ -41,18 +36,12 @@ export interface DetectionRulesTypeUsage {
   custom_total: FeatureTypeUsage;
 }
 
-export interface DetectionRulesUsage {
-  custom: FeatureUsage;
-  elastic: FeatureUsage;
-}
-
 export interface MlJobsUsage {
   custom: FeatureUsage;
   elastic: FeatureUsage;
 }
 
 export interface DetectionsUsage {
-  detection_rules: DetectionRulesUsage;
   ml_jobs: MlJobsUsage;
 }
 
@@ -137,23 +126,16 @@ export interface CasesSavedObject {
 }
 
 export const defaultDetectionsUsage = {
-  detection_rules: initialRulesUsage,
   ml_jobs: initialMlJobsUsage,
 };
 
 export const fetchDetectionsUsage = async (
-  kibanaIndex: string,
-  esClient: ElasticsearchClient,
   ml: MlPluginSetup | undefined,
   savedObjectClient: SavedObjectsClientContract
 ): Promise<DetectionsUsage> => {
-  const [rulesUsage, mlJobsUsage] = await Promise.allSettled([
-    getRulesUsage(kibanaIndex, esClient),
-    getMlJobsUsage(ml, savedObjectClient),
-  ]);
+  const [mlJobsUsage] = await Promise.allSettled([getMlJobsUsage(ml, savedObjectClient)]);
 
   return {
-    detection_rules: rulesUsage.status === 'fulfilled' ? rulesUsage.value : initialRulesUsage,
     ml_jobs: mlJobsUsage.status === 'fulfilled' ? mlJobsUsage.value : initialMlJobsUsage,
   };
 };

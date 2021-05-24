@@ -5,36 +5,16 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from '../../../../../../src/core/server';
-import { SIGNALS_ID } from '../../../common/constants';
+import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { isJobStarted } from '../../../common/machine_learning/helpers';
 import { isSecurityJob } from '../../../common/machine_learning/is_security_job';
 import { MlPluginSetup } from '../../../../ml/server';
-import { DetectionRulesUsage, MlJobsUsage } from './index';
-import { isElasticRule, RuleSearchParams, RuleSearchResult } from './detection_telemetry_helpers';
+import { MlJobsUsage } from './index';
 
 interface DetectionsMetric {
   isElastic: boolean;
   isEnabled: boolean;
 }
-
-/**
- * Default detection rule usage count
- */
-export const initialRulesUsage: DetectionRulesUsage = {
-  custom: {
-    enabled: 0,
-    disabled: 0,
-  },
-  elastic: {
-    enabled: 0,
-    disabled: 0,
-  },
-};
 
 /**
  * Default ml job usage count
@@ -48,48 +28,6 @@ export const initialMlJobsUsage: MlJobsUsage = {
     enabled: 0,
     disabled: 0,
   },
-};
-
-const updateRulesUsage = (
-  ruleMetric: DetectionsMetric,
-  usage: DetectionRulesUsage
-): DetectionRulesUsage => {
-  const { isEnabled, isElastic } = ruleMetric;
-  if (isEnabled && isElastic) {
-    return {
-      ...usage,
-      elastic: {
-        ...usage.elastic,
-        enabled: usage.elastic.enabled + 1,
-      },
-    };
-  } else if (!isEnabled && isElastic) {
-    return {
-      ...usage,
-      elastic: {
-        ...usage.elastic,
-        disabled: usage.elastic.disabled + 1,
-      },
-    };
-  } else if (isEnabled && !isElastic) {
-    return {
-      ...usage,
-      custom: {
-        ...usage.custom,
-        enabled: usage.custom.enabled + 1,
-      },
-    };
-  } else if (!isEnabled && !isElastic) {
-    return {
-      ...usage,
-      custom: {
-        ...usage.custom,
-        disabled: usage.custom.disabled + 1,
-      },
-    };
-  } else {
-    return usage;
-  }
 };
 
 const updateMlJobsUsage = (jobMetric: DetectionsMetric, usage: MlJobsUsage): MlJobsUsage => {
@@ -129,37 +67,6 @@ const updateMlJobsUsage = (jobMetric: DetectionsMetric, usage: MlJobsUsage): MlJ
   } else {
     return usage;
   }
-};
-
-export const getRulesUsage = async (
-  index: string,
-  esClient: ElasticsearchClient
-): Promise<DetectionRulesUsage> => {
-  let rulesUsage: DetectionRulesUsage = initialRulesUsage;
-  const ruleSearchOptions: RuleSearchParams = {
-    body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
-    filterPath: ['hits.hits._source.alert.enabled', 'hits.hits._source.alert.tags'],
-    ignoreUnavailable: true,
-    index,
-    size: 10000, // elasticsearch index.max_result_window default value
-  };
-
-  try {
-    const { body: ruleResults } = await esClient.search<RuleSearchResult>(ruleSearchOptions);
-
-    if (ruleResults.hits?.hits?.length > 0) {
-      rulesUsage = ruleResults.hits.hits.reduce((usage, hit) => {
-        const isElastic = isElasticRule(hit._source?.alert.tags);
-        const isEnabled = Boolean(hit._source?.alert.enabled);
-
-        return updateRulesUsage({ isElastic, isEnabled }, usage);
-      }, initialRulesUsage);
-    }
-  } catch (e) {
-    // ignore failure, usage will be zeroed
-  }
-
-  return rulesUsage;
 };
 
 export const getMlJobsUsage = async (

@@ -14,7 +14,6 @@ import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import {
   getMockJobSummaryResponse,
   getMockListModulesResponse,
-  getMockRulesResponse,
   getMockMlJobDetailsResponse,
   getMockMlJobStatsResponse,
   getMockMlDatafeedStatsResponse,
@@ -36,54 +35,6 @@ describe('Detections Usage and Metrics', () => {
       mlMock = mlServicesMock.createSetupContract();
     });
 
-    it('returns zeroed counts if both calls are empty', async () => {
-      const result = await fetchDetectionsUsage('', esClientMock, mlMock, savedObjectsClient);
-
-      expect(result).toEqual({
-        detection_rules: {
-          custom: {
-            enabled: 0,
-            disabled: 0,
-          },
-          elastic: {
-            enabled: 0,
-            disabled: 0,
-          },
-        },
-        ml_jobs: {
-          custom: {
-            enabled: 0,
-            disabled: 0,
-          },
-          elastic: {
-            enabled: 0,
-            disabled: 0,
-          },
-        },
-      });
-    });
-
-    it('tallies rules data given rules results', async () => {
-      (esClientMock.search as jest.Mock).mockResolvedValue({ body: getMockRulesResponse() });
-
-      const result = await fetchDetectionsUsage('', esClientMock, mlMock, savedObjectsClient);
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          detection_rules: {
-            custom: {
-              enabled: 1,
-              disabled: 1,
-            },
-            elastic: {
-              enabled: 2,
-              disabled: 3,
-            },
-          },
-        })
-      );
-    });
-
     it('tallies jobs data given jobs results', async () => {
       const mockJobSummary = jest.fn().mockResolvedValue(getMockJobSummaryResponse());
       const mockListModules = jest.fn().mockResolvedValue(getMockListModulesResponse());
@@ -94,7 +45,7 @@ describe('Detections Usage and Metrics', () => {
         jobsSummary: mockJobSummary,
       });
 
-      const result = await fetchDetectionsUsage('', esClientMock, mlMock, savedObjectsClient);
+      const result = await fetchDetectionsUsage(mlMock, savedObjectsClient);
 
       expect(result).toEqual(
         expect.objectContaining({
