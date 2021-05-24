@@ -31,6 +31,7 @@ interface ExplorerAnomaliesContainerProps {
   timeBuckets: TimeBuckets;
   timefilter: TimefilterContract;
   onSelectEntity: (fieldName: string, fieldValue: string, operation: EntityFieldOperation) => void;
+  showSelectedInterval?: boolean;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -51,6 +52,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   timeBuckets,
   timefilter,
   onSelectEntity,
+  showSelectedInterval,
 }) => {
   return (
     <>
@@ -96,6 +98,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
               timefilter,
               onSelectEntity,
               tooManyBucketsCalloutMsg,
+              showSelectedInterval,
             }}
           />
         )}
