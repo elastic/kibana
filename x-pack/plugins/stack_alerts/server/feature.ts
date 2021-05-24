@@ -36,7 +36,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
           all: [IndexThreshold, GeoContainment, ElasticsearchQuery],
         },
         alert: {
-          read: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+          all: [IndexThreshold, GeoContainment, ElasticsearchQuery],
         },
       },
       savedObject: {
@@ -68,31 +68,4 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       ui: [],
     },
   },
-  subFeatures: [
-    {
-      name: 'Manage Alerts',
-      privilegeGroups: [
-        {
-          groupType: 'independent',
-          privileges: [
-            {
-              id: 'alert_manage',
-              name: 'Manage Alerts',
-              includeIn: 'all',
-              alerting: {
-                alert: {
-                  all: [IndexThreshold, GeoContainment, ElasticsearchQuery],
-                },
-              },
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: [],
-            },
-          ],
-        },
-      ],
-    },
-  ],
 };
