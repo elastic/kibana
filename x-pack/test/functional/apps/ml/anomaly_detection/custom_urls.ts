@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('custom urls', function () {
-    this.tags(['mlqa', 'pete']);
+    this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
