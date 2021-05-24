@@ -35,9 +35,6 @@ Panels display your data in charts, tables, maps, and more, which allow you to c
 | <<enhance-dashboards,Tools>>
 | Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
 
-| <<save-your-search,Saved search from Discover>>
-| Display a saved search data table from <<discover, *Discover*>>. The table results are not aggregated.
-
 |===
 
 [float]
@@ -57,7 +54,7 @@ To create dashboards, you must meet the minimum requirements.
 * Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
 
 * When the read-only indicator appears, you have insufficient privileges
-to create or save dashboards. The options to create and save dashboards are not visible. For more information,
+to create or save dashboards, and the options to create and save dashboards are not visible. For more information,
 refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
 [float]
@@ -92,25 +89,43 @@ When a panel contains a saved query, both queries are applied.
 
 [float]
 [[save-panels]]
-=== Save and add panels
+=== Save panels
 
-{kib} provides you with several options to save and add the panels to the dashboard.
+Consider where you want to save the panel in {kib}. You can save the panel just on the dashboard you are working on, or save the panel in the *Visualize Library*.
 
-* *Save to Library* &mdash; Saves the panel in the *Visualize Library* so that others can view and use the panel. 
+[float]
+[[save-to-visualize-library]]
+==== Save to the Visualize Library
+
+To use the panel on *Canvas* workpads and other dashboards, save the panel to the *Visualize Library*.
+
+. Click *Save to library*.
+
+. Enter the *Title* and add any applicable <<tags,*Tags*>>.
+
+. Make sure that *Add to Dashboard after saving* is selected.
+
+. Click *Save and return*.
 +
 When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
 
-* *Save and return* &mdash; Adds the panel to the dashboard without saving to the *Visualize Library* or adding a panel title. When you're ready, you can add a panel title and save the panel to the *Visulize Library* later.
+[float]
+[[save-to-the-dashboard]]
+==== Save to the dashboard
 
-To add a panel title:
+Quickly add the panel and return to the dashboard without specifying the save options or adding the panel to the *Visualize Library*. 
 
-. In the panel header, click *No Title*.
+. Click *Save and return*.
 
-. Select *Show panel title*.
+. Add more panels to the dashboard, or specify the panel title.
 
-. Enter the *Panel title*. 
+.. In the panel header, click *No Title*.
 
-To save the panel to the *Visualize Library*:
+.. Select *Show panel title*.
+
+.. Enter the *Panel title*. 
+
+If you change your mind and want to add the panel to the *Visualize Library*:
 
 . Open the panel menu, then select *More > Save to library*.
 
@@ -118,7 +133,7 @@ To save the panel to the *Visualize Library*:
 
 [float]
 [[edit-panels]]
-=== Edit panels
+== Edit panels
 
 To make changes to the panel, use the panel menu options.
 
@@ -142,7 +157,7 @@ If you want to use the panel later, make sure that you save the panel to the *Vi
 
 [float]
 [[search-or-filter-your-data]]
-=== Search and filter your data
+== Search and filter your data
 
 {kib} supports several ways to search your data and apply {es} filters. You can combine the filters with any panel
 filter to display the data want to you see.
@@ -159,7 +174,7 @@ To apply a panel-level time filter:
 [[arrange-panels]]
 [[moving-containers]]
 [[resizing-containers]]
-=== Arrange panels
+== Arrange panels
 
 To compare the data side-by-side, move and arrange the panels.
 
@@ -173,7 +188,7 @@ In the toolbar, click *Edit*, then use the following options:
 
 [float]
 [[apply-design-options]]
-=== Apply design options
+== Apply design options
 
 Apply a set of design options to the entire dashboard.
 
@@ -186,15 +201,17 @@ In the toolbar, click *Edit > Options*, then use the following options:
 * *Sync color pallettes across panels* &mdash; Specifies whether the color pallette is applied to all panels.
 
 [float]
-[[clone-panels]]
-[[copy-to-dashboard]]
-=== Clone and copy panels
+[[duplicate-panels]]
+== Duplicate panels
 
 To duplicate a panel and the configured functionality, use the clone and copy panel options. Cloned and copied panels replicate all of the functionality from the original panel, 
-including renaming, editing, and cloning. When you clone a panel, the clone appears beside the original panel, and moves other panels to provide a space on the 
-dashboard. 
+including renaming, editing, and cloning. 
 
-To clone a panel:
+[float]
+[[clone-panels]]
+=== Clone panels
+
+Cloned panels appear next to the original panel, and move the other panels to provide a space on the dashboard.
 
 . In the toolbar, click *Edit*.
 
@@ -202,44 +219,72 @@ To clone a panel:
 +
 When cloned panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the header.
 
-To copy a panel to another dashboard:
+[float]
+[[copy-to-dashboard]]
+=== Copy panels
+
+Copy panels from one dashboard to another dashboard.
 
 . Open the panel menu, then select *More > Copy to dashboard*.
 
 . On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
 
 [float]
-[[explore-the-underlying-data]]
-=== Explore the underlying documents
+[[explore-the-underlying-documents]]
+== Explore the underlying documents
 
-View the underlying documents in a panel, or in a data series. *Explore underlying data* is supported only for visualization panels with a single index pattern.
+To gain insight to the data, open the underlying panel or data series documents in *Discover*. The panel documents that you open in *Discover* have the same time range and filters as the source panel.
 
-To view the underlying documents in the panel, open the panel menu, then click *Explore underlying data*.
+[float]
+[[explore-underlying-panel-documents]]
+=== Explore the underlying panel documents
 
-The documents open in *Discover*, with the same time range and filters as the panel.
+When your visualization panel contains a single index pattern, you can open the panel documents in *Discover*.
 
+. Open the panel menu.
+
+. Click *Explore underlying data*.
++
 [role="screenshot"]
 image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
 
-To view the underlying documents in a data series, open the dashboard, then click on the data series in the panel that you want to view. 
+[float]
+[[explore-underlying-data-series-documents]]
+=== Explore the underlying data series documents
 
+To gain insight to a data series, open the documents in *Discover*. 
+
+. Click the data series in the panel that you want to view. 
+
+. Select *Explore underlying data*.
++
 [role="screenshot"]
 image::images/explore_data_in_chart.png[Explore underlying data from chart]
 
 [float]
 [[download-csv]]
-=== Download panel data
+== Download panel data
 
 Download panel data in a CSV file. You can download most panels in a CSV file, but there is a shortcut available
 for *Lens* panels.
 
+[float]
+[role="xpack"]
+[[download-lens-data]]
+=== Download Lens data
+
 When you download *Lens* panel data, each layer produces a single CSV file with columns.
 When you download multiple layers, the file names combine the visualization and layer index names.
 
-[role="xpack"]
-To download *Lens* panel data, open the *Lens* panel menu, then select *More > Download as CSV*.
+. Open the *Lens* panel menu
 
-To download all other panel data: 
+. Select *More > Download as CSV*.
+
+[float]
+[[download-other-panel-data]]
+=== Download all other panel data
+
+Download the data for non-*Lens* panels.  
 
 . Open the panel menu, then select *Inspect*.
 
@@ -254,13 +299,13 @@ image:images/Dashboard_inspect.png[Inspect in dashboard]
 
 [float]
 [[share-the-dashboard]]
-=== Share dashboards
+== Share dashboards
 
 To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information, refer to <<reporting-getting-started,Reporting>>.
 
 [float]
 [[import-dashboards]]
-=== Export the dashboard
+== Export dashboards
 
 To automate {kib}, you can export dashboards as JSON using the <<dashboard-api,import and export dashboard APIs>>. It is important to export dashboards with all necessary references.
 
