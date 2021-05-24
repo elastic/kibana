@@ -14,7 +14,7 @@ import { ISOLATION_STATUS_FAILURE } from './translations';
 
 interface HostIsolationStatusResponse {
   loading: boolean;
-  isIsolated: boolean;
+  isIsolated: Maybe<boolean>;
 }
 
 /*
@@ -24,7 +24,7 @@ export const useHostIsolationStatus = ({
 }: {
   agentId: string;
 }): HostIsolationStatusResponse => {
-  const [isIsolated, setIsIsolated] = useState<boolean>();
+  const [isIsolated, setIsIsolated] = useState<Maybe<boolean>>();
   const [loading, setLoading] = useState(false);
 
   const { addError } = useAppToasts();

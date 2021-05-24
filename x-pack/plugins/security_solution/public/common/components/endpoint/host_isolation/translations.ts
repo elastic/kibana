@@ -36,11 +36,11 @@ export const GET_UNISOLATION_SUCCESS_MESSAGE = (hostName: string) =>
     values: { hostName },
   });
 
-export const ISOLATE = i18n.translate('xpack.securitysolution.endpoint.hostisolation.isolate', {
+export const ISOLATE = i18n.translate('xpack.securitySolution.endpoint.hostisolation.isolate', {
   defaultMessage: 'isolate',
 });
 
-export const UNISOLATE = i18n.translate('xpack.securitysolution.endpoint.hostisolation.unisolate', {
+export const UNISOLATE = i18n.translate('xpack.securitySolution.endpoint.hostisolation.unisolate', {
   defaultMessage: 'unisolate',
 });
 

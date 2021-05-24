@@ -73,7 +73,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     skip: !expandedEvent.eventId,
   });
 
-  const isHostIsolationEnabled = useIsExperimentalFeatureEnabled('hostIsolationEnabled');
+  // const isHostIsolationEnabled = useIsExperimentalFeatureEnabled('hostIsolationEnabled');
+  const isHostIsolationEnabled = true;
 
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
