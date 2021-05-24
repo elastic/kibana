@@ -340,7 +340,7 @@ Maps::
 * Do not track total hits for elasticsearch search requests {kibana-pull}91754[#91754]
 Metrics::
 * Increase the groupBy pagination size on metric threshold alerts {kibana-pull}99683[#99683]
-* Adds anomalies tab to enhanced node details {kibana-pull}96967[#96967]
+* Adds anomalies tab to enhanced host details overlay {kibana-pull}96967[#96967]
 * Handle ES query errors in snapshot endpoint, improve UI error messaging {kibana-pull}96871[#96871]
 * Adds Log Rate to the metrics tab {kibana-pull}96596[#96596]
 * Change composite.size of snapshot ES query to improve speed {kibana-pull}95994[#95994]
