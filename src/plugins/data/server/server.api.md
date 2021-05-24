@@ -37,8 +37,8 @@ import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
 import { ISearchSource } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'src/core/server';
 import { IUiSettingsClient as IUiSettingsClient_3 } from 'kibana/server';
-import { KibanaRequest } from 'kibana/server';
-import { KibanaRequest as KibanaRequest_2 } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest as KibanaRequest_2 } from 'kibana/server';
 import { Logger } from 'src/core/server';
 import { Logger as Logger_2 } from 'kibana/server';
 import { LoggerFactory } from '@kbn/logging';
@@ -1040,7 +1040,7 @@ export interface ISearchOptions {
 // @public (undocumented)
 export interface ISearchSessionService<T = unknown> {
     // (undocumented)
-    asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSearchSessionsClient<T>;
+    asScopedProvider: (core: CoreStart) => (request: KibanaRequest_2) => IScopedSearchSessionsClient<T>;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1068,11 +1068,11 @@ export interface ISearchStart<SearchStrategyRequest extends IKibanaSearchRequest
     // (undocumented)
     aggs: AggsStart;
     // (undocumented)
-    asScoped: (request: KibanaRequest_2) => IScopedSearchClient;
+    asScoped: (request: KibanaRequest) => IScopedSearchClient;
     getSearchStrategy: (name?: string) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
     // (undocumented)
     searchSource: {
-        asScoped: (request: KibanaRequest_2) => Promise<ISearchStartSearchSource>;
+        asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
     };
 }
 
@@ -1391,6 +1391,8 @@ export interface SearchStrategyDependencies {
     // (undocumented)
     esClient: IScopedClusterClient;
     // (undocumented)
+    request: KibanaRequest;
+    // (undocumented)
     savedObjectsClient: SavedObjectsClientContract;
     // (undocumented)
     searchSessionsClient: IScopedSearchSessionsClient;
@@ -1551,7 +1553,7 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:269:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:270:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:81:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/search/types.ts:114:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/search/types.ts:115:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
