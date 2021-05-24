@@ -21,12 +21,28 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import type { IndexPattern, Query } from 'src/plugins/data/public';
+import { APP_ID } from '../../../../common/constants';
 import { getIndexPatternService, getData } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
+import { ILayer } from '../../../classes/layers/layer';
 
-export class FilterEditor extends Component {
-  state = {
+export interface Props {
+  layer?: ILayer;
+  setLayerQuery: (id: string, query: Query) => void;
+  updateSourceProp: (layerId: string, propName: string, value: unknown) => void;
+}
+
+interface State {
+  isPopoverOpen: boolean;
+  indexPatterns: IndexPattern[];
+  isSourceTimeAware: boolean;
+}
+
+export class FilterEditor extends Component<Props, State> {
+  private _isMounted = false;
+  state: State = {
     isPopoverOpen: false,
     indexPatterns: [],
     isSourceTimeAware: false,
@@ -43,9 +59,13 @@ export class FilterEditor extends Component {
   }
 
   async _loadIndexPatterns() {
+    if (!this.props.layer) {
+      return;
+    }
+
     // Filter only effects source so only load source indices.
     const indexPatternIds = this.props.layer.getSource().getIndexPatternIds();
-    const indexPatterns = [];
+    const indexPatterns: IndexPattern[] = [];
     const getIndexPatternPromises = indexPatternIds.map(async (indexPatternId) => {
       try {
         const indexPattern = await getIndexPatternService().get(indexPatternId);
@@ -65,6 +85,10 @@ export class FilterEditor extends Component {
   }
 
   async _loadSourceTimeAware() {
+    if (!this.props.layer) {
+      return;
+    }
+
     const isSourceTimeAware = await this.props.layer.getSource().isTimeAware();
     if (this._isMounted) {
       this.setState({ isSourceTimeAware });
@@ -81,21 +105,24 @@ export class FilterEditor extends Component {
     this.setState({ isPopoverOpen: false });
   };
 
-  _onQueryChange = ({ query }) => {
-    this.props.setLayerQuery(this.props.layer.getId(), query);
+  _onQueryChange = ({ query }: { query?: Query }) => {
+    if (!query) {
+      return;
+    }
+    this.props.setLayerQuery(this.props.layer!.getId(), query);
     this._close();
   };
 
-  _onApplyGlobalQueryChange = (applyGlobalQuery) => {
-    this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalQuery', applyGlobalQuery);
+  _onApplyGlobalQueryChange = (applyGlobalQuery: boolean) => {
+    this.props.updateSourceProp(this.props.layer!.getId(), 'applyGlobalQuery', applyGlobalQuery);
   };
 
-  _onApplyGlobalTimeChange = (applyGlobalTime) => {
-    this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalTime', applyGlobalTime);
+  _onApplyGlobalTimeChange = (applyGlobalTime: boolean) => {
+    this.props.updateSourceProp(this.props.layer!.getId(), 'applyGlobalTime', applyGlobalTime);
   };
 
   _renderQueryPopover() {
-    const layerQuery = this.props.layer.getQuery();
+    const layerQuery = this.props.layer!.getQuery();
     const { SearchBar } = getData().ui;
 
     return (
@@ -109,6 +136,7 @@ export class FilterEditor extends Component {
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <SearchBar
+            appName={APP_ID}
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
@@ -130,7 +158,7 @@ export class FilterEditor extends Component {
   }
 
   _renderQuery() {
-    const query = this.props.layer.getQuery();
+    const query = this.props.layer!.getQuery();
     if (!query || !query.query) {
       return (
         <EuiText size="s" textAlign="center">
@@ -156,7 +184,7 @@ export class FilterEditor extends Component {
   }
 
   _renderOpenButton() {
-    const query = this.props.layer.getQuery();
+    const query = this.props.layer!.getQuery();
     const openButtonLabel =
       query && query.query
         ? i18n.translate('xpack.maps.layerPanel.filterEditor.editFilterButtonLabel', {
@@ -180,6 +208,10 @@ export class FilterEditor extends Component {
   }
 
   render() {
+    if (!this.props.layer) {
+      return null;
+    }
+
     const globalTimeCheckbox = this.state.isSourceTimeAware ? (
       <GlobalTimeCheckbox
         label={i18n.translate('xpack.maps.filterEditor.applyGlobalTimeCheckboxLabel', {
