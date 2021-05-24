@@ -40,6 +40,7 @@ export class LayerPanel extends React.Component {
     displayName: '',
     immutableSourceProps: [],
     leftJoinFields: null,
+    supportsFitToBounds: false,
   };
 
   componentDidMount() {
@@ -47,11 +48,23 @@ export class LayerPanel extends React.Component {
     this._loadDisplayName();
     this._loadImmutableSourceProperties();
     this._loadLeftJoinFields();
+    this._loadSupportsFitToBounds();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
+
+  _loadSupportsFitToBounds = async () => {
+    if (!this.props.selectedLayer) {
+      return;
+    }
+
+    const supportsFitToBounds = await this.props.selectedLayer.supportsFitToBounds();
+    if (this._isMounted) {
+      this.setState({ supportsFitToBounds });
+    }
+  };
 
   _loadDisplayName = async () => {
     if (!this.props.selectedLayer) {
@@ -207,7 +220,10 @@ export class LayerPanel extends React.Component {
             <div className="mapLayerPanel__bodyOverflow">
               <LayerErrors />
 
-              <LayerSettings layer={selectedLayer} />
+              <LayerSettings
+                layer={selectedLayer}
+                supportsFitToBounds={this.state.supportsFitToBounds}
+              />
 
               {this.props.selectedLayer.renderSourceSettingsEditor({
                 onChange: this._onSourceChange,

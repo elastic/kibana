@@ -6,7 +6,12 @@
  */
 
 import { get } from 'lodash/fp';
-import { NamespaceType, NamespaceTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListFilter,
+  ExceptionListIdentifiers,
+  NamespaceType,
+  NamespaceTypeArray,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
 import {
@@ -14,8 +19,6 @@ import {
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,
 } from '../../common/types';
-
-import { ExceptionListFilter, ExceptionListIdentifiers } from './types';
 
 export const getSavedObjectType = ({
   namespaceType,
