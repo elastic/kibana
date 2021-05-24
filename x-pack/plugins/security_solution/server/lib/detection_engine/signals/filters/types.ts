@@ -7,9 +7,9 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { Logger } from 'src/core/server';
 
+import type { Type, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ListClient } from '../../../../../../lists/server';
 import { BuildRuleMessage } from '../rule_messages';
-import { ExceptionListItemSchema, Type } from '../../../../../../lists/common/schemas';
 
 export interface FilterEventsAgainstListOptions<T> {
   listClient: ListClient;
