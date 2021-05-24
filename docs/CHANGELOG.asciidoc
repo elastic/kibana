@@ -629,10 +629,13 @@ Use Geo containment alerts.
 *Details* +
 When you upgrade to 7.12.0, {kib} uses a new algorithm to migrate saved objects to reduce the downtime caused by temporary issues, such as network errors or temporarily overloaded {es} clusters.
 With the new algorithm, {kib} now retries the failed migrations without user intervention, which allows the migration to continue after the issues are resolved.
-For more information, refer to <<upgrade-migrations, saved object upgrade migrations>>.
+For more information, refer to {kibana-ref}/upgrade-migrations.html[saved object
+upgrade migrations].
 
 *Impact* +
-Before you upgrade to 7.12.0, review the documentation for <<upgrade-migrations-rolling-back, rolling back to a previous version of {kib}>>.
+Before you upgrade to 7.12.0, review the documentation for
+{kibana-ref}/upgrade-migrations.html#upgrade-migrations-rolling-back[rolling
+back to a previous version of {kib}].
 ====
 
 [discrete]
