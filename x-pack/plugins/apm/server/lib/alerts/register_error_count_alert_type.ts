@@ -7,6 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
@@ -21,7 +26,6 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
-import { createAPMLifecycleRuleType } from './create_apm_lifecycle_rule_type';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -34,11 +38,18 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorCount];
 
 export function registerErrorCountAlertType({
-  registry,
+  alerting,
+  logger,
+  ruleDataClient,
   config$,
 }: RegisterRuleDependencies) {
-  registry.registerType(
-    createAPMLifecycleRuleType({
+  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
+    ruleDataClient,
+    logger,
+  });
+
+  alerting.registerType(
+    createLifecycleRuleType({
       id: AlertType.ErrorCount,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,
@@ -146,9 +157,8 @@ export function registerErrorCountAlertType({
                     ? { [SERVICE_ENVIRONMENT]: environment }
                     : {}),
                   [PROCESSOR_EVENT]: ProcessorEvent.error,
-                  'kibana.observability.evaluation.value': errorCount,
-                  'kibana.observability.evaluation.threshold':
-                    alertParams.threshold,
+                  [ALERT_EVALUATION_VALUE]: errorCount,
+                  [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
                 },
               })
               .scheduleActions(alertTypeConfig.defaultActionGroupId, {

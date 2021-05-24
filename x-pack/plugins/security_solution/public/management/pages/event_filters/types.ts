@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
+  FoundExceptionListItemSchema,
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
 import { AsyncResourceState } from '../../state/async_resource_state';
 import { Immutable } from '../../../../common/endpoint/types';
-import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas';
 
 export interface EventFiltersPageLocation {
   page_index: number;
@@ -48,6 +48,7 @@ export interface EventFiltersService {
   getList(options?: EventFiltersServiceGetListOptions): Promise<FoundExceptionListItemSchema>;
   getOne(id: string): Promise<ExceptionListItemSchema>;
   updateOne(exception: Immutable<UpdateExceptionListItemSchema>): Promise<ExceptionListItemSchema>;
+  deleteOne(id: string): Promise<ExceptionListItemSchema>;
 }
 
 export interface EventFiltersListPageData {
@@ -68,5 +69,10 @@ export interface EventFiltersListPageState {
     data: AsyncResourceState<EventFiltersListPageData>;
     /** tracks if the overall list (not filtered or with invalid page numbers) contains data */
     dataExist: AsyncResourceState<boolean>;
+    /** state for deletion of items from the list */
+    deletion: {
+      item: ExceptionListItemSchema | undefined;
+      status: AsyncResourceState<ExceptionListItemSchema>;
+    };
   };
 }

@@ -26,18 +26,15 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       method: 'GET',
     });
   },
-  assignJobToSpace(jobType: JobType, jobIds: string[], spaces: string[]) {
-    const body = JSON.stringify({ jobType, jobIds, spaces });
+  updateJobsSpaces(
+    jobType: JobType,
+    jobIds: string[],
+    spacesToAdd: string[],
+    spacesToRemove: string[]
+  ) {
+    const body = JSON.stringify({ jobType, jobIds, spacesToAdd, spacesToRemove });
     return httpService.http<SavedObjectResult>({
-      path: `${basePath()}/saved_objects/assign_job_to_space`,
-      method: 'POST',
-      body,
-    });
-  },
-  removeJobFromSpace(jobType: JobType, jobIds: string[], spaces: string[]) {
-    const body = JSON.stringify({ jobType, jobIds, spaces });
-    return httpService.http<SavedObjectResult>({
-      path: `${basePath()}/saved_objects/remove_job_from_space`,
+      path: `${basePath()}/saved_objects/update_jobs_spaces`,
       method: 'POST',
       body,
     });

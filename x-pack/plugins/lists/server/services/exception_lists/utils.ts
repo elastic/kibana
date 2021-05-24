@@ -11,24 +11,22 @@ import {
   CommentsArray,
   CreateComment,
   CreateCommentsArray,
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+  FoundExceptionListItemSchema,
+  FoundExceptionListSchema,
   NamespaceType,
   NamespaceTypeArray,
   UpdateCommentsArrayOrUndefined,
   exceptionListItemType,
   exceptionListType,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   SavedObjectType,
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,
 } from '../../../common/types';
-import {
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-  FoundExceptionListItemSchema,
-  FoundExceptionListSchema,
-} from '../../../common/schemas';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 export const getSavedObjectType = ({

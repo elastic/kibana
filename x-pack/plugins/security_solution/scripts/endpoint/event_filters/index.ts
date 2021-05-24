@@ -9,6 +9,7 @@ import { run, RunFn, createFailError } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { AxiosError } from 'axios';
 import bluebird from 'bluebird';
+import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EventFilterGenerator } from '../../../common/endpoint/data_generators/event_filter_generator';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
@@ -17,7 +18,6 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '../../../../lists/common/constants';
-import { CreateExceptionListSchema } from '../../../../lists/common';
 
 export const cli = () => {
   run(

@@ -45,10 +45,6 @@ export interface LensAppState {
   isLoading: boolean;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
-  isSaveModalVisible: boolean;
-
-  // Used to show a popover that guides the user towards changing the date range when no data is available.
-  indicateNoData: boolean;
 
   // index patterns used to determine which filters are available in the top nav.
   indexPatternsForTopNav: IndexPattern[];
