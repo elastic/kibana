@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../../security_solution/common/constants';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   EventHit,
@@ -14,7 +14,7 @@ import {
   TimelineEventsAllStrategyResponse,
   TimelineEventsAllRequestOptions,
   TimelineEdges,
-} from '../../../../../../../security_solution/common/search_strategy';
+} from '../../../../../../common/search_strategy';
 import { TimelineFactory } from '../../types';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 import { TIMELINE_EVENTS_FIELDS } from './constants';

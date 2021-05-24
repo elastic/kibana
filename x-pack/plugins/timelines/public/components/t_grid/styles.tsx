@@ -8,8 +8,8 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
-import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../../security_solution/common/types/drag_and_drop';
-import { TimelineEventsType } from '../../../../security_solution/common/types/timeline';
+import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/types/drag_and_drop';
+import { TimelineEventsType } from '../../../common/types/timeline';
 
 import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
 import { EVENTS_TABLE_ARIA_LABEL } from './translations';

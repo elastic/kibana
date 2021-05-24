@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { Direction } from '../../../../../../../security_solution/common/search_strategy';
-import { ColumnHeaderOptions } from '../../../../../../../security_solution/common/types/timeline';
-import { assertUnreachable } from '../../../../../../../security_solution/common/utility_types';
+import {
+  ColumnHeaderOptions,
+  Direction,
+  assertUnreachable,
+} from '../../../../../../common';
 import { Sort, SortDirection } from '../../sort';
 
 interface GetNewSortDirectionOnClickParams {

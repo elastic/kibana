@@ -31,9 +31,9 @@ import {
   TimelineEventsQueries,
   TimelineItem,
   TimelineRequestSortField,
-} from '../../../security_solution/common/search_strategy';
-import { ESQuery } from '../../../security_solution/common/typed_json';
-import { KueryFilterQueryKind } from '../../../security_solution/common/types/timeline';
+} from '../../common/search_strategy';
+import { ESQuery } from '../../common/typed_json';
+import { KueryFilterQueryKind } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
 import { TimelineId } from '../store/t_grid/types';
 import * as i18n from './translations';

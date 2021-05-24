@@ -15,7 +15,7 @@ import {
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsItem,
   EventSource,
-} from '../../../../../../../security_solution/common/search_strategy';
+} from '../../../../../../common/search_strategy';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { inspectStringifyObject } from '../../../../../../../security_solution/server/utils/build_query';
 import { TimelineFactory } from '../../types';
@@ -24,7 +24,7 @@ import {
   getDataFromFieldsHits,
   getDataFromSourceHits,
   getDataSafety,
-} from '../../../../../../../security_solution/common/utils/field_formatters';
+} from '../../../../../../common/utils/field_formatters';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: (options: TimelineEventsDetailsRequestOptions) => {

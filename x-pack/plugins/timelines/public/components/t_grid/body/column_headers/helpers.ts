@@ -6,8 +6,8 @@
  */
 
 import { get } from 'lodash/fp';
-import { BrowserFields } from '../../../../../../security_solution/common/search_strategy/index_fields';
-import { ColumnHeaderOptions } from '../../../../../../security_solution/common/types/timeline';
+import { BrowserFields } from '../../../../../common/search_strategy/index_fields';
+import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 
 import {
   DEFAULT_COLUMN_MIN_WIDTH,

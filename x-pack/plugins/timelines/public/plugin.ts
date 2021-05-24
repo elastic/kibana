@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { CoreSetup, Plugin, PluginInitializerContext } from '../../../../src/core/public';
-import { TimelinesPluginSetup, TimelineProps } from './types';
+import { TimelinesPluginSetup, TGridProps } from './types';
 import { getTimelineLazy } from './methods';
 import { tGridActions, getReduxDeps, tGridSelectors } from './store/t_grid';
 import { initialTGridState, tGridReducer } from './store/t_grid/reducer';
@@ -20,7 +20,7 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
     }
 
     return {
-      getTimeline: (props: TimelineProps) => {
+      getTGrid: (props: TGridProps) => {
         return getTimelineLazy(props);
       },
       getTimelineStore: () => {
@@ -31,7 +31,7 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
           selectors: tGridSelectors,
         };
       },
-      getCreatedTgridStore: (type: TimelineProps['type']) => {
+      getCreatedTgridStore: (type: TGridProps['type']) => {
         return getReduxDeps(type);
       },
     };
@@ -43,7 +43,7 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
       return {};
     }
     return {
-      getTimeline: (props: TimelineProps) => {
+      getTimeline: (props: TGridProps) => {
         return getTimelineLazy(props);
       },
       getTimelineStore: () => {
@@ -53,7 +53,7 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
           reducer: tGridReducer,
         };
       },
-      getCreatedTgridStore: (type: TimelineProps['type']) => {
+      getCreatedTgridStore: (type: TGridProps['type']) => {
         return getReduxDeps(type);
       },
     };

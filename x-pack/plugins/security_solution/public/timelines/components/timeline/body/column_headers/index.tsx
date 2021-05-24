@@ -11,12 +11,12 @@ import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
 import { BrowserFields } from '../../../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/components/drag_and_drop/helpers';
 import {
+  ColumnHeaderOptions,
   ControlColumnProps,
   HeaderActionProps,
   TimelineId,

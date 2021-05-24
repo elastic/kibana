@@ -8,8 +8,11 @@
 import React, { HTMLAttributes, useState } from 'react';
 
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { CellValueElementProps, TimelineTabs } from '../../../../../../common/types/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import {
+  ColumnHeaderOptions,
+  CellValueElementProps,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
 
 export interface CommonProps {
   className?: string;

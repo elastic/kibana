@@ -8,7 +8,7 @@
 import {
   SortColumnTimeline,
   SortDirection,
-} from '../../../../../../security_solution/common/types/timeline';
+} from '../../../../../common/types/timeline';
 
 // TODO: Cleanup this type to match SortColumnTimeline
 export { SortDirection };

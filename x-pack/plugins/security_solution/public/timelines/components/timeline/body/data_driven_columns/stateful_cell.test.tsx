@@ -11,8 +11,11 @@ import React, { useEffect } from 'react';
 
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { CellValueElementProps, TimelineTabs } from '../../../../../../common/types/timeline';
-import { ColumnHeaderOptions } from '../../../../store/timeline/model';
+import {
+  ColumnHeaderOptions,
+  CellValueElementProps,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
 
 import { StatefulCell } from './stateful_cell';
 import { getMappedNonEcsValue } from '.';

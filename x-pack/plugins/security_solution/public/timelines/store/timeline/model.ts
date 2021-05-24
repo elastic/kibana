@@ -14,7 +14,6 @@ import type {
   TimelineType,
   TimelineStatus,
   TimelineTabs,
-  ColumnHeaderOptions,
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
@@ -23,9 +22,6 @@ import { TGridModel } from '../../../../../timelines/public';
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
-
-/** The specification of a column header */
-export { ColumnHeaderOptions };
 
 export type TimelineModel = TGridModel & {
   /** The selected tab to displayed in the timeline */

@@ -11,7 +11,7 @@ import {
   TimerangeFilter,
   TimerangeInput,
   TimelineRequestBasicOptions,
-} from '../../../../../../../security_solution/common/search_strategy';
+} from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/filters';
 
 export const buildTimelineKpiQuery = ({

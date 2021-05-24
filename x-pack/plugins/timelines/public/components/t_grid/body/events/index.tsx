@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 
 import { EventsTbody } from '../../styles';
 import { StatefulEvent } from './stateful_event';
-import { BrowserFields } from '../../../../../../security_solution/common/search_strategy/index_fields';
+import { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 import {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -18,11 +18,11 @@ import {
   OnRowSelected,
   RowRenderer,
   TimelineTabs,
-} from '../../../../../../security_solution/common/types/timeline';
+} from '../../../../../common/types/timeline';
 import {
   TimelineItem,
   TimelineNonEcsData,
-} from '../../../../../../security_solution/common/search_strategy';
+} from '../../../../../common/search_strategy';
 
 /** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
 const ARIA_ROW_INDEX_OFFSET = 2;

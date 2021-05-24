@@ -22,7 +22,7 @@ import {
   IndexField,
   IndexFieldsStrategyRequest,
   BeatFields,
-} from '../../../../security_solution/common/search_strategy/index_fields';
+} from '../../../common/search_strategy/index_fields';
 
 const apmIndexPattern = 'apm-*-transaction*';
 

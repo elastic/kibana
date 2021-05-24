@@ -7,13 +7,13 @@
 
 import { EuiDataGridColumn } from '@elastic/eui';
 import { FilterManager } from '../../../../../../src/plugins/data/public';
-import { TimelineNonEcsData } from '../../../../security_solution/common/search_strategy';
+import { TimelineNonEcsData } from '../../../common/search_strategy';
 import {
   ColumnHeaderOptions,
   RowRendererId,
   TimelineExpandedDetail,
   SortColumnTimeline,
-} from '../../../../security_solution/common/types/timeline';
+} from '../../../common/types/timeline';
 
 export interface TGridModel {
   /** The columns displayed in the timeline */

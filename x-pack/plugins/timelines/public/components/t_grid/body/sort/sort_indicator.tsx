@@ -12,7 +12,7 @@ import * as i18n from '../translations';
 import { SortNumber } from './sort_number';
 
 import { SortDirection } from '.';
-import { Direction } from '../../../../../../security_solution/common/search_strategy';
+import { Direction } from '../../../../../common/search_strategy';
 
 enum SortDirectionIndicatorEnum {
   SORT_UP = 'sortUp',

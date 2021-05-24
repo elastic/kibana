@@ -20,7 +20,7 @@ import {
   TimelineEventsType,
   RowRendererId,
   TimelineTabs,
-  TimelineInput,
+  TimelinePersistInput,
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
@@ -58,9 +58,9 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
 
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
 
-export const saveTimeline = actionCreator<TimelineInput>('SAVE_TIMELINE');
+export const saveTimeline = actionCreator<TimelinePersistInput>('SAVE_TIMELINE');
 
-export const createTimeline = actionCreator<TimelineInput>('CREATE_TIMELINE');
+export const createTimeline = actionCreator<TimelinePersistInput>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
 

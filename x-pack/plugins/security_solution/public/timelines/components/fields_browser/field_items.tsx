@@ -20,7 +20,6 @@ import styled from 'styled-components';
 
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { BrowserField, BrowserFields } from '../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { useDraggableKeyboardWrapper } from '../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { DragEffects } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../../../common/components/drag_and_drop/droppable_wrapper';
@@ -43,6 +42,7 @@ import { TruncatableText } from '../../../common/components/truncatable_text';
 import { FieldName } from './field_name';
 import * as i18n from './translations';
 import { getAlertColumnHeader } from './helpers';
+import { ColumnHeaderOptions } from '../../../../common';
 
 const TypeIcon = styled(EuiIcon)`
   margin: 0 4px;

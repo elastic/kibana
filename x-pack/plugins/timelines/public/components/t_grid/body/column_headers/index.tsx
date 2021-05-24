@@ -15,8 +15,8 @@ import {
   HeaderActionProps,
   TimelineId,
   TimelineTabs,
-} from '../../../../../../security_solution/common/types/timeline';
-import { BrowserFields } from '../../../../../../security_solution/common/search_strategy/index_fields';
+} from '../../../../../common/types/timeline';
+import { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 
 import { OnSelectAll } from '../../types';
 import {
@@ -31,7 +31,7 @@ import { ColumnHeader } from './column_header';
 import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
-} from '../../../../../../security_solution/common/types/drag_and_drop';
+} from '../../../../../common/types/drag_and_drop';
 
 interface Props {
   actionsColumnWidth: number;

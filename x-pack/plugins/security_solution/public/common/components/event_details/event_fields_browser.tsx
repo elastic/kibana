@@ -21,7 +21,6 @@ import {
 
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { getColumnHeaders } from '../../../timelines/components/timeline/body/column_headers/helpers';
@@ -30,7 +29,7 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { TimelineTabs } from '../../../../common/types/timeline';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
 
 interface Props {
   browserFields: BrowserFields;

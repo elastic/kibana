@@ -20,13 +20,13 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../src/plugins/data/public';
-import { BrowserFields } from '../../../../security_solution/common/search_strategy/index_fields';
+import { BrowserFields } from '../../../common/search_strategy/index_fields';
 import {
   DataProvider,
   DataProvidersAnd,
   DataProviderType,
   EXISTS_OPERATOR,
-} from '../../../../security_solution/common/types/timeline';
+} from '../../../common/types/timeline';
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';

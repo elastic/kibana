@@ -16,9 +16,9 @@ import {
   ControlColumnProps,
   RowCellRender,
   TimelineTabs,
-} from '../../../../../../security_solution/common/types/timeline';
-import { TimelineNonEcsData } from '../../../../../../security_solution/common/search_strategy';
-import { Ecs } from '../../../../../../security_solution/common/ecs';
+} from '../../../../../common/types/timeline';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy';
+import { Ecs } from '../../../../../common/ecs';
 
 interface Props {
   id: string;

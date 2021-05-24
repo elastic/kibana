@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ColumnHeaderOptions, ColumnHeaderType } from '../../../../store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../../../common';
+import { ColumnHeaderType } from '../../../../store/timeline/model';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';

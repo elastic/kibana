@@ -21,6 +21,7 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
+  ColumnHeaderOptions,
   TimelineEventsType,
   TimelineExpandedDetail,
   TimelineTypeLiteral,
@@ -35,7 +36,7 @@ import {
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
-import { ColumnHeaderOptions, KqlMode, TimelineModel } from './model';
+import { KqlMode, TimelineModel } from './model';
 import { TimelineById } from './types';
 import {
   DEFAULT_FROM_MOMENT,

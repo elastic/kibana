@@ -8,7 +8,7 @@
 import {
   TimelineFactoryQueryTypes,
   TimelineEventsQueries,
-} from '../../../../../../security_solution/common/search_strategy/timeline';
+} from '../../../../../common/search_strategy/timeline';
 
 import { TimelineFactory } from '../types';
 import { timelineEventsAll } from './all';

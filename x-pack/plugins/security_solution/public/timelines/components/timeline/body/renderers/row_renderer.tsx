@@ -7,10 +7,7 @@
 
 import React from 'react';
 
-import type { RowRenderer } from '../../../../../../common/types/timeline';
 import { EventsTrSupplement } from '../../styles';
-
-export { RowRenderer };
 interface RowRendererContainerProps {
   children: React.ReactNode;
 }

@@ -5,44 +5,39 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { EuiButton } from '@elastic/eui';
-import { TimelineId } from '../store/t_grid/types';
-import * as actions from '../store/t_grid/actions';
-import { getReduxDeps } from '../store/t_grid';
+import React from 'react';
+import { useSelector } from 'react-redux';
 
-import { TimelineProps } from '../types';
+import { TGridProps } from '../types';
+import { TGridIntegrated } from './t_grid/integrated';
 
-export const TGrid = (props: TimelineProps) => {
-  const reduxStuff = getReduxDeps(props.type);
-  const dispatch = useDispatch();
+export const TGrid = (props: TGridProps) => {
+  // const reduxStuff = getReduxDeps(props.type);
+  // const dispatch = useDispatch();
   const currentTime = useSelector((state) => state);
   console.log(currentTime);
-  const testActionHandler = useCallback(
-    () =>
-      dispatch(
-        actions.setEventsLoading({
-          id: TimelineId.test,
-          eventIds: [`${Math.random()}`],
-          isLoading: false,
-        })
-      ),
-    [dispatch]
-  );
+  const { type, ...componentsProps } = props;
+  // const testActionHandler = useCallback(
+  //   () =>
+  //     dispatch(
+  //       actions.setEventsLoading({
+  //         id: TimelineId.test,
+  //         eventIds: [`${Math.random()}`],
+  //         isLoading: false,
+  //       })
+  //     ),
+  //   [dispatch]
+  // );
+
   if (props.type === 'standalone') {
     return (
       <div data-test-subj="timeline-wrapper">
-        <EuiButton onClick={testActionHandler}>{'whatever'}</EuiButton>
+        {/* <EuiButton onClick={testActionHandler}>{'whatever'}</EuiButton> */}
         <h1>{'current time: '}</h1>
       </div>
     );
   } else {
-    return (
-      <div data-test-subj="timeline-wrapper">
-        <h1>{'current time: '}</h1>
-      </div>
-    );
+    return <TGridIntegrated {...componentsProps} />;
   }
 };
 

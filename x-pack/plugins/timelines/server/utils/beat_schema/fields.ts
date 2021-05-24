@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BeatFields } from '../../../../security_solution/common/search_strategy/index_fields';
+import { BeatFields } from '../../../common/search_strategy/index_fields';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 export const fieldsBeat: BeatFields = {

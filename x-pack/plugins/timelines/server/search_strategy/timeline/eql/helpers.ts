@@ -7,16 +7,13 @@
 
 import { isEmpty } from 'lodash/fp';
 import { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../security_solution/common/constants';
-import {
-  EqlSearchResponse,
-  EqlSequence,
-} from '../../../../../security_solution/common/detection_engine/types';
-import { EventHit, TimelineEdges } from '../../../../../security_solution/common/search_strategy';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
+import { EqlSearchResponse, EqlSequence, EventHit } from '../../../../common';
+import { TimelineEdges } from '../../../../common/search_strategy';
 import {
   TimelineEqlRequestOptions,
   TimelineEqlResponse,
-} from '../../../../../security_solution/common/search_strategy/timeline/events/eql';
+} from '../../../../common/search_strategy/timeline/events/eql';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { inspectStringifyObject } from '../../../../../security_solution/server/utils/build_query';
 import { TIMELINE_EVENTS_FIELDS } from '../factory/events/all/constants';

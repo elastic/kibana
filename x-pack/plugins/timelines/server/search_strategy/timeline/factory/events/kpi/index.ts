@@ -12,7 +12,7 @@ import {
   TimelineEventsQueries,
   TimelineRequestBasicOptions,
   TimelineKpiStrategyResponse,
-} from '../../../../../../../security_solution/common/search_strategy/timeline';
+} from '../../../../../../common/search_strategy/timeline';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { inspectStringifyObject } from '../../../../../../../security_solution/server/utils/build_query';
 import { TimelineFactory } from '../../types';

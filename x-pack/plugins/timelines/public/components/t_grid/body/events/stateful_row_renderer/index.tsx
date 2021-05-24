@@ -17,9 +17,9 @@ import {
 import { useStatefulEventFocus } from '../use_stateful_event_focus';
 
 import * as i18n from '../translations';
-import { BrowserFields } from '../../../../../../../security_solution/common/search_strategy/index_fields';
-import { TimelineItem } from '../../../../../../../security_solution/common/search_strategy';
-import { RowRenderer } from '../../../../../../../security_solution/common/types/timeline';
+import { BrowserFields } from '../../../../../../common/search_strategy/index_fields';
+import { TimelineItem } from '../../../../../../common/search_strategy';
+import { RowRenderer } from '../../../../../../common/types/timeline';
 import { getRowRenderer } from '../../renderers/get_row_renderer';
 
 /**

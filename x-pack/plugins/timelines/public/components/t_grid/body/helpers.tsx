@@ -7,12 +7,12 @@
 
 import { isEmpty } from 'lodash/fp';
 
-import { Ecs } from '../../../../../security_solution/common/ecs';
+import { Ecs } from '../../../../common/ecs';
 import {
   TimelineItem,
   TimelineNonEcsData,
-} from '../../../../../security_solution/common/search_strategy';
-import { TimelineEventsType } from '../../../../../security_solution/common/types/timeline';
+} from '../../../../common/search_strategy';
+import { TimelineEventsType } from '../../../../common/types/timeline';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>

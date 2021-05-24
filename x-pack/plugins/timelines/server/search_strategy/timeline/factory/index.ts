@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineFactoryQueryTypes } from '../../../../../security_solution/common/search_strategy/timeline';
+import { TimelineFactoryQueryTypes } from '../../../../common/search_strategy/timeline';
 import { TimelineFactory } from './types';
 import { timelineEventsFactory } from './events';
 

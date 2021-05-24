@@ -17,7 +17,7 @@ import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { getMappedNonEcsValue } from '../data_driven_columns';
 import { StatefulEventContext } from './stateful_event_context';
-import { BrowserFields } from '../../../../../../security_solution/common/search_strategy/index_fields';
+import { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 import {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -25,11 +25,8 @@ import {
   RowRenderer,
   TimelineExpandedDetailType,
   TimelineTabs,
-} from '../../../../../../security_solution/common/types/timeline';
-import {
-  TimelineItem,
-  TimelineNonEcsData,
-} from '../../../../../../security_solution/common/search_strategy';
+} from '../../../../../common/types/timeline';
+import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { tGridActions, tGridSelectors } from '../../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../../hooks/use_selector';
 

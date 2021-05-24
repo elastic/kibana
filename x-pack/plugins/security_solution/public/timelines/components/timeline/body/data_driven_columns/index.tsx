@@ -13,13 +13,13 @@ import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-g
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import {
+  ColumnHeaderOptions,
   CellValueElementProps,
   ActionProps,
   ControlColumnProps,
   TimelineTabs,
   RowCellRender,
 } from '../../../../../../common/types/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import { OnRowSelected } from '../../events';
 import { inputsModel } from '../../../../../common/store';

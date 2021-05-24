@@ -26,8 +26,8 @@ import {
   RowRendererId,
   TimelineId,
   TimelineTabs,
-} from '../../../../../security_solution/common/types/timeline';
-import { TimelineItem } from '../../../../../security_solution/common/search_strategy/timeline';
+} from '../../../../common/types/timeline';
+import { TimelineItem } from '../../../../common/search_strategy/timeline';
 
 import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
@@ -37,7 +37,7 @@ import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
-import { BrowserFields } from '../../../../../security_solution/common/search_strategy/index_fields';
+import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { OnRowSelected, OnSelectAll } from '../types';
 import { tGridActions } from '../../../types';
 import { TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';

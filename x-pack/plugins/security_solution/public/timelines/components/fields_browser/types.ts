@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ColumnHeaderOptions } from '../../../../common';
 import { BrowserFields } from '../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 
 export type OnFieldSelected = (fieldId: string) => void;
 export type OnHideFieldBrowser = () => void;

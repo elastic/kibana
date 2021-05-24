@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { TimelineTabs } from '../../../../../../security_solution/common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 
 interface StatefulEventContext {
   tabType: TimelineTabs | undefined;

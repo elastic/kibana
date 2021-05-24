@@ -8,7 +8,7 @@
 import {
   ColumnHeaderOptions,
   ColumnHeaderType,
-} from '../../../../../../security_solution/common/types/timeline';
+} from '../../../../../common/types/timeline';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';

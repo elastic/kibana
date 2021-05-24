@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import {
-  RowRenderer,
-  RowRendererId,
-} from '../../../../../../security_solution/common/types/timeline';
+import { RowRenderer, RowRendererId } from '../../../../../common/types/timeline';
 
 const PlainRowRenderer = () => <></>;
 

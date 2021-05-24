@@ -7,13 +7,13 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 import { FilterManager } from '../../../../../../src/plugins/data/public';
-import { TimelineNonEcsData } from '../../../../security_solution/common/search_strategy';
+import { TimelineNonEcsData } from '../../../common/search_strategy';
 import {
   ColumnHeaderOptions,
   SortColumnTimeline,
   TimelineExpandedDetailType,
   TimelineTabs,
-} from '../../../../security_solution/common/types/timeline';
+} from '../../../common/types/timeline';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
 

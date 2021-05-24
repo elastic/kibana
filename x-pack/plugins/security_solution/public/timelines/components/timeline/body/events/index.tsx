@@ -15,12 +15,12 @@ import {
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
 import {
+  ColumnHeaderOptions,
   CellValueElementProps,
   ControlColumnProps,
   RowRenderer,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnRowSelected } from '../../events';
 import { EventsTbody } from '../../styles';
 import { StatefulEvent } from './stateful_event';

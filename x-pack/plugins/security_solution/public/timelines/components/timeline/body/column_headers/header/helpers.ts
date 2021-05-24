@@ -6,9 +6,8 @@
  */
 
 import { Direction } from '../../../../../../../common/search_strategy';
-import { SortDirection } from '../../../../../../../common/types/timeline';
+import { ColumnHeaderOptions, SortDirection } from '../../../../../../../common/types/timeline';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
 import { Sort } from '../../sort';
 
 interface GetNewSortDirectionOnClickParams {

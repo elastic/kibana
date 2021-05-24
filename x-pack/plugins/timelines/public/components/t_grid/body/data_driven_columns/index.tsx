@@ -29,10 +29,10 @@ import {
   ControlColumnProps,
   RowCellRender,
   TimelineTabs,
-} from '../../../../../../security_solution/common/types/timeline';
-import { TimelineNonEcsData } from '../../../../../../security_solution/common/search_strategy';
+} from '../../../../../common/types/timeline';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
-import { Ecs } from '../../../../../../security_solution/common/ecs';
+import { Ecs } from '../../../../../common/ecs';
 
 interface CellProps {
   _id: string;

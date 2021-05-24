@@ -9,7 +9,7 @@ import {
   DataProvider,
   DataProvidersAnd,
   IS_OPERATOR,
-} from '../../../security_solution/common/types/timeline';
+} from '../../common/types/timeline';
 
 export const providerA: DataProvidersAnd = {
   enabled: true,

@@ -7,31 +7,23 @@
 
 import { ReactElement } from 'react';
 import { Store } from 'redux';
+import { TGridIntegratedProps } from './components/t_grid/integrated';
 import { tGridActions } from './store/t_grid';
 import { tGridReducer } from './store/t_grid/reducer';
 import { TimelineState } from './store/t_grid/types';
 export * from './store/t_grid';
 export interface TimelinesPluginSetup {
-  getTimeline?: (props: TimelineProps) => ReactElement<TimelineProps>;
+  getTGrid: (props: TGridProps) => ReactElement<TGridProps>;
   getTimelineStore?: () => ReduxDeps;
   getCreatedTgridStore?: (
-    type: EmbeddedProps['type']
-  ) => ReduxDeps | ((type: StandaloneProps['type']) => Store);
+    type: 'standalone' | 'embedded'
+  ) => ReduxDeps | ((type: 'standalone' | 'embedded') => Store);
 }
 export interface ReduxDeps {
   actions: typeof tGridActions;
   reducer: typeof tGridReducer;
   initialState: TimelineState;
 }
-interface StandaloneProps {
-  type: 'standalone';
+export interface TGridProps extends TGridIntegratedProps {
+  type: 'standalone' | 'embedded';
 }
-interface EmbeddedProps {
-  type: 'embedded';
-}
-
-interface BaseTimelineProps {
-  timelineId: string;
-}
-
-export type TimelineProps = BaseTimelineProps & (EmbeddedProps | StandaloneProps);

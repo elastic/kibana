@@ -45,7 +45,7 @@ export const useDraggableKeyboardWrapper = ({
         cancelDrag(prevDragAction);
         return null;
       }
-      return prevDragAction;
+      return null;
     });
   }, [cancelDrag]);
 

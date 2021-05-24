@@ -14,12 +14,11 @@ import { alertsHeaders } from '../alerts_viewer/default_headers';
 import { BrowserField, BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { dragAndDropActions } from '../../store/actions';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { addContentToTimeline } from '../../../timelines/components/timeline/data_providers/helpers';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { TimelineId } from '../../../../common/types/timeline';
+import { ColumnHeaderOptions, TimelineId } from '../../../../common/types/timeline';
 import {
   getFieldIdFromDraggable,
   getProviderIdFromDraggable,

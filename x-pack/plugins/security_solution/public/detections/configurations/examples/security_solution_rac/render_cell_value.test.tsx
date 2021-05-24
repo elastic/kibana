@@ -15,9 +15,9 @@ import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../com
 import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
 
 import { RenderCellValue } from '.';
+import { ColumnHeaderOptions } from '../../../../../common';
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';

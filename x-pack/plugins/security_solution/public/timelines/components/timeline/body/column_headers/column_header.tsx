@@ -17,9 +17,8 @@ import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-g
 import { useDraggableKeyboardWrapper } from '../../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
 import { getDraggableFieldId } from '../../../../../common/components/drag_and_drop/helpers';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnFilterChange } from '../../events';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';

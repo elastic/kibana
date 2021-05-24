@@ -9,12 +9,12 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { ColumnHeaderOptions } from '../../../../../../../common';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../../../store/timeline';
-import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
 import { OnFilterChange } from '../../../events';
 import { Sort } from '../../sort';
 import { Actions } from '../actions';

@@ -20,6 +20,7 @@ import {
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import {
+  ColumnHeaderOptions,
   ControlColumnProps,
   RowRendererId,
   TimelineId,
@@ -28,7 +29,7 @@ import {
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import { inputsModel, State } from '../../../../common/store';
-import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
+import { TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { OnRowSelected, OnSelectAll } from '../events';

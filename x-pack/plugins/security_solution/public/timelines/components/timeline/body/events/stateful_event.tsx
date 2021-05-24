@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
+  ColumnHeaderOptions,
   CellValueElementProps,
   ControlColumnProps,
   RowRenderer,
@@ -22,7 +23,6 @@ import {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';

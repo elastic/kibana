@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { ColumnHeaderOptions } from '../../../../../../../security_solution/common/types/timeline';
+import { ColumnHeaderOptions } from '../../../../../../common/types/timeline';
 import { Sort } from '../../sort';
 import { Actions } from '../actions';
 import { getNewSortDirectionOnClick } from './helpers';

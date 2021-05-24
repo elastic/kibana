@@ -14,4 +14,4 @@ export {
   OnRowSelected,
   OnSelectAll,
   OnUpdateColumns,
-} from '../../../../security_solution/common/types/timeline';
+} from '../../../common/types/timeline';

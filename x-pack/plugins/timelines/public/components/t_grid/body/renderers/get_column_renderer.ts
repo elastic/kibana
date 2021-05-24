@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TimelineNonEcsData } from '../../../../../../security_solution/common/search_strategy';
-import { ColumnRenderer } from '../../../../../../security_solution/common/types/timeline';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy';
+import { ColumnRenderer } from '../../../../../common/types/timeline';
 
 const unhandledColumnRenderer = (): never => {
   throw new Error('Unhandled Column Renderer');

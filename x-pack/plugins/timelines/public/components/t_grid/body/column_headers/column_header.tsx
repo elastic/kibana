@@ -28,12 +28,9 @@ import { Header } from './header';
 
 import * as i18n from './translations';
 import { tGridActions } from '../../../../store/t_grid';
-import {
-  ColumnHeaderOptions,
-  TimelineTabs,
-} from '../../../../../../security_solution/common/types/timeline';
-import { Direction } from '../../../../../../security_solution/common/search_strategy';
-import { getDraggableFieldId } from '../../../../../../security_solution/common/types/drag_and_drop';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../../common/types/timeline';
+import { Direction } from '../../../../../common/search_strategy';
+import { getDraggableFieldId } from '../../../../../common/types/drag_and_drop';
 
 const ContextMenu = styled(EuiContextMenu)`
   width: 115px;

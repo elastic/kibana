@@ -12,7 +12,7 @@ import {
   TimerangeInput,
   TimelineEventsAllRequestOptions,
   TimelineRequestSortField,
-} from '../../../../../../../security_solution/common/search_strategy';
+} from '../../../../../../common/search_strategy';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createQueryFilterClauses } from '../../../../../../../security_solution/server/utils/build_query';
 

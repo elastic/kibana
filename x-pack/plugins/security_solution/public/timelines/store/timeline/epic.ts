@@ -41,6 +41,7 @@ import {
   TimelineType,
   ResponseTimeline,
   TimelineResult,
+  ColumnHeaderOptions,
 } from '../../../../common/types/timeline';
 import { inputsModel } from '../../../common/store/inputs';
 import { addError } from '../../../common/store/app/actions';
@@ -81,7 +82,7 @@ import {
   showCallOutUnauthorizedMsg,
   saveTimeline,
 } from './actions';
-import { ColumnHeaderOptions, TimelineModel } from './model';
+import { TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
 import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_pinned_event';
 import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';

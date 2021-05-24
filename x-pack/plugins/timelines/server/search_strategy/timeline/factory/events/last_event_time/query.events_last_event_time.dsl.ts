@@ -9,9 +9,9 @@ import { isEmpty } from 'lodash/fp';
 import {
   TimelineEventsLastEventTimeRequestOptions,
   LastEventIndexKey,
-} from '../../../../../../../security_solution/common/search_strategy';
+} from '../../../../../../common/search_strategy';
 
-import { assertUnreachable } from '../../../../../../../security_solution/common/utility_types';
+import { assertUnreachable } from '../../../../../../common/utility_types';
 
 interface EventIndices {
   [key: string]: string[];

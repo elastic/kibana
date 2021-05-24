@@ -11,7 +11,7 @@ import { ToggleDetailPanel } from './actions';
 import { TimelineById, TimelineId } from './types';
 import { TGridModel } from './model';
 
-import { ColumnHeaderOptions } from '../../../../security_solution/common/types/timeline';
+import { ColumnHeaderOptions } from '../../../common/types/timeline';
 import { getTGridManageDefaults } from './defaults';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;

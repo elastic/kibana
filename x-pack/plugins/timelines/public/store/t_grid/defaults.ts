@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Direction } from '../../../../security_solution/common/search_strategy';
+import { Direction } from '../../../common/search_strategy';
 import {
   ColumnHeaderOptions,
   ColumnHeaderType,
-} from '../../../../security_solution/common/types/timeline';
+} from '../../../common/types/timeline';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,

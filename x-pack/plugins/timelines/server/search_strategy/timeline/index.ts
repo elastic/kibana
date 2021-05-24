@@ -16,7 +16,7 @@ import {
   TimelineFactoryQueryTypes,
   TimelineStrategyResponseType,
   TimelineStrategyRequestType,
-} from '../../../../security_solution/common/search_strategy/timeline';
+} from '../../../common/search_strategy/timeline';
 import { timelineFactory } from './factory';
 import { TimelineFactory } from './factory/types';
 

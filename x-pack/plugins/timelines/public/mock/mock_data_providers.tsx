@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataProvider, IS_OPERATOR } from '../../../security_solution/common/types/timeline';
+import { DataProvider, IS_OPERATOR } from '../../common/types/timeline';
 
 interface NameToEventCount<TValue> {
   [name: string]: TValue;

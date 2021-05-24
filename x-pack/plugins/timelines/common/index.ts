@@ -5,5 +5,8 @@
  * 2.0.
  */
 
+export * from './types';
+export * from './search_strategy';
+
 export const PLUGIN_ID = 'timelines';
 export const PLUGIN_NAME = 'timelines';
