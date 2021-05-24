@@ -9,13 +9,13 @@
 /**
  * This ID is used for _both_ the Saved Object ID and for the list_id
  * for the single global space agnostic endpoint list
- * TODO: Create a kbn-securitysolution-constants and add this to it.
- * @deprecated Use the ENDPOINT_LIST_ID from the kbn-securitysolution-constants.
+ * TODO: Create a kbn-securitysolution-list-constants and add this to it.
+ * @deprecated Use the ENDPOINT_LIST_ID from the kbn-securitysolution-list-constants.
  */
 export const ENDPOINT_LIST_ID = 'endpoint_list';
 
 /**
- * TODO: Create a kbn-securitysolution-constants and add this to it.
- * @deprecated Use the DEFAULT_MAX_SIGNALS from the kbn-securitysolution-constants.
+ * TODO: Create a kbn-securitysolution-list-constants and add this to it.
+ * @deprecated Use the DEFAULT_MAX_SIGNALS from the kbn-securitysolution-list-constants.
  */
 export const DEFAULT_MAX_SIGNALS = 100;
