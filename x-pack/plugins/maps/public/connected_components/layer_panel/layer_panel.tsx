@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 
-import { FilterEditor } from './filter_editor';
-import { JoinEditor } from './join_editor';
-import { FlyoutFooter } from './flyout_footer';
-import { LayerErrors } from './layer_errors';
-import { LayerSettings } from './layer_settings';
-import { StyleSettings } from './style_settings';
 import {
   EuiIcon,
   EuiFlexItem,
@@ -26,20 +20,48 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
+import { FilterEditor } from './filter_editor';
+import { JoinEditor, JoinField } from './join_editor';
+import { FlyoutFooter } from './flyout_footer';
+import { LayerErrors } from './layer_errors';
+import { LayerSettings } from './layer_settings';
+import { StyleSettings } from './style_settings';
+
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-
+import { LAYER_TYPE } from '../../../common/constants';
 import { getData, getCore } from '../../kibana_services';
+import { ILayer } from '../../classes/layers/layer';
+import { IVectorLayer } from '../../classes/layers/vector_layer';
+import { ImmutableSourceProperty, OnSourceChangeArgs } from '../../classes/sources/source';
+import { IField } from '../../classes/fields/field';
 
 const localStorage = new Storage(window.localStorage);
 
-export class LayerPanel extends React.Component {
-  state = {
+export interface Props {
+  selectedLayer?: ILayer;
+  updateSourceProp: (
+    layerId: string,
+    propName: string,
+    value: unknown,
+    newLayerType?: LAYER_TYPE
+  ) => void;
+}
+
+interface State {
+  displayName: string;
+  immutableSourceProps: ImmutableSourceProperty[];
+  leftJoinFields: JoinField[];
+  supportsFitToBounds: boolean;
+}
+
+export class LayerPanel extends Component<Props, State> {
+  private _isMounted = false;
+  state: State = {
     displayName: '',
     immutableSourceProps: [],
-    leftJoinFields: null,
+    leftJoinFields: [],
     supportsFitToBounds: false,
   };
 
@@ -89,14 +111,19 @@ export class LayerPanel extends React.Component {
   };
 
   async _loadLeftJoinFields() {
-    if (!this.props.selectedLayer || !this.props.selectedLayer.showJoinEditor()) {
+    if (
+      !this.props.selectedLayer ||
+      !this.props.selectedLayer.showJoinEditor() ||
+      (this.props.selectedLayer as IVectorLayer).getLeftJoinFields === undefined
+    ) {
       return;
     }
 
-    let leftJoinFields;
+    let leftJoinFields: JoinField[] = [];
     try {
-      const leftFieldsInstances = await this.props.selectedLayer.getLeftJoinFields();
-      const leftFieldPromises = leftFieldsInstances.map(async (field) => {
+      const leftFieldsInstances = await (this.props
+        .selectedLayer as IVectorLayer).getLeftJoinFields();
+      const leftFieldPromises = leftFieldsInstances.map(async (field: IField) => {
         return {
           name: field.getName(),
           label: await field.getLabel(),
@@ -104,22 +131,22 @@ export class LayerPanel extends React.Component {
       });
       leftJoinFields = await Promise.all(leftFieldPromises);
     } catch (error) {
-      leftJoinFields = [];
+      // ignore exceptions getting fields, will bubble up in layer errors panel
     }
     if (this._isMounted) {
       this.setState({ leftJoinFields });
     }
   }
 
-  _onSourceChange = (...args) => {
+  _onSourceChange = (...args: OnSourceChangeArgs[]) => {
     for (let i = 0; i < args.length; i++) {
       const { propName, value, newLayerType } = args[i];
-      this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value, newLayerType);
+      this.props.updateSourceProp(this.props.selectedLayer!.getId(), propName, value, newLayerType);
     }
   };
 
   _renderFilterSection() {
-    if (!this.props.selectedLayer.supportsElasticsearchFilters()) {
+    if (!this.props.selectedLayer || !this.props.selectedLayer.supportsElasticsearchFilters()) {
       return null;
     }
 
@@ -134,7 +161,7 @@ export class LayerPanel extends React.Component {
   }
 
   _renderJoinSection() {
-    if (!this.props.selectedLayer.showJoinEditor()) {
+    if (!this.props.selectedLayer || !this.props.selectedLayer.showJoinEditor()) {
       return null;
     }
 
@@ -153,29 +180,29 @@ export class LayerPanel extends React.Component {
   }
 
   _renderSourceProperties() {
-    return this.state.immutableSourceProps.map(({ label, value, link }) => {
-      function renderValue() {
-        if (link) {
-          return (
-            <EuiLink href={link} target="_blank">
-              {value}
-            </EuiLink>
-          );
+    return this.state.immutableSourceProps.map(
+      ({ label, value, link }: ImmutableSourceProperty) => {
+        function renderValue() {
+          if (link) {
+            return (
+              <EuiLink href={link} target="_blank">
+                {value}
+              </EuiLink>
+            );
+          }
+          return <span>{value}</span>;
         }
-        return <span>{value}</span>;
+        return (
+          <p key={label} className="mapLayerPanel__sourceDetail">
+            <strong>{label}</strong> {renderValue()}
+          </p>
+        );
       }
-      return (
-        <p key={label} className="mapLayerPanel__sourceDetail">
-          <strong>{label}</strong> {renderValue()}
-        </p>
-      );
-    });
+    );
   }
 
   render() {
-    const { selectedLayer } = this.props;
-
-    if (!selectedLayer) {
+    if (!this.props.selectedLayer) {
       return null;
     }
 
@@ -192,7 +219,7 @@ export class LayerPanel extends React.Component {
           <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type={selectedLayer.getLayerTypeIconName()} />
+                <EuiIcon type={this.props.selectedLayer.getLayerTypeIconName()} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
@@ -221,7 +248,7 @@ export class LayerPanel extends React.Component {
               <LayerErrors />
 
               <LayerSettings
-                layer={selectedLayer}
+                layer={this.props.selectedLayer}
                 supportsFitToBounds={this.state.supportsFitToBounds}
               />
 
