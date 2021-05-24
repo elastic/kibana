@@ -1004,55 +1004,37 @@ const addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules: SavedObje
         gauge_color_rules: gaugeColorRules = [],
       } = params;
 
-      const compareWithEqualMethods = ['lte', 'gte'];
-      const emptyRule = {
-        operator: 'empty',
-        value: null,
-      };
-
-      const getRulesWithComparingToZero = (rules: any[] = []) =>
-        last(
+      const getRuleWithComparingToZero = (rules: any[] = []) => {
+        const compareWithEqualMethods = ['lte', 'gte'];
+        return last(
           rules.filter(
             (rule) => compareWithEqualMethods.includes(rule.operator) && rule.value === 0
           )
         );
-
-      const convertRuleToEmpty = ({ id, ...rest }: any = {}) => ({
-        ...rest,
-        ...emptyRule,
-        id: uuid.v4(),
-      });
-
-      const lastBarRule = getRulesWithComparingToZero(barColorRules) ?? null;
-      const lastBackgroundRule = getRulesWithComparingToZero(backgroundColorRules) ?? null;
-      const lastGaugeRule = getRulesWithComparingToZero(gaugeColorRules) ?? null;
-
-      const colorRules = {
-        bar_color_rules: barColorRules,
-        background_color_rules: backgroundColorRules,
-        gauge_color_rules: gaugeColorRules,
       };
 
-      if (lastBarRule) {
-        colorRules.bar_color_rules = [
-          ...colorRules.bar_color_rules,
-          convertRuleToEmpty(lastBarRule),
-        ];
-      }
+      const convertRuleToEmpty = (rule: any = {}) => ({
+        ...rule,
+        id: uuid.v4(),
+        operator: 'empty',
+        value: null,
+      });
 
-      if (lastBackgroundRule) {
-        colorRules.background_color_rules = [
-          ...colorRules.background_color_rules,
-          convertRuleToEmpty(lastBackgroundRule),
-        ];
-      }
+      const addEmptyRuleToListIfNecessary = (rules: any[]) => {
+        const rule = getRuleWithComparingToZero(rules);
 
-      if (lastGaugeRule) {
-        colorRules.gauge_color_rules = [
-          ...colorRules.gauge_color_rules,
-          convertRuleToEmpty(lastGaugeRule),
-        ];
-      }
+        if (rule) {
+          return [...rules, convertRuleToEmpty(rule)];
+        }
+
+        return rules;
+      };
+
+      const colorRules = {
+        bar_color_rules: addEmptyRuleToListIfNecessary(barColorRules),
+        background_color_rules: addEmptyRuleToListIfNecessary(backgroundColorRules),
+        gauge_color_rules: addEmptyRuleToListIfNecessary(gaugeColorRules),
+      };
 
       return {
         ...doc,

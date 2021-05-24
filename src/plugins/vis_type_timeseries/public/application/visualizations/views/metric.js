@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import reactcss from 'reactcss';
 
-import { getLastValueOrEmpty } from '../../../../common/last_value_utils';
+import { getLastValue } from '../../../../common/last_value_utils';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 
 export class Metric extends Component {
@@ -58,7 +58,7 @@ export class Metric extends Component {
     const { metric, secondary } = this.props;
     const { scale, translateX, translateY } = this.state;
     const primaryFormatter = (metric && (metric.tickFormatter || metric.formatter)) || ((n) => n);
-    const primaryValue = primaryFormatter(getLastValueOrEmpty(metric?.data));
+    const primaryValue = primaryFormatter(getLastValue(metric?.data));
 
     const styles = reactcss(
       {
@@ -91,7 +91,7 @@ export class Metric extends Component {
     let secondarySnippet;
     if (secondary) {
       const secondaryFormatter = secondary.formatter || ((n) => n);
-      const secondaryValue = secondaryFormatter(getLastValueOrEmpty(secondary.data));
+      const secondaryValue = secondaryFormatter(getLastValue(secondary.data));
       if (secondary.color) styles.secondary_value.color = secondary.color;
       let secondaryLabel;
       if (secondary.label) {

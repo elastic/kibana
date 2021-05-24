@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { isBackgroundInverted, isBackgroundDark } from '../../lib/set_is_reversed';
-import { getLastValueOrEmpty } from '../../../../common/last_value_utils';
+import { getLastValue } from '../../../../common/last_value_utils';
 import { getValueBy } from '../lib/get_value_by';
 import { GaugeVis } from './gauge_vis';
 import reactcss from 'reactcss';
@@ -61,7 +61,7 @@ export class Gauge extends Component {
   render() {
     const { metric, type } = this.props;
     const { scale, translateX, translateY } = this.state;
-    const value = getLastValueOrEmpty(metric?.data);
+    const value = getLastValue(metric?.data);
     const max = (metric && getValueBy('max', metric.data)) || 1;
     const formatter =
       (metric && (metric.tickFormatter || metric.formatter)) ||

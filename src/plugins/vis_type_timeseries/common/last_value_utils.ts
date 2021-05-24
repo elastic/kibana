@@ -11,7 +11,7 @@ import { isArray, last, isEqual } from 'lodash';
 export const EMPTY_VALUE = null;
 export const DISPLAY_EMPTY_VALUE = '-';
 
-const extractValue = (data: unknown[] | void) => (data && data[1]) ?? null;
+const extractValue = (data: unknown[] | void) => (data && data[1]) ?? EMPTY_VALUE;
 
 export const getLastValue = (data: unknown) => {
   if (!isArray(data)) {
@@ -20,7 +20,5 @@ export const getLastValue = (data: unknown) => {
 
   return extractValue(last(data));
 };
-
-export const getLastValueOrEmpty = (data: unknown) => getLastValue(data) ?? EMPTY_VALUE;
 
 export const isEmptyValue = (value: unknown) => isEqual(value, EMPTY_VALUE);

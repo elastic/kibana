@@ -12,7 +12,7 @@ import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { get, isUndefined, assign, includes, pick, gt, gte, lt, lte, isNull } from 'lodash';
 import { Metric } from '../../../visualizations/views/metric';
-import { getLastValueOrEmpty } from '../../../../../common/last_value_utils';
+import { getLastValue } from '../../../../../common/last_value_utils';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 const OPERATORS = { gt, gte, lt, lte, empty: isNull };
 const OPERATORS_ALLOW_NULL = {
@@ -27,7 +27,7 @@ function getColors(props) {
   if (model.background_color_rules) {
     model.background_color_rules.forEach((rule) => {
       if (rule.operator) {
-        const value = getLastValueOrEmpty(series[0]?.data);
+        const value = getLastValue(series[0]?.data);
         // This check is necessary for preventing from comparing null values with numeric rules.
         const shouldOperate =
           (isNull(rule.value) && OPERATORS_ALLOW_NULL[rule.operator]) ||

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getLastValue, getLastValueOrEmpty, isEmptyValue, EMPTY_VALUE } from './last_value_utils';
+import { getLastValue, isEmptyValue, EMPTY_VALUE } from './last_value_utils';
 import { clone } from 'lodash';
 
 describe('getLastValue(data)', () => {
@@ -28,37 +28,20 @@ describe('getLastValue(data)', () => {
     expect(getLastValue([[0, 0]])).toBe(0);
   });
 
-  test("should return null, if second array is empty or it's last element is null/undefined (default)", () => {
+  test("should return empty value (null), if second array is empty or it's last element is null/undefined (default)", () => {
     expect(
       getLastValue([
         [1, null],
         [2, null],
       ])
-    ).toBeNull();
+    ).toBe(EMPTY_VALUE);
 
     expect(
       getLastValue([
         [1, null],
         [2, undefined],
       ])
-    ).toBeNull();
-  });
-});
-
-describe('getLastValueOrEmpty(data)', () => {
-  test('should return empty array', () => {
-    expect(getLastValueOrEmpty()).toBe(EMPTY_VALUE);
-  });
-
-  test('should return the last value', () => {
-    const lastValue = 10;
-    const data = [[1, lastValue]];
-    expect(getLastValueOrEmpty(data)).toBe(lastValue);
-  });
-
-  test(`should return empty array, if second array is empty or it's last element is null/undefined (default)`, () => {
-    const data = [[1, null]];
-    expect(getLastValueOrEmpty(data)).toBe(EMPTY_VALUE);
+    ).toBe(EMPTY_VALUE);
   });
 });
 

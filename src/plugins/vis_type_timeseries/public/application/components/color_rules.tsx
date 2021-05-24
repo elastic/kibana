@@ -45,8 +45,7 @@ interface ColorRule {
 }
 
 export interface ColorRulesOperator {
-  translateNameId: string;
-  defaultName: string;
+  label: string;
   method: string;
   value?: unknown;
   isValueConstant?: boolean;
@@ -64,37 +63,40 @@ const defaultPrimaryName = i18n.translate('visTypeTimeseries.colorRules.defaultP
 
 export const colorRulesOperatorsList: ColorRulesOperator[] = [
   {
-    translateNameId: 'visTypeTimeseries.colorRules.greaterThanLabel',
-    defaultName: '> greater than',
+    label: i18n.translate('visTypeTimeseries.colorRules.greaterThanLabel', {
+      defaultMessage: '> greater than',
+    }),
     method: 'gt',
   },
   {
-    translateNameId: 'visTypeTimeseries.colorRules.greaterThanOrEqualLabel',
-    defaultName: '>= greater than or equal',
+    label: i18n.translate('visTypeTimeseries.colorRules.greaterThanOrEqualLabel', {
+      defaultMessage: '>= greater than or equal',
+    }),
     method: 'gte',
   },
   {
-    translateNameId: 'visTypeTimeseries.colorRules.lessThanLabel',
-    defaultName: '< less than',
+    label: i18n.translate('visTypeTimeseries.colorRules.lessThanLabel', {
+      defaultMessage: '< less than',
+    }),
     method: 'lt',
   },
   {
-    translateNameId: 'visTypeTimeseries.colorRules.lessThanOrEqualLabel',
-    defaultName: '<= less than or equal',
+    label: i18n.translate('visTypeTimeseries.colorRules.lessThanOrEqualLabel', {
+      defaultMessage: '<= less than or equal',
+    }),
     method: 'lte',
   },
   {
-    translateNameId: 'visTypeTimeseries.colorRules.emptyLabel',
-    defaultName: 'empty',
+    label: i18n.translate('visTypeTimeseries.colorRules.emptyLabel', {
+      defaultMessage: 'empty',
+    }),
     method: 'empty',
     isValueConstant: true,
   },
 ];
 
 const operatorOptions = colorRulesOperatorsList.map((operator) => ({
-  label: i18n.translate(operator.translateNameId, {
-    defaultMessage: operator.defaultName,
-  }),
+  label: operator.label,
   value: operator.method,
 }));
 
