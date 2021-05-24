@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 export * from './autocomplete_operators';
+export * from './build_exception_filter';
+export * from './has_large_value_list';
 export * from './helpers';
 export * from './types';

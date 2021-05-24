@@ -748,14 +748,8 @@ describe('DocumentMigrator', () => {
         migrator.migrate(_.cloneDeep(failedDoc));
         expect('Did not throw').toEqual('But it should have!');
       } catch (error) {
-        expect(error.message).toMatchInlineSnapshot(`
-          "Failed to transform document smelly. Transform: dog:1.2.3
-          Doc: {\\"id\\":\\"smelly\\",\\"type\\":\\"dog\\",\\"attributes\\":{},\\"migrationVersion\\":{}}"
-        `);
+        expect(error.message).toBe('Dang diggity!');
         expect(error).toBeInstanceOf(TransformSavedObjectDocumentError);
-        expect(loggingSystemMock.collect(mockLoggerFactory).error[0][0]).toMatchInlineSnapshot(
-          `[Error: Dang diggity!]`
-        );
       }
     });
 
