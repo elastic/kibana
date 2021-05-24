@@ -6,9 +6,12 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { IdOrUndefined, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-
-import { ExceptionListSchema, ListIdOrUndefined } from '../../../common/schemas';
+import type {
+  ExceptionListSchema,
+  IdOrUndefined,
+  ListIdOrUndefined,
+  NamespaceType,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { getSavedObjectType } from './utils';
 import { getExceptionList } from './get_exception_list';
