@@ -1,0 +1,29 @@
+env:
+  GITHUB_COMMIT_STATUS_ENABLED: 'true'
+  GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/kibana-ci-baseline'
+steps:
+  - command: .buildkite/setup/pre_build.sh
+    label: Pre-Build
+
+  - wait
+
+  - command: .buildkite/scripts/jobs/baseline.sh
+    label: Default Build and Metrics
+    agents:
+      queue: baseline
+
+  - command: .buildkite/scripts/jobs/baseline_ts_refs.sh
+    label: Build TS Refs
+    agents:
+      queue: baseline-small
+
+  - command: .buildkite/scripts/jobs/baseline_public_api_docs.sh
+    label: Check Public API Docs
+    agents:
+      queue: baseline-small
+
+  - wait: ~
+    continue_on_failure: true
+
+  - command: .buildkite/setup/post_build.sh
+    label: Post-Build

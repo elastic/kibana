@@ -120,6 +120,9 @@ export class FunctionalTestRunner {
         throw new Error('No tests defined.');
       }
 
+      // eslint-disable-next-line
+      console.log(`--- Running ${this.configFile.replace(process.cwd() + '/', '')}`);
+
       const dockerServers = new DockerServersService(
         config.get('dockerServers'),
         this.log,

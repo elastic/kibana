@@ -88,6 +88,8 @@ export async function runTests(options) {
       continue;
     }
 
+    console.log(`--- Running ${configPath.replace(process.cwd(), '')}`);
+
     await withProcRunner(log, async (procs) => {
       const config = await readConfigFile(log, configPath);
 
