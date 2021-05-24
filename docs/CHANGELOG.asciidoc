@@ -222,7 +222,7 @@ Machine Learning::
 * Adding support for saved object based ML modules {kibana-pull}92855[#92855]
 * Adds search time runtime support for index based Data Visualizer {kibana-pull}95252[#95252]
 Metrics::
-* Observability Overview Host Summary {kibana-pull}90879[#90879]
+* Enhanced metrics widget on Observability overview page {kibana-pull}90879[#90879]
 Platform::
 * Enable osquery plugin {kibana-pull}97422[#97422]
 * Client side search cache {kibana-pull}92439[#92439]
