@@ -1,6 +1,6 @@
-# Kibana alerting
+# Kibana Alerting
 
-The Kibana alerting plugin provides a common place to set up rules. You can:
+The Kibana Alerting plugin provides a common place to set up rules. You can:
 
 - Register types of rules
 - List the types of registered rules
@@ -10,12 +10,12 @@ The Kibana alerting plugin provides a common place to set up rules. You can:
 
 Table of Contents
 
-- [Kibana alerting](#kibana-alerting)
+- [Kibana Alerting](#kibana-alerting)
 	- [Terminology](#terminology)
 	- [Usage](#usage)
-	- [Alerting API keys](#alerting-api-keys)
-	- [Plugin status](#plugin-status)
-	- [Rule types](#rule-types)
+	- [Alerting API Keys](#alerting-api-keys)
+	- [Plugin Status](#plugin-status)
+	- [Rule Types](#rule-types)
 		- [Methods](#methods)
 		- [Executor](#executor)
 		- [Action variables](#action-variables)
@@ -25,42 +25,49 @@ Table of Contents
 		- [Example](#example)
 	- [Role Based Access-Control](#role-based-access-control)
 	- [Alerting Navigation](#alert-navigation)
-	- [Experimental RESTful API](#restful-api)
-		- [`GET /api/alerting/rule/{id}/state`: Get rule state](#get-apialertingruleidstate-get-rule-state)
-		- [`GET /api/alerting/rule/{id}/_alert_summary`: Get rule alert summary](#get-apialertingruleidalertsummary-get-alert-summary)
-		- [`POST /api/alerting/rule/{id}/_update_api_key`: Update rule API key](#post-apialertingruleidupdateapikey-update-rule-api-key)
-	- [Alert factory](#alert-factory)
-	- [Templating actions](#templating-actions)
+	- [Internal HTTP APIs](#internal-http-apis)
+		- [`GET /internal/alerting/rule/{id}/state`: Get rule state](#get-internalalertingruleidstate-get-rule-state)
+		- [`GET /internal/alerting/rule/{id}/_alert_summary`: Get rule alert summary](#get-internalalertingruleidalertsummary-get-rule-alert-summary)
+		- [`POST /internal/alerting/rule/{id}/_update_api_key`: Update rule API key](#post-internalalertingruleidupdateapikey-update-rule-api-key)
+	- [Alert Factory](#alert-factory)
+	- [Templating Actions](#templating-actions)
 		- [Examples](#examples)
 
 ## Terminology
+
+> Disclaimer: We are actively working to update the terminology of the Alerting Framework. While all user-facing terminology has been updated, much of the codebase is still a work in progress.
+
+
+> References to `rule` and `rule type` entities are still named `AlertType` within the codebase.
+
+> References to `alert` and `alert factory` entities are still named `AlertInstance` and `alertInstanceFactory` within the codebase.
 
 **Rule Type**: A function that takes parameters and executes actions on alerts.
 
 **Rule**: A configuration that defines a schedule, a rule type w/ parameters, state information and actions.
 
-**Alert**: The instance(s) created from a rule execution.
+**Alert**: The alert(s) created from a rule execution.
 
 A Kibana rule detects a condition and executes one or more actions when that condition occurs.  Rules work by going through the followings steps:
 
-1. Run a periodic check to detect a condition (the check is provided by a Rule Type).
-2. Convert that condition into one or more stateful Alerts.
-3. Map Alerts to pre-defined Actions, using templating.
-4. Execute the Actions.
+1. Run a periodic check to detect a condition (the check is provided by a rule type).
+2. Convert that condition into one or more stateful alerts.
+3. Map alerts to pre-defined actions, using templating.
+4. Execute the actions.
 
 ## Usage
 
 1. Develop and register a rule type (see rule types -> example).
 2. Configure feature level privileges using RBAC.
-3. Create a rule using the RESTful API [Documentation](https://www.elastic.co/guide/en/kibana/master/alerts-api-update.html) (see rules -> create).
+3. Create a rule using the RESTful API [Documentation](https://www.elastic.co/guide/en/kibana/master/alerting-apis.html) (see rules -> create).
 
-## Alerting API keys
+## Alerting API Keys
 
 When we create a rule, we generate a new API key.
 
 When we update, enable, or disable a rule, we must invalidate the old API key and create a new one.
 
-To manage the invalidation process for API keys, we use the saved object type `api_key_pending_invalidation`.  This saved object stores all API keys that were marked for invalidation when rules were updated.
+To manage the invalidation process for API keys, we use the saved object type `api_key_pending_invalidation`.  This saved object stores all API keys that were marked for invalidation anytime rules were updated, enabled or disabled.
 
 For security plugin invalidation, we schedule a task to check if the `api_key_pending_invalidation` saved object contains new API keys that were marked for invalidation earlier than the configured delay. The default schedule for running this task is every 5 minutes.
 
@@ -68,9 +75,9 @@ To change the schedule for the invalidation task, use the kibana.yml configurati
 
 To change the default delay for the API key invalidation, use the kibana.yml configuration option `xpack.alerting.invalidateApiKeysTask.removalDelay`.
 
-## Plugin status
+## Plugin Status
 
-The plugin status of the alerting framework is customized by including information about checking failures for the framework decryption:
+The plugin status of the Alerting Framework is customized by including information about checking for failures during framework decryption:
 
 ```js
 core.status.set(
@@ -91,7 +98,7 @@ core.status.set(
 
 To check for framework decryption failures, we use the task `alerting_health_check`, which runs every 60 minutes by default. To change the default schedule, use the kibana.yml configuration option `xpack.alerting.healthCheck.interval`.
 
-## Alert types
+## Rule Types
 
 ### Methods
 
@@ -101,14 +108,14 @@ The following table describes the properties of the `options` object.
 
 |Property|Description|Type|
 |---|---|---|
-|id|Unique identifier for the rule type. By convention, ids starting with `.` are reserved for built in rule types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your rule types to avoid conflicting with another plugin.|string|
+|id|Unique identifier for the rule type. By convention, IDs starting with `.` are reserved for built-in rule types. We recommend using a convention like `<plugin_id>.mySpecialRule` for your rule types to avoid conflicting with another plugin.|string|
 |name|A user-friendly name for the rule type. These will be displayed in dropdowns when choosing rule types.|string|
-|actionGroups|An explicit list of groups the rule type may schedule actions for, each specifying the ActionGroup's unique ID and human readable name. Rule `actions` validation will use this configuration to ensure groups are valid. We highly encourage using `kbn-i18n` to translate the names of actionGroup  when registering the rule type. |Array<{id:string, name:string}>|
-|defaultActionGroupId|Default ID value for the group of the rule type.|string|
-|recoveryActionGroup|An action group to use when an alert goes from an active state to an inactive one. This action group should not be specified under the `actionGroups` property. If no recoveryActionGroup is specified, the default `recovered` action group will be used. |{id:string, name:string}|
-|actionVariables|An explicit list of action variables the rule type makes available via context and state in action parameter templates, and a short human readable description for each. Alerting UI  will use this to display prompts for the users for these variables, in action parameter editors. We highly encourage using `kbn-i18n` to translate the descriptions. |{ context: Array<{name:string, description:string}, state: Array<{name:string, description:string}>|
-|validate.params|When developing a rule type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as a rule saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
-|executor|This is where the code of the rule type lives. This is a function to be called when executing a rule on a scheduled interval. For full details, see the executor section below.|Function|
+|actionGroups|An explicit list of groups the rule type may schedule actions for, each specifying the ActionGroup's unique ID and human readable name. Each rule type's `actions` validation will use this list to ensure configured groups are valid. We highly encourage using `kbn-i18n` to translate the names of actionGroup  when registering the rule type. |Array<{id:string, name:string}>|
+|defaultActionGroupId|ID value for the default action group for the rule type.|string|
+|recoveryActionGroup|The action group to use when an alert goes from an active state to an inactive one. This action group should not be specified under the `actionGroups` property. If no recoveryActionGroup is specified, the default `recovered` action group will be used. |{id:string, name:string}|
+|actionVariables|An explicit list of action variables that the rule type makes available via context and state in action parameter templates, and a short human readable description for each. The Alerting UI  will use this to display prompts for the users for these variables, in action parameter editors. We highly encourage using `kbn-i18n` to translate the descriptions. |{ context: Array<{name:string, description:string}, state: Array<{name:string, description:string}>|
+|validate.params|When developing a rule type, you can choose to accept a series of parameters. You may also choose to have the parameters validated before they are passed to the `executor` function or created as a saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
+|executor|This is where the code for the rule type lives. This is a function to be called when executing a rule on an interval basis. For full details, see the executor section below.|Function|
 |producer|The id of the application producing this rule type.|string|
 |minimumLicenseRequired|The value of a minimum license. Most of the rules are licensed as "basic".|string|
 
@@ -131,14 +138,29 @@ This is the primary function for a rule type. Whenever the rule needs to execute
 |alertId|The id of this rule.|
 |spaceId|The id of the space of this rule.|
 |namespace|The namespace of the space of this rule. This is the same as `spaceId`, unless `spaceId === "default"`, in which case the namespace = `undefined`.|
-|name|The name of this rule.|
-|tags|The tags associated with this rule.|
-|createdBy|The userid of the user that created this rule.|
-|updatedBy|The userid of the user that last updated this rule.|
+|name|The name of this rule. This will eventually be removed in favor of `rule.name`.|
+|tags|The tags associated with this rule. This will eventually be removed in favor of `rule.tags`.|
+|createdBy|The user ID of the user that created this rule. This will eventually be removed in favor of `rule.createdBy`.|
+|updatedBy|The user ID of the user that last updated this rule. This will eventually be removed in favor of `rule.updatedBy`.|
+|rule.name|The name of this rule.|
+|rule.tags|The tags associated with this rule.|
+|rule.consumer|The consumer of this rule type.|
+|rule.producer|The producer of this rule type.|
+|rule.ruleTypeId|The ID of the rule type for this rule.|
+|rule.ruleTypeName|The user-friendly name of the rule type for this rule.|
+|rule.enabled|Whether this rule is currently enabled.|
+|rule.schedule|The configured schedule interval of this rule.|
+|rule.actions|The configured actions for this rule.|
+|rule.createdBy|The user ID of the user that created this rule.|
+|rule.updatedBy|The user ID of the user that last updated this rule.|
+|rule.createdAt|The date and time this rule was created.|
+|rule.updatedAt|The date and this this rule was last updated.|
+|rule.throttle|The configured throttle interval for this rule.|
+|rule.notifyWhen|The configured notification type for this rule.|
 
 ### Action Variables
 
-The `actionVariables` property should contain the **flattened** names of the state and context variables available when an executor calls `alertInstance.scheduleActions(actionGroup, context)`.  These names are meant to be used in prompters in the Alerting user interface, are used as text values for display, and can be inserted into to an action parameter text entry field via a UI gesture (e.g., clicking a menu item from a menu built with these names).  They should be flattened, so if a state or context variable is an object with properties, these should be listed with the "parent" property/properties in the name, separated by a `.` (period).
+The `actionVariables` property should contain the **flattened** names of the state and context variables available when an executor calls `alertInstance.scheduleActions(actionGroup, context)`.  These names are meant to be used in prompters in the Alerting UI, are used as text values for display, and can be inserted into to an action parameter text entry field via a UI gesture (e.g., clicking a menu item from a menu built with these names).  They should be flattened, so if a state or context variable is an object with properties, these should be listed with the "parent" property/properties in the name, separated by a `.` (period).
 
 For example, if the `context` has one variable `foo` which is an object that has one property `bar`, and there are no `state` variables, the `actionVariables` value would be in the following shape:
 
@@ -152,11 +174,11 @@ For example, if the `context` has one variable `foo` which is an object that has
 
 ## Licensing
 
-Currently most of rule types are free features. But some rule types are subscription features, such as the tracking containment rule.
+Currently most rule types are free features. But some rule types are subscription features, such as the tracking containment rule.
 
 ## Documentation
 
-You should create asciidoc for the new rule type.
+You should create asciidoc for each new rule type you develop:
 
 - For stack rules, add an entry to the rule type index - [`docs/user/alerting/stack-rules.asciidoc`](../../../docs/user/alerting/stack-rules.asciidoc) which points to a new document for the rule type that should live in the directory [`docs/user/alerting/stack-rules`](../../../docs/user/alerting/stack-rules).
 
@@ -176,6 +198,7 @@ This example rule type receives server and threshold as parameters. It will read
 ```typescript
 import { schema } from '@kbn/config-schema';
 import { AlertType, AlertExecutorOptions } from '../../../alerting/server';
+// These type names will eventually be updated to reflect the new terminology
 import {
 	AlertTypeParams,
 	AlertTypeState,
@@ -246,6 +269,7 @@ const myRuleType: AlertType<
 		services,
 		params,
 		state,
+		rule,
 	}: AlertExecutorOptions<
 		MyRuleTypeParams,
 		MyRuleTypeState,
@@ -262,12 +286,12 @@ const myRuleType: AlertType<
 		// Only execute if CPU usage is greater than threshold
 		if (currentCpuUsage > threshold) {
 			// The first argument is a unique identifier for the alert. In this 
-			// scenario the provided server will be used. Also, this id will be 
+			// scenario the provided server will be used. Also, this ID will be 
 			// used to make `getState()` return previous state, if any, on 
 			// matching identifiers.
 			const alert = services.alertInstanceFactory(server);
 
-			// State from the last execution. This will exist if an alert was //
+			// State from the last execution. This will exist if an alert was
 			// created and executed in the previous execution
 			const { cpuUsage: previousCpuUsage } = alert.getState();
 
@@ -288,8 +312,8 @@ const myRuleType: AlertType<
 		// within the `state` function parameter at the next execution
 		return {
 			// This is an example attribute you could set, it makes more sense 
-			// to use this state when the alert type executes multiple 
-			// instances but wants a single place to track certain values.
+			// to use this state when the rule type executes multiple 
+			// alerts but wants a single place to track certain values.
 			lastChecked: new Date(),
 		};
 	},
@@ -300,9 +324,11 @@ server.newPlatform.setup.plugins.alerting.registerType(myRuleType);
 ```
 
 ## Role Based Access-Control
-Once you have registered your rule type, you need to grant your users privileges to use it. When registering a feature in Kibana, you can specify multiple types of privileges which are granted to users when they're assigned certain roles.
 
-Assuming your feature introduces its own Rule Types, you'll want to control which roles have all/read privileges for these Rule Types when they're inside the feature. In addition, when users are inside your feature, you might want to grant them access to Rule Types from other features, such as built-in stack rules or rule types provided by other features.
+Once you have registered your AlertType, you need to grant your users privileges to use it.
+When registering a feature in Kibana, you can specify multiple types of privileges which are granted to users when they're assigned certain roles.
+Assuming your feature introduces its own AlertTypes, you'll want to control which roles have all/read privileges for these AlertTypes when they're inside the feature.
+In addition, when users are inside your feature, you might want to grant them access to AlertTypes from other features, such as built-in stack rules or rule types provided by other features.
 
 You can control all of these abilities by assigning privileges to the Alerting Framework from within your own feature, for example:
 
@@ -345,7 +371,7 @@ In this example we can see the following:
 
 - Our feature grants any user who's assigned the `all` role in our feature the `all` role in the Alerting framework over every rule of the `my-application-id.my-rule-type` type which is created _inside_ the feature. What that means is that this privilege will allow the user to execute any of the `all` operations (listed below) on these rules as long as their `consumer` is `my-application-id`. Below that you'll notice we've done the same with the `read` role, which grants the Alerting Framework's `read` role privileges over these very same rules.
 - In addition, our feature grants the same privileges over any rule of type `my-application-id.my-restricted-rule-type`, which is another hypothetical rule type registered by this feature. It's worth noting that this type has been omitted from the `read` role. What this means is that only users with the `all` role will be able to interact with rules of this type.
-- Next, lets look at the `.index-threshold` and `xpack.uptime.alerts.actionGroups.tls` types. These have been specified in both `read` and `all`, which means that all the users in the feature will gain privileges over rules of these types (as long as their `consumer` is `my-application-id`). The difference between these two and the previous two is that they are _produced_ by other features! `.index-threshold` is a built-in stack rule type, provided by the _Built-In Rules_ feature, and `xpack.uptime.alerts.actionGroups.tls` is a rule type provided by the _Uptime_ feature. Specifying these types here tells the Alerting Framework that as far as the `my-application-id` feature is concerned, the user is privileged to use them (with `all` and `read` applied), but that isn't enough. Using another feature's rule type is only possible if both the producer of the rule type and the consumer of the rule type explicitly grant privileges to do so. In this case, the _Built-In Rules_ & _Uptime_ features would have to explicitly add these privileges to a role and this role would have to be granted to this user.
+- Next, lets look at the `.index-threshold` and `xpack.uptime.alerts.actionGroups.tls` types. These have been specified in both `read` and `all`, which means that all the users in the feature will gain privileges over rules of these types (as long as their `consumer` is `my-application-id`). The difference between these two and the previous two is that they are _produced_ by other features! `.index-threshold` is a built-in stack rule type, provided by the _Stack Rules_ feature, and `xpack.uptime.alerts.actionGroups.tls` is a rule type provided by the _Uptime_ feature. Specifying these types here tells the Alerting Framework that as far as the `my-application-id` feature is concerned, the user is privileged to use them (with `all` and `read` applied), but that isn't enough. Using another feature's rule type is only possible if both the producer of the rule type and the consumer of the rule type explicitly grant privileges to do so. In this case, the _Stack Rules_ & _Uptime_ features would have to explicitly add these privileges to a role and this role would have to be granted to this user.
 
 It's important to note that any role can be granted a mix of `all` and `read` privileges accross multiple types, for example:
 
@@ -392,7 +418,8 @@ As part of that same change, we also decided that not only should they be allowe
 When a user is granted the `read` role in the Alerting Framework, they will be able to execute the following api calls:
 
 - `get`
-- `getAlertState`
+- `getRuleState`
+- `getAlertSummary`
 - `find`
 
 When a user is granted the `all` role in the Alerting Framework, they will be able to execute all of the `read` privileged api calls, but in addition they'll be granted the following calls:
@@ -405,8 +432,8 @@ When a user is granted the `all` role in the Alerting Framework, they will be ab
 - `updateApiKey`
 - `muteAll`
 - `unmuteAll`
-- `muteInstance`
-- `unmuteInstance`
+- `muteAlert`
+- `unmuteAlert`
 
 Finally, all users, whether they're granted any role or not, are privileged to call the following:
 
@@ -416,11 +443,11 @@ Attempting to execute any operation the user isn't privileged to execute will re
 
 ## Alert Navigation
 
-When registering a Rule Type, you'll likely want to provide a way of viewing rules of that type within your own plugin, or perhaps you want to provide a view for all rules created from within your solution within your own UI.
+When registering a rule type, you'll likely want to provide a way of viewing rules of that type within your own plugin, or perhaps you want to provide a view for all rules created from within your solution within your own UI.
 
-In order for the Alerting framework to know that your plugin has its own internal view for displaying a rule, you must register a navigation handler within the framework.
+In order for the Alerting Framework to know that your plugin has its own internal view for displaying a rule, you must register a navigation handler within the framework.
 
-A navigation handler is nothing more than a function that receives a Rule and its corresponding RuleType, and is expected to then return the path *within your plugin* which knows how to display this rule.
+A navigation handler is nothing more than a function that receives a rule and its corresponding AlertType, and is expected to then return the path *within your plugin* which knows how to display this rule.
 
 The signature of such a handler is:
 
@@ -445,14 +472,14 @@ alerting.registerNavigation(
 );
 ```
 
-This tells the Alerting framework that, given a rule of the AlertType whose ID is `my-application-id.my-unique-rule-type`, if that rule's `consumer` value (which is set when the rule is created by your plugin) is your application (whose id is `my-application-id`), then it will navigate to your application using the path `/my-unique-rule/${the id of the rule}`.
+This tells the Alerting Framework that, given a rule of the AlertType whose ID is `my-application-id.my-unique-rule-type`, if that rule's `consumer` value (which is set when the rule is created by your plugin) is your application (whose id is `my-application-id`), then it will navigate to your application using the path `/my-unique-rule/${the id of the rule}`.
 
-The navigation is handled using the `navigateToApp` api, meaning that the path will be automatically picked up by your `react-router-dom` **Route** component, so all you have top do is configure a Route that handles the path `/my-unique-rule/:id`.
+The navigation is handled using the `navigateToApp` API, meaning that the path will be automatically picked up by your `react-router-dom` **Route** component, so all you have top do is configure a Route that handles the path `/my-unique-rule/:id`.
 
 You can look at the `alerting-example` plugin to see an example of using this API, which is enabled using the `--run-examples` flag when you run `yarn start`.
 
 ### registerDefaultNavigation
-The _registerDefaultNavigation_ api allows you to register a handler for any rule type within your solution:
+The _registerDefaultNavigation_ API allows you to register a handler for any rule type within your solution:
 
 ```
 alerting.registerDefaultNavigation(
@@ -461,7 +488,7 @@ alerting.registerDefaultNavigation(
 );
 ```
 
-This tells the Alerting framework that any rule whose `consumer` value is your application can be navigated to your application using the path `/my-other-rules/${the id of the rule}`.
+This tells the Alerting Framework that any rule whose `consumer` value is your application can be navigated to in your application using the path `/my-other-rules/${the id of the rule}`.
 
 ### Balancing both APIs side by side
 As we mentioned, using `registerDefaultNavigation` will tell the Alerting Framework that your application can handle any type of rule we throw at it, as long as your application created it, using the handler you provided.
@@ -472,8 +499,8 @@ You can use the `registerNavigation` API to specify as many AlertType specific h
 
 ## Internal HTTP APIs
 
-API descriptions for performing CRUD operations on rules is available in the [user documentation](https://www.elastic.co/guide/en/kibana/master/alerting-apis.html).
-In addition to those public APIs, we provide the following internal APIs. Internal APIs should not be consumed by plugins outside of the alerting plugins.
+We provide public APIs for performing CRUD operations on rules. Descriptions for these APIs are available in the [user documentation](https://www.elastic.co/guide/en/kibana/master/alerting-apis.html).
+In addition to the public APIs, we provide the following internal APIs. Internal APIs should not be consumed by plugins outside of the alerting plugins.
 
 ### `GET /internal/alerting/rule/{id}/state`: Get rule state
 
@@ -506,7 +533,7 @@ Query:
 |---|---|---|
 |id|The id of the rule you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
 
-## Alert factory
+## Alert Factory
 
 **alertInstanceFactory(id)**
 
@@ -531,13 +558,13 @@ What happens though, if the alert _has_ changed, but they just happen to be in t
 If the subgroup changes, then the framework will treat the alert as if it had been placed in a new action group. It is important to note that we only use the subgroup to denote a change if both the current execution and the previous one specified a subgroup.
 
 You might wonder, why bother using a subgroup if you can just add a new action group?
-Action Groups are static, and have to be define when the AlertType is defined.
+Action Groups are static, and have to be define when the rule type is defined.
 Action Subgroups are dynamic, and can be defined on the fly.
 
 This approach enables users to specify actions under specific action groups, but they can't specify actions that are specific to subgroups.
 As subgroups fall under action groups, we will schedule the actions specified for the action group, but the subgroup allows the AlertType implementer to reuse the same action group for multiple different active subgroups.
 
-## Templating actions
+## Templating Actions
 
 There needs to be a way to map rule context into action parameters. For this, we started off by adding template support. Any string within the `params` of a rule saved object's `actions` will be processed as a template and can inject context or state values.
 
