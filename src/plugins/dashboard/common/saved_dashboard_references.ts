@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import semverSatisfies from 'semver/functions/satisfies';
+import Semver from 'semver';
 import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
 import { DashboardContainerStateWithType, DashboardPanelState } from './types';
 import { EmbeddablePersistableStateService } from '../../embeddable/common/types';
@@ -24,7 +23,7 @@ export interface SavedObjectAttributesAndReferences {
 }
 
 const isPre730Panel = (panel: Record<string, string>): boolean => {
-  return 'version' in panel ? semverSatisfies(panel.version, '<7.3') : true;
+  return 'version' in panel ? Semver.gt('7.3.0', panel.version) : true;
 };
 
 function dashboardAttributesToState(
@@ -82,6 +81,9 @@ export function extractReferences(
   }
 
   const { panels, state } = dashboardAttributesToState(attributes);
+  if (!Array.isArray(panels)) {
+    return { attributes, references };
+  }
 
   if (((panels as unknown) as Array<Record<string, string>>).some(isPre730Panel)) {
     return pre730ExtractReferences({ attributes, references }, deps);

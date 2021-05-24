@@ -140,6 +140,18 @@ describe('When on the Event Filters List Page', () => {
 
       expect(renderResult.getByTestId('eventFiltersContent-error').textContent).toEqual(' oh no');
     });
+
+    it('should show modal when delete is clicked on a card', async () => {
+      render();
+      await dataReceived();
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('exceptionsViewerDeleteBtn'));
+      });
+
+      expect(
+        renderResult.baseElement.querySelector('[data-test-subj="eventFilterDeleteModalHeader"]')
+      ).not.toBeNull();
+    });
   });
 
   describe('And search is dispatched', () => {

@@ -17,6 +17,16 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { format, parse } from 'url';
+import {
+  ALERT_START,
+  EVENT_ACTION,
+  RULE_ID,
+  RULE_NAME,
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import {
+  ParsedTechnicalFields,
+  parseTechnicalFields,
+} from '../../../../rule_registry/common/parse_technical_fields';
 import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useFetcher } from '../../hooks/use_fetcher';
@@ -30,7 +40,8 @@ import { AlertsTable } from './alerts_table';
 
 export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
 
-export interface TopAlert extends TopAlertResponse {
+export interface TopAlert {
+  fields: ParsedTechnicalFields;
   start: number;
   reason: string;
   link?: string;
@@ -42,7 +53,7 @@ interface AlertsPageProps {
 }
 
 export function AlertsPage({ routeParams }: AlertsPageProps) {
-  const { core, observabilityRuleRegistry } = usePluginContext();
+  const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const { prepend } = core.http.basePath;
   const history = useHistory();
   const {
@@ -74,18 +85,19 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
         },
       }).then((alerts) => {
         return alerts.map((alert) => {
-          const ruleType = observabilityRuleRegistry.getTypeByRuleId(alert['rule.id']);
+          const parsedFields = parseTechnicalFields(alert);
+          const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
           const formatted = {
             link: undefined,
-            reason: alert['rule.name'],
-            ...(ruleType?.format?.({ alert, formatters: { asDuration, asPercent } }) ?? {}),
+            reason: parsedFields[RULE_NAME]!,
+            ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
           };
 
           const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;
 
           return {
-            ...alert,
             ...formatted,
+            fields: parsedFields,
             link: parsedLink
               ? format({
                   ...parsedLink,
@@ -96,13 +108,13 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
                   },
                 })
               : undefined,
-            active: alert['event.action'] !== 'close',
-            start: new Date(alert['kibana.rac.alert.start']).getTime(),
+            active: parsedFields[EVENT_ACTION] !== 'close',
+            start: new Date(parsedFields[ALERT_START]!).getTime(),
           };
         });
       });
     },
-    [kuery, observabilityRuleRegistry, rangeFrom, rangeTo]
+    [kuery, observabilityRuleTypeRegistry, rangeFrom, rangeTo]
   );
 
   return (

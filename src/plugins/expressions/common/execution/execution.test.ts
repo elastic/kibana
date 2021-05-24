@@ -362,14 +362,21 @@ describe('Execution', () => {
     });
 
     test('result is undefined until execution completes', async () => {
+      jest.useFakeTimers();
       const execution = createExecution('sleep 10');
       expect(execution.state.get().result).toBe(undefined);
       execution.start(null).subscribe(jest.fn());
       expect(execution.state.get().result).toBe(undefined);
-      await new Promise((r) => setTimeout(r, 1));
+
+      jest.advanceTimersByTime(1);
+      await new Promise(process.nextTick);
       expect(execution.state.get().result).toBe(undefined);
-      await new Promise((r) => setTimeout(r, 11));
+
+      jest.advanceTimersByTime(10);
+      await new Promise(process.nextTick);
       expect(execution.state.get().result).toBe(null);
+
+      jest.useRealTimers();
     });
 
     test('handles functions returning observables', () => {

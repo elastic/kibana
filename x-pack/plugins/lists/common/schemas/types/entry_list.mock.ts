@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntryList } from '@kbn/securitysolution-io-ts-utils';
+import type { EntryList } from '@kbn/securitysolution-io-ts-list-types';
 
 import { FIELD, LIST, LIST_ID, OPERATOR, TYPE } from '../../constants.mock';
 

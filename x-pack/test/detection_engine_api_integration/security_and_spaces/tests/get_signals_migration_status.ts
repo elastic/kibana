@@ -19,7 +19,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('Signals migration status', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/99915
+  describe.skip('Signals migration status', () => {
     let legacySignalsIndexName: string;
     beforeEach(async () => {
       await createSignalsIndex(supertest);
