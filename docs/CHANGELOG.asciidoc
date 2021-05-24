@@ -420,7 +420,7 @@ Fleet::
 * Match telemetry key names to UI agent states {kibana-pull}95567[#95567]
 * Ignore inactive agents when removing a policy {kibana-pull}94311[#94311]
 * Correctly track install status of an integration {kibana-pull}93464[#93464]
-* Fixes default integration name when adding 10+ names {kibana-pull}93278[#93278]
+* Fix default integration name when adding 10+ names {kibana-pull}93278[#93278]
 * Prevent duplicate enrollment token names {kibana-pull}92735[#92735]
 * Set all keyword and text fields for `index.query.default_field` index template setting {kibana-pull}91791[#91791]
 Lens & Visualizations::
