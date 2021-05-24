@@ -25,7 +25,7 @@ export const metricSet = [
     name: 'kibana_requests',
   },
   {
-    keys: ['kibana_task_manager_drift_p50'],
+    keys: ['kibana_task_manager_drift'],
     name: 'kibana_task_manager',
   },
 ];

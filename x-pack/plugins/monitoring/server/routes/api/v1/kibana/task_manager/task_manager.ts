@@ -77,7 +77,12 @@ export function taskManagerInstanceRoute(server: any, npRoute: RouteDependencies
           (alertTypes ?? []).map(async (alertType) => {
             const metricSet = [
               {
-                keys: ['kibana_task_manager_single_drift_p50'],
+                keys: [
+                  'kibana_task_manager_single_drift_p50',
+                  'kibana_task_manager_single_drift_p90',
+                  'kibana_task_manager_single_drift_p95',
+                  'kibana_task_manager_single_drift_p99',
+                ],
                 name: 'kibana_task_manager',
               },
             ];
@@ -87,29 +92,25 @@ export function taskManagerInstanceRoute(server: any, npRoute: RouteDependencies
                   path: 'kibana_stats.task_manager.drift.by_type',
                   query: {
                     term: {
-                      'kibana_stats.task_manager.drift.by_type.alertType': alertType,
+                      'kibana_stats.task_manager.drift.by_type.alert_type': alertType,
                     },
                   },
                 },
               },
             ];
             const result = await getMetrics(legacyRequest, kbnIndexPattern, metricSet, filters);
-            metrics[`kibana_task_manager_${alertType}`] = [
-              {
-                ...result.kibana_task_manager[0],
-                metric: {
-                  ...result.kibana_task_manager[0].metric,
-                  label: result.kibana_task_manager[0].metric.label.replace(
-                    '[alertType]',
-                    alertType
-                  ),
-                  description: result.kibana_task_manager[0].metric.label.replace(
-                    '[alertType]',
-                    alertType
-                  ),
-                },
-              },
-            ];
+            metrics[`kibana_task_manager_${alertType}`] = result.kibana_task_manager.map(
+              (metricResult: any) => {
+                return {
+                  ...metricResult,
+                  metric: {
+                    ...metricResult.metric,
+                    label: metricResult.metric.label.replace('[alertType]', alertType),
+                    description: metricResult.metric.label.replace('[alertType]', alertType),
+                  },
+                };
+              }
+            );
           })
         );
 

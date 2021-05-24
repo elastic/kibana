@@ -67,7 +67,7 @@ export async function getAlertTypes(
           aggs: {
             types: {
               terms: {
-                field: 'kibana_stats.task_manager.drift.by_type.alertType',
+                field: 'kibana_stats.task_manager.drift.by_type.alert_type',
                 size: 1000, // TODO: how to paginate properly here
               },
             },

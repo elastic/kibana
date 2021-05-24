@@ -60,7 +60,7 @@ export async function fetchTaskManagerDurationStats(
                 },
                 {
                   term: {
-                    'kibana_stats.task_manager.drift.by_type.alertType': alertType,
+                    'kibana_stats.task_manager.drift.by_type.alert_type': alertType,
                   },
                 },
                 {

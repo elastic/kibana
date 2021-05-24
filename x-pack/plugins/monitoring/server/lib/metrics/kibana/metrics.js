@@ -263,59 +263,45 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
   }),
-  kibana_task_manager_drift_p50: new KibanaTaskManagerMetric({
-    field: 'kibana_stats.task_manager.drift.by_type.stat.p50',
-    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Label', {
-      defaultMessage: 'P50 drift for [alertType]',
-    }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Description',
-      {
-        defaultMessage: 'P50 drift for [alertType]',
-      }
-    ),
-    format: LARGE_ABBREVIATED,
-    metricAgg: 'max',
-    units: '',
-    limit: {
-      max: 5,
-    },
-  }),
-  kibana_task_manager_single_drift_p50: new KibanaSingleTaskManagerMetric({
-    // debug: true,
-    field: 'kibana_stats.task_manager.drift.by_type.stat.p50',
-    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Label', {
-      defaultMessage: 'P50 drift for [alertType]',
-    }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Description',
-      {
-        defaultMessage: 'P50 drift for [alertType]',
-      }
-    ),
-    format: LARGE_ABBREVIATED,
-    metricAgg: 'max',
-    units: '',
-    limit: {
-      max: 5,
-    },
-  }),
-  // kibana_task_manager_drift_p50_per_alert_type_opts: {
-  //   field: 'kibana_stats.task_manager.drift.by_type.stat.p50',
-  //   label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Label', {
-  //     defaultMessage: 'P50 drift for [alertType]',
-  //   }),
-  //   description: i18n.translate(
-  //     'xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Description',
-  //     {
-  //       defaultMessage: 'P50 drift for [alertType]',
-  //     }
-  //   ),
-  //   format: SMALL_FLOAT,
-  //   metricAgg: 'max',
-  //   units: '',
-  //   limit: {
-  //     max: 5,
-  //   },
-  // },
+  ...(() => {
+    const metrics = {};
+    metrics.kibana_task_manager_drift = new KibanaTaskManagerMetric({
+      field: `kibana_stats.task_manager.drift.by_type.stat.p99`,
+      label: i18n.translate(`xpack.monitoring.metrics.kibanaInstance.taskManager.drift.p99.label`, {
+        defaultMessage: `P99 drift for [alertType]`,
+      }),
+      description: i18n.translate(
+        `xpack.monitoring.metrics.kibanaInstance.taskManager.drift.p99.description`,
+        {
+          defaultMessage: `P99 drift for [alertType]`,
+        }
+      ),
+      format: LARGE_ABBREVIATED,
+      metricAgg: 'max',
+      units: '',
+    });
+    for (const percentile of ['50', '90', '95', '99']) {
+      metrics[
+        `kibana_task_manager_single_drift_p${percentile}`
+      ] = new KibanaSingleTaskManagerMetric({
+        field: `kibana_stats.task_manager.drift.by_type.stat.p${percentile}`,
+        label: i18n.translate(
+          `xpack.monitoring.metrics.kibanaInstance.taskManager.singleDrift.p${percentile}.label`,
+          {
+            defaultMessage: `P${percentile} drift for [alertType]`,
+          }
+        ),
+        description: i18n.translate(
+          `xpack.monitoring.metrics.kibanaInstance.taskManager.singleDrift.p${percentile}.description`,
+          {
+            defaultMessage: `P${percentile} drift for [alertType]`,
+          }
+        ),
+        format: LARGE_ABBREVIATED,
+        metricAgg: 'max',
+        units: '',
+      });
+    }
+    return metrics;
+  })(),
 };

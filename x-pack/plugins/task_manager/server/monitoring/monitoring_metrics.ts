@@ -12,7 +12,7 @@ export interface MonitoringMetrics {
   task_manager: {
     drift: {
       by_type: Array<{
-        alertType: string;
+        alert_type: string;
         stat: AveragedStat | undefined;
       }>;
     };

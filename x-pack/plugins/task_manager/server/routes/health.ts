@@ -132,7 +132,7 @@ export function healthRoute(
             by_type: Object.keys(health?.stats.runtime?.value.drift_by_type ?? {}).map(
               (alertType) => {
                 return {
-                  alertType,
+                  alert_type: alertType,
                   stat: health?.stats.runtime?.value.drift_by_type[alertType],
                 };
               }
