@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { coreMock } from '../src/core/server/mocks';
-import { licensingMock } from './plugins/licensing/server/mocks';
+import { coreMock } from '../../../../src/core/server/mocks';
+import { licensingMock } from '../../licensing/server/mocks';
 
 function createCoreRequestHandlerContextMock() {
   return {
