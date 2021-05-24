@@ -6,15 +6,6 @@
  */
 
 export {
-  ListSchema,
-  ExceptionListSchema,
-  ExceptionListItemSchema,
-  CreateExceptionListSchema,
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-  exceptionListItemSchema,
-  createExceptionListItemSchema,
-  listSchema,
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   EXCEPTION_LIST_URL,
@@ -22,5 +13,4 @@ export {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_NAME,
   ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
-  buildExceptionFilter,
 } from '../../lists/common';
