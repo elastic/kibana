@@ -346,7 +346,7 @@ Metrics::
 * Change composite.size of snapshot ES query to improve speed {kibana-pull}95994[#95994]
 * Change top_hits aggregation to top_metrics for snapshot api {kibana-pull}95644[#95644]
 * Adds preview charts to Inventory alerts {kibana-pull}91658[#91658]
-* Observability Overview Host Summary {kibana-pull}90879[#90879]
+* Enhanced metrics widget on Observability overview page {kibana-pull}90879[#90879]
 * Adds anomalies table to flyout {kibana-pull}90305[#90305]
 Monitoring::
 * Fetch detection adoption metrics {kibana-pull}97789[#97789]
