@@ -298,7 +298,7 @@ Logs::
 * Support runtime fields in the log threshold alert {kibana-pull}97603[#97603]
 * Display and query runtime fields from KIPs in the log stream and entry flyout {kibana-pull}97467[#97467]
 * Adds error.stack_trace to the default log formatter {kibana-pull}94906[#94906]
-* Support Kibana index patterns in the Logs UI settings UI {kibana-pull}94849[#94849]
+* Support Kibana index patterns in the Logs app settings {kibana-pull}94849[#94849]
 Machine Learning::
 * UI enhancements for anomaly detection rule type {kibana-pull}97626[#97626]
 * Persist apply time range switch setting in anomaly detection job selector flyout {kibana-pull}97407[#97407]
