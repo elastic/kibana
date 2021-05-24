@@ -9,7 +9,7 @@ import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src
 import { DatafeedStats, Job, MlPluginSetup } from '../../../../ml/server';
 import { isJobStarted } from '../../../common/machine_learning/helpers';
 import { isSecurityJob } from '../../../common/machine_learning/is_security_job';
-import { DetectionsMetric, MlJobMetric, MlJobsUsage, MlJobUsage } from './index';
+import { DetectionsMetric, MlJobMetric, MlJobsUsage, MlJobUsage } from './types';
 
 /**
  * Default ml job usage count

@@ -7,16 +7,16 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { SIGNALS_ID } from '../../../common/constants';
+import { isElasticRule } from './index';
 import {
   AlertsAggregationResponse,
   CasesSavedObject,
   DetectionRulesTypeUsage,
   DetectionRuleMetric,
   DetectionRuleAdoption,
-  isElasticRule,
   RuleSearchParams,
   RuleSearchResult,
-} from './index';
+} from './types';
 
 /**
  * Default detection rule usage count, split by type + elastic/custom
