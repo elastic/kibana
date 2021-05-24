@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { FocusEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,10 +17,10 @@ import {
   EuiSpacer,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+import useMountedState from 'react-use/lib/useMountedState';
 import { DEFAULT_COLOR } from './constants';
 import { getDataMinMax, getStepValue, isValidColor } from './utils';
-import { TooltipWrapper } from '../index';
-import { useDebounceWithOptions } from '../helpers';
+import { TooltipWrapper, useDebouncedValue } from '../index';
 import { ColorStop } from './types';
 
 export interface CustomStopsProps {
@@ -39,34 +39,58 @@ export const CustomStops = ({
   reverse,
   ['data-test-prefix']: dataTestPrefix,
 }: CustomStopsProps) => {
-  const [localColorStops, setLocalColorStops] = useState<Array<{ color: string; stop: string }>>(
-    colorStops.map(({ color, stop }) => ({ color, stop: String(stop) }))
+  const onChangeWithValidation = useCallback(
+    (newColorStops: Array<{ color: string; stop: string }>) => {
+      const areStopsValid = newColorStops.every(({ color, stop }, i) => {
+        const numberStop = Number(stop);
+        const prevNumberStop = Number(newColorStops[i - 1]?.stop ?? -Infinity);
+        return isValidColor(color) && !Number.isNaN(numberStop) && numberStop >= prevNumberStop;
+      });
+      if (areStopsValid) {
+        onChange(newColorStops.map(({ color, stop }) => ({ color, stop: Number(stop) })));
+      }
+    },
+    [onChange]
   );
+  const memoizedValues = useMemo(
+    () => colorStops.map(({ color, stop }) => ({ color, stop: String(stop) })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [colorStops, reverse]
+  );
+  const { inputValue: localColorStops, handleInputChange: setLocalColorStops } = useDebouncedValue({
+    onChange: onChangeWithValidation,
+    value: memoizedValues,
+  });
   const [sortedReason, setSortReason] = useState<string>('');
   const shouldEnableDelete = localColorStops.length > 2;
 
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
 
-  useDebounceWithOptions(
-    () => {
-      const areStopsValid = localColorStops.every(({ color, stop }, i) => {
-        const numberStop = Number(stop);
-        const prevNumberStop = Number(localColorStops[i - 1]?.stop ?? -Infinity);
-        return isValidColor(color) && !Number.isNaN(numberStop) && numberStop >= prevNumberStop;
-      });
-      if (areStopsValid) {
-        onChange(localColorStops.map(({ color, stop }) => ({ color, stop: Number(stop) })));
-      }
-    },
-    { skipFirstRender: true },
-    256,
-    [localColorStops]
-  );
-
+  // refresh on unmount:
+  // the onChange logic here is a bit different than the one above as it has to actively sort if required
+  const isMounted = useMountedState();
   useEffect(() => {
-    setLocalColorStops(colorStops.map(({ color, stop }) => ({ color, stop: String(stop) })));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reverse]);
+    return () => {
+      if (!isMounted()) {
+        const areStopsValid = localColorStops.every(({ color, stop }, i) => {
+          const numberStop = Number(stop);
+          return isValidColor(color) && !Number.isNaN(numberStop);
+        });
+        const shouldSort = localColorStops.some(({ stop }, i) => {
+          const numberStop = Number(stop);
+          const prevNumberStop = Number(localColorStops[i - 1]?.stop ?? -Infinity);
+          return numberStop < prevNumberStop;
+        });
+        if (areStopsValid && shouldSort) {
+          onChange(
+            localColorStops
+              .map(({ color, stop }) => ({ color, stop: Number(stop) }))
+              .sort(({ stop: stopA }, { stop: stopB }) => Number(stopA) - Number(stopB))
+          );
+        }
+      }
+    };
+  }, [localColorStops, isMounted, onChange]);
 
   return (
     <>
