@@ -10,6 +10,10 @@ import {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '../../../../../../src/core/server';
+import { SIGNALS_ID } from '../../../common/constants';
+import { DatafeedStats, Job, MlPluginSetup } from '../../../../ml/server';
+import { isJobStarted } from '../../../common/machine_learning/helpers';
+import { isSecurityJob } from '../../../common/machine_learning/is_security_job';
 import {
   AlertsAggregationResponse,
   CasesSavedObject,
@@ -19,12 +23,10 @@ import {
   MlJobMetric,
   MlJobsUsage,
   MlJobUsage,
+  isElasticRule,
+  RuleSearchParams,
+  RuleSearchResult,
 } from './index';
-import { SIGNALS_ID } from '../../../common/constants';
-import { DatafeedStats, Job, MlPluginSetup } from '../../../../ml/server';
-import { isElasticRule, RuleSearchParams, RuleSearchResult } from './detection_telemetry_helpers';
-import { isJobStarted } from '../../../common/machine_learning/helpers';
-import { isSecurityJob } from '../../../common/machine_learning/is_security_job';
 
 /**
  * Default detection rule usage count, split by type + elastic/custom
