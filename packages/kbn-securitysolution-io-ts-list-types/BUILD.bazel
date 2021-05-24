@@ -2,7 +2,7 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
 PKG_BASE_NAME = "kbn-securitysolution-io-ts-list-types"
-PKG_REQUIRE_NAME = "@kbn/securitysolution-io-list-types"
+PKG_REQUIRE_NAME = "@kbn/securitysolution-io-ts-list-types"
 
 SOURCE_FILES = glob(
   [
@@ -73,7 +73,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = [":tsc"] + DEPS,
+  deps = DEPS + [":tsc"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
