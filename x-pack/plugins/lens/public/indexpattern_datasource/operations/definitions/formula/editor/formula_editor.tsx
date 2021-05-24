@@ -17,6 +17,7 @@ import {
   EuiPopover,
   EuiText,
   EuiToolTip,
+  EuiMarkdownFormat,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
@@ -421,6 +422,10 @@ export function FormulaEditor({
     []
   );
 
+  const closePopover = useCallback(() => {
+    setIsHelpOpen(false);
+  }, []);
+
   const codeEditorOptions: CodeEditorProps = {
     languageId: LANGUAGE_ID,
     value: text ?? '',
@@ -562,6 +567,18 @@ export function FormulaEditor({
                   );
                 }}
               />
+
+              {!text ? (
+                <div className="lnsFormula__editorPlaceholder">
+                  <EuiMarkdownFormat>
+                    {i18n.translate('xpack.lens.formulaPlaceholderText', {
+                      defaultMessage: 'Type a formula by combining functions with math, like:',
+                    })}
+                  </EuiMarkdownFormat>
+
+                  <pre>count() + 1</pre>
+                </div>
+              ) : null}
             </div>
 
             <div className="lnsFormula__editorFooter">
@@ -606,26 +623,26 @@ export function FormulaEditor({
                         panelPaddingSize="none"
                         anchorPosition="leftCenter"
                         isOpen={isHelpOpen}
-                        closePopover={() => setIsHelpOpen(false)}
+                        closePopover={() => {}}
                         button={
-                          <EuiButtonIcon
+                          <EuiButtonEmpty
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
                             onClick={() => setIsHelpOpen(!isHelpOpen)}
                             iconType="help"
                             color="text"
-                            aria-label={i18n.translate(
-                              'xpack.lens.formula.editorHelpOverlayLabel',
-                              {
-                                defaultMessage: 'Function reference',
-                              }
-                            )}
-                          />
+                            size="s"
+                          >
+                            {i18n.translate('xpack.lens.formula.editorHelpOverlayLabel', {
+                              defaultMessage: 'Function reference',
+                            })}
+                          </EuiButtonEmpty>
                         }
                       >
                         <MemoizedFormulaHelp
                           isFullscreen={isFullscreen}
                           indexPattern={indexPattern}
                           operationDefinitionMap={operationDefinitionMap}
+                          closeHelp={closePopover}
                         />
                       </EuiPopover>
                     </EuiToolTip>
@@ -664,6 +681,7 @@ export function FormulaEditor({
                 isFullscreen={isFullscreen}
                 indexPattern={indexPattern}
                 operationDefinitionMap={operationDefinitionMap}
+                closeHelp={closePopover}
               />
             </div>
           ) : null}

@@ -17,6 +17,7 @@ import {
   EuiListGroup,
   EuiMarkdownFormat,
   EuiTitle,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../../types';
 import { tinymathFunctions } from '../util';
@@ -35,10 +36,12 @@ function FormulaHelp({
   indexPattern,
   operationDefinitionMap,
   isFullscreen,
+  closeHelp,
 }: {
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   isFullscreen: boolean;
+  closeHelp: () => void;
 }) {
   const [selectedFunction, setSelectedFunction] = useState<string | undefined>();
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
@@ -49,56 +52,11 @@ function FormulaHelp({
     }
   }, [selectedFunction]);
 
-  const tinymathFns = useMemo(() => {
-    return getPossibleFunctions(indexPattern)
-      .filter((key) => key in tinymathFunctions)
-      .sort()
-      .map((key) => {
-        const [description, examples] = tinymathFunctions[key].help.split(`\`\`\``);
-        return {
-          label: key,
-          description: description.replace(/\n/g, '\n\n'),
-          examples: examples ? `\`\`\`${examples}\`\`\`` : '',
-        };
-      });
-  }, [indexPattern]);
-
   const helpGroups: Array<{
     label: string;
     description?: JSX.Element;
     items: Array<{ label: string; description?: JSX.Element }>;
   }> = [];
-
-  helpGroups.push({
-    label: i18n.translate('xpack.lens.formulaDocumentation.mathSection', {
-      defaultMessage: 'Math',
-    }),
-    description: (
-      <EuiText size="s">
-        {i18n.translate('xpack.lens.formulaDocumentation.mathSectionDescription', {
-          defaultMessage:
-            'These functions will be executed for reach row of the resulting table using single values from the same row calculated using other functions.',
-        })}
-      </EuiText>
-    ),
-    items: [],
-  });
-
-  helpGroups[0].items.push(
-    ...tinymathFns.map(({ label, description, examples }) => {
-      return {
-        label,
-        description: (
-          <>
-            <EuiTitle size="s">
-              <h3>{getFunctionSignatureLabel(label, operationDefinitionMap)}</h3>
-            </EuiTitle>
-            <EuiMarkdownFormat>{`${description}${examples}`}</EuiMarkdownFormat>
-          </>
-        ),
-      };
-    })
-  );
 
   helpGroups.push({
     label: i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSection', {
@@ -118,7 +76,7 @@ function FormulaHelp({
   const availableFunctions = getPossibleFunctions(indexPattern);
 
   // Es aggs
-  helpGroups[1].items.push(
+  helpGroups[0].items.push(
     ...availableFunctions
       .filter(
         (key) =>
@@ -161,7 +119,7 @@ function FormulaHelp({
   });
 
   // Calculations aggs
-  helpGroups[2].items.push(
+  helpGroups[1].items.push(
     ...availableFunctions
       .filter(
         (key) =>
@@ -192,12 +150,75 @@ function FormulaHelp({
       }))
   );
 
+  helpGroups.push({
+    label: i18n.translate('xpack.lens.formulaDocumentation.mathSection', {
+      defaultMessage: 'Math',
+    }),
+    description: (
+      <EuiText size="s">
+        {i18n.translate('xpack.lens.formulaDocumentation.mathSectionDescription', {
+          defaultMessage:
+            'These functions will be executed for reach row of the resulting table using single values from the same row calculated using other functions.',
+        })}
+      </EuiText>
+    ),
+    items: [],
+  });
+
+  const tinymathFns = useMemo(() => {
+    return getPossibleFunctions(indexPattern)
+      .filter((key) => key in tinymathFunctions)
+      .sort()
+      .map((key) => {
+        const [description, examples] = tinymathFunctions[key].help.split(`\`\`\``);
+        return {
+          label: key,
+          description: description.replace(/\n/g, '\n\n'),
+          examples: examples ? `\`\`\`${examples}\`\`\`` : '',
+        };
+      });
+  }, [indexPattern]);
+
+  helpGroups[2].items.push(
+    ...tinymathFns.map(({ label, description, examples }) => {
+      return {
+        label,
+        description: (
+          <>
+            <EuiTitle size="s">
+              <h3>{getFunctionSignatureLabel(label, operationDefinitionMap)}</h3>
+            </EuiTitle>
+            <EuiMarkdownFormat>{`${description}${examples}`}</EuiMarkdownFormat>
+          </>
+        ),
+      };
+    })
+  );
+
   return (
     <>
       <EuiPopoverTitle className="lnsFormula__docsHeader" paddingSize="s">
-        {i18n.translate('xpack.lens.formulaDocumentation.header', {
-          defaultMessage: 'Formula reference',
-        })}
+        <EuiFlexGroup>
+          <EuiFlexItem grow={true}>
+            {i18n.translate('xpack.lens.formulaDocumentation.header', {
+              defaultMessage: 'Formula reference',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {!isFullscreen ? (
+              <EuiButtonIcon
+                iconType="cross"
+                color="text"
+                onClick={() => {
+                  closeHelp();
+                }}
+                aria-label={i18n.translate('xpack.lens.dimensionContainer.close', {
+                  defaultMessage: 'Close',
+                })}
+              />
+            ) : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPopoverTitle>
 
       <EuiFlexGroup className="lnsFormula__docsContent" gutterSize="none" responsive={false}>

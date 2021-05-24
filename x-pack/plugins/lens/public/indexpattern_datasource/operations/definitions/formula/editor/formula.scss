@@ -47,7 +47,18 @@
 }
 
 .lnsFormula__editorContent {
+  position: relative;
   height: 201px;
+}
+
+.lnsFormula__editorPlaceholder {
+  position: absolute;
+  top: 80px;
+  left: 0;
+  right: 0;
+  // Matches monaco editor
+  font-family: Menlo, Monaco, 'Courier New', monospace;
+  text-align: center;
 }
 
 .lnsIndexPatternDimensionEditor-isFullscreen .lnsFormula__editorContent {
