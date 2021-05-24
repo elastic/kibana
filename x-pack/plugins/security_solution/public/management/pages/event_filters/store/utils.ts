@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { CreateExceptionListItemSchema } from '../../../../shared_imports';
+import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Ecs } from '../../../../../common/ecs';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../constants';
 

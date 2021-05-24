@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListType,
+  ExceptionListItemSchema,
+  ExceptionListIdentifiers,
+  Pagination,
+} from '@kbn/securitysolution-io-ts-list-types';
 import type {
   FilterOptions,
   ExceptionsPagination,
   ExceptionListItemIdentifiers,
   Filter,
 } from '../types';
-import type {
-  ExceptionListItemSchema,
-  ExceptionListIdentifiers,
-  Pagination,
-} from '../../../../../public/shared_imports';
 
 export type ViewerModalName = 'addModal' | 'editModal' | null;
 

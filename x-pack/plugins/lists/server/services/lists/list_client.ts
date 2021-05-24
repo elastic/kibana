@@ -17,15 +17,15 @@ import {
   setPolicy,
   setTemplate,
 } from '@kbn/securitysolution-es-utils';
-
-import {
+import type {
   FoundListItemSchema,
   FoundListSchema,
   ListItemArraySchema,
   ListItemSchema,
   ListSchema,
   SearchListItemArraySchema,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
 import { ConfigType } from '../../config';
 import {
   createList,
