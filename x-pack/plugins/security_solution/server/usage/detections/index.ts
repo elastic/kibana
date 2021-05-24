@@ -7,12 +7,8 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../ml/server';
-import {
-  getMlJobMetrics,
-  getDetectionRuleMetrics,
-  initialMlJobsUsage,
-  initialDetectionRulesUsage,
-} from './detections_metrics_helpers';
+import { getMlJobMetrics, initialMlJobsUsage } from './detection_ml_helpers';
+import { getDetectionRuleMetrics, initialDetectionRulesUsage } from './detection_rule_helpers';
 
 import { INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
 
@@ -46,6 +42,11 @@ export interface RuleSearchResult {
     updatedAt: string;
     params: DetectionRuleParms;
   };
+}
+
+export interface DetectionsMetric {
+  isElastic: boolean;
+  isEnabled: boolean;
 }
 
 interface DetectionRuleParms {

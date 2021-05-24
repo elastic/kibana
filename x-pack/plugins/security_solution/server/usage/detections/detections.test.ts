@@ -11,6 +11,8 @@ import {
   savedObjectsClientMock,
 } from '../../../../../../src/core/server/mocks';
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
+import { fetchDetectionsMetrics } from './index';
+import { initialMlJobsUsage } from './detection_ml_helpers';
 import {
   getMockJobSummaryResponse,
   getMockListModulesResponse,
@@ -21,8 +23,6 @@ import {
   getMockRuleAlertsResponse,
   getMockAlertCasesResponse,
 } from './detections.mocks';
-import { fetchDetectionsMetrics } from './index';
-import { initialMlJobsUsage } from './detections_metrics_helpers';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 
