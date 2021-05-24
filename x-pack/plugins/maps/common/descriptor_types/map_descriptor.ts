@@ -63,7 +63,7 @@ export type TooltipState = {
   features: TooltipFeature[];
   id: string;
   isLocked: boolean;
-  location: number[]; // 0 index is lon, 1 index is lat
+  location: [number, number]; // 0 index is lon, 1 index is lat
 };
 
 export type DrawState = {

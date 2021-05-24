@@ -6,17 +6,16 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { NamespaceType } from '@kbn/securitysolution-io-ts-utils';
-
-import {
+import type {
   FilterOrUndefined,
   FoundExceptionListItemSchema,
   ListId,
+  NamespaceType,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { findExceptionListsItem } from './find_exception_list_items';
 
