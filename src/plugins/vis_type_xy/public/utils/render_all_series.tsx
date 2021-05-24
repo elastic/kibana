@@ -75,7 +75,7 @@ export const renderAllSeries = (
       data: { id: paramId },
       lineWidth: strokeWidth,
       showCircles,
-      dotsRadius,
+      circlesRadius,
       drawLinesBetweenPoints,
       mode,
       interpolate,
@@ -176,7 +176,7 @@ export const renderAllSeries = (
                 point: {
                   visible: showCircles,
                   fill: markSizeAccessor ? ColorVariant.Series : undefined,
-                  radius: dotsRadius,
+                  radius: circlesRadius,
                 },
               }}
             />

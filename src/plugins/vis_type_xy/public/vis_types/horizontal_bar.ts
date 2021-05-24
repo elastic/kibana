@@ -103,7 +103,7 @@ export const getHorizontalBarVisTypeDefinition = (
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
-          dotsRadius: 3,
+          circlesRadius: 3,
         },
       ],
       addTooltip: true,

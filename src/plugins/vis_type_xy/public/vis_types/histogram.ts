@@ -102,7 +102,7 @@ export const getHistogramVisTypeDefinition = (
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
-          dotsRadius: 3,
+          circlesRadius: 3,
         },
       ],
       radiusRatio: 0,

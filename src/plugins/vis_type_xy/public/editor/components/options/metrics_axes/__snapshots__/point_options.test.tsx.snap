@@ -25,9 +25,9 @@ exports[`PointOptions component should init with the default set of props 1`] = 
   >
     <EuiRange
       compressed={true}
-      data-test-subj="dotsRadius"
+      data-test-subj="circlesRadius"
       disabled={false}
-      fullWidth={false}
+      fullWidth={true}
       isLoading={false}
       levels={Array []}
       max={10}

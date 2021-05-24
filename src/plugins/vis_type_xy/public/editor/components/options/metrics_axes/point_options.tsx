@@ -35,15 +35,15 @@ function PointOptions({ chart, setChart }: PointOptionsParams) {
       />
       <EuiSpacer size="m" />
       <EuiFormRow
-        label={i18n.translate('visTypeXy.controls.pointSeries.series.dotsRadius', {
+        label={i18n.translate('visTypeXy.controls.pointSeries.series.circlesRadius', {
           defaultMessage: 'Dots size',
         })}
         fullWidth
         display="rowCompressed"
       >
         <EuiRange
-          data-test-subj="dotsRadius"
-          value={chart.dotsRadius}
+          data-test-subj="circlesRadius"
+          value={chart.circlesRadius}
           min={1}
           max={10}
           step={1}
@@ -52,7 +52,7 @@ function PointOptions({ chart, setChart }: PointOptionsParams) {
           showInput
           compressed
           onChange={(e) => {
-            setChart('dotsRadius', Number(e.currentTarget.value));
+            setChart('circlesRadius', Number(e.currentTarget.value));
           }}
         />
       </EuiFormRow>

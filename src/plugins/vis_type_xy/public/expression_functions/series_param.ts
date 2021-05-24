@@ -29,7 +29,7 @@ export type ExpressionValueSeriesParam = ExpressionValueBoxed<
     mode: SeriesParam['mode'];
     show: boolean;
     showCircles: boolean;
-    dotsRadius: number;
+    circlesRadius: number;
     seriesParamType: SeriesParam['type'];
     valueAxis: string;
   }
@@ -96,13 +96,13 @@ export const seriesParam = (): ExpressionFunctionDefinition<
     showCircles: {
       types: ['boolean'],
       help: i18n.translate('visTypeXy.function.seriesParam.showCircles.help', {
-        defaultMessage: 'Show dots',
+        defaultMessage: 'Show circles',
       }),
     },
-    dotsRadius: {
+    circlesRadius: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.seriesParam.dotsRadius.help', {
-        defaultMessage: 'Defines the dots radius',
+      help: i18n.translate('visTypeXy.function.seriesParam.circlesRadius.help', {
+        defaultMessage: 'Defines the circles size (radius)',
       }),
     },
     type: {
@@ -128,7 +128,7 @@ export const seriesParam = (): ExpressionFunctionDefinition<
       mode: args.mode,
       show: args.show,
       showCircles: args.showCircles,
-      dotsRadius: args.dotsRadius,
+      circlesRadius: args.circlesRadius,
       seriesParamType: args.type,
       valueAxis: args.valueAxis,
     };

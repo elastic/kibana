@@ -75,7 +75,7 @@ const seriesParam: SeriesParam = {
   drawLinesBetweenPoints: true,
   lineWidth: 2,
   showCircles: true,
-  dotsRadius: 3,
+  circlesRadius: 3,
   interpolate: InterpolationMode.Linear,
   valueAxis: defaultValueAxisId,
 };

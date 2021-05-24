@@ -38,7 +38,7 @@ describe('PointOptions component', () => {
   it('should disable the dots size range if the show dots switch is off', () => {
     chart.showCircles = false;
     const comp = mount(<PointOptions {...defaultProps} />);
-    const range = findTestSubject(comp, 'dotsRadius');
+    const range = findTestSubject(comp, 'circlesRadius');
     expect(range.at(1).props().disabled).toBeTruthy();
   });
 });

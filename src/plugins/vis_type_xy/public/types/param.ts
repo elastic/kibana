@@ -78,7 +78,7 @@ export interface SeriesParam {
   mode: ChartMode;
   show: boolean;
   showCircles: boolean;
-  dotsRadius: number;
+  circlesRadius: number;
   type: ChartType;
   valueAxis: string;
 }

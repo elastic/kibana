@@ -98,7 +98,7 @@ const prepareSeriesParam = (data: SeriesParam) => {
     mode: data.mode,
     show: data.show,
     showCircles: data.showCircles,
-    dotsRadius: data.dotsRadius,
+    circlesRadius: data.circlesRadius,
     type: data.type,
     valueAxis: data.valueAxis,
   });
