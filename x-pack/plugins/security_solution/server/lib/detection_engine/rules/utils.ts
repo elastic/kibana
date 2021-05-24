@@ -6,7 +6,7 @@
  */
 
 import { pickBy, isEmpty } from 'lodash/fp';
-import {
+import type {
   FromOrUndefined,
   MachineLearningJobIdOrUndefined,
   RiskScoreMappingOrUndefined,
@@ -25,8 +25,8 @@ import {
   SeverityMappingOrUndefined,
   MaxSignalsOrUndefined,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
-import { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
 import {
   DescriptionOrUndefined,
   AnomalyThresholdOrUndefined,

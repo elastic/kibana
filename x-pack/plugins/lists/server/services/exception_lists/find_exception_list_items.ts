@@ -6,8 +6,16 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { Id, NamespaceTypeArray } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type {
+  FoundExceptionListItemSchema,
+  Id,
+  NamespaceTypeArray,
+  PageOrUndefined,
+  PerPageOrUndefined,
+  SortFieldOrUndefined,
+  SortOrderOrUndefined,
+} from '@kbn/securitysolution-io-ts-list-types';
+import type {
   EmptyStringArrayDecoded,
   NonEmptyStringArrayDecoded,
 } from '@kbn/securitysolution-io-ts-types';
@@ -17,13 +25,6 @@ import {
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,
 } from '../../../common/types';
-import {
-  FoundExceptionListItemSchema,
-  PageOrUndefined,
-  PerPageOrUndefined,
-  SortFieldOrUndefined,
-  SortOrderOrUndefined,
-} from '../../../common/schemas';
 import { escapeQuotes } from '../utils/escape_query';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
