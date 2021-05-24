@@ -16,10 +16,10 @@ const Logo = () => (
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
   >
-    <path fill="url(#pattern0)" d="M0 0H16V16H0z" />
+    <rect width="32" height="32" fill="url(#pattern0)" />
     <defs>
       <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">
-        <use transform="matrix(.00281 0 0 .00281 -.063 -.063)" xlinkHref="#image0" />
+        <use xlinkHref="#image0" transform="translate(-0.0625 -0.0625) scale(0.0028125)" />
       </pattern>
       <image
         id="image0"

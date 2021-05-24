@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -433,9 +433,8 @@ export const AlertForm = ({
   const alertTypeNodes = Object.entries(alertTypesByProducer)
     .sort((a, b) => alertTypeGroupCompare(a, b, solutions))
     .map(([solution, items], groupIndex) => (
-      <>
+      <Fragment key={`group${groupIndex}`}>
         <EuiFlexGroup
-          key={`group${groupIndex}`}
           gutterSize="none"
           alignItems="center"
           className="triggersActionsUI__alertTypeNodeHeading"
@@ -471,41 +470,39 @@ export const AlertForm = ({
                 </span>
               );
               return (
-                <>
-                  <EuiListGroupItem
-                    key={index}
-                    data-test-subj={`${item.id}-SelectOption`}
-                    color="primary"
-                    label={
-                      item.checkEnabledResult.isEnabled ? (
-                        alertTypeListItemHtml
-                      ) : (
-                        <EuiToolTip
-                          position="top"
-                          data-test-subj={`${item.id}-disabledTooltip`}
-                          content={item.checkEnabledResult.message}
-                        >
-                          {alertTypeListItemHtml}
-                        </EuiToolTip>
-                      )
+                <EuiListGroupItem
+                  key={index}
+                  data-test-subj={`${item.id}-SelectOption`}
+                  color="primary"
+                  label={
+                    item.checkEnabledResult.isEnabled ? (
+                      alertTypeListItemHtml
+                    ) : (
+                      <EuiToolTip
+                        position="top"
+                        data-test-subj={`${item.id}-disabledTooltip`}
+                        content={item.checkEnabledResult.message}
+                      >
+                        {alertTypeListItemHtml}
+                      </EuiToolTip>
+                    )
+                  }
+                  isDisabled={!item.checkEnabledResult.isEnabled}
+                  onClick={() => {
+                    setAlertProperty('alertTypeId', item.id);
+                    setActions([]);
+                    setAlertTypeModel(item.alertTypeItem);
+                    setAlertProperty('params', {});
+                    if (alertTypesIndex && alertTypesIndex.has(item.id)) {
+                      setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
                     }
-                    isDisabled={!item.checkEnabledResult.isEnabled}
-                    onClick={() => {
-                      setAlertProperty('alertTypeId', item.id);
-                      setActions([]);
-                      setAlertTypeModel(item.alertTypeItem);
-                      setAlertProperty('params', {});
-                      if (alertTypesIndex && alertTypesIndex.has(item.id)) {
-                        setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
-                      }
-                    }}
-                  />
-                </>
+                  }}
+                />
               );
             })}
         </EuiListGroup>
         <EuiSpacer />
-      </>
+      </Fragment>
     ));
 
   const alertTypeDetails = (
