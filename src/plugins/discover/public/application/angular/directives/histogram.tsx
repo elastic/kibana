@@ -159,7 +159,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     );
 
     return (
-      <Chart size="100%" id="discover">
+      <Chart size="100%" id="discover_histogram_timechart">
         <Settings
           xDomain={xDomain}
           onBrushEnd={this.onBrushEnd}
