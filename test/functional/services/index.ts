@@ -15,7 +15,7 @@ import {
   FindProvider,
   ScreenshotsProvider,
   SnapshotsProvider,
-  TestSubjectsProvider,
+  TestSubjects,
 } from './common';
 import { ComboBoxProvider } from './combo_box';
 import {
@@ -56,7 +56,7 @@ export const services = {
   filterBar: FilterBarProvider,
   queryBar: QueryBarProvider,
   find: FindProvider,
-  testSubjects: TestSubjectsProvider,
+  testSubjects: TestSubjects,
   docTable: DocTableProvider,
   screenshots: ScreenshotsProvider,
   snapshots: SnapshotsProvider,
