@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiEmptyPrompt,
   EuiToolTip,
+  EuiFlyoutFooter,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -45,7 +46,11 @@ import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/comp
 import { EndpointIsolateFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpoint_details_flyout_subheader';
 import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
-import { getEndpointListPath } from '../../../../common/routing';
+import { getEndpointDetailsPath, getEndpointListPath } from '../../../../common/routing';
+import {
+  TakeActionDropdown,
+  TakeActionDropdownProps,
+} from '../../../../../detections/components/host_isolation/take_action_dropdown';
 
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -62,6 +67,8 @@ export const EndpointDetailsFlyout = memo(() => {
   const error = useEndpointSelector(detailsError);
   const show = useEndpointSelector(showView);
 
+  const showFlyoutFooter = show === 'details' || show === 'policy_response';
+
   const handleFlyoutClose = useCallback(() => {
     const { show: _show, ...urlSearchParams } = queryParamsWithoutSelectedEndpoint;
     history.push(
@@ -71,6 +78,20 @@ export const EndpointDetailsFlyout = memo(() => {
       })
     );
   }, [history, queryParamsWithoutSelectedEndpoint]);
+
+  const handleActionClick: TakeActionDropdownProps['onChange'] = useCallback(
+    (action) => {
+      if (details?.agent.id && action === 'isolateHost') {
+        history.push(
+          getEndpointDetailsPath({
+            name: 'endpointIsolate',
+            selected_endpoint: details.agent.id,
+          })
+        );
+      }
+    },
+    [details?.agent.id, history]
+  );
 
   useEffect(() => {
     if (error !== undefined) {
@@ -123,6 +144,12 @@ export const EndpointDetailsFlyout = memo(() => {
           {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={details} />}
 
           {show === 'isolate' && <EndpointIsolateFlyoutPanel hostMeta={details} />}
+
+          {showFlyoutFooter && (
+            <EuiFlyoutFooter className="eui-textRight">
+              <TakeActionDropdown onChange={handleActionClick} />
+            </EuiFlyoutFooter>
+          )}
         </>
       )}
     </EuiFlyout>

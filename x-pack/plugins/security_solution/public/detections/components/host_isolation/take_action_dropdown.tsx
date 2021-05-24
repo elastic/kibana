@@ -10,56 +10,58 @@ import { EuiContextMenuItem, EuiContextMenuPanel, EuiButton, EuiPopover } from '
 import { ISOLATE_HOST } from './translations';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 
-export const TakeActionDropdown = React.memo(
-  ({ onChange }: { onChange: (action: 'isolateHost') => void }) => {
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+export interface TakeActionDropdownProps {
+  onChange: (action: 'isolateHost') => void;
+}
 
-    const closePopoverHandler = useCallback(() => {
-      setIsPopoverOpen(false);
-    }, []);
+export const TakeActionDropdown = React.memo<TakeActionDropdownProps>(({ onChange }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-    const takeActionItems = useMemo(() => {
-      return [
-        <EuiContextMenuItem
-          key="isolateHost"
-          onClick={() => {
-            setIsPopoverOpen(false);
-            onChange('isolateHost');
-          }}
-        >
-          {ISOLATE_HOST}
-        </EuiContextMenuItem>,
-      ];
-    }, [onChange]);
+  const closePopoverHandler = useCallback(() => {
+    setIsPopoverOpen(false);
+  }, []);
 
-    const takeActionButton = useMemo(() => {
-      return (
-        <EuiButton
-          iconSide="right"
-          fill
-          iconType="arrowDown"
-          onClick={() => {
-            setIsPopoverOpen(!isPopoverOpen);
-          }}
-        >
-          {TAKE_ACTION}
-        </EuiButton>
-      );
-    }, [isPopoverOpen]);
-
-    return (
-      <EuiPopover
-        id="hostIsolationTakeActionPanel"
-        button={takeActionButton}
-        isOpen={isPopoverOpen}
-        closePopover={closePopoverHandler}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
+  const takeActionItems = useMemo(() => {
+    return [
+      <EuiContextMenuItem
+        key="isolateHost"
+        onClick={() => {
+          setIsPopoverOpen(false);
+          onChange('isolateHost');
+        }}
       >
-        <EuiContextMenuPanel size="s" items={takeActionItems} />
-      </EuiPopover>
+        {ISOLATE_HOST}
+      </EuiContextMenuItem>,
+    ];
+  }, [onChange]);
+
+  const takeActionButton = useMemo(() => {
+    return (
+      <EuiButton
+        iconSide="right"
+        fill
+        iconType="arrowDown"
+        onClick={() => {
+          setIsPopoverOpen(!isPopoverOpen);
+        }}
+      >
+        {TAKE_ACTION}
+      </EuiButton>
     );
-  }
-);
+  }, [isPopoverOpen]);
+
+  return (
+    <EuiPopover
+      id="hostIsolationTakeActionPanel"
+      button={takeActionButton}
+      isOpen={isPopoverOpen}
+      closePopover={closePopoverHandler}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenuPanel size="s" items={takeActionItems} />
+    </EuiPopover>
+  );
+});
 
 TakeActionDropdown.displayName = 'TakeActionDropdown';
