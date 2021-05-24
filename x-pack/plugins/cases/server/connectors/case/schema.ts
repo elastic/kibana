@@ -52,11 +52,9 @@ const JiraFieldsSchema = schema.object({
 });
 
 const SwimlaneFieldsSchema = schema.object({
-  alertName: schema.string(),
   alertSource: schema.nullable(schema.string()),
   caseId: schema.nullable(schema.string()),
   caseName: schema.nullable(schema.string()),
-  comments: schema.nullable(schema.string()),
   severity: schema.nullable(schema.string()),
 });
 
