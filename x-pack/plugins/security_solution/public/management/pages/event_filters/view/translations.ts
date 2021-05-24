@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
+import type {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
 import { ServerApiError } from '../../../../common/types';
 
 export const getCreationSuccessMessage = (

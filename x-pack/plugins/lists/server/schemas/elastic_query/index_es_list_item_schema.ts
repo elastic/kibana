@@ -9,18 +9,16 @@ import * as t from 'io-ts';
 import {
   created_at,
   created_by,
+  deserializerOrUndefined,
+  list_id,
   metaOrUndefined,
+  serializerOrUndefined,
+  tie_breaker_id,
   updated_at,
   updated_by,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { esDataTypeUnion } from '../common/schemas';
-import {
-  deserializerOrUndefined,
-  list_id,
-  serializerOrUndefined,
-  tie_breaker_id,
-} from '../../../common/schemas';
 
 export const indexEsListItemSchema = t.intersection([
   t.exact(
