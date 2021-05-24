@@ -53,11 +53,11 @@ jest.mock('../../kibana_services', () => {
 });
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallow } from 'enzyme';
+import { ILayer } from '../../classes/layers/layer';
+import { EditLayerPanel } from './edit_layer_panel';
 
-import { LayerPanel } from './view';
-
-const mockLayer = {
+const mockLayer = ({
   getId: () => {
     return '1';
   },
@@ -79,7 +79,7 @@ const mockLayer = {
   renderSourceSettingsEditor: () => {
     return <div>mockSourceSettings</div>;
   },
-};
+} as unknown) as ILayer;
 
 const defaultProps = {
   selectedLayer: mockLayer,
@@ -87,9 +87,9 @@ const defaultProps = {
   updateSourceProp: () => {},
 };
 
-describe('LayerPanel', () => {
+describe('EditLayerPanel', () => {
   test('is rendered', async () => {
-    const component = shallowWithIntl(<LayerPanel {...defaultProps} />);
+    const component = shallow(<EditLayerPanel {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -100,7 +100,7 @@ describe('LayerPanel', () => {
   });
 
   test('should render empty panel when selectedLayer is null', async () => {
-    const component = shallowWithIntl(<LayerPanel {...defaultProps} selectedLayer={undefined} />);
+    const component = shallow(<EditLayerPanel {...defaultProps} selectedLayer={undefined} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

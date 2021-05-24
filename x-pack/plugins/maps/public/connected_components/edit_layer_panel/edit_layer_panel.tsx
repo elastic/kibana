@@ -56,7 +56,7 @@ interface State {
   supportsFitToBounds: boolean;
 }
 
-export class LayerPanel extends Component<Props, State> {
+export class EditLayerPanel extends Component<Props, State> {
   private _isMounted = false;
   state: State = {
     displayName: '',

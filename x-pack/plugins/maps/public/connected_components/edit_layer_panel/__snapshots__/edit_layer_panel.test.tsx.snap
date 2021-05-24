@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`LayerPanel is rendered 1`] = `
+exports[`EditLayerPanel is rendered 1`] = `
 <Provider
   services={
     Object {
@@ -140,4 +140,4 @@ exports[`LayerPanel is rendered 1`] = `
 </Provider>
 `;
 
-exports[`LayerPanel should render empty panel when selectedLayer is null 1`] = `""`;
+exports[`EditLayerPanel should render empty panel when selectedLayer is null 1`] = `""`;
