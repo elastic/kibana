@@ -8,7 +8,7 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-Review important information about the {kib} 7.12.x releases.
+Review important information about the {kib} 7.x releases.
 
 * <<release-notes-7.13.0>>
 * <<release-notes-7.12.1>>
