@@ -18,6 +18,9 @@ interface Props {
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   action: SwimlaneActionConnector;
+  appId: string;
+  apiToken: string;
+  apiUrl: string;
 }
 
 export interface UseGetApplication {
@@ -29,6 +32,9 @@ export const useGetApplication = ({
   http,
   action,
   toastNotifications,
+  appId,
+  apiToken,
+  apiUrl,
 }: Props): UseGetApplication => {
   const [isLoading, setIsLoading] = useState(false);
   const isCancelledRef = useRef(false);
@@ -44,14 +50,16 @@ export const useGetApplication = ({
       const response = await getApplicationApi({
         http,
         signal: abortCtrlRef.current.signal,
-        connectorId: action.id,
+        appId,
+        apiToken,
+        url: apiUrl,
       });
 
       if (!isCancelledRef.current) {
         setIsLoading(false);
         if (response.status && response.status === 'error') {
           toastNotifications.addDanger({
-            title: i18n.SW_GET_APPLICATION_API_ERROR,
+            title: i18n.SW_GET_APPLICATION_API_ERROR(appId),
             text: `${response.serviceMessage ?? response.message}`,
           });
         } else {
@@ -62,14 +70,14 @@ export const useGetApplication = ({
       if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
           toastNotifications.addDanger({
-            title: i18n.SW_GET_APPLICATION_API_ERROR,
+            title: i18n.SW_GET_APPLICATION_API_ERROR(appId),
             text: error.message,
           });
         }
         setIsLoading(false);
       }
     }
-  }, [action, http, toastNotifications]);
+  }, [apiToken, apiUrl, appId, http, toastNotifications]);
 
   return {
     isLoading,

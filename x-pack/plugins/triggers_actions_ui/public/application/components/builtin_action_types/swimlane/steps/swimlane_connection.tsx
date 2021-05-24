@@ -40,6 +40,9 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
     http,
     toastNotifications: toasts,
     action,
+    apiToken,
+    appId,
+    apiUrl,
   });
   const isValid = useMemo(() => apiUrl && apiToken && appId, [apiToken, apiUrl, appId]);
 
@@ -47,12 +50,13 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
     // fetch swimlane application configuration
     const application = await getApplication();
 
-    if (application != null) {
-      const allFields = application.fields;
-      updateFields(allFields);
-      updateCurrentStep(2);
+    if (!application) {
+      throw new Error(i18n.SW_GET_APPLICATION_API_ERROR(appId));
     }
-  }, [getApplication, updateCurrentStep, updateFields]);
+    const allFields = application.fields;
+    updateFields(allFields);
+    updateCurrentStep(2);
+  }, [appId, getApplication, updateCurrentStep, updateFields]);
 
   const onChangeConfig = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, key: 'apiUrl' | 'appId') => {
@@ -151,7 +155,7 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
             fullWidth
             isInvalid={isInvalid}
             readOnly={readOnly}
-            value={apiToken ?? ''}
+            value={apiToken || ''}
             data-test-subj="swimlaneApiTokenInput"
             onChange={onChangeSecrets}
             onBlur={onBlurSecrets}

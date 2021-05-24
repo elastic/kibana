@@ -12,7 +12,7 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import { SwimlaneActionConnector, SwimlaneFieldMappingConfig } from './types';
 import { SwimlaneConnection, SwimlaneFields } from './steps';
 
-const SwimlaneActionConnectorFields: React.FC<
+const SwimlaneActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<SwimlaneActionConnector>
 > = ({ errors, action, editActionConfig, editActionSecrets, readOnly }) => {
   const [currentStep, setCurrentStep] = useState<number>(1);

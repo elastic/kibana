@@ -49,12 +49,14 @@ export const SW_REQUIRED_API_TOKEN_TEXT = i18n.translate(
   }
 );
 
-export const SW_GET_APPLICATION_API_ERROR = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlane.unableToGetApplicationMessage',
-  {
-    defaultMessage: 'Unable to get application',
-  }
-);
+export const SW_GET_APPLICATION_API_ERROR = (id: string | null) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.builtinActionTypes.swimlane.unableToGetApplicationMessage',
+    {
+      defaultMessage: 'Unable to get application with id {id}',
+      values: { id },
+    }
+  );
 
 export const SW_API_URL_TEXT_FIELD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.apiUrlTextFieldLabel',

@@ -6,27 +6,38 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-import { ActionTypeExecutorResult } from '../../../../../../actions/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { GetApplicationResponse } from '../../../../../../actions/server/builtin_action_types/swimlane/types';
-import { BASE_ACTION_API_PATH } from '../../../constants';
 
 export async function getApplication({
   http,
   signal,
-  connectorId,
+  url,
+  appId,
+  apiToken,
 }: {
   http: HttpSetup;
   signal: AbortSignal;
-  connectorId: string;
-}): Promise<ActionTypeExecutorResult<GetApplicationResponse>> {
-  return await http.post(
-    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
-    {
-      body: JSON.stringify({
-        params: { subAction: 'getApplication', subActionParams: {} },
-      }),
+  url: string;
+  appId: string;
+  apiToken: string;
+}): Promise<Record<string, any>> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Private-Token': `${apiToken}`,
+  };
+
+  const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
+  const apiUrl = urlWithoutTrailingSlash.endsWith('api')
+    ? urlWithoutTrailingSlash
+    : urlWithoutTrailingSlash + '/api';
+  const applicationUrl = `${apiUrl}/app/{appId}`;
+
+  const getApplicationUrl = (id: string) => applicationUrl.replace('{appId}', id);
+  try {
+    return await http.get(getApplicationUrl(appId), {
+      headers,
       signal,
-    }
-  );
+    });
+  } catch (error) {
+    throw new Error(`Unable to get application with id ${appId}. Error: ${error.message}`);
+  }
 }
