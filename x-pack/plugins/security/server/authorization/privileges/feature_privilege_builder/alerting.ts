@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { get, uniq } from 'lodash';
+import { uniq } from 'lodash';
 
 import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
-enum AlertingEntity {
+enum AlertingType {
   RULE = 'rule',
   ALERT = 'alert',
 }
@@ -20,7 +20,7 @@ const readOperations: Record<AlertingEntity, string[]> = {
   alert: ['get', 'find'],
 };
 
-const writeOperations: Record<AlertingEntity, string[]> = {
+const writeOperations: Record<AlertingType, string[]> = {
   rule: [
     'create',
     'delete',
@@ -35,7 +35,7 @@ const writeOperations: Record<AlertingEntity, string[]> = {
   ],
   alert: ['update'],
 };
-const allOperations: Record<AlertingEntity, string[]> = {
+const allOperations: Record<AlertingType, string[]> = {
   rule: [...readOperations.rule, ...writeOperations.rule],
   alert: [...readOperations.alert, ...writeOperations.alert],
 };
@@ -48,28 +48,19 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
     const getAlertingPrivilege = (
       operations: Record<AlertingType, string[]>,
       privilegedTypes: readonly string[],
-      alertingEntity: string,
       consumer: string
     ) =>
-      privilegedTypes.flatMap((type) =>
-        operations.map((operation) =>
-          this.actions.alerting.get(type, consumer, alertingEntity, operation)
+      privilegedTypes.flatMap((privilegedType) =>
+        Object.values(AlertingType).flatMap((alertingType) =>
+          operations[alertingType].map((operation) =>
+            this.actions.alerting.get(privilegedType, consumer, alertingType, operation)
+          )
         )
       );
 
-    const getPrivilegesForEntity = (entity: AlertingEntity) => {
-      const all = get(privilegeDefinition.alerting, `${entity}.all`) ?? [];
-      const read = get(privilegeDefinition.alerting, `${entity}.read`) ?? [];
-
-      return uniq([
-        ...getAlertingPrivilege(allOperations[entity], all, entity, feature.id),
-        ...getAlertingPrivilege(readOperations[entity], read, entity, feature.id),
-      ]);
-    };
-
     return uniq([
-      ...getPrivilegesForEntity(AlertingEntity.RULE),
-      ...getPrivilegesForEntity(AlertingEntity.ALERT),
+      ...getAlertingPrivilege(allOperations, privilegeDefinition.alerting?.all ?? [], feature.id),
+      ...getAlertingPrivilege(readOperations, privilegeDefinition.alerting?.read ?? [], feature.id),
     ]);
   }
 }
