@@ -102,11 +102,13 @@ describe('Task Runner', () => {
     maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
   };
 
+  const mockDate = new Date('2019-02-12T21:01:22.479Z');
+
   const mockedAlertTypeSavedObject: Alert<AlertTypeParams> = {
     id: '1',
     consumer: 'bar',
-    createdAt: new Date('2019-02-12T21:01:22.479Z'),
-    updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+    createdAt: mockDate,
+    updatedAt: mockDate,
     throttle: null,
     muteAll: false,
     notifyWhen: 'onActiveAlert',
@@ -157,6 +159,7 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.renderActionParameterTemplates.mockImplementation(
       (actionTypeId, actionId, params) => params
     );
+    alertTypeRegistry.get.mockReturnValue(alertType);
   });
 
   test('successfully executes the task', async () => {
@@ -207,6 +210,45 @@ describe('Task Runner', () => {
     expect(call.tags).toEqual(['alert-', '-tags']);
     expect(call.createdBy).toBe('alert-creator');
     expect(call.updatedBy).toBe('alert-updater');
+    expect(call.rule).not.toBe(null);
+    expect(call.rule.name).toBe('alert-name');
+    expect(call.rule.tags).toEqual(['alert-', '-tags']);
+    expect(call.rule.consumer).toBe('bar');
+    expect(call.rule.enabled).toBe(true);
+    expect(call.rule.schedule).toMatchInlineSnapshot(`
+    Object {
+      "interval": "10s",
+    }
+    `);
+    expect(call.rule.createdBy).toBe('alert-creator');
+    expect(call.rule.updatedBy).toBe('alert-updater');
+    expect(call.rule.createdAt).toBe(mockDate);
+    expect(call.rule.updatedAt).toBe(mockDate);
+    expect(call.rule.notifyWhen).toBe('onActiveAlert');
+    expect(call.rule.throttle).toBe(null);
+    expect(call.rule.producer).toBe('alerts');
+    expect(call.rule.ruleTypeId).toBe('test');
+    expect(call.rule.ruleTypeName).toBe('My test alert');
+    expect(call.rule.actions).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "actionTypeId": "action",
+        "group": "default",
+        "id": "1",
+        "params": Object {
+          "foo": true,
+        },
+      },
+      Object {
+        "actionTypeId": "action",
+        "group": "recovered",
+        "id": "2",
+        "params": Object {
+          "isResolved": true,
+        },
+      },
+    ]
+    `);
     expect(call.services.alertInstanceFactory).toBeTruthy();
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
