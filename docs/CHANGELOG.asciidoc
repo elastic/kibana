@@ -93,6 +93,8 @@ The existing agents in {kib} are not migrated as part of the migration to Fleet.
 The existing agent API keys are invalidated and display as `Inactive` on the *Agents* page.
 ====
 
+// end::notable-breaking-changes[]
+
 [float]
 [[known-issue-7.13.0]]
 === Known issue
@@ -102,9 +104,6 @@ When pages load, {kib} calls the Fleet packages API. For more information, refer
 
 *Impact* +
 In some cases, *Dev Tools* displays a 403 error with the `Access to Fleet API require the superuser role` message, but you can continue to access *Fleet*.
-
-
-// end::notable-breaking-changes[]
 
 [float]
 [[deprecations-7.13.0]]
