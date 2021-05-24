@@ -6,7 +6,8 @@
  */
 
 import React, { ComponentProps, useState } from 'react';
-import { StatusFilter, Status } from './status_filter';
+import type { AlertStatus } from '../../../common/typings';
+import { StatusFilter } from './status_filter';
 
 type Args = ComponentProps<typeof StatusFilter>;
 
@@ -19,7 +20,7 @@ export default {
 };
 
 export function Example({ onChange }: Args) {
-  const [status, setStatus] = useState<Status>('open');
+  const [status, setStatus] = useState<AlertStatus>('open');
 
   return (
     <StatusFilter
