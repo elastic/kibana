@@ -21,6 +21,7 @@ export class JsonUploadAndParseAsyncWrapper extends React.Component<
     JsonUploadAndParse: null,
   };
   private _isMounted = false;
+
   componentDidMount() {
     this._isMounted = true;
     lazyLoadModules().then((modules) => {
@@ -30,6 +31,10 @@ export class JsonUploadAndParseAsyncWrapper extends React.Component<
         });
       }
     });
+  }
+
+  componentWillUnmount(): void {
+    this._isMounted = false;
   }
 
   render() {

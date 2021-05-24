@@ -8,7 +8,7 @@
 import React, { Component, Fragment } from 'react';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { createNewIndexAndPattern } from './utils/indexing_service';
+import { createNewIndexAndPattern } from './create_new_index_pattern';
 import { RenderWizardArguments } from '../layer_wizard_registry';
 import { VectorLayer } from '../vector_layer';
 import { ESSearchSource } from '../../sources/es_search_source';
@@ -17,9 +17,8 @@ import { getIndexNameFormComponent } from '../../../kibana_services';
 
 interface State {
   indexName: string;
-  indexError: string;
+  indexNameError: string;
   indexingTriggered: boolean;
-  indexPatternId: string;
 }
 
 export class NewVectorLayerEditor extends Component<RenderWizardArguments, State> {
@@ -27,9 +26,8 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
 
   state: State = {
     indexName: '',
-    indexError: '',
+    indexNameError: '',
     indexingTriggered: false,
-    indexPatternId: '',
   };
 
   componentDidMount() {
@@ -52,7 +50,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       return;
     }
     this.setState({
-      indexError: i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexError', {
+      indexNameError: i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexError', {
         defaultMessage: 'Could not create index: {errorMessage}',
         values: {
           errorMessage: message,
@@ -62,7 +60,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
   }
 
   _createNewIndex = async () => {
-    let indexPatternId: string;
+    let indexPatternId: string | undefined;
     try {
       const response = await createNewIndexAndPattern(this.state.indexName);
       indexPatternId = response.indexPatternId;
@@ -74,9 +72,9 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     if (!indexPatternId) {
       return this._setCreateIndexError(
         i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexError', {
-          defaultMessage: 'Could not create index: {errorMessage}',
+          defaultMessage: 'Could not create index with name {message}',
           values: {
-            errorMessage: message,
+            message: this.state.indexName,
           },
         })
       );
@@ -102,7 +100,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
   _onIndexChange = (indexName: string, indexError?: string) => {
     this.setState({
       indexName,
-      indexError: indexError ? indexError : '',
+      indexNameError: indexError ? indexError : '',
     });
     if (indexName && !indexError) {
       this.props.enableNextBtn();

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getHttp } from '../../../../kibana_services';
-import { CreateDocSourceResp, INDEX_SOURCE_API_PATH } from '../../../../../common';
+import { getHttp } from '../../../kibana_services';
+import { CreateDocSourceResp, INDEX_SOURCE_API_PATH } from '../../../../common';
 
 export const createNewIndexAndPattern = async (indexName: string) => {
   return await getHttp().fetch<CreateDocSourceResp>({

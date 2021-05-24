@@ -34,9 +34,7 @@ export class IndexNameForm extends Component<Props> {
     const indexName = event.target.value;
     this.props.onIndexNameChange(indexName);
     this._validateIndexName(indexName);
-    if (this.props.onIndexNameValidationStart) {
-      this.props.onIndexNameValidationStart();
-    }
+    this.props.onIndexNameValidationStart();
   };
 
   _validateIndexName = _.debounce(async (indexName: string) => {
@@ -44,9 +42,7 @@ export class IndexNameForm extends Component<Props> {
     if (!this._isMounted || indexName !== this.props.indexName) {
       return;
     }
-    if (this.props.onIndexNameValidationEnd) {
-      this.props.onIndexNameValidationEnd();
-    }
+    this.props.onIndexNameValidationEnd();
     this.props.onIndexNameChange(indexName, indexNameError);
   }, 500);
 
