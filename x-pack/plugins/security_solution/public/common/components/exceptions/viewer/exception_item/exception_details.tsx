@@ -16,10 +16,10 @@ import {
 import React, { useMemo, Fragment } from 'react';
 import styled, { css } from 'styled-components';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { DescriptionListItem } from '../../types';
 import { getDescriptionListContent } from '../helpers';
 import * as i18n from '../../translations';
-import type { ExceptionListItemSchema } from '../../../../../../public/shared_imports';
 
 const MyExceptionDetails = styled(EuiFlexItem)`
   ${({ theme }) => css`

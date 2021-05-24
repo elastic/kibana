@@ -4,9 +4,9 @@
 
 ## SavedObjectsCollectMultiNamespaceReferencesObject interface
 
-An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the `namespaceType: 'multi'` or `namespaceType: 'multi-isolated'` option).
+An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the `namespaceType: 'multiple'` or `namespaceType: 'multiple-isolated'` option).
 
-Note: if options.purpose is 'updateObjectsSpaces', it must be a shareable type (in other words, the object type must be registered with the `namespaceType: 'multi'`<!-- -->).
+Note: if options.purpose is 'updateObjectsSpaces', it must be a shareable type (in other words, the object type must be registered with the `namespaceType: 'multiple'`<!-- -->).
 
 <b>Signature:</b>
 
