@@ -101,7 +101,7 @@ To use the panel on *Canvas* workpads and other dashboards, save the panel to th
 
 . Click *Save to library*.
 
-. Enter the *Title* and add any applicable <<tags,*Tags*>>.
+. Enter the *Title* and add any applicable *Tags*.
 
 . Make sure that *Add to Dashboard after saving* is selected.
 
