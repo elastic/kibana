@@ -300,6 +300,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
               subtitle={utilityBar ? undefined : subtitle}
               title={globalFullScreen ? titleWithExitFullScreen : justTitle}
+              isInspectDisabled={combinedQueries!.filterQuery === undefined}
             >
               {HeaderSectionContent}
             </HeaderSection>

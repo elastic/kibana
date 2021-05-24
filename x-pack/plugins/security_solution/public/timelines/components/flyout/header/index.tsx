@@ -134,7 +134,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
                     queryId={`${timelineId}-${activeTab}`}
                     inputId="timeline"
                     inspectIndex={0}
-                    isDisabled={!isDataInTimeline}
+                    isDisabled={!isDataInTimeline || kqlQuery.filterQuery === undefined}
                     title={i18n.INSPECT_TIMELINE_TITLE}
                   />
                 </EuiFlexItem>

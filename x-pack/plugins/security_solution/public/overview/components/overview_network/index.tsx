@@ -53,6 +53,7 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
     filterQuery,
     indexNames,
     startDate,
+    skip: filterQuery === undefined,
   });
 
   const goToNetwork = useCallback(
@@ -123,7 +124,12 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
       <InspectButtonContainer>
         <EuiPanel hasBorder data-test-subj="overview-network-query">
           <>
-            <HeaderSection id={OverviewNetworkQueryId} subtitle={subtitle} title={title}>
+            <HeaderSection
+              id={OverviewNetworkQueryId}
+              subtitle={subtitle}
+              title={title}
+              isInspectDisabled={filterQuery === undefined}
+            >
               {networkPageButton}
             </HeaderSection>
 

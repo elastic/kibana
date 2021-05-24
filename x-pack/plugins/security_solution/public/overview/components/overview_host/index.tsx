@@ -51,6 +51,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
     filterQuery,
     indexNames,
     startDate,
+    skip: filterQuery === undefined,
   });
 
   const goToHost = useCallback(
@@ -117,7 +118,12 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
     <EuiFlexItem>
       <InspectButtonContainer>
         <EuiPanel hasBorder>
-          <HeaderSection id={OverviewHostQueryId} subtitle={subtitle} title={title}>
+          <HeaderSection
+            id={OverviewHostQueryId}
+            subtitle={subtitle}
+            title={title}
+            isInspectDisabled={filterQuery === undefined}
+          >
             <>{hostPageButton}</>
           </HeaderSection>
 

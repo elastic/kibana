@@ -65,6 +65,7 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
           )}`}
           title={i18n.ANOMALIES}
           tooltip={i18n.TOOLTIP}
+          isInspectDisabled={skip}
         />
 
         <BasicTable
