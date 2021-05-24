@@ -30,13 +30,14 @@ import {
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   AggDescriptor,
+  Attribution,
   ESTermSourceDescriptor,
   JoinDescriptor,
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
 } from '../../../common/descriptor_types';
-import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
+import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { getJoinAggKey } from '../../../common/get_agg_key';
@@ -76,7 +77,6 @@ export interface ILayer {
   getMbLayerIds(): string[];
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
-  canShowTooltip(): boolean;
   syncLayerWithMB(mbMap: MbMap): void;
   getLayerTypeIconName(): string;
   isInitialDataLoadComplete(): boolean;
@@ -97,8 +97,10 @@ export interface ILayer {
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
   isFittable(): Promise<boolean>;
+  isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
+  getDescriptor(): LayerDescriptor;
 }
 
 export type CustomIconAndTooltipContent = {
@@ -129,6 +131,8 @@ export class AbstractLayer implements ILayer {
       alpha: _.get(options, 'alpha', 0.75),
       visible: _.get(options, 'visible', true),
       style: _.get(options, 'style', null),
+      includeInFitToBounds:
+        typeof options.includeInFitToBounds === 'boolean' ? options.includeInFitToBounds : true,
     };
   }
 
@@ -154,6 +158,10 @@ export class AbstractLayer implements ILayer {
     // @ts-expect-error
     const mbStyle = mbMap.getStyle();
     return mbStyle.sources[sourceId].data;
+  }
+
+  getDescriptor(): LayerDescriptor {
+    return this._descriptor;
   }
 
   async cloneDescriptor(): Promise<LayerDescriptor> {
@@ -240,7 +248,11 @@ export class AbstractLayer implements ILayer {
   }
 
   async isFittable(): Promise<boolean> {
-    return (await this.supportsFitToBounds()) && this.isVisible();
+    return (await this.supportsFitToBounds()) && this.isVisible() && this.isIncludeInFitToBounds();
+  }
+
+  isIncludeInFitToBounds(): boolean {
+    return !!this._descriptor.includeInFitToBounds;
   }
 
   async isFilteredByGlobalTime(): Promise<boolean> {
@@ -259,10 +271,16 @@ export class AbstractLayer implements ILayer {
   }
 
   async getAttributions(): Promise<Attribution[]> {
-    if (!this.hasErrors()) {
-      return await this.getSource().getAttributions();
+    if (this.hasErrors() || !this.isVisible()) {
+      return [];
     }
-    return [];
+
+    const attributionProvider = this.getSource().getAttributionProvider();
+    if (attributionProvider) {
+      return attributionProvider();
+    }
+
+    return this._descriptor.attribution !== undefined ? [this._descriptor.attribution] : [];
   }
 
   getStyleForEditing(): IStyle {
@@ -438,10 +456,6 @@ export class AbstractLayer implements ILayer {
 
   ownsMbSourceId(mbSourceId: string): boolean {
     throw new Error('Should implement AbstractLayer#ownsMbSourceId');
-  }
-
-  canShowTooltip() {
-    return false;
   }
 
   syncLayerWithMB(mbMap: MbMap) {

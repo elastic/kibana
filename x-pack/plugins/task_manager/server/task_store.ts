@@ -340,6 +340,7 @@ export class TaskStore {
     const { body } = await this.esClient.search<ConcreteTaskInstance>({
       index: this.index,
       ignore_unavailable: true,
+      track_total_hits: true,
       body: ensureAggregationOnlyReturnsTaskObjects({
         query,
         aggs,

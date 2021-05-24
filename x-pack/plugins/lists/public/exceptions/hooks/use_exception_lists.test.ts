@@ -6,17 +6,21 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import type {
+  ExceptionListSchema,
+  UseExceptionListsProps,
+} from '@kbn/securitysolution-io-ts-list-types';
+import * as api from '@kbn/securitysolution-list-api';
+import { ReturnExceptionLists, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
-import * as api from '../api';
 import { getFoundExceptionListSchemaMock } from '../../../common/schemas/response/found_exception_list_schema.mock';
-import { ExceptionListSchema } from '../../../common/schemas';
-import { UseExceptionListsProps } from '../types';
-
-import { ReturnExceptionLists, useExceptionLists } from './use_exception_lists';
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const mockKibanaNotificationsService = coreMock.createStart().notifications;
+jest.mock('@kbn/securitysolution-list-api');
+
+// TODO: Move this test to the kbn package: packages/kbn-securitysolution-list-hooks/src/use_exception_lists/index.test.ts once mocks are ported over
 
 describe('useExceptionLists', () => {
   beforeEach(() => {

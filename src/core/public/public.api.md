@@ -589,6 +589,9 @@ export interface DocLinksStart {
             readonly painlessWalkthrough: string;
             readonly luceneExpressions: string;
         };
+        readonly search: {
+            readonly sessions: string;
+        };
         readonly indexPatterns: {
             readonly introduction: string;
             readonly fieldFormattersNumber: string;
@@ -619,10 +622,14 @@ export interface DocLinksStart {
         readonly visualize: Record<string, string>;
         readonly apis: Readonly<{
             bulkIndexAlias: string;
+            byteSizeUnits: string;
+            createAutoFollowPattern: string;
+            createFollower: string;
             createIndex: string;
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
             createRoleMappingTemplates: string;
+            createRollupJobsRequest: string;
             createApiKey: string;
             createPipeline: string;
             createTransformRequest: string;
@@ -638,6 +645,7 @@ export interface DocLinksStart {
             putIndexTemplateV1: string;
             putWatch: string;
             simulatePipeline: string;
+            timeUnits: string;
             updateTransform: string;
         }>;
         readonly observability: Record<string, string>;
@@ -892,15 +900,6 @@ export interface IHttpInterceptController {
 export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
     readonly body?: TResponseBody;
     readonly response?: Readonly<Response>;
-}
-
-// @public (undocumented)
-export interface ImageValidation {
-    // (undocumented)
-    maxSize: {
-        length: number;
-        description: string;
-    };
 }
 
 // @public
@@ -1165,6 +1164,20 @@ export interface SavedObjectReference {
     type: string;
 }
 
+// @public
+export interface SavedObjectReferenceWithContext {
+    id: string;
+    inboundReferences: Array<{
+        type: string;
+        id: string;
+        name: string;
+    }>;
+    isMissing?: boolean;
+    spaces: string[];
+    spacesWithMatchingAliases?: string[];
+    type: string;
+}
+
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
     namespace?: string;
@@ -1231,6 +1244,12 @@ export class SavedObjectsClient {
 
 // @public
 export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
+
+// @public
+export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
+    // (undocumented)
+    objects: SavedObjectReferenceWithContext[];
+}
 
 // @public (undocumented)
 export interface SavedObjectsCreateOptions {
@@ -1509,25 +1528,6 @@ export class SimpleSavedObject<T = unknown> {
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
-// @public
-export type StringValidation = StringValidationRegex | StringValidationRegexString;
-
-// @public
-export interface StringValidationRegex {
-    // (undocumented)
-    message: string;
-    // (undocumented)
-    regex: RegExp;
-}
-
-// @public
-export interface StringValidationRegexString {
-    // (undocumented)
-    message: string;
-    // (undocumented)
-    regexString: string;
-}
-
 // Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1596,8 +1596,6 @@ export interface UiSettingsParams<T = unknown> {
     schema: Type<T>;
     sensitive?: boolean;
     type?: UiSettingsType;
-    // (undocumented)
-    validation?: ImageValidation | StringValidation;
     value?: T;
 }
 

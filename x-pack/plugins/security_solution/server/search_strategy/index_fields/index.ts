@@ -7,7 +7,12 @@
 
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
-import { IndexPatternsFetcher, ISearchStrategy } from '../../../../../../src/plugins/data/server';
+import get from 'lodash/get';
+import {
+  IndexPatternsFetcher,
+  ISearchStrategy,
+  SearchStrategyDependencies,
+} from '../../../../../../src/plugins/data/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FieldDescriptor } from '../../../../../../src/plugins/data/server/index_patterns';
 import {
@@ -16,6 +21,8 @@ import {
   IndexFieldsStrategyRequest,
   BeatFields,
 } from '../../../common/search_strategy/index_fields';
+
+const apmIndexPattern = 'apm-*-transaction*';
 
 export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   IndexFieldsStrategyRequest,
@@ -27,60 +34,73 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
 
   return {
-    search: (request, options, { esClient }) =>
-      from(
-        new Promise<IndexFieldsStrategyResponse>(async (resolve) => {
-          const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
-          const dedupeIndices = dedupeIndexName(request.indices);
+    search: (request, options, deps) => from(requestIndexFieldSearch(request, deps, beatFields)),
+  };
+};
 
-          const responsesIndexFields = await Promise.all(
-            dedupeIndices
-              .map((index) =>
-                indexPatternsFetcher.getFieldsForWildcard({
-                  pattern: index,
-                })
-              )
-              .map((p) => p.catch((e) => false))
-          );
-          let indexFields: IndexField[] = [];
+export const requestIndexFieldSearch = async (
+  request: IndexFieldsStrategyRequest,
+  { esClient }: SearchStrategyDependencies,
+  beatFields: BeatFields
+): Promise<IndexFieldsStrategyResponse> => {
+  const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
+  const dedupeIndices = dedupeIndexName(request.indices);
 
-          if (!request.onlyCheckIfIndicesExist) {
-            indexFields = await formatIndexFields(
-              beatFields,
-              responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
-              dedupeIndices
-            );
-          }
-
-          return resolve({
-            indexFields,
-            indicesExist: dedupeIndices.filter((index, i) => responsesIndexFields[i] !== false),
-            rawResponse: {
-              timed_out: false,
-              took: -1,
-              _shards: {
-                total: -1,
-                successful: -1,
-                failed: -1,
-                skipped: -1,
-              },
-              hits: {
-                total: -1,
-                max_score: -1,
-                hits: [
-                  {
-                    _index: '',
-                    _type: '',
-                    _id: '',
-                    _score: -1,
-                    _source: null,
-                  },
-                ],
-              },
-            },
+  const responsesIndexFields = await Promise.all(
+    dedupeIndices
+      .map(async (index) => {
+        if (request.onlyCheckIfIndicesExist && index.includes(apmIndexPattern)) {
+          // for apm index pattern check also if there's data https://github.com/elastic/kibana/issues/90661
+          const searchResponse = await esClient.asCurrentUser.search({
+            index,
+            body: { query: { match_all: {} }, size: 0 },
           });
-        })
-      ),
+          return get(searchResponse, 'body.hits.total.value', 0) > 0;
+        } else {
+          return indexPatternsFetcher.getFieldsForWildcard({
+            pattern: index,
+          });
+        }
+      })
+      .map((p) => p.catch((e) => false))
+  );
+
+  let indexFields: IndexField[] = [];
+
+  if (!request.onlyCheckIfIndicesExist) {
+    indexFields = await formatIndexFields(
+      beatFields,
+      responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
+      dedupeIndices
+    );
+  }
+
+  return {
+    indexFields,
+    indicesExist: dedupeIndices.filter((index, i) => responsesIndexFields[i] !== false),
+    rawResponse: {
+      timed_out: false,
+      took: -1,
+      _shards: {
+        total: -1,
+        successful: -1,
+        failed: -1,
+        skipped: -1,
+      },
+      hits: {
+        total: -1,
+        max_score: -1,
+        hits: [
+          {
+            _index: '',
+            _type: '',
+            _id: '',
+            _score: -1,
+            _source: null,
+          },
+        ],
+      },
+    },
   };
 };
 

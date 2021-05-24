@@ -7,15 +7,13 @@
 
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
 import {
+  EuiCallOut,
   EuiDataGrid,
   EuiDataGridSorting,
   EuiDataGridProps,
   EuiDataGridColumn,
   EuiLink,
-  EuiTextColor,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiSpacer,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
@@ -26,6 +24,11 @@ import { Direction, ResultEdges } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
 import { useActionResults } from '../action_results/use_action_results';
 import { generateEmptyDataMessage } from './translations';
+import {
+  ViewResultsInDiscoverAction,
+  ViewResultsInLensAction,
+  ViewResultsActionButtonType,
+} from '../scheduled_query_groups/scheduled_query_group_queries_table';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -33,20 +36,17 @@ interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
   agentIds?: string[];
+  endDate?: string;
   isLive?: boolean;
-}
-
-interface SummaryTableValue {
-  total: number | string;
-  pending: number | string;
-  responded: number;
-  failed: number;
+  startDate?: string;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   actionId,
   agentIds,
   isLive,
+  startDate,
+  endDate,
 }) => {
   const {
     // @ts-expect-error update types
@@ -60,52 +60,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     sortField: '@timestamp',
     isLive,
   });
-
-  const notRespondedCount = useMemo(() => {
-    if (!agentIds || !aggregations.totalResponded) {
-      return '-';
-    }
-
-    return agentIds.length - aggregations.totalResponded;
-  }, [aggregations.totalResponded, agentIds]);
-
-  const summaryColumns: Array<EuiBasicTableColumn<SummaryTableValue>> = useMemo(
-    () => [
-      {
-        field: 'total',
-        name: 'Agents queried',
-      },
-      {
-        field: 'responded',
-        name: 'Successful',
-      },
-      {
-        field: 'pending',
-        name: 'Not yet responded',
-      },
-      {
-        field: 'failed',
-        name: 'Failed',
-        // eslint-disable-next-line react/display-name
-        render: (failed: number) => (
-          <EuiTextColor color={failed ? 'danger' : 'default'}>{failed}</EuiTextColor>
-        ),
-      },
-    ],
-    []
-  );
-
-  const summaryItems = useMemo(
-    () => [
-      {
-        total: agentIds?.length ?? '-',
-        pending: notRespondedCount,
-        responded: aggregations.totalResponded,
-        failed: aggregations.failed,
-      },
-    ],
-    [aggregations, agentIds, notRespondedCount]
-  );
 
   const { getUrlForApp } = useKibana().services.application;
 
@@ -132,17 +86,23 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [setPagination]
   );
 
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([
+    {
+      id: 'agent.name',
+      direction: Direction.asc,
+    },
+  ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
-
-  const { data: allResultsData } = useAllResults({
+  const { data: allResultsData, isFetched } = useAllResults({
     actionId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
-    direction: Direction.asc,
-    sortField: '@timestamp',
     isLive,
+    sort: sortingColumns.map((sortedColumn) => ({
+      field: sortedColumn.id,
+      direction: sortedColumn.direction as Direction,
+    })),
   });
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
@@ -234,27 +194,50 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     }
   }, [columns, allResultsData?.edges]);
 
+  const toolbarVisibility = useMemo(
+    () => ({
+      additionalControls: (
+        <>
+          <ViewResultsInDiscoverAction
+            actionId={actionId}
+            buttonType={ViewResultsActionButtonType.button}
+            endDate={endDate}
+            startDate={startDate}
+          />
+          <ViewResultsInLensAction
+            actionId={actionId}
+            buttonType={ViewResultsActionButtonType.button}
+            endDate={endDate}
+            startDate={startDate}
+          />
+        </>
+      ),
+    }),
+    [actionId, endDate, startDate]
+  );
+
+  if (!aggregations.totalResponded) {
+    return <EuiLoadingContent lines={5} />;
+  }
+
+  if (aggregations.totalResponded && isFetched && !allResultsData?.edges.length) {
+    return <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />;
+  }
+
   return (
     // @ts-expect-error update types
     <DataContext.Provider value={allResultsData?.edges}>
-      <EuiBasicTable items={summaryItems} rowHeader="total" columns={summaryColumns} />
-      <EuiSpacer />
-      {columns.length > 0 ? (
-        <EuiDataGrid
-          aria-label="Osquery results"
-          columns={columns}
-          columnVisibility={columnVisibility}
-          rowCount={allResultsData?.totalCount ?? 0}
-          renderCellValue={renderCellValue}
-          sorting={tableSorting}
-          pagination={tablePagination}
-          height="500px"
-        />
-      ) : (
-        <div className={'eui-textCenter'}>
-          {generateEmptyDataMessage(aggregations.totalResponded)}
-        </div>
-      )}
+      <EuiDataGrid
+        aria-label="Osquery results"
+        columns={columns}
+        columnVisibility={columnVisibility}
+        rowCount={allResultsData?.totalCount ?? 0}
+        renderCellValue={renderCellValue}
+        sorting={tableSorting}
+        pagination={tablePagination}
+        height="500px"
+        toolbarVisibility={toolbarVisibility}
+      />
     </DataContext.Provider>
   );
 };

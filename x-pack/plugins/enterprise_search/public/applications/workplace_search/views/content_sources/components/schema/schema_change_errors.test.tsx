@@ -14,7 +14,7 @@ import { useParams } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { SchemaErrorsAccordion } from '../../../../../shared/schema/schema_errors_accordion';
+import { SchemaErrorsAccordion } from '../../../../../shared/schema';
 
 import { SchemaChangeErrors } from './schema_change_errors';
 

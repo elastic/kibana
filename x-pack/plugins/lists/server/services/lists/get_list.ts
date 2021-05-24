@@ -6,9 +6,10 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import type { Id, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Id, ListSchema, SearchEsListSchema } from '../../../common/schemas';
 import { transformElasticToList } from '../utils/transform_elastic_to_list';
+import { SearchEsListSchema } from '../../schemas/elastic_response';
 
 interface GetListOptions {
   id: Id;

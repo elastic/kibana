@@ -24,12 +24,12 @@ import type {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
-import type { PanelSchema } from '../../../common/types';
+import type { Panel } from '../../../common/types';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
   req: VisTypeTimeseriesVisDataRequest,
-  panel: PanelSchema,
+  panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
   const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);

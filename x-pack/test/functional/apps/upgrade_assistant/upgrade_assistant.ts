@@ -17,10 +17,11 @@ export default function upgradeAssistantFunctionalTests({
   const security = getService('security');
   const log = getService('log');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/86546
-  describe.skip('Upgrade Checkup', function () {
-    this.tags('includeFirefox');
+  // Updated for the hiding of the UA UI.
+  describe('Upgrade Checkup', function () {
+    this.tags('skipFirefox');
 
     before(async () => {
       await esArchiver.load('empty_kibana');
@@ -33,11 +34,18 @@ export default function upgradeAssistantFunctionalTests({
       await security.testUser.restoreDefaults();
     });
 
-    it('allows user to navigate to upgrade checkup', async () => {
+    it('Overview page', async () => {
+      await PageObjects.upgradeAssistant.navigateToPage();
+      await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
+        return testSubjects.exists('comingSoonPrompt');
+      });
+    });
+
+    it.skip('allows user to navigate to upgrade checkup', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
     });
 
-    it('allows user to toggle deprecation logging', async () => {
+    it.skip('allows user to toggle deprecation logging', async () => {
       log.debug('expect initial state to be ON');
       expect(await PageObjects.upgradeAssistant.deprecationLoggingEnabledLabel()).to.be('On');
       expect(await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled()).to.be(true);
@@ -60,7 +68,7 @@ export default function upgradeAssistantFunctionalTests({
       });
     });
 
-    it('allows user to open cluster tab', async () => {
+    it.skip('allows user to open cluster tab', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
       await PageObjects.upgradeAssistant.clickTab('cluster');
       expect(await PageObjects.upgradeAssistant.issueSummaryText()).to.be(
@@ -68,7 +76,7 @@ export default function upgradeAssistantFunctionalTests({
       );
     });
 
-    it('allows user to open indices tab', async () => {
+    it.skip('allows user to open indices tab', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
       await PageObjects.upgradeAssistant.clickTab('indices');
       expect(await PageObjects.upgradeAssistant.issueSummaryText()).to.be(

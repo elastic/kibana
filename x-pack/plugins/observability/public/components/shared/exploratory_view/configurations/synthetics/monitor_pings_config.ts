@@ -8,6 +8,7 @@
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels } from '../constants';
 import { buildExistsFilter } from '../utils';
+import { DOWN_LABEL, UP_LABEL } from '../constants/labels';
 
 export function getMonitorPingsConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -22,12 +23,12 @@ export function getMonitorPingsConfig({ seriesId, indexPattern }: ConfigProps): 
       {
         operationType: 'sum',
         sourceField: 'summary.up',
-        label: 'Up',
+        label: UP_LABEL,
       },
       {
         operationType: 'sum',
         sourceField: 'summary.down',
-        label: 'Down',
+        label: DOWN_LABEL,
       },
     ],
     yTitle: 'Pings',
