@@ -15,7 +15,7 @@ import {
   defaultPaletteParams,
 } from '../../shared_components/coloring/constants';
 import { CustomPaletteParams } from '../../shared_components/coloring/types';
-import { remapStopsByNewInterval } from '../../shared_components/coloring/utils';
+import { getStopsForFixedMode } from '../../shared_components/coloring/utils';
 
 function getCustomPaletteConfig(
   palettes: PaletteRegistry,
@@ -43,26 +43,13 @@ function getCustomPaletteConfig(
     return { value: id, title, type: 'text' as const, 'data-test-subj': `custom-palette` };
   }
 
-  const referenceStops = activePalette.params.colorStops || activePalette.params.stops;
-  const fallbackStops = activePalette.params.stops;
-
-  // what happens when user set two stops with the same value? we'll fallback to the display interval
-  const oldInterval =
-    referenceStops[referenceStops.length - 1].stop - referenceStops[0].stop ||
-    fallbackStops[fallbackStops.length - 1].stop - fallbackStops[0].stop;
-
   // full custom palette
   return {
     value: id,
     title,
     type: FIXED_PROGRESSION,
     'data-test-subj': `custom-palette`,
-    palette: remapStopsByNewInterval(activePalette.params.stops, {
-      newInterval: 100,
-      oldInterval,
-      newMin: 0,
-      oldMin: referenceStops[0].stop,
-    }),
+    palette: getStopsForFixedMode(activePalette.params.stops, activePalette.params.colorStops),
   };
 }
 

@@ -32,10 +32,10 @@ import {
   getPaletteStops,
   mergePaletteParams,
   getDataMinMax,
-  roundStopValues,
   remapStopsByNewInterval,
   getSwitchToCustomParams,
   reversePalette,
+  roundStopValues,
 } from './utils';
 const idPrefix = htmlIdGenerator()();
 
@@ -70,11 +70,8 @@ export function CustomizablePalette({
   const rangeType = activePalette.params?.rangeType ?? defaultPaletteParams.rangeType;
   const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
-  const colorStopsToShow = getColorStops(
-    palettes,
-    activePalette?.params?.colorStops || [],
-    activePalette,
-    dataBounds
+  const colorStopsToShow = roundStopValues(
+    getColorStops(palettes, activePalette?.params?.colorStops || [], activePalette, dataBounds)
   );
 
   return (
@@ -242,14 +239,12 @@ export function CustomizablePalette({
                   activePalette.params?.rangeType,
                   dataBounds
                 );
-                const newColorStops = roundStopValues(
-                  remapStopsByNewInterval(colorStopsToShow, {
-                    oldInterval: oldMax - oldMin,
-                    newInterval: newMax - newMin,
-                    newMin,
-                    oldMin,
-                  })
-                );
+                const newColorStops = remapStopsByNewInterval(colorStopsToShow, {
+                  oldInterval: oldMax - oldMin,
+                  newInterval: newMax - newMin,
+                  newMin,
+                  oldMin,
+                });
                 const stops = getPaletteStops(
                   palettes,
                   { ...activePalette.params, colorStops: newColorStops, ...params },

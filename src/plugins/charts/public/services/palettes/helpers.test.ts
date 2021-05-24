@@ -7,6 +7,7 @@
  */
 
 import { workoutColorForValue } from './helpers';
+import { CustomPaletteState } from '../..';
 
 describe('workoutColorForValue', () => {
   it('should return no color for empty value', () => {
@@ -28,22 +29,17 @@ describe('workoutColorForValue', () => {
   });
 
   describe('range: "number"', () => {
+    const DEFAULT_PROPS: CustomPaletteState = {
+      continuity: 'above',
+      colors: ['red', 'green', 'blue', 'yellow'],
+      range: 'number',
+      gradient: false,
+      rangeMin: 0,
+      rangeMax: 200,
+      stops: [],
+    };
     it('find the right color for predefined palettes', () => {
-      expect(
-        workoutColorForValue(
-          123,
-          {
-            continuity: 'above',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'number',
-            gradient: false,
-            rangeMin: 0,
-            rangeMax: 200,
-            stops: [],
-          },
-          { min: 0, max: 200 }
-        )
-      ).toBe('blue');
+      expect(workoutColorForValue(123, DEFAULT_PROPS, { min: 0, max: 200 })).toBe('blue');
     });
 
     it('find the right color for custom stops palettes', () => {
@@ -51,12 +47,7 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           50,
           {
-            continuity: 'above',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'number',
-            gradient: false,
-            rangeMin: 0,
-            rangeMax: 200,
+            ...DEFAULT_PROPS,
             stops: [20, 40, 60, 80],
           },
           { min: 0, max: 200 }
@@ -69,11 +60,7 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           123,
           {
-            continuity: 'above',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'number',
-            gradient: false,
-            rangeMin: 0,
+            ...DEFAULT_PROPS,
             rangeMax: 100,
             stops: [20, 40, 60, 80],
           },
@@ -84,11 +71,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           123,
           {
+            ...DEFAULT_PROPS,
             continuity: 'all',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'number',
-            gradient: false,
-            rangeMin: 0,
             rangeMax: 100,
             stops: [20, 40, 60, 80],
           },
@@ -102,11 +86,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           123,
           {
+            ...DEFAULT_PROPS,
             continuity: 'below',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'number',
-            gradient: false,
-            rangeMin: 0,
             rangeMax: 100,
             stops: [20, 40, 60, 80],
           },
@@ -117,11 +98,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           123,
           {
+            ...DEFAULT_PROPS,
             continuity: 'none',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'number',
-            gradient: false,
-            rangeMin: 0,
             rangeMax: 100,
             stops: [20, 40, 60, 80],
           },
@@ -135,10 +113,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           10,
           {
+            ...DEFAULT_PROPS,
             continuity: 'below',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'number',
-            gradient: false,
             rangeMin: 20,
             rangeMax: 100,
             stops: [20, 40, 60, 80],
@@ -150,10 +126,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           10,
           {
+            ...DEFAULT_PROPS,
             continuity: 'all',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'number',
-            gradient: false,
             rangeMin: 20,
             rangeMax: 100,
             stops: [20, 40, 60, 80],
@@ -168,10 +142,7 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           0,
           {
-            continuity: 'above',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'number',
-            gradient: false,
+            ...DEFAULT_PROPS,
             rangeMin: 10,
             rangeMax: 100,
             stops: [20, 40, 60, 80],
@@ -183,10 +154,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           0,
           {
+            ...DEFAULT_PROPS,
             continuity: 'none',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'number',
-            gradient: false,
             rangeMin: 10,
             rangeMax: 100,
             stops: [20, 40, 60, 80],
@@ -198,22 +167,17 @@ describe('workoutColorForValue', () => {
   });
 
   describe('range: "percent"', () => {
+    const DEFAULT_PROPS: CustomPaletteState = {
+      continuity: 'above',
+      colors: ['red', 'green', 'blue', 'yellow'],
+      range: 'percent',
+      gradient: false,
+      rangeMin: 0,
+      rangeMax: 100,
+      stops: [],
+    };
     it('find the right color for predefined palettes', () => {
-      expect(
-        workoutColorForValue(
-          123,
-          {
-            continuity: 'above',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'percent',
-            gradient: false,
-            rangeMin: 0,
-            rangeMax: 100,
-            stops: [],
-          },
-          { min: 0, max: 200 }
-        )
-      ).toBe('blue');
+      expect(workoutColorForValue(123, DEFAULT_PROPS, { min: 0, max: 200 })).toBe('blue');
     });
 
     it('find the right color for custom stops palettes', () => {
@@ -221,12 +185,7 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           113,
           {
-            continuity: 'above',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'percent',
-            gradient: false,
-            rangeMin: 0,
-            rangeMax: 100,
+            ...DEFAULT_PROPS,
             stops: [20, 40, 60, 80],
           },
           { min: 0, max: 200 }
@@ -239,11 +198,7 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           123,
           {
-            continuity: 'above',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'percent',
-            gradient: false,
-            rangeMin: 0,
+            ...DEFAULT_PROPS,
             rangeMax: 90,
             stops: [20, 40, 60, 80],
           },
@@ -254,11 +209,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           123,
           {
+            ...DEFAULT_PROPS,
             continuity: 'all',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'percent',
-            gradient: false,
-            rangeMin: 0,
             rangeMax: 90,
             stops: [20, 40, 60, 80],
           },
@@ -272,11 +224,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           190,
           {
+            ...DEFAULT_PROPS,
             continuity: 'below',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'percent',
-            gradient: false,
-            rangeMin: 0,
             rangeMax: 90,
             stops: [20, 40, 60, 80],
           },
@@ -287,11 +236,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           190,
           {
+            ...DEFAULT_PROPS,
             continuity: 'none',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'percent',
-            gradient: false,
-            rangeMin: 0,
             rangeMax: 90,
             stops: [20, 40, 60, 80],
           },
@@ -305,10 +251,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           10,
           {
+            ...DEFAULT_PROPS,
             continuity: 'below',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'percent',
-            gradient: false,
             rangeMin: 20,
             rangeMax: 100,
             stops: [20, 40, 60, 80],
@@ -320,10 +264,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           10,
           {
+            ...DEFAULT_PROPS,
             continuity: 'all',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'percent',
-            gradient: false,
             rangeMin: 20,
             rangeMax: 100,
             stops: [20, 40, 60, 80],
@@ -338,10 +280,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           0,
           {
+            ...DEFAULT_PROPS,
             continuity: 'above',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'percent',
-            gradient: false,
             rangeMin: 10,
             rangeMax: 100,
             stops: [20, 40, 60, 80],
@@ -353,10 +293,8 @@ describe('workoutColorForValue', () => {
         workoutColorForValue(
           0,
           {
+            ...DEFAULT_PROPS,
             continuity: 'none',
-            colors: ['red', 'green', 'blue', 'yellow'],
-            range: 'percent',
-            gradient: false,
             rangeMin: 10,
             rangeMax: 100,
             stops: [20, 40, 60, 80],

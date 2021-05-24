@@ -285,3 +285,24 @@ export function getContrastColor(color: string, isDarkTheme: boolean) {
   const lightColor = isDarkTheme ? euiDarkVars.euiColorGhost : euiLightVars.euiColorGhost;
   return isColorDark(...chroma(color).rgb()) ? lightColor : darkColor;
 }
+
+/**
+ * Same as stops, but remapped against a range 0-100
+ */
+export function getStopsForFixedMode(stops: ColorStop[], colorStops?: ColorStop[]) {
+  const referenceStops =
+    colorStops || stops.map(({ color }, index) => ({ color, stop: 20 * index }));
+  const fallbackStops = stops;
+
+  // what happens when user set two stops with the same value? we'll fallback to the display interval
+  const oldInterval =
+    referenceStops[referenceStops.length - 1].stop - referenceStops[0].stop ||
+    fallbackStops[fallbackStops.length - 1].stop - fallbackStops[0].stop;
+
+  return remapStopsByNewInterval(stops, {
+    newInterval: 100,
+    oldInterval,
+    newMin: 0,
+    oldMin: referenceStops[0].stop,
+  });
+}

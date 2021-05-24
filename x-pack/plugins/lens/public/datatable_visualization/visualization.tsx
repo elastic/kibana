@@ -22,6 +22,7 @@ import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { CustomPaletteParams } from '../shared_components/coloring/types';
+import { getStopsForFixedMode } from '../shared_components';
 
 export interface ColumnState {
   columnId: string;
@@ -260,7 +261,12 @@ export const getDatatableVisualization = ({
                   : hasColoring
                   ? 'colorBy'
                   : undefined,
-                palette: hasColoring ? columnConfig.palette?.params?.stops || [] : undefined,
+                palette: hasColoring
+                  ? getStopsForFixedMode(
+                      columnConfig.palette?.params?.stops || [],
+                      columnConfig.palette?.params?.colorStops
+                    )
+                  : undefined,
               };
             }),
           supportsMoreColumns: true,
