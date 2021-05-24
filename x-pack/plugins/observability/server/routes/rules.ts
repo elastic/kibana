@@ -23,6 +23,7 @@ const alertsListRoute = createObservabilityServerRoute({
       }),
       t.partial({
         kuery: t.string,
+        status: t.string,
         size: toNumberRt,
       }),
     ]),

@@ -15,15 +15,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { format, parse } from 'url';
 import {
   ALERT_START,
   EVENT_ACTION,
   RULE_ID,
   RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { format, parse } from 'url';
 import {
   ParsedTechnicalFields,
   parseTechnicalFields,
@@ -36,9 +36,9 @@ import { RouteParams } from '../../routes';
 import { callObservabilityApi } from '../../services/call_observability_api';
 import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
 import { getAbsoluteDateRange } from '../../utils/date';
-import { StatusFilter, Status } from './status_filter';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTable } from './alerts_table';
+import { Status, StatusFilter } from './status_filter';
 
 export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
 
@@ -83,6 +83,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             start,
             end,
             kuery,
+            status,
           },
         },
       }).then((alerts) => {
@@ -116,7 +117,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
         });
       });
     },
-    [kuery, observabilityRuleTypeRegistry, rangeFrom, rangeTo]
+    [kuery, observabilityRuleTypeRegistry, rangeFrom, rangeTo, status]
   );
 
   function setStatusFilter(value: Status) {

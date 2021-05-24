@@ -20,6 +20,7 @@ export function StatusFilter({ status = 'open', onChange }: StatusFilterProps) {
   return (
     <EuiFilterGroup>
       <EuiFilterButton
+        data-test-subj="StatusFilter all button"
         hasActiveFilters={status === 'all'}
         onClick={() => onChange('all')}
         withNext={true}
@@ -29,6 +30,7 @@ export function StatusFilter({ status = 'open', onChange }: StatusFilterProps) {
         })}
       </EuiFilterButton>
       <EuiFilterButton
+        data-test-subj="StatusFilter open button"
         hasActiveFilters={status === 'open'}
         onClick={() => onChange('open')}
         withNext={true}
@@ -37,7 +39,11 @@ export function StatusFilter({ status = 'open', onChange }: StatusFilterProps) {
           defaultMessage: 'Active',
         })}
       </EuiFilterButton>
-      <EuiFilterButton hasActiveFilters={status === 'closed'} onClick={() => onChange('closed')}>
+      <EuiFilterButton
+        data-test-subj="StatusFilter closed button"
+        hasActiveFilters={status === 'closed'}
+        onClick={() => onChange('closed')}
+      >
         {i18n.translate('xpack.observability.alerts.statusFilter.recoveredButtonLabel', {
           defaultMessage: 'Recovered',
         })}
