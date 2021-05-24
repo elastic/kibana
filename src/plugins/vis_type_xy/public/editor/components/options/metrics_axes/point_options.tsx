@@ -35,7 +35,7 @@ function PointOptions({ chart, setChart }: PointOptionsParams) {
       />
       <EuiSpacer size="m" />
       <EuiFormRow
-        label={i18n.translate('isTypeXy.controls.pointSeries.series.dotsRadius', {
+        label={i18n.translate('visTypeXy.controls.pointSeries.series.dotsRadius', {
           defaultMessage: 'Dots size',
         })}
         fullWidth
