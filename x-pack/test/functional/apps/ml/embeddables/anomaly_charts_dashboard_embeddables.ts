@@ -54,6 +54,8 @@ const testDataList = [
   },
 ];
 
+const dashboardName = `My ML Anomaly Dashboard ${Date.now()}`;
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
@@ -109,6 +111,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.timePicker.pauseAutoRefresh();
           await ml.dashboardEmbeddables.assertAnomalyChartsSeverityThresholdControlExists();
           await ml.dashboardEmbeddables.assertAnomalyChartsExists();
+        });
+
+        it('saves and deletes dashboard', async () => {
+          await ml.dashboardEmbeddables.saveDashboard(dashboardName);
+          await ml.dashboardEmbeddables.deleteDashboard(dashboardName);
         });
       });
     }
