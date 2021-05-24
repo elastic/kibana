@@ -29,12 +29,13 @@
         "queue": "baseline",
         "name": "kb-baseline",
         "machineType": "c2-standard-8",
-        "diskSizeGb": 128
+        "localSsds": 1
       },
       {
         "queue": "baseline-small",
         "name": "kb-baseline-small",
-        "machineType": "c2-standard-4"
+        "machineType": "c2-standard-4",
+        "localSsds": 1
       },
       {
         "queue": "jest",
