@@ -34,7 +34,7 @@ export const filterByMapExtentAction = createAction<FilterByMapExtentActionConte
           defaultMessage: 'Disable filter by map extent',
         })
       : i18n.translate('xpack.maps.filterByMapExtentMenuItem.enableDisplayName', {
-          defaultMessage: 'Filter by map extent',
+          defaultMessage: 'Enable filter by map extent',
         });
   },
   getIconType: () => {

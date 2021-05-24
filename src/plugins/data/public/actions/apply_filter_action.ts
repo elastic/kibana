@@ -88,6 +88,7 @@ export function createFilterAction(
         selectedFilters = await filterSelectionPromise;
       }
 
+      // remove existing filters for control prior to adding new filtes for control
       if (controlledBy) {
         filterManager.getFilters().forEach((filter) => {
           if (filter.meta.controlledBy === controlledBy) {
