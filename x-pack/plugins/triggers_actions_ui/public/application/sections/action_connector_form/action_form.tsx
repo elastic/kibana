@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -19,7 +19,6 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
-import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   ActionTypeModel,
@@ -44,6 +43,7 @@ import { ActionGroup, AlertActionParam } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 import { ConnectorAddModal } from '.';
+import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 
 export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
   omitOptionalMessageVariables?: boolean;
@@ -275,7 +275,9 @@ export const ActionForm = ({
             <EuiIcon
               size="xl"
               type={
-                ((<Suspense fallback={null}>{item.iconClass}</Suspense>) as unknown) as IconType
+                typeof item.iconClass === 'string'
+                  ? item.iconClass
+                  : suspendedComponentWithProps(item.iconClass as React.ComponentType)
               }
             />
           </EuiKeyPadMenuItem>
