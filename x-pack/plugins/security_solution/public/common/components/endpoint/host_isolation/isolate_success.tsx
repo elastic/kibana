@@ -47,7 +47,11 @@ export const EndpointIsolateSuccess = memo<EndpointIsolateSuccessProps>(
 
         <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="right" onClick={onComplete}>
+            <EuiButtonEmpty
+              flush="right"
+              onClick={onComplete}
+              data-test-subj="hostIsolateSuccessCompleteButton"
+            >
               <EuiText size="s">
                 <p>{completeButtonLabel}</p>
               </EuiText>

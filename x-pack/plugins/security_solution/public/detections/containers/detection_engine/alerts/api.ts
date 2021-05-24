@@ -14,11 +14,7 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../../common/constants';
-import {
-  HOST_METADATA_GET_API,
-  ISOLATE_HOST_ROUTE,
-  UNISOLATE_HOST_ROUTE,
-} from '../../../../../common/endpoint/constants';
+import { HOST_METADATA_GET_API } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   BasicSignals,
@@ -30,6 +26,7 @@ import {
   CasesFromAlertsResponse,
 } from './types';
 import { resolvePathVariables } from '../../../../management/pages/trusted_apps/service/utils';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/host_isolation';
 
 /**
  * Fetch Alerts by providing a query
@@ -129,13 +126,10 @@ export const createHostIsolation = async ({
   comment?: string;
   caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
-  KibanaServices.get().http.fetch<HostIsolationResponse>(ISOLATE_HOST_ROUTE, {
-    method: 'POST',
-    body: JSON.stringify({
-      agent_ids: [agentId],
-      comment,
-      case_ids: caseIds,
-    }),
+  isolateHost({
+    agent_ids: [agentId],
+    comment,
+    case_ids: caseIds,
   });
 
 /**
@@ -147,7 +141,7 @@ export const createHostIsolation = async ({
  *
  * @throws An error if response is not OK
  */
-export const createHostUnisolation = async ({
+export const createHostUnIsolation = async ({
   agentId,
   comment = '',
   caseIds,
@@ -156,14 +150,12 @@ export const createHostUnisolation = async ({
   comment?: string;
   caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
-  KibanaServices.get().http.fetch<HostIsolationResponse>(UNISOLATE_HOST_ROUTE, {
-    method: 'POST',
-    body: JSON.stringify({
-      agent_ids: [agentId],
-      comment,
-      case_ids: caseIds,
-    }),
+  unIsolateHost({
+    agent_ids: [agentId],
+    comment,
+    case_ids: caseIds,
   });
+
 /**
  * Get list of associated case ids from alert id
  *

@@ -8,7 +8,7 @@
 import { useCallback, useState } from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { HOST_ISOLATION_FAILURE } from './translations';
-import { createHostUnisolation } from './api';
+import { createHostUnIsolation } from './api';
 
 interface HostUnisolationStatus {
   loading: boolean;
@@ -32,7 +32,7 @@ export const useHostUnisolation = ({
   const unIsolateHost = useCallback(async () => {
     try {
       setLoading(true);
-      const isolationStatus = await createHostUnisolation({ agentId, comment, caseIds });
+      const isolationStatus = await createHostUnIsolation({ agentId, comment, caseIds });
       setLoading(false);
       return isolationStatus.action ? true : false;
     } catch (error) {
