@@ -118,10 +118,10 @@ describe('status check alert', () => {
 
   const mockMonitorAlertState = (
     monitor: GetMonitorStatusResult,
-    currentDownMonitors: GetMonitorStatusResult[],
+    activeDownMonitors: GetMonitorStatusResult[],
     date = defaultDateString
   ) => ({
-    currentDownMonitors,
+    activeDownMonitors,
     currentTriggerStarted: date,
     firstCheckedAt: date,
     firstTriggeredAt: date,
@@ -310,7 +310,62 @@ describe('status check alert', () => {
         mockMonitorAlertState(mockDownMonitors[1], mockDownMonitors),
       ]);
       expect(updatedState).toEqual({
-        currentDownMonitors: mockDownMonitors,
+        activeDownMonitors: mockDownMonitors,
+        currentTriggerStarted: defaultDateString,
+        firstCheckedAt: defaultDateString,
+        firstTriggeredAt: defaultDateString,
+        isTriggered: true,
+        lastCheckedAt: defaultDateString,
+        lastResolvedAt: undefined,
+        lastTriggeredAt: defaultDateString,
+      });
+    });
+
+    it('persists alert on individual locations when up monitors for those locations are not found', async () => {
+      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+
+      mockGetter.mockImplementation((params) => {
+        return params.status !== 'up' ? mockDownMonitors : [];
+      });
+      const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });
+      const alert = statusCheckAlertFactory(server, libs, plugins);
+      const options = mockOptions();
+      const alertServices: AlertServicesMock = options.services;
+      // @ts-ignore the executor can return `void`, but ours never does
+      const state: Record<string, any> = await alert.executor(options);
+      expect(mockGetter).toHaveBeenCalledTimes(2);
+      expect(alertServices.alertInstanceFactory).toHaveBeenCalledTimes(2);
+      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(2);
+      expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(2);
+
+      // update getMonitorStatus to return 0 up monitors, but less down monitors than the previous interval
+      mockGetter.mockImplementation((params) => {
+        return params.status === 'up' ? [] : [mockDownMonitors[1]];
+      });
+      // clear existing mocks
+      mockGetter.mockClear();
+      const updatedOptions = mockOptions(undefined, undefined, state);
+      const updatedAlertServices: AlertServicesMock = updatedOptions.services;
+
+      // re-execute exector to simulate alert update
+      // @ts-ignore the executor can return `void`, but ours never does
+      const updatedState: Record<string, any> = await alert.executor(updatedOptions);
+
+      const [
+        { value: updatedAlertInstanceMock },
+      ] = updatedAlertServices.alertInstanceFactory.mock.results;
+
+      expect(mockGetter).toHaveBeenCalledTimes(2);
+      expect(updatedAlertServices.alertInstanceFactory).toHaveBeenCalledTimes(2);
+      expect(updatedAlertInstanceMock.replaceState.mock.calls[0]).toEqual([
+        mockMonitorAlertState(mockDownMonitors[1], [...mockDownMonitors].reverse()),
+      ]);
+      expect(updatedAlertInstanceMock.replaceState.mock.calls[1]).toEqual([
+        mockMonitorAlertState(mockDownMonitors[0], [...mockDownMonitors].reverse()),
+      ]);
+      expect(updatedState).toEqual({
+        activeDownMonitors: [...mockDownMonitors].reverse(),
         currentTriggerStarted: defaultDateString,
         firstCheckedAt: defaultDateString,
         firstTriggeredAt: defaultDateString,
@@ -363,7 +418,7 @@ describe('status check alert', () => {
         mockMonitorAlertState(mockDownMonitors[1], [mockDownMonitors[1]]),
       ]);
       expect(updatedState).toEqual({
-        currentDownMonitors: [mockDownMonitors[1]],
+        activeDownMonitors: [mockDownMonitors[1]],
         currentTriggerStarted: defaultDateString,
         firstCheckedAt: defaultDateString,
         firstTriggeredAt: defaultDateString,
@@ -411,7 +466,7 @@ describe('status check alert', () => {
       expect(alertServices.alertInstanceFactory).not.toHaveBeenCalled();
 
       expect(updatedState).toEqual({
-        currentDownMonitors: [],
+        activeDownMonitors: [],
         currentTriggerStarted: undefined,
         firstCheckedAt: defaultDateString,
         firstTriggeredAt: defaultDateString,
@@ -452,7 +507,7 @@ describe('status check alert', () => {
       ]);
       expect(state).toMatchInlineSnapshot(`
         Object {
-          "currentDownMonitors": Array [
+          "activeDownMonitors": Array [
             Object {
               "count": 234,
               "location": "harrisburg",
@@ -862,7 +917,7 @@ describe('status check alert', () => {
       `);
       expect(state).toMatchInlineSnapshot(`
         Object {
-          "currentDownMonitors": Array [
+          "activeDownMonitors": Array [
             Object {
               "count": 234,
               "location": "harrisburg",
@@ -1141,7 +1196,7 @@ describe('status check alert', () => {
       expect(alertInstanceMock.replaceState.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "currentDownMonitors": Array [],
+            "activeDownMonitors": Array [],
             "currentTriggerStarted": "availability test",
             "firstCheckedAt": "availability test",
             "firstTriggeredAt": "availability test",
@@ -1209,7 +1264,7 @@ describe('status check alert', () => {
       `);
       expect(state).toMatchInlineSnapshot(`
         Object {
-          "currentDownMonitors": Array [],
+          "activeDownMonitors": Array [],
           "currentTriggerStarted": undefined,
           "firstCheckedAt": "availability test",
           "firstTriggeredAt": undefined,

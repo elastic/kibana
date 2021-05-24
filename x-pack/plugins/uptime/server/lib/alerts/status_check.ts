@@ -197,6 +197,17 @@ const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
   return `${urlText}_${monIdByLoc}`;
 };
 
+const getUnresolvedDownMonitors = (
+  upMonitors: GetMonitorStatusResult[] = [],
+  prevDownMonitors: GetMonitorStatusResult[] = []
+): GetMonitorStatusResult[] =>
+  prevDownMonitors.filter((prevDownMonitor) => {
+    const hasUpMonitor = upMonitors.find(
+      (upMonitor) => upMonitor.location === prevDownMonitor.location
+    );
+    return !hasUpMonitor;
+  });
+
 export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) =>
   uptimeAlertWrapper<ActionGroupIds>({
     id: 'xpack.uptime.alerts.monitorStatus',
@@ -323,6 +334,24 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
             status: 'up',
           })) || [];
       }
+      /* Active down monitors which do not have a corresponding up document.
+       * Monitors should only be considered resolved when an up document is found */
+      const unresolvedDownMonitors = getUnresolvedDownMonitors(
+        upMonitorsByLocation,
+        state.activeDownMonitors
+      );
+
+      /* all down monitors within the current timespan,
+       * plus all non resolved active down monitors,
+       * New down monitors take priority in these is any updated data,
+       * like a new error message */
+      const newAndUnresolvedDownMonitors = [
+        ...downMonitorsByLocation,
+        ...unresolvedDownMonitors.filter(
+          (monitor) =>
+            !downMonitorsByLocation.find((downMonitor) => monitor.location === downMonitor.location)
+        ),
+      ];
 
       /* If there are neither down monitors nor up monitors in the current timespan,
        * check if currently down monitors exist in the alert state.
@@ -332,9 +361,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       const monitorsToAlertOn: GetMonitorStatusResult[] =
         upMonitorsByLocation.length === 0 &&
         downMonitorsByLocation.length === 0 &&
-        state.currentDownMonitors?.length
-          ? state.currentDownMonitors
-          : downMonitorsByLocation;
+        state.activeDownMonitors?.length
+          ? state.activeDownMonitors
+          : newAndUnresolvedDownMonitors;
       const isMonitorDownAnywhere = getIsMonitorDown(
         downMonitorsByLocation,
         upMonitorsByLocation,
@@ -356,7 +385,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
             ...monitorSummary,
             statusMessage,
             ...updateState<UptimeMonitorStatusCustomState>(state, true, {
-              currentDownMonitors: monitorsToAlertOn,
+              activeDownMonitors: monitorsToAlertOn,
             }),
           });
 
@@ -364,7 +393,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         }
 
         return updateState<UptimeMonitorStatusCustomState>(state, isMonitorDownAnywhere, {
-          currentDownMonitors: monitorsToAlertOn,
+          activeDownMonitors: monitorsToAlertOn,
         });
       }
 
@@ -397,7 +426,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
         alertInstance.replaceState({
           ...updateState<UptimeMonitorStatusCustomState>(state, true, {
-            currentDownMonitors: monitorsToAlertOn,
+            activeDownMonitors: monitorsToAlertOn,
           }),
           ...monitorSummary,
           statusMessage,
@@ -409,7 +438,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       });
 
       return updateState<UptimeMonitorStatusCustomState>(state, isMonitorDownAnywhere, {
-        currentDownMonitors: monitorsToAlertOn,
+        activeDownMonitors: monitorsToAlertOn,
       });
     },
   });
