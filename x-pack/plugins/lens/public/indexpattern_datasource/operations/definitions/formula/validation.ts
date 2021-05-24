@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isObject } from 'lodash';
+import { isObject, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parse, TinymathLocation } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
@@ -58,6 +58,10 @@ interface ValidationErrors {
     message: string;
     type: { operation: string; count: number; params: string };
   };
+  tooManyQueries: {
+    message: string;
+    type: { operation: string };
+  };
 }
 type ErrorTypes = keyof ValidationErrors;
 type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
@@ -94,11 +98,61 @@ export function hasInvalidOperations(
   };
 }
 
+export const getRawQueryValidationError = (text: string) => {
+  // try to extract the query context here
+  const singleLine = text.split('\n').join('');
+  const allArgs = singleLine.split(',').filter((args) => /(kql|lucene)/.test(args));
+  // no args, so no problem
+  if (allArgs.length === 0) {
+    return;
+  }
+  // at this point each entry in allArgs may contain one or more
+  // in the worst case it would be a math chain of count operation
+  // For instance: count(kql=...) + count(lucene=...) - count(kql=...)
+  // therefore before partition them, split them by "count" keywork and filter only string with a length
+  const flattenArgs = allArgs.flatMap((arg) =>
+    arg.split('count').filter((subArg) => /(kql|lucene)/.test(subArg))
+  );
+  const [kqlQueries, luceneQueries] = partition(flattenArgs, (arg) => /kql/.test(arg));
+  const errors = [];
+  for (const kqlQuery of kqlQueries) {
+    const result = validateQueryQuotes(kqlQuery, 'kql');
+    if (result) {
+      errors.push(result);
+    }
+  }
+  for (const luceneQuery of luceneQueries) {
+    const result = validateQueryQuotes(luceneQuery, 'lucene');
+    if (result) {
+      errors.push(result);
+    }
+  }
+  return errors.length ? errors : undefined;
+};
+
+const validateQueryQuotes = (rawQuery: string, language: 'kql' | 'lucene') => {
+  // check if the raw argument has the minimal requirements
+  const [_, rawValue] = rawQuery.split('=');
+  // it must start with a single quote
+  if (rawValue.trim()[0] !== "'") {
+    return i18n.translate('xpack.lens.indexPattern.formulaOperationQueryError', {
+      defaultMessage:
+        'The {language} query for the operation must be wrapped in single quotes: {rawQuery}',
+      values: { language, rawQuery },
+    });
+  }
+};
+
 export const getQueryValidationError = (
-  query: string,
-  language: 'kql' | 'lucene',
+  { value: query, name: language, text }: { value: string; name: 'kql' | 'lucene'; text: string },
   indexPattern: IndexPattern
 ): string | undefined => {
+  // check if the raw argument has the minimal requirements
+  const result = validateQueryQuotes(text, language);
+  // forward the error here is ok?
+  if (result) {
+    return result;
+  }
   try {
     if (language === 'kql') {
       esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query), indexPattern);
@@ -203,6 +257,12 @@ function getMessageFromId<K extends ErrorTypes>({
         values: { operation: out.operation, count: out.count, params: out.params },
       });
       break;
+    case 'tooManyQueries':
+      message = i18n.translate('xpack.lens.indexPattern.formulaOperationDoubleQueryError', {
+        defaultMessage: 'The operation {operation} contains too many queries',
+        values: { operation: out.operation },
+      });
+      break;
     // case 'mathRequiresFunction':
     //   message = i18n.translate('xpack.lens.indexPattern.formulaMathRequiresFunctionLabel', {
     //     defaultMessage; 'The function {name} requires an Elasticsearch function',
@@ -224,6 +284,12 @@ export function tryToParse(
   try {
     root = parse(formula);
   } catch (e) {
+    // give it last try
+    const maybeQueryProblems = getRawQueryValidationError(formula);
+    if (maybeQueryProblems) {
+      // need to emulate an error shape here
+      return { root: null, error: { message: maybeQueryProblems[0], locations: [] } };
+    }
     return {
       root: null,
       error: getMessageFromId({
@@ -319,7 +385,7 @@ function getQueryValidationErrors(
   const errors: ErrorWrapper[] = [];
   (namedArguments ?? []).forEach((arg) => {
     if (arg.name === 'kql' || arg.name === 'lucene') {
-      const message = getQueryValidationError(arg.value, arg.name, indexPattern);
+      const message = getQueryValidationError(arg, indexPattern);
       if (message) {
         errors.push({
           message,
@@ -329,6 +395,12 @@ function getQueryValidationErrors(
     }
   });
   return errors;
+}
+
+function checkSingleQuery(namedArguments: TinymathNamedArgument[] | undefined) {
+  return namedArguments
+    ? namedArguments.filter((arg) => arg.name === 'kql' || arg.name === 'lucene').length > 1
+    : undefined;
 }
 
 function validateNameArguments(
@@ -382,6 +454,18 @@ function validateNameArguments(
   const queryValidationErrors = getQueryValidationErrors(namedArguments, indexPattern);
   if (queryValidationErrors.length) {
     errors.push(...queryValidationErrors);
+  }
+  const hasTooManyQueries = checkSingleQuery(namedArguments);
+  if (hasTooManyQueries) {
+    errors.push(
+      getMessageFromId({
+        messageId: 'tooManyQueries',
+        values: {
+          operation: node.name,
+        },
+        locations: [node.location],
+      })
+    );
   }
   return errors;
 }

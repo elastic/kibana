@@ -899,6 +899,68 @@ invalid: "
       ).toEqual(undefined);
     });
 
+    it('returns an error for a query not wrapped in single quotes', () => {
+      const formulas = [
+        `count(kql="category.keyword: *")`,
+        `count(kql=category.keyword: *)`,
+        `count(lucene="category.keyword: *")`,
+        `count(lucene=category.keyword: *)`,
+        `count(lucene=category.keyword: *) + average(bytes)`,
+        `count(lucene='category.keyword: *') + count(kql=category.keyword: *)`,
+        `count(lucene='category.keyword: *') + count(kql=category.keyword: *, kql='category.keyword: *')`,
+        `count(lucene='category.keyword: *') + count(kql="category.keyword: *")`,
+        `moving_average(count(kql=category.keyword: *), window=7, kql=category.keywork: *)`,
+        `moving_average(
+          cumulative_sum(
+             7 * clamp(sum(bytes), 0, last_value(memory) + max(memory))
+          ), window=10, kql=category.keywork: *
+        )`,
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(
+          expect.arrayContaining([
+            expect.stringMatching(`query for the operation must be wrapped in single quotes`),
+          ])
+        );
+      }
+    });
+
+    it('returns no error for a query wrapped in single quotes but with some whitespaces', () => {
+      const formulas = [
+        `count(kql ='category.keyword: *')`,
+        `count(kql = 'category.keyword: *')`,
+        `count(kql =    'category.keyword: *')`,
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(undefined);
+      }
+    });
+
+    it('returns an error for multiple queries submitted for the same function', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula(`count(kql='category.keyword: *', lucene='category.keyword: *')`),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual(['The operation count contains too many queries']);
+    });
+
     it('returns no error if a math operation is passed to fullReference operations', () => {
       const formulas = [
         'derivative(7+1)',
