@@ -8,9 +8,14 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { ILayer } from '../../../classes/layers/layer';
 
-export function LayerErrors({ layer }) {
-  if (!layer.hasErrors()) {
+export interface Props {
+  layer?: ILayer;
+}
+
+export function LayerErrors({ layer }: Props) {
+  if (!layer || !layer.hasErrors()) {
     return null;
   }
 

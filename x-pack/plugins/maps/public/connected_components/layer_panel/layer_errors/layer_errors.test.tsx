@@ -7,29 +7,29 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-
+import { ILayer } from '../../../classes/layers/layer';
 import { LayerErrors } from './layer_errors';
 
 test('Should render errors when layer has errors', () => {
-  const mockLayer = {
+  const mockLayer = ({
     hasErrors: () => {
       return true;
     },
     getErrors: () => {
       return 'simulated layer error';
     },
-  };
+  } as unknown) as ILayer;
   const component = shallow(<LayerErrors layer={mockLayer} />);
 
   expect(component).toMatchSnapshot();
 });
 
 test('should render nothing when layer has no errors', () => {
-  const mockLayer = {
+  const mockLayer = ({
     hasErrors: () => {
       return false;
     },
-  };
+  } as unknown) as ILayer;
   const component = shallow(<LayerErrors layer={mockLayer} />);
 
   expect(component).toMatchSnapshot();

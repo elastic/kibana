@@ -8,8 +8,9 @@
 import { connect } from 'react-redux';
 import { LayerErrors } from './layer_errors';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
+import { MapStoreState } from '../../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     layer: getSelectedLayer(state),
   };
