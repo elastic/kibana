@@ -1,8 +1,8 @@
 {
   "gcp": {
-    "project": "elastic-kibana-184716",
+    "project": "elastic-kibana-ci",
     "zones": ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"],
-    "serviceAccount": "elastic-buildkite-agent@elastic-kibana-184716.iam.gserviceaccount.com",
+    "serviceAccount": "elastic-buildkite-agent@elastic-kibana-ci.iam.gserviceaccount.com",
     "imageFamily": "kb-ubuntu",
     "subnetwork": "buildkite",
     "disableExternalIp": true,
