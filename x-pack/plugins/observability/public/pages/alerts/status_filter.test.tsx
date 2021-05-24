@@ -7,19 +7,20 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { StatusFilter, Status } from './status_filter';
+import type { AlertStatus } from '../../../common/typings';
+import { StatusFilter } from './status_filter';
 
 describe('StatusFilter', () => {
   describe('render', () => {
     it('renders', () => {
       const onChange = jest.fn();
-      const status: Status = 'all';
+      const status: AlertStatus = 'all';
       const props = { onChange, status };
 
       expect(() => render(<StatusFilter {...props} />)).not.toThrowError();
     });
 
-    (['all', 'open', 'closed'] as Status[]).map((status) => {
+    (['all', 'open', 'closed'] as AlertStatus[]).map((status) => {
       describe(`when clicking the ${status} button`, () => {
         it('calls the onChange callback with "${status}"', () => {
           const onChange = jest.fn();

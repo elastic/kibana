@@ -28,6 +28,7 @@ import {
   ParsedTechnicalFields,
   parseTechnicalFields,
 } from '../../../../rule_registry/common/parse_technical_fields';
+import type { AlertStatus } from '../../../common/typings';
 import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useFetcher } from '../../hooks/use_fetcher';
@@ -38,7 +39,7 @@ import type { ObservabilityAPIReturnType } from '../../services/call_observabili
 import { getAbsoluteDateRange } from '../../utils/date';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTable } from './alerts_table';
-import { Status, StatusFilter } from './status_filter';
+import { StatusFilter } from './status_filter';
 
 export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
 
@@ -120,7 +121,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     [kuery, observabilityRuleTypeRegistry, rangeFrom, rangeTo, status]
   );
 
-  function setStatusFilter(value: Status) {
+  function setStatusFilter(value: AlertStatus) {
     const nextSearchParams = new URLSearchParams(history.location.search);
     nextSearchParams.set('status', value);
     history.push({
