@@ -5,20 +5,24 @@
  * 2.0.
  */
 
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { StyleSettings } from './style_settings';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
 import { updateLayerStyleForSelectedLayer } from '../../../actions';
+import { MapStoreState } from '../../../reducers/store';
+import { StyleDescriptor } from '../../../../common/descriptor_types';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     layer: getSelectedLayer(state),
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    updateStyleDescriptor: (styleDescriptor) => {
+    updateStyleDescriptor: (styleDescriptor: StyleDescriptor) => {
       dispatch(updateLayerStyleForSelectedLayer(styleDescriptor));
     },
   };

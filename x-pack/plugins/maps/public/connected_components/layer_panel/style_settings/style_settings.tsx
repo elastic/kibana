@@ -10,8 +10,19 @@ import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { StyleDescriptor } from '../../../../common/descriptor_types';
+import { ILayer } from '../../../classes/layers/layer';
 
-export function StyleSettings({ layer, updateStyleDescriptor }) {
+export interface Props {
+  layer?: ILayer;
+  updateStyleDescriptor: (styleDescriptor: StyleDescriptor) => void;
+}
+
+export function StyleSettings({ layer, updateStyleDescriptor }: Props) {
+  if (!layer) {
+    return null;
+  }
+
   const settingsEditor = layer.renderStyleEditor(updateStyleDescriptor);
 
   if (!settingsEditor) {
