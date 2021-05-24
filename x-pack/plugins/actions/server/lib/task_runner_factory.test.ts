@@ -125,6 +125,7 @@ test('executes the task by calling the executor with proper parameters', async (
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
+    isEphemeral: false,
     params: { baz: true },
     request: expect.objectContaining({
       headers: {
@@ -246,6 +247,7 @@ test('uses API key when provided', async () => {
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
+    isEphemeral: false,
     params: { baz: true },
     request: expect.objectContaining({
       headers: {
@@ -283,6 +285,7 @@ test(`doesn't use API key when not provided`, async () => {
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
+    isEphemeral: false,
     params: { baz: true },
     request: expect.objectContaining({
       headers: {},

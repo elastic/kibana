@@ -45,15 +45,28 @@ export function createExecutionEnqueuerFunction({
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
     { id, params, spaceId, source, apiKey }: ExecuteOptions
   ): Promise<void> {
+    if (!isESOCanEncrypt) {
+      throw new Error(
+        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+      );
+    }
+
     const action = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
     validateCanActionBeUsed(action);
 
-    const actionTaskParamsRecord = await createActionTaskParams(
-      action,
-      isESOCanEncrypt,
-      actionTypeRegistry,
-      unsecuredSavedObjectsClient,
-      { id, params, source, spaceId, apiKey }
+    const { actionTypeId } = action;
+    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
+
+    const actionTaskParamsRecord = await unsecuredSavedObjectsClient.create(
+      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      {
+        actionId: id,
+        params,
+        apiKey,
+      },
+      executionSourceAsSavedObjectReferences(source)
     );
 
     await taskManager.schedule({
@@ -108,35 +121,6 @@ function validateCanActionBeUsed(action: PreConfiguredAction | RawAction) {
       `Unable to execute action because no secrets are defined for the "${name}" connector.`
     );
   }
-}
-
-async function createActionTaskParams(
-  action: PreConfiguredAction | RawAction,
-  isESOCanEncrypt: boolean,
-  actionTypeRegistry: ActionTypeRegistryContract,
-  unsecuredSavedObjectsClient: SavedObjectsClientContract,
-  { id, params, source, apiKey }: ExecuteOptions
-) {
-  if (!isESOCanEncrypt) {
-    throw new Error(
-      `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-    );
-  }
-
-  const { actionTypeId } = action;
-  if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
-    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-  }
-
-  return await unsecuredSavedObjectsClient.create(
-    ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-    {
-      actionId: id,
-      params,
-      apiKey,
-    },
-    executionSourceAsSavedObjectReferences(source)
-  );
 }
 
 function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorOptions['source']) {

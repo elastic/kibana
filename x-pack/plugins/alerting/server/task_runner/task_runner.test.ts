@@ -264,6 +264,7 @@ describe('Task Runner', () => {
   test('actionsPlugin.execute is called per alert instance that is scheduled', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
     alertType.executor.mockImplementation(
       async ({
         services: executorServices,
@@ -294,8 +295,8 @@ describe('Task Runner', () => {
       references: [],
     });
     await taskRunner.run();
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
-    expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.ephemeralEnqueuedExecution.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
@@ -456,7 +457,7 @@ describe('Task Runner', () => {
       references: [],
     });
     await taskRunner.run();
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
     const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(4);
@@ -542,6 +543,7 @@ describe('Task Runner', () => {
   test('skips firing actions for active instance if instance is muted', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
     alertType.executor.mockImplementation(
       async ({
         services: executorServices,
@@ -574,7 +576,7 @@ describe('Task Runner', () => {
       references: [],
     });
     await taskRunner.run();
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(1);
 
     const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(4);
@@ -640,7 +642,7 @@ describe('Task Runner', () => {
       references: [],
     });
     await taskRunner.run();
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
@@ -740,7 +742,7 @@ describe('Task Runner', () => {
       references: [],
     });
     await taskRunner.run();
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(1);
   });
 
   test('actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert instance state subgroup has changed', async () => {
@@ -796,12 +798,13 @@ describe('Task Runner', () => {
       references: [],
     });
     await taskRunner.run();
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(1);
   });
 
   test('includes the apiKey in the request used to initialize the actionsClient', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
     alertType.executor.mockImplementation(
       async ({
         services: executorServices,
@@ -850,8 +853,8 @@ describe('Task Runner', () => {
       '/'
     );
 
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
-    expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.ephemeralEnqueuedExecution.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
@@ -977,6 +980,7 @@ describe('Task Runner', () => {
   test('fire recovered actions for execution for the alertInstances which is in the recovered state', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
 
     alertType.executor.mockImplementation(
       async ({
@@ -1050,8 +1054,8 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
-    expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(2);
+    expect(actionsClient.ephemeralEnqueuedExecution.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
@@ -1076,6 +1080,7 @@ describe('Task Runner', () => {
     const alertId = uuid.v4();
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
 
     alertType.executor.mockImplementation(
       async ({
@@ -1147,14 +1152,16 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
-    expect(actionsClient.enqueueExecution.mock.calls[1][0].id).toEqual('1');
-    expect(actionsClient.enqueueExecution.mock.calls[0][0].id).toEqual('2');
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(2);
+    expect(actionsClient.ephemeralEnqueuedExecution.mock.calls[1][0].id).toEqual('1');
+    expect(actionsClient.ephemeralEnqueuedExecution.mock.calls[0][0].id).toEqual('2');
   });
 
   test('fire actions under a custom recovery group when specified on an alert type for alertInstances which are in the recovered state', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+
+    actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
 
     const recoveryActionGroup = {
       id: 'customRecovered',
@@ -1242,8 +1249,8 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
-    expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(2);
+    expect(actionsClient.ephemeralEnqueuedExecution.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
