@@ -354,13 +354,13 @@ describe('Detections Usage and Metrics', () => {
           ml_jobs: {
             ml_job_usage: {
               custom: {
-                disabled: 1, 
-                enabled: 1
+                disabled: 1,
+                enabled: 1,
               },
               elastic: {
-                disabled: 1, 
-                enabled: 1
-              }
+                disabled: 1,
+                enabled: 1,
+              },
             },
             ml_job_metrics: [
               {
