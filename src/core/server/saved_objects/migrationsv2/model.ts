@@ -109,7 +109,7 @@ function getAliases(indices: FetchIndexResponse) {
 function extractTransformFailuresReason(
   corruptDocumentIds: string[],
   transformErrors: TransformErrorObjects[]
-): { corruptDocsReason: string; transformErrsReason: string } {
+): string {
   const corruptDocumentIdReason =
     corruptDocumentIds.length > 0
       ? ` Corrupt saved object documents: ${corruptDocumentIds.join(',')}`
@@ -122,10 +122,7 @@ function extractTransformFailuresReason(
           .map((errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`)
           .join('/n')
       : '';
-  return {
-    corruptDocsReason: corruptDocumentIdReason,
-    transformErrsReason: transformErrorsReason,
-  };
+  return `Migrations failed. Reason:${corruptDocumentIdReason}${transformErrorsReason}. To allow migrations to proceed, please delete these documents.`;
 }
 
 const delayRetryState = <S extends State>(
@@ -538,14 +535,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
-          const { corruptDocsReason, transformErrsReason } = extractTransformFailuresReason(
+          const transformFailureReason = extractTransformFailuresReason(
             stateP.corruptDocumentIds,
             stateP.transformErrors
           );
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `Migrations failed. Reason:${corruptDocsReason}${transformErrsReason}. To allow migrations to proceed, please delete these documents.`,
+            reason: transformFailureReason,
           };
         } else {
           // we don't have any more outdated documents and we haven't encountered any document transformation issues.
@@ -722,14 +719,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
-          const { corruptDocsReason, transformErrsReason } = extractTransformFailuresReason(
+          const transformFailureReason = extractTransformFailuresReason(
             stateP.corruptDocumentIds,
             stateP.transformErrors
           );
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `Migrations failed. Reason:${corruptDocsReason}${transformErrsReason}. To allow migrations to proceed, please delete these documents.`,
+            reason: transformFailureReason,
           };
         } else {
           // If there are no more results we have transformed all outdated
