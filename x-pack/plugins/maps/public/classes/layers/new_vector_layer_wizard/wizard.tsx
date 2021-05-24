@@ -52,7 +52,6 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       return;
     }
     this.setState({
-      indexingTriggered: false,
       createIndexError: errorMessage,
     });
   }
@@ -152,6 +151,8 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
             indexName={this.state.indexName}
             indexNameError={this.state.indexNameError}
             onIndexNameChange={this._onIndexChange}
+            onIndexNameValidationStart={() => {}}
+            onIndexNameValidationEnd={() => {}}
           />
         </>
       </EuiPanel>
