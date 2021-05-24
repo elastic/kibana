@@ -29,12 +29,6 @@ jest.mock('./flyout_footer', () => ({
   },
 }));
 
-jest.mock('./layer_errors', () => ({
-  LayerErrors: () => {
-    return <div>mockLayerErrors</div>;
-  },
-}));
-
 jest.mock('./layer_settings', () => ({
   LayerSettings: () => {
     return <div>mockLayerSettings</div>;
@@ -78,6 +72,9 @@ const mockLayer = ({
   },
   renderSourceSettingsEditor: () => {
     return <div>mockSourceSettings</div>;
+  },
+  hasErrors: () => {
+    return false;
   },
 } as unknown) as ILayer;
 

@@ -90,7 +90,6 @@ exports[`EditLayerPanel is rendered 1`] = `
       <div
         className="mapLayerPanel__bodyOverflow"
       >
-        <LayerErrors />
         <LayerSettings
           layer={
             Object {
@@ -98,6 +97,7 @@ exports[`EditLayerPanel is rendered 1`] = `
               "getId": [Function],
               "getImmutableSourceProperties": [Function],
               "getLayerTypeIconName": [Function],
+              "hasErrors": [Function],
               "renderSourceSettingsEditor": [Function],
               "showJoinEditor": [Function],
               "supportsElasticsearchFilters": [Function],
@@ -116,6 +116,7 @@ exports[`EditLayerPanel is rendered 1`] = `
                 "getId": [Function],
                 "getImmutableSourceProperties": [Function],
                 "getLayerTypeIconName": [Function],
+                "hasErrors": [Function],
                 "renderSourceSettingsEditor": [Function],
                 "showJoinEditor": [Function],
                 "supportsElasticsearchFilters": [Function],
