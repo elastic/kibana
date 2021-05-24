@@ -46,22 +46,46 @@ export const registerCollector: RegisterCollector = ({
       detections: {
         detection_rules: {
           custom: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
+            enabled: {
+              type: 'long',
+              _meta: { description: 'The number of custom detection rules enabled' },
+            },
+            disabled: {
+              type: 'long',
+              _meta: { description: 'The number of custom detection rules disabled' },
+            },
           },
           elastic: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
+            enabled: {
+              type: 'long',
+              _meta: { description: 'The number of elastic prebuilt detection rules enabled' },
+            },
+            disabled: {
+              type: 'long',
+              _meta: { description: 'The number of elastic prebuilt detection rules disabled' },
+            },
           },
         },
         ml_jobs: {
           custom: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
+            enabled: {
+              type: 'long',
+              _meta: { description: 'The number of custom ML jobs rules enabled' },
+            },
+            disabled: {
+              type: 'long',
+              _meta: { description: 'The number of custom ML jobs rules disabled' },
+            },
           },
           elastic: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
+            enabled: {
+              type: 'long',
+              _meta: { description: 'The number of elastic provided ML jobs rules enabled' },
+            },
+            disabled: {
+              type: 'long',
+              _meta: { description: 'The number of elastic provided ML jobs rules disabled' },
+            },
           },
         },
       },
@@ -269,22 +293,52 @@ export const registerCollector: RegisterCollector = ({
         },
       },
       endpoints: {
-        total_installed: { type: 'long' },
-        active_within_last_24_hours: { type: 'long' },
+        total_installed: {
+          type: 'long',
+          _meta: { description: 'The number of installed endpoints' },
+        },
+        active_within_last_24_hours: {
+          type: 'long',
+          _meta: { description: 'The number of active endpoints' },
+        },
         os: {
           type: 'array',
           items: {
-            full_name: { type: 'keyword' },
-            platform: { type: 'keyword' },
-            version: { type: 'keyword' },
-            count: { type: 'long' },
+            full_name: {
+              type: 'keyword',
+              _meta: { description: 'Full name of the operating system' },
+            },
+            platform: {
+              type: 'keyword',
+              _meta: { description: 'OS Platform. eg Centos, Ubuntu' },
+            },
+            version: {
+              type: 'keyword',
+              _meta: {
+                description:
+                  'The version of the operating system, eg 16.04.7 LTS (Xenial Xerus), 8 (Core)',
+              },
+            },
+            count: {
+              type: 'long',
+              _meta: { description: 'The total number of endpoints from that platform' },
+            },
           },
         },
         policies: {
           malware: {
-            active: { type: 'long' },
-            inactive: { type: 'long' },
-            failure: { type: 'long' },
+            active: {
+              type: 'long',
+              _meta: { description: 'The total number of active malware policies' },
+            },
+            inactive: {
+              type: 'long',
+              _meta: { description: 'The total number of inactive malware policies' },
+            },
+            failure: {
+              type: 'long',
+              _meta: { description: 'The total number of failing malware policies' },
+            },
           },
         },
       },
