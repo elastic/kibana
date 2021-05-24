@@ -1073,7 +1073,7 @@ Action type model definition:
 export function getActionType(): ActionTypeModel {
   return {
     id: '.pagerduty',
-    iconClass: 'apps',
+    iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText',
       {
@@ -1110,7 +1110,7 @@ and action params form available in Create Alert form:
 Each action type should be defined as an `ActionTypeModel` object with the following properties:
 ```
   id: string;
-  iconClass: string;
+  iconClass: IconType;
   selectMessage: string;
   actionTypeTitle?: string;
   validateConnector: (connector: any) => ValidationResult;
@@ -1121,7 +1121,7 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
 |Property|Description|
 |---|---|
 |id|Action type id. Should be the same as on server side.|
-|iconClass|Icon of action type, that will be displayed on the select card in UI.|
+|iconClass|Setting for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or a lazy loaded React component, ReactElement.|
 |selectMessage|Short description of action type responsibility, that will be displayed on the select card in UI.|
 |validateConnector|Validation function for action connector.|
 |validateParams|Validation function for action params.|
