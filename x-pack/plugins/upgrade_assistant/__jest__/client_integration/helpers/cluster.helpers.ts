@@ -32,11 +32,6 @@ const createActions = (testBed: TestBed) => {
     find(`upgradeAssistant${camelcaseTabName}Tab`).simulate('click');
   };
 
-  const clickFixButton = () => {
-    const { find } = testBed;
-    find('removeIndexSettingsButton').simulate('click');
-  };
-
   const clickExpandAll = () => {
     const { find } = testBed;
     find('expandAll').simulate('click');
@@ -44,7 +39,6 @@ const createActions = (testBed: TestBed) => {
 
   return {
     clickTab,
-    clickFixButton,
     clickExpandAll,
   };
 };
