@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error
+import './typings';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 // @ts-expect-error
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
