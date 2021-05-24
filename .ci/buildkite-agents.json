@@ -69,7 +69,7 @@
       {
         "queue": "packer",
         "name": "kb-packer",
-        "serviceAccount": "buildkite-packer-agent@elastic-kibana-184716.iam.gserviceaccount.com",
+        "serviceAccount": "buildkite-packer-agent@elastic-kibana-ci.iam.gserviceaccount.com",
         "maximumAgents": 10,
         "machineType": "e2-small"
       }
