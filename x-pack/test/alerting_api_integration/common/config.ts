@@ -9,7 +9,7 @@ import path from 'path';
 import getPort from 'get-port';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators/server/plugin';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';

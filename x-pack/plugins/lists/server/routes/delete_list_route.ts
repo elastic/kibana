@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { EntriesArray, validate } from '@kbn/securitysolution-io-ts-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import type { ListsPluginRouter } from '../types';
-import { LIST_URL } from '../../common/constants';
 import {
+  EntriesArray,
   ExceptionListItemSchema,
   FoundExceptionListSchema,
   deleteListSchema,
   exceptionListItemSchema,
   listSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import type { ListsPluginRouter } from '../types';
+import { LIST_URL } from '../../common/constants';
 import { getSavedObjectType } from '../services/exception_lists/utils';
 import { ExceptionListClient } from '../services/exception_lists/exception_list_client';
 import { escapeQuotes } from '../services/utils/escape_query';

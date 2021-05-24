@@ -33,7 +33,11 @@ export const TCPAdvancedFields = () => {
   );
 
   return (
-    <EuiAccordion id="uptimeFleetTCPAdvancedOptions" buttonContent="Advanced TCP options">
+    <EuiAccordion
+      id="uptimeFleetTCPAdvancedOptions"
+      buttonContent="Advanced TCP options"
+      data-test-subj="syntheticsTCPAdvancedFieldsAccordion"
+    >
       <EuiSpacer size="m" />
       <EuiDescribedFormGroup
         title={
@@ -75,10 +79,11 @@ export const TCPAdvancedFields = () => {
                 configKey: ConfigKeys.PROXY_URL,
               })
             }
+            data-test-subj="syntheticsProxyUrl"
           />
         </EuiFormRow>
         {!!fields[ConfigKeys.PROXY_URL] && (
-          <EuiFormRow>
+          <EuiFormRow data-test-subj="syntheticsUseLocalResolver">
             <EuiCheckbox
               id={'uptimeFleetUseLocalResolverCheckbox'}
               checked={fields[ConfigKeys.PROXY_USE_LOCAL_RESOLVER]}
@@ -122,6 +127,7 @@ export const TCPAdvancedFields = () => {
                 }),
               [handleInputChange]
             )}
+            data-test-subj="syntheticsTCPRequestSendCheck"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -166,6 +172,7 @@ export const TCPAdvancedFields = () => {
                 }),
               [handleInputChange]
             )}
+            data-test-subj="syntheticsTCPResponseReceiveCheck"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
