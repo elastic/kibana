@@ -58,6 +58,13 @@ export const SW_GET_APPLICATION_API_ERROR = (id: string | null) =>
     }
   );
 
+export const SW_GET_APPLICATION_API_NO_FIELDS_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlane.unableToGetApplicationFieldsMessage',
+  {
+    defaultMessage: 'Unable to get application fields',
+  }
+);
+
 export const SW_API_URL_TEXT_FIELD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.apiUrlTextFieldLabel',
   {

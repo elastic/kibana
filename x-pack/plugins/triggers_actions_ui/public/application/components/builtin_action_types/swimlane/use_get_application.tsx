@@ -6,31 +6,27 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { ToastsApi } from 'kibana/public';
 import { getApplication as getApplicationApi } from './api';
 import * as i18n from './translations';
-import { SwimlaneActionConnector, SwimlaneFieldMappingConfig } from './types';
+import { SwimlaneFieldMappingConfig } from './types';
 
 interface Props {
-  http: HttpSetup;
   toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
-  action: SwimlaneActionConnector;
   appId: string;
   apiToken: string;
   apiUrl: string;
 }
 
 export interface UseGetApplication {
-  getApplication: () => Promise<{ fields: SwimlaneFieldMappingConfig[] } | undefined>;
+  getApplication: () => Promise<{ fields?: SwimlaneFieldMappingConfig[] } | undefined>;
   isLoading: boolean;
 }
 
 export const useGetApplication = ({
-  http,
-  action,
   toastNotifications,
   appId,
   apiToken,
@@ -47,8 +43,7 @@ export const useGetApplication = ({
       abortCtrlRef.current = new AbortController();
       setIsLoading(true);
 
-      const response = await getApplicationApi({
-        http,
+      const data = await getApplicationApi({
         signal: abortCtrlRef.current.signal,
         appId,
         apiToken,
@@ -57,14 +52,15 @@ export const useGetApplication = ({
 
       if (!isCancelledRef.current) {
         setIsLoading(false);
-        if (response.status && response.status === 'error') {
+        if (!data.fields) {
+          // If the response was malformed and fields doesn't exist, show an error toast
           toastNotifications.addDanger({
             title: i18n.SW_GET_APPLICATION_API_ERROR(appId),
-            text: `${response.serviceMessage ?? response.message}`,
+            text: i18n.SW_GET_APPLICATION_API_NO_FIELDS_ERROR,
           });
-        } else {
-          return response.data;
+          return;
         }
+        return data;
       }
     } catch (error) {
       if (!isCancelledRef.current) {
@@ -77,7 +73,7 @@ export const useGetApplication = ({
         setIsLoading(false);
       }
     }
-  }, [apiToken, apiUrl, appId, http, toastNotifications]);
+  }, [apiToken, apiUrl, appId, toastNotifications]);
 
   return {
     isLoading,

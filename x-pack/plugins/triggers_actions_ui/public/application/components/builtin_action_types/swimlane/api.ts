@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
-
 export async function getApplication({
-  http,
   signal,
   url,
   appId,
   apiToken,
 }: {
-  http: HttpSetup;
   signal: AbortSignal;
   url: string;
   appId: string;
@@ -33,10 +29,19 @@ export async function getApplication({
 
   const getApplicationUrl = (id: string) => applicationUrl.replace('{appId}', id);
   try {
-    return await http.get(getApplicationUrl(appId), {
+    const response = await window.fetch(getApplicationUrl(appId), {
+      method: 'GET',
       headers,
       signal,
     });
+
+    if (!response.ok) {
+      throw new Error(
+        `Received status: ${response.status} when attempting to get application with id: ${appId}`
+      );
+    }
+
+    return await response.json();
   } catch (error) {
     throw new Error(`Unable to get application with id ${appId}. Error: ${error.message}`);
   }

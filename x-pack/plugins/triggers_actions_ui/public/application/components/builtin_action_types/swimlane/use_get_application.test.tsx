@@ -47,8 +47,9 @@ describe('useGetApplication', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetApplication>(() =>
         useGetApplication({
-          http: services.http,
-          action,
+          appId: action.config.appId,
+          apiToken: action.secrets.apiToken,
+          apiUrl: action.config.apiUrl,
           toastNotifications: services.notifications.toasts,
         })
       );
@@ -65,8 +66,9 @@ describe('useGetApplication', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetApplication>(() =>
         useGetApplication({
-          http: services.http,
-          action,
+          appId: action.config.appId,
+          apiToken: action.secrets.apiToken,
+          apiUrl: action.config.apiUrl,
           toastNotifications: services.notifications.toasts,
         })
       );
@@ -76,9 +78,10 @@ describe('useGetApplication', () => {
       result.current.getApplication();
       await waitForNextUpdate();
       expect(getApplicationMock).toBeCalledWith({
-        http: services.http,
-        connectorId: action.id,
         signal: abortCtrl.signal,
+        appId: action.config.appId,
+        apiToken: action.secrets.apiToken,
+        url: action.config.apiUrl,
       });
     });
   });
@@ -87,8 +90,9 @@ describe('useGetApplication', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetApplication>(() =>
         useGetApplication({
-          http: services.http,
-          action,
+          appId: action.config.appId,
+          apiToken: action.secrets.apiToken,
+          apiUrl: action.config.apiUrl,
           toastNotifications: services.notifications.toasts,
         })
       );
@@ -108,8 +112,9 @@ describe('useGetApplication', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetApplication>(() =>
         useGetApplication({
-          http: services.http,
-          action,
+          appId: action.config.appId,
+          apiToken: action.secrets.apiToken,
+          apiUrl: action.config.apiUrl,
           toastNotifications: services.notifications.toasts,
         })
       );
@@ -129,8 +134,9 @@ describe('useGetApplication', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetApplication>(() =>
         useGetApplication({
-          http: services.http,
-          action,
+          appId: action.config.appId,
+          apiToken: action.secrets.apiToken,
+          apiUrl: action.config.apiUrl,
           toastNotifications: services.notifications.toasts,
         })
       );
@@ -143,23 +149,21 @@ describe('useGetApplication', () => {
       });
 
       expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Unable to get application',
+        title: 'Unable to get application with id bcq16kdTbz5jlwM6h',
         text: 'Something went wrong',
       });
     });
   });
 
-  it('it displays an error when service fails', async () => {
-    getApplicationMock.mockResolvedValue({
-      status: 'error',
-      serviceMessage: 'An error occurred',
-    });
+  it('it displays an error when the response does not contain the correct fields', async () => {
+    getApplicationMock.mockResolvedValue({});
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetApplication>(() =>
         useGetApplication({
-          http: services.http,
-          action,
+          appId: action.config.appId,
+          apiToken: action.secrets.apiToken,
+          apiUrl: action.config.apiUrl,
           toastNotifications: services.notifications.toasts,
         })
       );
@@ -168,8 +172,8 @@ describe('useGetApplication', () => {
       await waitForNextUpdate();
 
       expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Unable to get application',
-        text: 'An error occurred',
+        title: 'Unable to get application with id bcq16kdTbz5jlwM6h',
+        text: 'Unable to get application fields',
       });
     });
   });

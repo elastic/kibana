@@ -30,16 +30,13 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
   updateFields,
 }) => {
   const {
-    http,
     notifications: { toasts },
   } = useKibana().services;
   const { apiUrl, appId } = action.config;
   const { apiToken } = action.secrets;
   const { docLinks } = useKibana().services;
   const { getApplication } = useGetApplication({
-    http,
     toastNotifications: toasts,
-    action,
     apiToken,
     appId,
     apiUrl,
@@ -50,13 +47,15 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
     // fetch swimlane application configuration
     const application = await getApplication();
 
-    if (!application) {
-      throw new Error(i18n.SW_GET_APPLICATION_API_ERROR(appId));
+    if (!application?.fields) {
+      // Error has already been surfaced within the getApplication call by a toast
+      return;
     }
+
     const allFields = application.fields;
     updateFields(allFields);
     updateCurrentStep(2);
-  }, [appId, getApplication, updateCurrentStep, updateFields]);
+  }, [getApplication, updateCurrentStep, updateFields]);
 
   const onChangeConfig = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, key: 'apiUrl' | 'appId') => {
