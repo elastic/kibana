@@ -11,7 +11,15 @@ import {
   ExternalServiceApi,
   Incident,
   PushToServiceApiHandlerArgs,
+  GetApplicationResponse,
+  GetApplicationHandlerArgs,
 } from './types';
+
+const getApplicationHandler = async ({
+  externalService,
+}: GetApplicationHandlerArgs): Promise<GetApplicationResponse> => {
+  return await externalService.getApplication();
+};
 
 const createRecordHandler = async ({
   externalService,
@@ -52,6 +60,7 @@ const pushToServiceHandler = async ({
 };
 
 export const api: ExternalServiceApi = {
+  getApplication: getApplicationHandler,
   createRecord: createRecordHandler,
   pushToService: pushToServiceHandler,
 };

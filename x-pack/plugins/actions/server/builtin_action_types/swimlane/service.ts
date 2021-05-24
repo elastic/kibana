@@ -17,6 +17,7 @@ import {
   ExternalService,
   ExternalServiceCredentials,
   ExternalServiceIncidentResponse,
+  GetApplicationResponse,
   MappingConfigType,
   SwimlaneComment,
   SwimlanePublicConfigurationType,
@@ -51,6 +52,8 @@ export const createExternalService = (
     ? urlWithoutTrailingSlash
     : urlWithoutTrailingSlash + '/api';
 
+  const applicationUrl = `${apiUrl}/app/${appId}`;
+
   const getPostRecordUrl = (id: string) => `${apiUrl}/app/${id}/record`;
 
   const getPostRecordIdUrl = (id: string, recordId: string) =>
@@ -64,6 +67,28 @@ export const createExternalService = (
 
   const getCommentFieldId = (fieldMappings: MappingConfigType): string | null =>
     fieldMappings.commentsConfig?.id || null;
+
+  const getApplication = async (): Promise<GetApplicationResponse> => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        configurationUtilities,
+        headers,
+        logger,
+        method: 'get',
+        url: applicationUrl,
+      });
+
+      return res.data;
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to get application with id ${appId}. Error: ${error.message}`
+        )
+      );
+    }
+  };
 
   const createRecord = async (
     params: CreateRecordParams
@@ -209,5 +234,6 @@ export const createExternalService = (
     createComment,
     createRecord,
     updateRecord,
+    getApplication,
   };
 };

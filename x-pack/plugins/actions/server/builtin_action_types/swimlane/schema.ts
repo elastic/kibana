@@ -50,6 +50,7 @@ const SwimlaneFields = {
   severity: schema.nullable(schema.string()),
 };
 
+export const ExecutorSubActionGetApplicationParamsSchema = schema.object({});
 export const ExecutorSubActionCreateRecordParamsSchema = schema.object(SwimlaneFields);
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
@@ -68,6 +69,10 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
 });
 
 export const ExecutorParamsSchema = schema.oneOf([
+  schema.object({
+    subAction: schema.literal('getApplication'),
+    subActionParams: ExecutorSubActionGetApplicationParamsSchema,
+  }),
   schema.object({
     subAction: schema.literal('createRecord'),
     subActionParams: ExecutorSubActionCreateRecordParamsSchema,

@@ -15,12 +15,7 @@ import { fieldLabels } from './index';
 const SwimlaneFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<SwimlaneFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
-  const { alertSource, caseId, caseName, severity } = fields || {
-    alertSource: null,
-    caseId: null,
-    caseName: null,
-    severity: null,
-  };
+  const { alertSource = null, caseId = null, caseName = null, severity = null } = fields ?? {};
 
   const onFieldChange = useCallback(
     (key, value) => {

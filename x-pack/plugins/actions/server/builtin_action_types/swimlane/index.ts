@@ -33,7 +33,7 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const supportedSubActions: string[] = ['application', 'createRecord', 'pushToService'];
+const supportedSubActions: string[] = ['getApplication', 'createRecord', 'pushToService'];
 
 // action type definition
 export function getActionType(
@@ -99,6 +99,12 @@ async function executor(
     const errorMessage = `[Action][ExternalService] -> [Swimlane] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
+  }
+
+  if (subAction === 'getApplication') {
+    data = await api.getApplication({
+      externalService,
+    });
   }
 
   if (subAction === 'createRecord') {

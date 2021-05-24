@@ -70,6 +70,10 @@ export interface FieldConfig {
   fieldType: string;
 }
 
+export interface GetApplicationResponse {
+  fields: FieldConfig[];
+}
+
 export interface SwimlaneRecordPayload {
   applicationId: string;
   id?: string;
@@ -78,6 +82,7 @@ export interface SwimlaneRecordPayload {
 }
 
 export interface ExternalService {
+  getApplication: () => Promise<GetApplicationResponse>;
   createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
   createRecord: (params: CreateRecordParams) => Promise<ExternalServiceIncidentResponse>;
   updateRecord: (params: UpdateRecordParams) => Promise<ExternalServiceIncidentResponse>;
@@ -101,11 +106,12 @@ export interface GetApplicationHandlerArgs {
 }
 
 export interface ExternalServiceApi {
+  getApplication: (args: GetApplicationHandlerArgs) => Promise<GetApplicationResponse>;
   createRecord: (args: CreateRecordApiHandlerArgs) => Promise<ExternalServiceIncidentResponse>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<ExternalServiceIncidentResponse>;
 }
 
-export type SwimlaneExecutorResultData = ExternalServiceIncidentResponse;
+export type SwimlaneExecutorResultData = ExternalServiceIncidentResponse | GetApplicationResponse;
 export type SwimlaneDataValues = Record<string, string | number>;
 export interface SwimlaneComment {
   fieldId: string;

@@ -18,7 +18,7 @@ import { FormattedMessage } from 'react-intl';
 import * as i18n from '../translations';
 import { StepProps } from './';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { getApplication } from '../api';
+import { useGetApplication } from '../use_get_application';
 
 export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
   action,
@@ -29,22 +29,31 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
   updateCurrentStep,
   updateFields,
 }) => {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const { apiUrl, appId } = action.config;
   const { apiToken } = action.secrets;
   const { docLinks } = useKibana().services;
+  const { getApplication } = useGetApplication({
+    http,
+    toastNotifications: toasts,
+    action,
+  });
   const isValid = useMemo(() => apiUrl && apiToken && appId, [apiToken, apiUrl, appId]);
+
   const connectSwimlane = useCallback(async () => {
     // fetch swimlane application configuration
-    const application = await getApplication({ http, url: apiUrl, appId, apiToken });
+    const application = await getApplication();
 
-    if (!application) {
-      throw new Error(i18n.SW_GET_APPLICATION_API_ERROR(appId));
+    if (application != null) {
+      const allFields = application.fields;
+      updateFields(allFields);
+      updateCurrentStep(2);
     }
-    const allFields = application.fields;
-    updateFields(allFields);
-    updateCurrentStep(2);
-  }, [apiToken, apiUrl, appId, http, updateCurrentStep, updateFields]);
+  }, [getApplication, updateCurrentStep, updateFields]);
+
   const onChangeConfig = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, key: 'apiUrl' | 'appId') => {
       editActionConfig(key, e.target.value);
@@ -142,7 +151,7 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
             fullWidth
             isInvalid={isInvalid}
             readOnly={readOnly}
-            value={apiToken || ''}
+            value={apiToken ?? ''}
             data-test-subj="swimlaneApiTokenInput"
             onChange={onChangeSecrets}
             onBlur={onBlurSecrets}
