@@ -100,6 +100,7 @@ export const getLineVisTypeDefinition = (
           lineWidth: 2,
           interpolate: InterpolationMode.Linear,
           showCircles: true,
+          dotsRadius: 3,
         },
       ],
       addTooltip: true,
