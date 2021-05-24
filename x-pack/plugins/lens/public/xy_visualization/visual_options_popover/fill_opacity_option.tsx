@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSpacer, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiRange } from '@elastic/eui';
 
 export interface FillOpacityOptionProps {
   /**
@@ -29,10 +29,11 @@ export const FillOpacityOption: React.FC<FillOpacityOptionProps> = ({
   return isFillOpacityEnabled ? (
     <>
       <EuiFormRow
-        display="columnCompressedSwitch"
+        display="columnCompressed"
         label={i18n.translate('xpack.lens.xyChart.fillOpacityLabel', {
           defaultMessage: 'Fill opacity',
         })}
+        fullWidth
       >
         <EuiRange
           data-test-subj="lnsFillOpacity"
@@ -42,12 +43,12 @@ export const FillOpacityOption: React.FC<FillOpacityOptionProps> = ({
           step={0.1}
           showInput
           compressed
+          fullWidth
           onChange={(e) => {
             onChange(Number(e.currentTarget.value));
           }}
         />
       </EuiFormRow>
-      <EuiSpacer />
     </>
   ) : null;
 };

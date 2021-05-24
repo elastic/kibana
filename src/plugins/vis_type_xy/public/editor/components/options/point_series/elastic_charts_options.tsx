@@ -104,7 +104,7 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
       {isAreaChart && (
         <EuiFormRow
           label={i18n.translate('visTypeXy.editors.elasticChartsOptions.fillOpacity', {
-            defaultMessage: 'Color opacity',
+            defaultMessage: 'Fill opacity',
           })}
           fullWidth
           display="rowCompressed"
@@ -116,6 +116,7 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
             max={1}
             step={0.1}
             showInput
+            fullWidth
             compressed
             onChange={(e) => {
               setValue('fillOpacity', Number(e.currentTarget.value));

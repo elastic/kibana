@@ -47,6 +47,7 @@ function PointOptions({ chart, setChart }: PointOptionsParams) {
           min={1}
           max={10}
           step={1}
+          fullWidth
           disabled={!chart.showCircles}
           showInput
           compressed
