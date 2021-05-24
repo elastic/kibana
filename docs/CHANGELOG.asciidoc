@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.16>>
 * <<release-notes-6.8.15>>
 * <<release-notes-6.8.14>>
 * <<release-notes-6.8.13>>
@@ -102,6 +103,13 @@ This section summarizes the changes in each release.
 //=== Known issues
 ////
 
+[[release-notes-6.8.16]]
+== {kib} 6.8.16
+
+coming::[6.8.16]
+
+The 6.8.16 release does not include any user-facing changes.
+
 [[release-notes-6.8.15]]
 == {kib} 6.8.15
 
@@ -143,12 +151,12 @@ Reporting::
 [[release-notes-6.8.13]]
 == {kib} 6.8.13
 
-There are no user-facing changes.
+The 6.8.13 release does not include any user-facing changes.
 
 [[release-notes-6.8.12]]
 == {kib} 6.8.12
 
-For the 6.8.12 release, there are no user-facing changes.
+The 6.8.12 release does not include any user-facing changes.
 
 [[release-notes-6.8.11]]
 == {kib} 6.8.11
@@ -3105,7 +3113,7 @@ Visualization::
 [[release-notes-6.1.4]]
 == {kib} 6.1.4
 
-There are no user-facing changes in this release.
+The 6.1.4 release does not include any user-facing changes.
 
 [[release-notes-6.1.3]]
 == {kib} 6.1.3
