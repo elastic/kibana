@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Comment, CommentsArray } from '@kbn/securitysolution-io-ts-utils';
+import type { Comment, CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { DATE_NOW, ID, USER } from '../../constants.mock';
 
