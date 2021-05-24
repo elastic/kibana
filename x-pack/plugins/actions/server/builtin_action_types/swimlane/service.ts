@@ -10,7 +10,11 @@ import axios from 'axios';
 
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { getErrorMessage, request } from '../lib/axios_utils';
-import { getBodyForEventAction, removeCommentFieldUpdatedInformation } from './helpers';
+import {
+  getBodyForEventAction,
+  removeCommentFieldUpdatedInformation,
+  removeUnsafeFields,
+} from './helpers';
 import {
   CreateCommentParams,
   CreateRecordParams,
@@ -79,7 +83,7 @@ export const createExternalService = (
         url: applicationUrl,
       });
 
-      return res.data;
+      return { ...res.data, fields: removeUnsafeFields(res.data?.fields ?? []) };
     } catch (error) {
       throw new Error(
         getErrorMessage(

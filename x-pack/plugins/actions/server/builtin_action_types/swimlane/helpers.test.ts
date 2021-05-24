@@ -6,7 +6,7 @@
  */
 
 import { MappingConfigType } from './types';
-import { getBodyForEventAction } from './helpers';
+import { getBodyForEventAction, removeUnsafeFields } from './helpers';
 
 describe('Create Record Mapping', () => {
   let mappingConfig: MappingConfigType;
@@ -66,11 +66,48 @@ describe('Create Record Mapping', () => {
     const data = getBodyForEventAction(appId, mappingConfig, params);
     expect(data?.values?.[mappingConfig.alertSourceConfig?.id ?? 0]).toEqual(params.alertSource);
     expect(data?.values?.[mappingConfig.alertNameConfig.id]).toEqual(params.alertName);
-    // @ts-ignore
-    expect(data?.values?.[mappingConfig.caseNameConfig.id]).toEqual(params.caseName);
+    expect(data?.values?.[mappingConfig.caseNameConfig?.id ?? 0]).toEqual(params.caseName);
     expect(data?.values?.[mappingConfig.caseIdConfig?.id ?? 0]).toEqual(params.caseId);
-    // @ts-ignore
-    expect(data?.values?.[mappingConfig.commentsConfig.id]).toEqual(params.comments);
+    expect(data?.values?.[mappingConfig.commentsConfig?.id ?? 0]).toEqual(params.comments);
     expect(data?.values?.[mappingConfig?.severityConfig?.id ?? 0]).toEqual(params.severity);
+  });
+});
+
+describe('removeUnsafeFields', () => {
+  const fields = [
+    {
+      id: '__proto__',
+      name: 'Alert Source',
+      key: 'alert-source',
+      fieldType: 'text',
+    },
+    {
+      id: 'adnjls',
+      name: '__proto__',
+      key: 'alert-source',
+      fieldType: 'text',
+    },
+    {
+      id: 'adnjls',
+      name: 'Alert Source',
+      key: '__proto__',
+      fieldType: 'text',
+    },
+    {
+      id: 'adnjls',
+      name: 'Alert Source',
+      key: 'alert-source',
+      fieldType: '__proto__',
+    },
+    {
+      id: 'safe',
+      name: 'safe',
+      key: 'safe',
+      fieldType: 'safe',
+    },
+  ];
+  test('it returns only safe fields', () => {
+    const safeFields = removeUnsafeFields(fields);
+    expect(safeFields).toEqual([fields[4]]);
   });
 });

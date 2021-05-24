@@ -8,6 +8,7 @@
 import {
   CreateRecordParams,
   ExecutorSubActionCreateRecordParams,
+  FieldConfig,
   MappingConfigType,
   SwimlaneDataComments,
   SwimlaneDataValues,
@@ -86,3 +87,12 @@ export const removeCommentFieldUpdatedInformation = (content: string): string =>
   }
   return content;
 };
+
+export const removeUnsafeFields = (fields: FieldConfig[]): FieldConfig[] =>
+  fields.filter(
+    (filter) =>
+      filter.id !== '__proto__' &&
+      filter.key !== '__proto__' &&
+      filter.name !== '__proto__' &&
+      filter.fieldType !== '__proto__'
+  );
