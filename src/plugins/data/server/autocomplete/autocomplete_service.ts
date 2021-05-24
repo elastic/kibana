@@ -21,8 +21,7 @@ export class AutocompleteService implements Plugin<void> {
   }
 
   public setup(core: CoreSetup) {
-    if (this.valueSuggestionsEnabled)
-      registerRoutes(core, this.initializerContext.config.legacy.globalConfig$);
+    if (this.valueSuggestionsEnabled) registerRoutes(core, this.initializerContext.config.create());
   }
 
   public start() {}

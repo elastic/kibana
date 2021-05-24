@@ -7,19 +7,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, SharedGlobalConfig } from 'kibana/server';
+import { IRouter } from 'kibana/server';
 
 import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import type { IFieldType } from '../index';
 import { findIndexPatternById, getFieldByName } from '../index_patterns';
 import { getRequestAbortedSignal } from '../lib';
 import { getKbnServerError } from '../../../kibana_utils/server';
 import { shimAbortSignal } from '../index';
+import { ConfigSchema } from '../../config';
 
-export function registerValueSuggestionsRoute(
-  router: IRouter,
-  config$: Observable<SharedGlobalConfig>
-) {
+export function registerValueSuggestionsRoute(router: IRouter, config$: Observable<ConfigSchema>) {
   router.post(
     {
       path: '/api/kibana/suggestions/values/{index}',
@@ -42,6 +41,8 @@ export function registerValueSuggestionsRoute(
       },
     },
     async (context, request, response) => {
+      const config = await config$.pipe(first()).toPromise();
+      const { tiers } = config.autocomplete.valueSuggestions;
       const { field: fieldName, query, filters, fieldMeta } = request.body;
       const { index } = request.params;
       const signal = getRequestAbortedSignal(request.events.aborted$);
@@ -67,7 +68,7 @@ export function registerValueSuggestionsRoute(
                   ...filters,
                   {
                     terms: {
-                      _tier: ['data_warm', 'data_hot'],
+                      _tier: tiers,
                     },
                   },
                 ],
