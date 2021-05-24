@@ -20,8 +20,6 @@ import {
   SavedObjectsDeleteOptions,
   SavedObjectsClientContract,
 } from '../../../../../../src/core/server';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 jest.useFakeTimers();
 

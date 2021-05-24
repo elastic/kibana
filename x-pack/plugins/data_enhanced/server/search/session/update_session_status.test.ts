@@ -11,7 +11,7 @@ import {
   SearchSessionSavedObjectAttributes,
 } from '../../../../../../src/plugins/data/common';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { SearchSessionsConfig, SearchStatus } from './types';
+import { SearchStatus } from './types';
 import moment from 'moment';
 import {
   SavedObjectsBulkUpdateObject,
@@ -22,17 +22,6 @@ import {
 describe('bulkUpdateSessions', () => {
   let mockClient: any;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  const config: SearchSessionsConfig = {
-    enabled: true,
-    pageSize: 5,
-    notTouchedInProgressTimeout: moment.duration(1, 'm'),
-    notTouchedTimeout: moment.duration(5, 'm'),
-    maxUpdateRetries: 3,
-    defaultExpiration: moment.duration(7, 'd'),
-    trackingInterval: moment.duration(10, 's'),
-    monitoringTaskTimeout: moment.duration(5, 'm'),
-    management: {} as any,
-  };
   const mockLogger: any = {
     debug: jest.fn(),
     warn: jest.fn(),
