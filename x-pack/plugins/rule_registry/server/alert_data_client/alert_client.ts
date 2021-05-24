@@ -66,6 +66,7 @@ export interface FindResult<Params extends AlertTypeParams> {
 
 export interface UpdateOptions<Params extends AlertTypeParams> {
   id: string;
+  owner: string;
   data: {
     status: string;
   };
@@ -174,34 +175,36 @@ export class AlertsClient {
 
   public async update<Params extends AlertTypeParams = never>({
     id,
+    owner,
     data,
   }: UpdateOptions<Params>): Promise<PartialAlert<Params>> {
-    const query = buildAlertsSearchQuery({
-      index: '.alerts-*',
-      alertId: id,
-    });
     // TODO: Type out alerts (rule registry fields + alerting alerts type)
-    const { body: result } = await this.esClient.search<RawAlert>(query);
-    const hits = result.hits.hits[0];
+    const result = await this.esClient.get({
+      index: '.alerts-observability-apm', // '.siem-signals-devin-hurley-default',
+      id,
+    });
+    console.error('RESULT', result);
+    const hits = result.body._source;
+    console.error(`ruleTypeId: ${hits['rule.id']} and consumer: ${hits['kibana.rac.alert.owner']}`);
 
     try {
       // ASSUMPTION: user bulk updating alerts from single owner/space
       // may need to iterate to support rules shared across spaces
       await this.authorization.ensureAuthorized({
-        ruleTypeId: hits['kibana.rac.alert.id'],
-        consumer: hits['kibana.rac.producer'],
+        ruleTypeId: hits['rule.id'],
+        consumer: hits['kibana.rac.alert.owner'],
         operation: WriteOperations.Update,
         entity: AlertingAuthorizationEntity.Alert,
       });
+      console.error('GOT PAST AUTHZ');
 
       try {
-        const indices = this.authorization.getAuthorizedAlertsIndices([
-          hits['kibana.rac.producer'],
-        ]);
-        // TODO: @Devin fix params for update
+        const index = this.authorization.getAuthorizedAlertsIndices(hits['kibana.rac.alert.owner']);
+
+        console.error('INDEX', index);
         const updateParameters = {
           id,
-          index: indices,
+          index,
           body: {
             doc: {
               'kibana.rac.alert.status': data.status,
@@ -209,16 +212,18 @@ export class AlertsClient {
           },
         };
 
-        return await this.esClient.update(updateParameters);
+        return this.esClient.update(updateParameters);
       } catch (error) {
         // TODO: Update error message
         this.logger.error('');
+        console.error('UPDATE ERROR', error);
         throw error;
       }
     } catch (error) {
+      console.error('AUTHZ ERROR', error);
       throw Boom.forbidden(
         this.auditLogger.racAuthorizationFailure({
-          owner: hits['kibana.rac.producer'],
+          owner: hits['kibana.rac.alert.producer'],
           operation: ReadOperations.Get,
           type: 'access',
         })
@@ -246,10 +251,13 @@ export class AlertsClient {
       });
 
       try {
-        const indices = this.authorization.getAuthorizedAlertsIndices([owner]);
+        const index = this.authorization.getAuthorizedAlertsIndices(owner);
+        if (index == null) {
+          throw Error(`cannot find authorized index for owner: ${owner}`);
+        }
         const updateParameters = buildAlertsUpdateParameters({
           ids,
-          index: indices,
+          index,
           status: data.status,
         });
 

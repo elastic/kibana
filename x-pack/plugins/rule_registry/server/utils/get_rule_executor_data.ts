@@ -6,6 +6,7 @@
  */
 
 import {
+  OWNER,
   PRODUCER,
   RULE_CATEGORY,
   RULE_ID,
@@ -16,6 +17,7 @@ import {
 import { AlertTypeExecutor, AlertTypeWithExecutor } from '../types';
 
 export interface RuleExecutorData {
+  [OWNER]: string;
   [RULE_CATEGORY]: string;
   [RULE_ID]: string;
   [RULE_UUID]: string;
@@ -35,5 +37,6 @@ export function getRuleExecutorData(
     [RULE_NAME]: options.name,
     [TAGS]: options.tags,
     [PRODUCER]: type.producer,
+    [OWNER]: type.consumer,
   };
 }

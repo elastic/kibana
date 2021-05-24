@@ -210,6 +210,40 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerTrustedAppsRoutes(router, endpointContext);
     registerHostIsolationRoutes(router, endpointContext);
 
+    router.get({ path: '/security-myfakepath', validate: false }, async (context, req, res) => {
+      try {
+        const racClient = await context.ruleRegistry?.getAlertsClient();
+        const thing = await racClient?.find({ owner: SERVER_APP_ID });
+        console.error('hits?', JSON.stringify(thing.body.hits.hits, null, 2));
+        return res.ok({ body: { success: true, alerts: thing.body.hits.hits } });
+      } catch (err) {
+        console.error('monitoring route threw an error');
+        console.error('ERROR JSON', JSON.stringify(err, null, 2));
+        const statusCode = err.output.statusCode;
+        console.error('ERROR STATUSCODE?', statusCode);
+        // { message: err.message },
+
+        // const contentType = {
+        //   'Content-Type': 'application/json',
+        // };
+        // const defaultedHeaders = {
+        //   ...contentType,
+        // };
+
+        // return res.custom({
+        //   statusCode,
+        //   headers: defaultedHeaders,
+        //   body: Buffer.from(
+        //     JSON.stringify({
+        //       message: 'hello world', //err.message,
+        //       status_code: statusCode,
+        //     })
+        //   ),
+        // });
+        return res.unauthorized({ body: { message: err.message } });
+      }
+    });
+
     plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
       name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {

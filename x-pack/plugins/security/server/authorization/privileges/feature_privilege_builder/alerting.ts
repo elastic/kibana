@@ -46,7 +46,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
     feature: KibanaFeature
   ): string[] {
     const getAlertingPrivilege = (
-      operations: string[],
+      operations: Record<AlertingType, string[]>,
       privilegedTypes: readonly string[],
       alertingEntity: string,
       consumer: string

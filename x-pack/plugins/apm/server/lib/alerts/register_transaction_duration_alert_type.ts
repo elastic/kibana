@@ -14,7 +14,11 @@ import {
 } from '@kbn/rule-data-utils/target/technical_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  APM_SERVER_FEATURE_ID,
+} from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -75,7 +79,7 @@ export function registerTransactionDurationAlertType({
         apmActionVariables.interval,
       ],
     },
-    producer: 'apm',
+    producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();

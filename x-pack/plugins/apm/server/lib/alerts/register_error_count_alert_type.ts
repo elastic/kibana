@@ -14,7 +14,11 @@ import {
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  APM_SERVER_FEATURE_ID,
+} from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -66,7 +70,7 @@ export function registerErrorCountAlertType({
           apmActionVariables.interval,
         ],
       },
-      producer: 'apm',
+      producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       executor: async ({ services, params }) => {
         const config = await config$.pipe(take(1)).toPromise();

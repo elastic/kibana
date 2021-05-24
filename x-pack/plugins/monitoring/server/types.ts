@@ -21,6 +21,7 @@ import type {
   ActionsApiRequestHandlerContext,
 } from '../../actions/server';
 import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
+import { RacApiRequestHandlerContext } from '../../rule_registry/server';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
@@ -58,6 +59,7 @@ export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerCon
   actions?: ActionsApiRequestHandlerContext;
   alerting?: AlertingApiRequestHandlerContext;
   infra: InfraRequestHandlerContext;
+  ruleRegistry?: RacApiRequestHandlerContext;
 }
 
 export interface PluginsStart {

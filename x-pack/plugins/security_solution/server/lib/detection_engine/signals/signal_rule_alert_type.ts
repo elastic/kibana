@@ -108,9 +108,12 @@ export const signalRulesAlertType = ({
       services,
       params,
       spaceId,
+      consumer,
       updatedBy: updatedByUser,
     }) {
       const { ruleId, maxSignals, meta, outputIndex, timestampOverride, type } = params;
+
+      console.error('CONSUMER', consumer);
 
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;

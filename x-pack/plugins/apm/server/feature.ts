@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '../../licensing/common/types';
-import { AlertType } from '../common/alert_types';
+import { AlertType, APM_SERVER_FEATURE_ID } from '../common/alert_types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
   LicensingPluginSetup,
@@ -15,14 +15,14 @@ import {
 } from '../../licensing/server';
 
 export const APM_FEATURE = {
-  id: 'apm',
+  id: APM_SERVER_FEATURE_ID,
   name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
     defaultMessage: 'APM and User Experience',
   }),
   order: 900,
   category: DEFAULT_APP_CATEGORIES.observability,
-  app: ['apm', 'ux', 'kibana'],
-  catalogue: ['apm'],
+  app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
+  catalogue: [APM_SERVER_FEATURE_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
@@ -30,9 +30,9 @@ export const APM_FEATURE = {
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
-      app: ['apm', 'ux', 'kibana'],
-      api: ['apm', 'apm_write', 'rac'],
-      catalogue: ['apm'],
+      app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
+      api: [APM_SERVER_FEATURE_ID, 'apm_write'],
+      catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
         read: [],
@@ -51,9 +51,9 @@ export const APM_FEATURE = {
       ui: ['show', 'save', 'alerting:show', 'alerting:save'],
     },
     read: {
-      app: ['apm', 'ux', 'kibana'],
-      api: ['apm', 'rac'],
-      catalogue: ['apm'],
+      app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
+      api: [APM_SERVER_FEATURE_ID],
+      catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
         read: [],

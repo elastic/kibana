@@ -176,6 +176,19 @@ export class MonitoringPlugin
         logger: this.log,
       });
       initInfraSource(config, plugins.infra);
+      router.get({ path: '/monitoring-myfakepath', validate: false }, async (context, req, res) => {
+        try {
+          const racClient = await context.ruleRegistry?.getAlertsClient();
+          const thing = await racClient?.find({ owner: 'apm' });
+          console.error('THE THING!!!', JSON.stringify(thing.body, null, 2));
+          return res.ok({ body: { success: true, alerts: thing.body.hits.hits } });
+        } catch (err) {
+          console.error('monitoring route threw an error');
+          console.error(err);
+          return res.unauthorized({ body: { message: err.message } });
+          // return res.customError({ statusCode: err.statusCode, body: { message: err.message } });
+        }
+      });
     }
 
     return {

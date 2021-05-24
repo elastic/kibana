@@ -6,10 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import { map, mapValues, fromPairs, has } from 'lodash';
+import { map, mapValues, fromPairs, has, get } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { AlertTypeRegistry } from '../types';
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginSetup, AlertingActions } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertingAuthorizationAuditLogger, ScopeType } from './audit_logger';
@@ -145,12 +145,12 @@ export class AlertingAuthorization {
     return this.authorization?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
-  public getAuthorizedAlertsIndices(owners: string[]): string {
-    return owners
-      .map((owner) => {
-        return `.alerts-${owner}*`;
-      })
-      .join(',');
+  public getAuthorizedAlertsIndices(owner: string): string | undefined {
+    return owner === 'apm'
+      ? '.alerts-observability-apm'
+      : owner === 'securitySolution'
+      ? '.siem-signals*'
+      : undefined;
   }
 
   public async ensureAuthorized({ ruleTypeId, consumer, operation, entity }: EnsureAuthorizedOpts) {
@@ -197,6 +197,7 @@ export class AlertingAuthorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
+        // This should also log the type they're trying to access rule/alert
         throw Boom.forbidden(
           this.auditLogger.logAuthorizationFailure(
             username,

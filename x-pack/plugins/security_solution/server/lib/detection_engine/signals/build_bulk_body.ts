@@ -28,7 +28,7 @@ export const buildBulkBody = (
 ): SignalHit => {
   const rule = buildRuleWithOverrides(ruleSO, doc._source!);
   const signal: Signal = {
-    ...buildSignal([doc], rule),
+    ...buildSignal([doc], rule, ruleSO.attributes.consumer),
     ...additionalSignalFields(doc),
   };
   const event = buildEventTypeSignal(doc);
