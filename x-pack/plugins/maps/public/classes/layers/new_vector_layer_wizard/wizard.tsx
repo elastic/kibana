@@ -6,7 +6,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPanel, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createNewIndexAndPattern } from './create_new_index_pattern';
 import { RenderWizardArguments } from '../layer_wizard_registry';
@@ -19,6 +19,7 @@ interface State {
   indexName: string;
   indexNameError: string;
   indexingTriggered: boolean;
+  createIndexError: string;
 }
 
 export class NewVectorLayerEditor extends Component<RenderWizardArguments, State> {
@@ -28,6 +29,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     indexName: '',
     indexNameError: '',
     indexingTriggered: false,
+    createIndexError: '',
   };
 
   componentDidMount() {
@@ -45,17 +47,13 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     }
   }
 
-  _setCreateIndexError(message: string) {
+  _setCreateIndexError(errorMessage: string) {
     if (!this._isMounted) {
       return;
     }
     this.setState({
-      indexNameError: i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexError', {
-        defaultMessage: 'Could not create index: {errorMessage}',
-        values: {
-          errorMessage: message,
-        },
-      }),
+      indexingTriggered: false,
+      createIndexError: errorMessage,
     });
   }
 
@@ -70,7 +68,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     }
 
     if (!indexPatternId) {
-      return this._setCreateIndexError(
+      this._setCreateIndexError(
         i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexError', {
           defaultMessage: 'Could not create index with name {message}',
           values: {
@@ -78,6 +76,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
           },
         })
       );
+      return;
     }
 
     if (!this._isMounted) {
@@ -110,6 +109,20 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
   };
 
   render() {
+    if (this.state.createIndexError) {
+      return (
+        <EuiCallOut
+          title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexErrorTitle', {
+            defaultMessage: 'Sorry, could not create index pattern',
+          })}
+          color="danger"
+          iconType="alert"
+        >
+          <p>{this.state.createIndexError}</p>
+        </EuiCallOut>
+      );
+    }
+
     const IndexNameForm = getIndexNameFormComponent();
     return (
       <EuiPanel>
@@ -137,7 +150,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
           />
           <IndexNameForm
             indexName={this.state.indexName}
-            indexNameError={this.state.indexError}
+            indexNameError={this.state.indexNameError}
             onIndexNameChange={this._onIndexChange}
           />
         </>
