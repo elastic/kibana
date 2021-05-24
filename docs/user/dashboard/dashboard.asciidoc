@@ -72,7 +72,7 @@ Begin with an empty dashboard, or open an existing dashboard.
 * To open an existing dashboard, click the dashboard *Title* you want to open.
 
 [float]
-[[add-panels]]
+[[create-panels-with-lens]]
 === Add panels
 
 Create and add panels of your data to the dashboard, or add existing panels from the library. 
