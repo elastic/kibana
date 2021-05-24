@@ -8,10 +8,10 @@
 import { lazy } from 'react';
 
 import { CaseConnector } from '../types';
-import { ConnectorTypes, SwimlaneUnmappedFieldsType } from '../../../../common';
+import { ConnectorTypes, SwimlaneFieldsType } from '../../../../common';
 import * as i18n from './translations';
 
-export const getCaseConnector = (): CaseConnector<SwimlaneUnmappedFieldsType> => {
+export const getCaseConnector = (): CaseConnector<SwimlaneFieldsType> => {
   return {
     id: ConnectorTypes.swimlane,
     fieldsComponent: lazy(() => import('./case_fields')),

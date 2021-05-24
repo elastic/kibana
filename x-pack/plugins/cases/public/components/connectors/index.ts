@@ -16,7 +16,7 @@ import {
   ServiceNowITSMFieldsType,
   ServiceNowSIRFieldsType,
   ResilientFieldsType,
-  SwimlaneUnmappedFieldsType,
+  SwimlaneFieldsType,
 } from '../../../common';
 
 export { getActionType as getCaseConnectorUi } from './case';
@@ -43,7 +43,7 @@ class CaseConnectors {
       getServiceNowITSMCaseConnector()
     );
     this.caseConnectorsRegistry.register<ServiceNowSIRFieldsType>(getServiceNowSIRCaseConnector());
-    this.caseConnectorsRegistry.register<SwimlaneUnmappedFieldsType>(getSwimlaneCaseConnector());
+    this.caseConnectorsRegistry.register<SwimlaneFieldsType>(getSwimlaneCaseConnector());
   }
 
   registry(): CaseConnectorsRegistry {

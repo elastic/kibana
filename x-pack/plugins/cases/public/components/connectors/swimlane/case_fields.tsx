@@ -9,11 +9,11 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { ConnectorFieldsProps } from '../types';
-import { ConnectorTypes, SwimlaneUnmappedFieldsType } from '../../../../common';
+import { ConnectorTypes, SwimlaneFieldsType } from '../../../../common';
 import { ConnectorCard } from '../card';
 import { fieldLabels } from './index';
 const SwimlaneFieldsComponent: React.FunctionComponent<
-  ConnectorFieldsProps<SwimlaneUnmappedFieldsType>
+  ConnectorFieldsProps<SwimlaneFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const { alertSource, caseId, caseName, severity } = fields || {
     alertSource: null,
@@ -39,7 +39,7 @@ const SwimlaneFieldsComponent: React.FunctionComponent<
     () =>
       Object.entries({ alertSource, caseId, caseName, severity }).reduce(
         (acc: Array<{ title: string; description: string }>, [key, value]) => {
-          const fieldName = key as keyof SwimlaneUnmappedFieldsType;
+          const fieldName = key as keyof SwimlaneFieldsType;
           return [
             ...acc,
             ...(value !== null && value !== ''
