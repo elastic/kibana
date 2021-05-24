@@ -6,10 +6,10 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
-import { getMlJobsUsage, initialMlJobsUsage } from './detections_usage_helpers';
 import {
   getMlJobMetrics,
   getDetectionRuleMetrics,
+  initialMlJobsUsage,
   initialDetectionRulesUsage,
 } from './detections_metrics_helpers';
 import { MlPluginSetup } from '../../../../ml/server';
@@ -46,7 +46,7 @@ export interface DetectionsUsage {
 }
 
 export interface DetectionMetrics {
-  ml_jobs: MlJobMetric[];
+  ml_jobs: MlJobUsage;
   detection_rules: DetectionRuleAdoption;
 }
 
@@ -84,6 +84,11 @@ export interface MlJobMetric {
   data_counts: MlJobDataCount;
   model_size_stats: MlJobModelSize;
   timing_stats: MlTimingStats;
+}
+
+export interface MlJobUsage {
+  ml_job_usage: MlJobsUsage;
+  ml_job_metrics: MlJobMetric[];
 }
 
 export interface DetectionRuleMetric {
@@ -125,21 +130,6 @@ export interface CasesSavedObject {
   };
 }
 
-export const defaultDetectionsUsage = {
-  ml_jobs: initialMlJobsUsage,
-};
-
-export const fetchDetectionsUsage = async (
-  ml: MlPluginSetup | undefined,
-  savedObjectClient: SavedObjectsClientContract
-): Promise<DetectionsUsage> => {
-  const [mlJobsUsage] = await Promise.allSettled([getMlJobsUsage(ml, savedObjectClient)]);
-
-  return {
-    ml_jobs: mlJobsUsage.status === 'fulfilled' ? mlJobsUsage.value : initialMlJobsUsage,
-  };
-};
-
 export const fetchDetectionsMetrics = async (
   kibanaIndex: string,
   signalsIndex: string,
@@ -153,7 +143,10 @@ export const fetchDetectionsMetrics = async (
   ]);
 
   return {
-    ml_jobs: mlJobMetrics.status === 'fulfilled' ? mlJobMetrics.value : [],
+    ml_jobs:
+      mlJobMetrics.status === 'fulfilled'
+        ? mlJobMetrics.value
+        : { ml_job_metrics: [], ml_job_usage: initialMlJobsUsage },
     detection_rules:
       detectionRuleMetrics.status === 'fulfilled'
         ? detectionRuleMetrics.value

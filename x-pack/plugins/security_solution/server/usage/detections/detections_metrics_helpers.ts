@@ -17,10 +17,14 @@ import {
   DetectionRuleMetric,
   DetectionRuleAdoption,
   MlJobMetric,
+  MlJobsUsage,
+  MlJobUsage,
 } from './index';
 import { SIGNALS_ID } from '../../../common/constants';
 import { DatafeedStats, Job, MlPluginSetup } from '../../../../ml/server';
 import { isElasticRule, RuleSearchParams, RuleSearchResult } from './detection_telemetry_helpers';
+import { isJobStarted } from '../../../common/machine_learning/helpers';
+import { isSecurityJob } from '../../../common/machine_learning/is_security_job';
 
 /**
  * Default detection rule usage count, split by type + elastic/custom
@@ -289,13 +293,85 @@ export const getDetectionRuleMetrics = async (
   };
 };
 
+interface DetectionsMetric {
+  isElastic: boolean;
+  isEnabled: boolean;
+}
+
+/**
+ * Default ml job usage count
+ */
+export const initialMlJobsUsage: MlJobsUsage = {
+  custom: {
+    enabled: 0,
+    disabled: 0,
+  },
+  elastic: {
+    enabled: 0,
+    disabled: 0,
+  },
+};
+
+const updateMlJobsUsage = (jobMetric: DetectionsMetric, usage: MlJobsUsage): MlJobsUsage => {
+  const { isEnabled, isElastic } = jobMetric;
+  if (isEnabled && isElastic) {
+    return {
+      ...usage,
+      elastic: {
+        ...usage.elastic,
+        enabled: usage.elastic.enabled + 1,
+      },
+    };
+  } else if (!isEnabled && isElastic) {
+    return {
+      ...usage,
+      elastic: {
+        ...usage.elastic,
+        disabled: usage.elastic.disabled + 1,
+      },
+    };
+  } else if (isEnabled && !isElastic) {
+    return {
+      ...usage,
+      custom: {
+        ...usage.custom,
+        enabled: usage.custom.enabled + 1,
+      },
+    };
+  } else if (!isEnabled && !isElastic) {
+    return {
+      ...usage,
+      custom: {
+        ...usage.custom,
+        disabled: usage.custom.disabled + 1,
+      },
+    };
+  } else {
+    return usage;
+  }
+};
+
 export const getMlJobMetrics = async (
   ml: MlPluginSetup | undefined,
   savedObjectClient: SavedObjectsClientContract
-): Promise<MlJobMetric[]> => {
+): Promise<MlJobUsage> => {
+  let jobsUsage: MlJobsUsage = initialMlJobsUsage;
+
   if (ml) {
     try {
       const fakeRequest = { headers: {} } as KibanaRequest;
+
+      const modules = await ml.modulesProvider(fakeRequest, savedObjectClient).listModules();
+      const moduleJobs = modules.flatMap((module) => module.jobs);
+      const jobs = await ml.jobServiceProvider(fakeRequest, savedObjectClient).jobsSummary();
+
+      jobsUsage = jobs.filter(isSecurityJob).reduce((usage, job) => {
+        const isElastic = moduleJobs.some((moduleJob) => moduleJob.id === job.id);
+        const isEnabled = isJobStarted(job.jobState, job.datafeedState);
+
+        return updateMlJobsUsage({ isElastic, isEnabled }, usage);
+      }, initialMlJobsUsage);
+
       const jobsType = 'security';
       const securityJobStats = await ml
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
@@ -317,7 +393,7 @@ export const getMlJobMetrics = async (
         datafeedStatsCache.set(`${datafeedStat.datafeed_id}`, datafeedStat)
       );
 
-      return securityJobStats.jobs.map((stat) => {
+      const jobMetrics: MlJobMetric[] = securityJobStats.jobs.map((stat) => {
         const jobId = stat.job_id;
         const jobDetail = jobDetailsCache.get(stat.job_id);
         const datafeed = datafeedStatsCache.get(`datafeed-${jobId}`);
@@ -369,10 +445,18 @@ export const getMlJobMetrics = async (
           },
         } as MlJobMetric;
       });
+
+      return {
+        ml_job_usage: jobsUsage,
+        ml_job_metrics: jobMetrics,
+      };
     } catch (e) {
       // ignore failure, usage will be zeroed
     }
   }
 
-  return [];
+  return {
+    ml_job_usage: initialMlJobsUsage,
+    ml_job_metrics: [],
+  };
 };
