@@ -260,9 +260,33 @@ export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRu
   cy.get(LOOK_BACK_TIME_TYPE).select(rule.lookBack.timeType);
 };
 
+export const fillDefineThresholdRule = (rule: ThresholdRule) => {
+  const thresholdField = 0;
+  const threshold = 1;
+
+  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
+  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(COMBO_BOX_CLEAR_BTN).click();
+
+  rule.index!.forEach((index) => {
+    cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
+  });
+
+  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
+  cy.get(THRESHOLD_INPUT_AREA)
+    .find(INPUT)
+    .then((inputs) => {
+      cy.wrap(inputs[thresholdField]).type(rule.thresholdField);
+      cy.get(THRESHOLD_FIELD_SELECTION).click({ force: true });
+      cy.wrap(inputs[threshold]).clear().type(rule.threshold);
+    });
+};
+
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
+
+  const typeThresholdField = ($el: Cypress.ObjectLike) => cy.wrap($el).type(rule.thresholdField);
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id!)).click();
@@ -270,7 +294,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
-      cy.wrap(inputs[thresholdField]).type(rule.thresholdField);
+      cy.wrap(inputs[thresholdField]).pipe(typeThresholdField);
       cy.get(THRESHOLD_FIELD_SELECTION).click({ force: true });
       cy.wrap(inputs[threshold]).clear().type(rule.threshold);
     });
@@ -476,6 +500,10 @@ export const selectMachineLearningRuleType = () => {
 
 export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
+};
+
+export const previewResults = () => {
+  cy.get(QUERY_PREVIEW_BUTTON).click();
 };
 
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {

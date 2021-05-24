@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.browser.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "incremental": true,
+    "outDir": "./target_web",
+    "declaration": false,
+    "isolatedModules": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../../packages/kbn-i18n/src",
+    "types": [
+      "jest",
+      "node"
+    ],
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "types/intl_format_cache.d.ts",
+    "types/intl_relativeformat.d.ts"
+  ],
+  "exclude": [
+    "**/__fixtures__/**/*"
+  ]
+}

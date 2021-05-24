@@ -32,12 +32,13 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { v4 as generateUUI } from 'uuid';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { MaybeImmutable } from '../../../../common/endpoint/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ComponentWithAnyProps = ComponentType<any>;
 
 export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> extends CommonProps {
-  items: T[];
+  items: MaybeImmutable<T[]>;
   onChange: (changes: { pageIndex: number; pageSize: number }) => void;
   /**
    * The React Component that will be used to render the `items`. use `itemComponentProps` below to
@@ -79,6 +80,7 @@ interface TypedGenericComponentMemo {
 
 const RootContainer = styled.div`
   position: relative;
+  padding-top: ${({ theme }) => theme.eui.paddingSizes.xs};
 
   .body {
     min-height: ${({ theme }) => theme.eui.gutterTypes.gutterExtraLarge};
@@ -104,15 +106,17 @@ const DefaultNoItemsFound = memo(() => {
 
 DefaultNoItemsFound.displayName = 'DefaultNoItemsFound';
 
-const ErrorMessage = memo<{ message: string }>(({ message }) => {
-  return (
-    <EuiText textAlign="center">
-      <EuiSpacer size="m" />
-      <EuiIcon type="minusInCircle" color="danger" /> {message}
-      <EuiSpacer size="m" />
-    </EuiText>
-  );
-});
+const ErrorMessage = memo<{ message: string; 'data-test-subj'?: string }>(
+  ({ message, 'data-test-subj': dataTestSubj }) => {
+    return (
+      <EuiText textAlign="center" data-test-subj={dataTestSubj}>
+        <EuiSpacer size="m" />
+        <EuiIcon type="minusInCircle" color="danger" /> {message}
+        <EuiSpacer size="m" />
+      </EuiText>
+    );
+  }
+);
 
 ErrorMessage.displayName = 'ErrorMessage';
 
@@ -164,7 +168,11 @@ export const PaginatedContent = memo(
 
     const generatedBodyItemContent = useMemo(() => {
       if (error) {
-        return 'string' === typeof error ? <ErrorMessage message={error} /> : error;
+        return 'string' === typeof error ? (
+          <ErrorMessage message={error} data-test-subj={getTestId('error')} />
+        ) : (
+          error
+        );
       }
 
       // This casting here is needed in order to avoid the following a TS error (TS2322)
@@ -174,7 +182,11 @@ export const PaginatedContent = memo(
       const Item = ItemComponent as ComponentType<ReturnType<typeof itemComponentProps>>;
 
       if (items.length) {
-        return items.map((item) => {
+        // Cast here is to get around the fact that TS does not seem to be able to narrow the types down when the only
+        // difference is that the array might be Readonly. The error output is:
+        // `...has signatures, but none of those signatures are compatible with each other.`
+        // Can read more about it here: https://github.com/microsoft/TypeScript/issues/33591
+        return (items as T[]).map((item) => {
           let key: Key;
 
           if (itemId) {
@@ -191,22 +203,37 @@ export const PaginatedContent = memo(
           return <Item {...itemComponentProps(item)} key={key} />;
         });
       }
-
-      return noItemsMessage || <DefaultNoItemsFound />;
-    }, [ItemComponent, error, itemComponentProps, itemId, itemKeys, items, noItemsMessage]);
+      if (!loading) return noItemsMessage || <DefaultNoItemsFound />;
+    }, [
+      ItemComponent,
+      error,
+      getTestId,
+      itemComponentProps,
+      itemId,
+      itemKeys,
+      items,
+      noItemsMessage,
+      loading,
+    ]);
 
     return (
       <RootContainer data-test-subj={dataTestSubj} aria-label={ariaLabel} className={className}>
-        {loading && <EuiProgress size="xs" color="primary" />}
+        {loading && (
+          <EuiProgress
+            size="xs"
+            color="primary"
+            position="absolute"
+            data-test-subj={getTestId('loader')}
+          />
+        )}
 
         <div className="body" data-test-subj={getTestId('body')}>
-          <EuiSpacer size="l" />
           <div className={`body-content ${contentClassName}`}>
             {children ? children : generatedBodyItemContent}
           </div>
         </div>
 
-        {pagination && (
+        {pagination && (children || items.length > 0) && (
           <div data-test-subj={getTestId('footer')}>
             <EuiSpacer size="l" />
 

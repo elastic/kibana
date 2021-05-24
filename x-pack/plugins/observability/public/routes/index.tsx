@@ -133,7 +133,7 @@ export const routes = {
     breadcrumb: [
       {
         text: i18n.translate('xpack.observability.overview.exploratoryView', {
-          defaultMessage: 'Exploratory view',
+          defaultMessage: 'Analyze data',
         }),
       },
     ],

@@ -37,7 +37,7 @@ it('test extractImportReference', () => {
   expect(results[0]).toBe('(param: string) => ');
   expect(results[1]).toEqual({
     text: 'Bar',
-    docId: getPluginApiDocId('plugin_a', log),
+    docId: getPluginApiDocId('plugin_a'),
     section: 'def-public.Bar',
     pluginId: 'pluginA',
     scope: ApiScope.CLIENT,
@@ -53,7 +53,7 @@ it('test extractImportReference with public folder nested under server folder', 
   expect(results.length).toBe(1);
   expect(results[0]).toEqual({
     text: 'Bar',
-    docId: getPluginApiDocId('plugin_a', log),
+    docId: getPluginApiDocId('plugin_a'),
     section: 'def-server.Bar',
     pluginId: 'pluginA',
     scope: ApiScope.SERVER,

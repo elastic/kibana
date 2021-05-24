@@ -115,23 +115,7 @@ const getMockedEsClient = (esClientMock: jest.Mock) => {
 };
 
 describe('error handling', () => {
-  it('handles a 404 when searching for space usage', async () => {
-    const { features, licensing, usageCollection, usageStatsService } = setup({
-      license: { isAvailable: true, type: 'basic' },
-    });
-    const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
-      features,
-      licensing,
-      usageStatsServicePromise: Promise.resolve(usageStatsService),
-    });
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClient.search.mockRejectedValue({ status: 404 });
-
-    await collector.fetch(getMockFetchContext(esClient));
-  });
-
-  it('throws error for a non-404', async () => {
+  it('throws error if cluster unavailable', async () => {
     const { features, licensing, usageCollection, usageStatsService } = setup({
       license: { isAvailable: true, type: 'basic' },
     });
@@ -143,7 +127,7 @@ describe('error handling', () => {
     });
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-    const statusCodes = [401, 402, 403, 500];
+    const statusCodes = [401, 402, 403, 404, 500];
     for (const statusCode of statusCodes) {
       const error = { status: statusCode };
       esClient.search.mockRejectedValue(error);

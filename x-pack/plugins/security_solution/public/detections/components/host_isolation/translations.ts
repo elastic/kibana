@@ -14,29 +14,14 @@ export const ISOLATE_HOST = i18n.translate(
   }
 );
 
-export const COMMENT = i18n.translate('xpack.securitySolution.endpoint.hostIsolation.comment', {
-  defaultMessage: 'Comment',
-});
-
-export const COMMENT_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.comment.placeholder',
-  { defaultMessage: 'You may leave an optional note here.' }
-);
-
-export const CANCEL = i18n.translate('xpack.securitySolution.endpoint.hostIsolation.cancel', {
-  defaultMessage: 'Cancel',
-});
-
-export const CONFIRM = i18n.translate('xpack.securitySolution.endpoint.hostIsolation.confirm', {
-  defaultMessage: 'Confirm',
-});
-
-export const CASES_ASSOCIATED_WITH_ALERT = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.isolateHost.casesAssociatedWihtAlert',
-  {
-    defaultMessage: ' cases associated with the rule ',
-  }
-);
+export const CASES_ASSOCIATED_WITH_ALERT = (caseCount: number): string =>
+  i18n.translate(
+    'xpack.securitySolution.endpoint.hostIsolation.isolateHost.casesAssociatedWithAlert',
+    {
+      defaultMessage: ' {caseCount, plural, one {case} other {cases}} associated with the rule ',
+      values: { caseCount },
+    }
+  );
 
 export const RETURN_TO_ALERT_DETAILS = i18n.translate(
   'xpack.securitySolution.endpoint.hostIsolation.returnToAlertDetails',

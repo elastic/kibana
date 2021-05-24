@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EventFiltersFlyout } from '.';
+import { EventFiltersFlyout, EventFiltersFlyoutProps } from '.';
 import * as reactTestingLibrary from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
 import {
@@ -14,12 +14,18 @@ import {
 } from '../../../../../../common/mock/endpoint';
 import { MiddlewareActionSpyHelper } from '../../../../../../common/store/test_utils';
 
-import {
+import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
-} from '../../../../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { EventFiltersHttpService } from '../../../service';
+import { createdEventFilterEntryMock } from '../../../test_utils';
+import { getFormEntryState, isUninitialisedForm } from '../../../store/selector';
+import { EventFiltersListPageState } from '../../../types';
 
 jest.mock('../form');
+jest.mock('../../../service');
+
 jest.mock('../../hooks', () => {
   const originalModule = jest.requireActual('../../hooks');
   const useEventFiltersNotification = jest.fn().mockImplementation(() => {});
@@ -32,16 +38,31 @@ jest.mock('../../hooks', () => {
 
 let mockedContext: AppContextTestRender;
 let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
-let render: () => ReturnType<AppContextTestRender['render']>;
+let render: (
+  props?: Partial<EventFiltersFlyoutProps>
+) => ReturnType<AppContextTestRender['render']>;
 const act = reactTestingLibrary.act;
 let onCancelMock: jest.Mock;
+const EventFiltersHttpServiceMock = EventFiltersHttpService as jest.Mock;
+let getState: () => EventFiltersListPageState;
 
 describe('Event filter flyout', () => {
+  beforeAll(() => {
+    EventFiltersHttpServiceMock.mockImplementation(() => {
+      return {
+        getOne: () => createdEventFilterEntryMock(),
+        addEventFilters: () => createdEventFilterEntryMock(),
+        updateOne: () => createdEventFilterEntryMock(),
+      };
+    });
+  });
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     onCancelMock = jest.fn();
-    render = () => mockedContext.render(<EventFiltersFlyout onCancel={onCancelMock} />);
+    getState = () => mockedContext.store.getState().management.eventFilters;
+    render = (props) =>
+      mockedContext.render(<EventFiltersFlyout {...props} onCancel={onCancelMock} />);
   });
 
   afterEach(() => reactTestingLibrary.cleanup());
@@ -59,10 +80,8 @@ describe('Event filter flyout', () => {
       await waitForAction('eventFiltersInitForm');
     });
 
-    expect(mockedContext.store.getState().management.eventFilters.form.entry).not.toBeUndefined();
-    expect(
-      mockedContext.store.getState().management.eventFilters.form.entry!.entries[0].field
-    ).toBe('');
+    expect(getFormEntryState(getState())).not.toBeUndefined();
+    expect(getFormEntryState(getState())!.entries[0].field).toBe('');
   });
 
   it('should confirm form when button is disabled', () => {
@@ -71,9 +90,7 @@ describe('Event filter flyout', () => {
     act(() => {
       fireEvent.click(confirmButton);
     });
-    expect(
-      mockedContext.store.getState().management.eventFilters.form.submissionResourceState.type
-    ).toBe('UninitialisedResourceState');
+    expect(isUninitialisedForm(getState())).toBeTruthy();
   });
 
   it('should confirm form when button is enabled', async () => {
@@ -82,8 +99,7 @@ describe('Event filter flyout', () => {
       type: 'eventFiltersChangeForm',
       payload: {
         entry: {
-          ...(mockedContext.store.getState().management.eventFilters.form!
-            .entry as CreateExceptionListItemSchema),
+          ...(getState().form!.entry as CreateExceptionListItemSchema),
           name: 'test',
           os_types: ['windows'],
         },
@@ -97,9 +113,7 @@ describe('Event filter flyout', () => {
       fireEvent.click(confirmButton);
       await waitForAction('eventFiltersCreateSuccess');
     });
-    expect(
-      mockedContext.store.getState().management.eventFilters.form.submissionResourceState.type
-    ).toBe('UninitialisedResourceState');
+    expect(isUninitialisedForm(getState())).toBeTruthy();
     expect(confirmButton.hasAttribute('disabled')).toBeFalsy();
   });
 
@@ -112,8 +126,7 @@ describe('Event filter flyout', () => {
         type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'LoadedResourceState',
-          data: mockedContext.store.getState().management.eventFilters.form!
-            .entry as ExceptionListItemSchema,
+          data: getState().form!.entry as ExceptionListItemSchema,
         },
       });
     });
@@ -165,5 +178,23 @@ describe('Event filter flyout', () => {
     });
 
     expect(onCancelMock).toHaveBeenCalledTimes(0);
+  });
+
+  it('should renders correctly when id and edit type', () => {
+    const component = render({ id: 'fakeId', type: 'edit' });
+
+    expect(component.getAllByText('Update Endpoint Event Filter')).not.toBeNull();
+    expect(component.getByText('cancel')).not.toBeNull();
+    expect(component.getByText('Endpoint Security')).not.toBeNull();
+  });
+
+  it('should dispatch action to init form store on mount with id', async () => {
+    await act(async () => {
+      render({ id: 'fakeId', type: 'edit' });
+      await waitForAction('eventFiltersInitFromId');
+    });
+
+    expect(getFormEntryState(getState())).not.toBeUndefined();
+    expect(getFormEntryState(getState())!.item_id).toBe(createdEventFilterEntryMock().item_id);
   });
 });

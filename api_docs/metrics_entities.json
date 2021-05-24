@@ -16,47 +16,91 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "metricsEntities",
       "id": "def-server.MetricsEntitiesPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "MetricsEntitiesPluginSetup",
       "description": [],
-      "tags": [],
-      "children": [
-        {
-          "tags": [],
-          "id": "def-server.MetricsEntitiesPluginSetup.getMetricsEntitiesClient",
-          "type": "Function",
-          "label": "getMetricsEntitiesClient",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/metrics_entities/server/types.ts",
-            "lineNumber": 15
-          },
-          "signature": [
-            "GetMetricsEntitiesClientType"
-          ]
-        }
-      ],
       "source": {
         "path": "x-pack/plugins/metrics_entities/server/types.ts",
         "lineNumber": 14
       },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "metricsEntities",
+          "id": "def-server.MetricsEntitiesPluginSetup.getMetricsEntitiesClient",
+          "type": "Function",
+          "tags": [],
+          "label": "getMetricsEntitiesClient",
+          "description": [],
+          "signature": [
+            "(esClient: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCorePluginApi",
+              "section": "def-server.ElasticsearchClient",
+              "text": "ElasticsearchClient"
+            },
+            ") => ",
+            "MetricsEntitiesClient"
+          ],
+          "source": {
+            "path": "x-pack/plugins/metrics_entities/server/types.ts",
+            "lineNumber": 15
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "metricsEntities",
+              "id": "def-server.esClient",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "esClient",
+              "description": [],
+              "signature": [
+                "Pick<",
+                "KibanaClient",
+                ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                "TransportRequestParams",
+                ", options?: ",
+                "TransportRequestOptions",
+                " | undefined): ",
+                "TransportRequestPromise",
+                "<",
+                "ApiResponse",
+                "<Record<string, any>, unknown>>; }; }"
+              ],
+              "source": {
+                "path": "x-pack/plugins/metrics_entities/server/types.ts",
+                "lineNumber": 12
+              },
+              "deprecated": false
+            }
+          ]
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "metricsEntities",
       "id": "def-server.MetricsEntitiesPluginStart",
       "type": "Type",
-      "label": "MetricsEntitiesPluginStart",
       "tags": [],
+      "label": "MetricsEntitiesPluginStart",
       "description": [],
+      "signature": [
+        "void"
+      ],
       "source": {
         "path": "x-pack/plugins/metrics_entities/server/types.ts",
         "lineNumber": 18
       },
-      "signature": [
-        "void"
-      ],
+      "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -68,26 +112,29 @@
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "metricsEntities",
         "id": "def-common.ELASTIC_NAME",
         "type": "string",
+        "tags": [],
         "label": "ELASTIC_NAME",
         "description": [
           "\nGlobal prefix for all the transform jobs"
+        ],
+        "signature": [
+          "\"estc\""
         ],
         "source": {
           "path": "x-pack/plugins/metrics_entities/common/constants.ts",
           "lineNumber": 21
         },
-        "signature": [
-          "\"estc\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "metricsEntities",
         "id": "def-common.METRICS_ENTITIES_TRANSFORMS",
         "type": "string",
+        "tags": [],
         "label": "METRICS_ENTITIES_TRANSFORMS",
         "description": [
           "\nTransforms route"
@@ -96,53 +143,60 @@
           "path": "x-pack/plugins/metrics_entities/common/constants.ts",
           "lineNumber": 16
         },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "metricsEntities",
         "id": "def-common.METRICS_ENTITIES_URL",
         "type": "string",
+        "tags": [],
         "label": "METRICS_ENTITIES_URL",
         "description": [
           "\nBase route"
+        ],
+        "signature": [
+          "\"/api/metrics_entities\""
         ],
         "source": {
           "path": "x-pack/plugins/metrics_entities/common/constants.ts",
           "lineNumber": 11
         },
-        "signature": [
-          "\"/api/metrics_entities\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "metricsEntities",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
+        "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
+        "signature": [
+          "\"metricsEntities\""
+        ],
         "source": {
           "path": "x-pack/plugins/metrics_entities/common/index.ts",
           "lineNumber": 8
         },
-        "signature": [
-          "\"metricsEntities\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "metricsEntities",
         "id": "def-common.PLUGIN_NAME",
         "type": "string",
+        "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
+        "signature": [
+          "\"metrics_entities\""
+        ],
         "source": {
           "path": "x-pack/plugins/metrics_entities/common/index.ts",
           "lineNumber": 9
         },
-        "signature": [
-          "\"metrics_entities\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],

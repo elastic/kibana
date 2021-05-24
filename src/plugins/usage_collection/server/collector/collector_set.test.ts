@@ -25,10 +25,8 @@ const loggerSpies = {
 
 describe('CollectorSet', () => {
   describe('registers a collector set and runs lifecycle events', () => {
-    let init: Function;
     let fetch: Function;
     beforeEach(() => {
-      init = noop;
       fetch = noop;
       loggerSpies.debug.mockRestore();
       loggerSpies.warn.mockRestore();
@@ -42,7 +40,6 @@ describe('CollectorSet', () => {
       const registerPojo = () => {
         collectors.registerCollector({
           type: 'type_collector_test',
-          init,
           // @ts-expect-error we are intentionally sending it wrong.
           fetch,
         });

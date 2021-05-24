@@ -184,7 +184,7 @@ export class DocLinksService {
           remoteClustersProxy: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#proxy-mode`,
           remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#remote-cluster-proxy-settings`,
           scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
-          transportSettings: `${ELASTICSEARCH_DOCS}modules-transport.html`,
+          transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
           deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
         },
@@ -198,6 +198,9 @@ export class DocLinksService {
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
           percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
+        },
+        search: {
+          sessions: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/search-sessions.html`,
         },
         date: {
           dateMath: `${ELASTICSEARCH_DOCS}common-options.html#date-math`,
@@ -316,6 +319,7 @@ export class DocLinksService {
           createSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           createRoleMapping: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html`,
           createRoleMappingTemplates: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html#_role_templates`,
+          createRollupJobsRequest: `${ELASTICSEARCH_DOCS}rollup-put-job.html#rollup-put-job-api-request-body`,
           createApiKey: `${ELASTICSEARCH_DOCS}security-api-create-api-key.html`,
           createPipeline: `${ELASTICSEARCH_DOCS}put-pipeline-api.html`,
           createTransformRequest: `${ELASTICSEARCH_DOCS}put-transform.html#put-transform-request-body`,
@@ -343,7 +347,7 @@ export class DocLinksService {
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
         },
         snapshotRestore: {
-          guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
+          guide: `${KIBANA_DOCS}snapshot-repositories.html`,
           changeIndexSettings: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html#change-index-settings-during-restore`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
           registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-filesystem-repository`,
@@ -501,6 +505,9 @@ export interface DocLinksStart {
       readonly painlessWalkthrough: string;
       readonly luceneExpressions: string;
     };
+    readonly search: {
+      readonly sessions: string;
+    };
     readonly indexPatterns: {
       readonly introduction: string;
       readonly fieldFormattersNumber: string;
@@ -538,6 +545,7 @@ export interface DocLinksStart {
       createSnapshotLifecyclePolicy: string;
       createRoleMapping: string;
       createRoleMappingTemplates: string;
+      createRollupJobsRequest: string;
       createApiKey: string;
       createPipeline: string;
       createTransformRequest: string;
