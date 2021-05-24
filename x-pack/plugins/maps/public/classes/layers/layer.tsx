@@ -98,6 +98,7 @@ export interface ILayer {
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
   isFittable(): Promise<boolean>;
+  isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
   getDescriptor(): LayerDescriptor;
@@ -132,6 +133,8 @@ export class AbstractLayer implements ILayer {
       alpha: _.get(options, 'alpha', 0.75),
       visible: _.get(options, 'visible', true),
       style: _.get(options, 'style', null),
+      includeInFitToBounds:
+        typeof options.includeInFitToBounds === 'boolean' ? options.includeInFitToBounds : true,
     };
   }
 
@@ -247,7 +250,11 @@ export class AbstractLayer implements ILayer {
   }
 
   async isFittable(): Promise<boolean> {
-    return (await this.supportsFitToBounds()) && this.isVisible();
+    return (await this.supportsFitToBounds()) && this.isVisible() && this.isIncludeInFitToBounds();
+  }
+
+  isIncludeInFitToBounds(): boolean {
+    return !!this._descriptor.includeInFitToBounds;
   }
 
   async isFilteredByGlobalTime(): Promise<boolean> {

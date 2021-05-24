@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -33,6 +34,8 @@ export interface Props {
   updateMaxZoom: (layerId: string, maxZoom: number) => void;
   updateAlpha: (layerId: string, alpha: number) => void;
   updateLabelsOnTop: (layerId: string, areLabelsOnTop: boolean) => void;
+  updateIncludeInFitToBounds: (layerId: string, includeInFitToBounds: boolean) => void;
+  supportsFitToBounds: boolean;
 }
 
 export function LayerSettings(props: Props) {
@@ -58,12 +61,42 @@ export function LayerSettings(props: Props) {
     props.updateLabelsOnTop(layerId, event.target.checked);
   };
 
+  const includeInFitToBoundsChange = (event: EuiSwitchEvent) => {
+    props.updateIncludeInFitToBounds(layerId, event.target.checked);
+  };
+
   const onAttributionChange = (attribution?: Attribution) => {
     if (attribution) {
       props.setLayerAttribution(layerId, attribution);
     } else {
       props.clearLayerAttribution(layerId);
     }
+  };
+
+  const renderIncludeInFitToBounds = () => {
+    if (!props.supportsFitToBounds) {
+      return null;
+    }
+    return (
+      <EuiFormRow display="columnCompressedSwitch">
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.maps.layerPanel.settingsPanel.fittableFlagTooltip', {
+            defaultMessage: `Fit to data bounds adjusts your map extent to show all of your data. Layers may provide reference data and should not be included in the fit to data bounds computation. Use this option to exclude a layer from fit to data bounds computation.`,
+          })}
+        >
+          <EuiSwitch
+            label={i18n.translate('xpack.maps.layerPanel.settingsPanel.fittableFlagLabel', {
+              defaultMessage: `Include layer in fit to data bounds computation`,
+            })}
+            checked={props.layer.isIncludeInFitToBounds()}
+            onChange={includeInFitToBoundsChange}
+            data-test-subj="mapLayerPanelFittableFlagCheckbox"
+            compressed
+          />
+        </EuiToolTip>
+      </EuiFormRow>
+    );
   };
 
   const renderZoomSliders = () => {
@@ -140,6 +173,7 @@ export function LayerSettings(props: Props) {
         <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
         {renderShowLabelsOnTop()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
+        {renderIncludeInFitToBounds()}
       </EuiPanel>
 
       <EuiSpacer size="s" />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntryNested } from '@kbn/securitysolution-io-ts-utils';
+import type { EntryNested } from '@kbn/securitysolution-io-ts-list-types';
 
 import { NESTED, NESTED_FIELD } from '../../constants.mock';
 

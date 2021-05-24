@@ -421,7 +421,7 @@ describe('createExtentFilter', () => {
     });
   });
 
-  it('should make left longitude greater then right longitude when area crosses 180 meridian east to west', () => {
+  it('should make left longitude greater than right longitude when area crosses 180 meridian east to west', () => {
     const mapExtent = {
       maxLat: 39,
       maxLon: 200,
@@ -440,7 +440,7 @@ describe('createExtentFilter', () => {
     });
   });
 
-  it('should make left longitude greater then right longitude when area crosses 180 meridian west to east', () => {
+  it('should make left longitude greater than right longitude when area crosses 180 meridian west to east', () => {
     const mapExtent = {
       maxLat: 39,
       maxLon: -100,
