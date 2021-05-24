@@ -635,9 +635,9 @@ describe('when on the endpoint list page', () => {
 
     it('should show the flyout', async () => {
       const renderResult = await renderAndWaitForData();
-      return renderResult.findByTestId('endpointDetailsFlyout').then((flyout) => {
-        expect(flyout).not.toBeNull();
-      });
+      await expect(renderResult.findByTestId('endpointDetailsFlyout')).not.toBeNull();
+      // Should also show the footer
+      await expect(renderResult.queryByTestId('endpointDetailsFlyoutFooter')).not.toBeNull();
     });
 
     it('should display policy name value as a link', async () => {
@@ -741,6 +741,29 @@ describe('when on the endpoint list page', () => {
       expect(linkToReassign.getAttribute('href')).toEqual(
         `/app/fleet#/fleet/agents/${elasticAgentId}/activity?openReassignFlyout=true`
       );
+    });
+
+    it('should show the Host isolation panel when action is clicked', async () => {
+      const renderResult = await renderAndWaitForData();
+
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('hostIsolationTakeActionButton'));
+      });
+
+      const changeUrlAction = middlewareSpy.waitForAction('userChangedUrl');
+
+      act(() => {
+        fireEvent.click(
+          reactTestingLibrary
+            .within(renderResult.baseElement as HTMLElement)
+            .getByTestId('hostIsolationIsolateAction')
+        );
+      });
+
+      expect((await changeUrlAction).payload).toMatchObject({
+        pathname: '/endpoints',
+        search: '?selected_endpoint=1&show=isolate',
+      });
     });
 
     describe('when link to reassignment in Ingest is clicked', () => {
@@ -1030,6 +1053,10 @@ describe('when on the endpoint list page', () => {
             getCurrentIsolationRequestState(store.getState().management.endpoints)
           )
         ).toBe(true);
+      });
+
+      it('should NOT show the flyout footer', async () => {
+        await expect(renderResult.queryByTestId('endpointDetailsFlyoutFooter')).toBeNull();
       });
     });
   });

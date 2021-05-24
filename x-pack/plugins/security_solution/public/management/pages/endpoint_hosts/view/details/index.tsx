@@ -146,7 +146,7 @@ export const EndpointDetailsFlyout = memo(() => {
           {show === 'isolate' && <EndpointIsolateFlyoutPanel hostMeta={details} />}
 
           {showFlyoutFooter && (
-            <EuiFlyoutFooter className="eui-textRight">
+            <EuiFlyoutFooter className="eui-textRight" data-test-subj="endpointDetailsFlyoutFooter">
               <TakeActionDropdown onChange={handleActionClick} />
             </EuiFlyoutFooter>
           )}

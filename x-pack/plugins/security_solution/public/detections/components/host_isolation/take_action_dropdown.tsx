@@ -25,6 +25,7 @@ export const TakeActionDropdown = React.memo<TakeActionDropdownProps>(({ onChang
     return [
       <EuiContextMenuItem
         key="isolateHost"
+        data-test-subj="hostIsolationIsolateAction"
         onClick={() => {
           setIsPopoverOpen(false);
           onChange('isolateHost');
@@ -41,6 +42,7 @@ export const TakeActionDropdown = React.memo<TakeActionDropdownProps>(({ onChang
         iconSide="right"
         fill
         iconType="arrowDown"
+        data-test-subj="hostIsolationTakeActionButton"
         onClick={() => {
           setIsPopoverOpen(!isPopoverOpen);
         }}
