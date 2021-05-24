@@ -12,7 +12,7 @@ import Util from 'util';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 
-const logFilePath = Path.join(__dirname, 'migration_test_corrupt_docs_kibana.log');
+const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures_test.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 async function removeLogFile() {
@@ -20,8 +20,7 @@ async function removeLogFile() {
   await asyncUnlink(logFilePath).catch(() => void 0);
 }
 
-// relies on archive with SO from v8
-describe.skip('migration v2 with corrupt saved object documents', () => {
+describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
@@ -40,34 +39,38 @@ describe.skip('migration v2 with corrupt saved object documents', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
-  it('collects corrupt saved object documents accross batches', async () => {
+  it('migrates the documents to the highest version', async () => {
     const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
           license: 'basic',
-          // original uncorrupt SO:
+          // example of original 'foo' SO with corrupt id:
+          // _id: one
           // {
-          //  type: 'foo', // 'bar', 'baz'
-          //  foo: {}, // bar: {}, baz: {}
-          //  migrationVersion: {
-          //    foo: '7.13.0',
+          //  foo: {
+          //    name: 'one',
           //  },
-          // },
-          // original corrupt SO example:
-          // {
-          //  id: 'bar:123' // '123' etc
           //  type: 'foo',
-          //  foo: {},
+          //  references: [],
           //  migrationVersion: {
           //    foo: '7.13.0',
           //  },
+          // "coreMigrationVersion": "7.13.0",
+          // "updated_at": "2021-05-16T18:16:45.450Z"
           // },
-          // contains migrated index with 8.0 aliases to skip migration, but run outdated doc search
+
+          // SO that will fail transformation:
+          // {
+          //  type: 'space',
+          //  space: {},
+          // },
+          //
+          //
           dataArchive: Path.join(
             __dirname,
             'archives',
-            '8.0.0_migrated_with_corrupt_outdated_docs.zip'
+            '7_13_corrupt_and_transform_failures_docs.zip'
           ),
         },
       },
@@ -81,25 +84,9 @@ describe.skip('migration v2 with corrupt saved object documents', () => {
     coreSetup.savedObjects.registerType({
       name: 'foo',
       hidden: false,
-      mappings: { properties: {} },
-      namespaceType: 'agnostic',
-      migrations: {
-        '7.14.0': (doc) => doc,
+      mappings: {
+        properties: {},
       },
-    });
-    coreSetup.savedObjects.registerType({
-      name: 'bar',
-      hidden: false,
-      mappings: { properties: {} },
-      namespaceType: 'agnostic',
-      migrations: {
-        '7.14.0': (doc) => doc,
-      },
-    });
-    coreSetup.savedObjects.registerType({
-      name: 'baz',
-      hidden: false,
-      mappings: { properties: {} },
       namespaceType: 'agnostic',
       migrations: {
         '7.14.0': (doc) => doc,
@@ -117,30 +104,22 @@ describe.skip('migration v2 with corrupt saved object documents', () => {
       expect(
         errorMessage.endsWith(' To allow migrations to proceed, please delete these documents.')
       ).toBeTruthy();
+
       const expectedCorruptDocIds = [
-        '"foo:my_name"',
-        '"123"',
-        '"456"',
-        '"789"',
-        '"foo:other_name"',
-        '"bar:123"',
-        '"baz:123"',
-        '"bar:345"',
-        '"bar:890"',
-        '"baz:456"',
-        '"baz:789"',
-        '"bar:other_name"',
-        '"baz:other_name"',
-        '"bar:my_name"',
-        '"baz:my_name"',
-        '"foo:123"',
-        '"foo:456"',
-        '"foo:789"',
-        '"foo:other"',
+        'P2SQfHkBs3dBRGh--No5',
+        'QGSZfHkBs3dBRGh-ANoD',
+        'QWSZfHkBs3dBRGh-hNob',
+        'QmSZfHkBs3dBRGh-w9qH',
+        'one',
+        'two',
+        'Q2SZfHkBs3dBRGh-9dp2',
       ];
       for (const corruptDocId of expectedCorruptDocIds) {
         expect(errorMessage.includes(corruptDocId)).toBeTruthy();
       }
+      const expectedTransformErrorMessage =
+        'Transformation errors: space:default: Document "default" has property "space" which belongs to a more recent version of Kibana [6.6.0]. The last known version is [undefined]';
+      expect(errorMessage.includes(expectedTransformErrorMessage)).toBeTruthy();
     }
   });
 });
