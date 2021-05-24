@@ -31,7 +31,7 @@ const alertsListRoute = createObservabilityServerRoute({
   }),
   handler: async ({ ruleDataClient, context, params }) => {
     const {
-      query: { start, end, kuery, size = 100 },
+      query: { start, end, kuery, size = 100, status },
     } = params;
 
     return getTopAlerts({
@@ -40,6 +40,7 @@ const alertsListRoute = createObservabilityServerRoute({
       end,
       kuery,
       size,
+      status,
     });
   },
 });

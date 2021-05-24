@@ -7,6 +7,15 @@
 
 import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { esKuery } from '../../../../../src/plugins/data/server';
+import { AlertStatus } from '../../common/typings';
+
+export function alertStatusQuery(status: AlertStatus) {
+  if (status === 'all') {
+    return [];
+  }
+
+  return [{ term: { 'kibana.rac.alert.status': status } }];
+}
 
 export function rangeQuery(start?: number, end?: number, field = '@timestamp'): QueryContainer[] {
   return [
