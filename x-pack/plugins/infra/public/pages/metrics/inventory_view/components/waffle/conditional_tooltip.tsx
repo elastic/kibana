@@ -50,21 +50,7 @@ export const ConditionalToolTip = withTheme(({ theme, node, nodeType, currentTim
       },
     },
   });
-  const { nodes, reload } = useSnapshot(
-    query,
-    requestMetrics,
-    [],
-    nodeType,
-    sourceId,
-    currentTime,
-    '',
-    '',
-    false // Doesn't send request until reload() is called
-  );
-
-  useEffect(() => {
-    reload();
-  }, [reload]);
+  const { nodes } = useSnapshot(query, requestMetrics, [], nodeType, sourceId, currentTime, '', '');
 
   const dataNode = first(nodes);
   const metrics = (dataNode && dataNode.metrics) || [];
