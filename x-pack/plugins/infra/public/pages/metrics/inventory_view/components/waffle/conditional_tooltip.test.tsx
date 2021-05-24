@@ -39,7 +39,6 @@ describe('ConditionalToolTip', () => {
   const currentTime = Date.now();
 
   it('renders correctly', () => {
-    const reloadMock = jest.fn(() => Promise.resolve());
     mockedUseSnapshot.mockReturnValue({
       nodes: [
         {
@@ -68,7 +67,7 @@ describe('ConditionalToolTip', () => {
       error: null,
       loading: false,
       interval: '60s',
-      reload: reloadMock,
+      reload: jest.fn(() => Promise.resolve()),
     });
     mockedUseWaffleOptionsContext.mockReturnValue(mockedUseWaffleOptionsContexReturnValue);
     const expectedQuery = JSON.stringify({
@@ -113,10 +112,8 @@ describe('ConditionalToolTip', () => {
       'default',
       currentTime,
       '',
-      '',
-      false
+      ''
     );
-    expect(reloadMock).toHaveBeenCalled();
   });
 });
 
