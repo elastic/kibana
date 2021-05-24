@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 
-import { ActionsConnectorsList } from './actions_connectors_list';
+import ActionsConnectorsList from './actions_connectors_list';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';

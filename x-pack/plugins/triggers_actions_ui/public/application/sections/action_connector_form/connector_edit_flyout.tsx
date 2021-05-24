@@ -45,7 +45,7 @@ import './connector_edit_flyout.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 
-export const ConnectorEditFlyout = ({
+const ConnectorEditFlyout = ({
   initialConnector,
   onClose,
   tab = EditConectorTabs.Configuration,

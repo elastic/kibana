@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { Suspense, useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -19,6 +19,7 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
+import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   ActionTypeModel,
@@ -271,7 +272,12 @@ export const ActionForm = ({
             label={actionTypesIndex[item.id].name}
             onClick={() => addActionType(item)}
           >
-            <EuiIcon size="xl" type={item.iconClass} />
+            <EuiIcon
+              size="xl"
+              type={
+                ((<Suspense fallback={null}>{item.iconClass}</Suspense>) as unknown) as IconType
+              }
+            />
           </EuiKeyPadMenuItem>
         );
 

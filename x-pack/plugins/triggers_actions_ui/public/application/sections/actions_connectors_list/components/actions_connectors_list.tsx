@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
-import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
 import {
   hasDeleteActionsCapability,
   hasSaveActionsCapability,
@@ -44,8 +43,10 @@ import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connect
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
+import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
 
-export const ActionsConnectorsList: React.FunctionComponent = () => {
+const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
     http,
     notifications: { toasts },
