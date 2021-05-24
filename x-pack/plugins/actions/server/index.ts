@@ -59,8 +59,6 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.actions.whitelistedHosts', 'xpack.actions.allowedHosts'),
-    unused('xpack.actions.proxyRejectUnauthorizedCertificates'),
-    unused('xpack.actions.rejectUnauthorized'),
     (settings, fromPath, addDeprecation) => {
       const customHostSettings = settings?.xpack?.actions?.customHostSettings ?? [];
       if (
@@ -71,7 +69,23 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       ) {
         addDeprecation({
           message:
-            '`xpack.actions.customHostSettings[<index>].tls.rejectUnauthorized` is deprecated and is no longer used',
+            '`xpack.actions.customHostSettings[<index>].tls.rejectUnauthorized` is deprecated. Use `xpack.actions.customHostSettings[<index>].tls.verificationMode` instead, with the setting `verificationMode:full` eql to `rejectUnauthorized:true`, and `verificationMode:none` eql to `rejectUnauthorized:false`.',
+        });
+      }
+    },
+    (settings, fromPath, addDeprecation) => {
+      if (!!settings?.xpack?.actions?.rejectUnauthorized) {
+        addDeprecation({
+          message:
+            '`xpack.actions.rejectUnauthorized` is deprecated. Use `xpack.actions.verificationMode` instead, with the setting `verificationMode:full` eql to `rejectUnauthorized:true`, and `verificationMode:none` eql to `rejectUnauthorized:false`.',
+        });
+      }
+    },
+    (settings, fromPath, addDeprecation) => {
+      if (!!settings?.xpack?.actions?.proxyRejectUnauthorizedCertificates) {
+        addDeprecation({
+          message:
+            '`xpack.actions.proxyRejectUnauthorizedCertificates` is deprecated. Use `xpack.actions.proxyVerificationMode` instead, with the setting `proxyVerificationMode:full` eql to `rejectUnauthorized:true`, and `proxyVerificationMode:none` eql to `rejectUnauthorized:false`.',
         });
       }
     },
