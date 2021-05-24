@@ -16,7 +16,7 @@ import { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    layer: getSelectedLayer(state),
+    layer: getSelectedLayer(state)!,
   };
 }
 

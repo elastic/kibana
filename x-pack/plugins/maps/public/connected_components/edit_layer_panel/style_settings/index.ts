@@ -16,7 +16,7 @@ import { StyleDescriptor } from '../../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    layer: getSelectedLayer(state),
+    layer: getSelectedLayer(state)!,
   };
 }
 

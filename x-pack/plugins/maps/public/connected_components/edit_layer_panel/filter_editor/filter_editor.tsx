@@ -29,7 +29,7 @@ import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
 import { ILayer } from '../../../classes/layers/layer';
 
 export interface Props {
-  layer?: ILayer;
+  layer: ILayer;
   setLayerQuery: (id: string, query: Query) => void;
   updateSourceProp: (layerId: string, propName: string, value: unknown) => void;
 }
@@ -59,10 +59,6 @@ export class FilterEditor extends Component<Props, State> {
   }
 
   async _loadIndexPatterns() {
-    if (!this.props.layer) {
-      return;
-    }
-
     // Filter only effects source so only load source indices.
     const indexPatternIds = this.props.layer.getSource().getIndexPatternIds();
     const indexPatterns: IndexPattern[] = [];
@@ -85,10 +81,6 @@ export class FilterEditor extends Component<Props, State> {
   }
 
   async _loadSourceTimeAware() {
-    if (!this.props.layer) {
-      return;
-    }
-
     const isSourceTimeAware = await this.props.layer.getSource().isTimeAware();
     if (this._isMounted) {
       this.setState({ isSourceTimeAware });
@@ -109,20 +101,20 @@ export class FilterEditor extends Component<Props, State> {
     if (!query) {
       return;
     }
-    this.props.setLayerQuery(this.props.layer!.getId(), query);
+    this.props.setLayerQuery(this.props.layer.getId(), query);
     this._close();
   };
 
   _onApplyGlobalQueryChange = (applyGlobalQuery: boolean) => {
-    this.props.updateSourceProp(this.props.layer!.getId(), 'applyGlobalQuery', applyGlobalQuery);
+    this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalQuery', applyGlobalQuery);
   };
 
   _onApplyGlobalTimeChange = (applyGlobalTime: boolean) => {
-    this.props.updateSourceProp(this.props.layer!.getId(), 'applyGlobalTime', applyGlobalTime);
+    this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalTime', applyGlobalTime);
   };
 
   _renderQueryPopover() {
-    const layerQuery = this.props.layer!.getQuery();
+    const layerQuery = this.props.layer.getQuery();
     const { SearchBar } = getData().ui;
 
     return (
@@ -158,7 +150,7 @@ export class FilterEditor extends Component<Props, State> {
   }
 
   _renderQuery() {
-    const query = this.props.layer!.getQuery();
+    const query = this.props.layer.getQuery();
     if (!query || !query.query) {
       return (
         <EuiText size="s" textAlign="center">
@@ -184,7 +176,7 @@ export class FilterEditor extends Component<Props, State> {
   }
 
   _renderOpenButton() {
-    const query = this.props.layer!.getQuery();
+    const query = this.props.layer.getQuery();
     const openButtonLabel =
       query && query.query
         ? i18n.translate('xpack.maps.layerPanel.filterEditor.editFilterButtonLabel', {
@@ -208,10 +200,6 @@ export class FilterEditor extends Component<Props, State> {
   }
 
   render() {
-    if (!this.props.layer) {
-      return null;
-    }
-
     const globalTimeCheckbox = this.state.isSourceTimeAware ? (
       <GlobalTimeCheckbox
         label={i18n.translate('xpack.maps.filterEditor.applyGlobalTimeCheckboxLabel', {

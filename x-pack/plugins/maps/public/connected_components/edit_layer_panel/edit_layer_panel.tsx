@@ -8,6 +8,7 @@
 import React, { Component, Fragment } from 'react';
 
 import {
+  EuiCallOut,
   EuiIcon,
   EuiFlexItem,
   EuiTitle,
@@ -24,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import { FilterEditor } from './filter_editor';
 import { JoinEditor, JoinField } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
-import { LayerErrors } from './layer_errors';
 import { LayerSettings } from './layer_settings';
 import { StyleSettings } from './style_settings';
 
@@ -145,6 +145,26 @@ export class EditLayerPanel extends Component<Props, State> {
     }
   };
 
+  _renderLayerErrors() {
+    if (!this.props.selectedLayer || !this.props.selectedLayer.hasErrors()) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiCallOut
+          color="warning"
+          title={i18n.translate('xpack.maps.layerPanel.settingsPanel.unableToLoadTitle', {
+            defaultMessage: 'Unable to load layer',
+          })}
+        >
+          <p data-test-subj="layerErrorMessage">{this.props.selectedLayer.getErrors()}</p>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </Fragment>
+    );
+  }
+
   _renderFilterSection() {
     if (!this.props.selectedLayer || !this.props.selectedLayer.supportsElasticsearchFilters()) {
       return null;
@@ -245,7 +265,7 @@ export class EditLayerPanel extends Component<Props, State> {
 
           <div className="mapLayerPanel__body">
             <div className="mapLayerPanel__bodyOverflow">
-              <LayerErrors />
+              {this._renderLayerErrors()}
 
               <LayerSettings
                 layer={this.props.selectedLayer}

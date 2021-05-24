@@ -14,15 +14,11 @@ import { StyleDescriptor } from '../../../../common/descriptor_types';
 import { ILayer } from '../../../classes/layers/layer';
 
 export interface Props {
-  layer?: ILayer;
+  layer: ILayer;
   updateStyleDescriptor: (styleDescriptor: StyleDescriptor) => void;
 }
 
 export function StyleSettings({ layer, updateStyleDescriptor }: Props) {
-  if (!layer) {
-    return null;
-  }
-
   const settingsEditor = layer.renderStyleEditor(updateStyleDescriptor);
 
   if (!settingsEditor) {
