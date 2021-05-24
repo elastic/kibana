@@ -48,7 +48,12 @@
             "docId": "kibEmbeddablePluginApi",
             "section": "def-public.ReferenceOrValueEmbeddable",
             "text": "ReferenceOrValueEmbeddable"
-          }
+          },
+          "<",
+          "MapByValueInput",
+          ", ",
+          "MapByReferenceInput",
+          ">"
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
@@ -939,62 +944,33 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-          "lineNumber": 31
+          "lineNumber": 34
         },
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "maps",
             "id": "def-public.RenderTooltipContentParams.addFilters",
-            "type": "Function",
+            "type": "CompoundType",
             "tags": [],
             "label": "addFilters",
             "description": [],
             "signature": [
-              "(filter: object, actionId: string) => void"
+              "((filters: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[], actionId: string) => Promise<void>) | null"
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 32
+              "lineNumber": 35
             },
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.RenderTooltipContentParams.addFilters.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "filter",
-                "description": [],
-                "signature": [
-                  "object"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 32
-                },
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.RenderTooltipContentParams.addFilters.$2",
-                "type": "string",
-                "tags": [],
-                "label": "actionId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 32
-                },
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "deprecated": false
           },
           {
             "parentPluginId": "maps",
@@ -1008,11 +984,11 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 33
+              "lineNumber": 36
             },
             "deprecated": false,
-            "children": [],
-            "returnComment": []
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "maps",
@@ -1027,20 +1003,55 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 34
+              "lineNumber": 37
             },
             "deprecated": false
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.RenderTooltipContentParams.isLocked",
-            "type": "boolean",
+            "id": "def-public.RenderTooltipContentParams.getActionContext",
+            "type": "Function",
             "tags": [],
-            "label": "isLocked",
+            "label": "getActionContext",
             "description": [],
+            "signature": [
+              "(() => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionExecutionContext",
+                "text": "ActionExecutionContext"
+              },
+              "<object>) | undefined"
+            ],
             "source": {
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 35
+              "lineNumber": 38
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.RenderTooltipContentParams.getFilterActions",
+            "type": "Function",
+            "tags": [],
+            "label": "getFilterActions",
+            "description": [],
+            "signature": [
+              "(() => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]>) | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -1052,33 +1063,42 @@
             "label": "getLayerName",
             "description": [],
             "signature": [
-              "(layerId: string) => Promise<string>"
+              "(layerId: string) => Promise<string | null>"
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 36
+              "lineNumber": 40
             },
             "deprecated": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "maps",
-                "id": "def-public.RenderTooltipContentParams.getLayerName.$1",
+                "id": "def-public.layerId",
                 "type": "string",
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 36
+                  "lineNumber": 40
                 },
-                "deprecated": false,
-                "isRequired": true
+                "deprecated": false
               }
-            ],
-            "returnComment": []
+            ]
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.RenderTooltipContentParams.isLocked",
+            "type": "boolean",
+            "tags": [],
+            "label": "isLocked",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 41
+            },
+            "deprecated": false
           },
           {
             "parentPluginId": "maps",
@@ -1088,37 +1108,34 @@
             "label": "loadFeatureProperties",
             "description": [],
             "signature": [
-              "({ layerId, featureId }: ",
-              "LoadFeatureProps",
-              ") => Promise<",
+              "({ layerId, featureId, mbProperties, }: { layerId: string; featureId?: string | number | undefined; mbProperties: GeoJSON.GeoJsonProperties; }) => Promise<",
               "ITooltipProperty",
               "[]>"
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 37
+              "lineNumber": 42
             },
             "deprecated": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "maps",
-                "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1",
+                "id": "def-public.__0",
                 "type": "Object",
                 "tags": [],
-                "label": "{ layerId, featureId }",
+                "label": "__0",
                 "description": [],
                 "signature": [
-                  "LoadFeatureProps"
+                  "{ layerId: string; featureId?: string | number | undefined; mbProperties: GeoJSON.GeoJsonProperties; }"
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 37
+                  "lineNumber": 42
                 },
-                "deprecated": false,
-                "isRequired": true
+                "deprecated": false
               }
-            ],
-            "returnComment": []
+            ]
           },
           {
             "parentPluginId": "maps",
@@ -1128,36 +1145,56 @@
             "label": "loadFeatureGeometry",
             "description": [],
             "signature": [
-              "({ layerId, featureId }: ",
-              "LoadFeatureProps",
-              ") => ",
-              "FeatureGeometry"
+              "({ layerId, featureId, }: { layerId: string; featureId?: string | number | undefined; }) => GeoJSON.Point | GeoJSON.MultiPoint | GeoJSON.LineString | GeoJSON.MultiLineString | GeoJSON.Polygon | GeoJSON.MultiPolygon | GeoJSON.GeometryCollection | null"
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 38
+              "lineNumber": 51
             },
             "deprecated": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "maps",
-                "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1",
+                "id": "def-public.__0",
                 "type": "Object",
                 "tags": [],
-                "label": "{ layerId, featureId }",
+                "label": "__0",
                 "description": [],
                 "signature": [
-                  "LoadFeatureProps"
+                  "{ layerId: string; featureId?: string | number | undefined; }"
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 38
+                  "lineNumber": 51
                 },
-                "deprecated": false,
-                "isRequired": true
+                "deprecated": false
               }
+            ]
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.RenderTooltipContentParams.onSingleValueTrigger",
+            "type": "Function",
+            "tags": [],
+            "label": "onSingleValueTrigger",
+            "description": [],
+            "signature": [
+              "((actionId: string, key: string, value: ",
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.RawValue",
+                "text": "RawValue"
+              },
+              ") => void) | undefined"
             ],
-            "returnComment": []
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 58
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1273,7 +1310,22 @@
         "label": "MapEmbeddableOutput",
         "description": [],
         "signature": [
-          "EmbeddableOutput & { indexPatterns: IIndexPattern[]; }"
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          " & { indexPatterns: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-common.IIndexPattern",
+            "text": "IIndexPattern"
+          },
+          "[]; }"
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/types.ts",
@@ -3206,7 +3258,7 @@
         "label": "RawValue",
         "description": [],
         "signature": [
-          "undefined | null | string | number | false | true | string[]"
+          "string | number | boolean | string[] | null | undefined"
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",

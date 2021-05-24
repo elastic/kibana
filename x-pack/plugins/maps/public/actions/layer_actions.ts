@@ -408,6 +408,15 @@ export function updateLabelsOnTop(id: string, areLabelsOnTop: boolean) {
   };
 }
 
+export function updateFittableFlag(id: string, includeInFitToBounds: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'includeInFitToBounds',
+    newValue: includeInFitToBounds,
+  };
+}
+
 export function setLayerQuery(id: string, query: Query) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch({

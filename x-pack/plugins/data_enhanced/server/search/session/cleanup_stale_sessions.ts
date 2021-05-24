@@ -86,9 +86,11 @@ function checkNonPersistedSessionsPage(
                 try {
                   await client.asyncSearch.delete({ id: searchInfo.id });
                 } catch (e) {
-                  logger.error(
-                    `${SEARCH_SESSIONS_CLEANUP_TASK_TYPE} Error while deleting async_search ${searchInfo.id}: ${e.message}`
-                  );
+                  if (e.message !== 'resource_not_found_exception') {
+                    logger.error(
+                      `${SEARCH_SESSIONS_CLEANUP_TASK_TYPE} Error while deleting async_search ${searchInfo.id}: ${e.message}`
+                    );
+                  }
                 }
               }
             });
