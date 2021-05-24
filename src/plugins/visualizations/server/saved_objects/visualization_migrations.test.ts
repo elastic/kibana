@@ -2013,7 +2013,7 @@ describe('migration visualization', () => {
         prevParams[rulesArrayProperty].length + 1
       );
 
-      const lastElementIndex = migratedParams.bar_color_rules.length - 1;
+      const lastElementIndex = migratedParams[rulesArrayProperty].length - 1;
       expect(migratedParams[rulesArrayProperty][lastElementIndex]).toHaveProperty('operator');
       expect(migratedParams[rulesArrayProperty][lastElementIndex].operator).toEqual('empty');
       expect(migratedParams[rulesArrayProperty][lastElementIndex].color).toEqual(rule.color);
