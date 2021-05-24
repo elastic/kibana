@@ -75,10 +75,10 @@ Before you upgrade to 7.13.0, review the breaking changes, then mitigate the imp
 [%collapsible]
 ====
 *Details* +
-You are now unable to run and manage Elastic Agent with {kib}. For more information, refer to {kibana-pull}97206[#97206].
+Elastic Agents now use the Fleet Server to enroll agents, get agent policies, collect status information, and more. For more information, refer to {kibana-pull}97206[#97206].
 
 *Impact* +
-To run and manage Elastic Agent, use Fleet.
+To run and manage Elastic Agents, use the Fleet Server instead of {kib}. For more information, refer to {fleet-guide}/fleet-server.html[Fleet Server].
 ====
       
 [discrete]
@@ -98,10 +98,10 @@ The existing agent API keys are invalidated and display as `Inactive` on the *Ag
 === Known issue
 
 *Details* +
- An issue was found where, on page load, Kibana calls the Fleet packages API. For more information, refer to {kibana-issue}100285[#100285].
+When pages load, {kib} calls the Fleet packages API. For more information, refer to {kibana-issue}100285[#100285].
 
 *Impact* +
-In some cases, this results in dev browser tools displaying a 403 error with the message "Access to Fleet API require the superuser role". Though this error might display during debugging tasks, it does not impact your access to Fleet.
+In some cases, *Dev Tools* displays a 403 error with the `Access to Fleet API require the superuser role` message, but you can continue to access *Fleet*.
 
 
 // end::notable-breaking-changes[]
