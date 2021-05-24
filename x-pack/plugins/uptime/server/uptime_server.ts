@@ -5,21 +5,20 @@
  * 2.0.
  */
 
+import { Logger } from 'kibana/server';
 import { createUptimeESClient, UMServerLibs } from './lib/lib';
 import { createRouteWithAuth, restApiRoutes, uptimeRouteWrapper } from './rest_api';
 import { UptimeCoreSetup, UptimeCorePlugins } from './lib/adapters';
 import { uptimeAlertTypeFactories } from './lib/alerts';
-import { UptimeRuleRegistry } from './plugin';
-import { createLifecycleRuleTypeFactory } from '../../rule_registry/server';
+import { createLifecycleRuleTypeFactory, RuleDataClient } from '../../rule_registry/server';
 import { savedObjectsAdapter } from './lib/saved_objects';
-
-const createUptimeLifecycleRuleType = createLifecycleRuleTypeFactory<UptimeRuleRegistry>();
 
 export const initUptimeServer = (
   server: UptimeCoreSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePlugins,
-  ruleRegistry: UptimeRuleRegistry
+  ruleDataClient: RuleDataClient,
+  logger: Logger
 ) => {
   restApiRoutes.forEach((route) =>
     libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route)))
@@ -27,9 +26,13 @@ export const initUptimeServer = (
 
   uptimeAlertTypeFactories.forEach((alertTypeFactory) => {
     const alertType = alertTypeFactory(server, libs, plugins);
+    const createLifecycleRuleType = createLifecycleRuleTypeFactory({
+      ruleDataClient,
+      logger,
+    });
 
-    return ruleRegistry.registerType(
-      createUptimeLifecycleRuleType({
+    return plugins.alerting.registerType(
+      createLifecycleRuleType({
         ...alertType,
         producer: 'uptime',
         executor: async ({ services, ...rest }) => {

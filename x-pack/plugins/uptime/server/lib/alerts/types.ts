@@ -7,9 +7,9 @@
 import { Type } from '@kbn/config-schema';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { UMServerLibs, UptimeESClient } from '../lib';
-import { ActionVariable } from '../../../../alerting/common';
 import { DynamicSettings } from '../../../common/runtime_types';
-import { RuleType } from '../../../../rule_registry/server';
+import { AlertTypeWithExecutor } from '../../../../rule_registry/server';
+import { AlertInstanceContext } from '../../../../alerting/common';
 
 /**
  * Because all of our types are presumably going to list the `producer` as `'uptime'`,
@@ -18,10 +18,9 @@ import { RuleType } from '../../../../rule_registry/server';
  * When we register all the alerts we can inject this field.
  */
 export type DefaultUptimeAlertInstance = Omit<
-  RuleType<
-    any,
-    Type<any>,
-    ActionVariable,
+  AlertTypeWithExecutor<
+    Record<string, any>,
+    AlertInstanceContext,
     { alertWithLifecycle: any; dynamicSettings: DynamicSettings; uptimeEsClient: UptimeESClient }
   >,
   'producer'

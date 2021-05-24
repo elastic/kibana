@@ -27,9 +27,6 @@ import {
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
-import { uptimeRuleRegistrySettings } from '../../common/rules/uptime_rule_registry_settings';
-import { FormatterRuleRegistry } from '../../../observability/public';
-import type { UptimeRuleFieldMap } from '../../common/rules/uptime_rule_field_map';
 import { FleetStart } from '../../../fleet/public';
 import { FetchDataParams, ObservabilityPublicSetup } from '../../../observability/public';
 import { PLUGIN } from '../../common/constants/plugin';
@@ -101,11 +98,7 @@ export class UptimePlugin
       });
     }
 
-    const uptimeRuleRegistry = plugins.observability.ruleRegistry.create({
-      ...uptimeRuleRegistrySettings,
-      fieldMap: {} as UptimeRuleFieldMap,
-      ctor: FormatterRuleRegistry,
-    });
+    const { observabilityRuleTypeRegistry } = plugins.observability;
 
     alertTypeInitializers.forEach((init) => {
       const alertInitializer = init({
@@ -116,7 +109,7 @@ export class UptimePlugin
         plugins.triggersActionsUi &&
         !plugins.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
       ) {
-        uptimeRuleRegistry.registerType(alertInitializer);
+        observabilityRuleTypeRegistry.register(alertInitializer);
       }
     });
 

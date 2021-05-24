@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { once } from 'lodash';
 import {
   PluginInitializerContext,
   CoreStart,
@@ -13,25 +13,71 @@ import {
   ISavedObjectsRepository,
 } from '../../../../src/core/server';
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
-import { uptimeRuleRegistrySettings } from '../common/rules/uptime_rule_registry_settings';
 import { initServerWithKibana } from './kibana.index';
 import { KibanaTelemetryAdapter, UptimeCorePlugins } from './lib/adapters';
 import { umDynamicSettings } from './lib/saved_objects';
+import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { RuleDataClient } from '../../rule_registry/server';
+import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: ISavedObjectsRepository;
 
-  constructor(_initializerContext: PluginInitializerContext) {}
+  constructor(_initializerContext: PluginInitializerContext) {
+    this.initContext = _initializerContext;
+  }
 
   public setup(core: CoreSetup, plugins: UptimeCorePlugins) {
-    const uptimeRuleRegistry = plugins.observability.ruleRegistry.create({
-      ...uptimeRuleRegistrySettings,
-      fieldMap: uptimeRuleFieldMap,
+    const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
+
+    const ready = once(async () => {
+      const componentTemplateName = plugins.ruleRegistry.getFullAssetName('uptime-mappings');
+
+      if (!plugins.ruleRegistry.isWriteEnabled()) {
+        return;
+      }
+
+      await plugins.ruleRegistry.createOrUpdateComponentTemplate({
+        name: componentTemplateName,
+        body: {
+          template: {
+            settings: {
+              number_of_shards: 1,
+            },
+            mappings: mappingFromFieldMap(uptimeRuleFieldMap),
+          },
+        },
+      });
+
+      await plugins.ruleRegistry.createOrUpdateIndexTemplate({
+        name: plugins.ruleRegistry.getFullAssetName('uptime-index-template'),
+        body: {
+          index_patterns: [plugins.ruleRegistry.getFullAssetName('observability-uptime*')],
+          composed_of: [
+            plugins.ruleRegistry.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+            componentTemplateName,
+          ],
+        },
+      });
     });
 
-    initServerWithKibana({ router: core.http.createRouter() }, plugins, uptimeRuleRegistry);
+    const ruleDataClient = new RuleDataClient({
+      alias: plugins.ruleRegistry.getFullAssetName('observability-uptime'),
+      getClusterClient: async () => {
+        const coreStart = await getCoreStart();
+        return coreStart.elasticsearch.client.asInternalUser;
+      },
+      ready,
+    });
+
+    initServerWithKibana(
+      { router: core.http.createRouter() },
+      plugins,
+      ruleDataClient,
+      this.initContext.logger.get()
+    );
     core.savedObjects.registerType(umDynamicSettings);
     KibanaTelemetryAdapter.registerUsageCollector(
       plugins.usageCollection,
@@ -39,7 +85,7 @@ export class Plugin implements PluginType {
     );
 
     return {
-      ruleRegistry: uptimeRuleRegistry,
+      ruleRegistry: ruleDataClient,
     };
   }
 

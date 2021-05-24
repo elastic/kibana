@@ -6,6 +6,7 @@
  */
 
 import { Request, Server } from '@hapi/hapi';
+import { Logger } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
@@ -29,7 +30,8 @@ export interface KibanaServer extends Server {
 export const initServerWithKibana = (
   server: UptimeCoreSetup,
   plugins: UptimeCorePlugins,
-  ruleRegistry: UptimeRuleRegistry
+  ruleRegistry: UptimeRuleRegistry,
+  logger: Logger
 ) => {
   const { features } = plugins;
   const libs = compose(server);
@@ -81,5 +83,5 @@ export const initServerWithKibana = (
     },
   });
 
-  initUptimeServer(server, libs, plugins, ruleRegistry);
+  initUptimeServer(server, libs, plugins, ruleRegistry, logger);
 };

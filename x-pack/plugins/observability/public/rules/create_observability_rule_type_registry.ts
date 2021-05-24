@@ -14,10 +14,12 @@ type Formatter = (options: {
   formatters: { asDuration: AsDuration; asPercent: AsPercent };
 }) => { reason: string; link: string };
 
+export type FormattableAlertTypeModel = AlertTypeModel<any> & { format: Formatter };
+
 export function createObservabilityRuleTypeRegistry(alertTypeRegistry: AlertTypeRegistryContract) {
   const formatters: Array<{ typeId: string; fn: Formatter }> = [];
   return {
-    register: (type: AlertTypeModel<any> & { format: Formatter }) => {
+    register: (type: FormattableAlertTypeModel) => {
       const { format, ...rest } = type;
       formatters.push({ typeId: type.id, fn: format });
       alertTypeRegistry.register(rest);

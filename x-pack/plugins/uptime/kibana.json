@@ -18,7 +18,8 @@
     "features",
     "licensing",
     "triggersActionsUi",
-    "usageCollection"
+    "usageCollection",
+    "ruleRegistry"
   ],
   "server": true,
   "ui": true,
