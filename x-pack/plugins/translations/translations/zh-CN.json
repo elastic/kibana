@@ -104,7 +104,6 @@
     "advancedSettings.field.deprecationClickAreaLabel": "单击以查看 {settingName} 的过时文档。",
     "advancedSettings.field.helpText": "此设置已由 Kibana 服务器覆盖，无法更改。",
     "advancedSettings.field.imageChangeErrorMessage": "图片无法保存",
-    "advancedSettings.field.imageTooLargeErrorMessage": "图片过大，最大大小为 {maxSizeDescription}",
     "advancedSettings.field.invalidIconLabel": "无效",
     "advancedSettings.field.offLabel": "关闭",
     "advancedSettings.field.onLabel": "开启",
