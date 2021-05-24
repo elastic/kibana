@@ -7,13 +7,13 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { UpdateDocumentByQueryResponse } from 'elasticsearch';
-import { HttpStart } from '../../../../../../../src/core/public';
-
-import {
+import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
-  useApi,
-} from '../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { useApi } from '@kbn/securitysolution-list-hooks';
+import { HttpStart } from '../../../../../../../src/core/public';
+
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
 import {
