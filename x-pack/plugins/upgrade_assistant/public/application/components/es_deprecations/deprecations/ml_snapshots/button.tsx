@@ -40,14 +40,17 @@ export const FixMlSnapshotsButton: React.FunctionComponent<Props> = ({
 }) => {
   return (
     <FixSnapshotsProvider>
-      {(fixSnapshotsPrompt) => {
+      {(fixSnapshotsPrompt, successfulRequests) => {
+        const isSuccessfulRequest = successfulRequests[snapshotId] === true;
         return (
           <EuiButton
             size="s"
             data-test-subj="fixMlSnapshotsButton"
             onClick={() => fixSnapshotsPrompt({ snapshotId, jobId, description })}
+            isDisabled={isSuccessfulRequest}
+            iconType={isSuccessfulRequest ? 'check' : undefined}
           >
-            {i18nTexts.fixButtonLabel}
+            {isSuccessfulRequest ? i18nTexts.doneButtonLabel : i18nTexts.fixButtonLabel}
           </EuiButton>
         );
       }}

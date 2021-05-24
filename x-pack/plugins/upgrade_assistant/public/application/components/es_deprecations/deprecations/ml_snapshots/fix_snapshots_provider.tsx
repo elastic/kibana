@@ -22,7 +22,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
-
 interface Props {
   children: (
     fixSnapshotsPrompt: ({
@@ -33,7 +32,8 @@ interface Props {
       jobId: string;
       snapshotId: string;
       description: string;
-    }) => void
+    }) => void,
+    successfulRequests: { [key: string]: boolean }
   ) => React.ReactNode;
 }
 
@@ -95,6 +95,7 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [isUpgradingSnapshot, setIsUpgradingSnapshot] = useState(false);
   const [isDeletingSnapshot, setIsDeletingSnapshot] = useState(false);
+  const [successfulRequests, setSuccessfulRequests] = useState<{ [key: string]: boolean }>({});
 
   const jobId = useRef<string | undefined>(undefined);
   const snapshotId = useRef<string | undefined>(undefined);
@@ -116,6 +117,9 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
     if (error) {
       notifications.toasts.addDanger(i18nTexts.upgradeErrorNotificationText);
     } else {
+      setSuccessfulRequests({
+        [snapshotId.current!]: true,
+      });
       notifications.toasts.addSuccess(i18nTexts.upgradeSuccessNotificationText);
     }
   };
@@ -134,6 +138,9 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
     if (error) {
       notifications.toasts.addDanger(i18nTexts.deleteErrorNotificationText);
     } else {
+      setSuccessfulRequests({
+        [snapshotId.current!]: true,
+      });
       notifications.toasts.addSuccess(i18nTexts.deleteSuccessNotificationText);
     }
   };
@@ -150,6 +157,9 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
     description: string;
   }) => {
     setIsFlyoutOpen(true);
+    setSuccessfulRequests({
+      [currentSnapshotId]: false,
+    });
     jobId.current = currentJobId;
     snapshotId.current = currentSnapshotId;
     description.current = currentDescription;
@@ -157,7 +167,7 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
 
   return (
     <>
-      {children(fixSnapshotsPrompt)}
+      {children(fixSnapshotsPrompt, successfulRequests)}
 
       {isFlyoutOpen && (
         <EuiPortal>
