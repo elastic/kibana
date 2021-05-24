@@ -13,6 +13,9 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
+        "ephemeral_tasks": Object {
+          "enabled": true,
+        },
         "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
@@ -61,6 +64,9 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
+        "ephemeral_tasks": Object {
+          "enabled": true,
+        },
         "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
@@ -96,6 +102,9 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
+        "ephemeral_tasks": Object {
+          "enabled": true,
+        },
         "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,

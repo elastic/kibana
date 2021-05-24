@@ -172,7 +172,6 @@ export enum TaskStatus {
   Idle = 'idle',
   Claiming = 'claiming',
   Running = 'running',
-  Pending = 'pending',
   Failed = 'failed',
   Unrecognized = 'unrecognized',
 }
