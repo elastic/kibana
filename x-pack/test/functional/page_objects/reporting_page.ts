@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { format as formatUrl } from 'url';
-import supertestAsPromised from 'supertest-as-promised';
+import type SuperTest from 'supertest';
 
 import { FtrService } from '../ftr_provider_context';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../../plugins/reporting/common/constants';
@@ -52,7 +52,7 @@ export class ReportingPageObject extends FtrService {
     `);
   }
 
-  async getResponse(fullUrl: string): Promise<supertestAsPromised.Response> {
+  async getResponse(fullUrl: string): Promise<SuperTest.Response> {
     this.log.debug(`getResponse for ${fullUrl}`);
     const kibanaServerConfig = this.config.get('servers.kibana');
     const baseURL = formatUrl({

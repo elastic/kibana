@@ -7,8 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import type { SuperTest } from 'supertest';
-import type supertestAsPromised from 'supertest-as-promised';
+import type SuperTest from 'supertest';
 import deepmerge from 'deepmerge';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -29,7 +28,7 @@ import { assertTelemetryPayload } from '../../../../../test/api_integration/apis
  * @param timestamp The new timestamp to be set
  */
 function updateMonitoringDates(
-  esSupertest: SuperTest<supertestAsPromised.Test>,
+  esSupertest: SuperTest.SuperTest<SuperTest.Test>,
   fromTimestamp: string,
   toTimestamp: string,
   timestamp: string

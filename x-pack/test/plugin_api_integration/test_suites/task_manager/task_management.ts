@@ -8,8 +8,6 @@
 import { random, times } from 'lodash';
 import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
-import url from 'url';
-import supertestAsPromised from 'supertest-as-promised';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import TaskManagerMapping from '../../../../plugins/task_manager/server/saved_objects/mappings.json';
 import {
@@ -55,9 +53,8 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
-  const config = getService('config');
+  const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
-  const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
   describe('scheduling and running tasks', () => {
     beforeEach(async () => {
