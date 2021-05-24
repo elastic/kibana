@@ -32,20 +32,28 @@ describe('expression_functions', () => {
     });
 
     it('updates a variable', () => {
-      const actual = fn(input, { name: 'test', value: 2 }, context);
+      const actual = fn(input, { name: ['test'], value: [2] }, context);
       expect(variables.test).toEqual(2);
       expect(actual).toEqual(input);
     });
 
     it('sets a new variable', () => {
-      const actual = fn(input, { name: 'new', value: 3 }, context);
+      const actual = fn(input, { name: ['new'], value: [3] }, context);
       expect(variables.new).toEqual(3);
       expect(actual).toEqual(input);
     });
 
     it('stores context if value is not set', () => {
-      const actual = fn(input, { name: 'test' }, context);
+      const actual = fn(input, { name: ['test'], value: [] }, context);
       expect(variables.test).toEqual(input);
+      expect(actual).toEqual(input);
+    });
+
+    it('sets multiple variables', () => {
+      const actual = fn(input, { name: ['new1', 'new2', 'new3'], value: [1, , 3] }, context);
+      expect(variables.new1).toEqual(1);
+      expect(variables.new2).toEqual(input);
+      expect(variables.new3).toEqual(3);
       expect(actual).toEqual(input);
     });
   });
