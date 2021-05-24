@@ -111,10 +111,14 @@ export const getSubCase = async (
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
-export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> => {
+export const getCasesStatus = async (
+  signal: AbortSignal,
+  owner: string[]
+): Promise<CasesStatus> => {
   const response = await KibanaServices.get().http.fetch<CasesStatusResponse>(CASE_STATUS_URL, {
     method: 'GET',
     signal,
+    query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return convertToCamelCase<CasesStatusResponse, CasesStatus>(decodeCasesStatusResponse(response));
 };

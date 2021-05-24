@@ -16,10 +16,17 @@ Statistics API contract.
 
 ### getStatusTotalsByType
 
-▸ **getStatusTotalsByType**(): *Promise*<{ `count_closed_cases`: *number* ; `count_in_progress_cases`: *number* ; `count_open_cases`: *number*  }\>
+▸ **getStatusTotalsByType**(`params`: { `owner`: *undefined* \| *string* \| *string*[]  }): *Promise*<{ `count_closed_cases`: *number* ; `count_in_progress_cases`: *number* ; `count_open_cases`: *number*  }\>
 
 Retrieves the total number of open, closed, and in-progress cases.
 
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `params` | *object* |
+| `params.owner` | *undefined* \| *string* \| *string*[] |
+
 **Returns:** *Promise*<{ `count_closed_cases`: *number* ; `count_in_progress_cases`: *number* ; `count_open_cases`: *number*  }\>
 
-Defined in: [stats/client.ts:21](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/stats/client.ts#L21)
+Defined in: [stats/client.ts:34](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/stats/client.ts#L34)

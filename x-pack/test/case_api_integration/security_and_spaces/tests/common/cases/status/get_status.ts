@@ -134,10 +134,23 @@ export default ({ getService }: FtrProviderContext): void => {
           { user: secOnlyRead, stats: { open: 0, inProgress: 1, closed: 1 } },
           { user: obsOnlyRead, stats: { open: 1, inProgress: 1, closed: 0 } },
           { user: obsSecRead, stats: { open: 1, inProgress: 2, closed: 1 } },
+          {
+            user: obsSecRead,
+            stats: { open: 1, inProgress: 1, closed: 0 },
+            owner: 'observabilityFixture',
+          },
+          {
+            user: obsSecRead,
+            stats: { open: 1, inProgress: 2, closed: 1 },
+            owner: ['observabilityFixture', 'securitySolutionFixture'],
+          },
         ]) {
           const statuses = await getAllCasesStatuses({
             supertest: supertestWithoutAuth,
             auth: { user: scenario.user, space: 'space1' },
+            query: {
+              owner: scenario.owner,
+            },
           });
 
           expect(statuses).to.eql({

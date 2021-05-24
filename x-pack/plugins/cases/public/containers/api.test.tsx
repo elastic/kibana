@@ -215,15 +215,16 @@ describe('Case Configuration API', () => {
       fetchMock.mockResolvedValue(casesStatusSnake);
     });
     test('check url, method, signal', async () => {
-      await getCasesStatus(abortCtrl.signal);
+      await getCasesStatus(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/status`, {
         method: 'GET',
         signal: abortCtrl.signal,
+        owner: [SECURITY_SOLUTION_OWNER],
       });
     });
 
     test('happy path', async () => {
-      const resp = await getCasesStatus(abortCtrl.signal);
+      const resp = await getCasesStatus(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(resp).toEqual(casesStatus);
     });
   });

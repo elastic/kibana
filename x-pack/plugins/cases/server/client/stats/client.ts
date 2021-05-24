@@ -5,8 +5,21 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+
 import { CasesClientArgs } from '..';
-import { CasesStatusResponse, CasesStatusResponseRt, caseStatuses } from '../../../common/api';
+import {
+  CasesStatusRequest,
+  CasesStatusResponse,
+  CasesStatusResponseRt,
+  caseStatuses,
+  throwErrors,
+  excess,
+  CasesStatusRequestRt,
+} from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { constructQueryOptions, getAuthorizationFilter } from '../utils';
@@ -18,7 +31,7 @@ export interface StatsSubClient {
   /**
    * Retrieves the total number of open, closed, and in-progress cases.
    */
-  getStatusTotalsByType(): Promise<CasesStatusResponse>;
+  getStatusTotalsByType(params: CasesStatusRequest): Promise<CasesStatusResponse>;
 }
 
 /**
@@ -28,18 +41,29 @@ export interface StatsSubClient {
  */
 export function createStatsSubClient(clientArgs: CasesClientArgs): StatsSubClient {
   return Object.freeze({
-    getStatusTotalsByType: () => getStatusTotalsByType(clientArgs),
+    getStatusTotalsByType: (params: CasesStatusRequest) =>
+      getStatusTotalsByType(params, clientArgs),
   });
 }
 
-async function getStatusTotalsByType({
-  savedObjectsClient: soClient,
-  caseService,
-  logger,
-  authorization,
-  auditLogger,
-}: CasesClientArgs): Promise<CasesStatusResponse> {
+async function getStatusTotalsByType(
+  params: CasesStatusRequest,
+  clientArgs: CasesClientArgs
+): Promise<CasesStatusResponse> {
+  const {
+    savedObjectsClient: soClient,
+    caseService,
+    logger,
+    authorization,
+    auditLogger,
+  } = clientArgs;
+
   try {
+    const queryParams = pipe(
+      excess(CasesStatusRequestRt).decode(params),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
     const {
       filter: authorizationFilter,
       ensureSavedObjectsAreAuthorized,
@@ -52,7 +76,11 @@ async function getStatusTotalsByType({
 
     const [openCases, inProgressCases, closedCases] = await Promise.all([
       ...caseStatuses.map((status) => {
-        const statusQuery = constructQueryOptions({ status, authorizationFilter });
+        const statusQuery = constructQueryOptions({
+          owner: queryParams.owner,
+          status,
+          authorizationFilter,
+        });
         return caseService.findCaseStatusStats({
           soClient,
           caseOptions: statusQuery.case,
