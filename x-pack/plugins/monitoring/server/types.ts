@@ -62,8 +62,8 @@ export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerCon
 }
 
 export interface PluginsStart {
-  alerting: AlertingPluginStartContract;
-  actions: ActionsPluginsStartContact;
+  alerting?: AlertingPluginStartContract;
+  actions?: ActionsPluginsStartContact;
   licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
 }

@@ -71,6 +71,9 @@ export function taskManagerInstanceRoute(server: any, npRoute: RouteDependencies
           }
         );
 
+        const knownAlertTypes = context.alerting?.listTypes();
+        const knownActionTypes = context.actions?.listTypes();
+
         const metrics: { [key: string]: any } = {};
 
         await Promise.all(
@@ -101,12 +104,27 @@ export function taskManagerInstanceRoute(server: any, npRoute: RouteDependencies
             const result = await getMetrics(legacyRequest, kbnIndexPattern, metricSet, filters);
             metrics[`kibana_task_manager_${alertType}`] = result.kibana_task_manager.map(
               (metricResult: any) => {
+                const knownIdBasedEntities = [
+                  ...(knownAlertTypes ? knownAlertTypes.values() : []),
+                  ...(knownActionTypes ? knownActionTypes.values() : []),
+                ];
+                const knownAlert = knownIdBasedEntities.find(
+                  (knownIdBasedEntity) =>
+                    `alerting:${knownIdBasedEntity.id}` === alertType ||
+                    `actions:${knownIdBasedEntity.id}` === alertType
+                );
                 return {
                   ...metricResult,
                   metric: {
                     ...metricResult.metric,
-                    label: metricResult.metric.label.replace('[alertType]', alertType),
-                    description: metricResult.metric.label.replace('[alertType]', alertType),
+                    label: metricResult.metric.label.replace(
+                      '[alertType]',
+                      knownAlert?.name ?? alertType
+                    ),
+                    description: metricResult.metric.label.replace(
+                      '[alertType]',
+                      knownAlert?.name ?? alertType
+                    ),
                   },
                 };
               }

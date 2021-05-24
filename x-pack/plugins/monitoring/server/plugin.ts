@@ -323,7 +323,7 @@ export class MonitoringPlugin
             getActionTypeRegistry: () => context.actions?.listTypes(),
             getAlertsClient: () => {
               try {
-                return plugins.alerting.getAlertsClientWithRequest(req);
+                return plugins.alerting?.getAlertsClientWithRequest(req);
               } catch (err) {
                 // If security is disabled, this call will throw an error unless a certain config is set for dist builds
                 return null;
@@ -331,7 +331,7 @@ export class MonitoringPlugin
             },
             getActionsClient: () => {
               try {
-                return plugins.actions.getActionsClientWithRequest(req);
+                return plugins.actions?.getActionsClientWithRequest(req);
               } catch (err) {
                 // If security is disabled, this call will throw an error unless a certain config is set for dist builds
                 return null;
