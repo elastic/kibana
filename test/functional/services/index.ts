@@ -19,11 +19,11 @@ import {
 } from './common';
 import { ComboBoxProvider } from './combo_box';
 import {
-  DashboardAddPanelProvider,
-  DashboardReplacePanelProvider,
-  DashboardExpectProvider,
-  DashboardPanelActionsProvider,
-  DashboardVisualizationProvider,
+  DashboardAddPanelService,
+  DashboardReplacePanelService,
+  DashboardExpectService,
+  DashboardPanelActionsService,
+  DashboardVisualizationsService,
 } from './dashboard';
 import { DocTableProvider } from './doc_table';
 import { EmbeddingProvider } from './embedding';
@@ -60,13 +60,13 @@ export const services = {
   docTable: DocTableProvider,
   screenshots: ScreenshotsProvider,
   snapshots: SnapshotsProvider,
-  dashboardVisualizations: DashboardVisualizationProvider,
-  dashboardExpect: DashboardExpectProvider,
+  dashboardVisualizations: DashboardVisualizationsService,
+  dashboardExpect: DashboardExpectService,
   failureDebugging: FailureDebuggingProvider,
   listingTable: ListingTableProvider,
-  dashboardAddPanel: DashboardAddPanelProvider,
-  dashboardReplacePanel: DashboardReplacePanelProvider,
-  dashboardPanelActions: DashboardPanelActionsProvider,
+  dashboardAddPanel: DashboardAddPanelService,
+  dashboardReplacePanel: DashboardReplacePanelService,
+  dashboardPanelActions: DashboardPanelActionsService,
   flyout: FlyoutProvider,
   comboBox: ComboBoxProvider,
   dataGrid: DataGridProvider,
