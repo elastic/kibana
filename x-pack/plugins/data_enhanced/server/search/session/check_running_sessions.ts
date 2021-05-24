@@ -184,9 +184,11 @@ function checkRunningSessionsPage(
                   try {
                     await client.asyncSearch.delete({ id: searchInfo.id });
                   } catch (e) {
-                    logger.error(
-                      `Error while deleting async_search ${searchInfo.id}: ${e.message}`
-                    );
+                    if (e.message !== 'resource_not_found_exception') {
+                      logger.error(
+                        `Error while deleting async_search ${searchInfo.id}: ${e.message}`
+                      );
+                    }
                   }
                 }
               });
