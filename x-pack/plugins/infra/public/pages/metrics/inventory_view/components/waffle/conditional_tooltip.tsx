@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { first } from 'lodash';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
