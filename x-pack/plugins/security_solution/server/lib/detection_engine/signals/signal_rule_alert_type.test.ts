@@ -66,6 +66,25 @@ const getPayload = (
   previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
   createdBy: 'elastic',
   updatedBy: 'elastic',
+  rule: {
+    name: ruleAlert.name,
+    tags: ruleAlert.tags,
+    consumer: 'foo',
+    producer: 'foo',
+    ruleTypeId: 'ruleType',
+    ruleTypeName: 'Name of rule',
+    enabled: true,
+    schedule: {
+      interval: '1h',
+    },
+    actions: [],
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    createdAt: new Date('2019-12-13T16:50:33.400Z'),
+    updatedAt: new Date('2019-12-13T16:50:33.400Z'),
+    throttle: null,
+    notifyWhen: null,
+  },
 });
 
 describe('signal_rule_alert_type', () => {
