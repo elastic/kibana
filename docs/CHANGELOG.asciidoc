@@ -390,13 +390,13 @@ Alerting::
 * Ensures ES Query uses the correct sort value to avoid duplicate detections {kibana-pull}94349[#94349]
 * Deprecates reloadAlerts and replaces with onSave in Alert creation and editing {kibana-pull}91997[#91997]
 APM::
-* Transaction type is not persisted from service inventory {kibana-pull}99407[#99407]
-* Service overview page fetches data with wrong transaction type {kibana-pull}98657[#98657]
+* Persist transaction type when navigating from service inventory {kibana-pull}99407[#99407]
+* Fetch data from the service overview with correct transaction type {kibana-pull}98657[#98657]
 * Transaction duration histogram buckets without samples are clickable {kibana-pull}98540[#98540]
-* Bug: Fix header controls (type, search, comparison, and date picker) responsive breakpoints {kibana-pull}98179[#98179]
-* Home page is showing incorrect value of APM throughput (tpm) {kibana-pull}95991[#95991]
-* Fixes spaces issue for static index patterns {kibana-pull}95799[#95799]
-* The Observability Getting Started page infinitely redirects, breaking browser's back button {kibana-pull}95083[#95083]
+* Fix responsive breakpoints in header controls {kibana-pull}98179[#98179]
+* Fix incorrect APM throughput (tpm) on home page {kibana-pull}95991[#95991]
+* Fix spaces issue for static index patterns {kibana-pull}95799[#95799]
+* Prevent infinite redirects on Observability getting started page {kibana-pull}95083[#95083]
 Canvas::
 * Fixes browser timezone in screenshots {kibana-pull}93583[#93583]
 Dashboard::
