@@ -260,7 +260,8 @@ describe('actions_connectors_list component with items', () => {
     await setup();
     await wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
 
-    expect(wrapper.find('ConnectorEditFlyout')).toHaveLength(1);
+    const edit = await wrapper.find('ConnectorEditFlyout');
+    expect(edit).toHaveLength(1);
   });
 });
 
