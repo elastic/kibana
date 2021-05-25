@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest.get(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(200);
       });
 
-      it('should NOT fail to delete an unknown session', async () => {
+      it('should NOT fail when deleting an unknown session', async () => {
         await supertest.delete(`/internal/session/123`).set('kbn-xsrf', 'foo').expect(200);
       });
 
