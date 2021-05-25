@@ -29,8 +29,8 @@ interface CasesProps {
 
 export function CasesPage(props: CasesProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
-    null
+  const [lensAttributes, setLensAttributes] = useState<Array<TypedLensByValueInput['attributes']>>(
+    []
   );
 
   const closeModal = () => setIsModalVisible(false);
@@ -61,20 +61,22 @@ export function CasesPage(props: CasesProps) {
             </EuiTitle>
 
             <EuiButton onClick={showModal}>Add visualization</EuiButton>
-            {lensAttributes && (
+            {lensAttributes.map((lAttr) => (
               <Wrapper>
                 <LensComponent
                   id="exploratoryView"
                   timeRange={{ from: 'now-15m', to: 'now' }}
-                  attributes={lensAttributes}
+                  attributes={lAttr}
                 />
               </Wrapper>
-            )}
+            ))}
             {isModalVisible && (
               <ExploratoryViewModal
                 isOpen={isModalVisible}
                 onClose={(val) => {
-                  setLensAttributes(val);
+                  if (val !== null) {
+                    setLensAttributes((prevState) => [...prevState, val]);
+                  }
                   closeModal();
                 }}
               />
