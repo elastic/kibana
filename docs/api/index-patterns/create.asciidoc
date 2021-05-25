@@ -1,0 +1,102 @@
+[[index-patterns-api-create]]
+=== Create index pattern API
+++++
+<titleabbrev>Create index pattern</titleabbrev>
+++++
+
+experimental[] Create {kib} index pattern.
+
+[[index-patterns-api-create-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/index_patterns/index_pattern`
+
+`POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern`
+
+[[index-patterns-api-create-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[index-patterns-api-create-body-params]]
+==== Request body
+
+`override`:: (Optional, boolean) If should override an existing index pattern if an
+index pattern with the provided title already exists. Defaults to false.
+
+`refresh_fields`:: (Optional, boolean) If to reload index pattern fields after
+the index pattern is stored. Defaults to false.
+
+`index_pattern`:: (Required, object) Index pattern spec object. All fields are optional. See example request below.
+
+[[index-patterns-api-create-request-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[index-patterns-api-create-example]]
+==== Examples
+
+Create an index pattern with a custom title:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/index_patterns/index_pattern  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+{
+  "index_pattern": {
+     "title": "hello"
+  }
+}'
+--------------------------------------------------
+// KIBANA
+
+Customize creation behavior:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/index_patterns/index_pattern  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+{
+  "override": false,
+  "refresh_fields": true,
+  "index_pattern": {
+     "title": "hello"
+  }
+}'
+--------------------------------------------------
+// KIBANA
+
+At creation all index pattern fields are optional, and you can provide them:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/index_patterns/index_pattern  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+{
+  "index_pattern": {
+      "id": "...",
+      "version": "...",
+      "title": "...",
+      "type": "...",
+      "timeFieldName": "...",
+      "sourceFilters": [],
+      "fields": {},
+      "typeMeta": {},
+      "fieldFormats": {},
+      "fieldAttrs": {},
+      "allowNoIndex": "..."
+    }
+}'
+--------------------------------------------------
+// KIBANA
+
+
+The API returns created index pattern object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "index_pattern": {...}
+}
+--------------------------------------------------
+
