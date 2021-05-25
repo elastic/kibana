@@ -44,6 +44,7 @@ beforeAll(() => {
       actionTaskParamsId: '3',
     },
     taskType: 'actions:1',
+    traceparent: '',
   };
   taskRunnerFactory = new TaskRunnerFactory(mockedActionExecutor);
   mockedActionExecutor.initialize(actionExecutorInitializerParams);

@@ -257,6 +257,9 @@ export interface TaskInstance {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   state: Record<string, any>;
 
+  /**
+   * The serialized traceparent string of the current APM transaction or span.
+   */
   traceparent?: string;
 
   /**
@@ -358,6 +361,11 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * The random uuid of the Kibana instance which claimed ownership of the task last
    */
   ownerId: string | null;
+
+  /**
+   * The serialized traceparent string of the current APM transaction or span.
+   */
+  traceparent: string;
 }
 
 export type SerializedConcreteTaskInstance = Omit<

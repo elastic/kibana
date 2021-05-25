@@ -110,5 +110,6 @@ function mockTask() {
     user: undefined,
     version: '123',
     ownerId: '123',
+    traceparent: '',
   };
 }

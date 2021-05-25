@@ -591,6 +591,7 @@ const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): Concre
     alertId: '1',
   },
   ownerId: null,
+  traceparent: '',
   ...overrides,
 });
 
