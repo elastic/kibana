@@ -17,7 +17,7 @@ import {
   SnapshotsProvider,
   TestSubjectsProvider,
 } from './common';
-import { ComboBoxProvider } from './combo_box';
+import { ComboBoxService } from './combo_box';
 import {
   DashboardAddPanelProvider,
   DashboardReplacePanelProvider,
@@ -68,7 +68,7 @@ export const services = {
   dashboardReplacePanel: DashboardReplacePanelProvider,
   dashboardPanelActions: DashboardPanelActionsProvider,
   flyout: FlyoutProvider,
-  comboBox: ComboBoxProvider,
+  comboBox: ComboBoxService,
   dataGrid: DataGridProvider,
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
