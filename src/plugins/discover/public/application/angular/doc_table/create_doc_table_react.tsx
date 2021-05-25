@@ -133,7 +133,9 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
       });
     } else if (scope && scope.current) {
       scope.current.renderProps = { ...renderProps, rows, minimumVisibleRows };
-      scope.current.$apply();
+      if (scope.current.$root.$$phase !== '$apply' && scope.current.$root.$$phase !== '$digest') {
+        scope.current.$apply();
+      }
     }
   }, [renderProps, minimumVisibleRows, rows]);
 
