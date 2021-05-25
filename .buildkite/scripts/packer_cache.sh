@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/env.sh
-source .buildkite/scripts/setup_node.sh
+source .buildkite/scripts/common/env.sh
+source .buildkite/scripts/common/setup_node.sh
 
 yarn kbn bootstrap

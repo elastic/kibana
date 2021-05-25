@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-source "$(dirname "${0}")/util.sh"
-
 if [[ ! -f "target/.bootstrap-cache" ]]; then
   echo "--- yarn install and bootstrap"
   yarn kbn bootstrap --verbose

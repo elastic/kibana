@@ -7,17 +7,17 @@ steps:
 
   - wait
 
-  - command: .buildkite/scripts/jobs/baseline.sh
+  - command: .buildkite/scripts/steps/baseline.sh
     label: Default Build and Metrics
     agents:
       queue: baseline
 
-  - command: .buildkite/scripts/jobs/baseline_ts_refs.sh
+  - command: .buildkite/scripts/steps/baseline_ts_refs.sh
     label: Build TS Refs
     agents:
       queue: baseline-small
 
-  - command: .buildkite/scripts/jobs/baseline_public_api_docs.sh
+  - command: .buildkite/scripts/steps/baseline_public_api_docs.sh
     label: Check Public API Docs
     agents:
       queue: baseline-small

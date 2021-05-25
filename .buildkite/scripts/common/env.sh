@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/util.sh
-
 export CI=true
 
 KIBANA_DIR=$(pwd)

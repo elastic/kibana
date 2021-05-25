@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-source "$(dirname "${0}")/util.sh"
-
 echo '--- Default Saved Object Field Metrics'
 cd "$XPACK_DIR"
 checks-reporter-with-killswitch "Capture Kibana Saved Objects field count metrics" \
