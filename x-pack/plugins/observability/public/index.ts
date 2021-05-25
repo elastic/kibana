@@ -64,3 +64,10 @@ export type { SeriesUrl } from './components/shared/exploratory_view/types';
 
 export type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';
+export {
+  WaterfallChart,
+  WaterfallProvider,
+  WaterfallSidebarItem,
+  WaterfallFilter,
+} from './components/shared/waterfall';
+export * from './components/shared/waterfall/types';
