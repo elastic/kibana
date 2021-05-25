@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import { ColumnarPage } from '../../../components/page';
+import { i18n } from '@kbn/i18n';
 import { LogEntryRatePageContent } from './page_content';
 import { LogEntryRatePageProviders } from './page_providers';
 
@@ -15,9 +15,7 @@ export const LogEntryRatePage = () => {
   return (
     <EuiErrorBoundary>
       <LogEntryRatePageProviders>
-        <ColumnarPage data-test-subj="logsLogEntryRatePage">
-          <LogEntryRatePageContent />
-        </ColumnarPage>
+        <LogEntryRatePageContent />
       </LogEntryRatePageProviders>
     </EuiErrorBoundary>
   );

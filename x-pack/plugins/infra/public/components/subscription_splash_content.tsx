@@ -9,7 +9,6 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiFlexGroup,
   EuiFlexItem,
@@ -103,69 +102,53 @@ export const SubscriptionSplashContent: React.FC = () => {
 
   return (
     <EuiThemeProvider>
-      <SubscriptionPage>
-        <EuiPageBody>
-          <SubscriptionPageContent verticalPosition="center" horizontalPosition="center">
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h2>{title}</h2>
-                </EuiTitle>
-                <EuiSpacer size="xl" />
-                <EuiText>
-                  <p>{description}</p>
-                </EuiText>
-                <EuiSpacer />
-                <div>{cta}</div>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiImage
-                  alt={i18n.translate('xpack.infra.ml.splash.splashImageAlt', {
-                    defaultMessage: 'Placeholder image',
-                  })}
-                  url={services.http.basePath.prepend(
-                    '/plugins/infra/assets/anomaly_chart_minified.svg'
-                  )}
-                  size="fullWidth"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <SubscriptionPageFooter>
-              <EuiTitle size="xs">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.infra.ml.splash.learnMoreTitle"
-                    defaultMessage="Want to learn more?"
-                  />
-                </h3>
-              </EuiTitle>
-              <EuiButtonEmpty
-                flush="left"
-                iconType="training"
-                target="_blank"
-                color="text"
-                href="https://www.elastic.co/guide/en/kibana/master/xpack-logs-analysis.html"
-              >
-                <FormattedMessage
-                  id="xpack.infra.ml.splash.learnMoreLink"
-                  defaultMessage="Read documentation"
-                />
-              </EuiButtonEmpty>
-            </SubscriptionPageFooter>
-          </SubscriptionPageContent>
-        </EuiPageBody>
-      </SubscriptionPage>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="m">
+            <h2>{title}</h2>
+          </EuiTitle>
+          <EuiSpacer size="xl" />
+          <EuiText>
+            <p>{description}</p>
+          </EuiText>
+          <EuiSpacer />
+          <div>{cta}</div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiImage
+            alt={i18n.translate('xpack.infra.ml.splash.splashImageAlt', {
+              defaultMessage: 'Placeholder image',
+            })}
+            url={services.http.basePath.prepend('/plugins/infra/assets/anomaly_chart_minified.svg')}
+            size="fullWidth"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <SubscriptionPageFooter>
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.infra.ml.splash.learnMoreTitle"
+              defaultMessage="Want to learn more?"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiButtonEmpty
+          flush="left"
+          iconType="training"
+          target="_blank"
+          color="text"
+          href="https://www.elastic.co/guide/en/kibana/master/xpack-logs-analysis.html"
+        >
+          <FormattedMessage
+            id="xpack.infra.ml.splash.learnMoreLink"
+            defaultMessage="Read documentation"
+          />
+        </EuiButtonEmpty>
+      </SubscriptionPageFooter>
     </EuiThemeProvider>
   );
 };
-
-const SubscriptionPage = euiStyled(EuiPage)`
-  height: 100%
-`;
-
-const SubscriptionPageContent = euiStyled(EuiPageContent)`
-  max-width: 768px !important;
-`;
 
 const SubscriptionPageFooter = euiStyled.div`
   background: ${(props) => props.theme.eui.euiColorLightestShade};

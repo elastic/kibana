@@ -25,10 +25,24 @@ import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
+const anomaliesTitle = i18n.translate('xpack.infra.logs.anomaliesPageTitle', {
+  defaultMessage: 'Anomalies',
+});
+
 export const LogEntryRatePageContent = memo(() => {
+  const {
+    services: {
+      observability: {
+        navigation: { PageTemplate },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
   const {
     hasLogAnalysisCapabilites,
     hasLogAnalysisReadCapabilities,
@@ -83,43 +97,82 @@ export const LogEntryRatePageContent = memo(() => {
   }, JOB_STATUS_POLLING_INTERVAL);
 
   if (!hasLogAnalysisCapabilites) {
-    return <SubscriptionSplashContent />;
+    return (
+      <AnomaliesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+        <SubscriptionSplashContent />
+      </AnomaliesPageTemplate>
+    );
   } else if (!hasLogAnalysisReadCapabilities) {
-    return <MissingResultsPrivilegesPrompt />;
+    return (
+      <AnomaliesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+        <MissingResultsPrivilegesPrompt />
+      </AnomaliesPageTemplate>
+    );
   } else if (
     logEntryCategoriesSetupStatus.type === 'initializing' ||
     logEntryRateSetupStatus.type === 'initializing'
   ) {
     return (
-      <LoadingPage
-        message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
-          defaultMessage: 'Checking status of analysis jobs...',
-        })}
-      />
+      <AnomaliesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+        <LoadingPage
+          message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
+            defaultMessage: 'Checking status of analysis jobs...',
+          })}
+        />
+      </AnomaliesPageTemplate>
     );
   } else if (
     logEntryCategoriesSetupStatus.type === 'unknown' ||
     logEntryRateSetupStatus.type === 'unknown'
   ) {
-    return <LogAnalysisSetupStatusUnknownPrompt retry={fetchAllJobStatuses} />;
+    return (
+      <AnomaliesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+        <LogAnalysisSetupStatusUnknownPrompt retry={fetchAllJobStatuses} />
+      </AnomaliesPageTemplate>
+    );
   } else if (
     isJobStatusWithResults(logEntryCategoriesJobStatus['log-entry-categories-count']) ||
     isJobStatusWithResults(logEntryRateJobStatus['log-entry-rate'])
   ) {
     return (
       <>
-        <LogEntryRateResultsContent />
-        <LogAnalysisSetupFlyout />
+        <AnomaliesPageTemplate PageTemplate={PageTemplate}>
+          <LogEntryRateResultsContent />
+          <LogAnalysisSetupFlyout />
+        </AnomaliesPageTemplate>
       </>
     );
   } else if (!hasLogAnalysisSetupCapabilities) {
-    return <MissingSetupPrivilegesPrompt />;
+    return (
+      <AnomaliesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+        <MissingSetupPrivilegesPrompt />;
+      </AnomaliesPageTemplate>
+    );
   } else {
     return (
       <>
-        <LogEntryRateSetupContent onOpenSetup={showModuleList} />
-        <LogAnalysisSetupFlyout />
+        <AnomaliesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+          <LogEntryRateSetupContent onOpenSetup={showModuleList} />
+          <LogAnalysisSetupFlyout />
+        </AnomaliesPageTemplate>
       </>
     );
   }
 });
+
+const AnomaliesPageTemplate: React.FC<{
+  PageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
+  isEmptyState?: boolean;
+}> = ({ PageTemplate, isEmptyState = false, children }) => {
+  return (
+    <PageTemplate
+      data-test-subj="logsLogEntryRatePage"
+      isEmptyState={isEmptyState}
+      pageHeader={{
+        pageTitle: anomaliesTitle,
+      }}
+    >
+      {children}
+    </PageTemplate>
+  );
+};

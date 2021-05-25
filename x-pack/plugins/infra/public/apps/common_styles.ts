@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+
 export const CONTAINER_CLASSNAME = 'infra-container-element';
 
 export const prepareMountElement = (element: HTMLElement) => {
-  // Ensure the element we're handed from application mounting is assigned a class
-  // for our index.scss styles to apply to.
-  element.classList.add(CONTAINER_CLASSNAME);
+  // Ensure all wrapping elements have the APP_WRAPPER_CLASS so that the KinanaPageTemplate works as expected
+  element.classList.add(APP_WRAPPER_CLASS);
 };

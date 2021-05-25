@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
+import { of } from 'rxjs';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 import { createInventoryMetricAlertType } from './alerting/inventory';
@@ -49,6 +50,28 @@ export class Plugin implements InfraClientPluginClass {
         fetchData: createMetricsFetchData(core.getStartServices),
       });
     }
+
+    pluginsSetup.observability.navigation.registerSections(
+      of([
+        {
+          label: 'Logs',
+          sortKey: 200,
+          entries: [
+            { label: 'Stream', app: 'logs', path: '/stream' },
+            { label: 'Anomalies', app: 'logs', path: '/anomalies' },
+            { label: 'Categories', app: 'logs', path: '/categories' },
+          ],
+        },
+        {
+          label: 'Metrics',
+          sortKey: 300,
+          entries: [
+            { label: 'Inventory', app: 'metrics', path: '/inventory' },
+            { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
+          ],
+        },
+      ])
+    );
 
     pluginsSetup.embeddable.registerEmbeddableFactory(
       LOG_STREAM_EMBEDDABLE,

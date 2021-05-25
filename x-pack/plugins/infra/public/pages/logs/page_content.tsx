@@ -16,9 +16,6 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
 import { HelpCenterContent } from '../../components/help_center_content';
-import { AppNavigation } from '../../components/navigation/app_navigation';
-import { RoutedTabs } from '../../components/navigation/routed_tabs';
-import { ColumnarPage } from '../../components/page';
 import { useLogSourceContext } from '../../containers/logs/log_source';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { LogEntryCategoriesPage } from './log_entry_categories';
@@ -27,8 +24,16 @@ import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const LogsPageContent: React.FunctionComponent = () => {
+  const {
+    services: {
+      observability: {
+        navigation: { PageTemplate },
+      },
+    },
+  } = useKibanaContextForPlugin();
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu } = useContext(HeaderActionMenuContext);
 
@@ -66,7 +71,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
   };
 
   return (
-    <ColumnarPage>
+    <>
       <DocumentTitle title={pageTitle} />
 
       <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
@@ -101,13 +106,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
         ]}
         readOnlyBadge={!uiCapabilities?.logs?.save}
       />
-      <AppNavigation aria-label={pageTitle}>
-        <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
-          <EuiFlexItem>
-            <RoutedTabs tabs={[streamTab, anomaliesTab, logCategoriesTab, settingsTab]} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </AppNavigation>
       <Switch>
         <Route path={streamTab.pathname} component={StreamPage} />
         <Route path={anomaliesTab.pathname} component={LogEntryRatePage} />
@@ -117,7 +115,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
       </Switch>
-    </ColumnarPage>
+    </>
   );
 };
 

@@ -66,11 +66,6 @@ export const AnomaliesResults: React.FunctionComponent<{
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem>
-          <EuiTitle size="m" aria-label={title}>
-            <h1>{title}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ManageJobsButton onClick={onViewModuleList} size="s" />
         </EuiFlexItem>

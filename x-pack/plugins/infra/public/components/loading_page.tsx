@@ -25,14 +25,8 @@ export const LoadingPage = ({
   message,
   'data-test-subj': dataTestSubj = 'loadingPage',
 }: LoadingPageProps) => (
-  <FlexPage data-test-subj={dataTestSubj}>
-    <EuiPageBody>
-      <EuiPageContent verticalPosition="center" horizontalPosition="center">
-        <EuiFlexGroup alignItems="center" style={{ flexWrap: 'nowrap' }}>
-          <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
-          <EuiFlexItem data-test-subj="loadingMessage">{message}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageContent>
-    </EuiPageBody>
-  </FlexPage>
+  <EuiFlexGroup alignItems="center" style={{ flexWrap: 'nowrap' }}>
+    <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
+    <EuiFlexItem data-test-subj="loadingMessage">{message}</EuiFlexItem>
+  </EuiFlexGroup>
 );

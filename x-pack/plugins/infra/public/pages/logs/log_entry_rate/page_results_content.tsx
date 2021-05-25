@@ -191,75 +191,71 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
 
   return (
     <>
-      <ResultsContentPage>
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <DatasetsSelector
-                  availableDatasets={datasets}
-                  isLoading={isLoadingDatasets}
-                  selectedDatasets={selectedDatasets}
-                  onChangeDatasetSelection={setSelectedDatasets}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSuperDatePicker
-                  start={friendlyTimeRange.startTime}
-                  end={friendlyTimeRange.endTime}
-                  onTimeChange={handleSelectedTimeRangeChange}
-                  isPaused={autoRefresh.isPaused}
-                  refreshInterval={autoRefresh.interval}
-                  onRefreshChange={handleAutoRefreshChange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <LogAnalysisJobProblemIndicator
-              hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
-              hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
-              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-              hasStoppedJobs={hasStoppedLogEntryRateJobs}
-              isFirstUse={false /* the first use message is already shown by the section below */}
-              moduleName={logEntryRateModuleDescriptor.moduleName}
-              onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
-              onRecreateMlJobForUpdate={showLogEntryRateSetup}
-            />
-            <CategoryJobNoticesSection
-              hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
-              hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
-              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-              hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
-              isFirstUse={isFirstUse}
-              moduleName={logEntryCategoriesModuleDescriptor.moduleName}
-              onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}
-              onRecreateMlJobForUpdate={showLogEntryCategoriesSetup}
-              qualityWarnings={categoryQualityWarnings}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="m">
-              <AnomaliesResults
-                isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
-                onViewModuleList={showModuleList}
-                anomalies={logEntryAnomalies}
-                timeRange={timeRange.value}
-                page={page}
-                fetchNextPage={fetchNextPage}
-                fetchPreviousPage={fetchPreviousPage}
-                changeSortOptions={changeSortOptions}
-                changePaginationOptions={changePaginationOptions}
-                sortOptions={sortOptions}
-                paginationOptions={paginationOptions}
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <DatasetsSelector
+                availableDatasets={datasets}
+                isLoading={isLoadingDatasets}
                 selectedDatasets={selectedDatasets}
-                jobIds={jobIds}
-                autoRefresh={autoRefresh}
+                onChangeDatasetSelection={setSelectedDatasets}
               />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </ResultsContentPage>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSuperDatePicker
+                start={friendlyTimeRange.startTime}
+                end={friendlyTimeRange.endTime}
+                onTimeChange={handleSelectedTimeRangeChange}
+                isPaused={autoRefresh.isPaused}
+                refreshInterval={autoRefresh.interval}
+                onRefreshChange={handleAutoRefreshChange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LogAnalysisJobProblemIndicator
+            hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
+            hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
+            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
+            hasStoppedJobs={hasStoppedLogEntryRateJobs}
+            isFirstUse={false /* the first use message is already shown by the section below */}
+            moduleName={logEntryRateModuleDescriptor.moduleName}
+            onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
+            onRecreateMlJobForUpdate={showLogEntryRateSetup}
+          />
+          <CategoryJobNoticesSection
+            hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
+            hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
+            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
+            hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
+            isFirstUse={isFirstUse}
+            moduleName={logEntryCategoriesModuleDescriptor.moduleName}
+            onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}
+            onRecreateMlJobForUpdate={showLogEntryCategoriesSetup}
+            qualityWarnings={categoryQualityWarnings}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AnomaliesResults
+            isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
+            onViewModuleList={showModuleList}
+            anomalies={logEntryAnomalies}
+            timeRange={timeRange.value}
+            page={page}
+            fetchNextPage={fetchNextPage}
+            fetchPreviousPage={fetchPreviousPage}
+            changeSortOptions={changeSortOptions}
+            changePaginationOptions={changePaginationOptions}
+            sortOptions={sortOptions}
+            paginationOptions={paginationOptions}
+            selectedDatasets={selectedDatasets}
+            jobIds={jobIds}
+            autoRefresh={autoRefresh}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {isLogEntryFlyoutOpen ? (
         <LogEntryFlyout
           logEntryId={flyoutLogEntryId}
@@ -271,13 +267,3 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     </>
   );
 };
-
-// This is needed due to the flex-basis: 100% !important; rule that
-// kicks in on small screens via media queries breaking when using direction="column"
-export const ResultsContentPage = euiStyled(EuiPage)`
-  flex: 1 0 0%;
-
-  .euiFlexGroup--responsive > .euiFlexItem {
-    flex-basis: auto !important;
-  }
-`;
