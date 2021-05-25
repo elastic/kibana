@@ -77,7 +77,7 @@ function getExpressionForLayer(
       }
     });
 
-    const columnIndices = esAggEntries.map(([colId]) => colId);
+    const orderedColumnIds = esAggEntries.map(([colId]) => colId);
     esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input !== 'fullReference' && def.input !== 'managedReference') {
@@ -88,7 +88,7 @@ function getExpressionForLayer(
           indexPattern,
           layer,
           uiSettings,
-          columnIndices
+          orderedColumnIds
         );
         if (wrapInFilter) {
           aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(

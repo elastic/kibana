@@ -132,7 +132,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
-  toEsAggsFn: (column, columnId, _indexPattern, layer, uiSettings, columnIndices) => {
+  toEsAggsFn: (column, columnId, _indexPattern, layer, uiSettings, orderedColumnIds) => {
     return buildExpressionFunction<AggFunctionsMapping['aggTerms']>('aggTerms', {
       id: columnId,
       enabled: true,
@@ -141,7 +141,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       orderBy:
         column.params.orderBy.type === 'alphabetical'
           ? '_key'
-          : String(columnIndices.indexOf(column.params.orderBy.columnId)),
+          : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
       order: column.params.orderDirection,
       size: column.params.size,
       otherBucket: Boolean(column.params.otherBucket),
