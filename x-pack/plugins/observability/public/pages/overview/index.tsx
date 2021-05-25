@@ -11,6 +11,7 @@ import React from 'react';
 import { useTrackPageview } from '../..';
 import { Alert } from '../../../../alerting/common';
 import { EmptySections } from '../../components/app/empty_sections';
+import { ObservabilityHeader } from '../../components/app/header';
 import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
@@ -76,6 +77,7 @@ export function OverviewPage({ routeParams }: Props) {
         ],
       }}
     >
+      <ObservabilityHeader />
       <EuiFlexGroup>
         <EuiFlexItem grow={6}>
           {/* Data sections */}
