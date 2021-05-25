@@ -72,11 +72,7 @@ export function buildEsQuery(
       must: removeMatchAll([...kueryQuery.must, ...luceneQuery.must, ...filterQuery.must]),
       filter: removeMatchAll([...kueryQuery.filter, ...luceneQuery.filter, ...filterQuery.filter]),
       should: removeMatchAll([...kueryQuery.should, ...luceneQuery.should, ...filterQuery.should]),
-      must_not: removeMatchAll([
-        ...kueryQuery.must_not,
-        ...luceneQuery.must_not,
-        ...filterQuery.must_not,
-      ]),
+      must_not: [...kueryQuery.must_not, ...luceneQuery.must_not, ...filterQuery.must_not],
     },
   };
 }
