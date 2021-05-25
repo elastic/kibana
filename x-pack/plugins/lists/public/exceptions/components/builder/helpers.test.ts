@@ -6,51 +6,26 @@
  */
 
 import {
+  CreateExceptionListItemSchema,
   EntryExists,
   EntryList,
   EntryMatch,
   EntryMatchAny,
   EntryNested,
+  ExceptionListItemSchema,
   ExceptionListType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
-
-import { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../../../../common';
-import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
-import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
-import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { getEntryNestedMock } from '../../../../common/schemas/types/entry_nested.mock';
-import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
-import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
-import { getListResponseMock } from '../../../../common/schemas/response/list_schema.mock';
-import {
-  EXCEPTION_OPERATORS,
-  EXCEPTION_OPERATORS_SANS_LISTS,
-  doesNotExistOperator,
-  existsOperator,
-  isInListOperator,
-  isNotInListOperator,
-  isNotOneOfOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isOperator,
-} from '../autocomplete/operators';
-import { OperatorOption } from '../autocomplete/types';
-import { getEntryListMock } from '../../../../common/schemas/types/entry_list.mock';
-
 import {
   BuilderEntry,
+  EXCEPTION_OPERATORS,
+  EXCEPTION_OPERATORS_SANS_LISTS,
   EmptyEntry,
   ExceptionsBuilderExceptionItem,
   FormattedBuilderEntry,
-} from './types';
-import {
+  doesNotExistOperator,
+  existsOperator,
   filterExceptionItems,
   getCorrespondingKeywordField,
   getEntryFromOperator,
@@ -69,7 +44,30 @@ import {
   getOperatorType,
   getUpdatedEntriesOnDelete,
   isEntryNested,
-} from './helpers';
+  isInListOperator,
+  isNotInListOperator,
+  isNotOneOfOperator,
+  isNotOperator,
+  isOneOfOperator,
+  isOperator,
+} from '@kbn/securitysolution-list-utils';
+
+import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
+import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
+import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
+import {
+  fields,
+  getField,
+} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { getEntryNestedMock } from '../../../../common/schemas/types/entry_nested.mock';
+import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
+import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
+import { getListResponseMock } from '../../../../common/schemas/response/list_schema.mock';
+import { OperatorOption } from '../autocomplete/types';
+import { getEntryListMock } from '../../../../common/schemas/types/entry_list.mock';
+
+// TODO: ALL THESE TESTS SHOULD BE MOVED TO @kbn/securitysolution-list-utils for its helper. The only reason why they're here is due to missing other packages we hae to create or missing things from kbn packages such as mocks from kibana core
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),

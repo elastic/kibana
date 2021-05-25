@@ -17,14 +17,6 @@ export default function ({ getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    it('should display function suggestions filtered by function name', async () => {
-      await PageObjects.timelion.setExpression('.e');
-      const suggestions = await PageObjects.timelion.getSuggestionItemsText();
-      expect(suggestions.length).to.eql(2);
-      expect(suggestions[0].includes('.elasticsearch()')).to.eql(true);
-      expect(suggestions[1].includes('.es()')).to.eql(true);
-    });
-
     it('should show argument suggestions when function suggestion is selected', async () => {
       await PageObjects.timelion.setExpression('.es');
       await PageObjects.timelion.clickSuggestion();
@@ -44,6 +36,14 @@ export default function ({ getPageObjects }) {
       expect(valueSuggestions.length).to.eql(5);
       expect(valueSuggestions[0].includes('disable legend')).to.eql(true);
       expect(valueSuggestions[1].includes('place legend in north east corner')).to.eql(true);
+    });
+
+    it('should display function suggestions filtered by function name', async () => {
+      await PageObjects.timelion.setExpression('.e');
+      const suggestions = await PageObjects.timelion.getSuggestionItemsText();
+      expect(suggestions.length).to.eql(2);
+      expect(suggestions[0].includes('.elasticsearch()')).to.eql(true);
+      expect(suggestions[1].includes('.es()')).to.eql(true);
     });
 
     describe('dynamic suggestions for argument values', () => {

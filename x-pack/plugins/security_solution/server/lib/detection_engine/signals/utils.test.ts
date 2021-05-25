@@ -15,7 +15,6 @@ import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 
 // @ts-expect-error
 moment.suppressDeprecationWarnings = true;
@@ -112,34 +111,6 @@ describe('utils', () => {
     test('it throws given an invalid duration', () => {
       const duration = parseInterval('junk');
       expect(duration).toBeNull();
-    });
-  });
-
-  describe('parseScheduleDates', () => {
-    test('it returns a moment when given an ISO string', () => {
-      const result = parseScheduleDates('2020-01-01T00:00:00.000Z');
-      expect(result).not.toBeNull();
-      expect(result).toEqual(moment('2020-01-01T00:00:00.000Z'));
-    });
-
-    test('it returns a moment when given `now`', () => {
-      const result = parseScheduleDates('now');
-
-      expect(result).not.toBeNull();
-      expect(moment.isMoment(result)).toBeTruthy();
-    });
-
-    test('it returns a moment when given `now-x`', () => {
-      const result = parseScheduleDates('now-6m');
-
-      expect(result).not.toBeNull();
-      expect(moment.isMoment(result)).toBeTruthy();
-    });
-
-    test('it returns null when given a string that is not an ISO string, `now` or `now-x`', () => {
-      const result = parseScheduleDates('invalid');
-
-      expect(result).toBeNull();
     });
   });
 

@@ -7,9 +7,12 @@
 import { createSelector } from 'reselect';
 import { Pagination } from '@elastic/eui';
 
+import type {
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { EventFiltersListPageState, EventFiltersServiceGetListOptions } from '../types';
 
-import { ExceptionListItemSchema } from '../../../../shared_imports';
 import { ServerApiError } from '../../../../common/types';
 import {
   isLoadingResourceState,
@@ -18,7 +21,6 @@ import {
   isUninitialisedResourceState,
   getLastLoadedResourceState,
 } from '../../../state/async_resource_state';
-import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
