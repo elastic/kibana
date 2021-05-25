@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  ALERT_START,
+  ALERT_STATUS,
+  RULE_ID,
+  RULE_NAME,
+} from '@kbn/rule-data-utils/target/technical_field_names';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { format, parse } from 'url';
 import {
-  ALERT_START,
-  EVENT_ACTION,
-  RULE_ID,
-  RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
-import {
   ParsedTechnicalFields,
   parseTechnicalFields,
 } from '../../../../rule_registry/common/parse_technical_fields';
+import type { AlertStatus } from '../../../common/typings';
 import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useFetcher } from '../../hooks/use_fetcher';
@@ -30,6 +31,7 @@ import type { ObservabilityAPIReturnType } from '../../services/call_observabili
 import { getAbsoluteDateRange } from '../../utils/date';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTable } from './alerts_table';
+import { StatusFilter } from './status_filter';
 
 export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
 
@@ -50,7 +52,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const { prepend } = core.http.basePath;
   const history = useHistory();
   const {
-    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '' },
+    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'open' },
   } = routeParams;
 
   // In a future milestone we'll have a page dedicated to rule management in
@@ -74,6 +76,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             start,
             end,
             kuery,
+            status,
           },
         },
       }).then((alerts) => {
@@ -101,14 +104,23 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
                   },
                 })
               : undefined,
-            active: parsedFields[EVENT_ACTION] !== 'close',
+            active: parsedFields[ALERT_STATUS] !== 'closed',
             start: new Date(parsedFields[ALERT_START]!).getTime(),
           };
         });
       });
     },
-    [kuery, observabilityRuleTypeRegistry, rangeFrom, rangeTo]
+    [kuery, observabilityRuleTypeRegistry, rangeFrom, rangeTo, status]
   );
+
+  function setStatusFilter(value: AlertStatus) {
+    const nextSearchParams = new URLSearchParams(history.location.search);
+    nextSearchParams.set('status', value);
+    history.push({
+      ...history.location,
+      search: nextSearchParams.toString(),
+    });
+  }
 
   return (
     <ObservabilityPageTemplate
@@ -171,9 +183,19 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             }}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <AlertsTable items={topAlerts ?? []} />
-        </EuiFlexItem>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <StatusFilter status={status} onChange={setStatusFilter} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AlertsTable items={topAlerts ?? []} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
   );

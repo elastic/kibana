@@ -19,7 +19,7 @@ This will only enable the UI for these pages. In order to have alert data indexe
 you'll need to enable writing in the [Rule Registry plugin](../rule_registry/README.md):
 
 ```yaml
-xpack.ruleRegistry.unsafe.write.enabled: true
+xpack.ruleRegistry.write.enabled: true
 ```
 
 When both of the these are set to `true`, your alerts should show on the alerts page.
@@ -51,3 +51,41 @@ HTML coverage report can be found in target/coverage/jest after tests have run.
 ```bash
 open target/coverage/jest/index.html
 ```
+
+## API integration testing
+
+API tests are separated in two suites:
+
+- a basic license test suite
+- a trial license test suite (the equivalent of gold+)
+
+This requires separate test servers and test runners.
+
+### Basic
+
+```
+# Start server
+node scripts/functional_tests_server --config x-pack/test/observability_api_integration/basic/config.ts
+
+# Run tests
+node scripts/functional_test_runner --config x-pack/test/observability_api_integration/basic/config.ts
+```
+
+The API tests for "basic" are located in `x-pack/test/observability_api_integration/basic/tests`.
+
+### Trial
+
+```
+# Start server
+node scripts/functional_tests_server --config x-pack/test/observability_api_integration/trial/config.ts
+
+# Run tests
+node scripts/functional_test_runner --config x-pack/test/observability_api_integration/trial/config.ts
+```
+
+The API tests for "trial" are located in `x-pack/test/observability_api_integration/trial/tests`.
+
+### API test tips
+
+- For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
+- To update snapshots append `--updateSnapshots` to the functional_test_runner command
