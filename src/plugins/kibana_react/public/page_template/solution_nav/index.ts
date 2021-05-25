@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-
-import { services } from './services';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+export { KibanaPageTemplateSolutionNav, KibanaPageTemplateSolutionNavProps } from './solution_nav';
+export {
+  KibanaPageTemplateSolutionNavAvatar,
+  KibanaPageTemplateSolutionNavAvatarProps,
+} from './solution_nav_avatar';
