@@ -9,15 +9,16 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
 import { Version } from '@kbn/securitysolution-io-ts-types';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_NAME,
-} from '../../../common/constants';
+} from '@kbn/securitysolution-list-constants';
+
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
+import { transformSavedObjectToExceptionList } from './utils';
 
 interface CreateEndpointEventFiltersListOptions {
   savedObjectsClient: SavedObjectsClientContract;
