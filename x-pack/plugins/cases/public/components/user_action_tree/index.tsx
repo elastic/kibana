@@ -397,18 +397,22 @@ export const UserActionTree = React.memo(
 
                 return [
                   ...comments,
-                  getAlertAttachment({
-                    action,
-                    alertId,
-                    getCaseDetailHrefWithCommentId,
-                    getRuleDetailsHref,
-                    index: alertIndex,
-                    loadingAlertData,
-                    onRuleDetailsClick,
-                    ruleId,
-                    ruleName,
-                    onShowAlertDetails,
-                  }),
+                  getRuleDetailsHref != null && getRuleDetailsHref != null
+                    ? [
+                        getAlertAttachment({
+                          action,
+                          alertId,
+                          getCaseDetailHrefWithCommentId,
+                          getRuleDetailsHref,
+                          index: alertIndex,
+                          loadingAlertData,
+                          onRuleDetailsClick,
+                          ruleId,
+                          ruleName,
+                          onShowAlertDetails,
+                        }),
+                      ]
+                    : [],
                 ];
               } else if (comment != null && comment.type === CommentType.generatedAlert) {
                 // TODO: clean this up

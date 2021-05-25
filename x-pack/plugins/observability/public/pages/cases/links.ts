@@ -57,4 +57,3 @@ export const getCreateCaseUrl = () => `/create`;
 
 export const getConfigureCasesUrl = () => `/configure`;
 export const getCaseUrl = () => `/cases`;
-export const getRuleDetailsUrl = (detailName: string) => `/rules/id/${detailName}`;

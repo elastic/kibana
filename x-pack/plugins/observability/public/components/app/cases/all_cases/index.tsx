@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
 
 import {
   getCaseDetailsUrl,
@@ -72,6 +71,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       href: formatUrl(getCreateCaseUrl()),
       onClick: goToCreateCase,
     },
+    disableAlerts: true,
     showTitle: false,
     userCanCrud,
     owner: [CASES_OWNER],

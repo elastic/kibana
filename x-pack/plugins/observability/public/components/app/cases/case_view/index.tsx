@@ -12,13 +12,12 @@ import {
   getCaseDetailsUrlWithCommentId,
   getCaseUrl,
   getConfigureCasesUrl,
-  getRuleDetailsUrl,
   useFormatUrl,
 } from '../../../../pages/cases/links';
 import { Case } from '../../../../../../cases/common';
 import { useFetchAlertData } from './helpers';
 import { useKibana } from '../../../../utils/kibana_react';
-import { ALERTS_APP_ID, CASES_APP_ID } from '../constants';
+import { CASES_APP_ID } from '../constants';
 
 interface Props {
   caseId: string;
@@ -59,7 +58,6 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   } = useKibana().services;
   const history = useHistory();
   const { formatUrl } = useFormatUrl(CASES_APP_ID);
-  const { formatUrl: detectionsFormatUrl } = useFormatUrl(ALERTS_APP_ID);
 
   const allCasesLink = getCaseUrl();
   const formattedAllCasesLink = formatUrl(allCasesLink);
@@ -85,27 +83,6 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     },
     [history]
   );
-
-  const onDetectionsRuleDetailsClick = useCallback(
-    (ruleId: string | null | undefined) => {
-      navigateToApp(`observability-alerts`, {
-        path: getRuleDetailsUrl(ruleId ?? ''),
-      });
-    },
-    [navigateToApp]
-  );
-
-  const getDetectionsRuleDetailsHref = useCallback(
-    (ruleId) => {
-      return detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? ''));
-    },
-    [detectionsFormatUrl]
-  );
-
-  const showAlertDetails = useCallback((alertId: string, index: string) => {
-    // TO DO show alert details (in timeline on security solution)
-  }, []);
-
   return casesUi.getCaseView({
     allCasesNavigation: {
       href: formattedAllCasesLink,
@@ -126,11 +103,6 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     },
     getCaseDetailHrefWithCommentId,
     onCaseDataSuccess,
-    ruleDetailsNavigation: {
-      href: getDetectionsRuleDetailsHref,
-      onClick: onDetectionsRuleDetailsClick,
-    },
-    showAlertDetails,
     subCaseId,
     useFetchAlertData,
     userCanCrud,

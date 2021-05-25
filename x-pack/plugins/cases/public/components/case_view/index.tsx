@@ -53,8 +53,8 @@ export interface CaseViewComponentProps {
   configureCasesNavigation: CasesNavigation;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   onComponentInitialized?: () => void;
-  ruleDetailsNavigation: CasesNavigation<string | null | undefined, 'configurable'>;
-  showAlertDetails: (alertId: string, index: string) => void;
+  ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
+  showAlertDetails?: (alertId: string, index: string) => void;
   subCaseId?: string;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
   userCanCrud: boolean;
@@ -327,7 +327,9 @@ export const CaseComponent = React.memo<CaseComponentProps>(
 
     const onShowAlertDetails = useCallback(
       (alertId: string, index: string) => {
-        showAlertDetails(alertId, index);
+        if (showAlertDetails) {
+          showAlertDetails(alertId, index);
+        }
       },
       [showAlertDetails]
     );
