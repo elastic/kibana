@@ -31,3 +31,4 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
 
 const connectedJoinEditor = connect(mapStateToProps, mapDispatchToProps)(JoinEditor);
 export { connectedJoinEditor as JoinEditor };
+export { JoinField } from './join_editor';

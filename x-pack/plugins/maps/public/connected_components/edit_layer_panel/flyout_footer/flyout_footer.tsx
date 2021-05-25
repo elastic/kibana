@@ -10,12 +10,19 @@ import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+export interface Props {
+  cancelLayerPanel: () => void;
+  saveLayerEdits: () => void;
+  removeLayer: () => void;
+  hasStateChanged: boolean;
+}
+
 export const FlyoutFooter = ({
   cancelLayerPanel,
   saveLayerEdits,
   removeLayer,
   hasStateChanged,
-}) => {
+}: Props) => {
   const removeBtn = (
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty
