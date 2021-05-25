@@ -51,23 +51,23 @@ describe('server-log connector validation', () => {
 });
 
 describe('action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
+  test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       message: 'test message',
       level: 'trace',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: { message: [] },
     });
   });
 
-  test('params validation fails when message is not valid', () => {
+  test('params validation fails when message is not valid', async () => {
     const actionParams = {
       message: '',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         message: ['Message is required.'],
       },

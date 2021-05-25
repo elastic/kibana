@@ -117,7 +117,11 @@ export const IndexParamsFields = ({
       <EuiFormRow
         fullWidth
         error={errors.indexOverride as string[]}
-        isInvalid={((errors.indexOverride ?? []) as string[]) && errors.indexOverride.length > 0}
+        isInvalid={
+          errors.indexOverride !== undefined &&
+          (errors.indexOverride as string[]) &&
+          errors.indexOverride.length > 0
+        }
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndex',
           {
@@ -186,7 +190,7 @@ export const IndexParamsFields = ({
           defaultMessage: 'Code editor',
         }
       )}
-      errors={errors.documents as string[]}
+      errors={(errors.documents ?? []) as string[]}
       onDocumentsChange={onDocumentsChange}
       helpText={
         <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">

@@ -92,24 +92,24 @@ describe('servicenow connector validation', () => {
 
 describe('servicenow action params validation', () => {
   [SERVICENOW_ITSM_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
-    test(`${id}: action params validation succeeds when action params is valid`, () => {
+    test(`${id}: action params validation succeeds when action params is valid`, async () => {
       const actionTypeModel = actionTypeRegistry.get(id);
       const actionParams = {
         subActionParams: { incident: { short_description: 'some title {{test}}' }, comments: [] },
       };
 
-      expect(actionTypeModel.validateParams(actionParams)).toEqual({
+      expect(await actionTypeModel.validateParams(actionParams)).toEqual({
         errors: { ['subActionParams.incident.short_description']: [] },
       });
     });
 
-    test(`${id}: params validation fails when body is not valid`, () => {
+    test(`${id}: params validation fails when body is not valid`, async () => {
       const actionTypeModel = actionTypeRegistry.get(id);
       const actionParams = {
         subActionParams: { incident: { short_description: '' }, comments: [] },
       };
 
-      expect(actionTypeModel.validateParams(actionParams)).toEqual({
+      expect(await actionTypeModel.validateParams(actionParams)).toEqual({
         errors: {
           ['subActionParams.incident.short_description']: ['Short description is required.'],
         },

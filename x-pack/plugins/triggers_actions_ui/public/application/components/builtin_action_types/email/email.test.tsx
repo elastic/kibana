@@ -205,7 +205,7 @@ describe('connector validation', () => {
 });
 
 describe('action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
+  test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       to: [],
       cc: ['test1@test.com'],
@@ -213,7 +213,7 @@ describe('action params validation', () => {
       subject: 'test',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         to: [],
         cc: [],
@@ -224,13 +224,13 @@ describe('action params validation', () => {
     });
   });
 
-  test('action params validation fails when action params is not valid', () => {
+  test('action params validation fails when action params is not valid', async () => {
     const actionParams = {
       to: ['test@test.com'],
       subject: 'test',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         to: [],
         cc: [],

@@ -84,7 +84,7 @@ describe('pagerduty connector validation', () => {
 });
 
 describe('pagerduty action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
+  test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       eventAction: 'trigger',
       dedupKey: 'test',
@@ -97,7 +97,7 @@ describe('pagerduty action params validation', () => {
       class: 'test class',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         dedupKey: [],
         summary: [],
