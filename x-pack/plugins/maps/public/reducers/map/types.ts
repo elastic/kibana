@@ -63,6 +63,7 @@ export type MapSettings = {
   minZoom: number;
   showScaleControl: boolean;
   showSpatialFilters: boolean;
+  showTimesliderToggleButton: boolean;
   spatialFiltersAlpa: number;
   spatialFiltersFillColor: string;
   spatialFiltersLineColor: string;

@@ -151,6 +151,11 @@ export class MapEmbeddable
     const store = this._savedMap.getStore();
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
+    store.dispatch(
+      setMapSettings({
+        showTimesliderToggleButton: false,
+      })
+    );
 
     this._dispatchSetQuery({
       forceRefresh: false,

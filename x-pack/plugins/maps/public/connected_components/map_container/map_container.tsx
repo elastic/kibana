@@ -134,6 +134,13 @@ export class MapContainer extends Component<Props, State> {
   }
 
   async _loadShowTimesliderButton() {
+    if (!this.props.settings.showTimesliderToggleButton) {
+      if (this.state.showTimesliderButton) {
+        this.setState({ showTimesliderButton: false });
+      }
+      return;
+    }
+
     const promises = this.props.layerList.map(async (layer) => {
       return await layer.isFilteredByGlobalTime();
     });
