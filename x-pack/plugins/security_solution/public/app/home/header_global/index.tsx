@@ -24,8 +24,17 @@ const Wrapper = styled.header<{ $isFixed: boolean }>`
     background: ${theme.eui.euiColorEmptyShade};
     border-bottom: ${theme.eui.euiBorderThin};
     z-index: ${theme.eui.euiZNavigation};
-    position: ${$isFixed ? 'fixed' : 'relative'};
-    width: 100%;
+    position: relative;
+    ${
+      $isFixed
+        ? `
+    left: 240px;
+    position: fixed;
+    right: 0;
+    width: calc(100% - 240px);
+    `
+        : ''
+    }
   `}
 `;
 Wrapper.displayName = 'Wrapper';
@@ -49,7 +58,7 @@ interface HeaderGlobalProps {
 
 export const HeaderGlobal = React.memo(
   forwardRef<HTMLDivElement, HeaderGlobalProps>(({ isFixed = true }, ref) => {
-    const { HeaderGlobalPortalNode } = useHeaderGlobalPortal();
+    const { globalHeaderPortalNode } = useGlobalHeaderPortal();
     const { globalFullScreen } = useGlobalFullScreen();
     const { timelineFullScreen } = useTimelineFullScreen();
     const { http } = useKibana().services;
@@ -82,7 +91,7 @@ export const HeaderGlobal = React.memo(
             </FlexItem>
           </EuiFlexGroup>
         </WrapperContent>
-        <OutPortal node={HeaderGlobalPortalNode} />
+        <OutPortal node={globalHeaderPortalNode} />
       </Wrapper>
     );
   })
