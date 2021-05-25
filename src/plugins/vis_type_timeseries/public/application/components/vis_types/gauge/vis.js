@@ -10,13 +10,10 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { get, isUndefined, assign, includes, gt, gte, lt, lte, isNull } from 'lodash';
+import { get, isUndefined, assign, includes } from 'lodash';
 import { Gauge } from '../../../visualizations/views/gauge';
 import { getLastValue } from '../../../../../common/last_value_utils';
-const OPERATORS = { gt, gte, lt, lte, empty: isNull };
-const OPERATORS_ALLOW_NULL = {
-  empty: true,
-};
+import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -27,12 +24,7 @@ function getColors(props) {
     model.gauge_color_rules.forEach((rule) => {
       if (rule.operator) {
         const value = getLastValue(series[0]?.data);
-        // This check is necessary for preventing from comparing null values with numeric rules.
-        const shouldOperate =
-          (isNull(rule.value) && OPERATORS_ALLOW_NULL[rule.operator]) ||
-          (!isNull(rule.value) && !isNull(value));
-
-        if (shouldOperate && OPERATORS[rule.operator](value, rule.value)) {
+        if (shouldOperate(rule, value) && getOperator(rule.operator)(value, rule.value)) {
           gauge = rule.gauge;
           text = rule.text;
         }

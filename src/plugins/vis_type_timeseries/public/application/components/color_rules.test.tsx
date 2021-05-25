@@ -18,13 +18,14 @@ import {
   colorRulesOperatorsList,
   ColorRulesOperator,
 } from './color_rules';
+import { EMPTY } from '../../../common/operators_utils';
 
 describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js', () => {
   const emptyRule: ColorRulesOperator = colorRulesOperatorsList.filter(
-    (operator) => operator.method === 'empty'
+    (operator) => operator.method === EMPTY
   )[0];
   const notEmptyRule: ColorRulesOperator = colorRulesOperatorsList.filter(
-    (operator) => operator.method !== 'empty'
+    (operator) => operator.method !== EMPTY
   )[0];
 
   const getColorRulesProps = (gaugeColorRules: unknown = []) => ({

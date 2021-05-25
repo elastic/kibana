@@ -23,6 +23,7 @@ import { AddDeleteButtons } from './add_delete_buttons';
 import { collectionActions } from './lib/collection_actions';
 import { ColorPicker, ColorPickerProps } from './color_picker';
 import { TimeseriesVisParams } from '../../types';
+import { GTE, GT, LT, LTE, EMPTY } from '../../../common/operators_utils';
 
 export interface ColorRulesProps {
   name: keyof TimeseriesVisParams;
@@ -66,31 +67,31 @@ export const colorRulesOperatorsList: ColorRulesOperator[] = [
     label: i18n.translate('visTypeTimeseries.colorRules.greaterThanLabel', {
       defaultMessage: '> greater than',
     }),
-    method: 'gt',
+    method: GT,
   },
   {
     label: i18n.translate('visTypeTimeseries.colorRules.greaterThanOrEqualLabel', {
       defaultMessage: '>= greater than or equal',
     }),
-    method: 'gte',
+    method: GTE,
   },
   {
     label: i18n.translate('visTypeTimeseries.colorRules.lessThanLabel', {
       defaultMessage: '< less than',
     }),
-    method: 'lt',
+    method: LT,
   },
   {
     label: i18n.translate('visTypeTimeseries.colorRules.lessThanOrEqualLabel', {
       defaultMessage: '<= less than or equal',
     }),
-    method: 'lte',
+    method: LTE,
   },
   {
     label: i18n.translate('visTypeTimeseries.colorRules.emptyLabel', {
       defaultMessage: 'empty',
     }),
-    method: 'empty',
+    method: EMPTY,
     isValueConstant: true,
   },
 ];
