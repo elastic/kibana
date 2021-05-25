@@ -465,10 +465,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           applied: this.randomChoice(APPLIED_POLICIES),
         },
         configuration: {
-          isolation: false,
+          isolation: this.randomBoolean(),
         },
         state: {
-          isolation: false,
+          isolation: this.randomBoolean(),
         },
       },
     };

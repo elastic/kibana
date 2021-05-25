@@ -468,6 +468,7 @@ export type HostMetadata = Immutable<{
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
+        /** The endpoint integration policy revision number in kibana */
         endpoint_policy_version: number;
         version: number;
       };
