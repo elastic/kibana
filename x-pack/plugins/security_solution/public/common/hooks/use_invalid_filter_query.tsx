@@ -30,7 +30,7 @@ export const useInvalidFilterQuery = ({
   useEffect(() => {
     if (filterQuery === undefined && kqlError != null) {
       // Removes error stack from user view
-      delete kqlError.stack;
+      delete kqlError.stack; // Mutates the error object and can possibly lead to side effects, only going this route for type issues. Change when we add a stackless toast error
       addError(kqlError, { title: kqlError.name });
     }
     // This disable is required to only trigger the toast once per render
