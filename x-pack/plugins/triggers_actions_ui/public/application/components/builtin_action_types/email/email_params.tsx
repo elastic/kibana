@@ -44,13 +44,15 @@ export const EmailParamsFields = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultMessage]);
-
+  const isToInvalid: boolean = to !== undefined && errors.to !== undefined && errors.to.length > 0;
+  const isSubjectInvalid: boolean =
+    subject !== undefined && errors.subject !== undefined && errors.subject.length > 0;
   return (
     <Fragment>
       <EuiFormRow
         fullWidth
         error={errors.to}
-        isInvalid={errors.to.length > 0 && to !== undefined}
+        isInvalid={isToInvalid}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientTextFieldLabel',
           {
@@ -82,7 +84,7 @@ export const EmailParamsFields = ({
       >
         <EuiComboBox
           noSuggestions
-          isInvalid={errors.to.length > 0 && to !== undefined}
+          isInvalid={isToInvalid}
           fullWidth
           data-test-subj="toEmailAddressInput"
           selectedOptions={toOptions}
@@ -112,7 +114,7 @@ export const EmailParamsFields = ({
         <EuiFormRow
           fullWidth
           error={errors.cc}
-          isInvalid={errors.cc.length > 0 && cc !== undefined}
+          isInvalid={errors.cc !== undefined && errors.cc.length > 0 && cc !== undefined}
           label={i18n.translate(
             'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientCopyTextFieldLabel',
             {
@@ -122,7 +124,7 @@ export const EmailParamsFields = ({
         >
           <EuiComboBox
             noSuggestions
-            isInvalid={errors.cc.length > 0 && cc !== undefined}
+            isInvalid={errors.cc !== undefined && errors.cc.length > 0 && cc !== undefined}
             fullWidth
             data-test-subj="ccEmailAddressInput"
             selectedOptions={ccOptions}
@@ -153,7 +155,7 @@ export const EmailParamsFields = ({
         <EuiFormRow
           fullWidth
           error={errors.bcc}
-          isInvalid={errors.bcc.length > 0 && bcc !== undefined}
+          isInvalid={errors.bcc !== undefined && errors.bcc.length > 0 && bcc !== undefined}
           label={i18n.translate(
             'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientBccTextFieldLabel',
             {
@@ -163,7 +165,7 @@ export const EmailParamsFields = ({
         >
           <EuiComboBox
             noSuggestions
-            isInvalid={errors.bcc.length > 0 && bcc !== undefined}
+            isInvalid={errors.bcc !== undefined && errors.bcc.length > 0 && bcc !== undefined}
             fullWidth
             data-test-subj="bccEmailAddressInput"
             selectedOptions={bccOptions}
@@ -193,7 +195,7 @@ export const EmailParamsFields = ({
       <EuiFormRow
         fullWidth
         error={errors.subject}
-        isInvalid={errors.subject.length > 0 && subject !== undefined}
+        isInvalid={isSubjectInvalid}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.subjectTextFieldLabel',
           {
@@ -207,7 +209,7 @@ export const EmailParamsFields = ({
           messageVariables={messageVariables}
           paramsProperty={'subject'}
           inputTargetValue={subject}
-          errors={errors.subject as string[]}
+          errors={(errors.subject ?? []) as string[]}
         />
       </EuiFormRow>
       <TextAreaWithMessageVariables
@@ -222,7 +224,7 @@ export const EmailParamsFields = ({
             defaultMessage: 'Message',
           }
         )}
-        errors={errors.message as string[]}
+        errors={(errors.message ?? []) as string[]}
       />
     </Fragment>
   );

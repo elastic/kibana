@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiModal,
@@ -31,6 +31,7 @@ import {
   ActionConnector,
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
+  IErrorObject,
 } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
@@ -80,6 +81,27 @@ export const ConnectorAddModal = ({
       Record<string, unknown>
     >,
   });
+  const [errors, setErrors] = useState<{
+    configErrors: IErrorObject;
+    connectorBaseErrors: IErrorObject;
+    connectorErrors: IErrorObject;
+    secretsErrors: IErrorObject;
+  }>({
+    configErrors: {},
+    connectorBaseErrors: {},
+    connectorErrors: {},
+    secretsErrors: {},
+  });
+
+  const actionTypeModel = actionTypeRegistry.get(actionType.id);
+
+  useEffect(() => {
+    (async () => {
+      const res = await getConnectorErrors(connector, actionTypeModel);
+      setErrors({ ...res });
+    })();
+  }, [connector, actionTypeModel]);
+
   const setConnector = (value: any) => {
     dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
   };
@@ -96,13 +118,8 @@ export const ConnectorAddModal = ({
     onClose();
   }, [initialConnector, onClose]);
 
-  const actionTypeModel = actionTypeRegistry.get(actionType.id);
-  const { configErrors, connectorBaseErrors, connectorErrors, secretsErrors } = getConnectorErrors(
-    connector,
-    actionTypeModel
-  );
-  hasErrors = !!Object.keys(connectorErrors).find(
-    (errorKey) => connectorErrors[errorKey].length >= 1
+  hasErrors = !!Object.keys(errors.connectorErrors).find(
+    (errorKey) => (errors.connectorErrors as IErrorObject)[errorKey].length >= 1
   );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
@@ -161,7 +178,7 @@ export const ConnectorAddModal = ({
           actionTypeName={actionType.name}
           dispatch={dispatch}
           serverError={serverError}
-          errors={connectorErrors}
+          errors={errors.connectorErrors}
           actionTypeRegistry={actionTypeRegistry}
           consumer={consumer}
         />
@@ -188,9 +205,9 @@ export const ConnectorAddModal = ({
                 setConnector(
                   getConnectorWithInvalidatedFields(
                     connector,
-                    configErrors,
-                    secretsErrors,
-                    connectorBaseErrors
+                    errors.configErrors,
+                    errors.secretsErrors,
+                    errors.connectorBaseErrors
                   )
                 );
                 return;

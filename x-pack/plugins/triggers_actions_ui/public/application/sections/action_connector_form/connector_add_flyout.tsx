@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, Fragment, useReducer } from 'react';
+import React, { useCallback, useState, Fragment, useReducer, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -31,6 +31,8 @@ import {
   ActionConnector,
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
+  IErrorObject,
+  ActionTypeModel,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
@@ -57,6 +59,8 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   actionTypeRegistry,
 }) => {
   let hasErrors = false;
+  let actionTypeModel: ActionTypeModel | undefined;
+
   const {
     http,
     notifications: { toasts },
@@ -64,7 +68,17 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   } = useKibana().services;
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
-
+  const [errors, setErrors] = useState<{
+    configErrors: IErrorObject;
+    connectorBaseErrors: IErrorObject;
+    connectorErrors: IErrorObject;
+    secretsErrors: IErrorObject;
+  }>({
+    configErrors: {},
+    connectorBaseErrors: {},
+    connectorErrors: {},
+    secretsErrors: {},
+  });
   // hooks
   const initialConnector: InitialConnector<Record<string, unknown>, Record<string, unknown>> = {
     actionTypeId: actionType?.id ?? '',
@@ -82,6 +96,16 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
       Record<string, unknown>
     >,
   });
+
+  useEffect(() => {
+    (async () => {
+      if (actionTypeModel) {
+        const res = await getConnectorErrors(connector, actionTypeModel);
+        setErrors({ ...res });
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connector, actionType]);
 
   const setActionProperty = <Key extends keyof ActionConnector>(
     key: Key,
@@ -110,7 +134,6 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   }
 
   let currentForm;
-  let actionTypeModel;
   let saveButton;
   if (!actionType) {
     currentForm = (
@@ -124,14 +147,8 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
 
-    const {
-      configErrors,
-      connectorBaseErrors,
-      connectorErrors,
-      secretsErrors,
-    } = getConnectorErrors(connector, actionTypeModel);
-    hasErrors = !!Object.keys(connectorErrors).find(
-      (errorKey) => connectorErrors[errorKey].length >= 1
+    hasErrors = !!Object.keys(errors.connectorErrors).find(
+      (errorKey) => (errors.connectorErrors as IErrorObject)[errorKey].length >= 1
     );
 
     currentForm = (
@@ -139,7 +156,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
         actionTypeName={actionType.name}
         connector={connector}
         dispatch={dispatch}
-        errors={connectorErrors}
+        errors={errors.connectorErrors}
         actionTypeRegistry={actionTypeRegistry}
         consumer={consumer}
       />
@@ -179,9 +196,9 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
         setConnector(
           getConnectorWithInvalidatedFields(
             connector,
-            configErrors,
-            secretsErrors,
-            connectorBaseErrors
+            errors.configErrors,
+            errors.secretsErrors,
+            errors.connectorBaseErrors
           )
         );
         return;
@@ -244,13 +261,13 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="m" alignItems="center">
-          {actionTypeModel && actionTypeModel.iconClass ? (
+          {!!actionTypeModel && actionTypeModel.iconClass ? (
             <EuiFlexItem grow={false}>
               <EuiIcon type={actionTypeModel.iconClass} size="xl" />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem>
-            {actionTypeModel && actionType ? (
+            {!!actionTypeModel && actionType ? (
               <Fragment>
                 <EuiTitle size="s">
                   <h3 id="flyoutTitle">
@@ -323,7 +340,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween">
-              {canSave && actionTypeModel && actionType ? saveButton : null}
+              {canSave && !!actionTypeModel && actionType ? saveButton : null}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

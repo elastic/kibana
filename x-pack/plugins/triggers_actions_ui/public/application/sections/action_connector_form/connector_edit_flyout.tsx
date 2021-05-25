@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useReducer, useState, Fragment } from 'react';
+import React, { useCallback, useReducer, useState, Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -31,6 +31,7 @@ import { TestConnectorForm } from './test_connector_form';
 import {
   ActionConnector,
   ActionTypeRegistryContract,
+  IErrorObject,
   UserConfiguredActionConnector,
 } from '../../../types';
 import { ConnectorReducer, createConnectorReducer } from './connector_reducer';
@@ -72,6 +73,7 @@ export const ConnectorEditFlyout = ({
     docLinks,
     application: { capabilities },
   } = useKibana().services;
+
   const getConnectorWithoutSecrets = () => ({
     ...(initialConnector as UserConfiguredActionConnector<
       Record<string, unknown>,
@@ -88,6 +90,27 @@ export const ConnectorEditFlyout = ({
   const [{ connector }, dispatch] = useReducer(reducer, {
     connector: getConnectorWithoutSecrets(),
   });
+  const [errors, setErrors] = useState<{
+    configErrors: IErrorObject;
+    connectorBaseErrors: IErrorObject;
+    connectorErrors: IErrorObject;
+    secretsErrors: IErrorObject;
+  }>({
+    configErrors: {},
+    connectorBaseErrors: {},
+    connectorErrors: {},
+    secretsErrors: {},
+  });
+
+  const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
+
+  useEffect(() => {
+    (async () => {
+      const res = await getConnectorErrors(connector, actionTypeModel);
+      setErrors({ ...res });
+    })();
+  }, [connector, actionTypeModel]);
+
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [selectedTab, setTab] = useState<EditConectorTabs>(tab);
 
@@ -126,23 +149,8 @@ export const ConnectorEditFlyout = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose]);
 
-  const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
-  const {
-    configErrors,
-    connectorBaseErrors,
-    connectorErrors,
-    secretsErrors,
-  } = !connector.isPreconfigured
-    ? getConnectorErrors(connector, actionTypeModel)
-    : {
-        configErrors: {},
-        connectorBaseErrors: {},
-        connectorErrors: {},
-        secretsErrors: {},
-      };
-
-  const hasErrors = !!Object.keys(connectorErrors).find(
-    (errorKey) => connectorErrors[errorKey].length >= 1
+  const hasErrors = !!Object.keys(errors.connectorErrors).find(
+    (errorKey) => (errors.connectorErrors as IErrorObject)[errorKey].length >= 1
   );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
@@ -240,9 +248,9 @@ export const ConnectorEditFlyout = ({
       setConnector(
         getConnectorWithInvalidatedFields(
           connector,
-          configErrors,
-          secretsErrors,
-          connectorBaseErrors
+          errors.configErrors,
+          errors.secretsErrors,
+          errors.connectorBaseErrors
         )
       );
       return;
@@ -301,7 +309,7 @@ export const ConnectorEditFlyout = ({
           !connector.isPreconfigured ? (
             <ActionConnectorForm
               connector={connector}
-              errors={connectorErrors}
+              errors={errors.connectorErrors}
               dispatch={(changes) => {
                 setHasChanges(true);
                 // if the user changes the connector, "forget" the last execution

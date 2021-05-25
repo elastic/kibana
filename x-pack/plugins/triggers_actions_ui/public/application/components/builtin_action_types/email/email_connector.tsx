@@ -38,6 +38,12 @@ export const EmailActionConnectorFields: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const isFromInvalid: boolean =
+    from !== undefined && errors.from !== undefined && errors.from.length > 0;
+  const isHostInvalid: boolean =
+    host !== undefined && errors.host !== undefined && errors.host.length > 0;
+  const isPortInvalid: boolean =
+    port !== undefined && errors.port !== undefined && errors.port.length > 0;
   return (
     <>
       <EuiFlexGroup>
@@ -46,7 +52,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
             id="from"
             fullWidth
             error={errors.from}
-            isInvalid={errors.from.length > 0 && from !== undefined}
+            isInvalid={isFromInvalid}
             label={i18n.translate(
               'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.fromTextFieldLabel',
               {
@@ -65,7 +71,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
             <EuiFieldText
               fullWidth
               readOnly={readOnly}
-              isInvalid={errors.from.length > 0 && from !== undefined}
+              isInvalid={isFromInvalid}
               name="from"
               value={from || ''}
               data-test-subj="emailFromInput"
@@ -87,7 +93,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
             id="emailHost"
             fullWidth
             error={errors.host}
-            isInvalid={errors.host.length > 0 && host !== undefined}
+            isInvalid={isHostInvalid}
             label={i18n.translate(
               'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hostTextFieldLabel',
               {
@@ -98,7 +104,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
             <EuiFieldText
               fullWidth
               readOnly={readOnly}
-              isInvalid={errors.host.length > 0 && host !== undefined}
+              isInvalid={isHostInvalid}
               name="host"
               value={host || ''}
               data-test-subj="emailHostInput"
@@ -121,7 +127,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                 fullWidth
                 placeholder="587"
                 error={errors.port}
-                isInvalid={errors.port.length > 0 && port !== undefined}
+                isInvalid={isPortInvalid}
                 label={i18n.translate(
                   'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.portTextFieldLabel',
                   {
@@ -131,7 +137,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               >
                 <EuiFieldNumber
                   prepend=":"
-                  isInvalid={errors.port.length > 0 && port !== undefined}
+                  isInvalid={isPortInvalid}
                   fullWidth
                   readOnly={readOnly}
                   name="port"
@@ -221,7 +227,9 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                 id="emailUser"
                 fullWidth
                 error={errors.user}
-                isInvalid={errors.user.length > 0 && user !== undefined}
+                isInvalid={
+                  user !== undefined && errors.user !== undefined && errors.user.length > 0
+                }
                 label={i18n.translate(
                   'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
                   {
@@ -231,7 +239,9 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               >
                 <EuiFieldText
                   fullWidth
-                  isInvalid={errors.user.length > 0 && user !== undefined}
+                  isInvalid={
+                    user !== undefined && errors.user !== undefined && errors.user.length > 0
+                  }
                   name="user"
                   readOnly={readOnly}
                   value={user || ''}
@@ -252,7 +262,11 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                 id="emailPassword"
                 fullWidth
                 error={errors.password}
-                isInvalid={errors.password.length > 0 && password !== undefined}
+                isInvalid={
+                  password !== undefined &&
+                  errors.password !== undefined &&
+                  errors.password.length > 0
+                }
                 label={i18n.translate(
                   'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
                   {
@@ -263,7 +277,11 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                 <EuiFieldPassword
                   fullWidth
                   readOnly={readOnly}
-                  isInvalid={errors.password.length > 0 && password !== undefined}
+                  isInvalid={
+                    password !== undefined &&
+                    errors.password !== undefined &&
+                    errors.password.length > 0
+                  }
                   name="password"
                   value={password || ''}
                   data-test-subj="emailPasswordInput"

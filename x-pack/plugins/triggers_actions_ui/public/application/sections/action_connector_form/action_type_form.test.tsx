@@ -220,7 +220,6 @@ function getActionTypeForm(
       onAddConnector={onAddConnector ?? jest.fn()}
       onDeleteAction={onDeleteAction ?? jest.fn()}
       onConnectorSelected={onConnectorSelected ?? jest.fn()}
-      actionParamsErrors={{ errors: { summary: [], timestamp: [], dedupKey: [] } }}
       defaultActionGroupId={defaultActionGroupId ?? 'default'}
       setActionParamsProperty={jest.fn()}
       index={index ?? 1}

@@ -173,7 +173,8 @@ export const ActionConnectorForm = ({
     );
 
   const FieldsComponent = actionTypeRegistered.actionConnectorFields;
-
+  const isNameInvalid: boolean =
+    connector.name !== undefined && errors.name !== undefined && errors.name.length > 0;
   return (
     <EuiForm isInvalid={!!serverError} error={serverError?.body.message}>
       <EuiFormRow
@@ -185,13 +186,13 @@ export const ActionConnectorForm = ({
             defaultMessage="Connector name"
           />
         }
-        isInvalid={errors.name.length > 0 && connector.name !== undefined}
+        isInvalid={isNameInvalid}
         error={errors.name}
       >
         <EuiFieldText
           fullWidth
           readOnly={!canSave}
-          isInvalid={errors.name.length > 0 && connector.name !== undefined}
+          isInvalid={isNameInvalid}
           name="name"
           placeholder="Untitled"
           data-test-subj="nameInput"

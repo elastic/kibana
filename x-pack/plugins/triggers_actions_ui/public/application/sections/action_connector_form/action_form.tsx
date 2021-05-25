@@ -307,7 +307,7 @@ export const ActionForm = ({
       </EuiTitle>
       <EuiSpacer size="m" />
       {actionTypesIndex &&
-        actions.map(async (actionItem: AlertAction, index: number) => {
+        actions.map((actionItem: AlertAction, index: number) => {
           const actionConnector = connectors.find((field) => field.id === actionItem.id);
           // connectors doesn't exists
           if (!actionConnector) {
@@ -349,15 +349,10 @@ export const ActionForm = ({
             );
           }
 
-          const actionParamsErrors: ActionTypeFormProps['actionParamsErrors'] = await actionTypeRegistry
-            .get(actionItem.actionTypeId)
-            ?.validateParams(actionItem.params);
-
           return (
             <ActionTypeForm
               actionItem={actionItem}
               actionConnector={actionConnector}
-              actionParamsErrors={actionParamsErrors}
               index={index}
               key={`action-form-action-at-${index}`}
               setActionParamsProperty={setActionParamsProperty}
