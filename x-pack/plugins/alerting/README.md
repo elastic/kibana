@@ -556,7 +556,7 @@ features.registerKibanaFeature({
 });
 ```
 
-In the above example, note that the base feature privilege grants users with the `all` role `all` access the rules of the specified rule types but only `read` access to the alerts of the same rule type. In order to get `all` access to the alerts of these rule types, the role must grant the `manage_alerts` subfeature privilege. Because the `manage_alerts` subfeature privilege has `includeIn` set to `all`, it is _automatically_ included in the `all` feature privilege but can be excluded when the role is defined.
+In the above example, note that the base feature privilege grants users with the `all` role `all` access the rules of the specified rule types but only `read` access to the alerts of the same rule type. In order to get `all` access to the alerts of these rule types, the role must grant the `alert_manage` subfeature privilege. Because the `alert_manage` subfeature privilege has `includeIn` set to `all`, it is _automatically_ included in the `all` feature privilege but can be excluded when the role is defined.
 
 This subfeature privilege definition allows for the following granularity:
 
