@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, Plugin } from 'src/core/public';
-import { TelemetryPluginSetup } from '../../../../../src/plugins/telemetry/public';
+import type { TelemetryPluginSetup } from '../../../../../src/plugins/telemetry/public';
 
 interface TelemetryTestPluginSetupDependencies {
   telemetry: TelemetryPluginSetup;
