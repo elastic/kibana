@@ -323,7 +323,7 @@
               "\nThe url associated with this result.\nThis can be either an absolute url, a path relative to the incoming request's basePath, or a structure specifying if the basePath should be prepended.\n"
             ],
             "signature": [
-              "GlobalSearchProviderResultUrl"
+              "string | { path: string; prependBasePath: boolean; }"
             ],
             "source": {
               "path": "x-pack/plugins/global_search/common/types.ts",
@@ -478,7 +478,9 @@
               "path": "x-pack/plugins/global_search/public/types.ts",
               "lineNumber": 53
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -532,7 +534,9 @@
           "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
         ],
         "signature": [
-          "Pick<GlobalSearchProviderResult, \"type\" | \"title\" | \"id\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
+          "Pick<",
+          "GlobalSearchProviderResult",
+          ", \"type\" | \"title\" | \"id\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
         ],
         "source": {
           "path": "x-pack/plugins/global_search/common/types.ts",
@@ -551,7 +555,15 @@
       "label": "GlobalSearchPluginSetup",
       "description": [],
       "signature": [
-        "{ registerResultProvider: (provider: GlobalSearchResultProvider) => void; }"
+        "{ registerResultProvider: (provider: ",
+        {
+          "pluginId": "globalSearch",
+          "scope": "public",
+          "docId": "kibGlobalSearchPluginApi",
+          "section": "def-public.GlobalSearchResultProvider",
+          "text": "GlobalSearchResultProvider"
+        },
+        ") => void; }"
       ],
       "source": {
         "path": "x-pack/plugins/global_search/public/types.ts",
@@ -579,7 +591,9 @@
           "section": "def-public.GlobalSearchFindOptions",
           "text": "GlobalSearchFindOptions"
         },
-        ") => Observable<",
+        ") => ",
+        "Observable",
+        "<",
         "GlobalSearchBatchedResults",
         ">; getSearchableTypes: () => Promise<string[]>; }"
       ],
@@ -744,7 +758,10 @@
                 "text": "IUiSettingsClient"
               },
               "; }; capabilities: ",
-              "Observable"
+              "Observable",
+              "<",
+              "Capabilities",
+              ">; }"
             ],
             "source": {
               "path": "x-pack/plugins/global_search/server/types.ts",
@@ -910,7 +927,7 @@
               "\nThe url associated with this result.\nThis can be either an absolute url, a path relative to the incoming request's basePath, or a structure specifying if the basePath should be prepended.\n"
             ],
             "signature": [
-              "GlobalSearchProviderResultUrl"
+              "string | { path: string; prependBasePath: boolean; }"
             ],
             "source": {
               "path": "x-pack/plugins/global_search/common/types.ts",
@@ -1011,7 +1028,8 @@
               ") => ",
               "Observable",
               "<",
-              "GlobalSearchProviderResult"
+              "GlobalSearchProviderResult",
+              "[]>"
             ],
             "source": {
               "path": "x-pack/plugins/global_search/server/types.ts",
@@ -1103,7 +1121,32 @@
               "path": "x-pack/plugins/global_search/server/types.ts",
               "lineNumber": 140
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "globalSearch",
+                "id": "def-server.context",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "globalSearch",
+                    "scope": "server",
+                    "docId": "kibGlobalSearchPluginApi",
+                    "section": "def-server.GlobalSearchProviderContext",
+                    "text": "GlobalSearchProviderContext"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/global_search/server/types.ts",
+                  "lineNumber": 140
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1214,7 +1257,9 @@
               "path": "x-pack/plugins/global_search/server/types.ts",
               "lineNumber": 57
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -1251,7 +1296,9 @@
           "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
         ],
         "signature": [
-          "Pick<GlobalSearchProviderResult, \"type\" | \"title\" | \"id\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
+          "Pick<",
+          "GlobalSearchProviderResult",
+          ", \"type\" | \"title\" | \"id\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
         ],
         "source": {
           "path": "x-pack/plugins/global_search/common/types.ts",
@@ -1270,19 +1317,33 @@
       "label": "GlobalSearchPluginStart",
       "description": [],
       "signature": [
-        "{ find: (params: GlobalSearchFindParams, options: GlobalSearchFindOptions, request: ",
+        "{ find: (params: ",
+        "GlobalSearchFindParams",
+        ", options: ",
+        {
+          "pluginId": "globalSearch",
+          "scope": "server",
+          "docId": "kibGlobalSearchPluginApi",
+          "section": "def-server.GlobalSearchFindOptions",
+          "text": "GlobalSearchFindOptions"
+        },
+        ", request: ",
         {
           "pluginId": "core",
           "scope": "server",
-          "docId": "kibCorePluginApi",
+          "docId": "kibCoreHttpPluginApi",
           "section": "def-server.KibanaRequest",
           "text": "KibanaRequest"
         },
-        "<unknown, unknown, unknown, any>) => Observable<GlobalSearchBatchedResults>; getSearchableTypes: (request: ",
+        "<unknown, unknown, unknown, any>) => ",
+        "Observable",
+        "<",
+        "GlobalSearchBatchedResults",
+        ">; getSearchableTypes: (request: ",
         {
           "pluginId": "core",
           "scope": "server",
-          "docId": "kibCorePluginApi",
+          "docId": "kibCoreHttpPluginApi",
           "section": "def-server.KibanaRequest",
           "text": "KibanaRequest"
         },
@@ -1304,7 +1365,15 @@
       "label": "GlobalSearchPluginSetup",
       "description": [],
       "signature": [
-        "{ registerResultProvider: (provider: GlobalSearchResultProvider) => void; }"
+        "{ registerResultProvider: (provider: ",
+        {
+          "pluginId": "globalSearch",
+          "scope": "server",
+          "docId": "kibGlobalSearchPluginApi",
+          "section": "def-server.GlobalSearchResultProvider",
+          "text": "GlobalSearchResultProvider"
+        },
+        ") => void; }"
       ],
       "source": {
         "path": "x-pack/plugins/global_search/server/types.ts",

@@ -36,7 +36,10 @@
           ", ",
           "PluginStart",
           ", ",
-          "SetupPlugins"
+          "SetupPlugins",
+          ", ",
+          "StartPlugins",
+          ">"
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/public/plugin.tsx",
@@ -297,7 +300,9 @@
             "path": "x-pack/plugins/security_solution/public/types.ts",
             "lineNumber": 70
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
         }
       ],
       "lifecycle": "setup",
@@ -433,7 +438,10 @@
             "text": "PluginStart"
           },
           ", ",
-          "SetupPlugins"
+          "SetupPlugins",
+          ", ",
+          "StartPlugins",
+          ">"
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/server/plugin.ts",
@@ -701,7 +709,9 @@
               "path": "x-pack/plugins/security_solution/server/types.ts",
               "lineNumber": 18
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false

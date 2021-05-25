@@ -48,7 +48,12 @@
             "docId": "kibEmbeddablePluginApi",
             "section": "def-public.ReferenceOrValueEmbeddable",
             "text": "ReferenceOrValueEmbeddable"
-          }
+          },
+          "<",
+          "MapByValueInput",
+          ", ",
+          "MapByReferenceInput",
+          ">"
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
@@ -981,7 +986,9 @@
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
               "lineNumber": 36
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "maps",
@@ -1062,7 +1069,23 @@
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
               "lineNumber": 40
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.layerId",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                  "lineNumber": 40
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "maps",
@@ -1093,7 +1116,26 @@
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
               "lineNumber": 42
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.__0",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ layerId: string; featureId?: string | number | undefined; mbProperties: GeoJSON.GeoJsonProperties; }"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                  "lineNumber": 42
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "maps",
@@ -1109,7 +1151,26 @@
               "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
               "lineNumber": 51
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.__0",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ layerId: string; featureId?: string | number | undefined; }"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                  "lineNumber": 51
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "maps",
@@ -1249,7 +1310,22 @@
         "label": "MapEmbeddableOutput",
         "description": [],
         "signature": [
-          "EmbeddableOutput & { indexPatterns: IIndexPattern[]; }"
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          " & { indexPatterns: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-common.IIndexPattern",
+            "text": "IIndexPattern"
+          },
+          "[]; }"
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/types.ts",
@@ -3182,7 +3258,7 @@
         "label": "RawValue",
         "description": [],
         "signature": [
-          "undefined | null | string | number | false | true | string[]"
+          "string | number | boolean | string[] | null | undefined"
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",

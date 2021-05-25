@@ -262,7 +262,48 @@
             "text": "AlertExecutorOptions"
           },
           "<TParams, Record<string, unknown>, { [x: string]: unknown; }, TAlertInstanceContext, never> & { services: any; }) => Promise<{ wrapped: any; trackedAlerts: { [k: string]: { alertId: string; alertUuid: string; started: string; }; }; }>; id: string; name: string; validate?: { params?: ",
-          "AlertTypeParamsValidator"
+          "AlertTypeParamsValidator",
+          "<TParams> | undefined; } | undefined; actionGroups: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionGroup",
+            "text": "ActionGroup"
+          },
+          "<string>[]; defaultActionGroupId: string; recoveryActionGroup?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionGroup",
+            "text": "ActionGroup"
+          },
+          "<string> | undefined; producer: string; actionVariables?: { context?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          "[] | undefined; state?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          "[] | undefined; params?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          "[] | undefined; } | undefined; minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\"; }"
         ],
         "source": {
           "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
@@ -651,7 +692,7 @@
         "label": "RuleRegistryPluginConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly write: Readonly<{} & { enabled: boolean; }>; readonly index: string; }"
+          "{ readonly enabled: boolean; readonly index: string; readonly write: Readonly<{} & { enabled: boolean; }>; }"
         ],
         "source": {
           "path": "x-pack/plugins/rule_registry/server/index.ts",
