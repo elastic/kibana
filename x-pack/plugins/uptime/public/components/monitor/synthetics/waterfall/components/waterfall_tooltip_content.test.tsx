@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { SidebarTooltip } from './sidebar_tooltip';
+import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 
 jest.mock('../context/waterfall_chart', () => ({
   useWaterfallContext: jest.fn().mockReturnValue({
@@ -64,7 +64,7 @@ jest.mock('../context/waterfall_chart', () => ({
 describe('SidebarTooltip', () => {
   it('renders tooltip', () => {
     const { getByText, queryByText } = render(
-      <SidebarTooltip text="1. https://www.elastic.co" url="https://www.elastic.co" />
+      <WaterfallTooltipContent text="1. https://www.elastic.co" url="https://www.elastic.co" />
     );
     expect(getByText('#000000')).toBeInTheDocument();
     expect(getByText('test-val')).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe('SidebarTooltip', () => {
 
   it(`doesn't render metric if tooltip props missing`, () => {
     const { getAllByLabelText, getByText } = render(
-      <SidebarTooltip text="1. https://www.elastic.co" url="https://www.elastic.co" />
+      <WaterfallTooltipContent text="1. https://www.elastic.co" url="https://www.elastic.co" />
     );
     const metricElements = getAllByLabelText('tooltip item');
     expect(metricElements).toHaveLength(1);

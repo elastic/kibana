@@ -6,15 +6,24 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { useWaterfallContext } from '../context/waterfall_chart';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   text: string;
   url: string;
 }
 
-export const SidebarTooltip: React.FC<Props> = ({ text, url }) => {
+const StyledText = euiStyled(EuiText)`
+  font-weight: bold;
+`;
+
+const StyledHorizontalRule = euiStyled(EuiHorizontalRule)`
+  background-color: ${(props) => props.theme.eui.euiColorDarkShade};
+`;
+
+export const WaterfallTooltipContent: React.FC<Props> = ({ text, url }) => {
   const { data, renderTooltipItem, sidebarItems } = useWaterfallContext();
 
   const tooltipMetrics = data.filter(
@@ -25,10 +34,11 @@ export const SidebarTooltip: React.FC<Props> = ({ text, url }) => {
   );
   return (
     <>
-      <EuiText>{text}</EuiText>
+      <StyledText id="tooltiphead">{text}</StyledText>
+      <StyledHorizontalRule margin="none" />
       <EuiFlexGroup direction="column" gutterSize="none">
-        {tooltipMetrics.map((item, index) => (
-          <EuiFlexItem key={index}>{renderTooltipItem(item.config.tooltipProps)}</EuiFlexItem>
+        {tooltipMetrics.map((item, idx) => (
+          <EuiFlexItem key={idx}>{renderTooltipItem(item.config.tooltipProps)}</EuiFlexItem>
         ))}
       </EuiFlexGroup>
     </>
