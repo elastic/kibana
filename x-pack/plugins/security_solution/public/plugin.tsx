@@ -531,6 +531,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.storage,
         [...(managementSubPluginStart.store.middleware ?? [])]
       );
+      if (startPlugins.timelines && startPlugins.timelines.setTGridStore) {
+        console.log('store set up');
+        startPlugins.timelines?.setTGridStore(this._store);
+      }
     }
     return this._store;
   }

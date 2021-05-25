@@ -10,10 +10,10 @@ import * as tGridActions from './actions';
 export * as tGridActions from './actions';
 export * as tGridSelectors from './selectors';
 export * from './types';
-import { TimelineProps, ReduxDeps } from '../../types';
+import { TGridProps, ReduxDeps } from '../../types';
 import { initialTGridState, tGridReducer } from './reducer';
 
-export const getReduxDeps = (type: TimelineProps['type']): ReduxDeps => {
+export const getReduxDeps = (type: TGridProps['type']): ReduxDeps => {
   if (type === 'embedded') {
     return {
       actions: tGridActions,

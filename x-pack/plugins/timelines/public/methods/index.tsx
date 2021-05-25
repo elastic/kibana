@@ -7,18 +7,19 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { Provider as ReduxStoreProvider } from 'react-redux';
 import { TGridProps } from '../types';
 import { LastUpdatedAtProps, LoadingPanelProps } from '../components';
-import { TGridIntegrated } from '../components/t_grid/integrated';
 
-export const getTGridLazy = (props: TGridProps) => {
-  // const TimelineLazy = lazy(() => import('../components'));
-  // return (
-  //   <Suspense fallback={<EuiLoadingSpinner />}>
-  //     <TimelineLazy {...props} />
-  //   </Suspense>
-  // );
-  return <TGridIntegrated {...props} />;
+export const getTGridLazy = (props: TGridProps, store: any) => {
+  const TimelineLazy = lazy(() => import('../components'));
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <ReduxStoreProvider store={store}>
+        <TimelineLazy {...props} />
+      </ReduxStoreProvider>
+    </Suspense>
+  );
 };
 
 export const getLastUpdatedLazy = (props: LastUpdatedAtProps) => {

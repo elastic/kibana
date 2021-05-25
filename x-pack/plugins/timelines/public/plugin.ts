@@ -14,7 +14,7 @@ import { LastUpdatedAtProps, LoadingPanelProps, useDraggableKeyboardWrapper } fr
 
 export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
-
+  private _store: any;
   public setup(core: CoreSetup): TimelinesPluginSetup {
     const config = this.initializerContext.config.get<{ enabled: boolean }>();
     if (!config.enabled) {
@@ -23,7 +23,7 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
 
     return {
       getTGrid: (props: TGridProps) => {
-        return getTGridLazy(props);
+        return getTGridLazy(props, this._store);
       },
       getTimelineStore: () => {
         return {
@@ -32,6 +32,9 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
           reducer: tGridReducer,
           selectors: tGridSelectors,
         };
+      },
+      setTGridStore: (store: any) => {
+        this._store = store;
       },
       getCreatedTgridStore: (type: TGridProps['type']) => {
         return getReduxDeps(type);
@@ -61,7 +64,7 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
     }
     return {
       getTGrid: (props: TGridProps) => {
-        return getTGridLazy(props);
+        return getTGridLazy(props, this._store);
       },
       getTimelineStore: () => {
         return {
@@ -87,6 +90,9 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
       },
       getUseDraggableKeyboardWrapper: () => {
         return useDraggableKeyboardWrapper;
+      },
+      setTGridStore: (store: any) => {
+        this._store = store;
       },
     };
   }

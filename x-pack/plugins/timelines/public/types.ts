@@ -33,6 +33,7 @@ export interface TimelinesPluginSetup {
   getUseDraggableKeyboardWrapper: () => (
     props: UseDraggableKeyboardWrapperProps
   ) => UseDraggableKeyboardWrapper;
+  setTGridStore?: (store: any) => void;
 }
 export interface ReduxDeps {
   actions: typeof tGridActions;

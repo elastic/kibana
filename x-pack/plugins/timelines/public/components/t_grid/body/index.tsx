@@ -301,6 +301,7 @@ const makeMapStateToProps = () => {
 
   const getTGrid = tGridSelectors.getTGridByIdSelector();
   const mapStateToProps = (state: TimelineState, { browserFields, id }: OwnProps) => {
+    console.log('body', state);
     const timeline: TGridModel = getTGrid(state, id);
     const {
       columns,
