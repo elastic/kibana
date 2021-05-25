@@ -32,6 +32,7 @@ import {
   isLoadingResourceState,
 } from '../../../state';
 import { ServerApiError } from '../../../../common/types';
+import { isEndpointIsolated } from '../utils';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -305,12 +306,6 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
     return decodedQuery;
   }
 );
-
-export const getIsEndpointHostIsolated: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(detailsData, (details) => {
-  return Boolean(details?.Endpoint.configuration.isolation);
-});
 
 export const getCurrentIsolationRequestState = (
   state: Immutable<EndpointState>

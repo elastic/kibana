@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TableRowActionProps } from '../components/table_row_actions';
 import { MANAGEMENT_APP_ID } from '../../../../common/constants';
 import { APP_ID, SecurityPageName } from '../../../../../../common/constants';
 import { pagePathGetters } from '../../../../../../../fleet/public';
@@ -17,10 +16,16 @@ import { useFormatUrl } from '../../../../../common/components/link_to';
 import { useEndpointSelector } from './hooks';
 import { agentPolicies } from '../../store/selectors';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { isEndpointIsolated } from '../../utils';
+import { ContextMenuItemNavByRouterProps } from '../components/context_menu_item_nav_by_rotuer';
 
+/**
+ * Returns a list (array) of actions for an individual endpoint
+ * @param endpointMetadata
+ */
 export const useEndpointActionItems = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined
-): TableRowActionProps['items'] => {
+): ContextMenuItemNavByRouterProps[] => {
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const {
@@ -29,8 +34,9 @@ export const useEndpointActionItems = (
     },
   } = useKibana();
 
-  return useMemo<TableRowActionProps['items']>(() => {
+  return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
+      const isIsolated = isEndpointIsolated(endpointMetadata);
       const endpointId = endpointMetadata.agent.id;
       const endpointPolicyId = endpointMetadata.Endpoint.policy.applied.id;
       const endpointHostName = endpointMetadata.host.hostname;
@@ -41,22 +47,39 @@ export const useEndpointActionItems = (
       });
 
       return [
-        {
-          'data-test-subj': 'isolateLink',
-          icon: 'logoSecurity',
-          key: 'isolateHost',
-          navigateAppId: MANAGEMENT_APP_ID,
-          navigateOptions: {
-            path: endpointIsolatePath,
-          },
-          href: formatUrl(endpointIsolatePath),
-          children: (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.list.actions.isolateHost"
-              defaultMessage="Isolate Host"
-            />
-          ),
-        },
+        isIsolated
+          ? {
+              'data-test-subj': 'unIsolateLink',
+              icon: 'logoSecurity',
+              key: 'unIsolateHost',
+              navigateAppId: MANAGEMENT_APP_ID,
+              navigateOptions: {
+                path: endpointIsolatePath,
+              },
+              href: formatUrl(endpointIsolatePath),
+              children: (
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.list.actions.unIsolateHost"
+                  defaultMessage="Unisolate Host"
+                />
+              ),
+            }
+          : {
+              'data-test-subj': 'isolateLink',
+              icon: 'logoSecurity',
+              key: 'isolateHost',
+              navigateAppId: MANAGEMENT_APP_ID,
+              navigateOptions: {
+                path: endpointIsolatePath,
+              },
+              href: formatUrl(endpointIsolatePath),
+              children: (
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.list.actions.isolateHost"
+                  defaultMessage="Isolate Host"
+                />
+              ),
+            },
         {
           'data-test-subj': 'hostLink',
           icon: 'logoSecurity',
