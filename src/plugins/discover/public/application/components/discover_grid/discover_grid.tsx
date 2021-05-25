@@ -52,6 +52,10 @@ export interface DiscoverGridProps {
    */
   ariaLabelledBy: string;
   /**
+   * Optional class name to apply
+   */
+  className?: string;
+  /**
    * Determines which columns are displayed
    */
   columns: string[];

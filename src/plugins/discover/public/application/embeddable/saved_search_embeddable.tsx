@@ -17,11 +17,10 @@ import { SavedSearch } from '../../saved_searches';
 import { Adapters, RequestAdapter } from '../../../../inspector/common';
 import { ISearchSource } from '../../../../data/common';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { esFilters, FilterManager } from '../../../../data/public';
+import { APPLY_FILTER_TRIGGER, esFilters, FilterManager } from '../../../../data/public';
 import { DiscoverServices } from '../../build_services';
 import { Query, TimeRange } from '../../../../data/common/query';
 import { Filter } from '../../../../data/common/es_query/filters';
-import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { IFieldType } from '../../../../data/common/index_patterns/fields';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
@@ -38,26 +37,21 @@ import {
 import * as columnActions from '../angular/doc_table/actions/columns';
 import { getSortForSearchSource } from '../angular/doc_table';
 import { handleSourceColumnState } from '../angular/helpers';
+import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
+import { DiscoverGridSettings } from '../components/discover_grid/types';
 
-interface SearchProps extends SavedSearch {
-  columns?: string[];
+export interface SearchProps extends Partial<DiscoverGridProps> {
   settings?: DiscoverGridSettings;
   description?: string;
-  sort?: SortOrder[];
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
   setSortOrder?: (sortPair: SortOrder[]) => void;
-  setColumns?: (columns: string[]) => void;
-  removeColumn?: (column: string) => void;
-  addColumn?: (column: string) => void;
-  moveColumn?: (column: string, index: number) => void;
   filter?: (field: IFieldType, value: string[], operator: string) => void;
   hits?: ElasticSearchHit[];
-  indexPattern?: IndexPattern;
   totalHitCount?: number;
-  isLoading?: boolean;
-  showTimeCol?: boolean;
-  useNewFieldsApi?: boolean;
+  onMoveColumn?: (column: string, index: number) => void;
+  useLegacyTable?: boolean;
+  refs?: HTMLElement;
 }
 
 interface SearchEmbeddableConfig {
@@ -87,11 +81,10 @@ export class SavedSearchEmbeddable
   private prevFilters?: Filter[];
   private prevQuery?: Query;
   private prevSearchSessionId?: string;
-  private searchProps: SearchProps;
-
-  reload(): void {}
+  private searchProps?: SearchProps;
 
   private node?: HTMLElement;
+
   constructor(
     {
       savedSearch,
@@ -138,6 +131,7 @@ export class SavedSearchEmbeddable
   private fetch = async () => {
     const searchSessionId = this.input.searchSessionId;
     const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
+    if (!this.searchProps) return;
 
     const { searchSource } = this.savedSearch;
 
@@ -204,9 +198,13 @@ export class SavedSearchEmbeddable
   };
 
   private initializeSearchEmbeddableProps() {
-    const { searchSource, columns } = this.savedSearch;
+    const { searchSource } = this.savedSearch;
 
     const indexPattern = searchSource.getField('index');
+
+    if (!indexPattern) {
+      return;
+    }
 
     if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
       this.savedSearch.sort = getDefaultSort(
@@ -215,27 +213,52 @@ export class SavedSearchEmbeddable
       );
     }
 
-    const props = {
+    const props: SearchProps = {
       columns: this.savedSearch.columns,
       indexPattern,
+      isLoading: false,
       sort: getDefaultSort(
         indexPattern,
         getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
       ),
-      isLoading: false,
       rows: [],
       searchDescription: this.savedSearch.description,
       description: this.savedSearch.description,
       inspectorAdapters: this.inspectorAdapters,
       searchTitle: this.savedSearch.lastSavedTitle,
       services: this.services,
+      onAddColumn: (columnName: string) => {
+        if (!props.columns) {
+          return;
+        }
+        const updatedColumns = columnActions.addColumn(props.columns, columnName, true);
+        this.updateInput({ columns: updatedColumns });
+      },
+      onRemoveColumn: (columnName: string) => {
+        if (!props.columns) {
+          return;
+        }
+        const updatedColumns = columnActions.removeColumn(props.columns, columnName, true);
+        this.updateInput({ columns: updatedColumns });
+      },
+      onMoveColumn: (columnName: string, newIndex: number) => {
+        if (!props.columns) {
+          return;
+        }
+        const columns = columnActions.moveColumn(props.columns, columnName, newIndex);
+        this.updateInput({ columns });
+      },
+      onSetColumns: (columns: string[]) => {
+        this.updateInput({ columns });
+      },
+      sampleSize: 0,
       onFilter: () => {},
-      useNewFieldsApi: true,
-      onSetColumns: () => {},
+      useNewFieldsApi: !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
       onSort: () => {},
       onResize: () => {},
-      showTimeCol: true,
+      showTimeCol: !this.services.uiSettings.get('doc_table:hideTimeColumn', false),
       ariaLabelledBy: 'documentsAriaLabel',
+      useLegacyTable: this.services.uiSettings.get('doc_table:legacy'),
     };
 
     const timeRangeSearchSource = searchSource.create();
@@ -249,9 +272,7 @@ export class SavedSearchEmbeddable
 
     searchSource.setParent(this.filtersSearchSource);
 
-    this.searchProps = props;
-
-    this.pushContainerStateParamsToProps(props, { forceFetch: true });
+    this.pushContainerStateParamsToProps(props);
 
     props.setSortOrder = (sort: SortOrder[]) => {
       this.updateInput({ sort });
@@ -259,31 +280,28 @@ export class SavedSearchEmbeddable
 
     props.isLoading = true;
 
-    props.setColumns = (columns: string[]) => {
-      this.updateInput({ columns });
-    };
-
-    props.onAddColumn = (columnName: string) => {
-      if (!columns) {
-        return;
-      }
-      const updatedColumns = columnActions.addColumn(columns, columnName, true);
-      this.updateInput({ columns: updatedColumns });
-    };
-
-    props.onRemoveColumn = (columnName: string) => {
-      if (!columns) {
-        return;
-      }
-      const updatedColumns = columnActions.removeColumn(columns, columnName, true);
-      this.updateInput({ columns: updatedColumns });
-    };
-    props.sampleSize = 500;
-
-    props.isLoading = true;
     if (this.savedSearch.grid) {
       props.settings = this.savedSearch.grid;
     }
+
+    props.filter = async (field, value, operator) => {
+      let filters = esFilters.generateFilters(
+        this.filterManager,
+        field,
+        value,
+        operator,
+        indexPattern.id!
+      );
+      filters = filters.map((filter) => ({
+        ...filter,
+        $state: { store: esFilters.FilterStateStore.APP_STATE },
+      }));
+
+      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+        embeddable: this,
+        filters,
+      });
+    };
   }
 
   private async pushContainerStateParamsToProps(
@@ -326,8 +344,11 @@ export class SavedSearchEmbeddable
       this.prevQuery = this.input.query;
       this.prevTimeRange = this.input.timeRange;
       this.prevSearchSessionId = this.input.searchSessionId;
+      this.searchProps = searchProps;
       await this.fetch();
-      await this.rerenderComponent(this.node);
+      if (this.node) {
+        await this.rerenderComponent(this.node);
+      }
     } /* else if (this.searchProps) {
       // trigger a digest cycle to make sure non-fetch relevant changes are propagated
       //this.searchScope.$applyAsync();??
@@ -339,6 +360,9 @@ export class SavedSearchEmbeddable
    * @param {Element} domNode
    */
   public async render(domNode: HTMLElement) {
+    if (!this.searchProps) {
+      throw new Error('Search props not defined');
+    }
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
@@ -346,7 +370,10 @@ export class SavedSearchEmbeddable
   }
 
   private async rerenderComponent(domNode: HTMLElement) {
-    this.searchProps.useLegacyTable = this.services.uiSettings.get('doc_table:legacy');
+    if (!this.searchProps) {
+      return;
+    }
+    this.searchProps.refs = domNode;
     await this.pushContainerStateParamsToProps(this.searchProps);
     ReactDOM.render(
       <SavedSearchEmbeddableComponent
@@ -369,5 +396,18 @@ export class SavedSearchEmbeddable
 
   public getInspectorAdapters() {
     return this.inspectorAdapters;
+  }
+
+  public destroy() {
+    super.destroy();
+    this.savedSearch.destroy();
+    if (this.searchProps) {
+      delete this.searchProps;
+    }
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+
+    if (this.abortController) this.abortController.abort();
   }
 }

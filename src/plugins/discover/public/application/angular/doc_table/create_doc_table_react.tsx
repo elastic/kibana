@@ -12,11 +12,9 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { I18nProvider } from '@kbn/i18n/react';
 import { getServices, IIndexPattern } from '../../../kibana_services';
 import { IndexPatternField } from '../../../../../data/common/index_patterns';
 import { SkipBottomButton } from '../../components/skip_bottom_button';
-import { DocTableLegacyMemoized } from '../../components/discover';
 
 export interface DocTableLegacyProps {
   columns: string[];
@@ -98,15 +96,6 @@ function getRenderFn(domNode: Element, props: any) {
       render(<div>error</div>, domNode);
     }
   };
-}
-
-export function DiscoverDocTableEmbeddable(props: DocTableLegacyProps) {
-  console.dir(props.className);
-  return (
-    <I18nProvider>
-      <DocTableLegacyMemoized {...props} />
-    </I18nProvider>
-  );
 }
 
 export function DocTableLegacy(renderProps: DocTableLegacyProps) {

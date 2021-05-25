@@ -49,7 +49,7 @@ import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { InspectorSession } from '../../../../inspector/public';
 import { useDataGridColumns } from '../helpers/use_data_grid_columns';
 
-export const DocTableLegacyMemoized = React.memo(DocTableLegacy);
+const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const DataGridMemoized = React.memo(DiscoverGrid);
 const TopNavMemoized = React.memo(DiscoverTopNav);

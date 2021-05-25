@@ -7,34 +7,21 @@
  */
 
 import React from 'react';
-import { withEmbeddableSubscription } from '../../../../embeddable/public';
-import { SearchInput, SearchOutput } from './types';
-import { SavedSearchEmbeddable } from './saved_search_embeddable';
+
+import { SearchProps } from './saved_search_embeddable';
 import { DiscoverGridEmbeddable } from '../components/create_discover_grid_directive';
-import { DiscoverDocTableEmbeddable } from '../angular/doc_table/create_doc_table_react';
+import {
+  DiscoverDocTableEmbeddable,
+  DocTableEmbeddableProps,
+} from '../angular/doc_table/create_doc_table_embeddable';
+import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 
-interface Props {
-  input: SearchInput;
-  output: SearchOutput;
-  embeddable: SavedSearchEmbeddable;
-}
-
-export function SavedSearchEmbeddableComponentInner({
-  input: { search },
-  output: { attributes },
-  embeddable,
-  props,
-}: Props) {
+export function SavedSearchEmbeddableComponent(props: SearchProps) {
   const { useLegacyTable } = props;
   if (useLegacyTable) {
-    return <DiscoverDocTableEmbeddable {...props} className="panel-content" />;
+    const docTableProps = props as DocTableEmbeddableProps;
+    return <DiscoverDocTableEmbeddable {...docTableProps} />;
   }
-  return <DiscoverGridEmbeddable {...props} className="dscDiscoverGrid" />;
+  const discoverGridProps = props as DiscoverGridProps;
+  return <DiscoverGridEmbeddable {...discoverGridProps} className="dscDiscoverGrid" />;
 }
-
-export const SavedSearchEmbeddableComponent = withEmbeddableSubscription<
-  SearchInput,
-  SearchOutput,
-  SavedSearchEmbeddable,
-  {}
->(SavedSearchEmbeddableComponentInner);
