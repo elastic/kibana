@@ -8,13 +8,13 @@
 
 import { gt, gte, lt, lte, isNull } from 'lodash';
 
-type Operator = 'gte' | 'lte' | 'gt' | 'lt' | 'empty';
-
-export const GTE: Operator = 'gte';
-export const LTE: Operator = 'lte';
-export const GT: Operator = 'gt';
-export const LT: Operator = 'lt';
-export const EMPTY: Operator = 'empty';
+export enum Operator {
+  Gte = 'gte',
+  Lte = 'lte',
+  Gt = 'gt',
+  Lt = 'lt',
+  Empty = 'empty',
+}
 
 export interface Rule {
   operator: Operator;
@@ -26,15 +26,15 @@ type OperatorsAllowNullType = {
 };
 
 const OPERATORS = {
-  [GTE]: gte,
-  [LTE]: lte,
-  [GT]: gt,
-  [LT]: lt,
-  [EMPTY]: isNull,
+  [Operator.Gte]: gte,
+  [Operator.Lte]: lte,
+  [Operator.Gt]: gt,
+  [Operator.Lt]: lt,
+  [Operator.Empty]: isNull,
 };
 
 const OPERATORS_ALLOW_NULL: OperatorsAllowNullType = {
-  [EMPTY]: true,
+  [Operator.Empty]: true,
 };
 
 export const getOperator = (operator: Operator) => {

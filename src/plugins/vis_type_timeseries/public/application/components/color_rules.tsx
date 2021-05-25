@@ -23,7 +23,7 @@ import { AddDeleteButtons } from './add_delete_buttons';
 import { collectionActions } from './lib/collection_actions';
 import { ColorPicker, ColorPickerProps } from './color_picker';
 import { TimeseriesVisParams } from '../../types';
-import { GTE, GT, LT, LTE, EMPTY } from '../../../common/operators_utils';
+import { Operator } from '../../../common/operators_utils';
 
 export interface ColorRulesProps {
   name: keyof TimeseriesVisParams;
@@ -41,13 +41,13 @@ interface ColorRule {
   id: string;
   background_color?: string;
   color?: string;
-  operator?: string;
+  operator?: Operator;
   text?: string;
 }
 
 export interface ColorRulesOperator {
   label: string;
-  method: string;
+  method: Operator;
   value?: unknown;
   isValueConstant?: boolean;
 }
@@ -67,31 +67,31 @@ export const colorRulesOperatorsList: ColorRulesOperator[] = [
     label: i18n.translate('visTypeTimeseries.colorRules.greaterThanLabel', {
       defaultMessage: '> greater than',
     }),
-    method: GT,
+    method: Operator.Gt,
   },
   {
     label: i18n.translate('visTypeTimeseries.colorRules.greaterThanOrEqualLabel', {
       defaultMessage: '>= greater than or equal',
     }),
-    method: GTE,
+    method: Operator.Gte,
   },
   {
     label: i18n.translate('visTypeTimeseries.colorRules.lessThanLabel', {
       defaultMessage: '< less than',
     }),
-    method: LT,
+    method: Operator.Lt,
   },
   {
     label: i18n.translate('visTypeTimeseries.colorRules.lessThanOrEqualLabel', {
       defaultMessage: '<= less than or equal',
     }),
-    method: LTE,
+    method: Operator.Lte,
   },
   {
     label: i18n.translate('visTypeTimeseries.colorRules.emptyLabel', {
       defaultMessage: 'empty',
     }),
-    method: EMPTY,
+    method: Operator.Empty,
     isValueConstant: true,
   },
 ];

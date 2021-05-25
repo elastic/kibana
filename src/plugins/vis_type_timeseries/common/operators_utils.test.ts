@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { getOperator, shouldOperate, Rule, GTE, EMPTY } from './operators_utils';
+import { getOperator, shouldOperate, Rule, Operator } from './operators_utils';
 
 describe('getOperator(operator)', () => {
   test('should return operator function', () => {
-    const operatorName = GTE;
+    const operatorName = Operator.Gte;
     const operator = getOperator(operatorName);
     expect(typeof operator).toBe('function');
   });
@@ -20,7 +20,7 @@ describe('shouldOperate(rule, value)', () => {
   test('should operate, if value is not null and rule value is not null', () => {
     const rule: Rule = {
       value: 1,
-      operator: GTE,
+      operator: Operator.Gte,
     };
     const value = 2;
 
@@ -29,7 +29,7 @@ describe('shouldOperate(rule, value)', () => {
 
   test('should operate, if value is null and operator allows null value', () => {
     const rule: Rule = {
-      operator: EMPTY,
+      operator: Operator.Empty,
       value: null,
     };
     const value = null;
@@ -39,7 +39,7 @@ describe('shouldOperate(rule, value)', () => {
 
   test("should not operate, if value is null and operator doesn't allow null values", () => {
     const rule: Rule = {
-      operator: GTE,
+      operator: Operator.Gte,
       value: 2,
     };
     const value = null;
@@ -49,7 +49,7 @@ describe('shouldOperate(rule, value)', () => {
 
   test("should not operate, if rule value is null and operator doesn't allow null values", () => {
     const rule: Rule = {
-      operator: GTE,
+      operator: Operator.Gte,
       value: null,
     };
     const value = 3;

@@ -12,6 +12,7 @@ import uuid from 'uuid';
 import { SavedObjectMigrationFn } from 'kibana/server';
 
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
+import { Operator } from '../../../vis_type_timeseries/common/operators_utils';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -998,14 +999,9 @@ const addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules: SavedObje
 
     if (visState && visState.type === 'metrics') {
       const params: any = get(visState, 'params') || {};
-      const {
-        bar_color_rules: barColorRules = [],
-        background_color_rules: backgroundColorRules = [],
-        gauge_color_rules: gaugeColorRules = [],
-      } = params;
 
       const getRuleWithComparingToZero = (rules: any[] = []) => {
-        const compareWithEqualMethods = ['lte', 'gte'];
+        const compareWithEqualMethods = [Operator.Gte, Operator.Lte];
         return last(
           rules.filter(
             (rule) => compareWithEqualMethods.includes(rule.operator) && rule.value === 0
@@ -1016,7 +1012,7 @@ const addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules: SavedObje
       const convertRuleToEmpty = (rule: any = {}) => ({
         ...rule,
         id: uuid.v4(),
-        operator: 'empty',
+        operator: Operator.Empty,
         value: null,
       });
 
@@ -1031,9 +1027,9 @@ const addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules: SavedObje
       };
 
       const colorRules = {
-        bar_color_rules: addEmptyRuleToListIfNecessary(barColorRules),
-        background_color_rules: addEmptyRuleToListIfNecessary(backgroundColorRules),
-        gauge_color_rules: addEmptyRuleToListIfNecessary(gaugeColorRules),
+        bar_color_rules: addEmptyRuleToListIfNecessary(params.bar_color_rules),
+        background_color_rules: addEmptyRuleToListIfNecessary(params.background_color_rules),
+        gauge_color_rules: addEmptyRuleToListIfNecessary(params.gauge_color_rules),
       };
 
       return {
