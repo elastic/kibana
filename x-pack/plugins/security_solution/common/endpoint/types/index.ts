@@ -474,9 +474,17 @@ export type HostMetadata = Immutable<{
       };
     };
     configuration: {
+      /**
+       * Shows whether the endpoint is set up to be isolated. (e.g. a user has isolated a host,
+       * and the endpoint successfully received that action and applied the setting)
+       */
       isolation?: boolean;
     };
     state: {
+      /**
+       * Shows what the current state of the host is. This could differ from `Endpoint.configuration.isolation`
+       * in some cases, but normally they will match
+       */
       isolation?: boolean;
     };
   };
