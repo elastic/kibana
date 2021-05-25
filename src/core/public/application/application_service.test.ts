@@ -107,6 +107,7 @@ describe('#setup()', () => {
         status: AppStatus.inaccessible,
         tooltip: 'App inaccessible due to reason',
         defaultPath: 'foo/bar',
+        deepLinks: [{ id: 'subapp2', title: 'Subapp 2', path: '/subapp2' }],
       }));
 
       applications = await applications$.pipe(take(1)).toPromise();
@@ -118,6 +119,9 @@ describe('#setup()', () => {
           status: AppStatus.inaccessible,
           defaultPath: 'foo/bar',
           tooltip: 'App inaccessible due to reason',
+          deepLinks: [
+            expect.objectContaining({ id: 'subapp2', title: 'Subapp 2', path: '/subapp2' }),
+          ],
         })
       );
       expect(applications.get('app2')).toEqual(

@@ -285,6 +285,16 @@ export type AppDeepLink = {
   keywords?: string[];
   /** Optional status of the chrome navigation, defaults to `hidden` */
   navLinkStatus?: AppNavLinkStatus;
+  /** An ordinal used to sort nav links relative to one another for display. */
+  order?: number;
+  /** A tooltip shown when hovering over app link. */
+  tooltip?: string;
+  /** A EUI iconType that will be used for the app's icon. This icon takes precendence over the `icon` property. */
+  euiIconType?: string;
+  /** A URL to an image file used as an icon. Used as a fallback if `euiIconType` is not provided. */
+  icon?: string;
+  /** If set to true, the application's route will only be checked against an {@link App.exactRoute | exact match}. Defaults to `false`. */
+  exactRoute?: boolean;
 } & (
   | {
       /** URL path to access this link, relative to the application's appRoute. */

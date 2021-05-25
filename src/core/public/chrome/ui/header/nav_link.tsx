@@ -24,6 +24,7 @@ interface Props {
   dataTestSubj: string;
   onClick?: Function;
   navigateToApp: CoreStart['application']['navigateToApp'];
+  navigateToUrl: CoreStart['application']['navigateToUrl'];
   externalLink?: boolean;
 }
 
@@ -37,10 +38,11 @@ export function createEuiListItem({
   basePath,
   onClick = () => {},
   navigateToApp,
+  navigateToUrl,
   dataTestSubj,
   externalLink = false,
 }: Props) {
-  const { href, id, title, disabled, euiIconType, icon, tooltip } = link;
+  const { href, id, title, disabled, euiIconType, icon, tooltip, deepLinkPath } = link;
 
   return {
     label: tooltip ?? title,
@@ -57,7 +59,8 @@ export function createEuiListItem({
         !isModifiedOrPrevented(event)
       ) {
         event.preventDefault();
-        navigateToApp(id);
+        if (deepLinkPath) navigateToUrl(deepLinkPath);
+        else navigateToApp(id);
       }
     },
     isActive: appId === id,
