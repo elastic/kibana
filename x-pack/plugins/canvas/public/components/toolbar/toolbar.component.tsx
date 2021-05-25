@@ -19,13 +19,15 @@ import {
 
 // @ts-expect-error untyped local
 import { WorkpadManager } from '../workpad_manager';
-import { RouterContext } from '../router';
 import { PageManager } from '../page_manager';
 import { Expression } from '../expression';
 import { Tray } from './tray';
 
 import { CanvasElement } from '../../../types';
 import { ComponentStrings } from '../../../i18n';
+import { RoutingLink, RoutingButtonIcon } from '../routing';
+
+import { WorkpadRoutingContext } from '../../routes/workpad';
 
 const { Toolbar: strings } = ComponentStrings;
 
@@ -50,7 +52,7 @@ export const Toolbar: FC<Props> = ({
 }) => {
   const [activeTray, setActiveTray] = useState<TrayType | null>(null);
   const [showWorkpadManager, setShowWorkpadManager] = useState(false);
-  const router = useContext(RouterContext);
+  const { getUrl, nextPage, previousPage } = useContext(WorkpadRoutingContext);
 
   // While the tray doesn't get activated if the workpad isn't writeable,
   // this effect will ensure that if the tray is open and the workpad
@@ -60,20 +62,6 @@ export const Toolbar: FC<Props> = ({
       setActiveTray(null);
     }
   }, [isWriteable, activeTray]);
-
-  if (!router) {
-    return <div>{strings.getErrorMessage('Router Undefined')}</div>;
-  }
-
-  const nextPage = () => {
-    const page = Math.min(selectedPageNumber + 1, totalPages);
-    router.navigateTo('loadWorkpad', { id: workpadId, page });
-  };
-
-  const previousPage = () => {
-    const page = Math.max(1, selectedPageNumber - 1);
-    router.navigateTo('loadWorkpad', { id: workpadId, page });
-  };
 
   const elementIsSelected = Boolean(selectedElement);
 
@@ -119,11 +107,11 @@ export const Toolbar: FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false} />
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
+            <RoutingButtonIcon
               color="text"
-              onClick={previousPage}
+              to={getUrl(selectedPageNumber - 1)}
               iconType="arrowLeft"
-              disabled={selectedPageNumber <= 1}
+              isDisabled={selectedPageNumber <= 1}
               aria-label={strings.getPreviousPageAriaLabel()}
             />
           </EuiFlexItem>
@@ -133,11 +121,11 @@ export const Toolbar: FC<Props> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
+            <RoutingButtonIcon
               color="text"
-              onClick={nextPage}
+              to={getUrl(selectedPageNumber + 1)}
               iconType="arrowRight"
-              disabled={selectedPageNumber >= totalPages}
+              isDisabled={selectedPageNumber >= totalPages}
               aria-label={strings.getNextPageAriaLabel()}
             />
           </EuiFlexItem>

@@ -1384,6 +1384,14 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitle', {
         defaultMessage: 'Cycle fullscreen pages',
       }),
+    getAutoplayListDurationManualText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.autoplayListDurationManual', {
+        defaultMessage: 'Manually',
+      }),
+    getDisableTooltip: () =>
+      i18n.translate('xpack.canvas.workpadHeaderKioskControl.disableTooltip', {
+        defaultMessage: 'Disable auto-play',
+      }),
   },
   WorkpadHeaderRefreshControlSettings: {
     getRefreshAriaLabel: () =>
