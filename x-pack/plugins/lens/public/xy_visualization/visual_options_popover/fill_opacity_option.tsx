@@ -18,6 +18,9 @@ export interface FillOpacityOptionProps {
    * Callback on display option change
    */
   onChange: (value: number) => void;
+  /**
+   * Flag for rendering or not the component
+   */
   isFillOpacityEnabled?: boolean;
 }
 
