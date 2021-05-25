@@ -142,6 +142,8 @@ would be available for users with more advanced use cases:
 ```yaml
 clustering:
   enabled: true               # enabled by default
+  coordinator:
+    max_old_space_size: 1gb   # optional, allows to configure memory limit for coordinator only
   workers:                    # when provided, total # of workers would be based on # of items in this list
     - name: foo               # not technically necessary, but useful for logging purposes
       max_old_space_size: 1gb # optional, allows to configure memory limits per-worker
@@ -150,8 +152,7 @@ clustering:
 ```
 
 This per-worker design would give us the flexibility to eventually provide more fine-grained configuration,
-like dedicated workers for http requests or background jobs. We could also eventually add `coordinator`
-specific config.
+like dedicated workers for http requests or background jobs.
 
 ## 5.2 Cross-worker communication
 
@@ -393,7 +394,6 @@ We will need to add some centralized status state in the coordinator. Also, as t
 from the coordinator, we will also need to have the workers retrieve the global status from the coordinator to serve 
 the status endpoint.
 
-TODO: 
 We may also want to have the `/status` endpoint display each individual worker status in addition to the 
 global status, which may be breaking change in the `/status` API response format.
 
@@ -418,10 +418,14 @@ Kibana, so this can probably be considered an improvement.
 
 In clustered mode, node options such as `max-old-space-size` will be used by all processes. 
 
+The `kibana` startup script will read this setting out of the CLI or `config/node.options` and set a NODE_OPTIONS environment
+variable, which will be passed to any workers, possibly leading to unexpected behavior.
+
 e.g. using `--max-old-space-size=1024` in a 2 workers cluster would have a maximum memory usage of 3gb (1 coordinator + 2 workers). 
 
-TODO: 
-Our recommendation is to _disable clustering by default when a user has set `max-old-space-size` in the `node.options` file_.
+Our plan for addressing this is to _disable clustering if a user has `max-old-space-size` set at all_, which would ensure it isn't
+possible to hit unpredictable behavior. To enable clustering, the user would simply remove `max-old-space-size` settings, and
+clustering would be on by default. They could alternatively configure memory settings for each worker individually, as shown above.
 
 ### 6.1.7 Workers error handling
 
@@ -543,7 +547,7 @@ we won't be introducing any breaking change later.
 
 ### 6.3.2 stats API
 
-TODO:
+TODO
 
 ### 6.3.3 instanceUUID
 
@@ -617,8 +621,21 @@ with the teams who we think will most likely be affected by these changes.
 
 # 11. Unresolved questions
 
-None (well, except every single section of the document).
+**Is it okay for the workers to share the same `path.data` directory?**
+
+Still need plugin devs to confirm whether there are any plugins writing to these files, which could cause concurrency issues.
+Reporting is the main question here.
+
+**Is using the same `server.uuid` in each worker going to cause problems?**
+
+Still need plugin devs to confirm whether this might be an issue, but so far we have no known cases where this would pose problems.
 
 # 12. Resolved questions
 
-...
+**How do we handle http requests that need to be served by a specific process?**
+
+The Node.js cluster API is not really the right solution for this, as it won't allow for custom scheduling policies. A custom scheduling policy would basically mean re-implementing the cluster API on our own. At this point we will not be solving this particular issue with the clustering project, however the abstraction proposed in this RFC will not preclude us from changing out the underlying implementation in the future should we choose to do so. 
+
+**How do we handle http requests that need to have knowledge of all processes?**
+
+`/status` and `/stats` are the big issues here, as they could be reported differently from each process. The current plan is to manage their state centrally in the coordinator and have each process report this data at a regular interval, so that all processes can retrieve it and serve it in response to any requests against that endpoint. Exact details of the changes to those APIs would need to be determined. I think `status` will likely require breaking changes as pointed out above, however `stats` may not.
