@@ -18,7 +18,7 @@ import {
   checkPrivileges,
   createSearchAfterReturnType,
 } from './utils';
-import * as parseScheduleDates from '../../../../common/detection_engine/parse_schedule_dates';
+import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { RuleAlertType } from '../rules/types';
@@ -48,6 +48,13 @@ jest.mock('./utils', () => {
 jest.mock('../notifications/schedule_notification_actions');
 jest.mock('./executors/query');
 jest.mock('./executors/ml');
+jest.mock('@kbn/securitysolution-io-ts-utils', () => {
+  const original = jest.requireActual('@kbn/securitysolution-io-ts-utils');
+  return {
+    ...original,
+    parseScheduleDates: jest.fn(),
+  };
+});
 
 const getPayload = (
   ruleAlert: RuleAlertType,
@@ -149,6 +156,7 @@ describe('signal_rule_alert_type', () => {
     (queryExecutor as jest.Mock).mockResolvedValue(executorReturnValue);
     (mlExecutor as jest.Mock).mockClear();
     (mlExecutor as jest.Mock).mockResolvedValue(executorReturnValue);
+    (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
     const value: Partial<ApiResponse<estypes.FieldCapabilitiesResponse>> = {
       statusCode: 200,
       body: {
@@ -348,11 +356,7 @@ describe('signal_rule_alert_type', () => {
       });
       payload.params.meta = {};
 
-      const parseScheduleDatesSpy = jest
-        .spyOn(parseScheduleDates, 'parseScheduleDates')
-        .mockReturnValue(moment(100));
       await alert.executor(payload);
-      parseScheduleDatesSpy.mockRestore();
 
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -385,11 +389,7 @@ describe('signal_rule_alert_type', () => {
       });
       delete payload.params.meta;
 
-      const parseScheduleDatesSpy = jest
-        .spyOn(parseScheduleDates, 'parseScheduleDates')
-        .mockReturnValue(moment(100));
       await alert.executor(payload);
-      parseScheduleDatesSpy.mockRestore();
 
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -422,11 +422,7 @@ describe('signal_rule_alert_type', () => {
       });
       payload.params.meta = { kibana_siem_app_url: 'http://localhost' };
 
-      const parseScheduleDatesSpy = jest
-        .spyOn(parseScheduleDates, 'parseScheduleDates')
-        .mockReturnValue(moment(100));
       await alert.executor(payload);
-      parseScheduleDatesSpy.mockRestore();
 
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
