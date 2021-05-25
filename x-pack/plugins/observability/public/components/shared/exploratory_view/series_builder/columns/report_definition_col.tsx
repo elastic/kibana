@@ -68,7 +68,7 @@ export function ReportDefinitionCol({
       </EuiFlexItem>
       <EuiHorizontalRule margin="xs" />
       {indexPattern &&
-        reportDefinitions.map(({ field, custom, options, defaultValue }) => (
+        reportDefinitions.map(({ field, custom, options }) => (
           <EuiFlexItem key={field}>
             {!custom ? (
               <ReportDefinitionField
@@ -78,12 +78,7 @@ export function ReportDefinitionCol({
                 onChange={onChange}
               />
             ) : (
-              <CustomReportField
-                field={field}
-                options={options}
-                defaultValue={defaultValue}
-                seriesId={seriesId}
-              />
+              <CustomReportField field={field} options={options} seriesId={seriesId} />
             )}
           </EuiFlexItem>
         ))}

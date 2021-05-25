@@ -17,7 +17,7 @@ interface Props {
   options: ReportDefinition['options'];
 }
 
-export function CustomReportField({ field, seriesId, options: opts, defaultValue }: Props) {
+export function CustomReportField({ field, seriesId, options: opts }: Props) {
   const { series, setSeries } = useUrlStorage(seriesId);
 
   const { reportDefinitions: rtd = {} } = series;
@@ -39,7 +39,7 @@ export function CustomReportField({ field, seriesId, options: opts, defaultValue
         value: fd || id,
         inputDisplay: label,
       }))}
-      valueOfSelected={reportDefinitions?.[field]?.[0] || defaultValue || options?.[0].field}
+      valueOfSelected={reportDefinitions?.[field]?.[0] || options?.[0].field}
       onChange={(value) => onChange(value)}
     />
   );
