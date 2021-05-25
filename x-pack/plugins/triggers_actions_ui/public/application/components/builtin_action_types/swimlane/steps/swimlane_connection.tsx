@@ -47,14 +47,11 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
     // fetch swimlane application configuration
     const application = await getApplication();
 
-    if (!application?.fields) {
-      // Error has already been surfaced within the getApplication call by a toast
-      return;
+    if (application != null && application.fields) {
+      const allFields = application.fields;
+      updateFields(allFields);
+      updateCurrentStep(2);
     }
-
-    const allFields = application.fields;
-    updateFields(allFields);
-    updateCurrentStep(2);
   }, [getApplication, updateCurrentStep, updateFields]);
 
   const onChangeConfig = useCallback(
@@ -63,6 +60,7 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
     },
     [editActionConfig]
   );
+
   const onBlurConfig = useCallback(
     (key: 'apiUrl' | 'appId') => {
       if (!action.config[key]) {
@@ -71,29 +69,29 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
     },
     [action.config, editActionConfig]
   );
+
   const onChangeSecrets = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       editActionSecrets('apiToken', e.target.value);
     },
     [editActionSecrets]
   );
+
   const onBlurSecrets = useCallback(() => {
     if (!apiToken) {
       editActionSecrets('apiToken', '');
     }
   }, [apiToken, editActionSecrets]);
 
-  const isInvalid = useMemo(() => errors.apiToken.length > 0 && apiToken !== undefined, [
-    apiToken,
-    errors.apiToken.length,
-  ]);
+  const isInvalid = errors.apiToken.length > 0 && apiToken !== undefined;
+
   return (
     <>
       <EuiFormRow id="apiUrl" fullWidth label={i18n.SW_API_URL_TEXT_FIELD_LABEL}>
         <EuiFieldText
           fullWidth
           name="apiUrl"
-          value={apiUrl || ''}
+          value={apiUrl ?? ''}
           readOnly={readOnly}
           data-test-subj="swimlaneApiUrlInput"
           onChange={(e) => onChangeConfig(e, 'apiUrl')}
@@ -104,7 +102,7 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
         <EuiFieldText
           fullWidth
           name="appId"
-          value={appId || ''}
+          value={appId ?? ''}
           readOnly={readOnly}
           data-test-subj="swimlaneAppIdInput"
           onChange={(e) => onChangeConfig(e, 'appId')}
@@ -154,7 +152,7 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
             fullWidth
             isInvalid={isInvalid}
             readOnly={readOnly}
-            value={apiToken || ''}
+            value={apiToken ?? ''}
             data-test-subj="swimlaneApiTokenInput"
             onChange={onChangeSecrets}
             onBlur={onBlurSecrets}

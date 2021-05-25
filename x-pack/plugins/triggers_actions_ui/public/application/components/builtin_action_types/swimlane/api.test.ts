@@ -7,7 +7,7 @@
 
 import { getApplication } from './api';
 
-const getActionsResponse = {
+const getApplicationResponse = {
   fields: [],
 };
 
@@ -26,7 +26,7 @@ describe('Swimlane API', () => {
 
       fetchMock.mockResolvedValueOnce({
         ok: true,
-        json: async () => getActionsResponse,
+        json: async () => getApplicationResponse,
       });
       const res = await getApplication({
         signal: abortCtrl.signal,
@@ -35,7 +35,7 @@ describe('Swimlane API', () => {
         url: '',
       });
 
-      expect(res).toEqual(getActionsResponse);
+      expect(res).toEqual(getApplicationResponse);
     });
 
     it('returns an error when the response fails', async () => {
@@ -44,7 +44,7 @@ describe('Swimlane API', () => {
       fetchMock.mockResolvedValueOnce({
         ok: false,
         status: 401,
-        json: async () => getActionsResponse,
+        json: async () => getApplicationResponse,
       });
 
       try {

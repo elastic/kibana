@@ -29,7 +29,7 @@ export async function getApplication({
 
   const getApplicationUrl = (id: string) => applicationUrl.replace('{appId}', id);
   try {
-    const response = await window.fetch(getApplicationUrl(appId), {
+    const response = await fetch(getApplicationUrl(appId), {
       method: 'GET',
       headers,
       signal,

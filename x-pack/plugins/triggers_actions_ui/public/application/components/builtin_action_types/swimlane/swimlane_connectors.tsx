@@ -24,6 +24,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
     }),
     []
   );
+
   const CurrentStepForm = useMemo(() => {
     return stepMap[currentStep];
   }, [currentStep, stepMap]);

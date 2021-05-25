@@ -12,6 +12,7 @@ import { StepProps } from './';
 
 const SINGLE_SELECTION = { asPlainText: true };
 const empty = { label: '', value: '' };
+
 const findOption = (
   options: Array<EuiComboBoxOptionOption<string | number>>,
   searchValue: string
