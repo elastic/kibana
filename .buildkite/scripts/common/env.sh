@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
-
 export CI=true
 
 KIBANA_DIR=$(pwd)
