@@ -59,7 +59,7 @@ export const useEndpointActionItems = (
               href: formatUrl(endpointIsolatePath),
               children: (
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.list.actions.unIsolateHost"
+                  id="xpack.securitySolution.endpoint.actions.unIsolateHost"
                   defaultMessage="Unisolate Host"
                 />
               ),
@@ -75,7 +75,7 @@ export const useEndpointActionItems = (
               href: formatUrl(endpointIsolatePath),
               children: (
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.list.actions.isolateHost"
+                  id="xpack.securitySolution.endpoint.actions.isolateHost"
                   defaultMessage="Isolate Host"
                 />
               ),
@@ -89,7 +89,7 @@ export const useEndpointActionItems = (
           href: `${getUrlForApp('securitySolution')}/hosts/${endpointHostName}`,
           children: (
             <FormattedMessage
-              id="xpack.securitySolution.endpoint.list.actions.hostDetails"
+              id="xpack.securitySolution.endpoint.actions.hostDetails"
               defaultMessage="View Host Details"
             />
           ),
@@ -110,7 +110,7 @@ export const useEndpointActionItems = (
           disabled: fleetAgentPolicies[endpointPolicyId] === undefined,
           children: (
             <FormattedMessage
-              id="xpack.securitySolution.endpoint.list.actions.agentPolicy"
+              id="xpack.securitySolution.endpoint.actions.agentPolicy"
               defaultMessage="View Agent Policy"
             />
           ),
@@ -130,7 +130,7 @@ export const useEndpointActionItems = (
           })}`,
           children: (
             <FormattedMessage
-              id="xpack.securitySolution.endpoint.list.actions.agentDetails"
+              id="xpack.securitySolution.endpoint.actions.agentDetails"
               defaultMessage="View Agent Details"
             />
           ),

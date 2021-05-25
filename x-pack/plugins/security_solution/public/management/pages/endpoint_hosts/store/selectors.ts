@@ -32,7 +32,6 @@ import {
   isLoadingResourceState,
 } from '../../../state';
 import { ServerApiError } from '../../../../common/types';
-import { isEndpointIsolated } from '../utils';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
