@@ -34,7 +34,7 @@ export function TransactionTabs({
   exceedsMax,
 }: Props) {
   const history = useHistory();
-  const tabs = [timelineTab, timelineNewTab, metadataTab, logsTab];
+  const tabs = [timelineTab, metadataTab, logsTab];
   const currentTab =
     tabs.find(({ key }) => key === urlParams.detailTab) ?? timelineTab;
   const TabContent = currentTab.component;
@@ -84,14 +84,6 @@ const timelineTab = {
   component: TimelineTabContent,
 };
 
-const timelineNewTab = {
-  key: 'timelineNew',
-  label: i18n.translate('xpack.apm.propertiesTable.tabs.timelineLabel.new', {
-    defaultMessage: 'Timeline (new)',
-  }),
-  component: TimelineNewTabContent,
-};
-
 const metadataTab = {
   key: 'metadata',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
@@ -125,28 +117,6 @@ function TimelineTabContent({
       urlParams={urlParams}
       waterfall={waterfall}
       exceedsMax={exceedsMax}
-      isNewView={false}
-    />
-  );
-}
-function TimelineNewTabContent({
-  location,
-  urlParams,
-  waterfall,
-  exceedsMax,
-}: {
-  location: Location<any>;
-  urlParams: IUrlParams;
-  waterfall: IWaterfall;
-  exceedsMax: boolean;
-}) {
-  return (
-    <WaterfallContainer
-      location={location}
-      urlParams={urlParams}
-      waterfall={waterfall}
-      exceedsMax={exceedsMax}
-      isNewView={true}
     />
   );
 }

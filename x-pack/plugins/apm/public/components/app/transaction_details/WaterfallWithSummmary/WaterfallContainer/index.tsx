@@ -16,14 +16,12 @@ import {
 } from './Waterfall/waterfall_helpers/waterfall_helpers';
 import { Waterfall } from './Waterfall';
 import { WaterfallLegends } from './WaterfallLegends';
-import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
 
 interface Props {
   urlParams: IUrlParams;
   location: Location;
   waterfall: IWaterfall;
   exceedsMax: boolean;
-  isNewView: boolean;
 }
 
 export function WaterfallContainer({
@@ -31,7 +29,6 @@ export function WaterfallContainer({
   urlParams,
   waterfall,
   exceedsMax,
-  isNewView,
 }: Props) {
   const { serviceName } = useParams<{ serviceName: string }>();
 
@@ -86,16 +83,12 @@ export function WaterfallContainer({
   return (
     <div>
       <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
-      {isNewView ? (
-        <WaterfallChartWrapper waterfall={waterfall} />
-      ) : (
-        <Waterfall
-          location={location}
-          waterfallItemId={urlParams.waterfallItemId}
-          waterfall={waterfall}
-          exceedsMax={exceedsMax}
-        />
-      )}
+      <Waterfall
+        location={location}
+        waterfallItemId={urlParams.waterfallItemId}
+        waterfall={waterfall}
+        exceedsMax={exceedsMax}
+      />
     </div>
   );
 }
