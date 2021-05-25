@@ -78,26 +78,16 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     newState.valueAccessor = numberMetric.columnId;
   }
 
-  const [dateHistogram, ordinal] = partition(groups, (g) => g.operation.dataType === 'date');
+  const [histogram, ordinal] = partition(groups, (g) => g.operation.scale === 'interval');
 
-  if (dateHistogram.length > 0) {
-    newState.xAccessor = dateHistogram[0].columnId;
+  newState.xAccessor = histogram[0]?.columnId || ordinal[0]?.columnId;
+  newState.yAccessor = groups.find((g) => g.columnId !== newState.xAccessor)?.columnId;
+
+  if (newState.xAccessor) {
     score += 0.3;
   }
-
-  if (ordinal.length > 0) {
-    if (!newState.xAccessor) {
-      newState.xAccessor = ordinal[0].columnId;
-      score += 0.3;
-    } else {
-      newState.yAccessor = ordinal[0].columnId;
-      score += 0.3;
-    }
-
-    if (!newState.yAccessor && ordinal[1]) {
-      newState.yAccessor = ordinal[1].columnId;
-      score += 0.3;
-    }
+  if (newState.yAccessor) {
+    score += 0.3;
   }
 
   return [
