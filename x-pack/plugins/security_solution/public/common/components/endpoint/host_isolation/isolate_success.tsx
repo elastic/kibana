@@ -20,13 +20,22 @@ export const EndpointIsolateSuccess = memo<EndpointIsolateSuccessProps>(
   ({ hostName, onComplete, completeButtonLabel, additionalInfo }) => {
     return (
       <>
-        <EuiCallOut iconType="check" color="success" title={GET_SUCCESS_MESSAGE(hostName)}>
+        <EuiCallOut
+          iconType="check"
+          color="success"
+          title={GET_SUCCESS_MESSAGE(hostName)}
+          data-test-subj="hostIsolateSuccessMessage"
+        >
           {additionalInfo}
         </EuiCallOut>
 
         <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="right" onClick={onComplete}>
+            <EuiButtonEmpty
+              flush="right"
+              onClick={onComplete}
+              data-test-subj="hostIsolateSuccessCompleteButton"
+            >
               <EuiText size="s">
                 <p>{completeButtonLabel}</p>
               </EuiText>
