@@ -25,7 +25,7 @@ filegroup(
       "//packages/kbn-legacy-logging:build",
       "//packages/kbn-logging:build",
       "//packages/kbn-plugin-generator:build",
-      "//packages/kbn-securitysolution-constants:build",
+      "//packages/kbn-securitysolution-list-constants:build",
       "//packages/kbn-securitysolution-io-ts-types:build",
       "//packages/kbn-securitysolution-io-ts-alerting-types:build",
       "//packages/kbn-securitysolution-io-ts-list-types:build",
