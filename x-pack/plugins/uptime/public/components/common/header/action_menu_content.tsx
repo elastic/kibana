@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiHeaderLinks, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiHeaderLinks, EuiHeaderSectionItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
@@ -50,10 +50,10 @@ export function ActionMenuContent(): React.ReactElement {
 
   return (
     <EuiHeaderLinks>
-      <EuiHeaderLink>
+      <EuiHeaderSectionItem>
         <ToggleAlertFlyoutButton />
-      </EuiHeaderLink>
-      <EuiHeaderLink>
+      </EuiHeaderSectionItem>
+      <EuiHeaderSectionItem>
         <EuiButtonEmpty
           aria-label={i18n.translate('xpack.uptime.page_header.settingsLink.label', {
             defaultMessage: 'Navigate to the Uptime settings page',
@@ -68,8 +68,8 @@ export function ActionMenuContent(): React.ReactElement {
         >
           <FormattedMessage id="xpack.uptime.page_header.settingsLink" defaultMessage="Settings" />
         </EuiButtonEmpty>
-      </EuiHeaderLink>
-      <EuiHeaderLink>
+      </EuiHeaderSectionItem>
+      <EuiHeaderSectionItem>
         <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
           <EuiButtonEmpty
             aria-label={i18n.translate('xpack.uptime.page_header.analyzeData.label', {
@@ -83,8 +83,8 @@ export function ActionMenuContent(): React.ReactElement {
             {ANALYZE_DATA}
           </EuiButtonEmpty>
         </EuiToolTip>
-      </EuiHeaderLink>
-      <EuiHeaderLink>
+      </EuiHeaderSectionItem>
+      <EuiHeaderSectionItem>
         <EuiButtonEmpty
           aria-label={i18n.translate('xpack.uptime.page_header.addDataLink.label', {
             defaultMessage: 'Navigate to a tutorial about adding Uptime data',
@@ -95,7 +95,7 @@ export function ActionMenuContent(): React.ReactElement {
         >
           {ADD_DATA_LABEL}
         </EuiButtonEmpty>
-      </EuiHeaderLink>
+      </EuiHeaderSectionItem>
     </EuiHeaderLinks>
   );
 }
