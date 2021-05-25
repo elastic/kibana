@@ -8,10 +8,10 @@
     "declarationMap": true
   },
   "include": [
+    "__jest__/**/*",
     "server/**/*",
     "public/**/*",
     "common/**/*",
-    "tests_client_integration/**/*",
     "__fixtures__/*",
     "../../../typings/**/*"
   ],
