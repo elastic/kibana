@@ -8,29 +8,32 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { getReduxDeps } from '../store/t_grid';
 
 import { TGrid as TGridComponent } from './tgrid';
 import { TGridProps } from '../types';
 
-export const TGrid = (props: TGridProps) => {
+export const TGrid = (props: TGridProps & { store: any }) => {
   const reduxStuff = getReduxDeps(props.type);
   console.log('TGrid', props.type);
-  if (props.type === 'standalone') {
-    return (
-      <Provider store={reduxStuff}>
-        <I18nProvider>
-          <TGridComponent {...props} />
-        </I18nProvider>
-      </Provider>
-    );
-  } else {
-    return (
+  // if (props.type === 'standalone') {
+  return (
+    <Provider store={props.store}>
       <I18nProvider>
-        <TGridComponent {...props} />
+        <DragDropContext>
+          <TGridComponent {...props} />
+        </DragDropContext>
       </I18nProvider>
-    );
-  }
+    </Provider>
+  );
+  // } else {
+  //   return (
+  //     <I18nProvider>
+  //       <TGridComponent {...props} />
+  //     </I18nProvider>
+  //   );
+  // }
 };
 
 // eslint-disable-next-line import/no-default-export

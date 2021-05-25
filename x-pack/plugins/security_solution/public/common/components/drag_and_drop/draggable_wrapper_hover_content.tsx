@@ -33,6 +33,7 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { stopPropagationAndPreventDefault } from '../../../../../timelines/public';
+import { TooltipWithKeyboardShortcut } from '../accessibility';
 
 export const AdditionalContent = styled.div`
   padding: 2px;
@@ -263,15 +264,17 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
 
         {!showTopN && value != null && (
           <EuiToolTip
-            content={timelines.getTooltipWithKeyboardShortcut({
-              additionalScreenReaderOnlyContext: getAdditionalScreenReaderOnlyContext({
-                field,
-                value,
-              }),
-              content: i18n.FILTER_FOR_VALUE,
-              shortcut: FILTER_FOR_VALUE_KEYBOARD_SHORTCUT,
-              showShortcut: ownFocus,
-            })}
+            content={
+              <TooltipWithKeyboardShortcut
+                additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+                  field,
+                  value,
+                })}
+                content={i18n.FILTER_FOR_VALUE}
+                shortcut={FILTER_FOR_VALUE_KEYBOARD_SHORTCUT}
+                showShortcut={ownFocus}
+              />
+            }
           >
             <EuiButtonIcon
               aria-label={i18n.FILTER_FOR_VALUE}
@@ -286,15 +289,17 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
 
         {!showTopN && value != null && (
           <EuiToolTip
-            content={timelines.getTooltipWithKeyboardShortcut({
-              additionalScreenReaderOnlyContext: getAdditionalScreenReaderOnlyContext({
-                field,
-                value,
-              }),
-              content: i18n.FILTER_OUT_VALUE,
-              shortcut: FILTER_OUT_VALUE_KEYBOARD_SHORTCUT,
-              showShortcut: ownFocus,
-            })}
+            content={
+              <TooltipWithKeyboardShortcut
+                additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+                  field,
+                  value,
+                })}
+                content={i18n.FILTER_OUT_VALUE}
+                shortcut={FILTER_OUT_VALUE_KEYBOARD_SHORTCUT}
+                showShortcut={ownFocus}
+              />
+            }
           >
             <EuiButtonIcon
               aria-label={i18n.FILTER_OUT_VALUE}
@@ -308,15 +313,17 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
 
         {!showTopN && value != null && draggableId != null && (
           <EuiToolTip
-            content={timelines.getTooltipWithKeyboardShortcut({
-              additionalScreenReaderOnlyContext: getAdditionalScreenReaderOnlyContext({
-                field,
-                value,
-              }),
-              content: i18n.ADD_TO_TIMELINE,
-              shortcut: ADD_TO_TIMELINE_KEYBOARD_SHORTCUT,
-              showShortcut: ownFocus,
-            })}
+            content={
+              <TooltipWithKeyboardShortcut
+                additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+                  field,
+                  value,
+                })}
+                content={i18n.ADD_TO_TIMELINE}
+                shortcut={ADD_TO_TIMELINE_KEYBOARD_SHORTCUT}
+                showShortcut={ownFocus}
+              />
+            }
           >
             <EuiButtonIcon
               aria-label={i18n.ADD_TO_TIMELINE}
@@ -336,15 +343,17 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
             <>
               {!showTopN && (
                 <EuiToolTip
-                  content={timelines.getTooltipWithKeyboardShortcut({
-                    additionalScreenReaderOnlyContext: getAdditionalScreenReaderOnlyContext({
-                      field,
-                      value,
-                    }),
-                    content: i18n.SHOW_TOP(field),
-                    shortcut: SHOW_TOP_N_KEYBOARD_SHORTCUT,
-                    showShortcut: ownFocus,
-                  })}
+                  content={
+                    <TooltipWithKeyboardShortcut
+                      additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+                        field,
+                        value,
+                      })}
+                      content={i18n.SHOW_TOP(field)}
+                      shortcut={SHOW_TOP_N_KEYBOARD_SHORTCUT}
+                      showShortcut={ownFocus}
+                    />
+                  }
                 >
                   <EuiButtonIcon
                     aria-label={i18n.SHOW_TOP(field)}

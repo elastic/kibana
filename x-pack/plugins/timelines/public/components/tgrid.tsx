@@ -15,7 +15,7 @@ export const TGrid = (props: TGridProps) => {
   // const reduxStuff = getReduxDeps(props.type);
   // const dispatch = useDispatch();
   const currentTime = useSelector((state) => state);
-  console.log(currentTime);
+  console.log('TGridIntegrated ', currentTime);
   const { type, ...componentsProps } = props;
   // const testActionHandler = useCallback(
   //   () =>
@@ -29,16 +29,16 @@ export const TGrid = (props: TGridProps) => {
   //   [dispatch]
   // );
 
-  if (props.type === 'standalone') {
-    return (
-      <div data-test-subj="timeline-wrapper">
-        {/* <EuiButton onClick={testActionHandler}>{'whatever'}</EuiButton> */}
-        <h1>{'current time: '}</h1>
-      </div>
-    );
-  } else {
-    return <TGridIntegrated {...componentsProps} />;
-  }
+  // if (props.type === 'standalone') {
+  //   return (
+  //     <div data-test-subj="timeline-wrapper">
+  //       {/* <EuiButton onClick={testActionHandler}>{'whatever'}</EuiButton> */}
+  //       <h1>{'current time: '}</h1>
+  //     </div>
+  //   );
+  // } else {
+  return <TGridIntegrated {...componentsProps} />;
+  // }
 };
 
 // eslint-disable-next-line import/no-default-export
