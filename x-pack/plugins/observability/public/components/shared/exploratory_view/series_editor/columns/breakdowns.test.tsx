@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { Breakdowns } from './breakdowns';
-import { mockIndexPattern, mockUrlStorage, render } from '../../rtl_helpers';
+import { mockIndexPattern, render } from '../../rtl_helpers';
 import { NEW_SERIES_KEY } from '../../hooks/use_series_storage';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import { USER_AGENT_OS } from '../../configurations/constants/elasticsearch_fieldnames';
@@ -21,17 +21,18 @@ describe('Breakdowns', function () {
   });
 
   it('should render properly', async function () {
-    mockUrlStorage({});
-
     render(<Breakdowns seriesId={'series-id'} breakdowns={dataViewSeries.breakdowns} />);
 
     screen.getAllByText('Browser family');
   });
 
   it('should call set series on change', function () {
-    const { setSeries } = mockUrlStorage({ breakdown: USER_AGENT_OS });
+    const initSeries = { breakdown: USER_AGENT_OS };
 
-    render(<Breakdowns seriesId={'series-id'} breakdowns={dataViewSeries.breakdowns} />);
+    const { setSeries } = render(
+      <Breakdowns seriesId={'series-id'} breakdowns={dataViewSeries.breakdowns} />,
+      { initSeries }
+    );
 
     screen.getAllByText('Operating system');
 

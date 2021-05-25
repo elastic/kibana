@@ -21,7 +21,7 @@ import { convertToShortUrl } from '../configurations/utils';
 import { OperationType, SeriesType } from '../../../../../../lens/public';
 import { URL_KEYS } from '../configurations/constants/url_constants';
 
-interface ContextValue {
+export interface SeriesContextValue {
   firstSeries: SeriesUrl;
   firstSeriesId: string;
   allSeriesIds: string[];
@@ -30,7 +30,7 @@ interface ContextValue {
   getSeries: (seriesId: string) => SeriesUrl;
   removeSeries: (seriesId: string) => void;
 }
-export const UrlStorageContext = createContext<ContextValue>({} as ContextValue);
+export const UrlStorageContext = createContext<SeriesContextValue>({} as SeriesContextValue);
 
 interface ProviderProps {
   storage: IKbnUrlStateStorage | ISessionStorageStateStorage;
