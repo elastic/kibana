@@ -40,7 +40,7 @@ export const makeBaseBreadcrumb = (href: string): EuiBreadcrumb => {
   };
 };
 
-export const casesBreadcrumb: EuiBreadcrumb = {
+export const casesBreadcrumb = {
   text: i18n.translate('xpack.observability.breadcrumbs.observability.cases', {
     defaultMessage: 'Cases',
   }),
