@@ -23,6 +23,8 @@ import './index.scss';
 import { LensBrushEvent, LensFilterEvent } from '../types';
 import { desanitizeFilterContext } from '../utils';
 import { search } from '../../../../../src/plugins/data/public';
+import { EmptyPlaceholder } from '../shared_components';
+import { LensIconChartHeatmap } from '../assets/chart_heatmap';
 
 declare global {
   interface Window {
@@ -218,6 +220,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     },
     timeZone,
   };
+
+  if (!chartData || !chartData.length) {
+    return <EmptyPlaceholder icon={LensIconChartHeatmap} />;
+  }
 
   return (
     <Chart>
