@@ -30,7 +30,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Fields',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.fingerprint.fieldNameHelpText', {
-      defaultMessage: 'Fields that should be included in the fingerprint.',
+      defaultMessage: 'Fields to include in the fingerprint.',
     }),
     validations: [
       {
@@ -67,7 +67,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.fingerprint.methodHelpText"
-        defaultMessage="The hash method used to compute the fingerprint. Defaults to {value}."
+        defaultMessage="Hash method used to compute the fingerprint. Defaults to {value}."
         values={{ value: <EuiCode>{'SHA-1'}</EuiCode> }}
       />
     ),
@@ -84,7 +84,17 @@ export const Fingerprint: FunctionComponent = () => {
         data-test-subj="fieldsValueField"
       />
 
-      <TargetField />
+      <TargetField
+        helpText={
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.fingerprint.targetFieldHelpText"
+            defaultMessage="Output field. Defaults to {field}."
+            values={{
+              field: <EuiCode>{'fingerprint'}</EuiCode>,
+            }}
+          />
+        }
+      />
 
       <UseField
         componentProps={{
@@ -140,7 +150,17 @@ export const Fingerprint: FunctionComponent = () => {
         data-test-subj="saltValueField"
       />
 
-      <IgnoreMissingField />
+      <IgnoreMissingField
+        helpText={
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.fingerprint.ignoreMissingFieldHelpText"
+            defaultMessage="Ignore any missing {field}."
+            values={{
+              field: <EuiCode>{'fields'}</EuiCode>,
+            }}
+          />
+        }
+      />
     </>
   );
 };
