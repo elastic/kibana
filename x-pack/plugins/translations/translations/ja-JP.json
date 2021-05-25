@@ -20159,7 +20159,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring": "ルール監視",
     "xpack.securitySolution.detectionEngine.rules.allRules.tabs.rules": "ルール",
     "xpack.securitySolution.detectionEngine.rules.backOptionsHeader": "検出に戻る",
-    "xpack.securitySolution.detectionEngine.rules.components.genericDownloader.exportFailureTitle": "データをエクスポートできませんでした…",
     "xpack.securitySolution.detectionEngine.rules.components.ruleActionsOverflow.allActionsTitle": "すべてのアクション",
     "xpack.securitySolution.detectionEngine.rules.continueButtonTitle": "続行",
     "xpack.securitySolution.detectionEngine.rules.create.successfullyCreatedRuleTitle": "{ruleName}が作成されました",
