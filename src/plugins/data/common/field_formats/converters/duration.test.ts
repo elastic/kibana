@@ -198,7 +198,7 @@ describe('Duration Format', () => {
     outputFormat: string;
     outputPrecision: number | undefined;
     showSuffix: boolean | undefined;
-    useShortSuffix: boolean | undefined;
+    useShortSuffix?: boolean;
     fixtures: any[];
   }) {
     fixtures.forEach((fixture: Record<string, any>) => {
