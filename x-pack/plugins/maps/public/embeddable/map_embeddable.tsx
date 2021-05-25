@@ -248,7 +248,7 @@ export class MapEmbeddable
       !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
       !_.isEqual(this.input.query, this._prevQuery) ||
       !esFilters.compareFilters(this._getFilters(), this._prevFilters) ||
-      this.input.searchSessionId !== this._prevSearchSessionId
+      this._getSearchSessionId() !== this._prevSearchSessionId
     ) {
       this._dispatchSetQuery({
         forceRefresh: false,
@@ -263,7 +263,7 @@ export class MapEmbeddable
       this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
 
-    const isRestore = getIsRestore(this.input.searchSessionId);
+    const isRestore = getIsRestore(this._getSearchSessionId());
     if (isRestore !== this._prevIsRestore) {
       this._prevIsRestore = isRestore;
       this._savedMap.getStore().dispatch(
@@ -283,20 +283,30 @@ export class MapEmbeddable
       : [];
   }
 
+  _getSearchSessionId() {
+    // New search session id causes all layers from elasticsearch to refetch data.
+    // Dashboard provides a new search session id anytime filters change.
+    // Thus, filtering embeddable container by map extent causes a new search session id any time the map is moved.
+    // Disabling search session when filtering embeddable container by map extent.
+    // The use case for search sessions (restoring results because of slow responses) does not match the use case of
+    // filtering by map extent (rapid responses as users explore their map).
+    return this.input.filterByMapExtent ? undefined : this.input.searchSessionId;
+  }
+
   _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
     const filters = this._getFilters();
     this._prevTimeRange = this.input.timeRange;
     this._prevQuery = this.input.query;
     this._prevFilters = filters;
-    this._prevSearchSessionId = this.input.searchSessionId;
+    this._prevSearchSessionId = this._getSearchSessionId();
     this._savedMap.getStore().dispatch<any>(
       setQuery({
         filters,
         query: this.input.query,
         timeFilters: this.input.timeRange,
         forceRefresh,
-        searchSessionId: this.input.searchSessionId,
-        searchSessionMapBuffer: getIsRestore(this.input.searchSessionId)
+        searchSessionId: this._getSearchSessionId(),
+        searchSessionMapBuffer: getIsRestore(this._getSearchSessionId())
           ? this.input.mapBuffer
           : undefined,
       })
