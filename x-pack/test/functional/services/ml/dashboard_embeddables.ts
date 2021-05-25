@@ -11,7 +11,7 @@ import { MlCommonUI } from './common_ui';
 import { MlDashboardJobSelectionTable } from './dashboard_job_selection_table';
 
 export function MachineLearningDashboardEmbeddablesProvider(
-  { getService, getPageObjects }: FtrProviderContext,
+  { getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   mlDashboardJobSelectionTable: MlDashboardJobSelectionTable
 ) {
@@ -19,8 +19,6 @@ export function MachineLearningDashboardEmbeddablesProvider(
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const listingTable = getService('listingTable');
-  const PageObjects = getPageObjects(['common', 'dashboard']);
 
   return {
     async assertAnomalyChartsEmbeddableInitializerExists() {
@@ -106,26 +104,6 @@ export function MachineLearningDashboardEmbeddablesProvider(
         await dashboardAddPanel.clickAddNewEmbeddableLink('ml_anomaly_charts');
 
         await mlDashboardJobSelectionTable.assertJobSelectionTableExists();
-      });
-    },
-
-    async saveDashboard(dashboardName: string) {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.dashboard.saveDashboard(dashboardName, {
-          saveAsNew: false,
-          waitDialogIsClosed: true,
-          exitFromEditMode: true,
-        });
-      });
-    },
-
-    async deleteDashboard(dashboardName: string) {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await listingTable.searchForItemWithName(dashboardName);
-        await listingTable.checkListingSelectAllCheckbox();
-        await listingTable.clickDeleteSelected();
-        await PageObjects.common.clickConfirmOnModal();
       });
     },
   };

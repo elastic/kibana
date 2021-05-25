@@ -94,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await ml.testResources.deleteMLTestDashboard();
       await ml.api.cleanMlIndices();
     });
 

@@ -54,8 +54,6 @@ const testDataList = [
   },
 ];
 
-const dashboardName = `My Accessible ML Anomaly Dashboard ${Date.now()}`;
-
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
@@ -126,11 +124,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await ml.dashboardEmbeddables.assertAnomalyChartsExists();
 
           await a11y.testAppSnapshot();
-        });
-
-        it('saves and deletes dashboard', async () => {
-          await ml.dashboardEmbeddables.saveDashboard(dashboardName);
-          await ml.dashboardEmbeddables.deleteDashboard(dashboardName);
         });
       });
     }
