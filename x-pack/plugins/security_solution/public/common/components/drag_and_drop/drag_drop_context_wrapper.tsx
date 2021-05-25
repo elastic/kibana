@@ -11,7 +11,7 @@ import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
-import { IS_DRAGGING_CLASS_NAME, useAddToTimelineSensor } from '@kbn/securitysolution-t-grid';
+import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
@@ -37,6 +37,7 @@ import {
   userIsReArrangingProviders,
 } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { useKibana } from '../../lib/kibana';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 // @ts-expect-error
@@ -91,8 +92,6 @@ const onDragEndHandler = ({
   }
 };
 
-const sensors = [useAddToTimelineSensor];
-
 /**
  * DragDropContextWrapperComponent handles all drag end events
  */
@@ -100,7 +99,11 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const getDataProviders = useMemo(() => dragAndDropSelectors.getDataProvidersSelector(), []);
-
+  const { timelines } = useKibana().services;
+  const useAddToTimelineSensor = useMemo(() => {
+    return timelines ? timelines.getUseAddToTimelineSensor() : null;
+  }, [timelines]);
+  const sensors = [useAddToTimelineSensor];
   const {
     dataProviders: activeTimelineDataProviders,
     timelineType,

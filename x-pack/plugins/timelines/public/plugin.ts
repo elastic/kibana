@@ -9,6 +9,8 @@ import { TimelinesPluginSetup, TGridProps } from './types';
 import { getTimelineLazy } from './methods';
 import { tGridActions, getReduxDeps, tGridSelectors } from './store/t_grid';
 import { initialTGridState, tGridReducer } from './store/t_grid/reducer';
+import { useAddToTimelineSensor } from './hooks/use_add_to_timeline';
+import { onKeyDownFocusHandler } from './components/accessibility';
 
 export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -33,6 +35,24 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
       },
       getCreatedTgridStore: (type: TGridProps['type']) => {
         return getReduxDeps(type);
+      },
+      getUseAddToTimelineSensor: () => {
+        return useAddToTimelineSensor;
+      },
+      getLoading: () => {
+
+      },
+      getLastUpdated: () => {
+
+      },
+      getDraggables: () => {
+
+      },
+      getDragAndDrop: () => {
+
+      },
+      getOnKeyDownFocusHandler: () => {
+        return onKeyDownFocusHandler;
       },
     };
   }
