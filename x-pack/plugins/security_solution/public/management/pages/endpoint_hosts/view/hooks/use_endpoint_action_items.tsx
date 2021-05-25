@@ -14,7 +14,7 @@ import { getEndpointDetailsPath } from '../../../../common/routing';
 import { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { useEndpointSelector } from './hooks';
-import { agentPolicies } from '../../store/selectors';
+import { agentPolicies, uiQueryParams } from '../../store/selectors';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { isEndpointIsolated } from '../../utils';
 import { ContextMenuItemNavByRouterProps } from '../components/context_menu_item_nav_by_rotuer';
@@ -28,6 +28,7 @@ export const useEndpointActionItems = (
 ): ContextMenuItemNavByRouterProps[] => {
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
+  const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
   const {
     services: {
       application: { getUrlForApp },
@@ -41,12 +42,19 @@ export const useEndpointActionItems = (
       const endpointPolicyId = endpointMetadata.Endpoint.policy.applied.id;
       const endpointHostName = endpointMetadata.host.hostname;
       const fleetAgentId = endpointMetadata.elastic.agent.id;
+      const {
+        show,
+        selected_endpoint: _selectedEndpoint,
+        ...currentUrlParams
+      } = allCurrentUrlParams;
       const endpointIsolatePath = getEndpointDetailsPath({
         name: 'endpointIsolate',
+        ...currentUrlParams,
         selected_endpoint: endpointId,
       });
       const endpointUnIsolatePath = getEndpointDetailsPath({
         name: 'endpointUnIsolate',
+        ...currentUrlParams,
         selected_endpoint: endpointId,
       });
 
@@ -143,5 +151,5 @@ export const useEndpointActionItems = (
     }
 
     return [];
-  }, [endpointMetadata, fleetAgentPolicies, formatUrl, getUrlForApp]);
+  }, [allCurrentUrlParams, endpointMetadata, fleetAgentPolicies, formatUrl, getUrlForApp]);
 };
