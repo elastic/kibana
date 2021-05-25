@@ -72,8 +72,9 @@ export function ActionMenuContent(): React.ReactElement {
       <EuiHeaderLink>
         <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
           <EuiButtonEmpty
-            aria-label={i18n.translate('xpack.uptime.page_header.exploratoryLink.label', {
-              defaultMessage: 'Navigate to the exploratory view to visualize data',
+            aria-label={i18n.translate('xpack.uptime.page_header.analyzeData.label', {
+              defaultMessage:
+                'Navigate to the "Analyze Data" view to visualize Synthetics/User data',
             })}
             href={syntheticExploratoryViewLink}
             color="primary"
