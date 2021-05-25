@@ -7,10 +7,14 @@
 
 import { isEmpty } from 'lodash';
 
-import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  EntriesArray,
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../shared_imports';
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import { JobStatus, Threshold, ThresholdNormalized } from './schemas/common/schemas';
 
@@ -18,11 +22,6 @@ export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
 ) => {
   return exceptionItems.some((exceptionItem) => hasLargeValueList(exceptionItem.entries));
-};
-
-export const hasLargeValueList = (entries: EntriesArray): boolean => {
-  const found = entries.filter(({ type }) => type === 'list');
-  return found.length > 0;
 };
 
 export const hasNestedEntry = (entries: EntriesArray): boolean => {
