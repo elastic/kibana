@@ -22,6 +22,7 @@ import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const supertest = getService('supertest');
   const TEST_URL = '/security-myfakepath';
   const SPACE1 = 'space1';
   const SPACE2 = 'space2';
@@ -103,6 +104,24 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(401);
         });
       }
+    });
+
+    describe('extra params', () => {
+      it('should NOT allow to pass a filter query parameter', async () => {
+        await supertest
+          .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?sortOrder=asc&namespaces[0]=*`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(400);
+      });
+
+      it('should NOT allow to pass a non supported query parameter', async () => {
+        await supertest
+          .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?notExists=something`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(400);
+      });
     });
   });
 };
