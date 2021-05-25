@@ -6,6 +6,7 @@
  */
 
 import { UpdateDocumentByQueryResponse } from 'elasticsearch';
+import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
 import { HostIsolationResponse } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -13,7 +14,6 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../../common/constants';
-import { ISOLATE_HOST_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   BasicSignals,
@@ -22,7 +22,9 @@ import {
   AlertSearchResponse,
   AlertsIndex,
   UpdateAlertStatusProps,
+  CasesFromAlertsResponse,
 } from './types';
+import { isolateHost } from '../../../../common/lib/host_isolation';
 
 /**
  * Fetch Alerts by providing a query
@@ -109,20 +111,35 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
  *
  * @param agent id
  * @param optional comment for the isolation action
+ * @param optional case ids if associated with an alert on the host
  *
  * @throws An error if response is not OK
  */
 export const createHostIsolation = async ({
   agentId,
   comment = '',
+  caseIds,
 }: {
   agentId: string;
   comment?: string;
+  caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
-  KibanaServices.get().http.fetch<HostIsolationResponse>(ISOLATE_HOST_ROUTE, {
-    method: 'POST',
-    body: JSON.stringify({
-      agent_ids: [agentId],
-      comment,
-    }),
+  isolateHost({
+    agent_ids: [agentId],
+    comment,
+    case_ids: caseIds,
+  });
+
+/**
+ * Get list of associated case ids from alert id
+ *
+ * @param alert id
+ */
+export const getCaseIdsFromAlertId = async ({
+  alertId,
+}: {
+  alertId: string;
+}): Promise<CasesFromAlertsResponse> =>
+  KibanaServices.get().http.fetch<CasesFromAlertsResponse>(getCasesFromAlertsUrl(alertId), {
+    method: 'get',
   });

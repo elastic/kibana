@@ -29,6 +29,10 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import {
+  ExceptionListTypeEnum,
+  ExceptionListIdentifiers,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
@@ -83,7 +87,7 @@ import { ExceptionsViewer } from '../../../../../common/components/exceptions/vi
 import { DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
-import { ExceptionListTypeEnum, ExceptionListIdentifiers } from '../../../../../shared_imports';
+
 import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,

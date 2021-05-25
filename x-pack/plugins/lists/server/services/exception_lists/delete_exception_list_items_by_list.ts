@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { NamespaceType } from '@kbn/securitysolution-io-ts-utils';
+import type { ListId, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { SavedObjectsClientContract } from '../../../../../../src/core/server/';
-import { ListId } from '../../../common/schemas';
 
 import { findExceptionListItem } from './find_exception_list_item';
-import { getSavedObjectType } from './utils';
 
 const PER_PAGE = 100;
 

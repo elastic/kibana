@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AcknowledgeSchema } from './acknowledge_schema';
+import type { AcknowledgeSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getAcknowledgeSchemaResponseMock = (): AcknowledgeSchema => ({
   acknowledged: true,

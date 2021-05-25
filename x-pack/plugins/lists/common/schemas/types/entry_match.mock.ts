@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntryMatch } from '@kbn/securitysolution-io-ts-utils';
+import type { EntryMatch } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENTRY_VALUE, FIELD, MATCH, OPERATOR } from '../../constants.mock';
 
