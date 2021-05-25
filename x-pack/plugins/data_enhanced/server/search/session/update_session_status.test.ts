@@ -150,6 +150,7 @@ describe('bulkUpdateSessions', () => {
         attributes: {
           status: SearchSessionStatus.IN_PROGRESS,
           touched: '123',
+          expires: moment().add(moment.duration(5, 'd')),
           idMapping: {
             'search-hash': {
               id: 'search-id',
