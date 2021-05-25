@@ -9,6 +9,16 @@ import type {
   EntryMatchAny,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  buildExceptionFilter,
+  buildExceptionItemFilter,
+  buildExclusionClause,
+  buildExistsClause,
+  buildMatchAnyClause,
+  buildMatchClause,
+  buildNestedClause,
+  createOrClauses,
+} from '@kbn/securitysolution-list-utils';
 
 import { getEntryMatchExcludeMock, getEntryMatchMock } from '../schemas/types/entry_match.mock';
 import {
@@ -23,16 +33,7 @@ import {
 } from '../schemas/types/entry_nested.mock';
 import { getExceptionListItemSchemaMock } from '../schemas/response/exception_list_item_schema.mock';
 
-import {
-  buildExceptionFilter,
-  buildExceptionItemFilter,
-  buildExclusionClause,
-  buildExistsClause,
-  buildMatchAnyClause,
-  buildMatchClause,
-  buildNestedClause,
-  createOrClauses,
-} from './build_exceptions_filter';
+// TODO: Port the test over to packages/kbn-securitysolution-list-utils/src/build_exception_filter/index.test.ts once the mocks are ported to kbn
 
 const modifiedGetEntryMatchAnyMock = (): EntryMatchAny => ({
   ...getEntryMatchAnyMock(),
