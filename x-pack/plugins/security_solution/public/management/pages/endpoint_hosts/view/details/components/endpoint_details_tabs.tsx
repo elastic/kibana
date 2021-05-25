@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-import { FlyoutVersion } from '../../../types';
+import { EndpointIndexUIQueryParams } from '../../../types';
 export enum EndpointDetailsTabsTypes {
   overview = 'overview',
   activityLog = 'activity-log',
@@ -48,7 +48,7 @@ export const EndpointDetailsFlyoutTabs = ({
   show,
   tabs,
 }: {
-  show: FlyoutVersion;
+  show: EndpointIndexUIQueryParams['show'];
   tabs: EndpointDetailsTabs[];
 }) => {
   const [selectedTabId, setSelectedTabId] = useState<EndpointDetailsTabsId>(() => {

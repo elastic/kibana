@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, memo, useState } from 'react';
+import styled from 'styled-components';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -51,15 +52,10 @@ import { EndpointActivityLog } from './endpoint_activity_log';
 import { PolicyResponse } from './policy_response';
 import * as i18 from '../translations';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
-import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
 import {
   EndpointDetailsFlyoutTabs,
   EndpointDetailsTabsTypes,
 } from './components/endpoint_details_tabs';
-import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { getEndpointListPath } from '../../../../common/routing';
-import { SecurityPageName } from '../../../../../app/types';
-import { useFormatUrl } from '../../../../../common/components/link_to';
 
 import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
 import { EndpointIsolateFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
@@ -199,13 +195,13 @@ export const EndpointDetailsFlyout = memo(() => {
           </EuiToolTip>
         )}
       </EuiFlyoutHeader>
-      {details === undefined ? (
+      {hostDetails === undefined ? (
         <EuiFlyoutBody>
           <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
         </EuiFlyoutBody>
       ) : (
         <>
-          {show === 'details' || show === 'activity-log' && (
+          {(show === 'details' || show === 'activity-log') && (
             <DetailsFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
               <EuiFlexGroup>
                 <EuiFlexItem>
@@ -215,9 +211,9 @@ export const EndpointDetailsFlyout = memo(() => {
             </DetailsFlyoutBody>
           )}
 
-          {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={details} />}
+          {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={hostDetails} />}
 
-          {show === 'isolate' && <EndpointIsolateFlyoutPanel hostMeta={details} />}
+          {show === 'isolate' && <EndpointIsolateFlyoutPanel hostMeta={hostDetails} />}
         </>
       )}
 

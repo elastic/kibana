@@ -18,7 +18,7 @@ import {
   MetadataQueryStrategyVersions,
   HostStatus,
 } from '../../../../../common/endpoint/types';
-import { EndpointState, EndpointIndexUIQueryParams, FlyoutVersion } from '../types';
+import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
   MANAGEMENT_DEFAULT_PAGE,
@@ -221,7 +221,12 @@ export const uiQueryParams: (
 
         if (value !== undefined) {
           if (key === 'show') {
-            if (value === 'policy_response' || value === 'details' || value === 'activity-log' || value === 'isolate') {
+            if (
+              value === 'policy_response' ||
+              value === 'details' ||
+              value === 'activity-log' ||
+              value === 'isolate'
+            ) {
               data[key] = value;
             }
           } else {

@@ -50,7 +50,6 @@ export interface ServerFailedToReturnEndpointDetailsActivityLog {
 }
 
 export interface ServerReturnedEndpointPolicyResponse {
-export interface ServerReturnedEndpointPolicyResponse {
   type: 'serverReturnedEndpointPolicyResponse';
   payload: GetHostPolicyResponse;
 }
