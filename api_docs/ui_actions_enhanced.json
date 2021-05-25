@@ -318,7 +318,8 @@
             "docId": "kibUiActionsEnhancedPluginApi",
             "section": "def-common.SerializedEvent",
             "text": "SerializedEvent"
-          }
+          },
+          ">"
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
@@ -504,12 +505,13 @@
             "label": "CollectConfig",
             "description": [],
             "signature": [
+              "() => ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponent",
-                "text": "UiComponent"
+                "section": "def-common.UiComponentInstance",
+                "text": "UiComponentInstance"
               },
               "<",
               {
@@ -525,7 +527,9 @@
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 55
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -535,7 +539,7 @@
             "label": "ReactCollectConfig",
             "description": [],
             "signature": [
-              "React.FC<",
+              "React.FunctionComponent<",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "public",
@@ -549,7 +553,42 @@
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 56
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.props",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.context",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "node_modules/@types/react/index.d.ts",
+                  "lineNumber": 554
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -565,7 +604,26 @@
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 57
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.context",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "source": {
+                  "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
+                  "lineNumber": 22
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -581,7 +639,42 @@
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
               "lineNumber": 58
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.config",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "Config"
+                ],
+                "source": {
+                  "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
+                  "lineNumber": 27
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.context",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "source": {
+                  "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
+                  "lineNumber": 27
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -591,13 +684,31 @@
             "label": "migrations",
             "description": [],
             "signature": [
+              "{ [key: string]: ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.MigrateFunctionsObject",
-                "text": "MigrateFunctionsObject"
-              }
+                "section": "def-common.MigrateFunction",
+                "text": "MigrateFunction"
+              },
+              "<",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              ", ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              ">; }"
             ],
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
@@ -1094,7 +1205,8 @@
             "text": "StartContract"
           },
           ", SetupDependencies, ",
-          "StartDependencies"
+          "StartDependencies",
+          ">"
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
@@ -2589,7 +2701,8 @@
             "docId": "kibUiActionsEnhancedPluginApi",
             "section": "def-common.SerializedEvent",
             "text": "SerializedEvent"
-          }
+          },
+          ">>"
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
@@ -2927,7 +3040,26 @@
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 70
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.context",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "source": {
+                  "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
+                  "lineNumber": 22
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2939,12 +3071,13 @@
               "\n`UiComponent` that collections config for this drilldown. You can create\na React component and transform it `UiComponent` using `uiToReactComponent`\nhelper from `kibana_utils` plugin.\n\n```tsx\nimport React from 'react';\nimport { uiToReactComponent } from 'src/plugins/kibana_utils';\nimport { CollectConfigProps } from 'src/plugins/kibana_utils/public';\n\ntype Props = CollectConfigProps<Config>;\n\nconst ReactCollectConfig: React.FC<Props> = () => {\n  return <div>Collecting config...'</div>;\n};\n\nexport const CollectConfig = uiToReactComponent(ReactCollectConfig);\n```"
             ],
             "signature": [
+              "() => ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponent",
-                "text": "UiComponent"
+                "section": "def-common.UiComponentInstance",
+                "text": "UiComponentInstance"
               },
               "<",
               {
@@ -2960,7 +3093,9 @@
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 91
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2978,7 +3113,42 @@
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 97
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.config",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "Config"
+                ],
+                "source": {
+                  "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
+                  "lineNumber": 27
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.context",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "source": {
+                  "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
+                  "lineNumber": 27
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3014,7 +3184,9 @@
               "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
               "lineNumber": 108
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3425,15 +3597,49 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "Pick<",
+              "{ readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>>(definition: A) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<",
+              "ActionContext",
+              "<A>>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly getActionFactory: (actionFactoryId: string) => ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "public",
                 "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.StartContract",
-                "text": "StartContract"
+                "section": "def-public.ActionFactory",
+                "text": "ActionFactory"
               },
-              ", \"attachAction\" | \"detachAction\" | \"registerAction\" | \"unregisterAction\" | \"hasAction\" | \"getActionFactory\" | \"hasActionFactory\">"
+              "<",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              ", object, ",
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "public",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-public.BaseActionFactoryContext",
+                "text": "BaseActionFactoryContext"
+              },
+              ">; readonly hasActionFactory: (actionFactoryId: string) => boolean; }"
             ],
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -3455,7 +3661,26 @@
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
               "lineNumber": 44
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.context",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "C"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 44
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -3615,7 +3840,15 @@
         "label": "DynamicActionsState",
         "description": [],
         "signature": [
-          "{ events: SerializedEvent[]; }"
+          "{ events: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.SerializedEvent",
+            "text": "SerializedEvent"
+          },
+          "[]; }"
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3651,7 +3884,23 @@
           "\nSerialized representation of a triggers-action pair, used to persist in storage."
         ],
         "signature": [
-          "{ eventId: string; triggers: string[]; action: SerializedAction; }"
+          "{ eventId: string; triggers: string[]; action: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.SerializedAction",
+            "text": "SerializedAction"
+          },
+          "<",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          },
+          ">; }"
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3668,7 +3917,7 @@
         "label": "UrlDrilldownConfig",
         "description": [],
         "signature": [
-          "{ url: {    format?: 'handlebars_v1';    template: string;}; openInNewTab: boolean; encodeUrl?: boolean | undefined; }"
+          "{ url: { format?: \"handlebars_v1\" | undefined; template: string; }; openInNewTab: boolean; encodeUrl?: boolean | undefined; }"
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
@@ -3749,7 +3998,8 @@
           "text": "UiActionsService"
         },
         ">>,Pick<",
-        "UiActionsServiceEnhancements"
+        "UiActionsServiceEnhancements",
+        ", \"telemetry\" | \"extract\" | \"inject\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
       ],
       "source": {
         "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
@@ -3765,7 +4015,7 @@
           "label": "DrilldownManager",
           "description": [],
           "signature": [
-            "React.FC<",
+            "React.FunctionComponent<",
             "PublicDrilldownManagerProps",
             ">"
           ],
@@ -3773,7 +4023,42 @@
             "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
             "lineNumber": 60
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "uiActionsEnhanced",
+              "id": "def-public.props",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
+              "source": {
+                "path": "node_modules/@types/react/index.d.ts",
+                "lineNumber": 554
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "uiActionsEnhanced",
+              "id": "def-public.context",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "source": {
+                "path": "node_modules/@types/react/index.d.ts",
+                "lineNumber": 554
+              },
+              "deprecated": false
+            }
+          ]
         }
       ],
       "lifecycle": "start",
@@ -3829,7 +4114,23 @@
             "label": "actionFactories",
             "description": [],
             "signature": [
-              "ActionFactoryRegistry"
+              "Map<string, ",
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "server",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-server.ActionFactory",
+                "text": "ActionFactory"
+              },
+              "<",
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "common",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-common.SerializedEvent",
+                "text": "SerializedEvent"
+              },
+              ">>"
             ],
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
@@ -4180,7 +4481,15 @@
         "label": "DynamicActionsState",
         "description": [],
         "signature": [
-          "{ events: SerializedEvent[]; }"
+          "{ events: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.SerializedEvent",
+            "text": "SerializedEvent"
+          },
+          "[]; }"
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -4216,7 +4525,23 @@
           "\nSerialized representation of a triggers-action pair, used to persist in storage."
         ],
         "signature": [
-          "{ eventId: string; triggers: string[]; action: SerializedAction; }"
+          "{ eventId: string; triggers: string[]; action: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.SerializedAction",
+            "text": "SerializedAction"
+          },
+          "<",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          },
+          ">; }"
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -4270,7 +4595,41 @@
             "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
             "lineNumber": 15
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "uiActionsEnhanced",
+              "id": "def-server.definition",
+              "type": "Object",
+              "tags": [],
+              "label": "definition",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "uiActionsEnhanced",
+                  "scope": "server",
+                  "docId": "kibUiActionsEnhancedPluginApi",
+                  "section": "def-server.ActionFactoryDefinition",
+                  "text": "ActionFactoryDefinition"
+                },
+                "<",
+                {
+                  "pluginId": "uiActionsEnhanced",
+                  "scope": "common",
+                  "docId": "kibUiActionsEnhancedPluginApi",
+                  "section": "def-common.SerializedEvent",
+                  "text": "SerializedEvent"
+                },
+                ">"
+              ],
+              "source": {
+                "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+                "lineNumber": 15
+              },
+              "deprecated": false
+            }
+          ]
         }
       ],
       "lifecycle": "setup",
@@ -4334,7 +4693,15 @@
         "label": "DynamicActionsState",
         "description": [],
         "signature": [
-          "{ events: SerializedEvent[]; }"
+          "{ events: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.SerializedEvent",
+            "text": "SerializedEvent"
+          },
+          "[]; }"
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -4370,7 +4737,23 @@
           "\nSerialized representation of a triggers-action pair, used to persist in storage."
         ],
         "signature": [
-          "{ eventId: string; triggers: string[]; action: SerializedAction; }"
+          "{ eventId: string; triggers: string[]; action: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.SerializedAction",
+            "text": "SerializedAction"
+          },
+          "<",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          },
+          ">; }"
         ],
         "source": {
           "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",

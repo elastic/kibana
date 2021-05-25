@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiButtonIcon, EuiBasicTableColumn, EuiToolTip } from '@elastic/eui';
 import { History } from 'history';
 
-import { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { Spacer } from '../../../../../../common/components/page';
 import { FormatUrl } from '../../../../../../common/components/link_to';
 import { LinkAnchor } from '../../../../../../common/components/links';
