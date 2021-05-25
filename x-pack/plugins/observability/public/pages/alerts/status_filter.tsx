@@ -19,7 +19,7 @@ export function StatusFilter({ status = 'open', onChange }: StatusFilterProps) {
   return (
     <EuiFilterGroup
       aria-label={i18n.translate('xpack.observability.alerts.statusFilterAriaLabel', {
-        defaultMessage: 'Filter alerts by active and recovered status',
+        defaultMessage: 'Filter alerts by open and closed status',
       })}
     >
       <EuiFilterButton
@@ -28,8 +28,8 @@ export function StatusFilter({ status = 'open', onChange }: StatusFilterProps) {
         onClick={() => onChange('open')}
         withNext={true}
       >
-        {i18n.translate('xpack.observability.alerts.statusFilter.activeButtonLabel', {
-          defaultMessage: 'Active',
+        {i18n.translate('xpack.observability.alerts.statusFilter.openButtonLabel', {
+          defaultMessage: 'Open',
         })}
       </EuiFilterButton>
       <EuiFilterButton
@@ -38,8 +38,8 @@ export function StatusFilter({ status = 'open', onChange }: StatusFilterProps) {
         onClick={() => onChange('closed')}
         withNext={true}
       >
-        {i18n.translate('xpack.observability.alerts.statusFilter.recoveredButtonLabel', {
-          defaultMessage: 'Recovered',
+        {i18n.translate('xpack.observability.alerts.statusFilter.closedButtonLabel', {
+          defaultMessage: 'Closed',
         })}
       </EuiFilterButton>
       <EuiFilterButton

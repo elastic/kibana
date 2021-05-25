@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_STATUS } from '@kbn/rule-data-utils/target/technical_field_names';
 import * as queries from './queries';
 
 describe('queries', () => {
@@ -19,7 +20,7 @@ describe('queries', () => {
       it('returns a query for open', () => {
         expect(queries.alertStatusQuery('open')).toEqual([
           {
-            term: { 'kibana.rac.alert.status': 'open' },
+            term: { [ALERT_STATUS]: 'open' },
           },
         ]);
       });
@@ -29,7 +30,7 @@ describe('queries', () => {
       it('returns a query for closed', () => {
         expect(queries.alertStatusQuery('closed')).toEqual([
           {
-            term: { 'kibana.rac.alert.status': 'closed' },
+            term: { [ALERT_STATUS]: 'closed' },
           },
         ]);
       });

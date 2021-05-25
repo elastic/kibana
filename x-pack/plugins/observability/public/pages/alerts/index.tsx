@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   ALERT_START,
-  EVENT_ACTION,
+  ALERT_STATUS,
   RULE_ID,
   RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
@@ -112,7 +112,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
                   },
                 })
               : undefined,
-            active: parsedFields[EVENT_ACTION] !== 'close',
+            active: parsedFields[ALERT_STATUS] !== 'closed',
             start: new Date(parsedFields[ALERT_START]!).getTime(),
           };
         });
