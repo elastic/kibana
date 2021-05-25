@@ -56,8 +56,6 @@ Review important information about the {kib} 7.13.x releases.
 [[release-notes-7.13.0]]
 == {kib} 7.13.0
 
-coming::[7.13.0]
-
 For information about the {kib} 7.13.0 release, review the following information.
 
 [float]
@@ -486,7 +484,7 @@ Management::
 * Fixes Transform runtime mappings retain original definition when cloning {kibana-pull}95436[#95436]
 * Fixes Transform runtime mapping editor so mappings can be removed {kibana-pull}95108[#95108]
 * Remove cloud validation for slm policy {kibana-pull}93609[#93609]
-* Fix: 🐛 do not send non-serializable fields over HTTP {kibana-pull}93207[#93207]
+* Fix: do not send non-serializable fields over HTTP {kibana-pull}93207[#93207]
 * Correctly format numeric histograms outside Discover {kibana-pull}91576[#91576]
 * Prevent rewrite of date_histogram interval {kibana-pull}91408[#91408]
 Maps::
