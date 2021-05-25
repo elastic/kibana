@@ -1,0 +1,168 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+// Maximum number of examples to obtain for text type fields.
+import { CoreSetup } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
+import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { RuntimeMappings } from '../../../../ml/common';
+import { IndexPatternTitle } from '../../../../ml/common/types/kibana';
+import {
+  ToastNotificationService,
+  toastNotificationServiceProvider,
+} from '../../../../ml/public/application/services/toast_notification_service';
+import { SavedSearchQuery } from '../../../../ml/public/application/contexts/ml';
+import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+import { ml } from '../../../../ml/public/application/services/ml_api_service';
+import {
+  DEFAULT_SAMPLER_SHARD_SIZE,
+  FieldHistogramRequestConfig,
+  FieldRequestConfig,
+  OMIT_FIELDS,
+} from '../../../common';
+
+const MAX_EXAMPLES_DEFAULT: number = 10;
+
+export class DataLoader {
+  private _indexPattern: IndexPattern;
+  private _runtimeMappings: RuntimeMappings;
+  private _indexPatternTitle: IndexPatternTitle = '';
+  private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
+  private _toastNotificationsService: ToastNotificationService;
+
+  constructor(
+    indexPattern: IndexPattern,
+    toastNotifications: CoreSetup['notifications']['toasts']
+  ) {
+    this._indexPattern = indexPattern;
+    this._runtimeMappings = this._indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
+    this._indexPatternTitle = indexPattern.title;
+    this._toastNotificationsService = toastNotificationServiceProvider(toastNotifications);
+  }
+
+  async loadOverallData(
+    query: string | SavedSearchQuery,
+    samplerShardSize: number,
+    earliest: number | undefined,
+    latest: number | undefined
+  ): Promise<any> {
+    const aggregatableFields: string[] = [];
+    const nonAggregatableFields: string[] = [];
+    this._indexPattern.fields.forEach((field) => {
+      const fieldName = field.displayName !== undefined ? field.displayName : field.name;
+      if (this.isDisplayField(fieldName) === true) {
+        if (field.aggregatable === true && field.type !== KBN_FIELD_TYPES.GEO_SHAPE) {
+          aggregatableFields.push(fieldName);
+        } else {
+          nonAggregatableFields.push(fieldName);
+        }
+      }
+    });
+
+    // Need to find:
+    // 1. List of aggregatable fields that do exist in docs
+    // 2. List of aggregatable fields that do not exist in docs
+    // 3. List of non-aggregatable fields that do exist in docs.
+    // 4. List of non-aggregatable fields that do not exist in docs.
+    const stats = await ml.getVisualizerOverallStats({
+      indexPatternTitle: this._indexPatternTitle,
+      query,
+      timeFieldName: this._indexPattern.timeFieldName,
+      samplerShardSize,
+      earliest,
+      latest,
+      aggregatableFields,
+      nonAggregatableFields,
+      runtimeMappings: this._runtimeMappings,
+    });
+
+    return stats;
+  }
+
+  async loadFieldStats(
+    query: string | SavedSearchQuery,
+    samplerShardSize: number,
+    earliest: number | undefined,
+    latest: number | undefined,
+    fields: FieldRequestConfig[],
+    interval?: number
+  ): Promise<any[]> {
+    const stats = await ml.getVisualizerFieldStats({
+      indexPatternTitle: this._indexPatternTitle,
+      query,
+      timeFieldName: this._indexPattern.timeFieldName,
+      earliest,
+      latest,
+      samplerShardSize,
+      interval,
+      fields,
+      maxExamples: this._maxExamples,
+      runtimeMappings: this._runtimeMappings,
+    });
+
+    return stats;
+  }
+
+  async loadFieldHistograms(
+    fields: FieldHistogramRequestConfig[],
+    query: string | SavedSearchQuery,
+    samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE,
+    editorRuntimeMappings?: RuntimeMappings
+  ): Promise<any[]> {
+    const stats = await ml.getVisualizerFieldHistograms({
+      indexPatternTitle: this._indexPatternTitle,
+      query,
+      fields,
+      samplerShardSize,
+      runtimeMappings: editorRuntimeMappings || this._runtimeMappings,
+    });
+
+    return stats;
+  }
+
+  displayError(err: any) {
+    if (err.statusCode === 500) {
+      this._toastNotificationsService.displayErrorToast(
+        err,
+        i18n.translate('xpack.ml.datavisualizer.dataLoader.internalServerErrorMessage', {
+          defaultMessage:
+            'Error loading data in index {index}. {message}. ' +
+            'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
+          values: {
+            index: this._indexPattern.title,
+            message: err.message,
+          },
+        })
+      );
+    } else {
+      this._toastNotificationsService.displayErrorToast(
+        err,
+        i18n.translate('xpack.ml.datavisualizer.page.errorLoadingDataMessage', {
+          defaultMessage: 'Error loading data in index {index}. {message}',
+          values: {
+            index: this._indexPattern.title,
+            message: err.message,
+          },
+        })
+      );
+    }
+  }
+
+  public set maxExamples(max: number) {
+    this._maxExamples = max;
+  }
+
+  public get maxExamples(): number {
+    return this._maxExamples;
+  }
+
+  // Returns whether the field with the specified name should be displayed,
+  // as certain fields such as _id and _source should be omitted from the view.
+  public isDisplayField(fieldName: string): boolean {
+    return !OMIT_FIELDS.includes(fieldName);
+  }
+}

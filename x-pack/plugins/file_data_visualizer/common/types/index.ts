@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { JOB_FIELD_TYPES } from './constants';
-
+import type { SimpleSavedObject } from 'kibana/public';
+export type { JobFieldType } from './job_field_type';
+export type { FieldRequestConfig, FieldHistogramRequestConfig } from './field_request_config';
 export type InputData = any[];
-
-export type JobFieldType = typeof JOB_FIELD_TYPES[keyof typeof JOB_FIELD_TYPES];
 
 export interface DataVisualizerTableState {
   pageSize: number;
@@ -20,3 +19,5 @@ export interface DataVisualizerTableState {
   visibleFieldNames: string[];
   showDistributions: boolean;
 }
+
+export type SavedSearchSavedObject = SimpleSavedObject<any>;

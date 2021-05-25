@@ -34,7 +34,6 @@ interface Props {
 
 const SPEC_ID = 'document_count';
 
-// @remove
 export const DocumentCountChart: FC<Props> = ({
   width,
   chartPoints,

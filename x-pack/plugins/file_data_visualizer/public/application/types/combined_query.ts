@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-// @remove
+export const SEARCH_QUERY_LANGUAGE = {
+  KUERY: 'kuery',
+  LUCENE: 'lucene',
+} as const;
+
+export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];
+
 export interface CombinedQuery {
   searchString: string | { [key: string]: any };
   searchQueryLanguage: string;

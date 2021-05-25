@@ -10,4 +10,5 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import type { FileDataVisualizerStartDependencies } from '../plugin';
 
 export type StartServices = CoreStart & FileDataVisualizerStartDependencies;
+// @todo: rename
 export const useFileDataVisualizerKibana = () => useKibana<StartServices>();

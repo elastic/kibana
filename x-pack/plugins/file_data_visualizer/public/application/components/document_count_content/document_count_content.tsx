@@ -6,16 +6,15 @@
  */
 
 import React, { FC } from 'react';
-import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
-import { TotalCountHeader } from '../../total_count_header';
-import { FieldVisConfig, FileBasedFieldVisConfig } from '../../../../stats_table/types';
+import { DocumentCountChart, DocumentCountChartPoint } from './document_count_chart';
+import { FieldVisConfig, FileBasedFieldVisConfig } from '../stats_table/types';
+import { TotalCountHeader } from './total_count_header';
 
 export interface Props {
   config?: FieldVisConfig | FileBasedFieldVisConfig;
   totalCount: number;
 }
 
-// @remove
 export const DocumentCountContent: FC<Props> = ({ config, totalCount }) => {
   if (config?.stats === undefined) {
     return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;

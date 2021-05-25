@@ -44,6 +44,7 @@ export interface MlGenericUrlPageState extends MlIndexBasedSearchState {
   [key: string]: any;
 }
 
+// @remove
 export interface DataVisualizerIndexBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
   searchString?: Query['query'];
   searchQuery?: Query['query'];

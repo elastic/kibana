@@ -122,6 +122,7 @@ export function getSavedSearchById(id: string): SavedSearchSavedObject | undefin
   return savedSearchesCache.find((s) => s.id === id);
 }
 
+// @remove
 /**
  * Returns true if the index passed in is time based
  * an optional flag will trigger the display a notification at the top of the page

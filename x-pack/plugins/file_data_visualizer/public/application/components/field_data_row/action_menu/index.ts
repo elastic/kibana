@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-// @remove
-export interface CombinedQuery {
-  searchString: string | { [key: string]: any };
-  searchQueryLanguage: string;
-}
+export { getActions } from './actions';

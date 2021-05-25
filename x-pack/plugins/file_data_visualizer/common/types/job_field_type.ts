@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-// @remove
-export interface CombinedQuery {
-  searchString: string | { [key: string]: any };
-  searchQueryLanguage: string;
-}
+import { JOB_FIELD_TYPES } from '../constants';
+export type JobFieldType = typeof JOB_FIELD_TYPES[keyof typeof JOB_FIELD_TYPES];

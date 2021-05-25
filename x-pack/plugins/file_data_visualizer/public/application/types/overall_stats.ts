@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @remove
 export interface AggregatableField {
   fieldName: string;
   stats: {
@@ -17,6 +16,7 @@ export interface AggregatableField {
 }
 
 export type NonAggregatableField = Omit<AggregatableField, 'stats'>;
+
 export interface OverallStats {
   totalCount: number;
   aggregatableExistsFields: AggregatableField[];

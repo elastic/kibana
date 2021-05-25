@@ -29,3 +29,7 @@ export const JOB_FIELD_TYPES = {
   TEXT: 'text',
   UNKNOWN: 'unknown',
 } as const;
+
+// Default sampler shard size used for field histograms
+export const DEFAULT_SAMPLER_SHARD_SIZE = 5000;
+export const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];

@@ -15,6 +15,7 @@ import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { FileUploadPluginStart } from '../../file_upload/public';
 import type { MapsStartApi } from '../../maps/public';
 import type { SecurityPluginSetup } from '../../security/public';
+import type { LensPublicStart } from '../../lens/public';
 import { getFileDataVisualizerComponent } from './api';
 import { getMaxBytesFormatted } from './application/util/get_max_bytes';
 
@@ -27,6 +28,7 @@ export interface FileDataVisualizerStartDependencies {
   embeddable: EmbeddableStart;
   security?: SecurityPluginSetup;
   share: SharePluginStart;
+  lens: LensPublicStart;
 }
 
 export type FileDataVisualizerPluginSetup = ReturnType<FileDataVisualizerPlugin['setup']>;

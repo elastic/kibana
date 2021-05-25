@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-// @remove
-export interface CombinedQuery {
-  searchString: string | { [key: string]: any };
-  searchQueryLanguage: string;
-}
+export const DATA_VISUALIZER_INDEX_VIEWER = 'DATA_VISUALIZER_INDEX_VIEWER';
