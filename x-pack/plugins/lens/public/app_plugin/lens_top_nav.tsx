@@ -257,7 +257,9 @@ export const LensTopNavMenu = ({
           trackUiEvent('app_query_change');
         }
         if (newQuery) {
-          dispatchSetState({ query: newQuery });
+          if (!_.isEqual(newQuery, query)) {
+            dispatchSetState({ query: newQuery });
+          }
         }
       }}
       onSaved={(newSavedQuery) => {

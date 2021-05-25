@@ -7,7 +7,6 @@
 
 import { EditorFrameProps } from './index';
 import { Document } from '../../persistence/saved_object_store';
-import { TableInspectorAdapter } from '../types';
 
 export interface PreviewState {
   visualization: {
@@ -23,7 +22,6 @@ export interface EditorFrameState extends PreviewState {
   description?: string;
   stagedPreview?: PreviewState;
   activeDatasourceId: string | null;
-  activeData?: TableInspectorAdapter;
 }
 
 export type Action =
