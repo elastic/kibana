@@ -524,6 +524,7 @@ function buildSuggestion({
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction || 'None',
     curveType: currentState?.curveType,
+    fillOpacity: currentState?.fillOpacity,
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,
     yRightTitle: currentState?.yRightTitle,
