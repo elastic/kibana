@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrService } from 'test/functional/ftr_provider_context';
+import { FtrService } from '../../ftr_provider_context';
 
 export class ManagementMenuService extends FtrService {
   private readonly find = this.ctx.getService('find');
