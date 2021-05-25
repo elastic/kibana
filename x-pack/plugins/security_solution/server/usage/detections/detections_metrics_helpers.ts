@@ -85,7 +85,7 @@ export const updateDetectionRuleUsage = (
         enabled: detectionRuleMetric.enabled ? usage.query.enabled + 1 : usage.query.enabled,
         disabled: !detectionRuleMetric.enabled ? usage.query.disabled + 1 : usage.query.disabled,
         alerts: usage.query.alerts + detectionRuleMetric.alert_count_daily,
-        cases: usage.query.cases + detectionRuleMetric.cases_count_daily,
+        cases: usage.query.cases + detectionRuleMetric.cases_count_total,
       },
     };
   } else if (detectionRuleMetric.rule_type === 'threshold') {
@@ -100,7 +100,7 @@ export const updateDetectionRuleUsage = (
           ? usage.threshold.disabled + 1
           : usage.threshold.disabled,
         alerts: usage.threshold.alerts + detectionRuleMetric.alert_count_daily,
-        cases: usage.threshold.cases + detectionRuleMetric.cases_count_daily,
+        cases: usage.threshold.cases + detectionRuleMetric.cases_count_total,
       },
     };
   } else if (detectionRuleMetric.rule_type === 'eql') {
@@ -111,7 +111,7 @@ export const updateDetectionRuleUsage = (
         enabled: detectionRuleMetric.enabled ? usage.eql.enabled + 1 : usage.eql.enabled,
         disabled: !detectionRuleMetric.enabled ? usage.eql.disabled + 1 : usage.eql.disabled,
         alerts: usage.eql.alerts + detectionRuleMetric.alert_count_daily,
-        cases: usage.eql.cases + detectionRuleMetric.cases_count_daily,
+        cases: usage.eql.cases + detectionRuleMetric.cases_count_total,
       },
     };
   } else if (detectionRuleMetric.rule_type === 'machine_learning') {
@@ -126,7 +126,7 @@ export const updateDetectionRuleUsage = (
           ? usage.machine_learning.disabled + 1
           : usage.machine_learning.disabled,
         alerts: usage.machine_learning.alerts + detectionRuleMetric.alert_count_daily,
-        cases: usage.machine_learning.cases + detectionRuleMetric.cases_count_daily,
+        cases: usage.machine_learning.cases + detectionRuleMetric.cases_count_total,
       },
     };
   } else if (detectionRuleMetric.rule_type === 'threat_match') {
@@ -141,7 +141,7 @@ export const updateDetectionRuleUsage = (
           ? usage.threat_match.disabled + 1
           : usage.threat_match.disabled,
         alerts: usage.threat_match.alerts + detectionRuleMetric.alert_count_daily,
-        cases: usage.threat_match.cases + detectionRuleMetric.cases_count_daily,
+        cases: usage.threat_match.cases + detectionRuleMetric.cases_count_total,
       },
     };
   }
@@ -158,7 +158,7 @@ export const updateDetectionRuleUsage = (
           ? updatedUsage.elastic_total.disabled + 1
           : updatedUsage.elastic_total.disabled,
         alerts: updatedUsage.elastic_total.alerts + detectionRuleMetric.alert_count_daily,
-        cases: updatedUsage.elastic_total.cases + detectionRuleMetric.cases_count_daily,
+        cases: updatedUsage.elastic_total.cases + detectionRuleMetric.cases_count_total,
       },
     };
   } else {
@@ -173,7 +173,7 @@ export const updateDetectionRuleUsage = (
           ? updatedUsage.custom_total.disabled + 1
           : updatedUsage.custom_total.disabled,
         alerts: updatedUsage.custom_total.alerts + detectionRuleMetric.alert_count_daily,
-        cases: updatedUsage.custom_total.cases + detectionRuleMetric.cases_count_daily,
+        cases: updatedUsage.custom_total.cases + detectionRuleMetric.cases_count_total,
       },
     };
   }
@@ -263,7 +263,7 @@ export const getDetectionRuleMetrics = async (
           created_on: hit._source?.alert.createdAt,
           updated_on: hit._source?.alert.updatedAt,
           alert_count_daily: alertsCache.get(ruleId) || 0,
-          cases_count_daily: casesCache.get(ruleId) || 0,
+          cases_count_total: casesCache.get(ruleId) || 0,
         } as DetectionRuleMetric;
       });
 
