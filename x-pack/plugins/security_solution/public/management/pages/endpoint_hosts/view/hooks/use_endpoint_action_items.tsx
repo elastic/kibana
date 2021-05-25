@@ -45,6 +45,10 @@ export const useEndpointActionItems = (
         name: 'endpointIsolate',
         selected_endpoint: endpointId,
       });
+      const endpointUnIsolatePath = getEndpointDetailsPath({
+        name: 'endpointUnIsolate',
+        selected_endpoint: endpointId,
+      });
 
       return [
         isIsolated
@@ -54,9 +58,9 @@ export const useEndpointActionItems = (
               key: 'unIsolateHost',
               navigateAppId: MANAGEMENT_APP_ID,
               navigateOptions: {
-                path: endpointIsolatePath,
+                path: endpointUnIsolatePath,
               },
-              href: formatUrl(endpointIsolatePath),
+              href: formatUrl(endpointUnIsolatePath),
               children: (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.actions.unIsolateHost"
