@@ -238,16 +238,14 @@ function FormulaHelp({
         responsive={false}
         alignItems="stretch"
       >
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem className="lnsFormula__docsSidebar" grow={1}>
           <EuiFlexGroup
+            className="lnsFormula__docsSidebarInner"
             direction="column"
             gutterSize="none"
-            responsive={false}
-            className="lnsFormula__docsSidebar"
           >
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem className="lnsFormula__docsSearch" grow={false}>
               <EuiFieldSearch
-                className="lnsFormula__docsSearch"
                 value={searchText}
                 onChange={(e) => {
                   setSearchText(e.target.value);
@@ -257,7 +255,8 @@ function FormulaHelp({
                 })}
               />
             </EuiFlexItem>
-            <EuiFlexItem className="lnsFormula__docsNav" grow={true}>
+
+            <EuiFlexItem className="lnsFormula__docsNav">
               {helpGroups.map((helpGroup, index) => {
                 return (
                   <nav className="lnsFormula__docsNavGroup" key={helpGroup.label}>
