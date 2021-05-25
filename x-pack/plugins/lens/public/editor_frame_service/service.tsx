@@ -146,7 +146,6 @@ export class EditorFrameService {
                 initialVisualizationId={
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }
-                key={doc?.savedObjectId} // ensures rerendering when switching to another visualization inside of lens (eg global search)
                 core={core}
                 plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
