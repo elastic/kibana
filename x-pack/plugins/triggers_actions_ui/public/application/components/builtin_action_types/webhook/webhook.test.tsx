@@ -30,7 +30,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('webhook connector validation', () => {
-  test('connector validation succeeds when hasAuth is true and connector config is valid', () => {
+  test('connector validation succeeds when hasAuth is true and connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -48,7 +48,7 @@ describe('webhook connector validation', () => {
       },
     } as WebhookActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           url: [],
@@ -64,7 +64,7 @@ describe('webhook connector validation', () => {
     });
   });
 
-  test('connector validation succeeds when hasAuth is false and connector config is valid', () => {
+  test('connector validation succeeds when hasAuth is false and connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         user: '',
@@ -82,7 +82,7 @@ describe('webhook connector validation', () => {
       },
     } as WebhookActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           url: [],
@@ -98,7 +98,7 @@ describe('webhook connector validation', () => {
     });
   });
 
-  test('connector validation fails when connector config is not valid', () => {
+  test('connector validation fails when connector config is not valid', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -112,7 +112,7 @@ describe('webhook connector validation', () => {
       },
     } as WebhookActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           url: ['URL is required.'],
@@ -128,7 +128,7 @@ describe('webhook connector validation', () => {
     });
   });
 
-  test('connector validation fails when url in config is not valid', () => {
+  test('connector validation fails when url in config is not valid', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -144,7 +144,7 @@ describe('webhook connector validation', () => {
       },
     } as WebhookActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           url: ['URL is invalid.'],

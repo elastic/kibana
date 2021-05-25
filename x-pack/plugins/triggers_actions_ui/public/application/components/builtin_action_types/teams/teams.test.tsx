@@ -29,7 +29,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('teams connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         webhookUrl: 'https:\\test',
@@ -40,7 +40,7 @@ describe('teams connector validation', () => {
       config: {},
     } as TeamsActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {},
       },
@@ -52,7 +52,7 @@ describe('teams connector validation', () => {
     });
   });
 
-  test('connector validation fails when connector config is not valid - empty webhook url', () => {
+  test('connector validation fails when connector config is not valid - empty webhook url', async () => {
     const actionConnector = {
       secrets: {},
       id: 'test',
@@ -61,7 +61,7 @@ describe('teams connector validation', () => {
       config: {},
     } as TeamsActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {},
       },
@@ -73,7 +73,7 @@ describe('teams connector validation', () => {
     });
   });
 
-  test('connector validation fails when connector config is not valid - invalid webhook url', () => {
+  test('connector validation fails when connector config is not valid - invalid webhook url', async () => {
     const actionConnector = {
       secrets: {
         webhookUrl: 'h',
@@ -84,7 +84,7 @@ describe('teams connector validation', () => {
       config: {},
     } as TeamsActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {},
       },
@@ -96,7 +96,7 @@ describe('teams connector validation', () => {
     });
   });
 
-  test('connector validation fails when connector config is not valid - invalid webhook url protocol', () => {
+  test('connector validation fails when connector config is not valid - invalid webhook url protocol', async () => {
     const actionConnector = {
       secrets: {
         webhookUrl: 'http://insecure',
@@ -107,7 +107,7 @@ describe('teams connector validation', () => {
       config: {},
     } as TeamsActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {},
       },

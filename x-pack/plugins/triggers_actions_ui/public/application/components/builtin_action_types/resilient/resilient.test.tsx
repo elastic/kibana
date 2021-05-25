@@ -29,7 +29,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('resilient connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         apiKeyId: 'email',
@@ -45,7 +45,7 @@ describe('resilient connector validation', () => {
       },
     } as ResilientActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           apiUrl: [],
@@ -61,7 +61,7 @@ describe('resilient connector validation', () => {
     });
   });
 
-  test('connector validation fails when connector config is not valid', () => {
+  test('connector validation fails when connector config is not valid', async () => {
     const actionConnector = ({
       secrets: {
         apiKeyId: 'user',
@@ -72,7 +72,7 @@ describe('resilient connector validation', () => {
       config: {},
     } as unknown) as ResilientActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           apiUrl: ['URL is required.'],

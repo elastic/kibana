@@ -51,11 +51,11 @@ export function validateBaseProperties<ConnectorConfig, ConnectorSecrets>(
   return validationResult;
 }
 
-export function getConnectorErrors<ConnectorConfig, ConnectorSecrets>(
+export async function getConnectorErrors<ConnectorConfig, ConnectorSecrets>(
   connector: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>,
   actionTypeModel: ActionTypeModel
 ) {
-  const connectorValidationResult = actionTypeModel?.validateConnector(connector);
+  const connectorValidationResult = await actionTypeModel?.validateConnector(connector);
   const configErrors = (connectorValidationResult.config
     ? connectorValidationResult.config.errors
     : {}) as IErrorObject;

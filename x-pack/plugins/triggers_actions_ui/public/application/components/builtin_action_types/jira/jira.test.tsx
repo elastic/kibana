@@ -29,7 +29,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('jira connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         email: 'email',
@@ -45,7 +45,7 @@ describe('jira connector validation', () => {
       },
     } as JiraActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           apiUrl: [],
@@ -61,7 +61,7 @@ describe('jira connector validation', () => {
     });
   });
 
-  test('connector validation fails when connector config is not valid', () => {
+  test('connector validation fails when connector config is not valid', async () => {
     const actionConnector = ({
       secrets: {
         email: 'user',
@@ -72,7 +72,7 @@ describe('jira connector validation', () => {
       config: {},
     } as unknown) as JiraActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           apiUrl: ['URL is required.'],

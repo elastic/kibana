@@ -29,7 +29,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('server-log connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector: UserConfiguredActionConnector<{}, {}> = {
       secrets: {},
       id: 'test',
@@ -39,7 +39,7 @@ describe('server-log connector validation', () => {
       isPreconfigured: false,
     };
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {},
       },
