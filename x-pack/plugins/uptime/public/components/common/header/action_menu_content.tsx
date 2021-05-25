@@ -51,9 +51,6 @@ export function ActionMenuContent(): React.ReactElement {
   return (
     <EuiHeaderLinks>
       <EuiHeaderSectionItem>
-        <ToggleAlertFlyoutButton />
-      </EuiHeaderSectionItem>
-      <EuiHeaderSectionItem>
         <EuiButtonEmpty
           aria-label={i18n.translate('xpack.uptime.page_header.settingsLink.label', {
             defaultMessage: 'Navigate to the Uptime settings page',
@@ -68,6 +65,9 @@ export function ActionMenuContent(): React.ReactElement {
         >
           <FormattedMessage id="xpack.uptime.page_header.settingsLink" defaultMessage="Settings" />
         </EuiButtonEmpty>
+      </EuiHeaderSectionItem>
+      <EuiHeaderSectionItem>
+        <ToggleAlertFlyoutButton />
       </EuiHeaderSectionItem>
       <EuiHeaderSectionItem>
         <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
