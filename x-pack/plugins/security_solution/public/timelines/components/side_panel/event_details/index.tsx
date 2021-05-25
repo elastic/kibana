@@ -32,6 +32,7 @@ import {
 } from '../../../../detections/components/host_isolation/translations';
 import { ALERT_DETAILS } from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsolationPrivileges } from '../../../../common/hooks/endpoint/use_isolate_privileges';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -83,6 +84,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     setIsHostIsolationPanel(false);
   }, []);
 
+  const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
   const showHostIsolationPanel = useCallback((action) => {
     if (action === 'isolateHost' || action === 'unisolateHost') {
       setIsHostIsolationPanel(true);
@@ -154,17 +156,20 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           />
         )}
       </StyledEuiFlyoutBody>
-      {isHostIsolationEnabled && isEndpointAlert && isHostIsolationPanelOpen === false && (
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <TakeActionDropdown onChange={showHostIsolationPanel} agentId={agentId} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiSpacer size="l" />
-        </EuiFlyoutFooter>
-      )}
+      {isIsolationAllowed &&
+        isHostIsolationEnabled &&
+        isEndpointAlert &&
+        isHostIsolationPanelOpen === false && (
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <TakeActionDropdown onChange={showHostIsolationPanel} agentId={agentId} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <EuiSpacer size="l" />
+          </EuiFlyoutFooter>
+        )}
     </>
   ) : (
     <>

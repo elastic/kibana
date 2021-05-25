@@ -32,6 +32,7 @@ export const EndpointIsolateSuccess = memo<EndpointIsolateSuccessProps>(
             iconType="check"
             color="success"
             title={GET_ISOLATION_SUCCESS_MESSAGE(hostName)}
+            data-test-subj="hostIsolateSuccessMessage"
           >
             {additionalInfo}
           </EuiCallOut>

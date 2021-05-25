@@ -18,7 +18,7 @@ interface IsolationPriviledgesStatus {
 /*
  * Host isolation requires superuser privileges and at least a platinum license
  */
-export const useIsolationPrivledges = (): IsolationPriviledgesStatus => {
+export const useIsolationPrivileges = (): IsolationPriviledgesStatus => {
   const [isLoading, setIsLoading] = useState(false);
   const [canIsolate, setCanIsolate] = useState(false);
 

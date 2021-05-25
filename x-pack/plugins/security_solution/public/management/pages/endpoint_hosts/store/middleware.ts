@@ -100,7 +100,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       try {
         const decodedQuery: Query = searchBarQuery(getState());
 
-        endpointResponse = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_API);
         endpointResponse = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_API, {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
