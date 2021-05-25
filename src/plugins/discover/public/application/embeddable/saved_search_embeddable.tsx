@@ -45,7 +45,7 @@ export interface SearchProps extends Partial<DiscoverGridProps> {
   description?: string;
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
-  setSortOrder?: (sortPair: SortOrder[]) => void;
+
   filter?: (field: IFieldType, value: string[], operator: string) => void;
   hits?: ElasticSearchHit[];
   totalHitCount?: number;
@@ -251,11 +251,34 @@ export class SavedSearchEmbeddable
       onSetColumns: (columns: string[]) => {
         this.updateInput({ columns });
       },
-      sampleSize: 0,
-      onFilter: () => {},
+      onSort: (sort: string[][]) => {
+        const sortOrderArr: SortOrder[] = [];
+        sort.forEach((arr) => {
+          sortOrderArr.push(arr as SortOrder);
+        });
+        this.updateInput({ sort: sortOrderArr });
+      },
+      sampleSize: 500,
+      onFilter: async (field, value, operator) => {
+        let filters = esFilters.generateFilters(
+          this.filterManager,
+          // @ts-expect-error
+          field,
+          value,
+          operator,
+          indexPattern.id!
+        );
+        filters = filters.map((filter) => ({
+          ...filter,
+          $state: { store: esFilters.FilterStateStore.APP_STATE },
+        }));
+
+        await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+          embeddable: this,
+          filters,
+        });
+      },
       useNewFieldsApi: !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
-      onSort: () => {},
-      onResize: () => {},
       showTimeCol: !this.services.uiSettings.get('doc_table:hideTimeColumn', false),
       ariaLabelledBy: 'documentsAriaLabel',
       useLegacyTable: this.services.uiSettings.get('doc_table:legacy'),
@@ -274,34 +297,11 @@ export class SavedSearchEmbeddable
 
     this.pushContainerStateParamsToProps(props);
 
-    props.setSortOrder = (sort: SortOrder[]) => {
-      this.updateInput({ sort });
-    };
-
     props.isLoading = true;
 
     if (this.savedSearch.grid) {
       props.settings = this.savedSearch.grid;
     }
-
-    props.filter = async (field, value, operator) => {
-      let filters = esFilters.generateFilters(
-        this.filterManager,
-        field,
-        value,
-        operator,
-        indexPattern.id!
-      );
-      filters = filters.map((filter) => ({
-        ...filter,
-        $state: { store: esFilters.FilterStateStore.APP_STATE },
-      }));
-
-      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
-        embeddable: this,
-        filters,
-      });
-    };
   }
 
   private async pushContainerStateParamsToProps(
