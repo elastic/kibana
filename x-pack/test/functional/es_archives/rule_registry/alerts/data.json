@@ -1,0 +1,10 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".alerts-observability-apm",
+    "source": {
+      "message": "hello world 1",
+      "kibana.rac.alert.owner": "apm"
+    }
+  }
+}

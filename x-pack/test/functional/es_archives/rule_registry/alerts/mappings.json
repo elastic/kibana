@@ -1,0 +1,23 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".alerts-observability-apm",
+    "mappings": {
+      "properties": {
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "kibana.rac.alert.owner": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    }
+  }
+}

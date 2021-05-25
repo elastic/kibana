@@ -23,11 +23,16 @@ import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
-  const TEST_URL = '/security-myfakepath';
+  const esArchiver = getService('esArchiver');
+
+  const TEST_URL = '/api/rac/alerts';
   const SPACE1 = 'space1';
   const SPACE2 = 'space2';
 
   describe('rbac', () => {
+    before(async () => {
+      await esArchiver.load('rule_registry/alerts');
+    });
     describe('Users:', () => {
       for (const scenario of [
         { user: superUser },
@@ -39,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]) {
         it(`${scenario.user.username} should be able to access the fake path in ${SPACE1}`, async () => {
           await supertestWithoutAuth
-            .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
+            .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/?id=NoxgpHkBqbdrfX07MqXV`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'true')
             .expect(200);
