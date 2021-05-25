@@ -19,7 +19,7 @@ import {
 import * as scalingConstants from './scaling_constants';
 import { Vector2, CameraState, AABB, Matrix3, CameraAnimationState } from '../../types';
 
-interface ClippingPlanes {
+export interface ClippingPlanes {
   renderWidth: number;
   renderHeight: number;
   clippingPlaneRight: number;

@@ -6,7 +6,7 @@
  */
 
 import { ReactNode } from 'react';
-import { Threats } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
   IIndexPattern,
