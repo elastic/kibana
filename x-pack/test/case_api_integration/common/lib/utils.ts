@@ -954,15 +954,17 @@ export const getAllCasesStatuses = async ({
   supertest,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
+  query = {},
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
+  query?: Record<string, unknown>;
 }): Promise<CasesStatusResponse> => {
   const { body: statuses } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASE_STATUS_URL}`)
     .auth(auth.user.username, auth.user.password)
-    .set('kbn-xsrf', 'true')
+    .query({ ...query })
     .expect(expectedHttpCode);
 
   return statuses;

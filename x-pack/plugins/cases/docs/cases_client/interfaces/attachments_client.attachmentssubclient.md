@@ -34,7 +34,7 @@ Adds an attachment to a case.
 
 **Returns:** *Promise*<[*ICaseResponse*](typedoc_interfaces.icaseresponse.md)\>
 
-Defined in: [attachments/client.ts:25](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/attachments/client.ts#L25)
+Defined in: [attachments/client.ts:25](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/attachments/client.ts#L25)
 
 ___
 
@@ -52,7 +52,7 @@ Deletes a single attachment for a specific case.
 
 **Returns:** *Promise*<void\>
 
-Defined in: [attachments/client.ts:33](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/attachments/client.ts#L33)
+Defined in: [attachments/client.ts:33](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/attachments/client.ts#L33)
 
 ___
 
@@ -70,7 +70,7 @@ Deletes all attachments associated with a single case.
 
 **Returns:** *Promise*<void\>
 
-Defined in: [attachments/client.ts:29](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/attachments/client.ts#L29)
+Defined in: [attachments/client.ts:29](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/attachments/client.ts#L29)
 
 ___
 
@@ -88,7 +88,7 @@ Retrieves all comments matching the search criteria.
 
 **Returns:** *Promise*<[*ICommentsResponse*](typedoc_interfaces.icommentsresponse.md)\>
 
-Defined in: [attachments/client.ts:37](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/attachments/client.ts#L37)
+Defined in: [attachments/client.ts:37](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/attachments/client.ts#L37)
 
 ___
 
@@ -106,7 +106,7 @@ Retrieves a single attachment for a case.
 
 **Returns:** *Promise*<{ `comment`: *string* ; `owner`: *string* ; `type`: user  } & { `associationType`: AssociationType ; `created_at`: *string* ; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `owner`: *string* ; `pushed_at`: ``null`` \| *string* ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| *string* ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: *string* ; `version`: *string*  } & { `alertId`: *string* \| *string*[] ; `index`: *string* \| *string*[] ; `owner`: *string* ; `rule`: { id: string \| null; name: string \| null; } ; `type`: alert \| generatedAlert  } & { `associationType`: AssociationType ; `created_at`: *string* ; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `owner`: *string* ; `pushed_at`: ``null`` \| *string* ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| *string* ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: *string* ; `version`: *string*  }\>
 
-Defined in: [attachments/client.ts:45](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/attachments/client.ts#L45)
+Defined in: [attachments/client.ts:45](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/attachments/client.ts#L45)
 
 ___
 
@@ -124,7 +124,7 @@ Gets all attachments for a single case.
 
 **Returns:** *Promise*<[*IAllCommentsResponse*](typedoc_interfaces.iallcommentsresponse.md)\>
 
-Defined in: [attachments/client.ts:41](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/attachments/client.ts#L41)
+Defined in: [attachments/client.ts:41](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/attachments/client.ts#L41)
 
 ___
 
@@ -144,4 +144,4 @@ The request must include all fields for the attachment. Even the fields that are
 
 **Returns:** *Promise*<[*ICaseResponse*](typedoc_interfaces.icaseresponse.md)\>
 
-Defined in: [attachments/client.ts:51](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/attachments/client.ts#L51)
+Defined in: [attachments/client.ts:51](https://github.com/jonathan-buttner/kibana/blob/2085a3b4480/x-pack/plugins/cases/server/client/attachments/client.ts#L51)
