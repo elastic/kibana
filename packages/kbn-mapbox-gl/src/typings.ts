@@ -6,9 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-
-import { pageObjects } from './page_objects';
-import { services } from './services';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+// Mapbox-gl doesn't declare this type.
+declare module 'mapbox-gl/dist/mapbox-gl-csp';
