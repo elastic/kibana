@@ -20,7 +20,7 @@ import {
   AppUpdater,
   AppStatus,
   AppNavLinkStatus,
-  AppSearchDeepLink,
+  AppDeepLink,
 } from '../../../core/public';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -38,22 +38,20 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
-    const deepLinks: AppSearchDeepLink[] = Object.values(
-      this.managementSections.definedSections
-    ).map((section: ManagementSection) => ({
-      id: section.id,
-      title: section.title,
-      searchDeepLinks: section.getAppsEnabled().map((mgmtApp) => ({
-        id: mgmtApp.id,
-        title: mgmtApp.title,
-        path: mgmtApp.basePath,
-        meta: { ...mgmtApp.meta },
-      })),
-    }));
+    const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
+      (section: ManagementSection) => ({
+        id: section.id,
+        title: section.title,
+        deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
+          id: mgmtApp.id,
+          title: mgmtApp.title,
+          path: mgmtApp.basePath,
+          keywords: mgmtApp.keywords,
+        })),
+      })
+    );
 
-    return {
-      meta: { searchDeepLinks: deepLinks },
-    };
+    return { deepLinks };
   });
 
   private hasAnyEnabledApps = true;
