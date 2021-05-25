@@ -35,4 +35,5 @@ export {
   validatePackagePolicyConfig,
   validationHasErrors,
   countValidationErrors,
+  getStreamsForInputType,
 } from '../../../../common';
