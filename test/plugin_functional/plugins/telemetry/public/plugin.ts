@@ -19,6 +19,10 @@ export class TelemetryTestPlugin implements Plugin {
       await telemetry.telemetryService.setOptIn(true);
       return telemetry.telemetryService.canSendTelemetry();
     };
+
+    window._resetTelemetry = async () => {
+      await telemetry.telemetryService.setOptIn(false);
+    };
   }
   start() {}
 }

@@ -1,7 +1,7 @@
 {
-  "name": "usage_collection_test_plugin",
+  "name": "telemetry_test_plugin",
   "version": "1.0.0",
-  "main": "target/test/plugin_functional/plugins/usage_collection",
+  "main": "target/test/plugin_functional/plugins/telemetry",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"

@@ -23,9 +23,16 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
     };
 
-    after(async () => browser.removeLocalStorageItem(KBN_SCREENSHOT_MODE_ENABLED_KEY));
+    after(async () => {
+      await browser.removeLocalStorageItem(KBN_SCREENSHOT_MODE_ENABLED_KEY);
+      await browser.executeAsync<void>((cb) => {
+        ((window as unknown) as Record<string, () => Promise<boolean>>)
+          ._resetTelemetry()
+          .then(() => cb());
+      });
+    });
 
-    it('does not send telemetry when in screenshot mode', async () => {
+    it('detects that telemetry cannot be sent in screenshot mode', async () => {
       await PageObjects.common.navigateToApp('home');
       expect(await checkCanSendTelemetry()).to.be(true);
 
