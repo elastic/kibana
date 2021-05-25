@@ -34,7 +34,7 @@ interface CalloutVisibility {
 function CaseCallOutComponent({ title, messages = [] }: CaseCallOutProps) {
   const { getMessages, addMessage } = useMessagesStorage();
 
-  const caseMessages = useMemo(() => getMessages('case'), [getMessages]);
+  const caseMessages = useMemo(() => getMessages('observability'), [getMessages]);
   const dismissedCallouts = useMemo(
     () =>
       caseMessages.reduce<CalloutVisibility>(
@@ -52,7 +52,7 @@ function CaseCallOutComponent({ title, messages = [] }: CaseCallOutProps) {
     (id, type) => {
       setCalloutVisibility((prevState) => ({ ...prevState, [id]: false }));
       if (type === 'primary') {
-        addMessage('case', id);
+        addMessage('observability', id);
       }
     },
     [setCalloutVisibility, addMessage]
