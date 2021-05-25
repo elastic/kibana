@@ -113,7 +113,7 @@ export const renderApp = ({
         <Router history={history}>
           <EuiThemeProvider darkMode={isDarkMode}>
             <i18nCore.Context>
-              <RedirectAppLinks application={core.application} className="kbnAppWrapper">
+              <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
                 <HasDataContextProvider>
                   <App />
                 </HasDataContextProvider>
