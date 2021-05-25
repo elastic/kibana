@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -40,7 +41,6 @@ import type {
 } from '../../triggers_actions_ui/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
-import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -193,6 +193,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
+      navLinkStatus: config.ui.enabled
+        ? AppNavLinkStatus.default
+        : AppNavLinkStatus.hidden,
       meta: {
         keywords: [
           'RUM',
@@ -231,7 +234,5 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     return {};
   }
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    toggleAppLinkInNav(core, this.initializerContext.config.get());
-  }
+  public start(core: CoreStart, plugins: ApmPluginStartDeps) {}
 }
