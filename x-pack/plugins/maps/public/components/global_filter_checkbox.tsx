@@ -6,10 +6,16 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 
-export function GlobalFilterCheckbox({ applyGlobalQuery, label, setApplyGlobalQuery }) {
-  const onApplyGlobalQueryChange = (event) => {
+interface Props {
+  applyGlobalQuery: boolean;
+  label: string;
+  setApplyGlobalQuery: (applyGlobalQuery: boolean) => void;
+}
+
+export function GlobalFilterCheckbox({ applyGlobalQuery, label, setApplyGlobalQuery }: Props) {
+  const onApplyGlobalQueryChange = (event: EuiSwitchEvent) => {
     setApplyGlobalQuery(event.target.checked);
   };
 

@@ -42,7 +42,7 @@ import { getTopNavConfig } from '../top_nav_config';
 import { MapRefreshConfig, MapQuery } from '../../../../common/descriptor_types';
 import { goToSpecifiedPath } from '../../../render_app';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { getExistingMapPath } from '../../../../common/constants';
+import { getExistingMapPath, APP_ID } from '../../../../common/constants';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
@@ -355,7 +355,7 @@ export class MapApp extends React.Component<Props, State> {
     return (
       <TopNavMenu
         setMenuMountPoint={this.props.setHeaderActionMenu}
-        appName="maps"
+        appName={APP_ID}
         config={topNavConfig}
         indexPatterns={this.state.indexPatterns}
         filters={this.props.filters}
