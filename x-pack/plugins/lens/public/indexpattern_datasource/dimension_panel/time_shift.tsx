@@ -15,7 +15,11 @@ import React, { useEffect, useState } from 'react';
 import { Query } from 'src/plugins/data/public';
 import { search } from '../../../../../../src/plugins/data/public';
 import { parseTimeShift } from '../../../../../../src/plugins/data/common';
-import { IndexPatternColumn, operationDefinitionMap } from '../operations';
+import {
+  adjustTimeScaleLabelSuffix,
+  IndexPatternColumn,
+  operationDefinitionMap,
+} from '../operations';
 import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { FramePublicAPI } from '../../types';
@@ -31,12 +35,23 @@ export function setTimeShift(
   layer: IndexPatternLayer,
   timeShift: string | undefined
 ) {
+  const currentColumn = layer.columns[columnId];
+  const label = currentColumn.customLabel
+    ? currentColumn.label
+    : adjustTimeScaleLabelSuffix(
+        currentColumn.label,
+        currentColumn.timeScale,
+        currentColumn.timeScale,
+        currentColumn.timeShift,
+        timeShift
+      );
   return {
     ...layer,
     columns: {
       ...layer.columns,
       [columnId]: {
         ...layer.columns[columnId],
+        label,
         timeShift,
       },
     },
@@ -206,10 +221,10 @@ export function TimeShift({
         display="columnCompressed"
         fullWidth
         label={i18n.translate('xpack.lens.indexPattern.timeShift.label', {
-          defaultMessage: 'Shift in time',
+          defaultMessage: 'Time shift',
         })}
         helpText={i18n.translate('xpack.lens.indexPattern.timeShift.help', {
-          defaultMessage: 'Time shift is specified by a number followed by a time unit',
+          defaultMessage: 'Enter the time shift number and unit',
         })}
         error={
           (localValueTooSmall &&

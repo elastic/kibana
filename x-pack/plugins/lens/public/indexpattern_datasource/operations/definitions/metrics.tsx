@@ -54,10 +54,13 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
-    if (!optionalTimeScaling) {
-      return label;
-    }
-    return adjustTimeScaleLabelSuffix(label, undefined, column?.timeScale);
+    return adjustTimeScaleLabelSuffix(
+      label,
+      undefined,
+      optionalTimeScaling ? column?.timeScale : undefined,
+      undefined,
+      column?.timeShift
+    );
   };
 
   return {

@@ -21,14 +21,21 @@ import {
   getSafeName,
   getFilter,
 } from './helpers';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 
-function ofName(name: string) {
-  return i18n.translate('xpack.lens.indexPattern.lastValueOf', {
-    defaultMessage: 'Last value of {name}',
-    values: {
-      name,
-    },
-  });
+function ofName(name: string, timeShift: string | undefined) {
+  return adjustTimeScaleLabelSuffix(
+    i18n.translate('xpack.lens.indexPattern.lastValueOf', {
+      defaultMessage: 'Last value of {name}',
+      values: {
+        name,
+      },
+    }),
+    undefined,
+    undefined,
+    undefined,
+    timeShift
+  );
 }
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
@@ -96,7 +103,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
     defaultMessage: 'Last value',
   }),
-  getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
+  getDefaultLabel: (column, indexPattern) =>
+    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
@@ -107,7 +115,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(field.displayName),
+      label: ofName(field.displayName, oldColumn.timeShift),
       sourceField: field.name,
       params: newParams,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
@@ -160,7 +168,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     }
 
     return {
-      label: ofName(field.displayName),
+      label: ofName(field.displayName, previousColumn?.timeShift),
       dataType: field.type as DataType,
       operationType: 'last_value',
       isBucketed: false,

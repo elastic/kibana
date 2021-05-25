@@ -489,7 +489,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               },
               {
                 title: i18n.translate('xpack.lens.indexPattern.timeShift.label', {
-                  defaultMessage: 'Shift in time',
+                  defaultMessage: 'Time shift',
                 }),
                 dataTestSubj: 'indexPattern-time-shift-enable',
                 onClick: () => {

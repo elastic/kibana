@@ -38,7 +38,13 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: adjustTimeScaleLabelSuffix(field.displayName, undefined, oldColumn.timeScale),
+      label: adjustTimeScaleLabelSuffix(
+        field.displayName,
+        undefined,
+        oldColumn.timeScale,
+        undefined,
+        oldColumn.timeShift
+      ),
       sourceField: field.name,
     };
   },
@@ -51,10 +57,23 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       };
     }
   },
-  getDefaultLabel: (column) => adjustTimeScaleLabelSuffix(countLabel, undefined, column.timeScale),
+  getDefaultLabel: (column) =>
+    adjustTimeScaleLabelSuffix(
+      countLabel,
+      undefined,
+      column.timeScale,
+      undefined,
+      column.timeShift
+    ),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: adjustTimeScaleLabelSuffix(countLabel, undefined, previousColumn?.timeScale),
+      label: adjustTimeScaleLabelSuffix(
+        countLabel,
+        undefined,
+        previousColumn?.timeScale,
+        undefined,
+        previousColumn?.timeShift
+      ),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
