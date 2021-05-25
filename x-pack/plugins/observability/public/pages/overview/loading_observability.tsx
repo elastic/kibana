@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ObservabilityHeader } from '../../components/app/header';
+import { ObservabilityHeaderMenu } from '../../components/app/header';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 
 export function LoadingObservability() {
@@ -16,7 +16,7 @@ export function LoadingObservability() {
 
   return (
     <ObservabilityPageTemplate template="centeredBody">
-      <ObservabilityHeader />
+      <ObservabilityHeaderMenu />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="xl" />

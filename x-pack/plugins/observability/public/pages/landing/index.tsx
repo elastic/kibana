@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { FleetPanel } from '../../components/app/fleet_panel';
-import { ObservabilityHeader } from '../../components/app/header';
+import { ObservabilityHeaderMenu } from '../../components/app/header';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTrackPageview } from '../../hooks/use_track_metric';
 import { appsSection } from '../home/section';
@@ -39,7 +39,7 @@ export function LandingPage() {
 
   return (
     <ObservabilityPageTemplate restrictWidth={1200}>
-      <ObservabilityHeader />
+      <ObservabilityHeaderMenu />
       <EuiFlexGroup direction="column">
         {/* title and description */}
         <EuiFlexItem className="obsLanding__title">
