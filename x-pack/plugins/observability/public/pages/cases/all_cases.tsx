@@ -13,7 +13,7 @@ import * as i18n from '../../components/app/cases/translations';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 
 import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../../components/app/cases/callout';
-import { CaseSavedObjectNoPermissions } from './saved_object_no_permissions';
+import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_cases_user_permissions';
 
 export const AllCasesPage = React.memo(() => {
@@ -39,7 +39,7 @@ export const AllCasesPage = React.memo(() => {
       </EuiPageTemplate>
     </>
   ) : (
-    <CaseSavedObjectNoPermissions />
+    <CaseFeatureNoPermissions />
   );
 });
 

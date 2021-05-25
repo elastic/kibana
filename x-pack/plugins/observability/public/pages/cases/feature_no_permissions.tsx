@@ -11,7 +11,7 @@ import { EmptyPage } from './empty_page';
 import * as i18n from '../../components/app/cases/translations';
 import { useKibana } from '../../utils/kibana_react';
 
-export const CaseSavedObjectNoPermissions = React.memo(() => {
+export const CaseFeatureNoPermissions = React.memo(() => {
   const docLinks = useKibana().services.docLinks;
   const actions = useMemo(
     () => ({
@@ -28,11 +28,11 @@ export const CaseSavedObjectNoPermissions = React.memo(() => {
   return (
     <EmptyPage
       actions={actions}
-      message={i18n.SAVED_OBJECT_NO_PERMISSIONS_MSG}
-      data-test-subj="no_saved_objects_permissions"
-      title={i18n.SAVED_OBJECT_NO_PERMISSIONS_TITLE}
+      message={i18n.CASES_FEATURE_NO_PERMISSIONS_MSG}
+      data-test-subj="no_feature_permissions"
+      title={i18n.CASES_FEATURE_NO_PERMISSIONS_TITLE}
     />
   );
 });
 
-CaseSavedObjectNoPermissions.displayName = 'CaseSavedObjectNoPermissions';
+CaseFeatureNoPermissions.displayName = 'CaseSavedObjectNoPermissions';

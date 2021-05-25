@@ -110,9 +110,9 @@ describe('CaseCallOut ', () => {
     );
 
     const id = createCalloutId(['message-one']);
-    expect(securityLocalStorageMock.getMessages).toHaveBeenCalledWith('case');
+    expect(securityLocalStorageMock.getMessages).toHaveBeenCalledWith('observability');
     wrapper.find(`[data-test-subj="callout-dismiss-${id}"]`).last().simulate('click');
-    expect(securityLocalStorageMock.addMessage).toHaveBeenCalledWith('case', id);
+    expect(securityLocalStorageMock.addMessage).toHaveBeenCalledWith('observability', id);
   });
 
   it('do not show the callout if is in the localStorage', () => {
