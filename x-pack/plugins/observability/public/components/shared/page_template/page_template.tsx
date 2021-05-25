@@ -35,12 +35,15 @@ export type WrappedPageTemplateProps = Pick<
     { template: KibanaPageTemplateProps['template'] }
   >;
 
-export type ObservabilityPageTemplateProps = {
+export interface ObservabilityPageTemplateDependencies {
   currentAppId$: Observable<string | undefined>;
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToApp: ApplicationStart['navigateToApp'];
   navigationSections$: Observable<NavigationSection[]>;
-} & WrappedPageTemplateProps;
+}
+
+export type ObservabilityPageTemplateProps = ObservabilityPageTemplateDependencies &
+  WrappedPageTemplateProps;
 
 export function ObservabilityPageTemplate({
   children,

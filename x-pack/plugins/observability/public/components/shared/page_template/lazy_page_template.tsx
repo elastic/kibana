@@ -6,14 +6,18 @@
  */
 
 import React from 'react';
-import type { WrappedPageTemplateProps } from './page_template';
-import { ObservabilitySideNavProps } from './side_nav';
+import type {
+  ObservabilityPageTemplateDependencies,
+  WrappedPageTemplateProps,
+} from './page_template';
 
 export const LazyObservabilityPageTemplate = React.lazy(() => import('./page_template'));
 
 export type LazyObservabilityPageTemplateProps = WrappedPageTemplateProps;
 
-export function createLazyObservabilityPageTemplate(injectedDeps: ObservabilitySideNavProps) {
+export function createLazyObservabilityPageTemplate(
+  injectedDeps: ObservabilityPageTemplateDependencies
+) {
   return (pageTemplateProps: LazyObservabilityPageTemplateProps) => (
     <React.Suspense fallback={null}>
       <LazyObservabilityPageTemplate {...pageTemplateProps} {...injectedDeps} />
