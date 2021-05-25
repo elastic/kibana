@@ -406,12 +406,10 @@ describe('CoreUsageDataService', () => {
           elasticsearch,
         });
 
-        await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                          Object {
-                            "pluginA.enabled": "[redacted]",
-                            "pluginAB.enabled": "[redacted]",
-                          }
-                      `);
+        await expect(getConfigsUsageData()).resolves.toEqual({
+          'pluginA.enabled': '[redacted]',
+          'pluginAB.enabled': '[redacted]',
+        });
       });
 
       it('returns an object of plugin config usage', async () => {
@@ -443,23 +441,21 @@ describe('CoreUsageDataService', () => {
           elasticsearch,
         });
 
-        await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                          Object {
-                            "elasticsearch.password": "[redacted]",
-                            "elasticsearch.username": "[redacted]",
-                            "logging.json": false,
-                            "pluginA.arrayOfNumbers": "[redacted]",
-                            "pluginA.enabled": true,
-                            "pluginA.objectConfig.debug": true,
-                            "pluginA.objectConfig.username": "[redacted]",
-                            "pluginAB.enabled": false,
-                            "pluginB.arrayOfObjects": "[redacted]",
-                            "plugins.paths": "[redacted]",
-                            "server.basePath": "/zvt",
-                            "server.port": 5603,
-                            "server.rewriteBasePath": true,
-                          }
-                      `);
+        await expect(getConfigsUsageData()).resolves.toEqual({
+          'elasticsearch.password': '[redacted]',
+          'elasticsearch.username': '[redacted]',
+          'logging.json': false,
+          'pluginA.arrayOfNumbers': '[redacted]',
+          'pluginA.enabled': true,
+          'pluginA.objectConfig.debug': true,
+          'pluginA.objectConfig.username': '[redacted]',
+          'pluginAB.enabled': false,
+          'pluginB.arrayOfObjects': '[redacted]',
+          'plugins.paths': '[redacted]',
+          'server.basePath': '/zvt',
+          'server.port': 5603,
+          'server.rewriteBasePath': true,
+        });
       });
 
       describe('config explicitly exposed to usage', () => {
@@ -482,12 +478,10 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "pluginA.objectConfig.debug": "[redacted]",
-                                "server.basePath": "[redacted]",
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginA.objectConfig.debug': '[redacted]',
+            'server.basePath': '[redacted]',
+          });
         });
 
         it('returns config value on safe complete match', async () => {
@@ -503,11 +497,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "server.basePath": "/zvt",
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'server.basePath': '/zvt',
+          });
         });
 
         it('returns [redacted] on unsafe parent match', async () => {
@@ -526,12 +518,10 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "pluginA.objectConfig.debug": "[redacted]",
-                                "pluginA.objectConfig.username": "[redacted]",
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginA.objectConfig.debug': '[redacted]',
+            'pluginA.objectConfig.username': '[redacted]',
+          });
         });
 
         it('returns config value on safe parent match', async () => {
@@ -550,12 +540,10 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "pluginA.objectConfig.debug": true,
-                                "pluginA.objectConfig.username": "some_user",
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginA.objectConfig.debug': true,
+            'pluginA.objectConfig.username': 'some_user',
+          });
         });
 
         it('returns [redacted] on explicitly marked as safe array of objects', async () => {
@@ -571,11 +559,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "pluginB.arrayOfObjects": "[redacted]",
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginB.arrayOfObjects': '[redacted]',
+          });
         });
 
         it('returns values on explicitly marked as safe array of numbers', async () => {
@@ -591,15 +577,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "pluginA.arrayOfNumbers": Array [
-                                  1,
-                                  2,
-                                  3,
-                                ],
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginA.arrayOfNumbers': [1, 2, 3],
+          });
         });
 
         it('returns values on explicitly marked as safe array of strings', async () => {
@@ -615,15 +595,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "plugins.paths": Array [
-                                  "pluginA",
-                                  "pluginAB",
-                                  "pluginB",
-                                ],
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'plugins.paths': ['pluginA', 'pluginAB', 'pluginB'],
+          });
         });
       });
 
@@ -644,12 +618,10 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "pluginA.objectConfig.debug": "[redacted]",
-                                "pluginA.objectConfig.username": "[redacted]",
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginA.objectConfig.debug': '[redacted]',
+            'pluginA.objectConfig.username': '[redacted]',
+          });
         });
 
         it('returns config value on safe parent match', async () => {
@@ -665,13 +637,11 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "elasticsearch.password": "[redacted]",
-                                "elasticsearch.username": "[redacted]",
-                                "pluginA.objectConfig.username": "[redacted]",
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'elasticsearch.password': '[redacted]',
+            'elasticsearch.username': '[redacted]',
+            'pluginA.objectConfig.username': '[redacted]',
+          });
         });
 
         it('returns [redacted] on implicit array of objects', async () => {
@@ -683,11 +653,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "pluginB.arrayOfObjects": "[redacted]",
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginB.arrayOfObjects': '[redacted]',
+          });
         });
 
         it('returns values on implicit array of numbers', async () => {
@@ -699,16 +667,11 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "pluginA.arrayOfNumbers": Array [
-                                  1,
-                                  2,
-                                  3,
-                                ],
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'pluginA.arrayOfNumbers': [1, 2, 3],
+          });
         });
+
         it('returns [redacted] on implicit array of strings', async () => {
           configService.getUsedPaths.mockResolvedValue(['plugins.paths']);
 
@@ -718,11 +681,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "plugins.paths": "[redacted]",
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'plugins.paths': '[redacted]',
+          });
         });
 
         it('returns config value for numbers', async () => {
@@ -734,11 +695,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "server.port": 5603,
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'server.port': 5603,
+          });
         });
 
         it('returns config value for booleans', async () => {
@@ -753,12 +712,10 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "logging.json": false,
-                                "pluginA.objectConfig.debug": true,
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'logging.json': false,
+            'pluginA.objectConfig.debug': true,
+          });
         });
 
         it('ignores exposed to usage configs but not used', async () => {
@@ -774,11 +731,9 @@ describe('CoreUsageDataService', () => {
             elasticsearch,
           });
 
-          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
-                              Object {
-                                "logging.json": false,
-                              }
-                          `);
+          await expect(getConfigsUsageData()).resolves.toEqual({
+            'logging.json': false,
+          });
         });
       });
     });
