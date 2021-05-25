@@ -15,6 +15,7 @@ import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   FIRST_ARIA_INDEX,
+  onKeyDownFocusHandler,
 } from '@kbn/securitysolution-t-grid';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import {
@@ -42,7 +43,6 @@ import { tGridActions } from '../../../types';
 import { TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
-import { onKeyDownFocusHandler } from '../../accessibility';
 
 interface OwnProps {
   activePage: number;

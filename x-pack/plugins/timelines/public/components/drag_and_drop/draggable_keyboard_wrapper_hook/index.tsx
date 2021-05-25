@@ -12,7 +12,7 @@ import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
 
 import { draggableKeyDownHandler } from '../helpers';
 
-interface Props {
+export interface UseDraggableKeyboardWrapperProps {
   closePopover?: () => void;
   draggableId: string;
   fieldName: string;
@@ -31,7 +31,7 @@ export const useDraggableKeyboardWrapper = ({
   fieldName,
   keyboardHandlerRef,
   openPopover,
-}: Props): UseDraggableKeyboardWrapper => {
+}: UseDraggableKeyboardWrapperProps): UseDraggableKeyboardWrapper => {
   const { beginDrag, cancelDrag, dragToLocation, endDrag, hasDraggableLock } = useAddToTimeline({
     draggableId,
     fieldName,

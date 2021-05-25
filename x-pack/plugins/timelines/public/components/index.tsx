@@ -10,32 +10,32 @@ import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
 import { getReduxDeps } from '../store/t_grid';
 
-import { TGrid } from './tgrid';
+import { TGrid as TGridComponent } from './tgrid';
 import { TGridProps } from '../types';
 
-export const Timeline = (props: TGridProps) => {
+export const TGrid = (props: TGridProps) => {
   const reduxStuff = getReduxDeps(props.type);
+  console.log('TGrid', props.type);
   if (props.type === 'standalone') {
     return (
       <Provider store={reduxStuff}>
         <I18nProvider>
-          <TGrid {...props} />
+          <TGridComponent {...props} />
         </I18nProvider>
       </Provider>
     );
   } else {
     return (
       <I18nProvider>
-        <TGrid {...props} />
+        <TGridComponent {...props} />
       </I18nProvider>
     );
   }
 };
 
 // eslint-disable-next-line import/no-default-export
-export { Timeline as default };
+export { TGrid as default };
 
-export * from './accessibility';
 export * from './drag_and_drop';
 export * from './draggables';
 export * from './last_updated';

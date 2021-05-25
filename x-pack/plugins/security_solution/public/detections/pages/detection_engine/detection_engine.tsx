@@ -11,7 +11,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { isTab } from '@kbn/securitysolution-t-grid';
+import { isTab } from '../../../../../timelines/public';
 
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';

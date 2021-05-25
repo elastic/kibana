@@ -14,7 +14,6 @@ import {
   EuiSearchBarProps,
 } from '@elastic/eui';
 import { History } from 'history';
-import { LastUpdatedAt } from '@kbn/securitysolution-t-grid';
 
 import { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
@@ -62,7 +61,7 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
   ({ formatUrl, history, hasNoPermissions, loading }) => {
     const {
-      services: { http, notifications },
+      services: { http, notifications, timelines },
     } = useKibana();
     const { exportExceptionList, deleteExceptionList } = useApi(http);
 
@@ -344,7 +343,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
             <HeaderSection
               split
               title={i18n.ALL_EXCEPTIONS}
-              subtitle={<LastUpdatedAt showUpdating={loading} updatedAt={lastUpdated} />}
+              subtitle={timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}
             >
               {!initLoading && <ExceptionsSearchBar onSearch={handleSearch} />}
             </HeaderSection>

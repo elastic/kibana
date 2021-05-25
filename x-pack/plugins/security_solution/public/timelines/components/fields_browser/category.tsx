@@ -12,12 +12,12 @@ import styled from 'styled-components';
 
 import {
   arrayIndexToAriaIndex,
+  onKeyDownFocusHandler,
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
 } from '@kbn/securitysolution-t-grid';
 import { BrowserFields } from '../../../common/containers/source';
 import { OnUpdateColumns } from '../timeline/events';
-import { useKibana } from '../../lib/kibana';
 
 import { CategoryTitle } from './category_title';
 import { FieldItem, getFieldColumns } from './field_items';
@@ -54,10 +54,9 @@ interface Props {
 export const Category = React.memo<Props>(
   ({ categoryId, filteredBrowserFields, fieldItems, onUpdateColumns, timelineId, width }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
-    const { timelines } = useKibana().services;
     const onKeyDown = useCallback(
       (keyboardEvent: React.KeyboardEvent) => {
-        timelines.getOnKeyDownFocusHandler({
+        onKeyDownFocusHandler({
           colindexAttribute: DATA_COLINDEX_ATTRIBUTE,
           containerElement: containerElement?.current,
           event: keyboardEvent,
@@ -67,7 +66,7 @@ export const Category = React.memo<Props>(
           rowindexAttribute: DATA_ROWINDEX_ATTRIBUTE,
         });
       },
-      [fieldItems.length, timelines]
+      [fieldItems.length]
     );
 
     const fieldItemsWithRowindex = useMemo(

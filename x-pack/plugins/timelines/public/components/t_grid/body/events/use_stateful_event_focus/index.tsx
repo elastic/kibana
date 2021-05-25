@@ -6,14 +6,13 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-
 import {
+  focusColumn,
   isArrowDownOrArrowUp,
   isArrowUp,
   isEscape,
-  focusColumn,
   OnColumnFocused,
-} from '@kbn/securitysolution-t-grid';
+} from '../../../../../../common';
 
 type FocusOwnership = 'not-owned' | 'owned';
 

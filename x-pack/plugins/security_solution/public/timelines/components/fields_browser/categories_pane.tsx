@@ -10,8 +10,11 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useRef } from 'react';
 import styled from 'styled-components';
 
-import { DATA_COLINDEX_ATTRIBUTE, DATA_ROWINDEX_ATTRIBUTE } from '@kbn/securitysolution-t-grid';
-import { useKibana } from '../../lib/kibana';
+import {
+  DATA_COLINDEX_ATTRIBUTE,
+  DATA_ROWINDEX_ATTRIBUTE,
+  onKeyDownFocusHandler,
+} from '../../../../../timelines/public';
 import { BrowserFields } from '../../../common/containers/source';
 
 import { getCategoryColumns } from './category_columns';
@@ -63,10 +66,9 @@ interface Props {
 export const CategoriesPane = React.memo<Props>(
   ({ filteredBrowserFields, onCategorySelected, selectedCategoryId, timelineId, width }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
-    const { timelines } = useKibana().services;
     const onKeyDown = useCallback(
       (e: React.KeyboardEvent) => {
-        timelines.getOnKeyDownFocusHandler({
+        onKeyDownFocusHandler({
           colindexAttribute: DATA_COLINDEX_ATTRIBUTE,
           containerElement: containerElement?.current,
           event: e,
@@ -76,7 +78,7 @@ export const CategoriesPane = React.memo<Props>(
           rowindexAttribute: DATA_ROWINDEX_ATTRIBUTE,
         });
       },
-      [containerElement, filteredBrowserFields, timelines]
+      [containerElement, filteredBrowserFields]
     );
 
     return (

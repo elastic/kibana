@@ -20,7 +20,6 @@ import {
   EuiPagination,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { LoadingPanel, LastUpdatedAt } from '@kbn/securitysolution-t-grid';
 import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -31,6 +30,8 @@ import * as i18n from './translations';
 import { OnChangePage } from '../types';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import { LoadingPanel } from '../../loading';
+import { LastUpdatedAt } from '../../last_updated';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 

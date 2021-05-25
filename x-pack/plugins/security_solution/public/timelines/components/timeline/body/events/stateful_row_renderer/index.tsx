@@ -13,7 +13,7 @@ import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   getRowRendererClassName,
-} from '@kbn/securitysolution-t-grid';
+} from '../../../../../../../../timelines/public';
 import { RowRenderer } from '../../../../../../../common';
 import { BrowserFields } from '../../../../../../common/containers/source';
 import { TimelineItem } from '../../../../../../../common/search_strategy/timeline';

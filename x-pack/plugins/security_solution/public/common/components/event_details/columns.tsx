@@ -21,7 +21,7 @@ import { get, isEmpty } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import styled from 'styled-components';
-import { onFocusReFocusDraggable } from '@kbn/securitysolution-t-grid';
+import { onFocusReFocusDraggable } from '../../../../../timelines/public';
 import { BrowserFields } from '../../containers/source';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';

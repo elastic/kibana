@@ -11,7 +11,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import * as i18n from './translations';
 
-interface LastUpdatedAtProps {
+export interface LastUpdatedAtProps {
   compact?: boolean;
   updatedAt: number;
   showUpdating?: boolean;
@@ -82,3 +82,6 @@ export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(
 );
 
 LastUpdatedAt.displayName = 'LastUpdatedAt';
+
+// eslint-disable-next-line import/no-default-export
+export { LastUpdatedAt as default };

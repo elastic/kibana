@@ -6,8 +6,16 @@
  */
 
 import { ReactElement } from 'react';
+import { SensorAPI } from 'react-beautiful-dnd';
 import { Store } from 'redux';
+import {
+  LastUpdatedAtProps,
+  LoadingPanelProps,
+  UseDraggableKeyboardWrapper,
+  UseDraggableKeyboardWrapperProps,
+} from './components';
 import { TGridIntegratedProps } from './components/t_grid/integrated';
+import { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
 import { tGridActions } from './store/t_grid';
 import { tGridReducer } from './store/t_grid/reducer';
 import { TimelineState } from './store/t_grid/types';
@@ -18,13 +26,13 @@ export interface TimelinesPluginSetup {
   getCreatedTgridStore?: (
     type: 'standalone' | 'embedded'
   ) => ReduxDeps | ((type: 'standalone' | 'embedded') => Store);
-  getLoading: () => any;
-  getLastUpdated: () => any;
-  getDraggables: () => any;
-  getDragAndDrop: () => any;
-  getOnKeyDownFocusHandler: () => any;
-  getUseAddToTimelineSensor: () => any;
-  getOnFocusReFocusDraggable: () => any;
+  getLoadingPanel: (props: LoadingPanelProps) => ReactElement<LoadingPanelProps>;
+  getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
+  getUseAddToTimeline: () => (props: UseAddToTimelineProps) => UseAddToTimeline;
+  getUseAddToTimelineSensor: () => (api: SensorAPI) => void;
+  getUseDraggableKeyboardWrapper: () => (
+    props: UseDraggableKeyboardWrapperProps
+  ) => UseDraggableKeyboardWrapper;
 }
 export interface ReduxDeps {
   actions: typeof tGridActions;

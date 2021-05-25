@@ -16,7 +16,8 @@ import {
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   isTab,
-} from '@kbn/securitysolution-t-grid';
+  onKeyDownFocusHandler,
+} from '../../../../../timelines/public';
 
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
@@ -24,7 +25,6 @@ import { BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { getColumnHeaders } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { useKibana } from '../../lib/kibana';
 import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -93,7 +93,6 @@ export const EventFieldsBrowser = React.memo<Props>(
     const dispatch = useDispatch();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
-    const { timelines } = useKibana().services;
     const items = useMemo(
       () =>
         sortBy(['field'], data).map((item, i) => ({
@@ -194,7 +193,7 @@ export const EventFieldsBrowser = React.memo<Props>(
             onSkipFocusAfterEventsTable: focusAddTimelineButton,
           });
         } else {
-          timelines.getOnKeyDownFocusHandler({
+          onKeyDownFocusHandler({
             colindexAttribute: DATA_COLINDEX_ATTRIBUTE,
             containerElement: containerElement?.current,
             event: keyboardEvent,
@@ -205,7 +204,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           });
         }
       },
-      [data, focusAddTimelineButton, focusSearchInput, timelines]
+      [data, focusAddTimelineButton, focusSearchInput]
     );
 
     useEffect(() => {

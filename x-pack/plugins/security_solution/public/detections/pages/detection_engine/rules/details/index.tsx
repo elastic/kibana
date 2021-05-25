@@ -27,9 +27,9 @@ import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { isTab } from '@kbn/securitysolution-t-grid';
-
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+
+import { isTab } from '../../../../../../../timelines/public';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,

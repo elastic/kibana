@@ -6,9 +6,9 @@
  */
 
 import { FluidDragActions, Position } from 'react-beautiful-dnd';
-import { KEYBOARD_DRAG_OFFSET } from '../../constants';
+import { KEYBOARD_DRAG_OFFSET } from '@kbn/securitysolution-t-grid';
 
-import { stopPropagationAndPreventDefault } from '../accessibility/helpers';
+import { stopPropagationAndPreventDefault } from '../../../common';
 
 /**
  * Temporarily disables tab focus on child links of the draggable to work
@@ -32,18 +32,7 @@ export const temporarilyDisableInteractiveChildTabIndexes = (draggableElement: H
   }, 0);
 };
 
-export const draggableKeyDownHandler = ({
-  beginDrag,
-  cancelDragActions,
-  closePopover,
-  draggableElement,
-  dragActions,
-  dragToLocation,
-  endDrag,
-  keyboardEvent,
-  openPopover,
-  setDragActions,
-}: {
+export interface DraggableKeyDownHandlerProps {
   beginDrag: () => FluidDragActions | null;
   cancelDragActions: () => void;
   closePopover?: () => void;
@@ -61,7 +50,20 @@ export const draggableKeyDownHandler = ({
   endDrag: (dragActions: FluidDragActions | null) => void;
   openPopover?: () => void;
   setDragActions: (value: React.SetStateAction<FluidDragActions | null>) => void;
-}) => {
+}
+
+export const draggableKeyDownHandler = ({
+  beginDrag,
+  cancelDragActions,
+  closePopover,
+  draggableElement,
+  dragActions,
+  dragToLocation,
+  endDrag,
+  keyboardEvent,
+  openPopover,
+  setDragActions,
+}: DraggableKeyDownHandlerProps) => {
   let currentPosition: DOMRect | null = null;
 
   switch (keyboardEvent.key) {

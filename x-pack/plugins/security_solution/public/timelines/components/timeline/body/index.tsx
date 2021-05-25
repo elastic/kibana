@@ -15,7 +15,7 @@ import {
   FIRST_ARIA_INDEX,
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
-} from '@kbn/securitysolution-t-grid';
+} from '../../../../../../timelines/public';
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import {
@@ -42,6 +42,7 @@ import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface OwnProps {
   activePage: number;

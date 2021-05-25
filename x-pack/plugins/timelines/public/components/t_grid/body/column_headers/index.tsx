@@ -7,7 +7,6 @@
 import deepEqual from 'fast-deep-equal';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
-import { DraggableFieldBadge } from '@kbn/securitysolution-t-grid';
 
 import {
   ControlColumnProps,
@@ -32,6 +31,7 @@ import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/types/drag_and_drop';
+import { DraggableFieldBadge } from '../../../draggables';
 
 interface Props {
   actionsColumnWidth: number;

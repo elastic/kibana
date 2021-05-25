@@ -17,3 +17,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 export * from './types';
 export * as TGridActions from './store/t_grid/actions';
+export * from '../common/utils/accessibility';

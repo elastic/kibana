@@ -13,7 +13,7 @@ import {
   EMPTY_PROVIDERS_GROUP_CLASS_NAME,
   HIGHLIGHTED_DROP_TARGET_CLASS_NAME,
   IS_DRAGGING_CLASS_NAME,
-} from '../constants';
+} from '@kbn/securitysolution-t-grid';
 
 let _sensorApiSingleton: SensorAPI;
 
@@ -122,16 +122,7 @@ export const animate = ({
   });
 };
 
-/**
- * This hook animates a draggable data provider to the timeline
- */
-export const useAddToTimeline = ({
-  draggableId,
-  fieldName,
-}: {
-  draggableId: DraggableId | undefined;
-  fieldName: string;
-}): {
+export interface UseAddToTimeline {
   beginDrag: () => FluidDragActions | null;
   cancelDrag: (dragActions: FluidDragActions | null) => void;
   dragToLocation: ({
@@ -144,7 +135,20 @@ export const useAddToTimeline = ({
   endDrag: (dragActions: FluidDragActions | null) => void;
   hasDraggableLock: () => boolean;
   startDragToTimeline: () => void;
-} => {
+}
+
+export interface UseAddToTimelineProps {
+  draggableId: DraggableId | undefined;
+  fieldName: string;
+}
+
+/**
+ * This hook animates a draggable data provider to the timeline
+ */
+export const useAddToTimeline = ({
+  draggableId,
+  fieldName,
+}: UseAddToTimelineProps): UseAddToTimeline => {
   const startDragToTimeline = useCallback(() => {
     if (_sensorApiSingleton == null) {
       throw new TypeError(

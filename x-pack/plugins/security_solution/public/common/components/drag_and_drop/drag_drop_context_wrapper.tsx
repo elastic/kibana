@@ -100,10 +100,7 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const getDataProviders = useMemo(() => dragAndDropSelectors.getDataProvidersSelector(), []);
   const { timelines } = useKibana().services;
-  const useAddToTimelineSensor = useMemo(() => {
-    return timelines ? timelines.getUseAddToTimelineSensor() : null;
-  }, [timelines]);
-  const sensors = [useAddToTimelineSensor];
+  const sensors = [timelines.getUseAddToTimelineSensor()];
   const {
     dataProviders: activeTimelineDataProviders,
     timelineType,

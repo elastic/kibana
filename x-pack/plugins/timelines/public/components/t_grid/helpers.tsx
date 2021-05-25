@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { isEmpty, get } from 'lodash/fp';
+import memoizeOne from 'memoize-one';
 import {
   elementOrChildrenHasFocus,
   getFocusedAriaColindexCell,
   getTableSkipFocus,
   handleSkipFocus,
   stopPropagationAndPreventDefault,
-} from '@kbn/securitysolution-t-grid';
-import { isEmpty, get } from 'lodash/fp';
-import memoizeOne from 'memoize-one';
+} from '../../../common';
 import {
   EsQueryConfig,
   Filter,

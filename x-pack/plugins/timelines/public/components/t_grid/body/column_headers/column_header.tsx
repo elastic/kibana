@@ -13,10 +13,7 @@ import deepEqual from 'fast-deep-equal';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import {
-  DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
-  useDraggableKeyboardWrapper,
-} from '@kbn/securitysolution-t-grid';
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
 
@@ -31,6 +28,7 @@ import { tGridActions } from '../../../../store/t_grid';
 import { ColumnHeaderOptions, TimelineTabs } from '../../../../../common/types/timeline';
 import { Direction } from '../../../../../common/search_strategy';
 import { getDraggableFieldId } from '../../../../../common/types/drag_and_drop';
+import { useDraggableKeyboardWrapper } from '../../../drag_and_drop';
 
 const ContextMenu = styled(EuiContextMenu)`
   width: 115px;

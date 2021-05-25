@@ -6,11 +6,11 @@
  */
 import { CoreSetup, Plugin, PluginInitializerContext } from '../../../../src/core/public';
 import { TimelinesPluginSetup, TGridProps } from './types';
-import { getTimelineLazy } from './methods';
+import { getLastUpdatedLazy, getLoadingPanelLazy, getTGridLazy } from './methods';
 import { tGridActions, getReduxDeps, tGridSelectors } from './store/t_grid';
 import { initialTGridState, tGridReducer } from './store/t_grid/reducer';
-import { useAddToTimelineSensor } from './hooks/use_add_to_timeline';
-import { onKeyDownFocusHandler } from './components/accessibility';
+import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
+import { LastUpdatedAtProps, LoadingPanelProps, useDraggableKeyboardWrapper } from './components';
 
 export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -18,12 +18,12 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
   public setup(core: CoreSetup): TimelinesPluginSetup {
     const config = this.initializerContext.config.get<{ enabled: boolean }>();
     if (!config.enabled) {
-      return {};
+      return {} as TimelinesPluginSetup;
     }
 
     return {
       getTGrid: (props: TGridProps) => {
-        return getTimelineLazy(props);
+        return getTGridLazy(props);
       },
       getTimelineStore: () => {
         return {
@@ -36,23 +36,20 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
       getCreatedTgridStore: (type: TGridProps['type']) => {
         return getReduxDeps(type);
       },
+      getLoadingPanel: (props: LoadingPanelProps) => {
+        return getLoadingPanelLazy(props);
+      },
+      getLastUpdated: (props: LastUpdatedAtProps) => {
+        return getLastUpdatedLazy(props);
+      },
+      getUseAddToTimeline: () => {
+        return useAddToTimeline;
+      },
       getUseAddToTimelineSensor: () => {
         return useAddToTimelineSensor;
       },
-      getLoading: () => {
-
-      },
-      getLastUpdated: () => {
-
-      },
-      getDraggables: () => {
-
-      },
-      getDragAndDrop: () => {
-
-      },
-      getOnKeyDownFocusHandler: () => {
-        return onKeyDownFocusHandler;
+      getUseDraggableKeyboardWrapper: () => {
+        return useDraggableKeyboardWrapper;
       },
     };
   }
@@ -63,8 +60,8 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
       return {};
     }
     return {
-      getTimeline: (props: TGridProps) => {
-        return getTimelineLazy(props);
+      getTGrid: (props: TGridProps) => {
+        return getTGridLazy(props);
       },
       getTimelineStore: () => {
         return {
@@ -75,6 +72,21 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
       },
       getCreatedTgridStore: (type: TGridProps['type']) => {
         return getReduxDeps(type);
+      },
+      getLoadingPanel: (props: LoadingPanelProps) => {
+        return getLoadingPanelLazy(props);
+      },
+      getLastUpdated: (props: LastUpdatedAtProps) => {
+        return getLastUpdatedLazy(props);
+      },
+      getUseAddToTimeline: () => {
+        return useAddToTimeline;
+      },
+      getUseAddToTimelineSensor: () => {
+        return useAddToTimelineSensor;
+      },
+      getUseDraggableKeyboardWrapper: () => {
+        return useDraggableKeyboardWrapper;
       },
     };
   }

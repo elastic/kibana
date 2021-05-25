@@ -13,7 +13,7 @@ import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   getRowRendererClassName,
-} from '@kbn/securitysolution-t-grid';
+} from '../../../../../../common';
 import { useStatefulEventFocus } from '../use_stateful_event_focus';
 
 import * as i18n from '../translations';

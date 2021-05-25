@@ -15,7 +15,7 @@ import {
   getTableSkipFocus,
   handleSkipFocus,
   stopPropagationAndPreventDefault,
-} from '@kbn/securitysolution-t-grid';
+} from '../../../../../timelines/public';
 import { BrowserField, BrowserFields } from '../../containers/source';
 import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,

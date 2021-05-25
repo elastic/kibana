@@ -6,4 +6,3 @@
  */
 
 export * from './helpers';
-export * from './tooltip_with_keyboard_shortcut';

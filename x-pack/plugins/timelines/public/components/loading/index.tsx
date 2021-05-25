@@ -15,7 +15,8 @@ const SpinnerFlexItem = styled(EuiFlexItem)`
 
 SpinnerFlexItem.displayName = 'SpinnerFlexItem';
 
-interface LoadingProps {
+export interface LoadingPanelProps {
+  dataTestSubj?: string;
   text: string;
   height: number | string;
   showBorder?: boolean;
@@ -24,8 +25,9 @@ interface LoadingProps {
   position?: string;
 }
 
-export const LoadingPanel = React.memo<LoadingProps>(
+export const LoadingPanel = React.memo<LoadingPanelProps>(
   ({
+    dataTestSubj = '',
     height = 'auto',
     showBorder = true,
     text,
@@ -41,7 +43,10 @@ export const LoadingPanel = React.memo<LoadingProps>(
       zIndex={zIndex}
     >
       <LoadingStaticContentPanel>
-        <EuiPanel className={showBorder ? '' : 'euiPanel-loading-hide-border'}>
+        <EuiPanel
+          data-test-subj={dataTestSubj}
+          className={showBorder ? '' : 'euiPanel-loading-hide-border'}
+        >
           <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
             <SpinnerFlexItem grow={false}>
               <EuiLoadingSpinner size="m" />
@@ -88,3 +93,6 @@ export const LoadingStaticContentPanel = styled.div`
 `;
 
 LoadingStaticContentPanel.displayName = 'LoadingStaticContentPanel';
+
+// eslint-disable-next-line import/no-default-export
+export { LoadingPanel as default };

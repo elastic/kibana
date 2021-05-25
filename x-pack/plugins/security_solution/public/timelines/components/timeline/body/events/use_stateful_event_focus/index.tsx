@@ -13,7 +13,7 @@ import {
   isEscape,
   focusColumn,
   OnColumnFocused,
-} from '@kbn/securitysolution-t-grid';
+} from '../../../../../../../../timelines/public';
 
 type FocusOwnership = 'not-owned' | 'owned';
 
