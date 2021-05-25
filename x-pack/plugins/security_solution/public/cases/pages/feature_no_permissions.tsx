@@ -11,14 +11,14 @@ import { EmptyPage } from '../../common/components/empty_page';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
 
-export const CaseSavedObjectNoPermissions = React.memo(() => {
+export const CaseFeatureNoPermissions = React.memo(() => {
   const docLinks = useKibana().services.docLinks;
   const actions = useMemo(
     () => ({
-      savedObject: {
+      feature: {
         icon: 'documents',
         label: i18n.GO_TO_DOCUMENTATION,
-        url: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${docLinks.DOC_LINK_VERSION}s`,
+        url: `${docLinks.links.siem.gettingStarted}`,
         target: '_blank',
       },
     }),
@@ -28,11 +28,11 @@ export const CaseSavedObjectNoPermissions = React.memo(() => {
   return (
     <EmptyPage
       actions={actions}
-      message={i18n.SAVED_OBJECT_NO_PERMISSIONS_MSG}
-      data-test-subj="no_saved_objects_permissions"
-      title={i18n.SAVED_OBJECT_NO_PERMISSIONS_TITLE}
+      message={i18n.CASES_FEATURE_NO_PERMISSIONS_MSG}
+      data-test-subj="no_feature_permissions"
+      title={i18n.CASES_FEATURE_NO_PERMISSIONS_TITLE}
     />
   );
 });
 
-CaseSavedObjectNoPermissions.displayName = 'CaseSavedObjectNoPermissions';
+CaseFeatureNoPermissions.displayName = 'CaseFeatureNoPermissions';

@@ -13,7 +13,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { AllCases } from '../components/all_cases';
 
 import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../components/callout';
-import { CaseSavedObjectNoPermissions } from './saved_object_no_permissions';
+import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { SecurityPageName } from '../../app/types';
 
 export const CasesPage = React.memo(() => {
@@ -33,7 +33,7 @@ export const CasesPage = React.memo(() => {
       <SpyRoute pageName={SecurityPageName.case} />
     </>
   ) : (
-    <CaseSavedObjectNoPermissions />
+    <CaseFeatureNoPermissions />
   );
 });
 
