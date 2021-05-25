@@ -17,7 +17,11 @@ export interface StatusFilterProps {
 
 export function StatusFilter({ status = 'open', onChange }: StatusFilterProps) {
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup
+      aria-label={i18n.translate('xpack.observability.alerts.statusFilterAriaLabel', {
+        defaultMessage: 'Filter alerts by active and recovered status',
+      })}
+    >
       <EuiFilterButton
         data-test-subj="StatusFilter open button"
         hasActiveFilters={status === 'open'}
