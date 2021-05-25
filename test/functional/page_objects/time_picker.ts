@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import { FtrProviderContext } from '../ftr_provider_context.d';
+import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export type CommonlyUsed =
