@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { IndexDataVisualizerViewProps, IndexDataVisualizerView } from './index_datavisualizer_view';
+export interface GetTimeFieldRangeResponse {
+  success: boolean;
+  start: { epoch: number; string: string };
+  end: { epoch: number; string: string };
+}

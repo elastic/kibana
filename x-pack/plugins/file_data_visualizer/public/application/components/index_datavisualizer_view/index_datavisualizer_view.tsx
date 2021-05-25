@@ -22,6 +22,7 @@ import {
 import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Required } from 'utility-types';
+import { i18n } from '@kbn/i18n';
 import {
   IndexPatternField,
   KBN_FIELD_TYPES,
@@ -29,22 +30,13 @@ import {
   esKuery,
   UI_SETTINGS,
   Query,
+  IndexPattern,
+  IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/public';
-import { NavigationMenu } from '../../components/navigation_menu';
-import { DatePickerWrapper } from '../../components/navigation_menu/date_picker_wrapper';
-import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
-import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
-import { useMlContext } from '../../contexts/ml';
-import { kbnTypeToMLJobType } from '../../util/field_types_utils';
-import { useNotifications, useTimefilter } from '../../contexts/kibana';
 import { getQueryFromSavedSearch } from '../../util/index_utils';
-import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { usePageUrlState, useUrlState } from '../../util/url_state';
-import { ActionsPanel } from './components/actions_panel';
-import { SearchPanel } from './components/search_panel';
 import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
-import { DataLoader } from './data_loader';
 import { FieldVisConfig } from '../stats_table/types';
 import type {
   MetricFieldsStats,
@@ -60,6 +52,20 @@ import { FieldRequestConfig, JobFieldType, SavedSearchSavedObject } from '../../
 import { useFileDataVisualizerKibana } from '../../kibana_context';
 import { FieldCountPanel } from '../field_count_panel';
 import { DocumentCountContent } from '../document_count_content';
+import { DataLoader } from '../../data_loader/data_loader';
+import { JOB_FIELD_TYPES } from '../../../../common';
+import { useTimefilter } from '../../hooks/kibana_services';
+import { kbnTypeToJobType } from '../../util/field_types_utils';
+import { SearchPanel } from '../search_panel';
+import { ActionsPanel } from '../actions_panel';
+import { DatePickerWrapper } from '../date_picker_wrapper';
+import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
+import { HelpMenu } from '../help_menu';
+
+export interface Refresh {
+  lastRefresh: number;
+  timeRange?: { start: string; end: string };
+}
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -110,28 +116,49 @@ export const getDefaultDataVisualizerListState = (): Required<DataVisualizerInde
   showEmptyFields: false,
 });
 
-export const IndexDataVisualizerView: FC = () => {
-  const mlContext = useMlContext();
+export interface IndexDataVisualizerViewProps {
+  combinedQuery: any;
+  currentIndexPattern: IndexPattern; // TODO this should be IndexPattern or null
+  currentSavedSearch: SavedSearchSavedObject | null;
+  indexPatterns: IndexPatternsContract;
+  kibanaConfig: any; // IUiSettingsClient;
+}
+
+export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
   const restorableDefaults = getDefaultDataVisualizerListState();
+
   const {
-    services: { lens: lensPlugin, docLinks },
+    services: { lens: lensPlugin, docLinks, notifications, uiSettings },
   } = useFileDataVisualizerKibana();
+  const { toasts } = notifications;
 
   const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(
     DATA_VISUALIZER_INDEX_VIEWER,
     restorableDefaults
   );
-  const [currentSavedSearch, setCurrentSavedSearch] = useState(mlContext.currentSavedSearch);
+  const [currentSavedSearch, setCurrentSavedSearch] = useState(
+    dataVisualizerProps.currentSavedSearch
+  );
 
-  const { combinedQuery, currentIndexPattern, kibanaConfig } = mlContext;
+  const { combinedQuery, currentIndexPattern, kibanaConfig } = dataVisualizerProps;
+
+  const getTimeBuckets = useCallback(() => {
+    return new TimeBuckets({
+      [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+      dateFormat: uiSettings.get('dateFormat'),
+      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+    });
+  }, [uiSettings]);
+
   const timefilter = useTimefilter({
     timeRangeSelector: currentIndexPattern.timeFieldName !== undefined,
     autoRefreshSelector: true,
   });
 
-  const { toasts } = useNotifications();
   const dataLoader = useMemo(() => new DataLoader(currentIndexPattern, toasts), [
     currentIndexPattern,
+    toasts,
   ]);
 
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -142,36 +169,41 @@ export const IndexDataVisualizerView: FC = () => {
         to: globalState.time.to,
       });
     }
-  }, [globalState?.time?.from, globalState?.time?.to]);
+  }, [globalState.time, globalState.time.from, globalState.time.to, timefilter]);
+
   useEffect(() => {
     if (globalState?.refreshInterval !== undefined) {
       timefilter.setRefreshInterval(globalState.refreshInterval);
     }
-  }, [globalState?.refreshInterval?.pause, globalState?.refreshInterval?.value]);
+  }, [
+    globalState?.refreshInterval?.pause,
+    globalState?.refreshInterval?.value,
+    globalState.refreshInterval,
+    timefilter,
+  ]);
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
   useEffect(() => {
     if (!currentIndexPattern.isTimeBased()) {
-      // toastNotifications.addWarning({
-      //   title: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationTitle', {
-      //     defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
-      //     values: { indexPatternTitle: currentIndexPattern.title },
-      //   }),
-      //   text: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationDescription', {
-      //     defaultMessage: 'Anomaly detection only runs over time-based indices',
-      //   }),
-      //
-      // })
+      toasts.addWarning({
+        title: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationTitle', {
+          defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
+          values: { indexPatternTitle: currentIndexPattern.title },
+        }),
+        text: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationDescription', {
+          defaultMessage: 'Anomaly detection only runs over time-based indices',
+        }),
+      });
     }
-  }, [currentIndexPattern]);
+  }, [currentIndexPattern, toasts]);
 
   // Obtain the list of non metric field types which appear in the index pattern.
   let indexedFieldTypes: JobFieldType[] = [];
   const indexPatternFields: IndexPatternField[] = currentIndexPattern.fields;
   indexPatternFields.forEach((field) => {
     if (field.scripted !== true) {
-      const dataVisualizerType: JobFieldType | undefined = kbnTypeToMLJobType(field);
+      const dataVisualizerType: JobFieldType | undefined = kbnTypeToJobType(field);
       if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
         indexedFieldTypes.push(dataVisualizerType);
       }
@@ -376,7 +408,7 @@ export const IndexDataVisualizerView: FC = () => {
 
     // Obtain the interval to use for date histogram aggregations
     // (such as the document count chart). Aim for 75 bars.
-    const buckets = getTimeBucketsFromCache();
+    const buckets = getTimeBuckets();
 
     const tf = timefilter as any;
     let earliest: number | undefined;
@@ -499,7 +531,7 @@ export const IndexDataVisualizerView: FC = () => {
     }
   }
 
-  function createMetricCards() {
+  const createMetricCards = useCallback(() => {
     const configs: FieldVisConfig[] = [];
     const aggregatableExistsFields: any[] = overallStats.aggregatableExistsFields || [];
 
@@ -519,7 +551,7 @@ export const IndexDataVisualizerView: FC = () => {
     // Add a config for 'document count', identified by no field name if indexpattern is time based.
     if (currentIndexPattern.timeFieldName !== undefined) {
       configs.push({
-        type: ML_JOB_FIELD_TYPES.NUMBER,
+        type: JOB_FIELD_TYPES.NUMBER,
         existsInDocs: true,
         loading: true,
         aggregatable: true,
@@ -547,7 +579,7 @@ export const IndexDataVisualizerView: FC = () => {
       const metricConfig: FieldVisConfig = {
         ...(fieldData ? fieldData : {}),
         fieldFormat: currentIndexPattern.getFormatterForField(field),
-        type: ML_JOB_FIELD_TYPES.NUMBER,
+        type: JOB_FIELD_TYPES.NUMBER,
         loading: true,
         aggregatable: true,
       };
@@ -560,9 +592,16 @@ export const IndexDataVisualizerView: FC = () => {
       visibleMetricsCount: metricFieldsToShow.length,
     });
     setMetricConfigs(configs);
-  }
+  }, [
+    currentIndexPattern,
+    dataLoader,
+    indexPatternFields,
+    metricsLoaded,
+    overallStats,
+    showEmptyFields,
+  ]);
 
-  function createNonMetricCards() {
+  const createNonMetricCards = useCallback(() => {
     const allNonMetricFields = indexPatternFields.filter((f) => {
       return (
         f.type !== KBN_FIELD_TYPES.NUMBER &&
@@ -627,7 +666,7 @@ export const IndexDataVisualizerView: FC = () => {
 
       // Map the field type from the Kibana index pattern to the field type
       // used in the data visualizer.
-      const dataVisualizerType = kbnTypeToMLJobType(field);
+      const dataVisualizerType = kbnTypeToJobType(field);
       if (dataVisualizerType !== undefined) {
         nonMetricConfig.type = dataVisualizerType;
       } else {
@@ -641,7 +680,14 @@ export const IndexDataVisualizerView: FC = () => {
     });
 
     setNonMetricConfigs(configs);
-  }
+  }, [
+    currentIndexPattern,
+    dataLoader,
+    indexPatternFields,
+    nonMetricsLoaded,
+    overallStats,
+    showEmptyFields,
+  ]);
 
   const wizardPanelWidth = '280px';
 
@@ -697,7 +743,7 @@ export const IndexDataVisualizerView: FC = () => {
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentIndexPattern, searchQuery]
+    [currentIndexPattern, searchQueryLanguage, searchString]
   );
 
   // Inject custom action column for the index based visualizer
@@ -724,7 +770,6 @@ export const IndexDataVisualizerView: FC = () => {
   const helpLink = docLinks.links.ml.guide;
   return (
     <Fragment>
-      <NavigationMenu tabId="datavisualizer" />
       <EuiPage data-test-subj="mlPageIndexDataVisualizer">
         <EuiPageBody>
           <EuiFlexGroup gutterSize="m">
@@ -743,6 +788,7 @@ export const IndexDataVisualizerView: FC = () => {
                           indexPattern={currentIndexPattern}
                           query={combinedQuery}
                           disabled={false}
+                          timefilter={timefilter}
                         />
                       </EuiFlexItem>
                     )}
@@ -814,7 +860,7 @@ export const IndexDataVisualizerView: FC = () => {
         </EuiPageBody>
       </EuiPage>
 
-      {/* @todo <HelpMenu docLink={helpLink} />*/}
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

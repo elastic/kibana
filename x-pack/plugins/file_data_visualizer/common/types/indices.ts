@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { IndexDataVisualizerViewProps, IndexDataVisualizerView } from './index_datavisualizer_view';
+import { estypes } from '@elastic/elasticsearch';
+
+export interface IndicesOptions {
+  allow_no_indices?: boolean;
+  expand_wildcards?: estypes.ExpandWildcards;
+  ignore_unavailable?: boolean;
+}

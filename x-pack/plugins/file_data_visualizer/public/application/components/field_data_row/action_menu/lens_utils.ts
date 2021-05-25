@@ -6,12 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ML_JOB_FIELD_TYPES } from '../../../../../../../common/constants/field_types';
-import type { TypedLensByValueInput } from '../../../../../../../../lens/public';
-import type { FieldVisConfig } from '../../../../stats_table/types';
-import type { IndexPatternColumn, XYLayerConfig } from '../../../../../../../../lens/public';
-import type { CombinedQuery } from '../../../common';
-import type { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import type { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import type { CombinedQuery } from '../../../types/combined_query';
+import type {
+  IndexPatternColumn,
+  TypedLensByValueInput,
+  XYLayerConfig,
+} from '../../../../../../lens/public';
+import { FieldVisConfig } from '../../stats_table/types';
+import { JOB_FIELD_TYPES } from '../../../../../common';
 interface ColumnsAndLayer {
   columns: Record<string, IndexPatternColumn>;
   layer: XYLayerConfig;
@@ -24,7 +27,7 @@ const COUNT = i18n.translate('xpack.ml.dataVisualizer.lensChart.countLabel', {
   defaultMessage: 'Count',
 });
 
-export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: IIndexPattern) {
+export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: IndexPattern) {
   // if index has no timestamp field
   if (defaultIndexPattern.timeFieldName === undefined) {
     const columns: Record<string, IndexPatternColumn> = {
@@ -186,19 +189,19 @@ export function getBooleanSettings(item: FieldVisConfig) {
 export function getCompatibleLensDataType(type: FieldVisConfig['type']): string | undefined {
   let lensType: string | undefined;
   switch (type) {
-    case ML_JOB_FIELD_TYPES.KEYWORD:
+    case JOB_FIELD_TYPES.KEYWORD:
       lensType = 'string';
       break;
-    case ML_JOB_FIELD_TYPES.DATE:
+    case JOB_FIELD_TYPES.DATE:
       lensType = 'date';
       break;
-    case ML_JOB_FIELD_TYPES.NUMBER:
+    case JOB_FIELD_TYPES.NUMBER:
       lensType = 'number';
       break;
-    case ML_JOB_FIELD_TYPES.IP:
+    case JOB_FIELD_TYPES.IP:
       lensType = 'ip';
       break;
-    case ML_JOB_FIELD_TYPES.BOOLEAN:
+    case JOB_FIELD_TYPES.BOOLEAN:
       lensType = 'string';
       break;
     default:
@@ -210,20 +213,20 @@ export function getCompatibleLensDataType(type: FieldVisConfig['type']): string 
 function getColumnsAndLayer(
   fieldType: FieldVisConfig['type'],
   item: FieldVisConfig,
-  defaultIndexPattern: IIndexPattern
+  defaultIndexPattern: IndexPattern
 ): ColumnsAndLayer | undefined {
   if (item.fieldName === undefined) return;
 
-  if (fieldType === ML_JOB_FIELD_TYPES.DATE) {
+  if (fieldType === JOB_FIELD_TYPES.DATE) {
     return getDateSettings(item);
   }
-  if (fieldType === ML_JOB_FIELD_TYPES.NUMBER) {
+  if (fieldType === JOB_FIELD_TYPES.NUMBER) {
     return getNumberSettings(item, defaultIndexPattern);
   }
-  if (fieldType === ML_JOB_FIELD_TYPES.IP || fieldType === ML_JOB_FIELD_TYPES.KEYWORD) {
+  if (fieldType === JOB_FIELD_TYPES.IP || fieldType === JOB_FIELD_TYPES.KEYWORD) {
     return getKeywordSettings(item);
   }
-  if (fieldType === ML_JOB_FIELD_TYPES.BOOLEAN) {
+  if (fieldType === JOB_FIELD_TYPES.BOOLEAN) {
     return getBooleanSettings(item);
   }
 }
@@ -231,7 +234,7 @@ function getColumnsAndLayer(
 // currently only supports the following types:
 // 'document' | 'string' | 'number' | 'date' | 'boolean' | 'ip'
 export function getLensAttributes(
-  defaultIndexPattern: IIndexPattern | undefined,
+  defaultIndexPattern: IndexPattern | undefined,
   combinedQuery: CombinedQuery,
   item: FieldVisConfig
 ): TypedLensByValueInput['attributes'] | undefined {

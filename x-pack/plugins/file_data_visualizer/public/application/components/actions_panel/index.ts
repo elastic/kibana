@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { IndexDataVisualizerViewProps, IndexDataVisualizerView } from './index_datavisualizer_view';
+export { ActionsPanel } from './actions_panel';

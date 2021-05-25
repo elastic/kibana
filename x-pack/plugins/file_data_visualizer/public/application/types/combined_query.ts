@@ -16,3 +16,8 @@ export interface CombinedQuery {
   searchString: string | { [key: string]: any };
   searchQueryLanguage: string;
 }
+
+export interface ErrorMessage {
+  query: string;
+  message: string;
+}

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { IndexDataVisualizerViewProps, IndexDataVisualizerView } from './index_datavisualizer_view';
+export { FullTimeRangeSelector } from './full_time_range_selector';
+export { getTimeFilterRange, TimeRange } from './full_time_range_selector_service';

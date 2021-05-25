@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { IndexDataVisualizerViewProps, IndexDataVisualizerView } from './index_datavisualizer_view';
+import { Subject } from 'rxjs';
+import { Required } from 'utility-types';
+import { Refresh } from '../components/index_datavisualizer_view/index_datavisualizer_view';
+
+export const mlTimefilterRefresh$ = new Subject<Required<Refresh>>();

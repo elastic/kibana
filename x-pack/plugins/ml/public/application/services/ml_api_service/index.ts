@@ -107,6 +107,11 @@ export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
 
 export const ml = mlApiServicesProvider(new HttpService(proxyHttpStart));
 
+// @remove
+// ml.getVisualizerOverallStats
+// ml.getVisualizerFieldStats;
+// ml.getVisualizerFieldHistograms;
+// getTimeFieldRange
 export function mlApiServicesProvider(httpService: HttpService) {
   return {
     getJobs(obj?: { jobId?: string }) {

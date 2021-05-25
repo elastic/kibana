@@ -7,41 +7,41 @@
 
 // Maximum number of examples to obtain for text type fields.
 import { CoreSetup } from 'kibana/public';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { RuntimeMappings } from '../../../../ml/common';
-import { IndexPatternTitle } from '../../../../ml/common/types/kibana';
-import {
-  ToastNotificationService,
-  toastNotificationServiceProvider,
-} from '../../../../ml/public/application/services/toast_notification_service';
-import { SavedSearchQuery } from '../../../../ml/public/application/contexts/ml';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
-import { ml } from '../../../../ml/public/application/services/ml_api_service';
+import { DEFAULT_SAMPLER_SHARD_SIZE, OMIT_FIELDS } from '../../../common/constants';
+import { FieldHistogramRequestConfig, FieldRequestConfig } from '../../../common/types';
 import {
-  DEFAULT_SAMPLER_SHARD_SIZE,
-  FieldHistogramRequestConfig,
-  FieldRequestConfig,
-  OMIT_FIELDS,
-} from '../../../common';
+  getVisualizerFieldHistograms,
+  getVisualizerFieldStats,
+  getVisualizerOverallStats,
+} from '../../api';
+
+type IndexPatternTitle = string;
+type SavedSearchQuery = Record<string, any> | null | undefined;
 
 const MAX_EXAMPLES_DEFAULT: number = 10;
 
 export class DataLoader {
   private _indexPattern: IndexPattern;
-  private _runtimeMappings: RuntimeMappings;
+  private _runtimeMappings: estypes.RuntimeFields;
   private _indexPatternTitle: IndexPatternTitle = '';
   private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
-  private _toastNotificationsService: ToastNotificationService;
+  private _toastNotifications: CoreSetup['notifications']['toasts'];
+  // private _toastNotificationsService: ToastNotificationService;
 
   constructor(
     indexPattern: IndexPattern,
     toastNotifications: CoreSetup['notifications']['toasts']
   ) {
     this._indexPattern = indexPattern;
-    this._runtimeMappings = this._indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
+    this._runtimeMappings = this._indexPattern.getComputedFields()
+      .runtimeFields as estypes.RuntimeFields;
     this._indexPatternTitle = indexPattern.title;
-    this._toastNotificationsService = toastNotificationServiceProvider(toastNotifications);
+    this._toastNotifications = toastNotifications;
+    // this._toastNotificationsService = toastNotificationServiceProvider(toastNotifications);
   }
 
   async loadOverallData(
@@ -68,7 +68,7 @@ export class DataLoader {
     // 2. List of aggregatable fields that do not exist in docs
     // 3. List of non-aggregatable fields that do exist in docs.
     // 4. List of non-aggregatable fields that do not exist in docs.
-    const stats = await ml.getVisualizerOverallStats({
+    const stats = await getVisualizerOverallStats({
       indexPatternTitle: this._indexPatternTitle,
       query,
       timeFieldName: this._indexPattern.timeFieldName,
@@ -91,7 +91,7 @@ export class DataLoader {
     fields: FieldRequestConfig[],
     interval?: number
   ): Promise<any[]> {
-    const stats = await ml.getVisualizerFieldStats({
+    const stats = await getVisualizerFieldStats({
       indexPatternTitle: this._indexPatternTitle,
       query,
       timeFieldName: this._indexPattern.timeFieldName,
@@ -111,9 +111,9 @@ export class DataLoader {
     fields: FieldHistogramRequestConfig[],
     query: string | SavedSearchQuery,
     samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE,
-    editorRuntimeMappings?: RuntimeMappings
+    editorRuntimeMappings?: estypes.RuntimeFields
   ): Promise<any[]> {
-    const stats = await ml.getVisualizerFieldHistograms({
+    const stats = await getVisualizerFieldHistograms({
       indexPatternTitle: this._indexPatternTitle,
       query,
       fields,
@@ -126,9 +126,8 @@ export class DataLoader {
 
   displayError(err: any) {
     if (err.statusCode === 500) {
-      this._toastNotificationsService.displayErrorToast(
-        err,
-        i18n.translate('xpack.ml.datavisualizer.dataLoader.internalServerErrorMessage', {
+      this._toastNotifications.addError(err, {
+        title: i18n.translate('datavisualizer.dataLoader.internalServerErrorMessage', {
           defaultMessage:
             'Error loading data in index {index}. {message}. ' +
             'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
@@ -136,19 +135,18 @@ export class DataLoader {
             index: this._indexPattern.title,
             message: err.message,
           },
-        })
-      );
+        }),
+      });
     } else {
-      this._toastNotificationsService.displayErrorToast(
-        err,
-        i18n.translate('xpack.ml.datavisualizer.page.errorLoadingDataMessage', {
+      this._toastNotifications.addError(err, {
+        title: i18n.translate('datavisualizer.page.errorLoadingDataMessage', {
           defaultMessage: 'Error loading data in index {index}. {message}',
           values: {
             index: this._indexPattern.title,
             message: err.message,
           },
-        })
-      );
+        }),
+      });
     }
   }
 
