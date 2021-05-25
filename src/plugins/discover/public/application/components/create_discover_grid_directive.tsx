@@ -25,6 +25,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridProps) {
         setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
         services={getServices()}
+        data-shared-item
       />
     </I18nProvider>
   );
