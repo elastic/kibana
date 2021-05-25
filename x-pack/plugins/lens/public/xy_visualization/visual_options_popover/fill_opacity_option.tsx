@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
+import { useDebouncedValue } from '../../shared_components';
 
 export interface FillOpacityOptionProps {
   /**
@@ -29,6 +30,7 @@ export const FillOpacityOption: React.FC<FillOpacityOptionProps> = ({
   value,
   isFillOpacityEnabled = true,
 }) => {
+  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
   return isFillOpacityEnabled ? (
     <>
       <EuiFormRow
@@ -40,7 +42,7 @@ export const FillOpacityOption: React.FC<FillOpacityOptionProps> = ({
       >
         <EuiRange
           data-test-subj="lnsFillOpacity"
-          value={value}
+          value={inputValue}
           min={0.1}
           max={1}
           step={0.1}
@@ -48,7 +50,7 @@ export const FillOpacityOption: React.FC<FillOpacityOptionProps> = ({
           compressed
           fullWidth
           onChange={(e) => {
-            onChange(Number(e.currentTarget.value));
+            handleInputChange(Number(e.currentTarget.value));
           }}
         />
       </EuiFormRow>
