@@ -7,48 +7,41 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
-import { noop } from 'lodash/fp';
-
-import { TestProviders } from '../../../common/mock';
-import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
-import { useInsertTimeline } from '../use_insert_timeline';
+import { waitFor } from '@testing-library/react';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Create } from '.';
-import { useKibana } from '../../../common/lib/kibana';
-import { Case } from '../../../../../cases/public/containers/types';
-import { basicCase } from '../../../../../cases/public/containers/mock';
-import { APP_ID } from '../../../../common/constants';
+import { useKibana } from '../../../../utils/kibana_react';
+import { basicCase } from '../../../../../../cases/public/containers/mock';
+import { CASES_APP_ID, CASES_OWNER } from '../constants';
+import { Case } from '../../../../../../cases/common';
+import { getCaseDetailsUrl } from '../../../../pages/cases/links';
 
-jest.mock('../use_insert_timeline');
-jest.mock('../../../common/lib/kibana');
-
-const useInsertTimelineMock = useInsertTimeline as jest.Mock;
+jest.mock('../../../../utils/kibana_react');
 
 describe('Create case', () => {
   const mockCreateCase = jest.fn();
+  const mockNavigateToApp = jest.fn();
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         cases: {
           getCreateCase: mockCreateCase,
         },
+        application: { navigateToApp: mockNavigateToApp },
       },
     });
   });
 
   it('it renders', () => {
     mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
+      <EuiThemeProvider>
+        <Create />
+      </EuiThemeProvider>
     );
 
     expect(mockCreateCase).toHaveBeenCalled();
-    expect(mockCreateCase.mock.calls[0][0].owner).toEqual([APP_ID]);
+    expect(mockCreateCase.mock.calls[0][0].owner).toEqual([CASES_OWNER]);
   });
 
   it('should redirect to all cases on cancel click', async () => {
@@ -59,17 +52,16 @@ describe('Create case', () => {
             onCancel();
           },
         },
+        application: { navigateToApp: mockNavigateToApp },
       },
     });
     mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
+      <EuiThemeProvider>
+        <Create />
+      </EuiThemeProvider>
     );
 
-    await waitFor(() => expect(mockHistory.push).toHaveBeenCalledWith('/'));
+    await waitFor(() => expect(mockNavigateToApp).toHaveBeenCalledWith(`${CASES_APP_ID}`));
   });
 
   it('should redirect to new case when posting the case', async () => {
@@ -80,41 +72,19 @@ describe('Create case', () => {
             onSuccess(basicCase);
           },
         },
+        application: { navigateToApp: mockNavigateToApp },
       },
     });
     mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
+      <EuiThemeProvider>
+        <Create />
+      </EuiThemeProvider>
     );
 
-    await waitFor(() => expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/basic-case-id'));
-  });
-
-  it.skip('it should insert a timeline', async () => {
-    let attachTimeline = noop;
-    useInsertTimelineMock.mockImplementation((value, onTimelineAttached) => {
-      attachTimeline = onTimelineAttached;
-    });
-
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
-      </TestProviders>
+    await waitFor(() =>
+      expect(mockNavigateToApp).toHaveBeenNthCalledWith(1, `${CASES_APP_ID}`, {
+        path: getCaseDetailsUrl({ id: basicCase.id }),
+      })
     );
-
-    act(() => {
-      attachTimeline('[title](url)');
-    });
-
-    await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="caseDescription"] textarea`).text()).toBe(
-        '[title](url)'
-      );
-    });
   });
 });

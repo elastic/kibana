@@ -7,7 +7,6 @@
 
 import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
 
 import { useKibana } from '../../../../utils/kibana_react';
 import { getCaseDetailsUrl } from '../../../../pages/cases/links';
@@ -18,19 +17,15 @@ export const Create = React.memo(() => {
     cases,
     application: { navigateToApp },
   } = useKibana().services;
-  const history = useHistory();
   const onSuccess = useCallback(
-    async ({ id }) => {
+    async ({ id }) =>
       navigateToApp(`${CASES_APP_ID}`, {
         path: getCaseDetailsUrl({ id }),
-      });
-    },
+      }),
     [navigateToApp]
   );
 
-  const handleSetIsCancel = useCallback(() => {
-    history.push('/');
-  }, [history]);
+  const handleSetIsCancel = useCallback(() => navigateToApp(`${CASES_APP_ID}`), [navigateToApp]);
 
   return (
     <EuiPanel>

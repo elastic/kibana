@@ -19,7 +19,6 @@ export interface UseMessagesStorage {
 export const useMessagesStorage = (): UseMessagesStorage => {
   // @ts-ignore
   const { storage } = useKibana().services;
-  console.log('STORAGE', storage);
 
   const getMessages = useCallback(
     (plugin: string): string[] => storage.get(`${plugin}-messages`) ?? [],

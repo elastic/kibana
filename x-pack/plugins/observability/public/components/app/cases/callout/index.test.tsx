@@ -8,12 +8,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useMessagesStorage } from '../../../../hooks/use_messages_storage';
 import { createCalloutId } from './helpers';
 import { CaseCallOut, CaseCallOutProps } from '.';
 
-jest.mock('../../../common/containers/local_storage/use_messages_storage');
-const TestProviders = (children: any) => children;
+jest.mock('../../../../hooks/use_messages_storage');
 const useSecurityLocalStorageMock = useMessagesStorage as jest.Mock;
 const securityLocalStorageMock = {
   getMessages: jest.fn(() => []),
@@ -35,9 +35,9 @@ describe('CaseCallOut ', () => {
       ],
     };
     const wrapper = mount(
-      <TestProviders>
+      <EuiThemeProvider>
         <CaseCallOut {...props} />
-      </TestProviders>
+      </EuiThemeProvider>
     );
 
     const id = createCalloutId(['message-one', 'message-two']);
@@ -59,9 +59,9 @@ describe('CaseCallOut ', () => {
     };
 
     const wrapper = mount(
-      <TestProviders>
+      <EuiThemeProvider>
         <CaseCallOut {...props} />
-      </TestProviders>
+      </EuiThemeProvider>
     );
 
     const idDanger = createCalloutId(['message-one']);
@@ -83,9 +83,9 @@ describe('CaseCallOut ', () => {
       ],
     };
     const wrapper = mount(
-      <TestProviders>
+      <EuiThemeProvider>
         <CaseCallOut {...props} />
-      </TestProviders>
+      </EuiThemeProvider>
     );
 
     const id = createCalloutId(['message-one']);
@@ -104,9 +104,9 @@ describe('CaseCallOut ', () => {
     };
 
     const wrapper = mount(
-      <TestProviders>
+      <EuiThemeProvider>
         <CaseCallOut {...props} />
-      </TestProviders>
+      </EuiThemeProvider>
     );
 
     const id = createCalloutId(['message-one']);
@@ -131,9 +131,9 @@ describe('CaseCallOut ', () => {
     }));
 
     const wrapper = mount(
-      <TestProviders>
+      <EuiThemeProvider>
         <CaseCallOut {...props} />
-      </TestProviders>
+      </EuiThemeProvider>
     );
 
     expect(wrapper.find(`[data-test-subj="case-callout-${id}"]`).last().exists()).toBeFalsy();
@@ -153,9 +153,9 @@ describe('CaseCallOut ', () => {
     };
 
     const wrapper = mount(
-      <TestProviders>
+      <EuiThemeProvider>
         <CaseCallOut {...props} />
-      </TestProviders>
+      </EuiThemeProvider>
     );
 
     const id = createCalloutId(['message-one']);
@@ -178,9 +178,9 @@ describe('CaseCallOut ', () => {
     };
 
     const wrapper = mount(
-      <TestProviders>
+      <EuiThemeProvider>
         <CaseCallOut {...props} />
-      </TestProviders>
+      </EuiThemeProvider>
     );
 
     const id = createCalloutId(['message-one']);
@@ -203,9 +203,9 @@ describe('CaseCallOut ', () => {
     };
 
     const wrapper = mount(
-      <TestProviders>
+      <EuiThemeProvider>
         <CaseCallOut {...props} />
-      </TestProviders>
+      </EuiThemeProvider>
     );
 
     const id = createCalloutId(['message-one']);

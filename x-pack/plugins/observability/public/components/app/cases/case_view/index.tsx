@@ -118,5 +118,3 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     userCanCrud,
   });
 });
-
-CaseView.displayName = 'CaseView';
