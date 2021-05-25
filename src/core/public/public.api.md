@@ -332,14 +332,7 @@ export interface ChromeNavLinks {
     getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
     has(id: string): boolean;
     showOnly(id: string): void;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
-    //
-    // @deprecated
-    update(id: string, values: ChromeNavLinkUpdateableFields): ChromeNavLink | undefined;
 }
-
-// @public (undocumented)
-export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'disabled' | 'hidden' | 'url' | 'href'>>;
 
 // @public
 export interface ChromeRecentlyAccessed {
