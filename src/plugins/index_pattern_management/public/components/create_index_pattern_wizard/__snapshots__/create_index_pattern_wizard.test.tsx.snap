@@ -18,8 +18,11 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
     <Header
       docLinks={
         Object {
+          "DOC_LINK_VERSION": "jest",
+          "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
           "links": Object {
             "indexPatterns": Object {},
+            "runtimeFields": Object {},
             "scriptedFields": Object {},
           },
         }
@@ -66,8 +69,11 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
     <Header
       docLinks={
         Object {
+          "DOC_LINK_VERSION": "jest",
+          "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
           "links": Object {
             "indexPatterns": Object {},
+            "runtimeFields": Object {},
             "scriptedFields": Object {},
           },
         }
@@ -108,8 +114,11 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
     <Header
       docLinks={
         Object {
+          "DOC_LINK_VERSION": "jest",
+          "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
           "links": Object {
             "indexPatterns": Object {},
+            "runtimeFields": Object {},
             "scriptedFields": Object {},
           },
         }
@@ -150,8 +159,11 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
     <Header
       docLinks={
         Object {
+          "DOC_LINK_VERSION": "jest",
+          "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
           "links": Object {
             "indexPatterns": Object {},
+            "runtimeFields": Object {},
             "scriptedFields": Object {},
           },
         }
@@ -192,8 +204,11 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
     <Header
       docLinks={
         Object {
+          "DOC_LINK_VERSION": "jest",
+          "ELASTIC_WEBSITE_URL": "htts://jestTest.elastic.co",
           "links": Object {
             "indexPatterns": Object {},
+            "runtimeFields": Object {},
             "scriptedFields": Object {},
           },
         }

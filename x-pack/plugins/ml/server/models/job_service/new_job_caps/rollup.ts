@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { SavedObject } from 'kibana/server';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { SavedObjectsClientContract } from 'kibana/server';
-import { FieldId } from '../../../../common/types/fields';
-import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
-
-export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
+import { RollupFields } from '../../../../common/types/fields';
 
 export interface RollupJob {
   job_id: string;
@@ -28,7 +27,7 @@ export async function rollupServiceProvider(
   const rollupIndexPatternObject = await loadRollupIndexPattern(indexPattern, savedObjectsClient);
   let jobIndexPatterns: string[] = [indexPattern];
 
-  async function getRollupJobs(): Promise<RollupJob[] | null> {
+  async function getRollupJobs(): Promise<estypes.RollupIndexCapabilitiesJob[] | null> {
     if (rollupIndexPatternObject !== null) {
       const parsedTypeMetaData = JSON.parse(rollupIndexPatternObject.attributes.typeMeta);
       const rollUpIndex: string = parsedTypeMetaData.params.rollup_index;
@@ -38,7 +37,7 @@ export async function rollupServiceProvider(
 
       const indexRollupCaps = rollupCaps[rollUpIndex];
       if (indexRollupCaps && indexRollupCaps.rollup_jobs) {
-        jobIndexPatterns = indexRollupCaps.rollup_jobs.map((j: RollupJob) => j.index_pattern);
+        jobIndexPatterns = indexRollupCaps.rollup_jobs.map((j) => j.index_pattern);
 
         return indexRollupCaps.rollup_jobs;
       }

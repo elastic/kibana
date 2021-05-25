@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { queryRulesSchema, QueryRulesSchema } from './query_rules_schema';
-import { exactCheck } from '../../../exact_check';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from '../../../test_utils';
 import { left } from 'fp-ts/lib/Either';
 
 describe('query_rules_schema', () => {

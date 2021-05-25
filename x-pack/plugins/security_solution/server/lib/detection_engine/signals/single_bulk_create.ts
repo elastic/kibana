@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { countBy, isEmpty, get } from 'lodash';
@@ -10,33 +11,22 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
-import { SignalSearchResponse, BulkResponse, SignalHit, WrappedSignalHit } from './types';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams, RefreshTypes } from '../types';
+} from '../../../../../alerting/server';
+import { AlertAttributes, SignalHit, SignalSearchResponse, WrappedSignalHit } from './types';
+import { RefreshTypes } from '../types';
 import { generateId, makeFloatString, errorAggregator } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { BuildRuleMessage } from './rule_messages';
-import { Logger } from '../../../../../../../src/core/server';
+import { Logger, SavedObject } from '../../../../../../../src/core/server';
 import { isEventTypeSignal } from './build_event_type_signal';
 
 interface SingleBulkCreateParams {
   filteredEvents: SignalSearchResponse;
-  ruleParams: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;
   signalsIndex: string;
-  actions: RuleAlertAction[];
-  name: string;
-  createdAt: string;
-  createdBy: string;
-  updatedAt: string;
-  updatedBy: string;
-  interval: string;
-  enabled: boolean;
-  tags: string[];
-  throttle: string;
   refresh: RefreshTypes;
   buildRuleMessage: BuildRuleMessage;
 }
@@ -55,12 +45,12 @@ export const filterDuplicateRules = (
   signalSearchResponse: SignalSearchResponse
 ) => {
   return signalSearchResponse.hits.hits.filter((doc) => {
-    if (doc._source.signal == null || !isEventTypeSignal(doc)) {
+    if (doc._source?.signal == null || !isEventTypeSignal(doc)) {
       return true;
     } else {
       return !(
-        doc._source.signal.ancestors.some((ancestor) => ancestor.rule === ruleId) ||
-        doc._source.signal.rule.id === ruleId
+        doc._source?.signal.ancestors.some((ancestor) => ancestor.rule === ruleId) ||
+        doc._source?.signal.rule.id === ruleId
       );
     }
   });
@@ -96,23 +86,14 @@ export interface BulkInsertSignalsResponse {
 export const singleBulkCreate = async ({
   buildRuleMessage,
   filteredEvents,
-  ruleParams,
+  ruleSO,
   services,
   logger,
   id,
   signalsIndex,
-  actions,
-  name,
-  createdAt,
-  createdBy,
-  updatedAt,
-  updatedBy,
-  interval,
-  enabled,
   refresh,
-  tags,
-  throttle,
 }: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
+  const ruleParams = ruleSO.attributes.params;
   filteredEvents.hits.hits = filterDuplicateRules(id, filteredEvents);
   logger.debug(buildRuleMessage(`about to bulk create ${filteredEvents.hits.hits.length} events`));
   if (filteredEvents.hits.hits.length === 0) {
@@ -140,24 +121,10 @@ export const singleBulkCreate = async ({
         ),
       },
     },
-    buildBulkBody({
-      doc,
-      ruleParams,
-      id,
-      actions,
-      name,
-      createdAt,
-      createdBy,
-      updatedAt,
-      updatedBy,
-      interval,
-      enabled,
-      tags,
-      throttle,
-    }),
+    buildBulkBody(ruleSO, doc),
   ]);
   const start = performance.now();
-  const response: BulkResponse = await services.callCluster('bulk', {
+  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk({
     index: signalsIndex,
     refresh,
     body: bulkBody,
@@ -169,25 +136,12 @@ export const singleBulkCreate = async ({
     )
   );
   logger.debug(buildRuleMessage(`took property says bulk took: ${response.took} milliseconds`));
-
   const createdItems = filteredEvents.hits.hits
-    .map((doc) =>
-      buildBulkBody({
-        doc,
-        ruleParams,
-        id,
-        actions,
-        name,
-        createdAt,
-        createdBy,
-        updatedAt,
-        updatedBy,
-        interval,
-        enabled,
-        tags,
-        throttle,
-      })
-    )
+    .map((doc, index) => ({
+      _id: response.items[index].create?._id ?? '',
+      _index: response.items[index].create?._index ?? '',
+      ...buildBulkBody(ruleSO, doc),
+    }))
     .filter((_, index) => get(response.items[index], 'create.status') === 201);
   const createdItemsCount = createdItems.length;
   const duplicateSignalsCount = countBy(response.items, 'create.status')['409'];
@@ -241,7 +195,7 @@ export const bulkInsertSignals = async (
     doc._source,
   ]);
   const start = performance.now();
-  const response: BulkResponse = await services.callCluster('bulk', {
+  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk({
     refresh,
     body: bulkBody,
   });
@@ -262,7 +216,11 @@ export const bulkInsertSignals = async (
 
   const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
   const createdItems = signals
-    .map((doc) => doc._source)
+    .map((doc, index) => ({
+      ...doc._source,
+      _id: response.items[index].create?._id ?? '',
+      _index: response.items[index].create?._index ?? '',
+    }))
     .filter((_, index) => get(response.items[index], 'create.status') === 201);
   logger.debug(`bulk created ${createdItemsCount} signals`);
   return { bulkCreateDuration: makeFloatString(end - start), createdItems, createdItemsCount };

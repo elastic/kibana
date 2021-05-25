@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { keyBy, pick, isEmpty, isEqual, isUndefined } from 'lodash/fp';
@@ -9,6 +10,7 @@ import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { IIndexPattern } from 'src/plugins/data/public';
+import { Subscription } from 'rxjs';
 
 import { useKibana } from '../../lib/kibana';
 import {
@@ -18,12 +20,13 @@ import {
   BrowserField,
   BrowserFields,
 } from '../../../../common/search_strategy/index_fields';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
+import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { DocValueFields } from '../../../../common/search_strategy/common';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
@@ -92,7 +95,7 @@ export const getDocValueFields = memoizeOne(
               ...accumulator,
               {
                 field: field.name,
-                format: field.format,
+                format: field.format ? field.format : undefined,
               },
             ];
           }
@@ -123,8 +126,9 @@ export const useFetchIndex = (
   indexNames: string[],
   onlyCheckIfIndicesExist: boolean = false
 ): [boolean, FetchIndexReturn] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const previousIndexesName = useRef<string[]>([]);
   const [isLoading, setLoading] = useState(false);
 
@@ -135,14 +139,14 @@ export const useFetchIndex = (
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const indexFieldsSearch = useCallback(
     (iNames) => {
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { indices: iNames, onlyCheckIfIndicesExist },
             {
@@ -152,62 +156,57 @@ export const useFetchIndex = (
           )
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
-                if (!didCancel) {
-                  const stringifyIndices = response.indicesExist.sort().join();
-                  previousIndexesName.current = response.indicesExist;
-                  setLoading(false);
-                  setState({
-                    browserFields: getBrowserFields(stringifyIndices, response.indexFields),
-                    docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
-                    indexes: response.indicesExist,
-                    indexExists: response.indicesExist.length > 0,
-                    indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
-                  });
-                }
-                searchSubscription$.unsubscribe();
-              } else if (!didCancel && response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
+                const stringifyIndices = response.indicesExist.sort().join();
+                previousIndexesName.current = response.indicesExist;
                 setLoading(false);
-                notifications.toasts.addWarning(i18n.ERROR_BEAT_FIELDS);
-                searchSubscription$.unsubscribe();
+                setState({
+                  browserFields: getBrowserFields(stringifyIndices, response.indexFields),
+                  docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
+                  indexes: response.indicesExist,
+                  indexExists: response.indicesExist.length > 0,
+                  indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
+                });
+                searchSubscription$.current.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                setLoading(false);
+                addWarning(i18n.ERROR_BEAT_FIELDS);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel) {
-                setLoading(false);
-              }
-
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  text: msg.message,
-                  title: i18n.FAIL_BEAT_FIELDS,
-                });
-              }
+              setLoading(false);
+              addError(msg, {
+                title: i18n.FAIL_BEAT_FIELDS,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
-    [data.search, notifications.toasts, onlyCheckIfIndicesExist]
+    [data.search, addError, addWarning, onlyCheckIfIndicesExist]
   );
 
   useEffect(() => {
     if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
       indexFieldsSearch(indexNames);
     }
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [indexNames, indexFieldsSearch, previousIndexesName]);
 
   return [isLoading, state];
 };
 
 export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const dispatch = useDispatch();
   const indexNamesSelectedSelector = useMemo(
     () => sourcererSelectors.getIndexNamesSelectedSelector(),
@@ -217,6 +216,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
     indexNames: string[];
     previousIndexNames: string;
   }>((state) => indexNamesSelectedSelector(state, sourcererScopeName));
+  const { addError, addWarning } = useAppToasts();
 
   const setLoading = useCallback(
     (loading: boolean) => {
@@ -227,11 +227,10 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
 
   const indexFieldsSearch = useCallback(
     (indicesName) => {
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { indices: indicesName, onlyCheckIfIndicesExist: false },
             {
@@ -241,59 +240,52 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
           )
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
-                if (!didCancel) {
-                  const stringifyIndices = response.indicesExist.sort().join();
-                  dispatch(
-                    sourcererActions.setSource({
+              if (isCompleteResponse(response)) {
+                const stringifyIndices = response.indicesExist.sort().join();
+                dispatch(
+                  sourcererActions.setSource({
+                    id: sourcererScopeName,
+                    payload: {
+                      browserFields: getBrowserFields(stringifyIndices, response.indexFields),
+                      docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
+                      errorMessage: null,
                       id: sourcererScopeName,
-                      payload: {
-                        browserFields: getBrowserFields(stringifyIndices, response.indexFields),
-                        docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
-                        errorMessage: null,
-                        id: sourcererScopeName,
-                        indexPattern: getIndexFields(stringifyIndices, response.indexFields),
-                        indicesExist: response.indicesExist.length > 0,
-                        loading: false,
-                      },
-                    })
-                  );
-                }
-                searchSubscription$.unsubscribe();
-              } else if (!didCancel && response.isPartial && !response.isRunning) {
-                // TODO: Make response error status clearer
+                      indexPattern: getIndexFields(stringifyIndices, response.indexFields),
+                      indicesExist: response.indicesExist.length > 0,
+                      loading: false,
+                    },
+                  })
+                );
+                searchSubscription$.current.unsubscribe();
+              } else if (isErrorResponse(response)) {
                 setLoading(false);
-                notifications.toasts.addWarning(i18n.ERROR_BEAT_FIELDS);
-                searchSubscription$.unsubscribe();
+                addWarning(i18n.ERROR_BEAT_FIELDS);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel) {
-                setLoading(false);
-              }
-
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  text: msg.message,
-                  title: i18n.FAIL_BEAT_FIELDS,
-                });
-              }
+              setLoading(false);
+              addError(msg, {
+                title: i18n.FAIL_BEAT_FIELDS,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
-    [data.search, dispatch, notifications.toasts, setLoading, sourcererScopeName]
+    [data.search, dispatch, addError, addWarning, setLoading, sourcererScopeName]
   );
 
   useEffect(() => {
     if (!isEmpty(indexNames) && previousIndexNames !== indexNames.sort().join()) {
       indexFieldsSearch(indexNames);
     }
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [indexNames, indexFieldsSearch, previousIndexNames]);
 };

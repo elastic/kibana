@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Reporter, METRIC_TYPE, ApplicationUsageTracker } from '@kbn/analytics';
-import { Subject, merge, Subscription } from 'rxjs';
+import { Reporter, ApplicationUsageTracker } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import type { Subscription } from 'rxjs';
 import React from 'react';
-import { Storage } from '../../kibana_utils/public';
-import { createReporter, trackApplicationUsageChange } from './services';
-import {
+import type {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
   CoreStart,
   HttpSetup,
-} from '../../../core/public';
+} from 'src/core/public';
+import { Storage } from '../../kibana_utils/public';
+import { createReporter, trackApplicationUsageChange } from './services';
 import { ApplicationUsageContext } from './components/track_application_view';
 
 export interface PublicConfigType {
@@ -31,32 +32,63 @@ export type IApplicationUsageTracker = Pick<
   'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
 >;
 
+/** Public's setup APIs exposed by the UsageCollection Service **/
 export interface UsageCollectionSetup {
+  /** Component helpers to track usage collection in the UI **/
   components: {
+    /**
+     * The context provider to wrap the application if planning to use
+     * {@link TrackApplicationView} somewhere inside the app.
+     *
+     * @example
+     * ```typescript jsx
+     * class MyPlugin implements Plugin {
+     *   ...
+     *   public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
+     *     const ApplicationUsageTrackingProvider = plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+     *
+     *     core.application.register({
+     *       id,
+     *       title,
+     *       ...,
+     *       mount: async (params: AppMountParameters) => {
+     *         ReactDOM.render(
+     *           <ApplicationUsageTrackingProvider> // Set the tracking context provider at the App level
+     *             <I18nProvider>
+     *               <App />
+     *             </I18nProvider>
+     *           </ApplicationUsageTrackingProvider>,
+     *           element
+     *         );
+     *         return () => ReactDOM.unmountComponentAtNode(element);
+     *       },
+     *     });
+     *   }
+     *   ...
+     * }
+     * ```
+     */
     ApplicationUsageTrackingProvider: React.FC;
   };
-  allowTrackUserAgent: (allow: boolean) => void;
-  applicationUsageTracker: IApplicationUsageTracker;
-  reportUiCounter: Reporter['reportUiCounter'];
-  METRIC_TYPE: typeof METRIC_TYPE;
-  __LEGACY: {
-    /**
-     * Legacy handler so we can report the actual app being used inside "kibana#/{appId}".
-     * To be removed when we get rid of the legacy world
-     *
-     * @deprecated
-     */
-    appChanged: (appId: string) => void;
-  };
+
+  /** Report whenever a UI event occurs for UI counters to report it **/
+  reportUiCounter: (
+    appName: string,
+    type: UiCounterMetricType,
+    eventNames: string | string[],
+    count?: number
+  ) => void;
 }
 
+/** Public's start APIs exposed by the UsageCollection Service **/
 export interface UsageCollectionStart {
-  reportUiCounter: Reporter['reportUiCounter'];
-  METRIC_TYPE: typeof METRIC_TYPE;
-  applicationUsageTracker: Pick<
-    ApplicationUsageTracker,
-    'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
-  >;
+  /** Report whenever a UI event occurs for UI counters to report it **/
+  reportUiCounter: (
+    appName: string,
+    type: UiCounterMetricType,
+    eventNames: string | string[],
+    count?: number
+  ) => void;
 }
 
 export function isUnauthenticated(http: HttpSetup) {
@@ -65,9 +97,7 @@ export function isUnauthenticated(http: HttpSetup) {
 }
 
 export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, UsageCollectionStart> {
-  private readonly legacyAppId$ = new Subject<string>();
   private applicationUsageTracker?: ApplicationUsageTracker;
-  private trackUserAgent: boolean = true;
   private subscriptions: Subscription[] = [];
   private reporter?: Reporter;
   private config: PublicConfigType;
@@ -97,15 +127,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
           </ApplicationUsageContext.Provider>
         ),
       },
-      applicationUsageTracker,
-      allowTrackUserAgent: (allow: boolean) => {
-        this.trackUserAgent = allow;
-      },
       reportUiCounter: this.reporter.reportUiCounter,
-      METRIC_TYPE,
-      __LEGACY: {
-        appChanged: (appId) => this.legacyAppId$.next(appId),
-      },
     };
   }
 
@@ -118,19 +140,15 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       this.reporter.start();
       this.applicationUsageTracker.start();
       this.subscriptions = trackApplicationUsageChange(
-        merge(application.currentAppId$, this.legacyAppId$),
+        application.currentAppId$,
         this.applicationUsageTracker
       );
     }
 
-    if (this.trackUserAgent) {
-      this.reporter.reportUserAgent('kibana');
-    }
+    this.reporter.reportUserAgent('kibana');
 
     return {
-      applicationUsageTracker: this.getPublicApplicationUsageTracker(),
       reportUiCounter: this.reporter.reportUiCounter,
-      METRIC_TYPE,
     };
   }
 

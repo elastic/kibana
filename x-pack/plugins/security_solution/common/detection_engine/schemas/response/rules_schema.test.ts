@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { left } from 'fp-ts/lib/Either';
@@ -20,8 +21,7 @@ import {
   addThreatMatchFields,
   addEqlFields,
 } from './rules_schema';
-import { exactCheck } from '../../../exact_check';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { TypeAndTimelineOnly } from './type_timeline_only_schema';
 import {
   getRulesSchemaMock,
@@ -29,7 +29,7 @@ import {
   getThreatMatchingSchemaMock,
   getRulesEqlSchemaMock,
 } from './rules_schema.mocks';
-import { ListArray } from '../types/lists';
+import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
@@ -762,9 +762,9 @@ describe('rules_schema', () => {
       expect(fields).toEqual(expected);
     });
 
-    test('should return 8 fields for a rule of type "threat_match"', () => {
+    test('should return nine (9) fields for a rule of type "threat_match"', () => {
       const fields = addThreatMatchFields({ type: 'threat_match' });
-      expect(fields.length).toEqual(8);
+      expect(fields.length).toEqual(9);
     });
   });
 

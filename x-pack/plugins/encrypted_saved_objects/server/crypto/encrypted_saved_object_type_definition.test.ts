@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
+import type { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
 
 it('correctly determines attribute properties', () => {
   const attributes = ['attr#1', 'attr#2', 'attr#3', 'attr#4'];

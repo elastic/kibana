@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { services as commonServiceProviders } from '../../common/services';
@@ -31,6 +31,7 @@ import { FilterBarProvider } from './filter_bar';
 import { FlyoutProvider } from './flyout';
 import { GlobalNavProvider } from './global_nav';
 import { InspectorProvider } from './inspector';
+import { FieldEditorProvider } from './field_editor';
 import { ManagementMenuProvider } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
@@ -46,6 +47,7 @@ import { ListingTableProvider } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
 import { MenuToggleProvider } from './menu_toggle';
+import { MonacoEditorProvider } from './monaco_editor';
 
 export const services = {
   ...commonServiceProviders,
@@ -73,6 +75,7 @@ export const services = {
   browser: BrowserProvider,
   pieChart: PieChartProvider,
   inspector: InspectorProvider,
+  fieldEditor: FieldEditorProvider,
   vegaDebugInspector: VegaDebugInspectorViewProvider,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
@@ -81,5 +84,6 @@ export const services = {
   elasticChart: ElasticChartProvider,
   supertest: KibanaSupertestProvider,
   managementMenu: ManagementMenuProvider,
+  monacoEditor: MonacoEditorProvider,
   MenuToggle: MenuToggleProvider,
 };

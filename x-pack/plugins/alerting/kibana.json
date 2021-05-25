@@ -1,0 +1,19 @@
+{
+  "id": "alerting",
+  "server": true,
+  "ui": true,
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "alerting"],
+  "requiredPlugins": [
+    "actions",
+    "encryptedSavedObjects",
+    "eventLog",
+    "features",
+    "kibanaUtils",
+    "licensing",
+    "taskManager"
+  ],
+  "optionalPlugins": ["usageCollection", "spaces", "security"],
+  "extraPublicDirs": ["common", "common/parse_duration"]
+}

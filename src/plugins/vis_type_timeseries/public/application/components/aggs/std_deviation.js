@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
@@ -27,7 +27,7 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 
-const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
+const RESTRICT_FIELDS = KBN_FIELD_TYPES.NUMBER;
 
 const StandardDeviationAggUi = (props) => {
   const { series, panel, fields, intl } = props;
@@ -72,8 +72,9 @@ const StandardDeviationAggUi = (props) => {
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
 
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  const indexPattern = series.override_index_pattern
+    ? series.series_index_pattern
+    : panel.index_pattern;
   const htmlId = htmlIdGenerator();
   const selectedModeOption = modeOptions.find((option) => {
     return model.mode === option.value;
@@ -106,24 +107,20 @@ const StandardDeviationAggUi = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('field')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.stdDeviation.fieldLabel"
                 defaultMessage="Field"
               />
             }
-          >
-            <FieldSelect
-              fields={fields}
-              type={model.type}
-              restrict={RESTRICT_FIELDS}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-            />
-          </EuiFormRow>
+            fields={fields}
+            type={model.type}
+            restrict={RESTRICT_FIELDS}
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow

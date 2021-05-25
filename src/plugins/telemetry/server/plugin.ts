@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { URL } from 'url';
@@ -45,6 +45,9 @@ interface TelemetryPluginsDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
 }
 
+/**
+ * Server's setup exposed APIs by the telemetry plugin
+ */
 export interface TelemetryPluginSetup {
   /**
    * Resolves into the telemetry Url used to send telemetry.
@@ -53,6 +56,9 @@ export interface TelemetryPluginSetup {
   getTelemetryUrl: () => Promise<URL>;
 }
 
+/**
+ * Server's start exposed APIs by the telemetry plugin
+ */
 export interface TelemetryPluginStart {
   /**
    * Resolves `true` if the user has opted into send Elastic usage data.

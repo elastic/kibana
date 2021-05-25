@@ -1,41 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../../shared_imports';
+import { IScopedClusterClient } from 'kibana/server';
 // @ts-ignore
 import { Settings } from '../../../models/settings/index';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-function fetchClusterSettings(client: ILegacyScopedClusterClient) {
-  return client.callAsInternalUser('cluster.getSettings', {
-    includeDefaults: true,
-    filterPath: '**.xpack.notification',
-  });
+function fetchClusterSettings(client: IScopedClusterClient) {
+  return client.asCurrentUser.cluster
+    .getSettings({
+      include_defaults: true,
+      filter_path: '**.xpack.notification',
+    })
+    .then(({ body }) => body);
 }
 
-export function registerLoadRoute(deps: RouteDependencies) {
-  deps.router.get(
+export function registerLoadRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
+  router.get(
     {
       path: '/api/watcher/settings',
       validate: false,
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       try {
-        const settings = await fetchClusterSettings(ctx.watcher!.client);
+        const settings = await fetchClusterSettings(ctx.core.elasticsearch.client);
         return response.ok({ body: Settings.fromUpstreamJson(settings).downstreamJson });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({ statusCode: e.statusCode, body: e });
-        }
-
-        // Case: default
-        return response.internalError({ body: e });
+        return handleEsError({ error: e, response });
       }
     })
   );

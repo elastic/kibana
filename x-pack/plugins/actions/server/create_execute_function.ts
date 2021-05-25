@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
 import { RawAction, ActionTypeRegistryContract, PreConfiguredAction } from './types';
-import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './saved_objects';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { isSavedObjectExecutionSource } from './lib';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
-  isESOUsingEphemeralEncryptionKey: boolean;
+  isESOCanEncrypt: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
   preconfiguredActions: PreConfiguredAction[];
 }
@@ -32,24 +33,30 @@ export type ExecutionEnqueuer = (
 export function createExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
-  isESOUsingEphemeralEncryptionKey,
+  isESOCanEncrypt,
   preconfiguredActions,
 }: CreateExecuteFunctionOptions) {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
     { id, params, spaceId, source, apiKey }: ExecuteOptions
   ) {
-    if (isESOUsingEphemeralEncryptionKey === true) {
+    if (!isESOCanEncrypt) {
       throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
       );
     }
 
-    const actionTypeId = await getActionTypeId(
+    const { actionTypeId, name, isMissingSecrets } = await getAction(
       unsecuredSavedObjectsClient,
       preconfiguredActions,
       id
     );
+
+    if (isMissingSecrets) {
+      throw new Error(
+        `Unable to execute action because no secrets are defined for the "${name}" connector.`
+      );
+    }
 
     if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
@@ -90,18 +97,16 @@ function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorO
     : {};
 }
 
-async function getActionTypeId(
+async function getAction(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string
-): Promise<string> {
+): Promise<PreConfiguredAction | RawAction> {
   const pcAction = preconfiguredActions.find((action) => action.id === actionId);
   if (pcAction) {
-    return pcAction.actionTypeId;
+    return pcAction;
   }
 
-  const {
-    attributes: { actionTypeId },
-  } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
-  return actionTypeId;
+  const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
+  return attributes;
 }

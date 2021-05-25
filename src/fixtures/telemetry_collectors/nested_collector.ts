@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { CollectorSet, UsageCollector } from '../../plugins/usage_collection/server/collector';
+import { CollectorSet, Collector } from '../../plugins/usage_collection/server/collector';
 import { loggerMock } from '../../core/server/logging/logger.mock';
 
 const collectorSet = new CollectorSet({
@@ -19,7 +19,7 @@ interface Usage {
 }
 
 export class NestedInside {
-  collector?: UsageCollector<Usage>;
+  collector?: Collector<Usage>;
   createMyCollector() {
     this.collector = collectorSet.makeUsageCollector<Usage>({
       type: 'my_nested_collector',

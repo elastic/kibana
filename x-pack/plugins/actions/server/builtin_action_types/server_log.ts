@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { Logger } from '../../../../../src/core/server';
+import { Logger, LogMeta } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { withoutControlCharacters } from './lib/string_utils';
 
@@ -65,7 +66,7 @@ async function executor(
 
   const sanitizedMessage = withoutControlCharacters(params.message);
   try {
-    logger[params.level](`Server log: ${sanitizedMessage}`);
+    (logger[params.level] as Logger['info'])<LogMeta>(`Server log: ${sanitizedMessage}`);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.serverLog.errorLoggingErrorMessage', {
       defaultMessage: 'error logging message',

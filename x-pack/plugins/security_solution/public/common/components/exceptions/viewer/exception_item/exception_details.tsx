@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -15,10 +16,10 @@ import {
 import React, { useMemo, Fragment } from 'react';
 import styled, { css } from 'styled-components';
 
-import { DescriptionListItem } from '../../types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { DescriptionListItem } from '../../types';
 import { getDescriptionListContent } from '../helpers';
 import * as i18n from '../../translations';
-import { ExceptionListItemSchema } from '../../../../../../public/lists_plugin_deps';
 
 const MyExceptionDetails = styled(EuiFlexItem)`
   ${({ theme }) => css`
@@ -37,16 +38,20 @@ const MyDescriptionListDescription = styled(EuiDescriptionListDescription)`
 
 const ExceptionDetailsComponent = ({
   showComments,
+  showModified = false,
+  showName = false,
   onCommentsClick,
   exceptionItem,
 }: {
   showComments: boolean;
+  showModified?: boolean;
+  showName?: boolean;
   exceptionItem: ExceptionListItemSchema;
   onCommentsClick: () => void;
 }): JSX.Element => {
   const descriptionListItems = useMemo(
-    (): DescriptionListItem[] => getDescriptionListContent(exceptionItem),
-    [exceptionItem]
+    (): DescriptionListItem[] => getDescriptionListContent(exceptionItem, showModified, showName),
+    [exceptionItem, showModified, showName]
   );
 
   const commentsSection = useMemo((): JSX.Element => {

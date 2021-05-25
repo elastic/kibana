@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FeatureRegistry } from './feature_registry';
@@ -157,7 +158,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"child \\"category\\" fails because [\\"category\\" is required]"`
+          `"[category.id]: expected value of type [string] but got [undefined]"`
         );
       });
 
@@ -174,7 +175,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"child \\"category\\" fails because [child \\"id\\" fails because [\\"id\\" is required]]"`
+          `"[category.id]: expected value of type [string] but got [undefined]"`
         );
       });
 
@@ -191,7 +192,7 @@ describe('FeatureRegistry', () => {
         expect(() =>
           featureRegistry.registerKibanaFeature(feature)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"child \\"category\\" fails because [child \\"label\\" fails because [\\"label\\" is required]]"`
+          `"[category.label]: expected value of type [string] but got [undefined]"`
         );
       });
     });
@@ -208,7 +209,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"privileges\\" fails because [\\"privileges\\" is required]"`
+        `"[privileges]: expected at least one defined value but got [undefined]"`
       );
     });
 
@@ -247,7 +248,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"subFeatures\\" fails because [\\"subFeatures\\" must contain less than or equal to 0 items]"`
+        `"[subFeatures]: array size is [1], but cannot be greater than [0]"`
       );
     });
 
@@ -487,11 +488,12 @@ describe('FeatureRegistry', () => {
       };
 
       const featureRegistry = new FeatureRegistry();
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"privileges\\" fails because [\\"foo\\" is not allowed]"`
-      );
+      expect(() => featureRegistry.registerKibanaFeature(feature))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[privileges]: types that failed validation:
+        - [privileges.0]: expected value to equal [null]
+        - [privileges.1.foo]: definition for this key is missing"
+      `);
     });
 
     it(`prevents privileges from specifying app entries that don't exist at the root level`, () => {
@@ -1277,7 +1279,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"reserved\\" fails because [child \\"privileges\\" fails because [\\"privileges\\" at position 0 fails because [child \\"id\\" fails because [\\"id\\" with value \\"reserved_1\\" fails to match the required pattern: /^(?!reserved_)[a-zA-Z0-9_-]+$/]]]]"`
+        `"[reserved.privileges.0.id]: Does not satisfy regexp /^(?!reserved_)[a-zA-Z0-9_-]+$/"`
       );
     });
 
@@ -1393,9 +1395,11 @@ describe('FeatureRegistry', () => {
       const featureRegistry = new FeatureRegistry();
       expect(() => {
         featureRegistry.registerKibanaFeature(feature1);
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"subFeatures\\" fails because [\\"subFeatures\\" at position 0 fails because [child \\"privilegeGroups\\" fails because [\\"privilegeGroups\\" at position 0 fails because [child \\"privileges\\" fails because [\\"privileges\\" at position 0 fails because [child \\"minimumLicense\\" fails because [\\"minimumLicense\\" is not allowed]]]]]]]"`
-      );
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "[subFeatures.0.privilegeGroups.0]: types that failed validation:
+        - [subFeatures.0.privilegeGroups.0.0.privileges.0.minimumLicense]: a value wasn't expected to be present
+        - [subFeatures.0.privilegeGroups.0.1.groupType]: expected value to equal [independent]"
+      `);
     });
 
     it('cannot register feature after getAll has been called', () => {
@@ -1574,7 +1578,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerElasticsearchFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"child \\"privileges\\" fails because [\\"privileges\\" is required]"`
+        `"[privileges]: expected value of type [array] but got [undefined]"`
       );
     });
 

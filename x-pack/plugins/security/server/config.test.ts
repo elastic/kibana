@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('crypto', () => ({
@@ -9,8 +10,9 @@ jest.mock('crypto', () => ({
   constants: jest.requireActual('crypto').constants,
 }));
 
-import { loggingSystemMock } from '../../../../src/core/server/mocks';
-import { createConfig, ConfigSchema } from './config';
+import { loggingSystemMock } from 'src/core/server/mocks';
+
+import { ConfigSchema, createConfig } from './config';
 
 describe('config schema', () => {
   it('generates proper defaults', () => {
@@ -1557,21 +1559,21 @@ describe('createConfig()', () => {
       ConfigSchema.validate({
         audit: {
           appender: {
-            kind: 'file',
-            path: '/path/to/file.txt',
+            type: 'file',
+            fileName: '/path/to/file.txt',
             layout: {
-              kind: 'json',
+              type: 'json',
             },
           },
         },
       }).audit.appender
     ).toMatchInlineSnapshot(`
       Object {
-        "kind": "file",
+        "fileName": "/path/to/file.txt",
         "layout": Object {
-          "kind": "json",
+          "type": "json",
         },
-        "path": "/path/to/file.txt",
+        "type": "file",
       }
     `);
   });
@@ -1582,12 +1584,12 @@ describe('createConfig()', () => {
         audit: {
           // no layout configured
           appender: {
-            kind: 'file',
+            type: 'file',
             path: '/path/to/file.txt',
           },
         },
       })
-    ).toThrow('[audit.appender.2.kind]: expected value to equal [legacy-appender]');
+    ).toThrow('[audit.appender.2.type]: expected value to equal [legacy-appender]');
   });
 
   it('rejects an ignore_filter when no appender is configured', () => {

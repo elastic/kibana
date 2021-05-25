@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
 
@@ -12,7 +14,7 @@ import { RouteDependencies } from '../../../types';
 export const registerGetRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError, getCapabilitiesForRollupIndices },
+  lib: { handleEsError, getCapabilitiesForRollupIndices },
 }: RouteDependencies) => {
   router.get(
     {
@@ -21,18 +23,13 @@ export const registerGetRoute = ({
     },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const data = await context.rollup!.client.callAsCurrentUser(
-          'rollup.rollupIndexCapabilities',
-          {
-            indexPattern: '_all',
-          }
-        );
+        const { client: clusterClient } = context.core.elasticsearch;
+        const { body: data } = await clusterClient.asCurrentUser.rollup.getRollupIndexCaps({
+          index: '_all',
+        });
         return response.ok({ body: getCapabilitiesForRollupIndices(data) });
       } catch (err) {
-        if (isEsError(err)) {
-          return response.customError({ statusCode: err.statusCode, body: err });
-        }
-        return response.internalError({ body: err });
+        return handleEsError({ error: err, response });
       }
     })
   );

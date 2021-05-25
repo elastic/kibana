@@ -1,30 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
-import {
+
+import type {
+  ISavedObjectTypeRegistry,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
-  SavedObjectsUpdateOptions,
-  SavedObjectsAddToNamespacesOptions,
-  SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
-  SavedObjectsUtils,
-  ISavedObjectTypeRegistry,
-} from '../../../../../src/core/server';
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateOptions,
+} from 'src/core/server';
+
+import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID } from '../../common/constants';
-import { SpacesServiceStart } from '../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
-import { ISpacesClient } from '../spaces_client';
+import type { ISpacesClient } from '../spaces_client';
+import type { SpacesServiceStart } from '../spaces_service/spaces_service';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
@@ -164,7 +174,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  public async find<T = unknown>(options: SavedObjectsFindOptions) {
+  public async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {
     throwErrorIfNamespaceSpecified(options);
 
     let namespaces = options.namespaces;
@@ -180,12 +190,12 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
         }
         if (namespaces.length === 0) {
           // return empty response, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
-          return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
         }
       } catch (err) {
         if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
           // return empty response, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
-          return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
         }
         throw err;
       }
@@ -193,7 +203,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       namespaces = [this.spaceId];
     }
 
-    return await this.client.find<T>({
+    return await this.client.find<T, A>({
       ...options,
       type: (options.type ? coerceToArray(options.type) : this.types).filter(
         (type) => type !== 'space'
@@ -247,6 +257,28 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   }
 
   /**
+   * Resolves a single object, using any legacy URL alias if it exists
+   *
+   * @param type - The type of SavedObject to retrieve
+   * @param id - The ID of the SavedObject to retrieve
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
+   * @returns {promise} - { saved_object, outcome }
+   */
+  public async resolve<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+
+    return await this.client.resolve<T>(type, id, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
    * Updates an object
    *
    * @param {string} type
@@ -265,50 +297,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.update(type, id, attributes, {
-      ...options,
-      namespace: spaceIdToNamespace(this.spaceId),
-    });
-  }
-
-  /**
-   * Adds namespaces to a SavedObject
-   *
-   * @param type
-   * @param id
-   * @param namespaces
-   * @param options
-   */
-  public async addToNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsAddToNamespacesOptions = {}
-  ) {
-    throwErrorIfNamespaceSpecified(options);
-
-    return await this.client.addToNamespaces(type, id, namespaces, {
-      ...options,
-      namespace: spaceIdToNamespace(this.spaceId),
-    });
-  }
-
-  /**
-   * Removes namespaces from a SavedObject
-   *
-   * @param type
-   * @param id
-   * @param namespaces
-   * @param options
-   */
-  public async deleteFromNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ) {
-    throwErrorIfNamespaceSpecified(options);
-
-    return await this.client.deleteFromNamespaces(type, id, namespaces, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });
@@ -353,6 +341,109 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     return await this.client.removeReferencesTo(type, id, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Gets all references and transitive references of the listed objects. Ignores any object that is not a multi-namespace type.
+   *
+   * @param objects
+   * @param options
+   */
+  public async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options: SavedObjectsCollectMultiNamespaceReferencesOptions = {}
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.collectMultiNamespaceReferences(objects, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Updates one or more objects to add and/or remove them from specified spaces.
+   *
+   * @param objects
+   * @param spacesToAdd
+   * @param spacesToRemove
+   * @param options
+   */
+  public async updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options: SavedObjectsUpdateObjectsSpacesOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
+   * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
+   *
+   * @param {string|Array<string>} type
+   * @param {object} [options] - {@link SavedObjectsOpenPointInTimeOptions}
+   * @property {string} [options.keepAlive]
+   * @property {string} [options.preference]
+   * @returns {promise} - { id: string }
+   */
+  async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.openPointInTimeForType(type, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES
+   * via the Elasticsearch client, and is included in the Saved Objects Client
+   * as a convenience for consumers who are using `openPointInTimeForType`.
+   *
+   * @param {string} id - ID returned from `openPointInTimeForType`
+   * @param {object} [options] - {@link SavedObjectsClosePointInTimeOptions}
+   * @returns {promise} - { succeeded: boolean; num_freed: number }
+   */
+  async closePointInTime(id: string, options: SavedObjectsClosePointInTimeOptions = {}) {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.closePointInTime(id, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Returns a generator to help page through large sets of saved objects.
+   *
+   * The generator wraps calls to `SavedObjects.find` and iterates over
+   * multiple pages of results using `_pit` and `search_after`. This will
+   * open a new Point In Time (PIT), and continue paging until a set of
+   * results is received that's smaller than the designated `perPage`.
+   *
+   * @param {object} findOptions - {@link SavedObjectsCreatePointInTimeFinderOptions}
+   * @param {object} [dependencies] - {@link SavedObjectsCreatePointInTimeFinderDependencies}
+   */
+  createPointInTimeFinder<T = unknown, A = unknown>(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ) {
+    throwErrorIfNamespaceSpecified(findOptions);
+    // We don't need to handle namespaces here, because `createPointInTimeFinder`
+    // is simply a helper that calls `find`, `openPointInTimeForType`, and
+    // `closePointInTime` internally, so namespaces will already be handled
+    // in those methods.
+    return this.client.createPointInTimeFinder<T, A>(findOptions, {
+      client: this,
+      // Include dependencies last so that subsequent SO client wrappers have their settings applied.
+      ...dependencies,
     });
   }
 }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _, { get } from 'lodash';
@@ -32,8 +32,8 @@ import {
   IExpressionLoaderParams,
   ExpressionsStart,
   ExpressionRenderError,
+  ExpressionAstExpression,
 } from '../../../../plugins/expressions/public';
-import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis, SerializedVis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
@@ -41,6 +41,7 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { SavedObjectAttributes } from '../../../../core/types';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
+import { toExpressionAst } from './to_ast';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -49,7 +50,7 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: IIndexPattern[];
   editPath: string;
   editUrl: string;
-  editable: boolean;
+  capabilities: { visualizeSave: boolean; dashboardSave: boolean };
   deps: VisualizeEmbeddableFactoryDeps;
 }
 
@@ -94,7 +95,7 @@ export class VisualizeEmbeddable
   private syncColors?: boolean;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
-  private expression: string = '';
+  private expression?: ExpressionAstExpression;
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
@@ -110,7 +111,7 @@ export class VisualizeEmbeddable
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
+    { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     attributeService?: AttributeService<
       VisualizeSavedObjectAttributes,
@@ -128,7 +129,6 @@ export class VisualizeEmbeddable
         editApp: 'visualize',
         editUrl,
         indexPatterns,
-        editable,
         visTypeName: vis.type.name,
       },
       parent
@@ -142,9 +142,16 @@ export class VisualizeEmbeddable
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
 
+    if (this.attributeService) {
+      const isByValue = !this.inputIsRefType(initialInput);
+      const editable = capabilities.visualizeSave || (isByValue && capabilities.dashboardSave);
+      this.updateOutput({ ...this.getOutput(), editable });
+    }
+
     this.subscriptions.push(
-      this.getUpdated$().subscribe(() => {
+      this.getUpdated$().subscribe((value) => {
         const isDirty = this.handleChanges();
+
         if (isDirty && this.handler) {
           this.updateHandler();
         }
@@ -330,6 +337,14 @@ export class VisualizeEmbeddable
               data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
             };
           }
+          // do not trigger the filter click event if the filter bar is not visible
+          if (
+            triggerId === VIS_EVENT_TO_TRIGGER.filter &&
+            !this.input.id &&
+            !this.vis.type.options.showFilterBar
+          ) {
+            return;
+          }
 
           getUiActions().getTrigger(triggerId).exec(context);
         }
@@ -361,8 +376,8 @@ export class VisualizeEmbeddable
     }
   }
 
-  public reload = () => {
-    this.handleVisUpdate();
+  public reload = async () => {
+    await this.handleVisUpdate();
   };
 
   private async updateHandler() {
@@ -382,20 +397,20 @@ export class VisualizeEmbeddable
     }
     this.abortController = new AbortController();
     const abortController = this.abortController;
-    this.expression = await buildPipeline(this.vis, {
+    this.expression = await toExpressionAst(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,
     });
 
     if (this.handler && !abortController.signal.aborted) {
-      this.handler.update(this.expression, expressionParams);
+      await this.handler.update(this.expression, expressionParams);
     }
   }
 
   private handleVisUpdate = async () => {
     this.handleChanges();
-    this.updateHandler();
+    await this.updateHandler();
   };
 
   private uiStateChangeHandler = () => {

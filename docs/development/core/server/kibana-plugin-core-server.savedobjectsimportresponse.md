@@ -20,4 +20,5 @@ export interface SavedObjectsImportResponse
 |  [success](./kibana-plugin-core-server.savedobjectsimportresponse.success.md) | <code>boolean</code> |  |
 |  [successCount](./kibana-plugin-core-server.savedobjectsimportresponse.successcount.md) | <code>number</code> |  |
 |  [successResults](./kibana-plugin-core-server.savedobjectsimportresponse.successresults.md) | <code>SavedObjectsImportSuccess[]</code> |  |
+|  [warnings](./kibana-plugin-core-server.savedobjectsimportresponse.warnings.md) | <code>SavedObjectsImportWarning[]</code> |  |
 

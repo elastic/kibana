@@ -1,23 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { useState, useEffect } from 'react';
-import { HttpSetup } from 'src/core/public';
+import type { HttpSetup } from 'src/core/public';
+
 import {
-  SendRequestConfig,
-  SendRequestResponse,
-  UseRequestConfig as _UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
+} from '../../../../../../../../src/plugins/es_ui_shared/public';
+import type {
+  SendRequestConfig,
+  SendRequestResponse,
+  UseRequestConfig,
 } from '../../../../../../../../src/plugins/es_ui_shared/public';
 
 let httpClient: HttpSetup;
 
-export type UseRequestConfig = _UseRequestConfig;
+export type { UseRequestConfig } from '../../../../../../../../src/plugins/es_ui_shared/public';
 
-interface RequestError extends Error {
+/**
+ * @internal
+ */
+export interface RequestError extends Error {
   statusCode?: number;
 }
 

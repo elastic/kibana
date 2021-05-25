@@ -1,32 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { timeline } from '../../objects/timeline';
 
 import {
   FAVORITE_TIMELINE,
   LOCKED_ICON,
-  UNLOCKED_ICON,
-  NOTES_TAB_BUTTON,
   NOTES_TEXT,
-  // NOTES_COUNT,
-  NOTES_TEXT_AREA,
   PIN_EVENT,
-  TIMELINE_DESCRIPTION,
   TIMELINE_FILTER,
-  // TIMELINE_FILTER,
-  TIMELINE_QUERY,
-  TIMELINE_TITLE,
-  OPEN_TIMELINE_MODAL,
+  TIMELINE_PANEL,
 } from '../../screens/timeline';
-import {
-  TIMELINES_DESCRIPTION,
-  TIMELINES_PINNED_EVENT_COUNT,
-  TIMELINES_NOTES_COUNT,
-  TIMELINES_FAVORITE,
-} from '../../screens/timelines';
+
 import { cleanKibana } from '../../tasks/common';
 
 import { loginAndWaitForPage } from '../../tasks/login';
@@ -37,69 +26,72 @@ import {
   addNotesToTimeline,
   closeTimeline,
   createNewTimeline,
+  goToQueryTab,
   markAsFavorite,
-  openTimelineFromSettings,
   pinFirstEvent,
   populateTimeline,
   waitForTimelineChanges,
 } from '../../tasks/timeline';
-import { openTimeline } from '../../tasks/timelines';
 
 import { OVERVIEW_URL } from '../../urls/navigation';
 
-describe('Timelines', () => {
-  beforeEach(() => {
+describe('Timelines', (): void => {
+  before(() => {
     cleanKibana();
+    loginAndWaitForPage(OVERVIEW_URL);
   });
 
-  it('Creates a timeline', () => {
-    cy.intercept('PATCH', '/api/timeline').as('timeline');
+  describe('Toggle create timeline from plus icon', () => {
+    after(() => {
+      closeTimeline();
+    });
 
-    loginAndWaitForPage(OVERVIEW_URL);
-    openTimelineUsingToggle();
-    addNameAndDescriptionToTimeline(timeline);
+    it('toggle create timeline ', () => {
+      createNewTimeline();
+      cy.get(TIMELINE_PANEL).should('be.visible');
+    });
+  });
 
-    cy.wait('@timeline').then(({ response }) => {
-      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
+  describe('Creates a timeline by clicking untitled timeline from bottom bar', () => {
+    after(() => {
+      closeTimeline();
+    });
 
+    before(() => {
+      openTimelineUsingToggle();
+      addNameAndDescriptionToTimeline(timeline);
       populateTimeline();
-      addFilter(timeline.filter);
-      pinFirstEvent();
+    });
 
+    beforeEach(() => {
+      goToQueryTab();
+    });
+
+    it('can be added filter', () => {
+      addFilter(timeline.filter);
+      cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
+    });
+
+    it('pins an event', () => {
+      pinFirstEvent();
       cy.get(PIN_EVENT)
         .should('have.attr', 'aria-label')
         .and('match', /Unpin the event in row 2/);
-      cy.get(LOCKED_ICON).should('be.visible');
+    });
 
+    it('has a lock icon', () => {
+      cy.get(LOCKED_ICON).should('be.visible');
+    });
+
+    it('can be added notes', () => {
       addNotesToTimeline(timeline.notes);
+      cy.get(NOTES_TEXT).should('have.text', timeline.notes);
+    });
+
+    it('can be marked as favorite', () => {
       markAsFavorite();
       waitForTimelineChanges();
-      createNewTimeline();
-      closeTimeline();
-      openTimelineFromSettings();
-
-      cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
-      cy.contains(timeline.title).should('exist');
-      cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);
-      cy.get(TIMELINES_PINNED_EVENT_COUNT).first().should('have.text', '1');
-      cy.get(TIMELINES_NOTES_COUNT).first().should('have.text', '1');
-      cy.get(TIMELINES_FAVORITE).first().should('exist');
-
-      openTimeline(timelineId);
-
-      cy.get(FAVORITE_TIMELINE).should('exist');
-      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description);
-      cy.get(TIMELINE_QUERY).should('have.text', `${timeline.query} `);
-      cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
-      cy.get(PIN_EVENT)
-        .should('have.attr', 'aria-label')
-        .and('match', /Unpin the event in row 2/);
-      cy.get(UNLOCKED_ICON).should('be.visible');
-      cy.get(NOTES_TAB_BUTTON).click();
-      cy.get(NOTES_TEXT_AREA).should('exist');
-
-      cy.get(NOTES_TEXT).should('have.text', timeline.notes);
+      cy.get(FAVORITE_TIMELINE).should('have.text', 'Remove from favorites');
     });
   });
 });

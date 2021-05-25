@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { dirname, resolve } from 'path';
 
 import Joi from 'joi';
+import type { CustomHelpers } from 'joi';
 
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
 const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
-const INSPECTING =
-  process.execArgv.includes('--inspect') || process.execArgv.includes('--inspect-brk');
+// it will search both --inspect and --inspect-brk
+const INSPECTING = !!process.execArgv.find((arg) => arg.includes('--inspect'));
 
 const urlPartsSchema = () =>
   Joi.object()
@@ -54,15 +55,17 @@ const dockerServerSchema = () =>
       image: requiredWhenEnabled(Joi.string()),
       port: requiredWhenEnabled(Joi.number()),
       portInContainer: requiredWhenEnabled(Joi.number()),
-      waitForLogLine: Joi.alternatives(Joi.object().type(RegExp), Joi.string()).optional(),
+      waitForLogLine: Joi.alternatives(Joi.object().instance(RegExp), Joi.string()).optional(),
       waitFor: Joi.func().optional(),
       args: Joi.array().items(Joi.string()).optional(),
     })
     .default();
 
 const defaultRelativeToConfigPath = (path: string) => {
-  const makeDefault: any = (_: any, options: any) => resolve(dirname(options.context.path), path);
-  makeDefault.description = `<config.js directory>/${path}`;
+  const makeDefault = (parent: any, helpers: CustomHelpers) => {
+    helpers.schema.description(`<config.js directory>/${path}`);
+    return resolve(dirname(helpers.prefs.context!.path), path);
+  };
   return makeDefault;
 };
 
@@ -169,10 +172,10 @@ export const schema = Joi.object()
 
     esTestCluster: Joi.object()
       .keys({
-        license: Joi.string().default('oss'),
+        license: Joi.string().default('basic'),
         from: Joi.string().default('snapshot'),
         serverArgs: Joi.array(),
-        serverEnvVars: Joi.object(),
+        esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
       })
@@ -210,6 +213,13 @@ export const schema = Joi.object()
     esArchiver: Joi.object()
       .keys({
         directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver')),
+      })
+      .default(),
+
+    // settings for the saved objects svc
+    kbnArchiver: Joi.object()
+      .keys({
+        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/kbn_archiver')),
       })
       .default(),
 

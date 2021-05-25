@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -20,12 +20,12 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
+import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
+import type { DocLinksStart, ToastsStart } from 'src/core/public';
 import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
 import { LazyField } from '../../../advanced_settings/public';
-import { ToastsStart } from '../../../../core/public';
 import { TrackApplicationView } from '../../../usage_collection/public';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
@@ -38,8 +38,9 @@ interface Props {
   isSecurityExampleEnabled: () => boolean;
   showAppliesSettingMessage: boolean;
   enableSaving: boolean;
-  query?: any;
+  query?: { text: string };
   toasts: ToastsStart;
+  docLinks: DocLinksStart['links'];
 }
 
 interface State {
@@ -51,32 +52,40 @@ interface State {
 }
 
 export class TelemetryManagementSection extends Component<Props, State> {
-  state: State = {
-    processing: false,
-    showExample: false,
-    showSecurityExample: false,
-    queryMatches: null,
-    enabled: this.props.telemetryService.getIsOptedIn() || false,
-  };
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      processing: false,
+      showExample: false,
+      showSecurityExample: false,
+      queryMatches: props.query ? this.checkQueryMatch(props.query) : null,
+      enabled: this.props.telemetryService.getIsOptedIn() || false,
+    };
+  }
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const { query } = nextProps;
+    const queryMatches = this.checkQueryMatch(query);
 
-    const searchTerm = (query.text || '').toLowerCase();
-    const searchTermMatches =
-      this.props.telemetryService.getCanChangeOptInStatus() &&
-      SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0);
-
-    if (searchTermMatches !== this.state.queryMatches) {
+    if (queryMatches !== this.state.queryMatches) {
       this.setState(
         {
-          queryMatches: searchTermMatches,
+          queryMatches,
         },
         () => {
-          this.props.onQueryMatchChange(searchTermMatches);
+          this.props.onQueryMatchChange(queryMatches);
         }
       );
     }
+  }
+
+  checkQueryMatch(query?: { text: string }): boolean {
+    const searchTerm = (query?.text ?? '').toLowerCase();
+    return (
+      this.props.telemetryService.getCanChangeOptInStatus() &&
+      SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0)
+    );
   }
 
   render() {
@@ -122,24 +131,26 @@ export class TelemetryManagementSection extends Component<Props, State> {
             {this.maybeGetAppliesSettingMessage()}
             <EuiSpacer size="s" />
             <LazyField
-              setting={
-                {
-                  type: 'boolean',
-                  name: 'telemetry:enabled',
-                  displayName: i18n.translate('telemetry.provideUsageStatisticsTitle', {
-                    defaultMessage: 'Provide usage statistics',
-                  }),
-                  value: enabled,
-                  description: this.renderDescription(),
-                  defVal: true,
-                  ariaName: i18n.translate('telemetry.provideUsageStatisticsAriaName', {
-                    defaultMessage: 'Provide usage statistics',
-                  }),
-                } as any
-              }
+              setting={{
+                type: 'boolean',
+                name: 'telemetry:enabled',
+                displayName: i18n.translate('telemetry.provideUsageStatisticsTitle', {
+                  defaultMessage: 'Provide usage statistics',
+                }),
+                value: enabled,
+                description: this.renderDescription(),
+                defVal: true,
+                ariaName: i18n.translate('telemetry.provideUsageStatisticsAriaName', {
+                  defaultMessage: 'Provide usage statistics',
+                }),
+                requiresPageReload: false,
+                category: [],
+                isOverridden: false,
+                isCustom: true,
+              }}
               loading={processing}
-              dockLinks={null as any}
-              toasts={null as any}
+              dockLinks={this.props.docLinks}
+              toasts={this.props.toasts}
               handleChange={this.toggleOptIn}
               enableSaving={this.props.enableSaving}
             />

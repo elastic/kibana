@@ -4,14 +4,17 @@
 
 ## PluginInitializerContext.config property
 
+Accessors for the plugin's configuration
+
 <b>Signature:</b>
 
 ```typescript
 config: {
         legacy: {
             globalConfig$: Observable<SharedGlobalConfig>;
+            get: () => SharedGlobalConfig;
         };
         create: <T = ConfigSchema>() => Observable<T>;
-        createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
+        get: <T = ConfigSchema>() => T;
     };
 ```

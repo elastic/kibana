@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -35,6 +36,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_winlogbeat');
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
       await ml.testResources.deleteIndexPatternByTitle('ft_logs-endpoint.events.*');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_metricbeat');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_cloudtrail');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_metrics_ui');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_apache_data_stream');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_nginx_data_stream');
 
       await esArchiver.unload('ml/ecommerce');
       await esArchiver.unload('ml/categorization');
@@ -53,6 +59,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('ml/farequote');
       await esArchiver.unload('ml/bm_classification');
       await esArchiver.unload('ml/ihp_outlier');
+      await esArchiver.unload('ml/module_metricbeat');
+      await esArchiver.unload('ml/module_siem_cloudtrail');
+      await esArchiver.unload('ml/module_metrics_ui');
+      await esArchiver.unload('ml/module_apache_data_stream');
+      await esArchiver.unload('ml/module_nginx_data_stream');
 
       await ml.testResources.resetKibanaTimeZone();
     });
@@ -69,5 +80,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./calendars'));
     loadTestFile(require.resolve('./annotations'));
     loadTestFile(require.resolve('./saved_objects'));
+    loadTestFile(require.resolve('./system'));
   });
 }

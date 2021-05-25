@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import dedent from 'dedent';
 import { CliError } from '../utils/errors';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
@@ -34,10 +35,16 @@ const kibanaProjectName = 'kibana';
  * `webpack` and `tsc` only, for the rest we rely on predefined timeouts.
  */
 export const WatchCommand: ICommand = {
-  description: 'Runs `kbn:watch` script for every project.',
+  description:
+    'Runs `kbn:watch` script for every project (only works on packages not using Bazel yet)',
   name: 'watch',
 
   async run(projects, projectGraph) {
+    log.warning(dedent`
+      We are migrating packages into the Bazel build system. If the package you are trying to watch
+      contains a BUILD.bazel file please just use 'yarn kbn watch-bazel'
+    `);
+
     const projectsToWatch: ProjectMap = new Map();
     for (const project of projects.values()) {
       // We can't watch project that doesn't have `kbn:watch` script.

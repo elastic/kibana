@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,7 +12,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const telemetryTestResources = getService('telemetryTestResources');
 
-  describe('security solution endpoint telemetry', () => {
+  // The source of the data for these tests have changed and need to be updated
+  // There are currently tests in the security_solution application being maintained
+  describe.skip('security solution endpoint telemetry', () => {
     after(async () => {
       await esArchiver.load('empty_kibana');
     });

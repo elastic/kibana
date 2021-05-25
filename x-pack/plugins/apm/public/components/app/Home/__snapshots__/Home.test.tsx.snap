@@ -8,6 +8,7 @@ exports[`Home component should render services 1`] = `
         "setHeaderActionMenu": [Function],
       },
       "config": Object {
+        "profilingEnabled": false,
         "serviceMapEnabled": true,
         "ui": Object {
           "enabled": false,
@@ -56,6 +57,9 @@ exports[`Home component should render services 1`] = `
           "get$": [Function],
         },
       },
+      "observabilityRuleTypeRegistry": Object {
+        "registerFormatter": [Function],
+      },
       "plugins": Object {
         "data": Object {
           "query": Object {
@@ -76,6 +80,9 @@ exports[`Home component should render services 1`] = `
               "useHash": false,
             },
           },
+        },
+        "observability": Object {
+          "isAlertingExperienceEnabled": [Function],
         },
       },
     }
@@ -95,6 +102,7 @@ exports[`Home component should render traces 1`] = `
         "setHeaderActionMenu": [Function],
       },
       "config": Object {
+        "profilingEnabled": false,
         "serviceMapEnabled": true,
         "ui": Object {
           "enabled": false,
@@ -143,6 +151,9 @@ exports[`Home component should render traces 1`] = `
           "get$": [Function],
         },
       },
+      "observabilityRuleTypeRegistry": Object {
+        "registerFormatter": [Function],
+      },
       "plugins": Object {
         "data": Object {
           "query": Object {
@@ -163,6 +174,9 @@ exports[`Home component should render traces 1`] = `
               "useHash": false,
             },
           },
+        },
+        "observability": Object {
+          "isAlertingExperienceEnabled": [Function],
         },
       },
     }

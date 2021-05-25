@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { SPACES, ALL_SPACES_ID } from './spaces';
 import { AUTHENTICATION } from './authentication';
@@ -114,7 +116,7 @@ export const createRequest = ({ type, id }: TestCase) => ({ type, id });
 
 const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 const isNamespaceAgnostic = (type: string) => type === 'globaltype';
-const isMultiNamespace = (type: string) => type === 'sharedtype';
+const isMultiNamespace = (type: string) => type === 'sharedtype' || type === 'sharecapabletype';
 export const expectResponses = {
   forbiddenTypes: (action: string) => (
     typeOrTypes: string | string[]
@@ -177,11 +179,11 @@ export const expectResponses = {
    * Additional assertions that we use in `import` and `resolve_import_errors` to ensure that
    * newly-created (or overwritten) objects don't have unexpected properties
    */
-  successCreated: async (es: any, spaceId: string, type: string, id: string) => {
+  successCreated: async (es: KibanaClient, spaceId: string, type: string, id: string) => {
     const isNamespaceUndefined =
       spaceId === SPACES.DEFAULT.spaceId || isNamespaceAgnostic(type) || isMultiNamespace(type);
     const expectedSpacePrefix = isNamespaceUndefined ? '' : `${spaceId}:`;
-    const savedObject = await es.get({
+    const { body: savedObject } = await es.get<Record<string, any>>({
       id: `${expectedSpacePrefix}${type}:${id}`,
       index: '.kibana',
     });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -25,11 +25,14 @@ describe('Discover cell actions ', function () {
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
       isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
         <FilterInBtn
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
           columnId={'extension'}
@@ -50,11 +53,14 @@ describe('Discover cell actions ', function () {
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
       isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
         <FilterOutBtn
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
           columnId={'extension'}

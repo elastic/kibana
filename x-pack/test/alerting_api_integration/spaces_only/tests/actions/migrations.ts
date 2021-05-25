@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -53,6 +54,15 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(responseNoAuth.status).to.eql(200);
       expect(responseNoAuth.body.config).key('hasAuth');
       expect(responseNoAuth.body.config.hasAuth).to.eql(false);
+    });
+
+    it('7.14.0 migrates connectors to have `isMissingSecrets` property', async () => {
+      const responseWithisMissingSecrets = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/action/7434121e-045a-47d6-a0a6-0b6da752397a`
+      );
+
+      expect(responseWithisMissingSecrets.status).to.eql(200);
+      expect(responseWithisMissingSecrets.body.isMissingSecrets).to.eql(false);
     });
   });
 }

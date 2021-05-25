@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -12,8 +12,8 @@ import { SavedObject } from '../../../../src/core/server';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('find', () => {
     describe('with kibana index', () => {
@@ -25,32 +25,9 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/api/saved_objects/_find?type=visualization&fields=title')
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
-              page: 1,
-              per_page: 20,
-              total: 1,
-              saved_objects: [
-                {
-                  type: 'visualization',
-                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  version: 'WzIsMV0=',
-                  attributes: {
-                    title: 'Count of requests',
-                  },
-                  score: 0,
-                  migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                  namespaces: ['default'],
-                  references: [
-                    {
-                      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                      type: 'index-pattern',
-                    },
-                  ],
-                  updated_at: '2017-09-21T18:51:23.794Z',
-                },
-              ],
-            });
+            expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
+              'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+            ]);
             expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
           }));
 
@@ -121,32 +98,12 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=default')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
-                page: 1,
-                per_page: 20,
-                total: 1,
-                saved_objects: [
-                  {
-                    type: 'visualization',
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    version: 'WzIsMV0=',
-                    attributes: {
-                      title: 'Count of requests',
-                    },
-                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                    namespaces: ['default'],
-                    score: 0,
-                    references: [
-                      {
-                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                        type: 'index-pattern',
-                      },
-                    ],
-                    updated_at: '2017-09-21T18:51:23.794Z',
-                  },
-                ],
-              });
+              expect(
+                resp.body.saved_objects.map((so: { id: string; namespaces: string[] }) => ({
+                  id: so.id,
+                  namespaces: so.namespaces,
+                }))
+              ).to.eql([{ id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: ['default'] }]);
               expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
             }));
       });
@@ -157,52 +114,15 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=*')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
-                page: 1,
-                per_page: 20,
-                total: 2,
-                saved_objects: [
-                  {
-                    type: 'visualization',
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    version: 'WzIsMV0=',
-                    attributes: {
-                      title: 'Count of requests',
-                    },
-                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                    namespaces: ['default'],
-                    score: 0,
-                    references: [
-                      {
-                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                        type: 'index-pattern',
-                      },
-                    ],
-                    updated_at: '2017-09-21T18:51:23.794Z',
-                  },
-                  {
-                    attributes: {
-                      title: 'Count of requests',
-                    },
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                    namespaces: ['foo-ns'],
-                    references: [
-                      {
-                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                        type: 'index-pattern',
-                      },
-                    ],
-                    score: 0,
-                    type: 'visualization',
-                    updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzYsMV0=',
-                  },
-                ],
-              });
-              expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
+              expect(
+                resp.body.saved_objects.map((so: { id: string; namespaces: string[] }) => ({
+                  id: so.id,
+                  namespaces: so.namespaces,
+                }))
+              ).to.eql([
+                { id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: ['default'] },
+                { id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: ['foo-ns'] },
+              ]);
             }));
       });
 
@@ -214,41 +134,9 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
-                page: 1,
-                per_page: 20,
-                total: 1,
-                saved_objects: [
-                  {
-                    type: 'visualization',
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    attributes: {
-                      title: 'Count of requests',
-                      visState: resp.body.saved_objects[0].attributes.visState,
-                      uiStateJSON: '{"spy":{"mode":{"name":null,"fill":false}}}',
-                      description: '',
-                      version: 1,
-                      kibanaSavedObjectMeta: {
-                        searchSourceJSON:
-                          resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
-                            .searchSourceJSON,
-                      },
-                    },
-                    namespaces: ['default'],
-                    score: 0,
-                    references: [
-                      {
-                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                        type: 'index-pattern',
-                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                      },
-                    ],
-                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                    updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzIsMV0=',
-                  },
-                ],
-              });
+              expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
+                'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+              ]);
             }));
 
         it('wrong type should return 400 with Bad Request', async () =>
@@ -275,9 +163,77 @@ export default function ({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 error: 'Bad Request',
                 message:
-                  'KQLSyntaxError: Expected AND, OR, end of input, ' +
-                  'whitespace but "<" found.\ndashboard.attributes.title:foo' +
-                  '<invalid\n------------------------------^: Bad Request',
+                  'KQLSyntaxError: Expected AND, OR, end of input but "<" found.\ndashboard.' +
+                  'attributes.title:foo<invalid\n------------------------------^: Bad Request',
+                statusCode: 400,
+              });
+            }));
+      });
+
+      describe('using aggregations', () => {
+        it('should return 200 with valid response for a valid aggregation', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: { max: { field: 'visualization.attributes.version' } },
+                })
+              )}`
+            )
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                aggregations: {
+                  type_count: {
+                    value: 1,
+                  },
+                },
+                page: 1,
+                per_page: 0,
+                saved_objects: [],
+                total: 1,
+              });
+            }));
+
+        it('should return a 400 when referencing an invalid SO attribute', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: { max: { field: 'dashboard.attributes.version' } },
+                })
+              )}`
+            )
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message:
+                  'Invalid aggregation: [type_count.max.field] Invalid attribute path: dashboard.attributes.version: Bad Request',
+                statusCode: 400,
+              });
+            }));
+
+        it('should return a 400 when using a forbidden aggregation option', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: {
+                    max: {
+                      field: 'visualization.attributes.version',
+                      script: 'Bad script is bad',
+                    },
+                  },
+                })
+              )}`
+            )
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message:
+                  'Invalid aggregation: [type_count.max.script]: definition for this key is missing: Bad Request',
                 statusCode: 400,
               });
             }));
@@ -415,11 +371,11 @@ export default function ({ getService }: FtrProviderContext) {
           }));
     });
 
-    describe.skip('without kibana index', () => {
+    describe('without kibana index', () => {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
+          await esDeleteAllIndices('.kibana*')
       );
 
       it('should return 200 with empty response', async () =>

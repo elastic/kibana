@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Remote File Copy to a Hidden Share",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : (\"cmd.exe\", \"powershell.exe\", \"robocopy.exe\", \"xcopy.exe\") and \n  process.args : (\"copy*\", \"move*\", \"cp\", \"mv\") and process.args : \"*$*\"\n",
   "risk_score": 47,
@@ -46,6 +47,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

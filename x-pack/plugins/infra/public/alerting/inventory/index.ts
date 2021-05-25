@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -12,7 +14,7 @@ import {
 } from '../../../server/lib/alerting/inventory_metric_threshold/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { AlertTypeParams } from '../../../../alerts/common';
+import { AlertTypeParams } from '../../../../alerting/common';
 import { validateMetricThreshold } from './components/validation';
 
 interface InventoryMetricAlertTypeParams extends AlertTypeParams {

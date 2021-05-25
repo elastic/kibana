@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiButtonEmpty,
   EuiIcon,
@@ -21,7 +23,11 @@ interface IconPopoverProps {
   onClose: () => void;
   detailsFetchStatus: FETCH_STATUS;
   isOpen: boolean;
-  icon?: string;
+  icon: {
+    type?: string;
+    size?: 's' | 'm' | 'l';
+    color?: string;
+  };
 }
 export function IconPopover({
   icon,
@@ -32,7 +38,7 @@ export function IconPopover({
   detailsFetchStatus,
   isOpen,
 }: IconPopoverProps) {
-  if (!icon) {
+  if (!icon.type) {
     return null;
   }
   const isLoading = detailsFetchStatus === FETCH_STATUS.LOADING;
@@ -42,7 +48,11 @@ export function IconPopover({
       ownFocus={false}
       button={
         <EuiButtonEmpty onClick={onClick} data-test-subj={`popover_${title}`}>
-          <EuiIcon type={icon} size="l" color="black" />
+          <EuiIcon
+            type={icon.type}
+            size={icon.size ?? 'l'}
+            color={icon.color ?? 'text'}
+          />
         </EuiButtonEmpty>
       }
       isOpen={isOpen}

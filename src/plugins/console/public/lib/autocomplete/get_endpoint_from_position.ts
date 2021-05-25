@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CoreEditor, Position } from '../../types';
 import { getCurrentMethodAndTokenPaths } from './autocomplete';
+import type RowParser from '../row_parser';
 
 // @ts-ignore
 import { getTopLevelUrlCompleteComponents } from '../kb/kb';
 // @ts-ignore
 import { populateContext } from './engine';
 
-export function getEndpointFromPosition(editor: CoreEditor, pos: Position, parser: any) {
+export function getEndpointFromPosition(editor: CoreEditor, pos: Position, parser: RowParser) {
   const lineValue = editor.getLineValue(pos.lineNumber);
   const context = {
     ...getCurrentMethodAndTokenPaths(

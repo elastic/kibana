@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { coreMock } from 'src/core/public/mocks';
@@ -68,9 +69,11 @@ describe('Metrics UI Observability Homepage Functions', () => {
         bucketSize,
       });
       expect(core.http.post).toHaveBeenCalledTimes(1);
-      expect(core.http.post).toHaveBeenCalledWith('/api/metrics/overview', {
+      expect(core.http.post).toHaveBeenCalledWith('/api/metrics/overview/top', {
         body: JSON.stringify({
           sourceId: 'default',
+          bucketSize,
+          size: 5,
           timerange: {
             from: startTime.valueOf(),
             to: endTime.valueOf(),

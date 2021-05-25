@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // info on nodemailer: https://nodemailer.com/about/
@@ -9,7 +10,8 @@ import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
 import { Logger } from '../../../../../../src/core/server';
-import { ProxySettings } from '../../types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
+import { CustomHostSettings } from '../../config';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -18,9 +20,8 @@ export interface SendEmailOptions {
   transport: Transport;
   routing: Routing;
   content: Content;
-  proxySettings?: ProxySettings;
-  rejectUnauthorized?: boolean;
   hasAuth: boolean;
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
 // config validation ensures either service is set or host/port are set
@@ -47,12 +48,17 @@ export interface Content {
 
 // send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
-  const { transport, routing, content, proxySettings, rejectUnauthorized, hasAuth } = options;
+  const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service, host, port, secure, user, password } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
 
-  const transportConfig: Record<string, unknown> = {};
+  // The transport options do not seem to be exposed as a type, and we reference
+  // some deep properties, so need to use any here.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transportConfig: Record<string, any> = {};
+  const proxySettings = configurationUtilities.getProxySettings();
+  const rejectUnauthorized = configurationUtilities.isRejectUnauthorizedCertificatesEnabled();
 
   if (hasAuth && user != null && password != null) {
     transportConfig.auth = {
@@ -60,6 +66,18 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       pass: password,
     };
   }
+
+  let useProxy = !!proxySettings;
+
+  if (host) {
+    if (proxySettings?.proxyBypassHosts && proxySettings?.proxyBypassHosts?.has(host)) {
+      useProxy = false;
+    }
+    if (proxySettings?.proxyOnlyHosts && !proxySettings?.proxyOnlyHosts?.has(host)) {
+      useProxy = false;
+    }
+  }
+  let customHostSettings: CustomHostSettings | undefined;
 
   if (service === JSON_TRANSPORT_SERVICE) {
     transportConfig.jsonTransport = true;
@@ -70,18 +88,49 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     transportConfig.host = host;
     transportConfig.port = port;
     transportConfig.secure = !!secure;
+    customHostSettings = configurationUtilities.getCustomHostSettings(`smtp://${host}:${port}`);
 
-    if (proxySettings) {
+    if (proxySettings && useProxy) {
       transportConfig.tls = {
         // do not fail on invalid certs if value is false
         rejectUnauthorized: proxySettings?.proxyRejectUnauthorizedCertificates,
       };
       transportConfig.proxy = proxySettings.proxyUrl;
       transportConfig.headers = proxySettings.proxyHeaders;
-    } else if (!transportConfig.secure) {
-      transportConfig.tls = {
-        rejectUnauthorized,
-      };
+    } else if (!transportConfig.secure && user == null && password == null) {
+      // special case - if secure:false && user:null && password:null set
+      // rejectUnauthorized false, because simple/test servers that don't even
+      // authenticate rarely have valid certs; eg cloud proxy, and npm maildev
+      transportConfig.tls = { rejectUnauthorized: false };
+    } else {
+      transportConfig.tls = { rejectUnauthorized };
+    }
+
+    // finally, allow customHostSettings to override some of the settings
+    // see: https://nodemailer.com/smtp/
+    if (customHostSettings) {
+      const tlsConfig: Record<string, unknown> = {};
+      const tlsSettings = customHostSettings.tls;
+      const smtpSettings = customHostSettings.smtp;
+
+      if (tlsSettings?.certificateAuthoritiesData) {
+        tlsConfig.ca = tlsSettings?.certificateAuthoritiesData;
+      }
+      if (tlsSettings?.rejectUnauthorized !== undefined) {
+        tlsConfig.rejectUnauthorized = tlsSettings?.rejectUnauthorized;
+      }
+
+      if (!transportConfig.tls) {
+        transportConfig.tls = tlsConfig;
+      } else {
+        transportConfig.tls = { ...transportConfig.tls, ...tlsConfig };
+      }
+
+      if (smtpSettings?.ignoreTLS) {
+        transportConfig.ignoreTLS = true;
+      } else if (smtpSettings?.requireTLS) {
+        transportConfig.requireTLS = true;
+      }
     }
   }
 

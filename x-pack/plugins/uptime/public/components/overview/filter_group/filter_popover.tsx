@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFieldSearch, EuiFilterSelectItem, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
@@ -27,6 +28,18 @@ export interface FilterPopoverProps {
 
 const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined =>
   selectedItems.find((selected) => selected === item) ? 'on' : undefined;
+
+export const filterByItemLabel = (item: string, title: string) =>
+  i18n.translate('xpack.uptime.filterPopover.filterItem.label', {
+    defaultMessage: 'Filter by {title} {item}.',
+    values: { item, title },
+  });
+
+export const removeFilterForItemLabel = (item: string, title: string) =>
+  i18n.translate('xpack.uptime.filterPopover.removeFilterItem.label', {
+    defaultMessage: 'Remove filter by {title} {item}.',
+    values: { item, title },
+  });
 
 export const FilterPopover = ({
   fieldName,
@@ -76,8 +89,11 @@ export const FilterPopover = ({
             numFilters={items.length}
             numActiveFilters={isOpen ? tempSelectedItems.length : selectedItems.length}
             onClick={() => {
+              if (isOpen) {
+                // only update these values on close
+                onFilterFieldChange(fieldName, tempSelectedItems);
+              }
               setIsOpen(!isOpen);
-              onFilterFieldChange(fieldName, tempSelectedItems);
             }}
             title={title}
           />
@@ -122,16 +138,22 @@ export const FilterPopover = ({
         />
       </EuiPopoverTitle>
       {!loading &&
-        itemsToDisplay.map((item) => (
-          <EuiFilterSelectItem
-            checked={isItemSelected(tempSelectedItems, item)}
-            data-test-subj={`filter-popover-item_${item}`}
-            key={item}
-            onClick={() => toggleSelectedItems(item, tempSelectedItems, setTempSelectedItems)}
-          >
-            {item}
-          </EuiFilterSelectItem>
-        ))}
+        itemsToDisplay.map((item) => {
+          const checked = isItemSelected(tempSelectedItems, item);
+          return (
+            <EuiFilterSelectItem
+              aria-label={
+                checked ? removeFilterForItemLabel(item, title) : filterByItemLabel(item, title)
+              }
+              checked={checked}
+              data-test-subj={`filter-popover-item_${item}`}
+              key={item}
+              onClick={() => toggleSelectedItems(item, tempSelectedItems, setTempSelectedItems)}
+            >
+              {item}
+            </EuiFilterSelectItem>
+          );
+        })}
       {id === 'location' && items.length === 0 && <LocationLink />}
     </EuiPopover>
   );

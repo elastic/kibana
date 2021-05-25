@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
+
+import { skipBodyValidation } from '../../lib/route_config_helpers';
 
 import { RouteDependencies } from '../../plugin';
 
@@ -13,22 +16,17 @@ export function registerDocumentsRoutes({
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
   router.post(
-    {
+    skipBodyValidation({
       path: '/api/app_search/engines/{engineName}/documents',
       validate: {
         params: schema.object({
           engineName: schema.string(),
         }),
-        body: schema.object({
-          documents: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
-        }),
       },
-    },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/documents/new`,
-      })(context, request, response);
-    }
+    }),
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/documents/new',
+    })
   );
 }
 
@@ -46,11 +44,9 @@ export function registerDocumentRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/documents/${request.params.documentId}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/documents/:documentId',
+    })
   );
   router.delete(
     {
@@ -62,10 +58,8 @@ export function registerDocumentRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/documents/${request.params.documentId}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/documents/:documentId',
+    })
   );
 }

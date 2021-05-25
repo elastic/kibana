@@ -1,24 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterPopover } from '../../filter_group/filter_popover';
 import { filterLabels } from '../../filter_group/translations';
-import { alertFilterLabels } from './translations';
+import { alertFilterLabels, filterAriaLabels } from './translations';
 import { FilterExpressionsSelectProps } from './filters_expression_select_container';
 import { OverviewFiltersState } from '../../../../state/reducers/overview_filters';
 
-type FilterFieldUpdate = (updateTarget: { fieldName: string; values: string[] }) => void;
-
-interface OwnProps {
-  setUpdatedFieldValues: FilterFieldUpdate;
-}
-
-type Props = FilterExpressionsSelectProps & Pick<OverviewFiltersState, 'filters'> & OwnProps;
+type Props = FilterExpressionsSelectProps & Pick<OverviewFiltersState, 'filters'>;
 
 export const FiltersExpressionsSelect: React.FC<Props> = ({
   alertParams,
@@ -26,13 +21,15 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
   newFilters,
   onRemoveFilter,
   setAlertParams,
-  setUpdatedFieldValues,
 }) => {
   const { tags, ports, schemes, locations } = overviewFilters;
-  const selectedPorts = alertParams?.filters?.['url.port'] ?? [];
-  const selectedLocations = alertParams?.filters?.['observer.geo.name'] ?? [];
-  const selectedSchemes = alertParams?.filters?.['monitor.type'] ?? [];
-  const selectedTags = alertParams?.filters?.tags ?? [];
+
+  const alertFilters = alertParams?.filters;
+
+  const selectedPorts = alertFilters?.['url.port'] ?? [];
+  const selectedLocations = alertFilters?.['observer.geo.name'] ?? [];
+  const selectedSchemes = alertFilters?.['monitor.type'] ?? [];
+  const selectedTags = alertFilters?.tags ?? [];
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
     // the `filters` field is no longer a string
@@ -53,11 +50,11 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
         )
       );
     }
-    setUpdatedFieldValues({ fieldName, values });
   };
 
   const monitorFilters = [
     {
+      'aria-label': filterAriaLabels.PORT,
       onFilterFieldChange,
       loading: false,
       fieldName: 'url.port',
@@ -71,6 +68,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       value: selectedPorts.length === 0 ? alertFilterLabels.ANY_PORT : selectedPorts?.join(','),
     },
     {
+      'aria-label': filterAriaLabels.TAG,
       onFilterFieldChange,
       loading: false,
       fieldName: 'tags',
@@ -78,11 +76,12 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       disabled: tags?.length === 0,
       items: tags ?? [],
       selectedItems: selectedTags,
-      title: filterLabels.TAGS,
+      title: filterLabels.TAG,
       description: selectedTags.length === 0 ? alertFilterLabels.WITH : alertFilterLabels.WITH_TAG,
       value: selectedTags.length === 0 ? alertFilterLabels.ANY_TAG : selectedTags?.join(','),
     },
     {
+      'aria-label': filterAriaLabels.SCHEME,
       onFilterFieldChange,
       loading: false,
       fieldName: 'monitor.type',
@@ -95,6 +94,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       value: selectedSchemes.length === 0 ? alertFilterLabels.ANY_TYPE : selectedSchemes?.join(','),
     },
     {
+      'aria-label': filterAriaLabels.LOCATION,
       onFilterFieldChange,
       loading: false,
       fieldName: 'observer.geo.name',
@@ -102,7 +102,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
       disabled: locations?.length === 0,
       items: locations ?? [],
       selectedItems: selectedLocations,
-      title: filterLabels.SCHEME,
+      title: filterLabels.LOCATION,
       description:
         selectedLocations.length === 0 ? alertFilterLabels.FROM : alertFilterLabels.FROM_LOCATION,
       value:
@@ -132,7 +132,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
               {...item}
               btnContent={
                 <EuiExpression
-                  aria-label={'ariaLabel'}
+                  aria-label={item['aria-label']}
                   color={'secondary'}
                   data-test-subj={'uptimeCreateStatusAlert.' + item.id}
                   description={description}
@@ -148,7 +148,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              aria-label="Remove filter"
+              aria-label={alertFilterLabels.REMOVE_FILTER_LABEL(item.title)}
               iconType="trash"
               color="danger"
               onClick={() => {
@@ -157,12 +157,9 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
               }}
             />
           </EuiFlexItem>
-
           <EuiSpacer size="xs" />
         </EuiFlexGroup>
       ))}
-
-      <EuiSpacer size="xs" />
     </>
   );
 };

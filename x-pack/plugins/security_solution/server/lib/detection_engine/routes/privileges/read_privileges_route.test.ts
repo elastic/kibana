@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { readPrivilegesRoute } from './read_privileges_route';
@@ -17,7 +18,7 @@ describe('read_privileges route', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getMockPrivilegesResult());
-    readPrivilegesRoute(server.router, false);
+    readPrivilegesRoute(server.router, true);
   });
 
   describe('normal status codes', () => {
@@ -74,6 +75,7 @@ describe('read_privileges route', () => {
       const { securitySolution, ...contextWithoutSecuritySolution } = context;
       const response = await server.inject(
         getPrivilegeRequest({ auth: { isAuthenticated: false } }),
+        // @ts-expect-error
         contextWithoutSecuritySolution
       );
       expect(response.status).toEqual(404);

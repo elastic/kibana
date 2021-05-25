@@ -1,35 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+import { CreateIndexRequest, PutMappingRequest } from '@elastic/elasticsearch/api/types';
 import pRetry from 'p-retry';
-import { Logger, LegacyAPICaller } from 'src/core/server';
+import { Logger, ElasticsearchClient } from 'src/core/server';
 
-export interface MappingsObject {
-  type: string;
-  ignore_above?: number;
-  scaling_factor?: number;
-  ignore_malformed?: boolean;
-  coerce?: boolean;
-  fields?: Record<string, MappingsObject>;
-}
-
-export interface MappingsDefinition {
-  dynamic?: boolean | 'strict';
-  properties: Record<string, MappingsDefinition | MappingsObject>;
-  dynamic_templates?: any[];
-}
+export type Mappings = Required<CreateIndexRequest>['body']['mappings'] &
+  Required<PutMappingRequest>['body'];
 
 export async function createOrUpdateIndex({
   index,
   mappings,
-  apiCaller,
+  client,
   logger,
 }: {
   index: string;
-  mappings: MappingsDefinition;
-  apiCaller: LegacyAPICaller;
+  mappings: Mappings;
+  client: ElasticsearchClient;
   logger: Logger;
 }) {
   try {
@@ -43,21 +33,22 @@ export async function createOrUpdateIndex({
      */
     await pRetry(
       async () => {
-        const indexExists = await apiCaller('indices.exists', { index });
+        const indexExists = (await client.indices.exists({ index })).body;
         const result = indexExists
           ? await updateExistingIndex({
               index,
-              apiCaller,
+              client,
               mappings,
             })
           : await createNewIndex({
               index,
-              apiCaller,
+              client,
               mappings,
             });
 
-        if (!result.acknowledged) {
-          const resultError = result && result.error && JSON.stringify(result.error);
+        if (!result.body.acknowledged) {
+          const bodyWithError: { body?: { error: any } } = result as any;
+          const resultError = JSON.stringify(bodyWithError?.body?.error);
           throw new Error(resultError);
         }
       },
@@ -75,14 +66,14 @@ export async function createOrUpdateIndex({
 
 function createNewIndex({
   index,
-  apiCaller,
+  client,
   mappings,
 }: {
   index: string;
-  apiCaller: LegacyAPICaller;
-  mappings: MappingsDefinition;
+  client: ElasticsearchClient;
+  mappings: Required<CreateIndexRequest>['body']['mappings'];
 }) {
-  return apiCaller('indices.create', {
+  return client.indices.create({
     index,
     body: {
       // auto_expand_replicas: Allows cluster to not have replicas for this index
@@ -94,14 +85,14 @@ function createNewIndex({
 
 function updateExistingIndex({
   index,
-  apiCaller,
+  client,
   mappings,
 }: {
   index: string;
-  apiCaller: LegacyAPICaller;
-  mappings: MappingsDefinition;
+  client: ElasticsearchClient;
+  mappings: PutMappingRequest['body'];
 }) {
-  return apiCaller('indices.putMapping', {
+  return client.indices.putMapping({
     index,
     body: mappings,
   });

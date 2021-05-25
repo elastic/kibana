@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { auto } from 'angular';
@@ -25,7 +25,8 @@ export class DocViewsRegistry {
     const docView = typeof docViewRaw === 'function' ? docViewRaw() : docViewRaw;
     if (docView.directive) {
       // convert angular directive to render function for backwards compatibility
-      docView.render = convertDirectiveToRenderFn(docView.directive, () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (docView.render as any) = convertDirectiveToRenderFn(docView.directive as any, () => {
         if (!this.angularInjectorGetter) {
           throw new Error('Angular was not initialized');
         }

@@ -1,26 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { extractDeprecationMessages } from '../../../lib/utils';
+import { extractWarningMessages } from '../../../lib/utils';
 import { XJson } from '../../../../../es_ui_shared/public';
-const { collapseLiteralStrings } = XJson;
 // @ts-ignore
 import * as es from '../../../lib/es/es';
 import { BaseResponseType } from '../../../types';
 
-export interface EsRequestArgs {
-  requests: any;
-}
+const { collapseLiteralStrings } = XJson;
 
-export interface ESRequestObject {
-  path: string;
-  data: any;
-  method: string;
+export interface EsRequestArgs {
+  requests: Array<{ url: string; method: string; data: string[] }>;
 }
 
 export interface ESResponseObject<V = unknown> {
@@ -32,7 +27,7 @@ export interface ESResponseObject<V = unknown> {
 }
 
 export interface ESRequestResult<V = unknown> {
-  request: ESRequestObject;
+  request: { data: string; method: string; path: string };
   response: ESResponseObject<V>;
 }
 
@@ -61,7 +56,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
         resolve(results);
         return;
       }
-      const req = requests.shift();
+      const req = requests.shift()!;
       const esPath = req.url;
       const esMethod = req.method;
       let esData = collapseLiteralStrings(req.data.join('\n'));
@@ -71,7 +66,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
       const startTime = Date.now();
       es.send(esMethod, esPath, esData).always(
-        (dataOrjqXHR: any, textStatus: string, jqXhrORerrorThrown: any) => {
+        (dataOrjqXHR, textStatus: string, jqXhrORerrorThrown) => {
           if (reqId !== CURRENT_REQ_ID) {
             return;
           }
@@ -88,8 +83,8 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
             const warnings = xhr.getResponseHeader('warning');
             if (warnings) {
-              const deprecationMessages = extractDeprecationMessages(warnings);
-              value = deprecationMessages.join('\n') + '\n' + value;
+              const warningMessages = extractWarningMessages(warnings);
+              value = warningMessages.join('\n') + '\n' + value;
             }
 
             if (isMultiRequest) {

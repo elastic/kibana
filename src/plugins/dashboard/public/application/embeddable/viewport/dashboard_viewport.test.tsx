@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -26,8 +26,10 @@ import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
 } from '../../../../../embeddable/public/lib/test_samples';
+import { getStubPluginServices } from '../../../../../presentation_util/public';
 
 let dashboardContainer: DashboardContainer | undefined;
+const presentationUtil = getStubPluginServices();
 
 const ExitFullScreenButton = () => <div data-test-subj="exitFullScreenModeText">EXIT</div>;
 
@@ -61,6 +63,7 @@ function getProps(
     uiActions: {
       getTriggerCompatibleActions: (() => []) as any,
     } as any,
+    presentationUtil,
   };
 
   const input = getSampleDashboardInput({
@@ -94,7 +97,9 @@ test('renders DashboardViewport', () => {
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <DashboardViewport {...props} />
+        <presentationUtil.ContextProvider>
+          <DashboardViewport {...props} />
+        </presentationUtil.ContextProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -108,7 +113,9 @@ test('renders DashboardViewport with no visualizations', () => {
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <DashboardViewport {...props} />
+        <presentationUtil.ContextProvider>
+          <DashboardViewport {...props} />
+        </presentationUtil.ContextProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -124,7 +131,9 @@ test('renders DashboardEmptyScreen', () => {
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <DashboardViewport {...props} />
+        <presentationUtil.ContextProvider>
+          <DashboardViewport {...props} />
+        </presentationUtil.ContextProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -140,7 +149,9 @@ test('renders exit full screen button when in full screen mode', async () => {
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <DashboardViewport {...props} />
+        <presentationUtil.ContextProvider>
+          <DashboardViewport {...props} />
+        </presentationUtil.ContextProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -166,7 +177,9 @@ test('renders exit full screen button when in full screen mode and empty screen'
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <DashboardViewport {...props} />
+        <presentationUtil.ContextProvider>
+          <DashboardViewport {...props} />
+        </presentationUtil.ContextProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -190,7 +203,9 @@ test('DashboardViewport unmount unsubscribes', async (done) => {
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <DashboardViewport {...props} />
+        <presentationUtil.ContextProvider>
+          <DashboardViewport {...props} />
+        </presentationUtil.ContextProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );

@@ -1,14 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { cloneDeep } from 'lodash';
-import { ISavedObjectsRepository } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { SavedObject } from './../../../../../../src/core/types/saved_objects';
-import { Agent, NewAgentEvent } from './../../../../fleet/common/types/models/agent';
+import { Agent } from './../../../../fleet/common/types/models/agent';
 import { AgentMetadata } from '../../../../fleet/common/types/models/agent';
-import { getFleetSavedObjectsMetadata, getLatestFleetEndpointEvent } from './fleet_saved_objects';
+import {
+  getEndpointIntegratedFleetMetadata,
+  getLatestFleetEndpointEvent,
+} from './fleet_saved_objects';
+import { EndpointAppContext } from '../../endpoint/types';
 
 export interface AgentOSMetadataTelemetry {
   full_name: string;
@@ -106,7 +112,8 @@ export const updateEndpointOSTelemetry = (
  * the same time span.
  */
 export const updateEndpointDailyActiveCount = (
-  latestEndpointEvent: SavedObject<NewAgentEvent>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  latestEndpointEvent: SavedObject<any>, // TODO: This information will be lost in 7.13, need to find an alternative route.
   lastAgentCheckin: Agent['last_checkin'],
   currentCount: number
 ) => {
@@ -124,7 +131,8 @@ export const updateEndpointDailyActiveCount = (
  * to populate the success of it's application. The policy is provided in the agent health checks.
  */
 export const updateEndpointPolicyTelemetry = (
-  latestEndpointEvent: SavedObject<NewAgentEvent>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  latestEndpointEvent: SavedObject<any>,
   policiesTracker: PoliciesTelemetry
 ): PoliciesTelemetry => {
   const policyHostTypeToPolicyType = {
@@ -191,19 +199,22 @@ export const updateEndpointPolicyTelemetry = (
 };
 
 /**
- * @description This aggregates the telemetry details from the two fleet savedObject sources, `fleet-agents` and `fleet-agent-events` to populate
+ * @description This aggregates the telemetry details from the fleet agent service `listAgents` and the fleet saved object `fleet-agent-events` to populate
  * the telemetry details for endpoint. Since we cannot access our own indices due to `kibana_system` not having access, this is the best alternative.
  * Once the data is requested, we iterate over all agents with endpoints registered, and then request the events for each active agent (within last 24 hours)
  * to confirm whether or not the endpoint is still active
  */
 export const getEndpointTelemetryFromFleet = async (
-  soClient: ISavedObjectsRepository
+  soClient: SavedObjectsClientContract,
+  endpointAppContext: EndpointAppContext,
+  esClient: ElasticsearchClient
 ): Promise<EndpointUsage | {}> => {
   // Retrieve every agent (max 10000) that references the endpoint as an installed package. It will not be listed if it was never installed
   let endpointAgents;
+  const agentService = endpointAppContext.service.getAgentService();
   try {
-    const response = await getFleetSavedObjectsMetadata(soClient);
-    endpointAgents = response.saved_objects;
+    const response = await getEndpointIntegratedFleetMetadata(agentService, esClient);
+    endpointAgents = response?.agents ?? [];
   } catch (error) {
     // Better to provide an empty object rather than default telemetry as this better informs us of an error
     return {};
@@ -223,8 +234,7 @@ export const getEndpointTelemetryFromFleet = async (
 
   for (let i = 0; i < endpointAgentsCount; i += 1) {
     try {
-      const { attributes: metadataAttributes } = endpointAgents[i];
-      const { last_checkin: lastCheckin, local_metadata: localMetadata } = metadataAttributes;
+      const { last_checkin: lastCheckin, local_metadata: localMetadata } = endpointAgents[i];
       const { host, os, elastic } = localMetadata as AgentLocalMetadata;
 
       // Although not perfect, the goal is to dedupe hosts to get the most recent data for a host

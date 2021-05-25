@@ -14,14 +14,14 @@ search: {
         intervalOptions: ({
             display: string;
             val: string;
-            enabled(agg: import("../common").IBucketAggConfig): boolean | "" | undefined;
+            enabled(agg: import("../common").IBucketAggConfig): boolean;
         } | {
             display: string;
             val: string;
         })[];
         InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
         InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
-        Ipv4Address: typeof Ipv4Address;
+        IpAddress: typeof IpAddress;
         isDateHistogramBucketAggConfig: typeof isDateHistogramBucketAggConfig;
         isNumberType: (agg: import("../common").AggConfig) => boolean;
         isStringType: (agg: import("../common").AggConfig) => boolean;
@@ -35,8 +35,24 @@ search: {
         siblingPipelineType: string;
         termsAggFilter: string[];
         toAbsoluteDates: typeof toAbsoluteDates;
+        boundsDescendingRaw: ({
+            bound: number;
+            interval: import("moment").Duration;
+            boundLabel: string;
+            intervalLabel: string;
+        } | {
+            bound: import("moment").Duration;
+            interval: import("moment").Duration;
+            boundLabel: string;
+            intervalLabel: string;
+        })[];
+        getNumberHistogramIntervalByDatatableColumn: (column: import("../../expressions").DatatableColumn) => number | undefined;
+        getDateHistogramMetaDataByDatatableColumn: (column: import("../../expressions").DatatableColumn) => {
+            interval: string | undefined;
+            timeZone: string | undefined;
+            timeRange: import("../common").TimeRange | undefined;
+        } | undefined;
     };
-    getRequestInspectorStats: typeof getRequestInspectorStats;
     getResponseInspectorStats: typeof getResponseInspectorStats;
     tabifyAggResponse: typeof tabifyAggResponse;
     tabifyGetColumns: typeof tabifyGetColumns;

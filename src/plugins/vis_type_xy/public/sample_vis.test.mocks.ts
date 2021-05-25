@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export const samplePieVis = {
@@ -106,10 +106,7 @@ export const samplePieVis = {
       },
     },
     hidden: false,
-    requestHandler: 'courier',
-    responseHandler: 'vislib_slices',
     hierarchicalData: true,
-    useCustomNoDataScreen: false,
   },
   title: '[Flights] Airline Carrier',
   description: '',
@@ -126,7 +123,6 @@ export const samplePieVis = {
       truncate: 100,
     },
   },
-  sessionState: {},
   data: {
     searchSource: {
       id: 'data_source1',
@@ -1401,6 +1397,7 @@ export const sampleAreaVis = {
             drawLinesBetweenPoints: true,
             lineWidth: 2,
             showCircles: true,
+            circlesRadius: 3,
             interpolate: 'linear',
             valueAxis: 'ValueAxis-1',
           },
@@ -1418,131 +1415,13 @@ export const sampleAreaVis = {
           color: '#E7664C',
         },
         labels: {},
+        palette: {
+          name: 'default',
+        },
+        fillOpacity: 0.5,
       },
     },
     editorConfig: {
-      collections: {
-        legendPositions: [
-          {
-            text: 'Top',
-            value: 'top',
-          },
-          {
-            text: 'Left',
-            value: 'left',
-          },
-          {
-            text: 'Right',
-            value: 'right',
-          },
-          {
-            text: 'Bottom',
-            value: 'bottom',
-          },
-        ],
-        positions: [
-          {
-            text: 'Top',
-            value: 'top',
-          },
-          {
-            text: 'Left',
-            value: 'left',
-          },
-          {
-            text: 'Right',
-            value: 'right',
-          },
-          {
-            text: 'Bottom',
-            value: 'bottom',
-          },
-        ],
-        chartTypes: [
-          {
-            text: 'Line',
-            value: 'line',
-          },
-          {
-            text: 'Area',
-            value: 'area',
-          },
-          {
-            text: 'Bar',
-            value: 'histogram',
-          },
-        ],
-        axisModes: [
-          {
-            text: 'Normal',
-            value: 'normal',
-          },
-          {
-            text: 'Percentage',
-            value: 'percentage',
-          },
-          {
-            text: 'Wiggle',
-            value: 'wiggle',
-          },
-          {
-            text: 'Silhouette',
-            value: 'silhouette',
-          },
-        ],
-        scaleTypes: [
-          {
-            text: 'Linear',
-            value: 'linear',
-          },
-          {
-            text: 'Log',
-            value: 'log',
-          },
-          {
-            text: 'Square root',
-            value: 'square root',
-          },
-        ],
-        chartModes: [
-          {
-            text: 'Normal',
-            value: 'normal',
-          },
-          {
-            text: 'Stacked',
-            value: 'stacked',
-          },
-        ],
-        interpolationModes: [
-          {
-            text: 'Straight',
-            value: 'linear',
-          },
-          {
-            text: 'Smoothed',
-            value: 'cardinal',
-          },
-          {
-            text: 'Stepped',
-            value: 'step-after',
-          },
-        ],
-        thresholdLineStyles: [
-          {
-            value: 'full',
-            text: 'Full',
-          },
-          {
-            value: 'dashed',
-            text: 'Dashed',
-          },
-          {
-            value: 'dot-dashed',
-            text: 'Dot-dashed',
-          },
-        ],
-      },
       optionTabs: [
         {
           name: 'advanced',
@@ -1622,10 +1501,7 @@ export const sampleAreaVis = {
       },
     },
     hidden: false,
-    requestHandler: 'courier',
-    responseHandler: 'none',
     hierarchicalData: false,
-    useCustomNoDataScreen: false,
   },
   title: '[eCommerce] Sales by Category',
   description: '',
@@ -1688,6 +1564,7 @@ export const sampleAreaVis = {
         },
         drawLinesBetweenPoints: true,
         showCircles: true,
+        circlesRadius: 5,
         interpolate: 'linear',
         valueAxis: 'ValueAxis-1',
       },
@@ -1703,6 +1580,9 @@ export const sampleAreaVis = {
       width: 1,
       style: 'full',
       color: '#E7664C',
+    },
+    palette: {
+      name: 'default',
     },
     labels: {},
     dimensions: {
@@ -1762,7 +1642,6 @@ export const sampleAreaVis = {
       ],
     },
   },
-  sessionState: {},
   data: {
     searchSource: {
       id: 'data_source1',

@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ElasticsearchClient } from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
 import { Logger } from '../../logging';
-import { SavedObjectsMigrationVersion } from '../types';
+import type { SavedObjectsMigrationVersion } from '../types';
+import type { TransformRawDocs } from './types';
 import { MigrationResult } from '../migrations/core';
-import { next, TransformRawDocs } from './next';
+import { next } from './next';
 import { createInitialState, model } from './model';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
+import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 
 /**
  * Migrates the provided indexPrefix index using a resilient algorithm that is
@@ -29,6 +31,7 @@ export async function runResilientMigrator({
   transformRawDocs,
   migrationVersionPerType,
   indexPrefix,
+  migrationsConfig,
 }: {
   client: ElasticsearchClient;
   kibanaVersion: string;
@@ -38,6 +41,7 @@ export async function runResilientMigrator({
   transformRawDocs: TransformRawDocs;
   migrationVersionPerType: SavedObjectsMigrationVersion;
   indexPrefix: string;
+  migrationsConfig: SavedObjectsMigrationConfigType;
 }): Promise<MigrationResult> {
   const initialState = createInitialState({
     kibanaVersion,
@@ -45,11 +49,13 @@ export async function runResilientMigrator({
     preMigrationScript,
     migrationVersionPerType,
     indexPrefix,
+    migrationsConfig,
   });
   return migrationStateActionMachine({
     initialState,
     logger,
     next: next(client, transformRawDocs),
     model,
+    client,
   });
 }

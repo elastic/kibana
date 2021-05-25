@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { coreMock } from 'src/core/public/mocks';
-import { SpacesPlugin } from './plugin';
-import { spacesOssPluginMock } from '../../../../src/plugins/spaces_oss/public/mocks';
-import { homePluginMock } from '../../../../src/plugins/home/public/mocks';
+import { advancedSettingsMock } from 'src/plugins/advanced_settings/public/mocks';
+import { homePluginMock } from 'src/plugins/home/public/mocks';
 import {
-  managementPluginMock,
   createManagementSectionMock,
-} from '../../../../src/plugins/management/public/mocks';
-import { advancedSettingsMock } from '../../../../src/plugins/advanced_settings/public/mocks';
+  managementPluginMock,
+} from 'src/plugins/management/public/mocks';
+import { spacesOssPluginMock } from 'src/plugins/spaces_oss/public/mocks';
+
+import { SpacesPlugin } from './plugin';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {

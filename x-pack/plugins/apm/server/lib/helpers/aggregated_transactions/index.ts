@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../server/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   TRANSACTION_DURATION,
@@ -13,6 +14,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getHasAggregatedTransactions({
   start,
@@ -23,28 +25,30 @@ export async function getHasAggregatedTransactions({
   end?: number;
   apmEventClient: APMEventClient;
 }) {
-  const response = await apmEventClient.search({
-    apm: {
-      events: [ProcessorEvent.metric],
-    },
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
-            ...(start && end ? [{ range: rangeFilter(start, end) }] : []),
-          ],
+  return withApmSpan('get_has_aggregated_transactions', async () => {
+    const response = await apmEventClient.search({
+      apm: {
+        events: [ProcessorEvent.metric],
+      },
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
+              ...(start && end ? rangeQuery(start, end) : []),
+            ],
+          },
         },
       },
-    },
-    terminateAfter: 1,
+      terminateAfter: 1,
+    });
+
+    if (response.hits.total.value > 0) {
+      return true;
+    }
+
+    return false;
   });
-
-  if (response.hits.total.value > 0) {
-    return true;
-  }
-
-  return false;
 }
 
 export async function getSearchAggregatedTransactions({

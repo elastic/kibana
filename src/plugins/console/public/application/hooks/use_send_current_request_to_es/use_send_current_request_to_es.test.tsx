@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('./send_request_to_es', () => ({ sendRequestToES: jest.fn() }));
@@ -26,8 +26,8 @@ import { useSendCurrentRequestToES } from './use_send_current_request_to_es';
 
 describe('useSendCurrentRequestToES', () => {
   let mockContextValue: ContextValue;
-  let dispatch: (...args: any[]) => void;
-  const contexts = ({ children }: { children?: any }) => (
+  let dispatch: (...args: unknown[]) => void;
+  const contexts = ({ children }: { children: JSX.Element }) => (
     <ServicesContextProvider value={mockContextValue}>{children}</ServicesContextProvider>
   );
 
@@ -93,5 +93,29 @@ describe('useSendCurrentRequestToES', () => {
     expect(mockContextValue.services.notifications.toasts.addError).toHaveBeenCalledWith(NaN, {
       title: 'Unknown Request Error',
     });
+  });
+
+  it('notifies the user about save to history errors once only', async () => {
+    // Set up mocks
+    (sendRequestToES as jest.Mock).mockReturnValue(
+      [{ request: {} }, { request: {} }] /* two responses to save history */
+    );
+    (mockContextValue.services.settings.toJSON as jest.Mock).mockReturnValue({});
+    (mockContextValue.services.history.addToHistory as jest.Mock).mockImplementation(() => {
+      // Mock throwing
+      throw new Error('cannot save!');
+    });
+    (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
+      getRequestsInRange: () => ['test', 'test'],
+    }));
+
+    const { result } = renderHook(() => useSendCurrentRequestToES(), { wrapper: contexts });
+    await act(() => result.current());
+
+    expect(dispatch).toHaveBeenCalledTimes(2);
+
+    expect(mockContextValue.services.history.addToHistory).toHaveBeenCalledTimes(2);
+    // It only called notification once
+    expect(mockContextValue.services.notifications.toasts.addError).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
@@ -12,7 +13,7 @@ import { act } from 'react-dom/test-utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
 
-jest.mock('../../../containers/source/use_source_via_http', () => ({
+jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
@@ -62,7 +63,8 @@ describe('ExpressionRow', () => {
       timeUnit: 'm',
       aggType: 'avg',
     };
-    const { wrapper } = await setup(expression as MetricExpression);
+    const { wrapper, update } = await setup(expression as MetricExpression);
+    await update();
     const [valueMatch] = wrapper.html().match('<span class="euiExpression__value">50</span>') ?? [];
     expect(valueMatch).toBeTruthy();
   });
@@ -80,5 +82,22 @@ describe('ExpressionRow', () => {
     const [valueMatch] =
       wrapper.html().match('<span class="euiExpression__value">0.5</span>') ?? [];
     expect(valueMatch).toBeTruthy();
+  });
+
+  it('should render a helpText for the of expression', async () => {
+    const expression = {
+      metric: 'system.load.1',
+      comparator: Comparator.GT,
+      threshold: [0.5],
+      timeSize: 1,
+      timeUnit: 'm',
+      aggType: 'avg',
+    } as MetricExpression;
+
+    const { wrapper } = await setup(expression as MetricExpression);
+
+    const helpText = wrapper.find('[data-test-subj="ofExpression"]').at(0).prop('helpText');
+
+    expect(helpText).toMatchSnapshot();
   });
 });

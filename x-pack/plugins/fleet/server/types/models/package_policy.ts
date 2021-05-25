@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
+
 import { isValidNamespace } from '../../../common';
 
 export const NamespaceSchema = schema.string({
@@ -21,6 +24,7 @@ const ConfigRecordSchema = schema.recordOf(
   schema.object({
     type: schema.maybe(schema.string()),
     value: schema.maybe(schema.any()),
+    frozen: schema.maybe(schema.boolean()),
   })
 );
 
@@ -42,6 +46,7 @@ const PackagePolicyBaseSchema = {
     schema.object({
       type: schema.string(),
       enabled: schema.boolean(),
+      keep_enabled: schema.maybe(schema.boolean()),
       vars: schema.maybe(ConfigRecordSchema),
       config: schema.maybe(
         schema.recordOf(
@@ -56,6 +61,7 @@ const PackagePolicyBaseSchema = {
         schema.object({
           id: schema.maybe(schema.string()), // BWC < 7.11
           enabled: schema.boolean(),
+          keep_enabled: schema.maybe(schema.boolean()),
           data_stream: schema.object({ dataset: schema.string(), type: schema.string() }),
           vars: schema.maybe(ConfigRecordSchema),
           config: schema.maybe(
@@ -75,6 +81,7 @@ const PackagePolicyBaseSchema = {
 
 export const NewPackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
+  force: schema.maybe(schema.boolean()),
 });
 
 export const UpdatePackagePolicySchema = schema.object({

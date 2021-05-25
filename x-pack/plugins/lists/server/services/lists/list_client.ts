@@ -1,19 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
-
+import { ElasticsearchClient } from 'kibana/server';
 import {
+  createBootstrapIndex,
+  deleteAllIndex,
+  deletePolicy,
+  deleteTemplate,
+  getIndexExists,
+  getPolicyExists,
+  getTemplateExists,
+  setPolicy,
+  setTemplate,
+} from '@kbn/securitysolution-es-utils';
+import type {
   FoundListItemSchema,
   FoundListSchema,
   ListItemArraySchema,
   ListItemSchema,
   ListSchema,
   SearchListItemArraySchema,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
 import { ConfigType } from '../../config';
 import {
   createList,
@@ -39,17 +51,6 @@ import {
   searchListItemByValues,
   updateListItem,
 } from '../../services/items';
-import {
-  createBootstrapIndex,
-  deleteAllIndex,
-  deletePolicy,
-  deleteTemplate,
-  getIndexExists,
-  getPolicyExists,
-  getTemplateExists,
-  setPolicy,
-  setTemplate,
-} from '../../siem_server_deps';
 import listsItemsPolicy from '../items/list_item_policy.json';
 
 import listPolicy from './list_policy.json';
@@ -79,13 +80,13 @@ export class ListClient {
   private readonly spaceId: string;
   private readonly user: string;
   private readonly config: ConfigType;
-  private readonly callCluster: LegacyAPICaller;
+  private readonly esClient: ElasticsearchClient;
 
-  constructor({ spaceId, user, config, callCluster }: ConstructorOptions) {
+  constructor({ spaceId, user, config, esClient }: ConstructorOptions) {
     this.spaceId = spaceId;
     this.user = user;
     this.config = config;
-    this.callCluster = callCluster;
+    this.esClient = esClient;
   }
 
   public getListIndex = (): string => {
@@ -105,9 +106,9 @@ export class ListClient {
   };
 
   public getList = async ({ id }: GetListOptions): Promise<ListSchema | null> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listIndex = this.getListIndex();
-    return getList({ callCluster, id, listIndex });
+    return getList({ esClient, id, listIndex });
   };
 
   public createList = async ({
@@ -121,12 +122,12 @@ export class ListClient {
     meta,
     version,
   }: CreateListOptions): Promise<ListSchema> => {
-    const { callCluster, user } = this;
+    const { esClient, user } = this;
     const listIndex = this.getListIndex();
     return createList({
-      callCluster,
       description,
       deserializer,
+      esClient,
       id,
       immutable,
       listIndex,
@@ -150,12 +151,12 @@ export class ListClient {
     meta,
     version,
   }: CreateListIfItDoesNotExistOptions): Promise<ListSchema> => {
-    const { callCluster, user } = this;
+    const { esClient, user } = this;
     const listIndex = this.getListIndex();
     return createListIfItDoesNotExist({
-      callCluster,
       description,
       deserializer,
+      esClient,
       id,
       immutable,
       listIndex,
@@ -169,51 +170,51 @@ export class ListClient {
   };
 
   public getListIndexExists = async (): Promise<boolean> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listIndex = this.getListIndex();
-    return getIndexExists(callCluster, listIndex);
+    return getIndexExists(esClient, listIndex);
   };
 
   public getListItemIndexExists = async (): Promise<boolean> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
-    return getIndexExists(callCluster, listItemIndex);
+    return getIndexExists(esClient, listItemIndex);
   };
 
   public createListBootStrapIndex = async (): Promise<unknown> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listIndex = this.getListIndex();
-    return createBootstrapIndex(callCluster, listIndex);
+    return createBootstrapIndex(esClient, listIndex);
   };
 
   public createListItemBootStrapIndex = async (): Promise<unknown> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
-    return createBootstrapIndex(callCluster, listItemIndex);
+    return createBootstrapIndex(esClient, listItemIndex);
   };
 
   public getListPolicyExists = async (): Promise<boolean> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listIndex = this.getListIndex();
-    return getPolicyExists(callCluster, listIndex);
+    return getPolicyExists(esClient, listIndex);
   };
 
   public getListItemPolicyExists = async (): Promise<boolean> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listsItemIndex = this.getListItemIndex();
-    return getPolicyExists(callCluster, listsItemIndex);
+    return getPolicyExists(esClient, listsItemIndex);
   };
 
   public getListTemplateExists = async (): Promise<boolean> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listIndex = this.getListIndex();
-    return getTemplateExists(callCluster, listIndex);
+    return getTemplateExists(esClient, listIndex);
   };
 
   public getListItemTemplateExists = async (): Promise<boolean> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
-    return getTemplateExists(callCluster, listItemIndex);
+    return getTemplateExists(esClient, listItemIndex);
   };
 
   public getListTemplate = (): Record<string, unknown> => {
@@ -227,71 +228,71 @@ export class ListClient {
   };
 
   public setListTemplate = async (): Promise<unknown> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const template = this.getListTemplate();
     const listIndex = this.getListIndex();
-    return setTemplate(callCluster, listIndex, template);
+    return setTemplate(esClient, listIndex, template);
   };
 
   public setListItemTemplate = async (): Promise<unknown> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const template = this.getListItemTemplate();
     const listItemIndex = this.getListItemIndex();
-    return setTemplate(callCluster, listItemIndex, template);
+    return setTemplate(esClient, listItemIndex, template);
   };
 
   public setListPolicy = async (): Promise<unknown> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listIndex = this.getListIndex();
-    return setPolicy(callCluster, listIndex, listPolicy);
+    return setPolicy(esClient, listIndex, listPolicy);
   };
 
   public setListItemPolicy = async (): Promise<unknown> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
-    return setPolicy(callCluster, listItemIndex, listsItemsPolicy);
+    return setPolicy(esClient, listItemIndex, listsItemsPolicy);
   };
 
   public deleteListIndex = async (): Promise<boolean> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listIndex = this.getListIndex();
-    return deleteAllIndex(callCluster, `${listIndex}-*`);
+    return deleteAllIndex(esClient, `${listIndex}-*`);
   };
 
   public deleteListItemIndex = async (): Promise<boolean> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
-    return deleteAllIndex(callCluster, `${listItemIndex}-*`);
+    return deleteAllIndex(esClient, `${listItemIndex}-*`);
   };
 
   public deleteListPolicy = async (): Promise<unknown> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listIndex = this.getListIndex();
-    return deletePolicy(callCluster, listIndex);
+    return deletePolicy(esClient, listIndex);
   };
 
   public deleteListItemPolicy = async (): Promise<unknown> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
-    return deletePolicy(callCluster, listItemIndex);
+    return deletePolicy(esClient, listItemIndex);
   };
 
   public deleteListTemplate = async (): Promise<unknown> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listIndex = this.getListIndex();
-    return deleteTemplate(callCluster, listIndex);
+    return deleteTemplate(esClient, listIndex);
   };
 
   public deleteListItemTemplate = async (): Promise<unknown> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
-    return deleteTemplate(callCluster, listItemIndex);
+    return deleteTemplate(esClient, listItemIndex);
   };
 
   public deleteListItem = async ({ id }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
-    return deleteListItem({ callCluster, id, listItemIndex });
+    return deleteListItem({ esClient, id, listItemIndex });
   };
 
   public deleteListItemByValue = async ({
@@ -299,10 +300,10 @@ export class ListClient {
     value,
     type,
   }: DeleteListItemByValueOptions): Promise<ListItemArraySchema> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
     return deleteListItemByValue({
-      callCluster,
+      esClient,
       listId,
       listItemIndex,
       type,
@@ -311,11 +312,11 @@ export class ListClient {
   };
 
   public deleteList = async ({ id }: DeleteListOptions): Promise<ListSchema | null> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listIndex = this.getListIndex();
     const listItemIndex = this.getListItemIndex();
     return deleteList({
-      callCluster,
+      esClient,
       id,
       listIndex,
       listItemIndex,
@@ -327,10 +328,10 @@ export class ListClient {
     listId,
     stream,
   }: ExportListItemsToStreamOptions): void => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
     exportListItemsToStream({
-      callCluster,
+      esClient,
       listId,
       listItemIndex,
       stream,
@@ -347,13 +348,13 @@ export class ListClient {
     meta,
     version,
   }: ImportListItemsToStreamOptions): Promise<ListSchema | null> => {
-    const { callCluster, user, config } = this;
+    const { esClient, user, config } = this;
     const listItemIndex = this.getListItemIndex();
     const listIndex = this.getListIndex();
     return importListItemsToStream({
-      callCluster,
       config,
       deserializer,
+      esClient,
       listId,
       listIndex,
       listItemIndex,
@@ -371,10 +372,10 @@ export class ListClient {
     value,
     type,
   }: GetListItemByValueOptions): Promise<ListItemArraySchema> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
     return getListItemByValue({
-      callCluster,
+      esClient,
       listId,
       listItemIndex,
       type,
@@ -391,11 +392,11 @@ export class ListClient {
     type,
     meta,
   }: CreateListItemOptions): Promise<ListItemSchema | null> => {
-    const { callCluster, user } = this;
+    const { esClient, user } = this;
     const listItemIndex = this.getListItemIndex();
     return createListItem({
-      callCluster,
       deserializer,
+      esClient,
       id,
       listId,
       listItemIndex,
@@ -413,11 +414,11 @@ export class ListClient {
     value,
     meta,
   }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
-    const { callCluster, user } = this;
+    const { esClient, user } = this;
     const listItemIndex = this.getListItemIndex();
     return updateListItem({
       _version,
-      callCluster,
+      esClient,
       id,
       listItemIndex,
       meta,
@@ -434,12 +435,12 @@ export class ListClient {
     meta,
     version,
   }: UpdateListOptions): Promise<ListSchema | null> => {
-    const { callCluster, user } = this;
+    const { esClient, user } = this;
     const listIndex = this.getListIndex();
     return updateList({
       _version,
-      callCluster,
       description,
+      esClient,
       id,
       listIndex,
       meta,
@@ -450,10 +451,10 @@ export class ListClient {
   };
 
   public getListItem = async ({ id }: GetListItemOptions): Promise<ListItemSchema | null> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
     return getListItem({
-      callCluster,
+      esClient,
       id,
       listItemIndex,
     });
@@ -464,10 +465,10 @@ export class ListClient {
     listId,
     value,
   }: GetListItemsByValueOptions): Promise<ListItemArraySchema> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
     return getListItemByValues({
-      callCluster,
+      esClient,
       listId,
       listItemIndex,
       type,
@@ -480,10 +481,10 @@ export class ListClient {
     listId,
     value,
   }: SearchListItemByValuesOptions): Promise<SearchListItemArraySchema> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
     return searchListItemByValues({
-      callCluster,
+      esClient,
       listId,
       listItemIndex,
       type,
@@ -500,11 +501,11 @@ export class ListClient {
     sortOrder,
     searchAfter,
   }: FindListOptions): Promise<FoundListSchema> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listIndex = this.getListIndex();
     return findList({
-      callCluster,
       currentIndexPosition,
+      esClient,
       filter,
       listIndex,
       page,
@@ -525,12 +526,12 @@ export class ListClient {
     sortOrder,
     searchAfter,
   }: FindListItemOptions): Promise<FoundListItemSchema | null> => {
-    const { callCluster } = this;
+    const { esClient } = this;
     const listIndex = this.getListIndex();
     const listItemIndex = this.getListItemIndex();
     return findListItem({
-      callCluster,
       currentIndexPosition,
+      esClient,
       filter,
       listId,
       listIndex,

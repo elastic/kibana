@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr, omit } from 'lodash/fp';
@@ -14,7 +15,7 @@ import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/p
 import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
-import { getBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/pages';
+import { getBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/common/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
 import {
   RouteSpyState,
@@ -145,10 +146,7 @@ export const getBreadcrumbsForRoute = (
   }
   if (isTimelinesRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'timeline', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
+    const urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
 
     return [
       siemRootBreadcrumb,

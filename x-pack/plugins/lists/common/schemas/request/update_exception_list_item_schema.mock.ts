@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import type { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   COMMENTS,
@@ -18,8 +21,6 @@ import {
   OS_TYPES,
   TAGS,
 } from '../../constants.mock';
-
-import { UpdateExceptionListItemSchema } from './update_exception_list_item_schema';
 
 export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
   _version: undefined,

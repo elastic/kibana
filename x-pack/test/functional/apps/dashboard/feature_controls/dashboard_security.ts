@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import {
   createDashboardEditUrl,
@@ -29,7 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  describe('dashboard feature controls security', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/86950
+  describe.skip('dashboard feature controls security', () => {
     before(async () => {
       await esArchiver.load('dashboard/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');

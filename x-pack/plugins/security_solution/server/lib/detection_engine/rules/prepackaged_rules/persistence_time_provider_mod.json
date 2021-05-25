@@ -1,0 +1,56 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Windows operating systems are utilizing the time provider architecture in order to obtain accurate time stamps from other network devices or clients in the network. Time providers are implemented in the form of a DLL file which resides in System32 folder. The service W32Time initiates during the startup of Windows and loads w32time.dll. Adversaries may abuse this architecture to establish persistence, specifically by registering and enabling a malicious DLL as a time provider.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Potential Persistence via Time Provider Modification",
+  "query": "registry where event.type:\"change\" and\n  registry.path:\"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\W32Time\\\\TimeProviders\\\\*\" and\n  registry.data.strings:\"*.dll\"\n",
+  "references": [
+    "https://pentestlab.blog/2019/10/22/persistence-time-providers/"
+  ],
+  "risk_score": 47,
+  "rule_id": "14ed1aa9-ebfd-4cf9-a463-0ac59ec55204",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.003",
+              "name": "Time Providers",
+              "reference": "https://attack.mitre.org/techniques/T1547/003/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

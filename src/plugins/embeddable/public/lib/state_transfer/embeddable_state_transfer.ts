@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { cloneDeep } from 'lodash';
@@ -50,13 +50,18 @@ export class EmbeddableStateTransfer {
   public getAppNameFromId = (appId: string): string | undefined => this.appList?.get(appId)?.title;
 
   /**
-   * Fetches an {@link EmbeddableEditorState | originating app} argument from the sessionStorage
+   * Fetches an {@link EmbeddableEditorState | editor state} from the sessionStorage for the provided app id
    *
+   * @param appId - The app to fetch incomingEditorState for
    * @param removeAfterFetch - Whether to remove the package state after fetch to prevent duplicates.
    */
-  public getIncomingEditorState(removeAfterFetch?: boolean): EmbeddableEditorState | undefined {
+  public getIncomingEditorState(
+    appId: string,
+    removeAfterFetch?: boolean
+  ): EmbeddableEditorState | undefined {
     return this.getIncomingState<EmbeddableEditorState>(
       isEmbeddableEditorState,
+      appId,
       EMBEDDABLE_EDITOR_STATE_KEY,
       {
         keysToRemoveAfterFetch: removeAfterFetch ? [EMBEDDABLE_EDITOR_STATE_KEY] : undefined,
@@ -64,24 +69,37 @@ export class EmbeddableStateTransfer {
     );
   }
 
-  public clearEditorState() {
+  /**
+   * Clears the {@link EmbeddableEditorState | editor state} from the sessionStorage for the provided app id
+   *
+   * @param appId - The app to fetch incomingEditorState for
+   * @param removeAfterFetch - Whether to remove the package state after fetch to prevent duplicates.
+   */
+  public clearEditorState(appId?: string) {
     const currentState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY);
     if (currentState) {
-      delete currentState[EMBEDDABLE_EDITOR_STATE_KEY];
+      if (appId) {
+        delete currentState[EMBEDDABLE_EDITOR_STATE_KEY]?.[appId];
+      } else {
+        delete currentState[EMBEDDABLE_EDITOR_STATE_KEY];
+      }
       this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, currentState);
     }
   }
 
   /**
-   * Fetches an {@link EmbeddablePackageState | embeddable package} argument from the sessionStorage
+   * Fetches an {@link EmbeddablePackageState | embeddable package} from the sessionStorage for the given AppId
    *
+   * @param appId - The app to fetch EmbeddablePackageState for
    * @param removeAfterFetch - Whether to remove the package state after fetch to prevent duplicates.
    */
   public getIncomingEmbeddablePackage(
+    appId: string,
     removeAfterFetch?: boolean
   ): EmbeddablePackageState | undefined {
     return this.getIncomingState<EmbeddablePackageState>(
       isEmbeddablePackageState,
+      appId,
       EMBEDDABLE_PACKAGE_STATE_KEY,
       {
         keysToRemoveAfterFetch: removeAfterFetch ? [EMBEDDABLE_PACKAGE_STATE_KEY] : undefined,
@@ -97,13 +115,13 @@ export class EmbeddableStateTransfer {
     appId: string,
     options?: {
       path?: string;
+      openInNewTab?: boolean;
       state: EmbeddableEditorState;
     }
   ): Promise<void> {
     this.isTransferInProgress = true;
     await this.navigateToWithState<EmbeddableEditorState>(appId, EMBEDDABLE_EDITOR_STATE_KEY, {
       ...options,
-      appendToExistingState: true,
     });
   }
 
@@ -118,18 +136,18 @@ export class EmbeddableStateTransfer {
     this.isTransferInProgress = true;
     await this.navigateToWithState<EmbeddablePackageState>(appId, EMBEDDABLE_PACKAGE_STATE_KEY, {
       ...options,
-      appendToExistingState: true,
     });
   }
 
   private getIncomingState<IncomingStateType>(
     guard: (state: unknown) => state is IncomingStateType,
+    appId: string,
     key: string,
     options?: {
       keysToRemoveAfterFetch?: string[];
     }
   ): IncomingStateType | undefined {
-    const incomingState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key];
+    const incomingState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key]?.[appId];
     const castState =
       !guard || guard(incomingState) ? (cloneDeep(incomingState) as IncomingStateType) : undefined;
     if (castState && options?.keysToRemoveAfterFetch) {
@@ -145,15 +163,17 @@ export class EmbeddableStateTransfer {
   private async navigateToWithState<OutgoingStateType = unknown>(
     appId: string,
     key: string,
-    options?: { path?: string; state?: OutgoingStateType; appendToExistingState?: boolean }
+    options?: { path?: string; state?: OutgoingStateType; openInNewTab?: boolean }
   ): Promise<void> {
-    const stateObject = options?.appendToExistingState
-      ? {
-          ...this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY),
-          [key]: options.state,
-        }
-      : { [key]: options?.state };
+    const existingAppState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key] || {};
+    const stateObject = {
+      ...this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY),
+      [key]: {
+        ...existingAppState,
+        [appId]: options?.state,
+      },
+    };
     this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateObject);
-    await this.navigateToApp(appId, { path: options?.path });
+    await this.navigateToApp(appId, { path: options?.path, openInNewTab: options?.openInNewTab });
   }
 }

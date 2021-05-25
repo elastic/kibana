@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -60,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post(`/api/saved_objects_tagging/tags/create`)
         .send({
-          name: 'Inv%li& t@g n*me',
+          name: 'a',
           description: 'some desc',
           color: 'this is not a valid color',
         })
@@ -74,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
               valid: false,
               warnings: [],
               errors: {
-                name: 'Tag name can only include a-z, 0-9, _, -,:.',
+                name: 'Tag name must be at least 2 characters',
                 color: 'Tag color must be a valid hex color',
               },
             },

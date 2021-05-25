@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Dispatch } from 'redux';
 import { State, ImmutableMiddlewareFactory } from './types';
 import { AppAction } from './actions';
+
+interface WaitForActionOptions<T extends A['type'], A extends AppAction = AppAction> {
+  validate?: (action: A extends { type: T } ? A : never) => boolean;
+}
 
 /**
  * Utilities for testing Redux middleware
@@ -20,7 +25,10 @@ export interface MiddlewareActionSpyHelper<S = State, A extends AppAction = AppA
    *
    * @param actionType
    */
-  waitForAction: <T extends A['type']>(actionType: T) => Promise<A extends { type: T } ? A : never>;
+  waitForAction: <T extends A['type']>(
+    actionType: T,
+    options?: WaitForActionOptions<T, A>
+  ) => Promise<A extends { type: T } ? A : never>;
   /**
    * A property holding the information around the calls that were processed by the  internal
    * `actionSpyMiddelware`. This property holds the information typically found in Jets's mocked
@@ -77,7 +85,7 @@ export const createSpyMiddleware = <
   let spyDispatch: jest.Mock<Dispatch<A>>;
 
   return {
-    waitForAction: async (actionType) => {
+    waitForAction: async (actionType, options = {}) => {
       type ResolvedAction = A extends { type: typeof actionType } ? A : never;
 
       // Error is defined here so that we get a better stack trace that points to the test from where it was used
@@ -86,6 +94,10 @@ export const createSpyMiddleware = <
       return new Promise<ResolvedAction>((resolve, reject) => {
         const watch: ActionWatcher = (action) => {
           if (action.type === actionType) {
+            if (options.validate && !options.validate(action as ResolvedAction)) {
+              return;
+            }
+
             watchers.delete(watch);
             clearTimeout(timeout);
             resolve(action as ResolvedAction);

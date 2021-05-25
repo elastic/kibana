@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -15,6 +15,7 @@ import {
   SavedObjectsImportResponse,
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsImportHook,
 } from './types';
 
 /**
@@ -29,6 +30,7 @@ export class SavedObjectsImporter {
   readonly #savedObjectsClient: SavedObjectsClientContract;
   readonly #typeRegistry: ISavedObjectTypeRegistry;
   readonly #importSizeLimit: number;
+  readonly #importHooks: Record<string, SavedObjectsImportHook[]>;
 
   constructor({
     savedObjectsClient,
@@ -42,6 +44,15 @@ export class SavedObjectsImporter {
     this.#savedObjectsClient = savedObjectsClient;
     this.#typeRegistry = typeRegistry;
     this.#importSizeLimit = importSizeLimit;
+    this.#importHooks = typeRegistry.getAllTypes().reduce((hooks, type) => {
+      if (type.management?.onImport) {
+        return {
+          ...hooks,
+          [type.name]: [type.management.onImport],
+        };
+      }
+      return hooks;
+    }, {} as Record<string, SavedObjectsImportHook[]>);
   }
 
   /**
@@ -64,6 +75,7 @@ export class SavedObjectsImporter {
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
+      importHooks: this.#importHooks,
     });
   }
 
@@ -87,6 +99,7 @@ export class SavedObjectsImporter {
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
+      importHooks: this.#importHooks,
     });
   }
 }

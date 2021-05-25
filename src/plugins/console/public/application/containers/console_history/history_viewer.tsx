@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -20,7 +20,7 @@ import { applyCurrentSettings } from '../editor/legacy/console_editor/apply_edit
 
 interface Props {
   settings: DevToolsSettings;
-  req: any | null;
+  req: { method: string; endpoint: string; data: string; time: string } | null;
 }
 
 export function HistoryViewer({ settings, req }: Props) {

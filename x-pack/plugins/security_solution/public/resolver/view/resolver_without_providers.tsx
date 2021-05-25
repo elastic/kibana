@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -25,6 +26,7 @@ import { ResolverProps, ResolverState } from '../types';
 import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
 import { useSyncSelectedNode } from './use_sync_selected_node';
+import { ResolverNoProcessEvents } from './resolver_no_process_events';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -93,6 +95,7 @@ export const ResolverWithoutProviders = React.memo(
     const isLoading = useSelector(selectors.isTreeLoading);
     const hasError = useSelector(selectors.hadErrorLoadingTree);
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
+    const resolverTreeHasNodes = useSelector(selectors.resolverTreeHasNodes);
     const colorMap = useColors();
 
     return (
@@ -111,7 +114,7 @@ export const ResolverWithoutProviders = React.memo(
               />
             </div>
           </div>
-        ) : (
+        ) : resolverTreeHasNodes ? (
           <>
             <GraphContainer
               data-test-subj="resolver:graph"
@@ -152,6 +155,8 @@ export const ResolverWithoutProviders = React.memo(
             </GraphContainer>
             <PanelRouter />
           </>
+        ) : (
+          <ResolverNoProcessEvents />
         )}
         <GraphControls />
         <SymbolDefinitions />

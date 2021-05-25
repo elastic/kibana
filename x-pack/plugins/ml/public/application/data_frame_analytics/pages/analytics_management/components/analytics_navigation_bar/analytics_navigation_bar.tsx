@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useCallback, useMemo } from 'react';
@@ -30,6 +31,7 @@ export const AnalyticsNavigationBar: FC<{
           defaultMessage: 'Jobs',
         }),
         path: '/data_frame_analytics',
+        testSubj: 'mlAnalyticsJobsTab',
       },
       {
         id: 'models',
@@ -37,6 +39,7 @@ export const AnalyticsNavigationBar: FC<{
           defaultMessage: 'Models',
         }),
         path: '/data_frame_analytics/models',
+        testSubj: 'mlTrainedModelsTab',
       },
     ];
     if (jobId !== undefined || modelId !== undefined) {
@@ -46,6 +49,7 @@ export const AnalyticsNavigationBar: FC<{
           defaultMessage: 'Map',
         }),
         path: '/data_frame_analytics/map',
+        testSubj: '',
       });
     }
     return navTabs;
@@ -66,6 +70,7 @@ export const AnalyticsNavigationBar: FC<{
             key={`tab-${tab.id}`}
             isSelected={tab.id === selectedTabId}
             onClick={onTabClick.bind(null, tab)}
+            data-test-subj={tab.testSubj}
           >
             {tab.name}
           </EuiTab>

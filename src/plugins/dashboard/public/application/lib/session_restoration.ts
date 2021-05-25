@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { DASHBOARD_APP_URL_GENERATOR, DashboardUrlGeneratorState } from '../../url_generator';
@@ -21,8 +21,8 @@ export function createSessionRestorationDataProvider(deps: {
     getUrlGeneratorData: async () => {
       return {
         urlGeneratorId: DASHBOARD_APP_URL_GENERATOR,
-        initialState: getUrlGeneratorState({ ...deps, forceAbsoluteTime: false }),
-        restoreState: getUrlGeneratorState({ ...deps, forceAbsoluteTime: true }),
+        initialState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: false }),
+        restoreState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: true }),
       };
     },
   };
@@ -32,20 +32,17 @@ function getUrlGeneratorState({
   data,
   getAppState,
   getDashboardId,
-  forceAbsoluteTime,
+  shouldRestoreSearchSession,
 }: {
   data: DataPublicPluginStart;
   getAppState: () => DashboardAppState;
   getDashboardId: () => string;
-  /**
-   * Can force time range from time filter to convert from relative to absolute time range
-   */
-  forceAbsoluteTime: boolean;
+  shouldRestoreSearchSession: boolean;
 }): DashboardUrlGeneratorState {
   const appState = getAppState();
   return {
     dashboardId: getDashboardId(),
-    timeRange: forceAbsoluteTime
+    timeRange: shouldRestoreSearchSession
       ? data.query.timefilter.timefilter.getAbsoluteTime()
       : data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
@@ -55,6 +52,12 @@ function getUrlGeneratorState({
     preserveSavedFilters: false,
     viewMode: appState.viewMode,
     panels: getDashboardId() ? undefined : appState.panels,
-    searchSessionId: data.search.session.getSessionId(),
+    searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
+    refreshInterval: shouldRestoreSearchSession
+      ? {
+          pause: true, // force pause refresh interval when restoring a session
+          value: 0,
+        }
+      : undefined,
   };
 }

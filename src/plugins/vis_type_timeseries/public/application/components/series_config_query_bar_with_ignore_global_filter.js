@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
@@ -23,7 +23,7 @@ export function SeriesConfigQueryBarWithIgnoreGlobalFilter({
   const htmlId = htmlIdGenerator();
   const yesNoOption = (
     <YesNo
-      disabled={Boolean(panel.ignore_global_filter)}
+      disabled={panel.ignore_global_filter}
       value={model.ignore_global_filter}
       name="ignore_global_filter"
       onChange={onChange}
@@ -90,5 +90,5 @@ SeriesConfigQueryBarWithIgnoreGlobalFilter.propTypes = {
   onChange: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
-  indexPatternForQuery: PropTypes.string,
+  indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 };

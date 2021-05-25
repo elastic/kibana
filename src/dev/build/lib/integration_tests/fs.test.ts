@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
@@ -243,6 +243,20 @@ describe('copyAll()', () => {
     expect(Math.abs(barTxt.atimeMs - time.getTime())).toBeLessThan(oneDay);
     expect(Math.abs(fooDir.atimeMs - time.getTime())).toBeLessThan(oneDay);
     expect(Math.abs(barTxt.mtimeMs - time.getTime())).toBeLessThan(oneDay);
+  });
+
+  it('defaults atime and mtime to now', async () => {
+    const destination = resolve(TMP, 'a/b/c/d/e/f');
+    await copyAll(FIXTURES, destination);
+    const barTxt = statSync(resolve(destination, 'foo_dir/bar.txt'));
+    const fooDir = statSync(resolve(destination, 'foo_dir'));
+
+    // precision is platform specific
+    const now = new Date();
+    const oneDay = 86400000;
+    expect(Math.abs(barTxt.atimeMs - now.getTime())).toBeLessThan(oneDay);
+    expect(Math.abs(fooDir.atimeMs - now.getTime())).toBeLessThan(oneDay);
+    expect(Math.abs(barTxt.mtimeMs - now.getTime())).toBeLessThan(oneDay);
   });
 });
 

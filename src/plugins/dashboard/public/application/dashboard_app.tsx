@@ -1,27 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { History } from 'history';
-import { merge, Subscription } from 'rxjs';
-import React, { useEffect, useCallback, useState } from 'react';
+import { merge, Subject, Subscription } from 'rxjs';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { debounceTime, finalize, switchMap, tap } from 'rxjs/operators';
 import { useKibana } from '../../../kibana_react/public';
 import { DashboardConstants } from '../dashboard_constants';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from './types';
 import {
+  getChangesFromAppStateForContainerState,
+  getDashboardContainerInput,
+  getFiltersSubscription,
   getInputSubscription,
   getOutputSubscription,
-  getFiltersSubscription,
   getSearchSessionIdFromURL,
-  getDashboardContainerInput,
-  getChangesFromAppStateForContainerState,
 } from './dashboard_app_functions';
 import {
   useDashboardBreadcrumbs,
@@ -30,11 +30,11 @@ import {
   useSavedDashboard,
 } from './hooks';
 
-import { removeQueryParam } from '../services/kibana_utils';
-import { IndexPattern } from '../services/data';
+import { IndexPattern, waitUntilNextSessionCompletes$ } from '../services/data';
 import { EmbeddableRenderer } from '../services/embeddable';
 import { DashboardContainerInput } from '.';
 import { leaveConfirmStrings } from '../dashboard_strings';
+import { createQueryParamObservable, replaceUrlHashQuery } from '../../../kibana_utils/public';
 
 export interface DashboardAppProps {
   history: History;
@@ -59,18 +59,40 @@ export function DashboardApp({
     indexPatterns: indexPatternService,
   } = useKibana<DashboardAppServices>().services;
 
-  const [lastReloadTime, setLastReloadTime] = useState(0);
+  const triggerRefresh$ = useMemo(() => new Subject<{ force?: boolean }>(), []);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
 
   const savedDashboard = useSavedDashboard(savedDashboardId, history);
+
+  const getIncomingEmbeddable = useCallback(
+    (removeAfterFetch?: boolean) => {
+      return embeddable
+        .getStateTransfer()
+        .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, removeAfterFetch);
+    },
+    [embeddable]
+  );
+
   const { dashboardStateManager, viewMode, setViewMode } = useDashboardStateManager(
     savedDashboard,
-    history
+    history,
+    getIncomingEmbeddable
   );
-  const dashboardContainer = useDashboardContainer(dashboardStateManager, history, false);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const dashboardContainer = useDashboardContainer({
+    timeFilter: data.query.timefilter.timefilter,
+    dashboardStateManager,
+    getIncomingEmbeddable,
+    setUnsavedChanges,
+    history,
+  });
+  const searchSessionIdQuery$ = useMemo(
+    () => createQueryParamObservable(history, DashboardConstants.SEARCH_SESSION_ID),
+    [history]
+  );
 
   const refreshDashboardContainer = useCallback(
-    (lastReloadRequestTime?: number) => {
+    (force?: boolean) => {
       if (!dashboardContainer || !dashboardStateManager) {
         return;
       }
@@ -80,7 +102,7 @@ export function DashboardApp({
         appStateDashboardInput: getDashboardContainerInput({
           isEmbeddedExternally: Boolean(embedSettings),
           dashboardStateManager,
-          lastReloadRequestTime,
+          lastReloadRequestTime: force ? Date.now() : undefined,
           dashboardCapabilities,
           query: data.query,
         }),
@@ -100,10 +122,35 @@ export function DashboardApp({
         const shouldRefetch = Object.keys(changes).some(
           (changeKey) => !noRefetchKeys.includes(changeKey as keyof DashboardContainerInput)
         );
-        if (getSearchSessionIdFromURL(history)) {
-          // going away from a background search results
-          removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
-        }
+
+        const newSearchSessionId: string | undefined = (() => {
+          // do not update session id if this is irrelevant state change to prevent excessive searches
+          if (!shouldRefetch) return;
+
+          let searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+          if (searchSessionIdFromURL) {
+            if (
+              data.search.session.isRestore() &&
+              data.search.session.isCurrentSession(searchSessionIdFromURL)
+            ) {
+              // navigating away from a restored session
+              dashboardStateManager.kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
+                if (nextUrl.includes(DashboardConstants.SEARCH_SESSION_ID)) {
+                  return replaceUrlHashQuery(nextUrl, (query) => {
+                    delete query[DashboardConstants.SEARCH_SESSION_ID];
+                    return query;
+                  });
+                }
+                return nextUrl;
+              });
+              searchSessionIdFromURL = undefined;
+            } else {
+              data.search.session.restore(searchSessionIdFromURL);
+            }
+          }
+
+          return searchSessionIdFromURL ?? data.search.session.start();
+        })();
 
         if (changes.viewMode) {
           setViewMode(changes.viewMode);
@@ -111,8 +158,7 @@ export function DashboardApp({
 
         dashboardContainer.updateInput({
           ...changes,
-          // do not start a new session if this is irrelevant state change to prevent excessive searches
-          ...(shouldRefetch && { searchSessionId: data.search.session.start() }),
+          ...(newSearchSessionId && { searchSessionId: newSearchSessionId }),
         });
       }
     },
@@ -159,22 +205,53 @@ export function DashboardApp({
     subscriptions.add(
       merge(
         ...[timeFilter.getRefreshIntervalUpdate$(), timeFilter.getTimeUpdate$()]
-      ).subscribe(() => refreshDashboardContainer())
+      ).subscribe(() => triggerRefresh$.next())
     );
+
     subscriptions.add(
-      merge(
-        data.search.session.onRefresh$,
-        data.query.timefilter.timefilter.getAutoRefreshFetch$()
-      ).subscribe(() => {
-        setLastReloadTime(() => new Date().getTime());
+      searchSessionIdQuery$.subscribe(() => {
+        triggerRefresh$.next({ force: true });
       })
     );
 
+    subscriptions.add(
+      data.query.timefilter.timefilter
+        .getAutoRefreshFetch$()
+        .pipe(
+          tap(() => {
+            triggerRefresh$.next({ force: true });
+          }),
+          switchMap((done) =>
+            // best way on a dashboard to estimate that panels are updated is to rely on search session service state
+            waitUntilNextSessionCompletes$(data.search.session).pipe(finalize(done))
+          )
+        )
+        .subscribe()
+    );
+
     dashboardStateManager.registerChangeListener(() => {
+      setUnsavedChanges(dashboardStateManager.getIsDirty(data.query.timefilter.timefilter));
       // we aren't checking dirty state because there are changes the container needs to know about
       // that won't make the dashboard "dirty" - like a view mode change.
-      refreshDashboardContainer();
+      triggerRefresh$.next();
     });
+
+    // debounce `refreshDashboardContainer()`
+    // use `forceRefresh=true` in case at least one debounced trigger asked for it
+    let forceRefresh: boolean = false;
+    subscriptions.add(
+      triggerRefresh$
+        .pipe(
+          tap((trigger) => {
+            forceRefresh = forceRefresh || (trigger?.force ?? false);
+          }),
+          debounceTime(50)
+        )
+        .subscribe(() => {
+          refreshDashboardContainer(forceRefresh);
+          forceRefresh = false;
+        })
+    );
 
     return () => {
       subscriptions.unsubscribe();
@@ -187,6 +264,8 @@ export function DashboardApp({
     data.search.session,
     indexPatternService,
     dashboardStateManager,
+    searchSessionIdQuery$,
+    triggerRefresh$,
     refreshDashboardContainer,
   ]);
 
@@ -216,13 +295,15 @@ export function DashboardApp({
     };
   }, [dashboardStateManager, dashboardContainer, onAppLeave, embeddable]);
 
-  // Refresh the dashboard container when lastReloadTime changes
+  // clear search session when leaving dashboard route
   useEffect(() => {
-    refreshDashboardContainer(lastReloadTime);
-  }, [lastReloadTime, refreshDashboardContainer]);
+    return () => {
+      data.search.session.clear();
+    };
+  }, [data.search.session]);
 
   return (
-    <div className="app-container dshAppContainer">
+    <>
       {savedDashboard && dashboardStateManager && dashboardContainer && viewMode && (
         <>
           <DashboardTopNav
@@ -231,18 +312,20 @@ export function DashboardApp({
               embedSettings,
               indexPatterns,
               savedDashboard,
+              unsavedChanges,
               dashboardContainer,
               dashboardStateManager,
             }}
             viewMode={viewMode}
             lastDashboardId={savedDashboardId}
+            clearUnsavedChanges={() => setUnsavedChanges(false)}
             timefilter={data.query.timefilter.timefilter}
             onQuerySubmit={(_payload, isUpdate) => {
               if (isUpdate === false) {
                 // The user can still request a reload in the query bar, even if the
                 // query is the same, and in that case, we have to explicitly ask for
                 // a reload, since no state changes will cause it.
-                setLastReloadTime(() => new Date().getTime());
+                triggerRefresh$.next({ force: true });
               }
             }}
           />
@@ -251,6 +334,6 @@ export function DashboardApp({
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }

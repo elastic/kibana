@@ -1,0 +1,75 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Adversaries can use the autostart mechanism provided by the Local Security Authority (LSA) authentication packages for privilege escalation or persistence by placing a reference to a binary in the Windows registry. The binary will then be executed by SYSTEM when the authentication packages are loaded.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Potential LSA Authentication Package Abuse",
+  "query": "registry where event.type == \"change\" and\n  registry.path : \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Lsa\\\\Authentication Packages\" and\n  /* exclude SYSTEM SID - look for changes by non-SYSTEM user */\n  not user.id : \"S-1-5-18\"\n",
+  "risk_score": 47,
+  "rule_id": "e9abe69b-1deb-4e19-ac4a-5d5ac00f72eb",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.002",
+              "name": "Authentication Package",
+              "reference": "https://attack.mitre.org/techniques/T1547/002/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.002",
+              "name": "Authentication Package",
+              "reference": "https://attack.mitre.org/techniques/T1547/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

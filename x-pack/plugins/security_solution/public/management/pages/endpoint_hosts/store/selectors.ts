@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // eslint-disable-next-line import/no-nodejs-modules
@@ -15,6 +16,7 @@ import {
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
   MetadataQueryStrategyVersions,
+  HostStatus,
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
@@ -24,6 +26,12 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
 } from '../../../common/constants';
 import { Query } from '../../../../../../../../src/plugins/data/common/query/types';
+import {
+  isFailedResourceState,
+  isLoadedResourceState,
+  isLoadingResourceState,
+} from '../../../state';
+import { ServerApiError } from '../../../../common/types';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -97,6 +105,15 @@ export const policyResponseTimestamp = (state: Immutable<EndpointState>) =>
   state.policyResponse && state.policyResponse['@timestamp'];
 
 /**
+ * Returns the Endpoint Package Policy Revision number, which correlates to the `applied_policy_version`
+ * property on the endpoint policy response message.
+ * @param state
+ */
+export const policyResponseAppliedRevision = (state: Immutable<EndpointState>): string => {
+  return String(state.policyResponse?.Endpoint.policy.applied.endpoint_policy_version || '');
+};
+
+/**
  * Returns the response configurations from the endpoint after a user modifies a policy.
  */
 export const policyResponseConfigurations: (
@@ -160,6 +177,7 @@ export const isOnEndpointPage = (state: Immutable<EndpointState>) => {
   );
 };
 
+/** Sanitized list of URL query params supported by the Details page */
 export const uiQueryParams: (
   state: Immutable<EndpointState>
 ) => Immutable<EndpointIndexUIQueryParams> = createSelector(
@@ -191,7 +209,7 @@ export const uiQueryParams: (
 
         if (value !== undefined) {
           if (key === 'show') {
-            if (value === 'policy_response' || value === 'details') {
+            if (value === 'policy_response' || value === 'details' || value === 'isolate') {
               data[key] = value;
             }
           } else {
@@ -216,10 +234,19 @@ export const hasSelectedEndpoint: (state: Immutable<EndpointState>) => boolean =
 );
 
 /** What policy details panel view to show */
-export const showView: (state: EndpointState) => 'policy_response' | 'details' = createSelector(
-  uiQueryParams,
-  (searchParams) => {
-    return searchParams.show === 'policy_response' ? 'policy_response' : 'details';
+export const showView: (
+  state: EndpointState
+) => EndpointIndexUIQueryParams['show'] = createSelector(uiQueryParams, (searchParams) => {
+  return searchParams.show ?? 'details';
+});
+
+/**
+ * Returns the Host Status which is connected the fleet agent
+ */
+export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
+  (state) => state.hostStatus,
+  (hostStatus) => {
+    return hostStatus ? hostStatus : HostStatus.UNHEALTHY;
   }
 );
 
@@ -278,3 +305,29 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
     return decodedQuery;
   }
 );
+
+export const getCurrentIsolationRequestState = (
+  state: Immutable<EndpointState>
+): EndpointState['isolationRequestState'] => {
+  return state.isolationRequestState;
+};
+
+export const getIsIsolationRequestPending: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getCurrentIsolationRequestState, (isolateHost) =>
+  isLoadingResourceState(isolateHost)
+);
+
+export const getWasIsolationRequestSuccessful: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getCurrentIsolationRequestState, (isolateHost) =>
+  isLoadedResourceState(isolateHost)
+);
+
+export const getIsolationRequestError: (
+  state: Immutable<EndpointState>
+) => ServerApiError | undefined = createSelector(getCurrentIsolationRequestState, (isolateHost) => {
+  if (isFailedResourceState(isolateHost)) {
+    return isolateHost.error;
+  }
+});

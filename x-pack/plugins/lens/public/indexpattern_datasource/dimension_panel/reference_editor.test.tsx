@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,7 +14,7 @@ import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'k
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { OperationMetadata } from '../../types';
-import { createMockedIndexPattern } from '../mocks';
+import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../mocks';
 import { ReferenceEditor, ReferenceEditorProps } from './reference_editor';
 import { insertOrReplaceColumn } from '../operations';
 import { FieldSelect } from './field_select';
@@ -49,6 +50,7 @@ describe('reference editor', () => {
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
       data: {} as DataPublicPluginStart,
+      dimensionGroups: [],
     };
   }
 
@@ -155,7 +157,7 @@ describe('reference editor', () => {
               label: 'Average of bytes',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
           },
@@ -190,7 +192,7 @@ describe('reference editor', () => {
               label: 'Average of bytes',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
           },
@@ -231,7 +233,7 @@ describe('reference editor', () => {
               label: 'Average of bytes',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
           },
@@ -257,6 +259,73 @@ describe('reference editor', () => {
         op: 'date_histogram',
         field: undefined,
       })
+    );
+  });
+
+  it("should show the sub-function as invalid if there's no field compatible with it", () => {
+    // This may happen for saved objects after changing the type of a field
+    wrapper = mount(
+      <ReferenceEditor
+        {...getDefaultArgs()}
+        currentIndexPattern={createMockedIndexPatternWithoutType('number')}
+        layer={{
+          indexPatternId: '1',
+          columnOrder: ['ref'],
+          columns: {
+            ref: {
+              label: 'Average of bytes',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'average',
+              sourceField: 'bytes',
+            },
+          },
+        }}
+        validation={{
+          input: ['field'],
+          validateMetadata: (meta: OperationMetadata) => true,
+        }}
+      />
+    );
+
+    const subFunctionSelect = wrapper
+      .find('[data-test-subj="indexPattern-reference-function"]')
+      .first();
+
+    expect(subFunctionSelect.prop('isInvalid')).toEqual(true);
+    expect(subFunctionSelect.prop('selectedOptions')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          'data-test-subj': 'lns-indexPatternDimension-average incompatible',
+          label: 'Average',
+          value: 'average',
+        }),
+      ])
+    );
+  });
+
+  it('should not display hidden sub-function types', () => {
+    // This may happen for saved objects after changing the type of a field
+    wrapper = mount(
+      <ReferenceEditor
+        {...getDefaultArgs()}
+        validation={{
+          input: ['field', 'fullReference', 'managedReference'],
+          validateMetadata: (meta: OperationMetadata) => true,
+        }}
+      />
+    );
+
+    const subFunctionSelect = wrapper
+      .find('[data-test-subj="indexPattern-reference-function"]')
+      .first();
+
+    expect(subFunctionSelect.prop('isInvalid')).toEqual(true);
+    expect(subFunctionSelect.prop('selectedOptions')).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ value: 'math' })])
+    );
+    expect(subFunctionSelect.prop('selectedOptions')).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ value: 'formula' })])
     );
   });
 
@@ -290,7 +359,7 @@ describe('reference editor', () => {
               label: 'Average of bytes',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
           },
@@ -308,7 +377,7 @@ describe('reference editor', () => {
     const fieldSelect = wrapper.find(FieldSelect);
     expect(fieldSelect.prop('fieldIsInvalid')).toEqual(true);
     expect(fieldSelect.prop('selectedField')).toEqual('bytes');
-    expect(fieldSelect.prop('selectedOperationType')).toEqual('avg');
+    expect(fieldSelect.prop('selectedOperationType')).toEqual('average');
     expect(fieldSelect.prop('incompleteOperation')).toEqual('max');
     expect(fieldSelect.prop('markAllFieldsCompatible')).toEqual(false);
   });
@@ -325,7 +394,7 @@ describe('reference editor', () => {
               label: 'Average of bytes',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
           },
@@ -343,7 +412,7 @@ describe('reference editor', () => {
     const fieldSelect = wrapper.find(FieldSelect);
     expect(fieldSelect.prop('fieldIsInvalid')).toEqual(false);
     expect(fieldSelect.prop('selectedField')).toEqual('timestamp');
-    expect(fieldSelect.prop('selectedOperationType')).toEqual('avg');
+    expect(fieldSelect.prop('selectedOperationType')).toEqual('average');
     expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
   });
 
@@ -365,6 +434,38 @@ describe('reference editor', () => {
     expect(fieldSelect.prop('selectedOperationType')).toBeUndefined();
     expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
     expect(fieldSelect.prop('markAllFieldsCompatible')).toEqual(true);
+  });
+
+  it('should show the FieldSelect as invalid if the selected field is missing', () => {
+    wrapper = mount(
+      <ReferenceEditor
+        {...getDefaultArgs()}
+        layer={{
+          indexPatternId: '1',
+          columnOrder: ['ref'],
+          columns: {
+            ref: {
+              label: 'Average of missing',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'average',
+              sourceField: 'missing',
+            },
+          },
+        }}
+        validation={{
+          input: ['field'],
+          validateMetadata: (meta: OperationMetadata) => true,
+        }}
+      />
+    );
+
+    const fieldSelect = wrapper.find(FieldSelect);
+    expect(fieldSelect.prop('fieldIsInvalid')).toEqual(true);
+    expect(fieldSelect.prop('selectedField')).toEqual('missing');
+    expect(fieldSelect.prop('selectedOperationType')).toEqual('average');
+    expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
+    expect(fieldSelect.prop('markAllFieldsCompatible')).toEqual(false);
   });
 
   it('should show the ParamEditor for functions that offer one', () => {

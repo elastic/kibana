@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash/fp';
@@ -33,7 +34,7 @@ const columnHeaders: ColumnHeaderOptions[] = [
     id: '@timestamp',
     type: 'date',
     aggregatable: true,
-    width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
   },
 ];
 
@@ -206,7 +207,7 @@ describe('field_items', () => {
       expect(toggleColumn).toBeCalledWith({
         columnHeaderType: 'not-filtered',
         id: '@timestamp',
-        width: 180,
+        initialWidth: 180,
       });
     });
 
@@ -265,7 +266,7 @@ describe('field_items', () => {
         expect(toggleColumn).toBeCalledWith({
           columnHeaderType: 'not-filtered',
           id: 'signal.rule.name',
-          width: 180,
+          initialWidth: 180,
         });
       });
     });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Client } from 'elasticsearch';
@@ -78,6 +78,7 @@ const callAPI = async (
  * See {@link LegacyClusterClient}.
  *
  * @deprecated Use {@link IClusterClient}.
+ * @removeBy 7.16
  * @public
  */
 export type ILegacyClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
@@ -89,6 +90,7 @@ export type ILegacyClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser
  *
  * See {@link LegacyClusterClient}.
  * @deprecated Use {@link ICustomClusterClient}.
+ * @removeBy 7.16
  * @public
  */
 export type ILegacyCustomClusterClient = Pick<
@@ -99,6 +101,7 @@ export type ILegacyCustomClusterClient = Pick<
 /**
  * {@inheritDoc IClusterClient}
  * @deprecated Use {@link IClusterClient}.
+ * @removeBy 7.16
  * @public
  */
 export class LegacyClusterClient implements ILegacyClusterClient {
@@ -121,9 +124,10 @@ export class LegacyClusterClient implements ILegacyClusterClient {
   constructor(
     private readonly config: LegacyElasticsearchClientConfig,
     private readonly log: Logger,
+    private readonly type: string,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
-    this.client = new Client(parseElasticsearchClientConfig(config, log));
+    this.client = new Client(parseElasticsearchClientConfig(config, log, type));
   }
 
   /**
@@ -186,7 +190,7 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     // between all scoped client instances.
     if (this.scopedClient === undefined) {
       this.scopedClient = new Client(
-        parseElasticsearchClientConfig(this.config, this.log, {
+        parseElasticsearchClientConfig(this.config, this.log, this.type, {
           auth: false,
           ignoreCertAndKey: !this.config.ssl || !this.config.ssl.alwaysPresentCertificate,
         })

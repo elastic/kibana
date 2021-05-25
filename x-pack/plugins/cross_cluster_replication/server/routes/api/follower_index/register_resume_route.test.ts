@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
-import { isEsError } from '../../../shared_imports';
+import { isEsError, License } from '../../../shared_imports';
 import { formatEsError } from '../../../lib/format_es_error';
-import { License } from '../../../services';
 import { mockRouteContext } from '../test_lib';
 import { registerResumeRoute } from './register_resume_route';
 

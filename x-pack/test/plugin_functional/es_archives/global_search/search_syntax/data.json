@@ -91,6 +91,24 @@
 {
   "type": "doc",
   "value": {
+    "id": "tag:tag-special-chars",
+    "index": ".kibana",
+    "source": {
+      "tag": {
+        "name": "my%tag",
+        "description": "Special chars",
+        "color": "#AA0077"
+      },
+      "type": "tag",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "index-pattern:logstash-*",
     "index": ".kibana",
     "source": {
@@ -356,3 +374,41 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "dashboard:ref-to-tag-special-chars",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "title": "dashboard 4 (tag-special-chars)",
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
+        },
+        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+        "panelsJSON": "[]",
+        "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+        "timeRestore": true,
+        "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+        "version": 1
+      },
+      "migrationVersion": {
+        "dashboard": "7.3.0"
+      },
+      "references": [
+        {
+          "id": "tag-special-chars",
+          "name": "tag-special-ref",
+          "type": "tag"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2018-04-11T21:57:52.253Z"
+    }
+  }
+}
+
+

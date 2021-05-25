@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getSupportedFieldsByMetricType } from './get_supported_fields_by_metric_type';
@@ -26,11 +26,11 @@ describe('getSupportedFieldsByMetricType', () => {
   shouldSupportAllFieldTypes('value_count');
   shouldHaveHistogramAndNumbers('avg');
   shouldHaveHistogramAndNumbers('sum');
+  shouldHaveHistogramAndNumbers('min');
+  shouldHaveHistogramAndNumbers('max');
 
   shouldHaveOnlyNumbers('positive_rate');
   shouldHaveOnlyNumbers('std_deviation');
-  shouldHaveOnlyNumbers('max');
-  shouldHaveOnlyNumbers('min');
 
   it(`should return everything but histogram for cardinality`, () => {
     expect(getSupportedFieldsByMetricType('cardinality')).not.toContain('histogram');

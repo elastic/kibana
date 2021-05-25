@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function enterSpaceFunctonalTests({
@@ -12,7 +14,8 @@ export default function enterSpaceFunctonalTests({
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
 
-  describe('Enter Space', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/100012
+  describe.skip('Enter Space', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('spaces/enter_space');

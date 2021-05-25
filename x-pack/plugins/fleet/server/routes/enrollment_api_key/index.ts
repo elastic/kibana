@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { IRouter } from 'src/core/server';
+
+import type { IRouter } from 'src/core/server';
+
 import { PLUGIN_ID, ENROLLMENT_API_KEY_ROUTES } from '../../constants';
 import {
   GetEnrollmentAPIKeysRequestSchema,
@@ -11,6 +14,7 @@ import {
   DeleteEnrollmentAPIKeyRequestSchema,
   PostEnrollmentAPIKeyRequestSchema,
 } from '../../types';
+
 import {
   getEnrollmentApiKeysHandler,
   getOneEnrollmentApiKeyHandler,

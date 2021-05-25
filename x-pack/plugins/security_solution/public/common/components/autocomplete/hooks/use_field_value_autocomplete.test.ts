@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
@@ -14,7 +15,7 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { stubIndexPatternWithFields } from '../../../../../../../../src/plugins/data/common/index_patterns/index_pattern.stub';
 import { getField } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { OperatorTypeEnum } from '../../../../lists_plugin_deps';
+import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 jest.mock('../../../../common/lib/kibana');
 

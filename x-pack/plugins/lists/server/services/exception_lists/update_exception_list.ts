@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-
-import {
+import type {
   DescriptionOrUndefined,
   ExceptionListSchema,
-  ExceptionListSoSchema,
   ExceptionListTypeOrUndefined,
   IdOrUndefined,
   ListIdOrUndefined,
@@ -18,11 +17,14 @@ import {
   NamespaceType,
   OsTypeArray,
   TagsOrUndefined,
-  VersionOrUndefined,
   _VersionOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
-import { getSavedObjectType, transformSavedObjectUpdateToExceptionList } from './utils';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
+
+import { transformSavedObjectUpdateToExceptionList } from './utils';
 import { getExceptionList } from './get_exception_list';
 
 interface UpdateExceptionListOptions {

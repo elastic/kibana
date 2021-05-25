@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useEffect, useState } from 'react';
@@ -25,6 +26,11 @@ import {
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
+import {
+  DISCOVER_APP_URL_GENERATOR,
+  DiscoverUrlGeneratorState,
+} from '../../../../../../../../../src/plugins/discover/public';
+
 import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
   isGetTransformsStatsResponseSchema,
@@ -35,7 +41,7 @@ import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
-import { getTransformProgress, getDiscoverUrl } from '../../../../common';
+import { getTransformProgress } from '../../../../common';
 import { useApi } from '../../../../hooks/use_api';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
@@ -45,6 +51,9 @@ import {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
+import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common/index_patterns';
+import { isPopulatedObject } from '../../../../../../common/shared_imports';
+import { isLatestTransform } from '../../../../../../common/types/transform';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -82,13 +91,45 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [progressPercentComplete, setProgressPercentComplete] = useState<undefined | number>(
       undefined
     );
+    const [discoverLink, setDiscoverLink] = useState<string>();
 
     const deps = useAppDependencies();
     const indexPatterns = deps.data.indexPatterns;
     const toastNotifications = useToastNotifications();
+    const { getUrlGenerator } = deps.share.urlGenerators;
+    const isDiscoverAvailable = deps.application.capabilities.discover?.show ?? false;
 
     useEffect(() => {
+      let unmounted = false;
+
       onChange({ created, started, indexPatternId });
+
+      const getDiscoverUrl = async (): Promise<void> => {
+        const state: DiscoverUrlGeneratorState = {
+          indexPatternId,
+        };
+
+        let discoverUrlGenerator;
+        try {
+          discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
+        } catch (error) {
+          // ignore error thrown when url generator is not available
+          return;
+        }
+
+        const discoverUrl = await discoverUrlGenerator.createUrl(state);
+        if (!unmounted) {
+          setDiscoverLink(discoverUrl);
+        }
+      };
+
+      if (started === true && indexPatternId !== undefined && isDiscoverAvailable) {
+        getDiscoverUrl();
+      }
+
+      return () => {
+        unmounted = true;
+      };
       // custom comparison
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [created, started, indexPatternId]);
@@ -188,12 +229,19 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const createKibanaIndexPattern = async () => {
       setLoading(true);
       const indexPatternName = transformConfig.dest.index;
+      const runtimeMappings = transformConfig.source.runtime_mappings as Record<
+        string,
+        RuntimeField
+      >;
 
       try {
         const newIndexPattern = await indexPatterns.createAndSave(
           {
             title: indexPatternName,
             timeFieldName,
+            ...(isPopulatedObject(runtimeMappings) && isLatestTransform(transformConfig)
+              ? { runtimeFieldMap: runtimeMappings }
+              : {}),
           },
           false,
           true
@@ -466,7 +514,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                     </EuiPanel>
                   </EuiFlexItem>
                 )}
-                {started === true && indexPatternId !== undefined && (
+                {isDiscoverAvailable && discoverLink !== undefined && (
                   <EuiFlexItem style={PANEL_ITEM_STYLE}>
                     <EuiCard
                       icon={<EuiIcon size="xxl" type="discoverApp" />}
@@ -479,7 +527,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                           defaultMessage: 'Use Discover to explore the transform.',
                         }
                       )}
-                      href={getDiscoverUrl(indexPatternId, deps.http.basePath.get())}
+                      href={discoverLink}
                       data-test-subj="transformWizardCardDiscover"
                     />
                   </EuiFlexItem>

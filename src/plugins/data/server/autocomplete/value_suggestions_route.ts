@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get, map } from 'lodash';
@@ -12,7 +12,8 @@ import { IRouter, SharedGlobalConfig } from 'kibana/server';
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { IFieldType, Filter } from '../index';
+import type { estypes } from '@elastic/elasticsearch';
+import type { IFieldType } from '../index';
 import { findIndexPatternById, getFieldByName } from '../index_patterns';
 import { getRequestAbortedSignal } from '../lib';
 
@@ -35,6 +36,7 @@ export function registerValueSuggestionsRoute(
             field: schema.string(),
             query: schema.string(),
             filters: schema.maybe(schema.any()),
+            fieldMeta: schema.maybe(schema.any()),
           },
           { unknowns: 'allow' }
         ),
@@ -42,7 +44,7 @@ export function registerValueSuggestionsRoute(
     },
     async (context, request, response) => {
       const config = await config$.pipe(first()).toPromise();
-      const { field: fieldName, query, filters } = request.body;
+      const { field: fieldName, query, filters, fieldMeta } = request.body;
       const { index } = request.params;
       const { client } = context.core.elasticsearch.legacy;
       const signal = getRequestAbortedSignal(request.events.aborted$);
@@ -52,22 +54,23 @@ export function registerValueSuggestionsRoute(
         terminate_after: config.kibana.autocompleteTerminateAfter.asMilliseconds(),
       };
 
-      const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
+      let field: IFieldType | undefined = fieldMeta;
 
-      const field = indexPattern && getFieldByName(fieldName, indexPattern);
+      if (!field?.name && !field?.type) {
+        const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
+
+        field = indexPattern && getFieldByName(fieldName, indexPattern);
+      }
+
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, filters);
 
-      try {
-        const result = await client.callAsCurrentUser('search', { index, body }, { signal });
+      const result = await client.callAsCurrentUser('search', { index, body }, { signal });
 
-        const buckets: any[] =
-          get(result, 'aggregations.suggestions.buckets') ||
-          get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
+      const buckets: any[] =
+        get(result, 'aggregations.suggestions.buckets') ||
+        get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
 
-        return response.ok({ body: map(buckets || [], 'key') });
-      } catch (error) {
-        return response.internalError({ body: error });
-      }
+      return response.ok({ body: map(buckets || [], 'key') });
     }
   );
 }
@@ -77,7 +80,7 @@ async function getBody(
   { timeout, terminate_after }: Record<string, any>,
   field: IFieldType | string,
   query: string,
-  filters: Filter[] = []
+  filters: estypes.QueryContainer[] = []
 ) {
   const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
 
@@ -86,7 +89,7 @@ async function getBody(
     q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
-  const executionHint = 'map';
+  const executionHint = 'map' as const;
 
   // We don't care about the accuracy of the counts, just the content of the terms, so this reduces
   // the amount of information that needs to be transmitted to the coordinating node

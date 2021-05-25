@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -9,7 +10,7 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 export class RemoveClusterButtonProvider extends Component {
   static propTypes = {
@@ -83,7 +84,7 @@ export class RemoveClusterButtonProvider extends Component {
       );
 
       modal = (
-        <EuiOverlayMask>
+        <>
           {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
           <EuiConfirmModal
             data-test-subj="remoteClustersDeleteConfirmModal"
@@ -107,7 +108,7 @@ export class RemoveClusterButtonProvider extends Component {
           >
             {!isSingleCluster && content}
           </EuiConfirmModal>
-        </EuiOverlayMask>
+        </>
       );
     }
 

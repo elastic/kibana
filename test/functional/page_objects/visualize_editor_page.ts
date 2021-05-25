@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect/expect.js';
@@ -128,9 +128,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async changeHeatmapColorNumbers(value = 6) {
-      const input = await testSubjects.find(`heatmapColorsNumber`);
-      await input.clearValueWithKeyboard();
-      await input.type(`${value}`);
+      await testSubjects.setValue('heatmapColorsNumber', `${value}`);
     }
 
     public async getBucketErrorMessage() {
@@ -296,7 +294,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async sizeUpEditor() {
-      const resizerPanel = await testSubjects.find('splitPanelResizer');
+      const resizerPanel = await testSubjects.find('euiResizableButton');
       // Drag panel 100 px left
       await browser.dragAndDrop({ location: resizerPanel }, { location: { x: -100, y: 0 } });
     }
@@ -353,6 +351,14 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       const accordion = await testSubjects.find(`advancedParams-${aggId}`);
       const accordionButton = await find.descendantDisplayedByCssSelector('button', accordion);
       await accordionButton.click();
+    }
+
+    public async inputValueInCodeEditor(value: string) {
+      const codeEditor = await find.byCssSelector('.react-monaco-editor-container');
+      const textarea = await codeEditor.findByClassName('monaco-mouse-cursor-text');
+
+      await textarea.click();
+      await browser.pressKeys(value);
     }
 
     public async clickReset() {

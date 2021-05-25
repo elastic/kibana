@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment';
 import '../../../common/mock/match_media';
 import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
@@ -15,7 +17,7 @@ import {
   isNotOperator,
   existsOperator,
   doesNotExistOperator,
-} from './operators';
+} from '@kbn/securitysolution-list-utils';
 import {
   getOperators,
   checkEmptyValue,
@@ -25,7 +27,7 @@ import {
   filterFieldToList,
 } from './helpers';
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
-import { ListSchema } from '../../../../../lists/common';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('helpers', () => {
   // @ts-ignore

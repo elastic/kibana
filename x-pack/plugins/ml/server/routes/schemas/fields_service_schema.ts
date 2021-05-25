@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
+import { indicesOptionsSchema } from './datafeeds_schema';
+import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const getCardinalityOfFieldsSchema = schema.object({
   /** Index or indexes for which to return the time range. */
@@ -28,4 +31,7 @@ export const getTimeFieldRangeSchema = schema.object({
   timeFieldName: schema.maybe(schema.string()),
   /** Query to match documents in the index(es). */
   query: schema.maybe(schema.any()),
+  /** Additional search options. */
+  runtimeMappings: runtimeMappingsSchema,
+  indicesOptions: indicesOptionsSchema,
 });

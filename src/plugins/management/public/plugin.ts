@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -20,7 +20,7 @@ import {
   AppUpdater,
   AppStatus,
   AppNavLinkStatus,
-  AppSearchDeepLink,
+  AppDeepLink,
 } from '../../../core/public';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -38,22 +38,20 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
-    const deepLinks: AppSearchDeepLink[] = Object.values(
-      this.managementSections.definedSections
-    ).map((section: ManagementSection) => ({
-      id: section.id,
-      title: section.title,
-      searchDeepLinks: section.getAppsEnabled().map((mgmtApp) => ({
-        id: mgmtApp.id,
-        title: mgmtApp.title,
-        path: mgmtApp.basePath,
-        meta: { ...mgmtApp.meta },
-      })),
-    }));
+    const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
+      (section: ManagementSection) => ({
+        id: section.id,
+        title: section.title,
+        deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
+          id: mgmtApp.id,
+          title: mgmtApp.title,
+          path: mgmtApp.basePath,
+          keywords: mgmtApp.keywords,
+        })),
+      })
+    );
 
-    return {
-      meta: { searchDeepLinks: deepLinks },
-    };
+    return { deepLinks };
   });
 
   private hasAnyEnabledApps = true;

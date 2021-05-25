@@ -1,12 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { DEFAULT_SPACE_ID } from '../constants';
 
 const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
 
+/**
+ * Extracts the space id from the given path.
+ *
+ * @param requestBasePath The base path of the current request.
+ * @param serverBasePath The server's base path.
+ * @returns the space id.
+ *
+ * @private
+ */
 export function getSpaceIdFromPath(
   requestBasePath?: string | null,
   serverBasePath?: string | null
@@ -38,6 +49,15 @@ export function getSpaceIdFromPath(
   };
 }
 
+/**
+ * Given a server base path, space id, and requested resource, this will construct a space-aware path
+ * that includes a URL identifier with the space id.
+ *
+ * @param basePath the server's base path.
+ * @param spaceId the space id.
+ * @param requestedPath the requested path (e.g. `/app/dashboard`).
+ * @returns the space-aware version of the requested path, inclusive of the server's base path.
+ */
 export function addSpaceIdToPath(
   basePath: string = '/',
   spaceId: string = '',

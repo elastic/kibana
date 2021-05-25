@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,8 +12,8 @@ import { useActions } from 'kea';
 import { EuiFilterGroup, EuiPopover } from '@elastic/eui';
 
 import { User } from '../../../types';
-
 import { GroupsLogic } from '../groups_logic';
+
 import { FilterableUsersList } from './filterable_users_list';
 
 interface FilterableUsersPopoverProps {
@@ -40,7 +41,7 @@ export const FilterableUsersPopover: React.FC<FilterableUsersPopoverProps> = ({
   return (
     <EuiFilterGroup className={className}>
       <EuiPopover
-        ownFocus={true}
+        ownFocus
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
@@ -53,7 +54,7 @@ export const FilterableUsersPopover: React.FC<FilterableUsersPopoverProps> = ({
           addFilteredUser={addFilteredUser}
           allGroupUsersLoading={allGroupUsersLoading}
           removeFilteredUser={removeFilteredUser}
-          isPopover={true}
+          isPopover
         />
       </EuiPopover>
     </EuiFilterGroup>

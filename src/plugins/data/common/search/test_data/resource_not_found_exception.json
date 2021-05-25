@@ -1,0 +1,13 @@
+{
+  "error" : {
+    "root_cause" : [
+      {
+        "type" : "resource_not_found_exception",
+        "reason" : "FlZlSXp6dkd3UXdHZjhsalVtVHBnYkEdYjNIWDhDOTZRN3ExemdmVkx4RXNQQToxMjc2ODk="
+      }
+    ],
+    "type" : "resource_not_found_exception",
+    "reason" : "FlZlSXp6dkd3UXdHZjhsalVtVHBnYkEdYjNIWDhDOTZRN3ExemdmVkx4RXNQQToxMjc2ODk="
+  },
+  "status" : 404
+}

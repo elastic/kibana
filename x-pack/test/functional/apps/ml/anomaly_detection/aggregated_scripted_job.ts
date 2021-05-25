@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -15,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supportedTestSuites = [
     {
       suiteTitle: 'supported job with aggregation field',
+      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_supported_aggs_${ts}`,
         job_type: 'anomaly_detector',
@@ -101,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'supported job with scripted field',
+      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_supported_script_${ts}`,
         job_type: 'anomaly_detector',
@@ -175,6 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
   const unsupportedTestSuites = [
     {
       suiteTitle: 'unsupported job with bucket_script aggregation field',
+      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_unsupported_aggs_${ts}`,
         job_type: 'anomaly_detector',
@@ -279,6 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'unsupported job with partition by of a scripted field',
+      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_unsupported_script_${ts}`,
         job_type: 'anomaly_detector',

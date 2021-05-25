@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const mockAlertDetailsData = [
@@ -653,5 +654,17 @@ export const mockAlertDetailsData = [
     field: 'fields.agent.version',
     values: ['7.10.0'],
     originalValue: ['7.10.0'],
+  },
+  {
+    category: 'threat',
+    field: 'threat.indicator',
+    values: [`{"first_seen":"2021-03-25T18:17:00.000Z"}`],
+    originalValue: [`{"first_seen":"2021-03-25T18:17:00.000Z"}`],
+  },
+  {
+    category: 'threat',
+    field: 'threat.indicator.matched',
+    values: `["file", "url"]`,
+    originalValue: ['file', 'url'],
   },
 ];

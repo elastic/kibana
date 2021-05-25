@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EMSSettings, IEMSConfig } from './ems_settings';
@@ -10,7 +11,7 @@ import {
   DEFAULT_EMS_FONT_LIBRARY_URL,
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
-} from '../../../../src/plugins/maps_legacy/common';
+} from '../../../../src/plugins/maps_ems/common';
 
 const IS_ENTERPRISE_PLUS = () => true;
 

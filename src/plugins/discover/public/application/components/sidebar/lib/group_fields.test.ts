@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { groupFields } from './group_fields';
@@ -47,6 +47,7 @@ const fieldCounts = {
   category: 1,
   currency: 1,
   customer_birth_date: 1,
+  unknown_field: 1,
 };
 
 describe('group_fields', function () {
@@ -166,18 +167,12 @@ describe('group_fields', function () {
       aggregatable: true,
       readFromDocValues: false,
     };
-    const fieldsToGroup = [category, currency, currencyKeyword];
+    const fieldsToGroup = [category, currency, currencyKeyword] as IndexPatternField[];
 
     const fieldFilterState = getDefaultFieldFilter();
 
-    const actual = groupFields(
-      fieldsToGroup as any,
-      ['currency'],
-      5,
-      fieldCounts,
-      fieldFilterState,
-      true
-    );
+    const actual = groupFields(fieldsToGroup, ['currency'], 5, fieldCounts, fieldFilterState, true);
+
     expect(actual.popular).toEqual([category]);
     expect(actual.selected).toEqual([currency]);
     expect(actual.unpopular).toEqual([]);
@@ -213,5 +208,71 @@ describe('group_fields', function () {
       'customer_birth_date',
       'unknown',
     ]);
+  });
+
+  it('should filter fields by a given name', function () {
+    const fieldFilterState = { ...getDefaultFieldFilter(), ...{ name: 'curr' } };
+
+    const actual1 = groupFields(
+      fields as IndexPatternField[],
+      ['customer_birth_date', 'currency', 'unknown'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      false
+    );
+    expect(actual1.selected.map((field) => field.name)).toEqual(['currency']);
+  });
+
+  it('excludes unmapped fields if showUnmappedFields set to false', function () {
+    const fieldFilterState = getDefaultFieldFilter();
+    const fieldsWithUnmappedField = [...fields];
+    fieldsWithUnmappedField.push({
+      name: 'unknown_field',
+      type: 'unknown',
+      esTypes: ['unknown'],
+      count: 1,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
+
+    const actual = groupFields(
+      fieldsWithUnmappedField as IndexPatternField[],
+      ['customer_birth_date', 'currency'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      true,
+      false
+    );
+    expect(actual.unpopular).toEqual([]);
+  });
+
+  it('includes unmapped fields when reading from source', function () {
+    const fieldFilterState = getDefaultFieldFilter();
+    const fieldsWithUnmappedField = [...fields];
+    fieldsWithUnmappedField.push({
+      name: 'unknown_field',
+      type: 'unknown',
+      esTypes: ['unknown'],
+      count: 0,
+      scripted: false,
+      searchable: false,
+      aggregatable: false,
+      readFromDocValues: false,
+    });
+
+    const actual = groupFields(
+      fieldsWithUnmappedField as IndexPatternField[],
+      ['customer_birth_date', 'currency'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      false,
+      undefined
+    );
+    expect(actual.unpopular.map((field) => field.name)).toEqual(['unknown_field']);
   });
 });

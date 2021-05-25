@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import { useKibana } from '../../services/kibana_react';
 import {
   connectToQueryState,
   esFilters,
+  noSearchSessionStorageCapabilityMessage,
   QueryState,
   syncQueryStateWithUrl,
 } from '../../services/data';
@@ -28,7 +29,7 @@ import { createSessionRestorationDataProvider } from '../lib/session_restoration
 import { DashboardStateManager } from '../dashboard_state_manager';
 import { getDashboardTitle } from '../../dashboard_strings';
 import { DashboardAppServices } from '../types';
-import { ViewMode } from '../../services/embeddable';
+import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
 
 // TS is picky with type guards, we can't just inline `() => false`
 function defaultTaggingGuard(_obj: SavedObject): _obj is TagDecoratedSavedObject {
@@ -43,7 +44,8 @@ interface DashboardStateManagerReturn {
 
 export const useDashboardStateManager = (
   savedDashboard: DashboardSavedObject | null,
-  history: History
+  history: History,
+  getIncomingEmbeddable: () => EmbeddablePackageState | undefined
 ): DashboardStateManagerReturn => {
   const {
     data: dataPlugin,
@@ -51,8 +53,10 @@ export const useDashboardStateManager = (
     uiSettings,
     usageCollection,
     initializerContext,
-    dashboardCapabilities,
     savedObjectsTagging,
+    dashboardCapabilities,
+    dashboardPanelStorage,
+    allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
 
   // Destructure and rename services; makes the Effect hook more specific, makes later
@@ -84,13 +88,17 @@ export const useDashboardStateManager = (
     });
 
     const stateManager = new DashboardStateManager({
+      hasPendingEmbeddable: () => Boolean(getIncomingEmbeddable()),
+      toasts: core.notifications.toasts,
       hasTaggingCapabilities,
+      dashboardPanelStorage,
       hideWriteControls,
       history,
       kbnUrlStateStorage,
       kibanaVersion,
       savedDashboard,
       usageCollection,
+      allowByValueEmbeddables,
     });
 
     // sync initial app filters from state to filterManager
@@ -155,17 +163,25 @@ export const useDashboardStateManager = (
     const dashboardTitle = getDashboardTitle(
       stateManager.getTitle(),
       stateManager.getViewMode(),
-      stateManager.getIsDirty(timefilter),
       stateManager.isNew()
     );
 
-    searchSession.setSearchSessionInfoProvider(
+    searchSession.enableStorage(
       createSessionRestorationDataProvider({
         data: dataPlugin,
         getDashboardTitle: () => dashboardTitle,
         getDashboardId: () => savedDashboard?.id || '',
         getAppState: () => stateManager.getAppState(),
-      })
+      }),
+      {
+        isDisabled: () =>
+          dashboardCapabilities.storeSearchSession
+            ? { disabled: false }
+            : {
+                disabled: true,
+                reasonText: noSearchSessionStorageCapabilityMessage,
+              },
+      }
     );
 
     setDashboardStateManager(stateManager);
@@ -181,6 +197,9 @@ export const useDashboardStateManager = (
     dataPlugin,
     filterManager,
     hasTaggingCapabilities,
+    initializerContext.config,
+    dashboardPanelStorage,
+    getIncomingEmbeddable,
     hideWriteControls,
     history,
     kibanaVersion,
@@ -192,6 +211,9 @@ export const useDashboardStateManager = (
     toasts,
     uiSettings,
     usageCollection,
+    allowByValueEmbeddables,
+    core.notifications.toasts,
+    dashboardCapabilities.storeSearchSession,
   ]);
 
   return { dashboardStateManager, viewMode, setViewMode };

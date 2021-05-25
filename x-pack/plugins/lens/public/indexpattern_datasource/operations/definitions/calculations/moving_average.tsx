@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { useState } from 'react';
-import React from 'react';
-import { EuiFormRow } from '@elastic/eui';
-import { EuiFieldNumber } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useState } from 'react';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 import {
@@ -19,8 +19,14 @@ import {
   hasDateField,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
-import { isValidNumber, useDebounceWithOptions } from '../helpers';
+import {
+  getFormatFromPreviousColumn,
+  isValidNumber,
+  useDebounceWithOptions,
+  getFilter,
+} from '../helpers';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
+import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 import type { OperationDefinition, ParamEditorProps } from '..';
 
 const ofName = buildLabelFunction((name?: string) => {
@@ -35,6 +41,8 @@ const ofName = buildLabelFunction((name?: string) => {
     },
   });
 });
+
+const WINDOW_DEFAULT_VALUE = 5;
 
 export type MovingAverageIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -57,10 +65,11 @@ export const movingAverageOperation: OperationDefinition<
   selectionStyle: 'full',
   requiredReferences: [
     {
-      input: ['field'],
+      input: ['field', 'managedReference'],
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
+  operationParams: [{ name: 'window', type: 'number', required: true }],
   getPossibleOperation: (indexPattern) => {
     if (hasDateField(indexPattern)) {
       return {
@@ -78,8 +87,12 @@ export const movingAverageOperation: OperationDefinition<
       window: [(layer.columns[columnId] as MovingAverageIndexPatternColumn).params.window],
     });
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }) => {
+  buildColumn: (
+    { referenceIds, previousColumn, layer },
+    columnParams = { window: WINDOW_DEFAULT_VALUE }
+  ) => {
     const metric = layer.columns[referenceIds[0]];
+    const { window = WINDOW_DEFAULT_VALUE } = columnParams;
     return {
       label: ofName(metric?.label, previousColumn?.timeScale),
       dataType: 'number',
@@ -88,13 +101,11 @@ export const movingAverageOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
-      params:
-        previousColumn?.dataType === 'number' &&
-        previousColumn.params &&
-        'format' in previousColumn.params &&
-        previousColumn.params.format
-          ? { format: previousColumn.params.format, window: 5 }
-          : { window: 5 },
+      filter: getFilter(previousColumn, columnParams),
+      params: {
+        window,
+        ...getFormatFromPreviousColumn(previousColumn),
+      },
     };
   },
   paramEditor: MovingAverageParamEditor,
@@ -111,6 +122,7 @@ export const movingAverageOperation: OperationDefinition<
       })
     );
   },
+  getHelpMessage: () => <MovingAveragePopup />,
   getDisabledStatus(indexPattern, layer) {
     return checkForDateHistogram(
       layer,
@@ -120,6 +132,7 @@ export const movingAverageOperation: OperationDefinition<
     )?.join(', ');
   },
   timeScalingMode: 'optional',
+  filterable: true,
 };
 
 function MovingAverageParamEditor({
@@ -168,3 +181,82 @@ function MovingAverageParamEditor({
     </EuiFormRow>
   );
 }
+
+const MovingAveragePopup = () => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  return (
+    <HelpPopover
+      anchorPosition="upCenter"
+      button={
+        <HelpPopoverButton
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+        >
+          {i18n.translate('xpack.lens.indexPattern.movingAverage.helpText', {
+            defaultMessage: 'How it works',
+          })}
+        </HelpPopoverButton>
+      }
+      closePopover={() => setIsPopoverOpen(false)}
+      isOpen={isPopoverOpen}
+      title={i18n.translate('xpack.lens.indexPattern.movingAverage.titleHelp', {
+        defaultMessage: 'How moving average works',
+      })}
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.lens.indexPattern.movingAverage.basicExplanation"
+          defaultMessage="Moving average slides a window across the data and displays the average value. Moving average is supported only by date histograms."
+        />
+      </p>
+
+      <p>
+        <FormattedMessage
+          id="xpack.lens.indexPattern.movingAverage.longerExplanation"
+          defaultMessage="To calculate the moving average, Lens uses the mean of the window and applies a skip policy for gaps.  For missing values, the bucket is skipped, and the calculation is performed on the next value."
+        />
+      </p>
+
+      <p>
+        <FormattedMessage
+          id="xpack.lens.indexPattern.movingAverage.tableExplanation"
+          defaultMessage="For example, given the data [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], you can calculate a simple moving average with a window size of 5:"
+        />
+      </p>
+
+      <ul>
+        <li>(1 + 2 + 3 + 4 + 5) / 5 = 3</li>
+        <li>(2 + 3 + 4 + 5 + 6) / 5 = 4</li>
+        <li>...</li>
+        <li>(5 + 6 + 7 + 8 + 9) / 5 = 7</li>
+      </ul>
+
+      <p>
+        <FormattedMessage
+          id="xpack.lens.indexPattern.movingAverage.windowLimitations"
+          defaultMessage="The window does not include the current value."
+        />
+      </p>
+      <p>
+        <FormattedMessage
+          id="xpack.lens.indexPattern.movingAverage.windowInitialPartial"
+          defaultMessage="The window is partial until it reaches the requested number of items.  For example, with a window size of 5:"
+        />
+      </p>
+      <ul>
+        <li>(1 + 2) / 2 = 1.5</li>
+        <li>(1 + 2 + 3) / 3 = 2</li>
+        <li>(1 + 2 + 3 + 4) / 4 = 2.5</li>
+        <li>(1 + 2 + 3 + 4 + 5) / 5 = 3</li>
+      </ul>
+
+      <p>
+        <FormattedMessage
+          id="xpack.lens.indexPattern.movingAverage.limitations"
+          defaultMessage="The first moving average value starts at the second item."
+        />
+      </p>
+    </HelpPopover>
+  );
+};

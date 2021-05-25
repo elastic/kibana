@@ -1,37 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useValues, useActions } from 'kea';
 
 import {
   EuiSpacer,
-  EuiButtonEmpty,
   EuiTitle,
   EuiPanel,
   EuiIcon,
   EuiFlexGrid,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiButtonEmptyProps,
-  EuiLinkProps,
 } from '@elastic/eui';
-import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
-import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
+import { AppLogic } from '../../app_logic';
+import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
+import { ContentSection } from '../../components/shared/content_section';
 import { SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
-import { ContentSection } from '../../components/shared/content_section';
-
-import { AppLogic } from '../../app_logic';
-import { OverviewLogic } from './overview_logic';
-
 import { OnboardingCard } from './onboarding_card';
+import { OverviewLogic } from './overview_logic';
 
 const SOURCES_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingSourcesCard.title',
@@ -143,19 +141,11 @@ export const OrgNameOnboarding: React.FC = () => {
       metric: 'org_name_change_button',
     });
 
-  const buttonProps = {
-    onClick,
-    target: '_blank',
-    color: 'primary',
-    href: getWorkplaceSearchUrl(ORG_SETTINGS_PATH),
-    'data-test-subj': 'orgNameChangeButton',
-  } as EuiButtonEmptyProps & EuiLinkProps;
-
   return (
-    <EuiPanel paddingSize="l">
+    <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem className="eui-hideFor--xs eui-hideFor--s" grow={false}>
-          <EuiIcon type="training" color="subdued" size="xl" />
+          <EuiIcon type="documentEdit" size="xl" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -168,12 +158,17 @@ export const OrgNameOnboarding: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty {...buttonProps}>
+          <EuiButtonTo
+            to={ORG_SETTINGS_PATH}
+            onClick={onClick}
+            data-test-subj="orgNameChangeButton"
+            size="s"
+          >
             <FormattedMessage
               id="xpack.enterpriseSearch.workplaceSearch.orgNameOnboarding.buttonLabel"
               defaultMessage="Name your organization"
             />
-          </EuiButtonEmpty>
+          </EuiButtonTo>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

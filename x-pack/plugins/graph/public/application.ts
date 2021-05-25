@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // inner angular imports
@@ -90,7 +91,10 @@ export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: Graph
     const licenseAllowsToShowThisPage = info.showAppLink && info.enableAppLink;
 
     if (!licenseAllowsToShowThisPage) {
-      deps.core.notifications.toasts.addDanger(info.message);
+      if (info.message) {
+        deps.core.notifications.toasts.addDanger(info.message);
+      }
+
       // This has to happen in the next tick because otherwise the original navigation
       // bringing us to the graph app in the first place
       // never completes and the browser enters are redirect loop

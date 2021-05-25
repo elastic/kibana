@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,6 +11,7 @@ import {
   EuiHideFor,
   EuiShowFor,
   EuiButtonIcon,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import { PercentileRange } from './index';
@@ -27,27 +29,21 @@ export function ResetPercentileZoom({
   const onClick = () => {
     setPercentileRange({ min: null, max: null });
   };
-  return (
-    <>
+  return !isDisabled ? (
+    <EuiFlexItem grow={false}>
       <EuiShowFor sizes={['xs']}>
         <EuiButtonIcon
           iconType="inspect"
           size="s"
           aria-label={I18LABELS.resetZoom}
           onClick={onClick}
-          disabled={isDisabled}
         />
       </EuiShowFor>
       <EuiHideFor sizes={['xs']}>
-        <EuiButtonEmpty
-          iconType="inspect"
-          size="s"
-          onClick={onClick}
-          disabled={isDisabled}
-        >
+        <EuiButtonEmpty iconType="inspect" size="s" onClick={onClick}>
           {I18LABELS.resetZoom}
         </EuiButtonEmpty>
       </EuiHideFor>
-    </>
-  );
+    </EuiFlexItem>
+  ) : null;
 }

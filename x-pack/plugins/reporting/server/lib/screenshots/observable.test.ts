@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('puppeteer', () => ({
   launch: () => ({
     // Fixme needs event emitters
     newPage: () => ({
+      emulateTimezone: jest.fn(),
       setDefaultTimeout: jest.fn(),
     }),
     process: jest.fn(),
@@ -17,6 +19,7 @@ jest.mock('puppeteer', () => ({
 
 import moment from 'moment';
 import * as Rx from 'rxjs';
+import { ReportingCore } from '../..';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { ConditionalHeaders } from '../../export_types/common';
 import {
@@ -25,6 +28,7 @@ import {
   createMockConfigSchema,
   createMockLayoutInstance,
   createMockLevelLogger,
+  createMockReportingCore,
 } from '../../test_helpers';
 import { ElementsPositionAndAttribute } from './';
 import * as contexts from './constants';
@@ -35,7 +39,7 @@ import { screenshotsObservableFactory } from './observable';
  */
 const logger = createMockLevelLogger();
 
-const reportingConfig = {
+const mockSchema = createMockConfigSchema({
   capture: {
     loadDelay: moment.duration(2, 's'),
     timeouts: {
@@ -44,11 +48,12 @@ const reportingConfig = {
       renderComplete: moment.duration(10, 's'),
     },
   },
-};
-const mockSchema = createMockConfigSchema(reportingConfig);
+});
 const mockConfig = createMockConfig(mockSchema);
 const captureConfig = mockConfig.get('capture');
 const mockLayout = createMockLayoutInstance(captureConfig);
+
+let core: ReportingCore;
 
 /*
  * Tests
@@ -57,7 +62,8 @@ describe('Screenshot Observable Pipeline', () => {
   let mockBrowserDriverFactory: any;
 
   beforeEach(async () => {
-    mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {});
+    core = await createMockReportingCore(mockSchema);
+    mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {});
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
@@ -116,7 +122,7 @@ describe('Screenshot Observable Pipeline', () => {
     const mockOpen = jest.fn();
 
     // mocks
-    mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
+    mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {
       screenshot: mockScreenshot,
       open: mockOpen,
     });
@@ -202,7 +208,7 @@ describe('Screenshot Observable Pipeline', () => {
     expect(mockOpen.mock.calls.length).toBe(2);
 
     const firstSelector = mockOpen.mock.calls[0][1].waitForSelector;
-    expect(firstSelector).toBe('.application');
+    expect(firstSelector).toBe('.kbnAppWrapper');
 
     const secondSelector = mockOpen.mock.calls[1][1].waitForSelector;
     expect(secondSelector).toBe('[data-shared-page="2"]');
@@ -216,7 +222,7 @@ describe('Screenshot Observable Pipeline', () => {
       });
 
       // mocks
-      mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
+      mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {
         waitForSelector: mockWaitForSelector,
       });
 
@@ -310,7 +316,7 @@ describe('Screenshot Observable Pipeline', () => {
         return Rx.never().toPromise();
       });
 
-      mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
+      mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {
         getCreatePage: mockGetCreatePage,
         waitForSelector: mockWaitForSelector,
       });
@@ -339,13 +345,11 @@ describe('Screenshot Observable Pipeline', () => {
 
         if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
           return Promise.resolve(null);
-        } else if (mockCall === contexts.CONTEXT_GETBROWSERDIMENSIONS) {
-          return Promise.resolve([800, 600]);
         } else {
           return Promise.resolve();
         }
       });
-      mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
+      mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {
         evaluate: mockBrowserEvaluate,
       });
       mockLayout.getViewport = () => null;

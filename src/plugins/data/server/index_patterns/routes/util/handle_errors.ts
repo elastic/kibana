@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { RequestHandler, RouteMethod } from 'src/core/server';
+import type { RequestHandler, RouteMethod, RequestHandlerContext } from 'src/core/server';
 import { ErrorIndexPatternNotFound } from '../../error';
 
 interface ErrorResponseBody {
@@ -29,9 +29,15 @@ interface ErrorWithData {
  * }
  * ```
  */
-export const handleErrors = <P, Q, B, Method extends RouteMethod>(
-  handler: RequestHandler<P, Q, B, Method>
-): RequestHandler<P, Q, B, Method> => async (context, request, response) => {
+export const handleErrors = <
+  P,
+  Q,
+  B,
+  Context extends RequestHandlerContext,
+  Method extends RouteMethod
+>(
+  handler: RequestHandler<P, Q, B, Context, Method>
+): RequestHandler<P, Q, B, Context, Method> => async (context, request, response) => {
   try {
     return await handler(context, request, response);
   } catch (error) {

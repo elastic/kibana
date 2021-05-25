@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createAction } from 'redux-actions';
@@ -29,5 +30,3 @@ export const fetchOverviewFiltersFail = createAction<Error>('FETCH_OVERVIEW_FILT
 export const fetchOverviewFiltersSuccess = createAction<OverviewFilters>(
   'FETCH_OVERVIEW_FILTERS_SUCCESS'
 );
-
-export const setOverviewFilters = createAction<OverviewFilters>('SET_OVERVIEW_FILTERS');

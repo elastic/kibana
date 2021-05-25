@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -26,6 +26,7 @@ export const getMaxMetricAgg = () => {
     name: METRIC_TYPES.MAX,
     expressionName: aggMaxFnName,
     title: maxTitle,
+    valueType: 'number',
     makeLabel(aggConfig) {
       return i18n.translate('data.search.aggs.metrics.maxLabel', {
         defaultMessage: 'Max {field}',
@@ -36,7 +37,7 @@ export const getMaxMetricAgg = () => {
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE],
+        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE, KBN_FIELD_TYPES.HISTOGRAM],
       },
     ],
   });

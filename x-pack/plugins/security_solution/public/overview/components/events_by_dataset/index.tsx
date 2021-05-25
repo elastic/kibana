@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Position } from '@elastic/charts';
@@ -51,6 +52,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showSpacer?: boolean;
   timelineId?: string;
+  toggleTopN?: () => void;
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -73,6 +75,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   showSpacer = true,
   timelineId,
   to,
+  toggleTopN,
 }) => {
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ID}-${uuid.v4()}`, []);
@@ -163,6 +166,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       headerChildren={headerContent}
       id={uniqueQueryId}
       indexNames={indexNames}
+      onError={toggleTopN}
       setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
       setQuery={setQuery}
       showSpacer={showSpacer}

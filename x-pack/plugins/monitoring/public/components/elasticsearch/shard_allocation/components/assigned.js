@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, sortBy } from 'lodash';
@@ -30,8 +31,16 @@ function sortByName(item) {
 
 export class Assigned extends React.Component {
   createShard = (shard) => {
-    const type = shard.primary ? 'primary' : 'replica';
-    const key = `${shard.index}.${shard.node}.${type}.${shard.state}.${shard.shard}`;
+    const type = get(shard, 'shard.primary', shard.primary) ? 'primary' : 'replica';
+    const key = `${get(shard, 'index.name', shard.index)}.${get(
+      shard,
+      'node.name',
+      shard.node
+    )}.${type}.${get(shard, 'shard.state', shard.state)}.${get(
+      shard,
+      'shard.number',
+      shard.shard
+    )}`;
     return <Shard shard={shard} key={key} />;
   };
 

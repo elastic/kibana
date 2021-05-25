@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useState, useEffect, useRef } from 'react';
@@ -17,7 +18,9 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 
-import { useImportList, ListSchema, Type } from '../../../shared_imports';
+import type { Type, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useImportList } from '@kbn/securitysolution-list-hooks';
+
 import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 

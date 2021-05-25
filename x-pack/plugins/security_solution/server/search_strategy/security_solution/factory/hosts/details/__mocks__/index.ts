@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 import {
   Direction,
@@ -1309,6 +1311,7 @@ export const formattedSearchStrategyResponse = {
             'winlogbeat-*',
           ],
           ignoreUnavailable: true,
+          track_total_hits: false,
           body: {
             aggregations: {
               host_architecture: {
@@ -1367,6 +1370,20 @@ export const formattedSearchStrategyResponse = {
                 terms: { field: 'cloud.region', size: 10, order: { timestamp: 'desc' } },
                 aggs: { timestamp: { max: { field: '@timestamp' } } },
               },
+              endpoint_id: {
+                filter: {
+                  term: {
+                    'agent.type': 'endpoint',
+                  },
+                },
+                aggs: {
+                  value: {
+                    terms: {
+                      field: 'agent.id',
+                    },
+                  },
+                },
+              },
             },
             query: {
               bool: {
@@ -1385,7 +1402,6 @@ export const formattedSearchStrategyResponse = {
               },
             },
             size: 0,
-            track_total_hits: false,
           },
         },
         null,
@@ -1408,8 +1424,23 @@ export const expectedDsl = {
     'winlogbeat-*',
   ],
   ignoreUnavailable: true,
+  track_total_hits: false,
   body: {
     aggregations: {
+      endpoint_id: {
+        filter: {
+          term: {
+            'agent.type': 'endpoint',
+          },
+        },
+        aggs: {
+          value: {
+            terms: {
+              field: 'agent.id',
+            },
+          },
+        },
+      },
       host_architecture: {
         terms: {
           field: 'host.architecture',
@@ -1643,6 +1674,5 @@ export const expectedDsl = {
       },
     },
     size: 0,
-    track_total_hits: false,
   },
 };

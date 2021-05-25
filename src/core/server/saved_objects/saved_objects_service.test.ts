@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -25,8 +25,10 @@ import { httpServerMock } from '../http/http_server.mocks';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
 import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
 import { SavedObjectsRepository } from './service/lib/repository';
+import { registerCoreObjectTypes } from './object_types';
 
 jest.mock('./service/lib/repository');
+jest.mock('./object_types');
 
 describe('SavedObjectsService', () => {
   const createCoreContext = ({
@@ -40,7 +42,7 @@ describe('SavedObjectsService', () => {
       }
       return new BehaviorSubject({
         maxImportPayloadBytes: new ByteSizeValue(0),
-        maxImportExportSize: new ByteSizeValue(0),
+        maxImportExportSize: 10000,
       });
     });
     return mockCoreContext.create({ configService, env });
@@ -67,6 +69,16 @@ describe('SavedObjectsService', () => {
   });
 
   describe('#setup()', () => {
+    it('calls registerCoreObjectTypes', async () => {
+      const coreContext = createCoreContext();
+      const soService = new SavedObjectsService(coreContext);
+
+      const mockedRegisterCoreObjectTypes = registerCoreObjectTypes as jest.Mock<any, any>;
+      expect(mockedRegisterCoreObjectTypes).not.toHaveBeenCalled();
+      await soService.setup(createSetupDeps());
+      expect(mockedRegisterCoreObjectTypes).toHaveBeenCalledTimes(1);
+    });
+
     describe('#setClientFactoryProvider', () => {
       it('registers the factory to the clientProvider', async () => {
         const coreContext = createCoreContext();
@@ -130,6 +142,7 @@ describe('SavedObjectsService', () => {
 
     describe('#registerType', () => {
       it('registers the type to the internal typeRegistry', async () => {
+        // we mocked registerCoreObjectTypes above, so this test case only reflects direct calls to the registerType method
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
@@ -261,7 +274,7 @@ describe('SavedObjectsService', () => {
         expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(req);
 
         const [
-          [, , , , includedHiddenTypes],
+          [, , , , , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(includedHiddenTypes).toEqual([]);
@@ -279,7 +292,7 @@ describe('SavedObjectsService', () => {
         createScopedRepository(req, ['someHiddenType']);
 
         const [
-          [, , , , includedHiddenTypes],
+          [, , , , , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);
@@ -298,7 +311,7 @@ describe('SavedObjectsService', () => {
         createInternalRepository();
 
         const [
-          [, , , client, includedHiddenTypes],
+          [, , , client, , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(coreStart.elasticsearch.client.asInternalUser).toBe(client);
@@ -315,7 +328,7 @@ describe('SavedObjectsService', () => {
         createInternalRepository(['someHiddenType']);
 
         const [
-          [, , , , includedHiddenTypes],
+          [, , , , , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,7 +15,7 @@ import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const legacyEsService = getService('legacyEs');
+  const esService = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('certs api', () => {
@@ -32,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       const monitorId = 'monitor1';
       before(async () => {
         makeChecksWithStatus(
-          legacyEsService,
+          esService,
           monitorId,
           3,
           1,

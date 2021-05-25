@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
@@ -9,6 +10,7 @@ export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
 export const ADD_LAYER = 'ADD_LAYER';
 export const SET_LAYER_ERROR_STATUS = 'SET_LAYER_ERROR_STATUS';
 export const ADD_WAITING_FOR_MAP_READY_LAYER = 'ADD_WAITING_FOR_MAP_READY_LAYER';
+export const CLEAR_LAYER_PROP = 'CLEAR_LAYER_PROP';
 export const CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST = 'CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const SET_LAYER_VISIBILITY = 'SET_LAYER_VISIBILITY';

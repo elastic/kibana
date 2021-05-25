@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LayerConfig } from './types';
+import { AxisExtentConfig, XYLayerConfig } from './types';
 import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 
@@ -14,7 +15,7 @@ interface FormattedMetric {
   fieldFormat: SerializedFieldFormat;
 }
 
-type GroupsConfiguration = Array<{
+export type GroupsConfiguration = Array<{
   groupId: string;
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
@@ -29,7 +30,7 @@ export function isFormatterCompatible(
 }
 
 export function getAxesConfiguration(
-  layers: LayerConfig[],
+  layers: XYLayerConfig[],
   shouldRotate: boolean,
   tables?: Record<string, Datatable>,
   formatFactory?: (mapping: SerializedFieldFormat) => IFieldFormat
@@ -109,4 +110,18 @@ export function getAxesConfiguration(
   }
 
   return axisGroups;
+}
+
+export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
+  const inclusiveZeroError =
+    extent &&
+    hasBarOrArea &&
+    ((extent.lowerBound !== undefined && extent.lowerBound > 0) ||
+      (extent.upperBound !== undefined && extent.upperBound) < 0);
+  const boundaryError =
+    extent &&
+    extent.lowerBound !== undefined &&
+    extent.upperBound !== undefined &&
+    extent.upperBound <= extent.lowerBound;
+  return { inclusiveZeroError, boundaryError };
 }

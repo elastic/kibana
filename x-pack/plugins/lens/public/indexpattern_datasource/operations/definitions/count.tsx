@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -10,7 +11,7 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
-import { getInvalidFieldMessage } from './helpers';
+import { getInvalidFieldMessage, getFilter } from './helpers';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
@@ -51,7 +52,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     }
   },
   getDefaultLabel: (column) => adjustTimeScaleLabelSuffix(countLabel, undefined, column.timeScale),
-  buildColumn({ field, previousColumn }) {
+  buildColumn({ field, previousColumn }, columnParams) {
     return {
       label: adjustTimeScaleLabelSuffix(countLabel, undefined, previousColumn?.timeScale),
       dataType: 'number',
@@ -60,6 +61,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       scale: 'ratio',
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
+      filter: getFilter(previousColumn, columnParams),
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
@@ -86,4 +88,5 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     return true;
   },
   timeScalingMode: 'optional',
+  filterable: true,
 };

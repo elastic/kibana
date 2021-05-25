@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
@@ -229,7 +231,7 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
         rule_id: undefined,
         updated_at: undefined,
         updated_by: undefined,
-        enabled: rule.enabled,
+        enabled: false,
         immutable: undefined,
         last_success_at: undefined,
         last_success_message: undefined,

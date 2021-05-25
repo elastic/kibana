@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -18,19 +18,21 @@ import {
   // @ts-ignore
 } from '../kb/kb';
 
+import { createTokenIterator } from '../../application/factories';
+import { Position, Token, Range, CoreEditor } from '../../types';
+import type RowParser from '../row_parser';
+
 import * as utils from '../utils';
 
 // @ts-ignore
 import { populateContext } from './engine';
+import { AutoCompleteContext, ResultTerm } from './types';
 // @ts-ignore
 import { URL_PATH_END_MARKER } from './components/index';
-import { createTokenIterator } from '../../application/factories';
 
-import { Position, Token, Range, CoreEditor } from '../../types';
+let lastEvaluatedToken: Token | null = null;
 
-let lastEvaluatedToken: any = null;
-
-function isUrlParamsToken(token: any) {
+function isUrlParamsToken(token: { type: string } | null) {
   switch ((token || {}).type) {
     case 'url.param':
     case 'url.equal':
@@ -54,7 +56,7 @@ function isUrlParamsToken(token: any) {
 export function getCurrentMethodAndTokenPaths(
   editor: CoreEditor,
   pos: Position,
-  parser: any,
+  parser: RowParser,
   forceEndOfUrl?: boolean /* Flag for indicating whether we want to avoid early escape optimization. */
 ) {
   const tokenIter = createTokenIterator({
@@ -62,8 +64,8 @@ export function getCurrentMethodAndTokenPaths(
     position: pos,
   });
   const startPos = pos;
-  let bodyTokenPath: any = [];
-  const ret: any = {};
+  let bodyTokenPath: string[] | null = [];
+  const ret: AutoCompleteContext = {};
 
   const STATES = {
     looking_for_key: 0, // looking for a key but without jumping over anything but white space and colon.
@@ -210,7 +212,12 @@ export function getCurrentMethodAndTokenPaths(
 
   ret.urlParamsTokenPath = null;
   ret.requestStartRow = tokenIter.getCurrentPosition().lineNumber;
-  let curUrlPart: any;
+  let curUrlPart:
+    | null
+    | string
+    | Array<string | Record<string, unknown>>
+    | undefined
+    | Record<string, unknown>;
 
   while (t && isUrlParamsToken(t)) {
     switch (t.type) {
@@ -240,7 +247,7 @@ export function getCurrentMethodAndTokenPaths(
         if (!ret.urlParamsTokenPath) {
           ret.urlParamsTokenPath = [];
         }
-        ret.urlParamsTokenPath.unshift(curUrlPart || {});
+        ret.urlParamsTokenPath.unshift((curUrlPart as Record<string, string>) || {});
         curUrlPart = null;
         break;
     }
@@ -268,7 +275,7 @@ export function getCurrentMethodAndTokenPaths(
         break;
       case 'url.slash':
         if (curUrlPart) {
-          ret.urlTokenPath.unshift(curUrlPart);
+          ret.urlTokenPath.unshift(curUrlPart as string);
           curUrlPart = null;
         }
         break;
@@ -277,7 +284,7 @@ export function getCurrentMethodAndTokenPaths(
   }
 
   if (curUrlPart) {
-    ret.urlTokenPath.unshift(curUrlPart);
+    ret.urlTokenPath.unshift(curUrlPart as string);
   }
 
   if (!ret.bodyTokenPath && !ret.urlParamsTokenPath) {
@@ -297,9 +304,15 @@ export function getCurrentMethodAndTokenPaths(
 }
 
 // eslint-disable-next-line
-export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEditor; parser: any }) {
+export default function ({
+  coreEditor: editor,
+  parser,
+}: {
+  coreEditor: CoreEditor;
+  parser: RowParser;
+}) {
   function isUrlPathToken(token: Token | null) {
-    switch ((token || ({} as any)).type) {
+    switch ((token || ({} as Token)).type) {
       case 'url.slash':
       case 'url.comma':
       case 'url.part':
@@ -309,8 +322,12 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     }
   }
 
-  function addMetaToTermsList(list: any, meta: any, template?: string) {
-    return _.map(list, function (t: any) {
+  function addMetaToTermsList(
+    list: unknown[],
+    meta: unknown,
+    template?: string
+  ): Array<{ meta: unknown; template: unknown; name?: string }> {
+    return _.map(list, function (t) {
       if (typeof t !== 'object') {
         t = { name: t };
       }
@@ -318,8 +335,13 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     });
   }
 
-  function applyTerm(term: any) {
-    const context = term.context;
+  function applyTerm(term: {
+    value?: string;
+    context?: AutoCompleteContext;
+    template?: { __raw: boolean; value: string };
+    insertValue?: string;
+  }) {
+    const context = term.context!;
 
     // make sure we get up to date replacement info.
     addReplacementInfoToContext(context, editor.getCurrentPosition(), term.insertValue);
@@ -346,7 +368,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
       } else {
         indentedTemplateLines = utils.jsonToString(term.template, true).split('\n');
       }
-      let currentIndentation = editor.getLineValue(context.rangeToReplace.start.lineNumber);
+      let currentIndentation = editor.getLineValue(context.rangeToReplace!.start.lineNumber);
       currentIndentation = currentIndentation.match(/^\s*/)![0];
       for (
         let i = 1;
@@ -374,8 +396,8 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     // disable listening to the changes we are making.
     editor.off('changeSelection', editorChangeListener);
 
-    if (context.rangeToReplace.start.column !== context.rangeToReplace.end.column) {
-      editor.replace(context.rangeToReplace, valueToInsert);
+    if (context.rangeToReplace!.start.column !== context.rangeToReplace!.end.column) {
+      editor.replace(context.rangeToReplace!, valueToInsert);
     } else {
       editor.insert(valueToInsert);
     }
@@ -384,12 +406,12 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
 
     // go back to see whether we have one of ( : { & [ do not require a comma. All the rest do.
     let newPos = {
-      lineNumber: context.rangeToReplace.start.lineNumber,
+      lineNumber: context.rangeToReplace!.start.lineNumber,
       column:
-        context.rangeToReplace.start.column +
+        context.rangeToReplace!.start.column +
         termAsString.length +
-        context.prefixToAdd.length +
-        (templateInserted ? 0 : context.suffixToAdd.length),
+        context.prefixToAdd!.length +
+        (templateInserted ? 0 : context.suffixToAdd!.length),
     };
 
     const tokenIter = createTokenIterator({
@@ -406,7 +428,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
           break;
         case 'punctuation.colon':
           nonEmptyToken = parser.nextNonEmptyToken(tokenIter);
-          if ((nonEmptyToken || ({} as any)).type === 'paren.lparen') {
+          if ((nonEmptyToken || ({} as Token)).type === 'paren.lparen') {
             nonEmptyToken = parser.nextNonEmptyToken(tokenIter);
             newPos = tokenIter.getCurrentPosition();
             if (nonEmptyToken && nonEmptyToken.value.indexOf('"') === 0) {
@@ -429,7 +451,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
 
   function getAutoCompleteContext(ctxEditor: CoreEditor, pos: Position) {
     // deduces all the parameters need to position and insert the auto complete
-    const context: any = {
+    const context: AutoCompleteContext = {
       autoCompleteSet: null, // instructions for what can be here
       endpoint: null,
       urlPath: null,
@@ -501,7 +523,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
         case 'whitespace':
           t = parser.prevNonEmptyToken(tokenIter);
 
-          switch ((t || ({} as any)).type) {
+          switch ((t || ({} as Token)).type) {
             case 'method':
               // we moved one back
               return 'path';
@@ -552,7 +574,11 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     return null;
   }
 
-  function addReplacementInfoToContext(context: any, pos: Position, replacingTerm?: any) {
+  function addReplacementInfoToContext(
+    context: AutoCompleteContext,
+    pos: Position,
+    replacingTerm?: unknown
+  ) {
     // extract the initial value, rangeToReplace & textBoxPosition
 
     // Scenarios for current token:
@@ -605,7 +631,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
       default:
         if (replacingTerm && context.updatedForToken.value === replacingTerm) {
           context.rangeToReplace = {
-            start: { lineNumber: pos.lineNumber, column: anchorToken.column },
+            start: { lineNumber: pos.lineNumber, column: anchorToken.position.column },
             end: {
               lineNumber: pos.lineNumber,
               column:
@@ -645,7 +671,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     }
   }
 
-  function addBodyPrefixSuffixToContext(context: any) {
+  function addBodyPrefixSuffixToContext(context: AutoCompleteContext) {
     // Figure out what happens next to the token to see whether it needs trailing commas etc.
 
     // Templates will be used if not destroying existing structure.
@@ -680,9 +706,9 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
         }
         context.addTemplate = true;
         // extend range to replace to include all up to token
-        context.rangeToReplace.end.lineNumber = tokenIter.getCurrentTokenLineNumber();
-        context.rangeToReplace.end.column =
-          tokenIter.getCurrentTokenColumn() + nonEmptyToken.value.length;
+        context.rangeToReplace!.end.lineNumber = tokenIter.getCurrentTokenLineNumber() as number;
+        context.rangeToReplace!.end.column =
+          (tokenIter.getCurrentTokenColumn() as number) + nonEmptyToken.value.length;
 
         // move one more time to check if we need a trailing comma
         nonEmptyToken = parser.nextNonEmptyToken(tokenIter);
@@ -711,11 +737,11 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
       insertingRelativeToToken = 0;
     } else {
       const pos = editor.getCurrentPosition();
-      if (pos.column === context.updatedForToken.position.column) {
+      if (pos.column === context.updatedForToken!.position.column) {
         insertingRelativeToToken = -1;
       } else if (
         pos.column <
-        context.updatedForToken.position.column + context.updatedForToken.value.length
+        context.updatedForToken!.position.column + context.updatedForToken!.value.length
       ) {
         insertingRelativeToToken = 0;
       } else {
@@ -743,12 +769,12 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     return context;
   }
 
-  function addUrlParamsPrefixSuffixToContext(context: any) {
+  function addUrlParamsPrefixSuffixToContext(context: AutoCompleteContext) {
     context.prefixToAdd = '';
     context.suffixToAdd = '';
   }
 
-  function addMethodPrefixSuffixToContext(context: any) {
+  function addMethodPrefixSuffixToContext(context: AutoCompleteContext) {
     context.prefixToAdd = '';
     context.suffixToAdd = '';
     const tokenIter = createTokenIterator({ editor, position: editor.getCurrentPosition() });
@@ -761,12 +787,12 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     }
   }
 
-  function addPathPrefixSuffixToContext(context: any) {
+  function addPathPrefixSuffixToContext(context: AutoCompleteContext) {
     context.prefixToAdd = '';
     context.suffixToAdd = '';
   }
 
-  function addMethodAutoCompleteSetToContext(context: any) {
+  function addMethodAutoCompleteSetToContext(context: AutoCompleteContext) {
     context.autoCompleteSet = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'].map((m, i) => ({
       name: m,
       score: -i,
@@ -774,7 +800,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     }));
   }
 
-  function addPathAutoCompleteSetToContext(context: any, pos: Position) {
+  function addPathAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {
     const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
     context.method = ret.method;
     context.token = ret.token;
@@ -783,10 +809,10 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     const components = getTopLevelUrlCompleteComponents(context.method);
     populateContext(ret.urlTokenPath, context, editor, true, components);
 
-    context.autoCompleteSet = addMetaToTermsList(context.autoCompleteSet, 'endpoint');
+    context.autoCompleteSet = addMetaToTermsList(context.autoCompleteSet!, 'endpoint');
   }
 
-  function addUrlParamsAutoCompleteSetToContext(context: any, pos: Position) {
+  function addUrlParamsAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {
     const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
     context.method = ret.method;
     context.otherTokenValues = ret.otherTokenValues;
@@ -813,7 +839,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
       // zero length tokenPath is true
       return context;
     }
-    let tokenPath: any[] = [];
+    let tokenPath: string[] = [];
     const currentParam = ret.urlParamsTokenPath.pop();
     if (currentParam) {
       tokenPath = Object.keys(currentParam); // single key object
@@ -830,7 +856,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     return context;
   }
 
-  function addBodyAutoCompleteSetToContext(context: any, pos: Position) {
+  function addBodyAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {
     const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
     context.method = ret.method;
     context.otherTokenValues = ret.otherTokenValues;
@@ -859,7 +885,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     // needed for scope linking + global term resolving
     context.endpointComponentResolver = getEndpointBodyCompleteComponents;
     context.globalComponentResolver = getGlobalAutocompleteComponents;
-    let components;
+    let components: unknown;
     if (context.endpoint) {
       components = context.endpoint.bodyAutocompleteRootComponents;
     } else {
@@ -935,15 +961,19 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     }
   }
 
-  function getCompletions(position: Position, prefix: string, callback: (...args: any[]) => void) {
+  function getCompletions(
+    position: Position,
+    prefix: string,
+    callback: (e: Error | null, result: ResultTerm[] | null) => void
+  ) {
     try {
       const context = getAutoCompleteContext(editor, position);
       if (!context) {
         callback(null, []);
       } else {
         const terms = _.map(
-          context.autoCompleteSet.filter((term: any) => Boolean(term) && term.name != null),
-          function (term: any) {
+          context.autoCompleteSet!.filter((term) => Boolean(term) && term.name != null),
+          function (term) {
             if (typeof term !== 'object') {
               term = {
                 name: term,
@@ -951,7 +981,13 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
             } else {
               term = _.clone(term);
             }
-            const defaults: any = {
+            const defaults: {
+              value?: string;
+              meta: string;
+              score: number;
+              context: AutoCompleteContext;
+              completer?: { insertMatch: (v: unknown) => void };
+            } = {
               value: term.name,
               meta: 'API',
               score: 0,
@@ -969,7 +1005,10 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
           }
         );
 
-        terms.sort(function (t1: any, t2: any) {
+        terms.sort(function (
+          t1: { score: number; name?: string },
+          t2: { score: number; name?: string }
+        ) {
           /* score sorts from high to low */
           if (t1.score > t2.score) {
             return -1;
@@ -978,7 +1017,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
             return 1;
           }
           /* names sort from low to high */
-          if (t1.name < t2.name) {
+          if (t1.name! < t2.name!) {
             return -1;
           }
           if (t1.name === t2.name) {
@@ -989,7 +1028,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
 
         callback(
           null,
-          _.map(terms, function (t: any, i: any) {
+          _.map(terms, function (t, i) {
             t.insertValue = t.insertValue || t.value;
             t.value = '' + t.value; // normalize to strings
             t.score = -i;
@@ -1010,8 +1049,13 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     getCompletions,
     // TODO: This needs to be cleaned up
     _test: {
-      getCompletions: (_editor: any, _editSession: any, pos: any, prefix: any, callback: any) =>
-        getCompletions(pos, prefix, callback),
+      getCompletions: (
+        _editor: unknown,
+        _editSession: unknown,
+        pos: Position,
+        prefix: string,
+        callback: (e: Error | null, result: ResultTerm[] | null) => void
+      ) => getCompletions(pos, prefix, callback),
       addReplacementInfoToContext,
       addChangeListener: () => editor.on('changeSelection', editorChangeListener),
       removeChangeListener: () => editor.off('changeSelection', editorChangeListener),

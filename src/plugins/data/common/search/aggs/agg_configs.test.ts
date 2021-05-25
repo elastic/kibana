@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { keyBy } from 'lodash';
@@ -230,7 +230,7 @@ describe('AggConfigs', () => {
   describe('#toDsl', () => {
     beforeEach(() => {
       indexPattern = stubIndexPattern as IndexPattern;
-      indexPattern.fields.getByName = (name) => (name as unknown) as IndexPatternField;
+      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
     });
 
     it('uses the sorted aggs', () => {
@@ -342,8 +342,8 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
-      const topLevelDsl = ac.toDsl(true);
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, hierarchical: true });
+      const topLevelDsl = ac.toDsl();
       const buckets = ac.bySchemaName('buckets');
       const metrics = ac.bySchemaName('metrics');
 
@@ -412,8 +412,8 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
-      const topLevelDsl = ac.toDsl(true)['2'];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, hierarchical: true });
+      const topLevelDsl = ac.toDsl()['2'];
 
       expect(Object.keys(topLevelDsl.aggs)).toContain('1');
       expect(Object.keys(topLevelDsl.aggs)).toContain('1-bucket');

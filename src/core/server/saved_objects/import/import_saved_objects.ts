@@ -1,15 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Readable } from 'stream';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsClientContract } from '../types';
-import { SavedObjectsImportFailure, SavedObjectsImportResponse } from './types';
+import {
+  SavedObjectsImportFailure,
+  SavedObjectsImportResponse,
+  SavedObjectsImportHook,
+} from './types';
 import {
   validateReferences,
   checkOriginConflicts,
@@ -17,6 +21,7 @@ import {
   checkConflicts,
   regenerateIds,
   collectSavedObjects,
+  executeImportHooks,
 } from './lib';
 
 /**
@@ -33,6 +38,8 @@ export interface ImportSavedObjectsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   /** The registry of all known saved object types */
   typeRegistry: ISavedObjectTypeRegistry;
+  /** List of registered import hooks */
+  importHooks: Record<string, SavedObjectsImportHook[]>;
   /** if specified, will import in given namespace, else will import as global object */
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
@@ -52,6 +59,7 @@ export async function importSavedObjectsFromStream({
   createNewCopies,
   savedObjectsClient,
   typeRegistry,
+  importHooks,
   namespace,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportFailure[] = [];
@@ -147,10 +155,15 @@ export async function importSavedObjectsFromStream({
       ...(attemptedOverwrite && { overwrite: true }),
     };
   });
+  const warnings = await executeImportHooks({
+    objects: createSavedObjectsResult.createdObjects,
+    importHooks,
+  });
 
   return {
     successCount: createSavedObjectsResult.createdObjects.length,
     success: errorAccumulator.length === 0,
+    warnings,
     ...(successResults.length && { successResults }),
     ...(errorResults.length && { errors: errorResults }),
   };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Cookie, cookie } from 'request';
@@ -58,17 +59,15 @@ export default function ({ getService }: FtrProviderContext) {
     describe('GET /internal/security/session', () => {
       it('should return current session information', async () => {
         const { body } = await getSessionInfo();
-        expect(body.now).to.be.a('number');
-        expect(body.idleTimeoutExpiration).to.be.a('number');
-        expect(body.lifespanExpiration).to.be(null);
+        expect(body.expiresInMs).to.be.a('number');
+        expect(body.canBeExtended).to.be(true);
         expect(body.provider).to.eql({ type: 'basic', name: 'basic1' });
       });
 
       it('should not extend the session', async () => {
         const { body } = await getSessionInfo();
         const { body: body2 } = await getSessionInfo();
-        expect(body2.now).to.be.greaterThan(body.now);
-        expect(body2.idleTimeoutExpiration).to.equal(body.idleTimeoutExpiration);
+        expect(body2.expiresInMs).to.be.lessThan(body.expiresInMs);
       });
     });
 
@@ -84,8 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await getSessionInfo();
         await extendSession();
         const { body: body2 } = await getSessionInfo();
-        expect(body2.now).to.be.greaterThan(body.now);
-        expect(body2.idleTimeoutExpiration).to.be.greaterThan(body.idleTimeoutExpiration);
+        expect(body2.expiresInMs).not.to.be.lessThan(body.expiresInMs);
       });
     });
   });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -212,7 +213,7 @@ export class WorkpadLoader extends React.PureComponent {
         width: '20%',
         render: (date) => this.props.formatDate(date),
       },
-      { name: '', actions, width: '5%' },
+      { name: strings.getTableActionsColumnTitle(), actions, width: '100px' },
     ];
 
     const sorting = {
@@ -309,6 +310,7 @@ export class WorkpadLoader extends React.PureComponent {
         onClick={this.openRemoveConfirm}
         disabled={!canUserWrite}
         aria-label={strings.getDeleteButtonAriaLabel(selectedWorkpads.length)}
+        data-test-subj="deleteWorkpadButton"
       >
         {strings.getDeleteButtonLabel(selectedWorkpads.length)}
       </EuiButton>
@@ -330,6 +332,7 @@ export class WorkpadLoader extends React.PureComponent {
         display="default"
         compressed
         className="canvasWorkpad__upload--compressed"
+        aria-label={strings.getFilePickerPlaceholder()}
         initialPromptText={strings.getFilePickerPlaceholder()}
         onChange={([file]) => uploadWorkpad(file, this.onUpload, this.props.notify)}
         accept="application/json"

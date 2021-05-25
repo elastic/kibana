@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
@@ -25,25 +25,68 @@ describe('SavedObjectTypeRegistry', () => {
     registry = new SavedObjectTypeRegistry();
   });
 
-  it('allows to register types', () => {
-    registry.registerType(createType({ name: 'typeA' }));
-    registry.registerType(createType({ name: 'typeB' }));
-    registry.registerType(createType({ name: 'typeC' }));
-
-    expect(
-      registry
-        .getAllTypes()
-        .map((type) => type.name)
-        .sort()
-    ).toEqual(['typeA', 'typeB', 'typeC']);
-  });
-
-  it('throws when trying to register the same type twice', () => {
-    registry.registerType(createType({ name: 'typeA' }));
-    registry.registerType(createType({ name: 'typeB' }));
-    expect(() => {
+  describe('#registerType', () => {
+    it('allows to register types', () => {
       registry.registerType(createType({ name: 'typeA' }));
-    }).toThrowErrorMatchingInlineSnapshot(`"Type 'typeA' is already registered"`);
+      registry.registerType(createType({ name: 'typeB' }));
+      registry.registerType(createType({ name: 'typeC' }));
+
+      expect(
+        registry
+          .getAllTypes()
+          .map((type) => type.name)
+          .sort()
+      ).toEqual(['typeA', 'typeB', 'typeC']);
+    });
+
+    it('throws when trying to register the same type twice', () => {
+      registry.registerType(createType({ name: 'typeA' }));
+      registry.registerType(createType({ name: 'typeB' }));
+      expect(() => {
+        registry.registerType(createType({ name: 'typeA' }));
+      }).toThrowErrorMatchingInlineSnapshot(`"Type 'typeA' is already registered"`);
+    });
+
+    it('throws when `management.onExport` is specified but `management.importableAndExportable` is undefined or false', () => {
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              onExport: (ctx, objs) => objs,
+            },
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport'"`
+      );
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              importableAndExportable: false,
+              onExport: (ctx, objs) => objs,
+            },
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport'"`
+      );
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              importableAndExportable: true,
+              onExport: (ctx, objs) => objs,
+            },
+          })
+        );
+      }).not.toThrow();
+    });
+
+    // TODO: same test with 'onImport'
   });
 
   describe('#getType', () => {
@@ -196,6 +239,7 @@ describe('SavedObjectTypeRegistry', () => {
 
     it(`returns false for other namespaceType`, () => {
       expectResult(false, { namespaceType: 'multiple' });
+      expectResult(false, { namespaceType: 'multiple-isolated' });
       expectResult(false, { namespaceType: 'single' });
       expectResult(false, { namespaceType: undefined });
     });
@@ -220,6 +264,7 @@ describe('SavedObjectTypeRegistry', () => {
     it(`returns false for other namespaceType`, () => {
       expectResult(false, { namespaceType: 'agnostic' });
       expectResult(false, { namespaceType: 'multiple' });
+      expectResult(false, { namespaceType: 'multiple-isolated' });
     });
   });
 
@@ -234,12 +279,36 @@ describe('SavedObjectTypeRegistry', () => {
       expect(registry.isMultiNamespace('unknownType')).toEqual(false);
     });
 
+    it(`returns true for namespaceType 'multiple' and 'multiple-isolated'`, () => {
+      expectResult(true, { namespaceType: 'multiple' });
+      expectResult(true, { namespaceType: 'multiple-isolated' });
+    });
+
+    it(`returns false for other namespaceType`, () => {
+      expectResult(false, { namespaceType: 'agnostic' });
+      expectResult(false, { namespaceType: 'single' });
+      expectResult(false, { namespaceType: undefined });
+    });
+  });
+
+  describe('#isShareable', () => {
+    const expectResult = (expected: boolean, schemaDefinition?: Partial<SavedObjectsType>) => {
+      registry = new SavedObjectTypeRegistry();
+      registry.registerType(createType({ name: 'foo', ...schemaDefinition }));
+      expect(registry.isShareable('foo')).toBe(expected);
+    };
+
+    it(`returns false when the type is not registered`, () => {
+      expect(registry.isShareable('unknownType')).toEqual(false);
+    });
+
     it(`returns true for namespaceType 'multiple'`, () => {
       expectResult(true, { namespaceType: 'multiple' });
     });
 
     it(`returns false for other namespaceType`, () => {
       expectResult(false, { namespaceType: 'agnostic' });
+      expectResult(false, { namespaceType: 'multiple-isolated' });
       expectResult(false, { namespaceType: 'single' });
       expectResult(false, { namespaceType: undefined });
     });

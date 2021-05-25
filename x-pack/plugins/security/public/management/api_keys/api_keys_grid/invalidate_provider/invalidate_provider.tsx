@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { EuiConfirmModal } from '@elastic/eui';
 import React, { Fragment, useRef, useState } from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'src/core/public';
-import { ApiKeyToInvalidate } from '../../../../../common/model';
-import { APIKeysAPIClient } from '../../api_keys_api_client';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { NotificationsStart } from 'src/core/public';
+
+import type { ApiKeyToInvalidate } from '../../../../../common/model';
+import type { APIKeysAPIClient } from '../../api_keys_api_client';
 
 interface Props {
   isAdmin: boolean;
@@ -38,7 +41,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
 
   const invalidateApiKeyPrompt: InvalidateApiKeys = (keys, onSuccess = () => undefined) => {
     if (!keys || !keys.length) {
-      throw new Error('No API key IDs specified for invalidation');
+      throw new Error('No API key IDs specified for deletion');
     }
     setIsModalOpen(true);
     setApiKeys(keys);
@@ -72,16 +75,16 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
         const hasMultipleSuccesses = itemsInvalidated.length > 1;
         const successMessage = hasMultipleSuccesses
           ? i18n.translate(
-              'xpack.security.management.apiKeys.invalidateApiKey.successMultipleNotificationTitle',
+              'xpack.security.management.apiKeys.deleteApiKey.successMultipleNotificationTitle',
               {
-                defaultMessage: 'Invalidated {count} API keys',
+                defaultMessage: 'Deleted {count} API keys',
                 values: { count: itemsInvalidated.length },
               }
             )
           : i18n.translate(
-              'xpack.security.management.apiKeys.invalidateApiKey.successSingleNotificationTitle',
+              'xpack.security.management.apiKeys.deleteApiKey.successSingleNotificationTitle',
               {
-                defaultMessage: "Invalidated API key '{name}'",
+                defaultMessage: "Deleted API key '{name}'",
                 values: { name: itemsInvalidated[0].name },
               }
             );
@@ -99,7 +102,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
       const hasMultipleErrors = (errors && errors.length > 1) || (error && apiKeys.length > 1);
       const errorMessage = hasMultipleErrors
         ? i18n.translate(
-            'xpack.security.management.apiKeys.invalidateApiKey.errorMultipleNotificationTitle',
+            'xpack.security.management.apiKeys.deleteApiKey.errorMultipleNotificationTitle',
             {
               defaultMessage: 'Error deleting {count} apiKeys',
               values: {
@@ -108,7 +111,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
             }
           )
         : i18n.translate(
-            'xpack.security.management.apiKeys.invalidateApiKey.errorSingleNotificationTitle',
+            'xpack.security.management.apiKeys.deleteApiKey.errorSingleNotificationTitle',
             {
               defaultMessage: "Error deleting API key '{name}'",
               values: { name: (errors && errors[0].name) || apiKeys[0].name },
@@ -126,58 +129,57 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
     const isSingle = apiKeys.length === 1;
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            isSingle
-              ? i18n.translate(
-                  'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateSingleTitle',
-                  {
-                    defaultMessage: "Invalidate API key '{name}'?",
-                    values: { name: apiKeys[0].name },
-                  }
-                )
-              : i18n.translate(
-                  'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateMultipleTitle',
-                  {
-                    defaultMessage: 'Invalidate {count} API keys?',
-                    values: { count: apiKeys.length },
-                  }
-                )
+      <EuiConfirmModal
+        role="dialog"
+        title={
+          isSingle
+            ? i18n.translate(
+                'xpack.security.management.apiKeys.deleteApiKey.confirmModal.deleteSingleTitle',
+                {
+                  defaultMessage: "Delete API key '{name}'?",
+                  values: { name: apiKeys[0].name },
+                }
+              )
+            : i18n.translate(
+                'xpack.security.management.apiKeys.deleteApiKey.confirmModal.deleteMultipleTitle',
+                {
+                  defaultMessage: 'Delete {count} API keys?',
+                  values: { count: apiKeys.length },
+                }
+              )
+        }
+        onCancel={closeModal}
+        onConfirm={invalidateApiKey}
+        cancelButtonText={i18n.translate(
+          'xpack.security.management.apiKeys.deleteApiKey.confirmModal.cancelButtonLabel',
+          { defaultMessage: 'Cancel' }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.security.management.apiKeys.deleteApiKey.confirmModal.confirmButtonLabel',
+          {
+            defaultMessage: 'Delete {count, plural, one {API key} other {API keys}}',
+            values: { count: apiKeys.length },
           }
-          onCancel={closeModal}
-          onConfirm={invalidateApiKey}
-          cancelButtonText={i18n.translate(
-            'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.cancelButtonLabel',
-            { defaultMessage: 'Cancel' }
-          )}
-          confirmButtonText={i18n.translate(
-            'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.confirmButtonLabel',
-            {
-              defaultMessage: 'Invalidate {count, plural, one {API key} other {API keys}}',
-              values: { count: apiKeys.length },
-            }
-          )}
-          buttonColor="danger"
-          data-test-subj="invalidateApiKeyConfirmationModal"
-        >
-          {!isSingle ? (
-            <Fragment>
-              <p>
-                {i18n.translate(
-                  'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateMultipleListDescription',
-                  { defaultMessage: 'You are about to invalidate these API keys:' }
-                )}
-              </p>
-              <ul>
-                {apiKeys.map(({ name, id }) => (
-                  <li key={id}>{name}</li>
-                ))}
-              </ul>
-            </Fragment>
-          ) : null}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+        )}
+        buttonColor="danger"
+        data-test-subj="invalidateApiKeyConfirmationModal"
+      >
+        {!isSingle ? (
+          <Fragment>
+            <p>
+              {i18n.translate(
+                'xpack.security.management.apiKeys.deleteApiKey.confirmModal.deleteMultipleListDescription',
+                { defaultMessage: 'You are about to delete these API keys:' }
+              )}
+            </p>
+            <ul>
+              {apiKeys.map(({ name, id }) => (
+                <li key={id}>{name}</li>
+              ))}
+            </ul>
+          </Fragment>
+        ) : null}
+      </EuiConfirmModal>
     );
   };
 

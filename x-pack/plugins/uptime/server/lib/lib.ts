@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   ElasticsearchClient,
   SavedObjectsClientContract,
@@ -10,11 +12,12 @@ import {
   ISavedObjectsRepository,
 } from 'kibana/server';
 import chalk from 'chalk';
+import { estypes } from '@elastic/elasticsearch';
 import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
 import { savedObjectsAdapter } from './saved_objects';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 
 export interface UMDomainLibs {
   requests: UptimeRequests;
@@ -25,16 +28,19 @@ export interface UMServerLibs extends UMDomainLibs {
   framework: UMBackendFrameworkAdapter;
 }
 
-interface CountResponse {
-  body: {
-    count: number;
-    _shards: {
-      total: number;
-      successful: number;
-      skipped: number;
-      failed: number;
+export interface CountResponse {
+  result: {
+    body: {
+      count: number;
+      _shards: {
+        total: number;
+        successful: number;
+        skipped: number;
+        failed: number;
+      };
     };
   };
+  indices: string;
 }
 
 export type UptimeESClient = ReturnType<typeof createUptimeESClient>;
@@ -48,11 +54,13 @@ export function createUptimeESClient({
   request?: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
 }) {
-  const { _debug = false } = (request?.query as { _debug: boolean }) ?? {};
+  const { _inspect = false } = (request?.query as { _inspect: boolean }) ?? {};
 
   return {
     baseESClient: esClient,
-    async search<TParams>(params: TParams): Promise<{ body: ESSearchResponse<unknown, TParams> }> {
+    async search<TParams extends estypes.SearchRequest>(
+      params: TParams
+    ): Promise<{ body: ESSearchResponse<unknown, TParams> }> {
       let res: any;
       let esError: any;
       const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
@@ -67,7 +75,7 @@ export function createUptimeESClient({
       } catch (e) {
         esError = e;
       }
-      if (_debug && request) {
+      if (_inspect && request) {
         debugESCall({ startTime, request, esError, operationName: 'search', params: esParams });
       }
 
@@ -94,7 +102,7 @@ export function createUptimeESClient({
         esError = e;
       }
 
-      if (_debug && request) {
+      if (_inspect && request) {
         debugESCall({ startTime, request, esError, operationName: 'count', params: esParams });
       }
 
@@ -102,7 +110,7 @@ export function createUptimeESClient({
         throw esError;
       }
 
-      return res;
+      return { result: res, indices: dynamicSettings.heartbeatIndices };
     },
     getSavedObjectsClient() {
       return savedObjectsClient;
@@ -146,4 +154,8 @@ export function debugESCall({
     console.log(formatObj(params));
   }
   console.log(`\n`);
+}
+
+export function createEsQuery<T extends estypes.SearchRequest>(params: T): T {
+  return params;
 }

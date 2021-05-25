@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../../../../kibana_services', () => {
@@ -34,6 +35,7 @@ describe('createLayerDescriptor', () => {
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',
+        includeInFitToBounds: true,
         joins: [],
         label: 'apm-*-transaction* | Source Point',
         maxZoom: 24,
@@ -142,6 +144,7 @@ describe('createLayerDescriptor', () => {
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',
+        includeInFitToBounds: true,
         joins: [],
         label: 'apm-*-transaction* | Destination point',
         maxZoom: 24,
@@ -250,6 +253,7 @@ describe('createLayerDescriptor', () => {
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',
+        includeInFitToBounds: true,
         joins: [],
         label: 'apm-*-transaction* | Line',
         maxZoom: 24,
@@ -370,6 +374,7 @@ describe('createLayerDescriptor', () => {
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',
+        includeInFitToBounds: true,
         joins: [],
         label: 'filebeat-* | Source Point',
         maxZoom: 24,
@@ -478,6 +483,7 @@ describe('createLayerDescriptor', () => {
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',
+        includeInFitToBounds: true,
         joins: [],
         label: 'filebeat-* | Destination point',
         maxZoom: 24,
@@ -586,6 +592,7 @@ describe('createLayerDescriptor', () => {
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',
+        includeInFitToBounds: true,
         joins: [],
         label: 'filebeat-* | Line',
         maxZoom: 24,

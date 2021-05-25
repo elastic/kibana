@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createBrowserHistory } from 'history';
@@ -17,6 +17,7 @@ import { createKbnUrlStateStorage } from '../services/kibana_utils';
 import { InputTimeRange, TimefilterContract, TimeRange } from '../services/data';
 
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { coreMock } from '../../../../core/public/mocks';
 
 describe('DashboardState', function () {
   let dashboardState: DashboardStateManager;
@@ -41,9 +42,12 @@ describe('DashboardState', function () {
     dashboardState = new DashboardStateManager({
       savedDashboard,
       hideWriteControls: false,
+      allowByValueEmbeddables: false,
+      hasPendingEmbeddable: () => false,
       kibanaVersion: '7.0.0',
       kbnUrlStateStorage: createKbnUrlStateStorage(),
       history: createBrowserHistory(),
+      toasts: coreMock.createStart().notifications.toasts,
       hasTaggingCapabilities: mockHasTaggingCapabilities,
     });
   }
@@ -194,6 +198,75 @@ describe('DashboardState', function () {
       dashboardState.switchViewMode(ViewMode.VIEW);
       dashboardState.isDirty = true;
       expect(dashboardState.getIsDirty()).toBeFalsy();
+    });
+  });
+
+  describe('initial view mode', () => {
+    test('initial view mode set to view when hideWriteControls is true', () => {
+      const initialViewModeDashboardState = new DashboardStateManager({
+        savedDashboard,
+        hideWriteControls: true,
+        allowByValueEmbeddables: false,
+        hasPendingEmbeddable: () => false,
+        kibanaVersion: '7.0.0',
+        kbnUrlStateStorage: createKbnUrlStateStorage(),
+        history: createBrowserHistory(),
+        toasts: coreMock.createStart().notifications.toasts,
+        hasTaggingCapabilities: mockHasTaggingCapabilities,
+      });
+      expect(initialViewModeDashboardState.getViewMode()).toBe(ViewMode.VIEW);
+    });
+
+    test('initial view mode set to edit if edit mode specified in URL', () => {
+      const kbnUrlStateStorage = createKbnUrlStateStorage();
+      kbnUrlStateStorage.set('_a', { viewMode: ViewMode.EDIT });
+
+      const initialViewModeDashboardState = new DashboardStateManager({
+        savedDashboard,
+        kbnUrlStateStorage,
+        kibanaVersion: '7.0.0',
+        hideWriteControls: false,
+        allowByValueEmbeddables: false,
+        history: createBrowserHistory(),
+        hasPendingEmbeddable: () => false,
+        toasts: coreMock.createStart().notifications.toasts,
+        hasTaggingCapabilities: mockHasTaggingCapabilities,
+      });
+      expect(initialViewModeDashboardState.getViewMode()).toBe(ViewMode.EDIT);
+    });
+
+    test('initial view mode set to edit if the dashboard is new', () => {
+      const newDashboard = getSavedDashboardMock();
+      newDashboard.id = undefined;
+      const initialViewModeDashboardState = new DashboardStateManager({
+        savedDashboard: newDashboard,
+        kibanaVersion: '7.0.0',
+        hideWriteControls: false,
+        allowByValueEmbeddables: false,
+        history: createBrowserHistory(),
+        hasPendingEmbeddable: () => false,
+        kbnUrlStateStorage: createKbnUrlStateStorage(),
+        toasts: coreMock.createStart().notifications.toasts,
+        hasTaggingCapabilities: mockHasTaggingCapabilities,
+      });
+      expect(initialViewModeDashboardState.getViewMode()).toBe(ViewMode.EDIT);
+    });
+
+    test('initial view mode set to edit if there is a pending embeddable', () => {
+      const newDashboard = getSavedDashboardMock();
+      newDashboard.id = undefined;
+      const initialViewModeDashboardState = new DashboardStateManager({
+        savedDashboard: newDashboard,
+        kibanaVersion: '7.0.0',
+        hideWriteControls: false,
+        allowByValueEmbeddables: false,
+        history: createBrowserHistory(),
+        hasPendingEmbeddable: () => true,
+        kbnUrlStateStorage: createKbnUrlStateStorage(),
+        toasts: coreMock.createStart().notifications.toasts,
+        hasTaggingCapabilities: mockHasTaggingCapabilities,
+      });
+      expect(initialViewModeDashboardState.getViewMode()).toBe(ViewMode.EDIT);
     });
   });
 });

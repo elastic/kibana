@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { StartServicesAccessor } from 'src/core/public';
-import { ManagementSetup, ManagementApp } from '../../../../../src/plugins/management/public';
-import { SpacesManager } from '../spaces_manager';
-import { PluginsStart } from '../plugin';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { ManagementApp, ManagementSetup } from 'src/plugins/management/public';
+
+import type { PluginsStart } from '../plugin';
+import type { SpacesManager } from '../spaces_manager';
 import { spacesManagementApp } from './spaces_management_app';
 
 interface SetupDeps {

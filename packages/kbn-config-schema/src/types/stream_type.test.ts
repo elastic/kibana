@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '..';
@@ -46,13 +46,7 @@ test('includes namespace in failure', () => {
 describe('#defaultValue', () => {
   test('returns default when undefined', () => {
     const value = new Stream();
-    expect(schema.stream({ defaultValue: value }).validate(undefined)).toMatchInlineSnapshot(`
-      Stream {
-        "_events": Object {},
-        "_eventsCount": 0,
-        "_maxListeners": undefined,
-      }
-    `);
+    expect(schema.stream({ defaultValue: value }).validate(undefined)).toBeInstanceOf(Stream);
   });
 
   test('returns value when specified', () => {

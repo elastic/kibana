@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -14,7 +14,7 @@ import { Position } from '@elastic/charts';
 
 import { ValueAxis, SeriesParam } from '../../../../types';
 import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
-import { valueAxis, seriesParam, vis } from './mocks';
+import { valueAxis, seriesParam } from './mocks';
 
 describe('ValueAxesPanel component', () => {
   let setParamByIndex: jest.Mock;
@@ -53,7 +53,6 @@ describe('ValueAxesPanel component', () => {
     defaultProps = {
       seriesParams: [seriesParamCount, seriesParamAverage],
       valueAxes: [axisLeft, axisRight],
-      vis,
       setParamByIndex,
       onValueAxisPositionChanged,
       addValueAxis,

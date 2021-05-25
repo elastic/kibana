@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { LegacyFetchHandlers } from '../legacy/types';
 import { GetConfigFn } from '../../../types';
+import { IKibanaSearchResponse } from '../../types';
 
 /**
  * @internal
@@ -25,12 +24,7 @@ export interface FetchHandlers {
    * Callback which can be used to hook into responses, modify them, or perform
    * side effects like displaying UI errors on the client.
    */
-  onResponse: (request: SearchRequest, response: SearchResponse<any>) => SearchResponse<any>;
-  /**
-   * These handlers are only used by the legacy defaultSearchStrategy and can be removed
-   * once that strategy has been deprecated.
-   */
-  legacy: LegacyFetchHandlers;
+  onResponse: (request: SearchRequest, response: IKibanaSearchResponse) => IKibanaSearchResponse;
 }
 
 export interface SearchError {

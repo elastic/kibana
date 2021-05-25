@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Exception } from '../objects/exception';
@@ -17,11 +18,14 @@ import {
 } from '../screens/exceptions';
 import {
   ALERTS_TAB,
+  BACK_TO_RULES,
   EXCEPTIONS_TAB,
+  FIELDS_BROWSER_BTN,
   REFRESH_BUTTON,
   REMOVE_EXCEPTION_BTN,
   RULE_SWITCH,
 } from '../screens/rule_details';
+import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
 export const activatesRule = () => {
   cy.intercept('PATCH', '/api/detection_engine/rules/_bulk_update').as('bulk_update');
@@ -30,11 +34,6 @@ export const activatesRule = () => {
   cy.wait('@bulk_update').then(({ response }) => {
     cy.wrap(response!.statusCode).should('eql', 200);
   });
-};
-
-export const deactivatesRule = () => {
-  cy.get(RULE_SWITCH).should('be.visible');
-  cy.get(RULE_SWITCH).click();
 };
 
 export const addsException = (exception: Exception) => {
@@ -50,6 +49,19 @@ export const addsException = (exception: Exception) => {
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
   cy.get(CONFIRM_BTN).should('not.exist');
+};
+
+export const addsFieldsToTimeline = (search: string, fields: string[]) => {
+  cy.get(FIELDS_BROWSER_BTN).click();
+  filterFieldsBrowser(search);
+  addsFields(fields);
+  closeFieldsBrowser();
+};
+
+export const openExceptionModalFromRuleSettings = () => {
+  cy.get(ADD_EXCEPTIONS_BTN).click();
+  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(FIELD_INPUT).should('be.visible');
 };
 
 export const addsExceptionFromRuleSettings = (exception: Exception) => {
@@ -88,4 +100,8 @@ export const waitForTheRuleToBeExecuted = async () => {
     cy.get(REFRESH_BUTTON).click({ force: true });
     status = await cy.get(RULE_STATUS).invoke('text').promisify();
   }
+};
+
+export const goBackToAllRulesTable = () => {
+  cy.get(BACK_TO_RULES).click();
 };

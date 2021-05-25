@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
 import {
   PluginSetupContract as AlertingSetup,
   AlertType,
-} from '../../../../../../plugins/alerts/server';
+} from '../../../../../../plugins/alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
   features: FeaturesPluginSetup;
 }
 
@@ -81,10 +82,10 @@ export const failingAlertType: AlertType<never, never, never, never, 'default' |
 };
 
 export class AlertingFixturePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerts, features }: AlertingExampleDeps) {
-    alerts.registerType(noopAlertType);
-    alerts.registerType(alwaysFiringAlertType);
-    alerts.registerType(failingAlertType);
+  public setup(core: CoreSetup, { alerting, features }: AlertingExampleDeps) {
+    alerting.registerType(noopAlertType);
+    alerting.registerType(alwaysFiringAlertType);
+    alerting.registerType(failingAlertType);
     features.registerKibanaFeature({
       id: 'alerting_fixture',
       name: 'alerting_fixture',

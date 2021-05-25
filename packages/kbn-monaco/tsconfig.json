@@ -1,9 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "incremental": false,
     "outDir": "./target",
     "declaration": true,
+    "declarationMap": true,
     "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-monaco/src",
     "types": [
       "jest",
       "node"

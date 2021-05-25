@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -19,8 +20,7 @@ import {
   UIM_CONFIG_FREEZE_INDEX,
   UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_WARM_PHASE,
-  defaultSetPriority,
-  defaultPhaseIndexPriority,
+  defaultIndexPriority,
 } from '../constants';
 
 import { Phases } from '../../../common/types';
@@ -50,17 +50,17 @@ export function getUiMetricsForPhases(phases: Phases): string[] {
         const isHotPhasePriorityChanged =
           phases.hot &&
           phases.hot.actions.set_priority &&
-          phases.hot.actions.set_priority.priority !== parseInt(defaultSetPriority, 10);
+          phases.hot.actions.set_priority.priority !== parseInt(defaultIndexPriority.hot, 10);
 
         const isWarmPhasePriorityChanged =
           phases.warm &&
           phases.warm.actions.set_priority &&
-          phases.warm.actions.set_priority.priority !== parseInt(defaultPhaseIndexPriority, 10);
+          phases.warm.actions.set_priority.priority !== parseInt(defaultIndexPriority.warm, 10);
 
         const isColdPhasePriorityChanged =
           phases.cold &&
           phases.cold.actions.set_priority &&
-          phases.cold.actions.set_priority.priority !== parseInt(defaultPhaseIndexPriority, 10);
+          phases.cold.actions.set_priority.priority !== parseInt(defaultIndexPriority.cold, 10);
         // If the priority is different than the default, we'll consider it a user interaction,
         // even if the user has set it to undefined.
         return (

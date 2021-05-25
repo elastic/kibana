@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { ScaleContinuousType } from '@elastic/charts/dist/scales';
+import { ScaleContinuousType } from '@elastic/charts';
 
 import { Datatable } from '../../../expressions/public';
 import { BUCKET_TYPES } from '../../../data/public';
@@ -39,6 +39,7 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     fittingFunction,
     detailedTooltip,
     isVislibVis,
+    fillOpacity,
   } = params;
   const aspects = getAspects(table.columns, params.dimensions);
   const xAxis = getAxis<XScaleType>(
@@ -63,6 +64,7 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     // NOTE: downscale ratio to match current vislib implementation
     markSizeRatio: radiusRatio * 0.6,
     fittingFunction,
+    fillOpacity,
     detailedTooltip,
     orderBucketsBySum,
     isTimeChart,
@@ -98,10 +100,6 @@ const shouldEnableHistogramMode = (
     );
   });
 
-  if (bars.length === 1) {
-    return true;
-  }
-
   const groupIds = [
     ...bars.reduce<Set<string>>((acc, { valueAxis: groupId, mode }) => {
       acc.add(groupId);
@@ -113,11 +111,9 @@ const shouldEnableHistogramMode = (
     return false;
   }
 
-  const test = bars.every(({ valueAxis: groupId, mode }) => {
+  return bars.every(({ valueAxis: groupId, mode }) => {
     const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
 
     return mode === 'stacked' || yAxisScale?.mode === 'percentage';
   });
-
-  return test;
 };

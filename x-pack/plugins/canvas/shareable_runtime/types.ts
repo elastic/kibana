@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RefObject } from 'react';
-// @ts-expect-error Unlinked Webpack Type
-import ContainerStyle from 'types/interpreter';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 import { ElementPosition, CanvasPage, CanvasWorkpad, RendererSpec } from '../types';
@@ -51,7 +50,7 @@ export interface CanvasRenderable {
   state: 'ready' | 'error';
   value: {
     as: string;
-    containerStyle: ContainerStyle;
+    containerStyle: any;
     css: string;
     type: 'render';
     value: any;

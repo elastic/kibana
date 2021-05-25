@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment';
 import {
   GetStepsData,
@@ -32,7 +34,7 @@ import {
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 describe('rule helpers', () => {
-  // @ts-ignore
+  // @ts-expect-error
   moment.suppressDeprecationWarnings = true;
   describe('getStepsData', () => {
     test('returns object with about, define, schedule and actions step properties formatted', () => {
@@ -49,7 +51,7 @@ describe('rule helpers', () => {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
         index: ['auditbeat-*'],
-        machineLearningJobId: '',
+        machineLearningJobId: [],
         queryBar: {
           query: {
             query: 'user.name: root or user.name: admin',
@@ -82,6 +84,10 @@ describe('rule helpers', () => {
         threshold: {
           field: ['host.name'],
           value: '50',
+          cardinality: {
+            field: ['process.name'],
+            value: '2',
+          },
         },
         threatIndex: [],
         threatMapping: [],
@@ -198,7 +204,7 @@ describe('rule helpers', () => {
       const expected = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
-        machineLearningJobId: '',
+        machineLearningJobId: [],
         index: ['auditbeat-*'],
         queryBar: {
           query: {
@@ -240,7 +246,7 @@ describe('rule helpers', () => {
       const expected = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
-        machineLearningJobId: '',
+        machineLearningJobId: [],
         index: ['auditbeat-*'],
         queryBar: {
           query: {

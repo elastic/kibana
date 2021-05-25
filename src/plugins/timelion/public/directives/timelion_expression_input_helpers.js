@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
+import { parseTimelionExpressionAsync } from '../../../vis_type_timelion/public';
 
 export const SUGGESTION_TYPE = {
   ARGUMENTS: 'arguments',
@@ -177,15 +178,9 @@ async function extractSuggestionsFromParsedResult(
   return { list: argumentSuggestions, location: location, type: SUGGESTION_TYPE.ARGUMENTS };
 }
 
-export async function suggest(
-  expression,
-  functionList,
-  Parser,
-  cursorPosition,
-  argValueSuggestions
-) {
+export async function suggest(expression, functionList, cursorPosition, argValueSuggestions) {
   try {
-    const result = await Parser.parse(expression);
+    const result = await parseTimelionExpressionAsync(expression);
     return await extractSuggestionsFromParsedResult(
       result,
       cursorPosition,

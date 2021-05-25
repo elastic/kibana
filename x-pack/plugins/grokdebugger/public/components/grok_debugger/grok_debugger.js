@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
@@ -127,7 +129,7 @@ export class GrokDebuggerComponent extends React.Component {
         <EuiPageBody>
           <EuiPageContent>
             <EuiPageContentBody>
-              <EuiForm className="grokdebugger-container" data-test-subj="grokDebugger">
+              <EuiForm className="grokdebugger-container" data-test-subj="grokDebuggerContainer">
                 <EventInput value={this.state.rawEvent} onChange={this.onRawEventChange} />
                 <PatternInput value={this.state.pattern} onChange={this.onPatternChange} />
                 <EuiSpacer />

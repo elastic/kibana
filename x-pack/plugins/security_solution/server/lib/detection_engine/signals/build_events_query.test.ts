@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { buildEventsSearchQuery } from './build_events_query';
@@ -14,15 +15,14 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       timestampOverride: undefined,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -38,12 +38,19 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -55,35 +62,45 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
           {
             '@timestamp': {
               order: 'asc',
+              unmapped_type: 'date',
             },
           },
         ],
       },
     });
   });
-  test('if searchAfterSortId is an empty string it should not be included', () => {
+
+  test('it builds a now-5m up to today filter with timestampOverride', () => {
     const query = buildEventsSearchQuery({
       index: ['auditbeat-*'],
       from: 'now-5m',
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: '',
-      timestampOverride: undefined,
-      excludeDocsWithTimestampOverride: false,
+      searchAfterSortIds: undefined,
+      timestampOverride: 'event.ingested',
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
+          {
+            field: 'event.ingested',
+            format: 'strict_date_optional_time',
+          },
           {
             field: '@timestamp',
             format: 'strict_date_optional_time',
@@ -97,12 +114,43 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
+                      bool: {
+                        should: [
+                          {
+                            range: {
+                              'event.ingested': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                          {
+                            bool: {
+                              filter: [
+                                {
+                                  range: {
+                                    '@timestamp': {
+                                      gte: 'now-5m',
+                                      lte: 'today',
+                                      format: 'strict_date_optional_time',
+                                    },
+                                  },
+                                },
+                                {
+                                  bool: {
+                                    must_not: {
+                                      exists: {
+                                        field: 'event.ingested',
+                                      },
+                                    },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
                       },
                     },
                   ],
@@ -114,18 +162,31 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
+          {
+            'event.ingested': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
           {
             '@timestamp': {
               order: 'asc',
+              unmapped_type: 'date',
             },
           },
         ],
       },
     });
   });
-  test('if searchAfterSortId is a valid sortId string', () => {
+
+  test('if searchAfterSortIds is a valid sortId string', () => {
     const fakeSortId = '123456789012';
     const query = buildEventsSearchQuery({
       index: ['auditbeat-*'],
@@ -133,15 +194,14 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: fakeSortId,
+      searchAfterSortIds: [fakeSortId],
       timestampOverride: undefined,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -157,12 +217,19 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -174,19 +241,25 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
+        search_after: [fakeSortId],
         sort: [
           {
             '@timestamp': {
               order: 'asc',
+              unmapped_type: 'date',
             },
           },
         ],
-        search_after: [fakeSortId],
       },
     });
   });
-  test('if searchAfterSortId is a valid sortId number', () => {
+  test('if searchAfterSortIds is a valid sortId number', () => {
     const fakeSortIdNumber = 123456789012;
     const query = buildEventsSearchQuery({
       index: ['auditbeat-*'],
@@ -194,15 +267,14 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: fakeSortIdNumber,
+      searchAfterSortIds: [fakeSortIdNumber],
       timestampOverride: undefined,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -218,12 +290,19 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -235,15 +314,21 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
+        search_after: [fakeSortIdNumber],
         sort: [
           {
             '@timestamp': {
               order: 'asc',
+              unmapped_type: 'date',
             },
           },
         ],
-        search_after: [fakeSortIdNumber],
       },
     });
   });
@@ -254,15 +339,14 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       timestampOverride: undefined,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -278,12 +362,19 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -295,11 +386,17 @@ describe('create_signals', () => {
             ],
           },
         },
-
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [
           {
             '@timestamp': {
               order: 'asc',
+              unmapped_type: 'date',
             },
           },
         ],
@@ -321,15 +418,14 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       timestampOverride: undefined,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [{ field: '@timestamp', format: 'strict_date_optional_time' }],
         query: {
@@ -340,12 +436,19 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -357,6 +460,12 @@ describe('create_signals', () => {
             ],
           },
         },
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         aggregations: {
           tags: {
             terms: {
@@ -368,6 +477,7 @@ describe('create_signals', () => {
           {
             '@timestamp': {
               order: 'asc',
+              unmapped_type: 'date',
             },
           },
         ],

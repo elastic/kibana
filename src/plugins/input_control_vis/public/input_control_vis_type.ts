@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisGroups, BaseVisTypeOptions } from '../../visualizations/public';
+import { VisGroups, VisTypeDefinition } from '../../visualizations/public';
 import { getControlsTab, OptionsTabLazy } from './components/editor';
 import { InputControlVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
@@ -15,7 +15,7 @@ import { InputControlVisParams } from './types';
 
 export function createInputControlVisTypeDefinition(
   deps: InputControlVisDependencies
-): BaseVisTypeOptions<InputControlVisParams> {
+): VisTypeDefinition<InputControlVisParams> {
   const ControlsTab = getControlsTab(deps);
 
   return {
@@ -56,7 +56,6 @@ export function createInputControlVisTypeDefinition(
       ],
     },
     inspectorAdapters: {},
-    requestHandler: 'none',
     toExpressionAst,
   };
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
@@ -24,7 +25,7 @@ import { combineQueries } from '../../../timelines/components/timeline/helpers';
 
 import { getOptions } from './helpers';
 import { TopN } from './top_n';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' };
@@ -46,11 +47,16 @@ const makeMapStateToProps = () => {
 
     return {
       activeTimelineEventType: activeTimeline.eventType,
-      activeTimelineFilters,
+      activeTimelineFilters:
+        activeTimeline.activeTab === TimelineTabs.query ? activeTimelineFilters : EMPTY_FILTERS,
       activeTimelineFrom: activeTimelineInput.timerange.from,
-      activeTimelineKqlQueryExpression: getKqlQueryTimeline(state, TimelineId.active),
+      activeTimelineKqlQueryExpression:
+        activeTimeline.activeTab === TimelineTabs.query
+          ? getKqlQueryTimeline(state, TimelineId.active)
+          : null,
       activeTimelineTo: activeTimelineInput.timerange.to,
-      dataProviders: activeTimeline.dataProviders,
+      dataProviders:
+        activeTimeline.activeTab === TimelineTabs.query ? activeTimeline.dataProviders : [],
       globalQuery: getGlobalQuerySelector(state),
       globalFilters: getGlobalFiltersQuerySelector(state),
       kqlMode: activeTimeline.kqlMode,
@@ -67,11 +73,10 @@ const connector = connect(makeMapStateToProps);
 //    this component is rendered in the context of the active timeline. This
 //    behavior enables the 'All events' view by appending the alerts index
 //    to the index pattern.
-interface OwnProps {
+export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
   indexPattern: IIndexPattern;
-  indexNames: string[];
   timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -90,7 +95,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
   dataProviders,
   field,
   indexPattern,
-  indexNames,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,
@@ -153,7 +157,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
       filters={timelineId === TimelineId.active ? EMPTY_FILTERS : globalFilters}
       from={timelineId === TimelineId.active ? activeTimelineFrom : from}
       indexPattern={indexPattern}
-      indexNames={indexNames}
       options={options}
       query={timelineId === TimelineId.active ? EMPTY_QUERY : globalQuery}
       setAbsoluteRangeDatePickerTarget={timelineId === TimelineId.active ? 'timeline' : 'global'}
@@ -169,4 +172,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
 
 StatefulTopNComponent.displayName = 'StatefulTopNComponent';
 
-export const StatefulTopN = connector(React.memo(StatefulTopNComponent));
+export const StatefulTopN: React.FunctionComponent<OwnProps> = connector(
+  React.memo(StatefulTopNComponent)
+);

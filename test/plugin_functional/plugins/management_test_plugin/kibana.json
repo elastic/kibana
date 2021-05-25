@@ -1,5 +1,5 @@
 {
-  "id": "management_test_plugin",
+  "id": "managementTestPlugin",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["management_test_plugin"],

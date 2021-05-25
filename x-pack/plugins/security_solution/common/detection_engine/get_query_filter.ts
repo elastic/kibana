@@ -1,27 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { Language } from '@kbn/securitysolution-io-ts-alerting-types';
+import type {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 import {
   Filter,
   IIndexPattern,
   buildEsQuery,
   EsQueryConfig,
 } from '../../../../../src/plugins/data/common';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '../../../lists/common/schemas';
 import { ESBoolQuery } from '../typed_json';
-import { buildExceptionFilter } from './build_exceptions_filter';
-import { Query, Language, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
+import { Query, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
 
 export const getQueryFilter = (
   query: Query,
   language: Language,
-  filters: Array<Partial<Filter>>,
+  filters: unknown,
   index: Index,
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   excludeExceptions: boolean = true
@@ -47,7 +49,7 @@ export const getQueryFilter = (
     chunkSize: 1024,
   });
   const initialQuery = { query, language };
-  const allFilters = getAllFilters((filters as unknown) as Filter[], exceptionFilter);
+  const allFilters = getAllFilters(filters as Filter[], exceptionFilter);
 
   return buildEsQuery(indexPattern, initialQuery, allFilters, config);
 };
@@ -64,7 +66,6 @@ interface EqlSearchRequest {
   method: string;
   path: string;
   body: object;
-  event_category_field?: string;
 }
 
 export const buildEqlSearchRequest = (
@@ -108,7 +109,7 @@ export const buildEqlSearchRequest = (
       },
     });
   }
-  const baseRequest = {
+  return {
     method: 'POST',
     path: `/${indexString}/_eql/search?allow_no_indices=true`,
     body: {
@@ -119,14 +120,7 @@ export const buildEqlSearchRequest = (
           filter: requestFilter,
         },
       },
+      event_category_field: eventCategoryOverride,
     },
   };
-  if (eventCategoryOverride) {
-    return {
-      ...baseRequest,
-      event_category_field: eventCategoryOverride,
-    };
-  } else {
-    return baseRequest;
-  }
 };

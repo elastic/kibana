@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../../core/public/mocks';
 import { createColorPalette as createLegacyColorPalette } from '../../../../../../src/plugins/charts/public';
 import { PaletteDefinition } from './types';
 import { buildPalettes } from './palettes';
@@ -14,10 +13,7 @@ import { colorsServiceMock } from '../legacy_colors/mock';
 import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 
 describe('palettes', () => {
-  const palettes: Record<string, PaletteDefinition> = buildPalettes(
-    coreMock.createStart().uiSettings,
-    colorsServiceMock
-  );
+  const palettes: Record<string, PaletteDefinition> = buildPalettes(colorsServiceMock);
   describe('default palette', () => {
     describe('syncColors: false', () => {
       it('should return different colors based on behind text flag', () => {
@@ -302,6 +298,7 @@ describe('palettes', () => {
 
     beforeEach(() => {
       (colorsServiceMock.mappedColors.mapKeys as jest.Mock).mockClear();
+      (colorsServiceMock.mappedColors.getColorFromConfig as jest.Mock).mockReset();
       (colorsServiceMock.mappedColors.get as jest.Mock).mockClear();
     });
 
@@ -321,6 +318,30 @@ describe('palettes', () => {
         );
         expect(colorsServiceMock.mappedColors.mapKeys).not.toHaveBeenCalled();
         expect(colorsServiceMock.mappedColors.get).not.toHaveBeenCalled();
+      });
+
+      it('should respect the advanced settings color mapping', () => {
+        const configColorGetter = colorsServiceMock.mappedColors.getColorFromConfig as jest.Mock;
+        configColorGetter.mockImplementation(() => 'blue');
+        const result = palette.getColor(
+          [
+            {
+              name: 'abc',
+              rankAtDepth: 2,
+              totalSeriesAtDepth: 10,
+            },
+            {
+              name: 'def',
+              rankAtDepth: 0,
+              totalSeriesAtDepth: 10,
+            },
+          ],
+          {
+            syncColors: false,
+          }
+        );
+        expect(result).toEqual('blue');
+        expect(configColorGetter).toHaveBeenCalledWith('abc');
       });
 
       it('should return a color from the legacy palette based on position of first series', () => {
@@ -361,6 +382,30 @@ describe('palettes', () => {
         );
         expect(colorsServiceMock.mappedColors.mapKeys).toHaveBeenCalledWith(['abc']);
         expect(colorsServiceMock.mappedColors.get).toHaveBeenCalledWith('abc');
+      });
+
+      it('should respect the advanced settings color mapping', () => {
+        const configColorGetter = colorsServiceMock.mappedColors.getColorFromConfig as jest.Mock;
+        configColorGetter.mockImplementation(() => 'blue');
+        const result = palette.getColor(
+          [
+            {
+              name: 'abc',
+              rankAtDepth: 2,
+              totalSeriesAtDepth: 10,
+            },
+            {
+              name: 'def',
+              rankAtDepth: 0,
+              totalSeriesAtDepth: 10,
+            },
+          ],
+          {
+            syncColors: false,
+          }
+        );
+        expect(result).toEqual('blue');
+        expect(configColorGetter).toHaveBeenCalledWith('abc');
       });
 
       it('should always use root series', () => {

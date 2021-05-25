@@ -1,34 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LogicMounter } from '../../../../../__mocks__/kea.mock';
-
 import {
+  LogicMounter,
   mockFlashMessageHelpers,
   mockHttpValues,
-  expectedAsyncError,
+  mockKibanaValues,
 } from '../../../../../__mocks__';
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
+
+import { nextTick } from '@kbn/test/jest';
 
 const contentSource = { id: 'source123' };
 jest.mock('../../source_logic', () => ({
   SourceLogic: { values: { contentSource } },
 }));
 
-import { AppLogic } from '../../../../app_logic';
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
+import { AppLogic } from '../../../../app_logic';
 
-import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 import { LEAVE_UNASSIGNED_FIELD } from './constants';
-
 import { DisplaySettingsLogic, defaultSearchResultConfig } from './display_settings_logic';
 
 describe('DisplaySettingsLogic', () => {
   const { http } = mockHttpValues;
+  const { navigateToUrl } = mockKibanaValues;
   const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(DisplaySettingsLogic);
 
@@ -44,6 +46,7 @@ describe('DisplaySettingsLogic', () => {
     serverRoute: '',
     editFieldIndex: null,
     dataLoading: true,
+    navigatingBetweenTabs: false,
     addFieldModalVisible: false,
     titleFieldHover: false,
     urlFieldHover: false,
@@ -207,6 +210,12 @@ describe('DisplaySettingsLogic', () => {
       });
     });
 
+    it('setNavigatingBetweenTabs', () => {
+      DisplaySettingsLogic.actions.setNavigatingBetweenTabs(true);
+
+      expect(DisplaySettingsLogic.values.navigatingBetweenTabs).toEqual(true);
+    });
+
     it('addDetailField', () => {
       const newField = { label: 'Monkey', fieldName: 'primate' };
       DisplaySettingsLogic.actions.setServerResponseData(serverProps);
@@ -286,14 +295,13 @@ describe('DisplaySettingsLogic', () => {
           DisplaySettingsLogic.actions,
           'onInitializeDisplaySettings'
         );
-        const promise = Promise.resolve(serverProps);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(serverProps));
         DisplaySettingsLogic.actions.initializeDisplaySettings();
 
         expect(http.get).toHaveBeenCalledWith(
           '/api/workplace_search/org/sources/source123/display_settings/config'
         );
-        await promise;
+        await nextTick();
         expect(onInitializeDisplaySettingsSpy).toHaveBeenCalledWith({
           ...serverProps,
           isOrganization: true,
@@ -307,14 +315,13 @@ describe('DisplaySettingsLogic', () => {
           DisplaySettingsLogic.actions,
           'onInitializeDisplaySettings'
         );
-        const promise = Promise.resolve(serverProps);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(serverProps));
         DisplaySettingsLogic.actions.initializeDisplaySettings();
 
         expect(http.get).toHaveBeenCalledWith(
           '/api/workplace_search/account/sources/source123/display_settings/config'
         );
-        await promise;
+        await nextTick();
         expect(onInitializeDisplaySettingsSpy).toHaveBeenCalledWith({
           ...serverProps,
           isOrganization: false,
@@ -322,10 +329,9 @@ describe('DisplaySettingsLogic', () => {
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('this is an error'));
         DisplaySettingsLogic.actions.initializeDisplaySettings();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
@@ -337,27 +343,50 @@ describe('DisplaySettingsLogic', () => {
           DisplaySettingsLogic.actions,
           'setServerResponseData'
         );
-        const promise = Promise.resolve(serverProps);
-        http.post.mockReturnValue(promise);
+        http.post.mockReturnValue(Promise.resolve(serverProps));
         DisplaySettingsLogic.actions.onInitializeDisplaySettings(serverProps);
         DisplaySettingsLogic.actions.setServerData();
 
         expect(http.post).toHaveBeenCalledWith(serverProps.serverRoute, {
           body: JSON.stringify({ ...searchResultConfig }),
         });
-        await promise;
+        await nextTick();
         expect(setServerResponseDataSpy).toHaveBeenCalledWith({
           ...serverProps,
         });
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.post.mockReturnValue(promise);
+        http.post.mockReturnValue(Promise.reject('this is an error'));
         DisplaySettingsLogic.actions.setServerData();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+      });
+    });
+
+    describe('handleSelectedTabChanged', () => {
+      beforeEach(() => {
+        DisplaySettingsLogic.actions.onInitializeDisplaySettings(serverProps);
+      });
+
+      it('calls sets navigatingBetweenTabs', async () => {
+        const setNavigatingBetweenTabsSpy = jest.spyOn(
+          DisplaySettingsLogic.actions,
+          'setNavigatingBetweenTabs'
+        );
+        DisplaySettingsLogic.actions.handleSelectedTabChanged('search_results');
+        await nextTick();
+
+        expect(setNavigatingBetweenTabsSpy).toHaveBeenCalledWith(true);
+        expect(navigateToUrl).toHaveBeenCalledWith('/p/sources/123/display_settings/');
+      });
+
+      it('calls calls correct route for "result_detail"', async () => {
+        DisplaySettingsLogic.actions.handleSelectedTabChanged('result_detail');
+        await nextTick();
+
+        expect(navigateToUrl).toHaveBeenCalledWith('/p/sources/123/display_settings/result_detail');
       });
     });
   });

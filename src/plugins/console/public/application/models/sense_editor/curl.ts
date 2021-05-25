@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 function detectCURLinLine(line: string) {
@@ -25,7 +25,7 @@ export function detectCURL(text: string) {
 export function parseCURL(text: string) {
   let state = 'NONE';
   const out = [];
-  let body: any[] = [];
+  let body: string[] = [];
   let line = '';
   const lines = text.trim().split('\n');
   let matches;
@@ -62,7 +62,7 @@ export function parseCURL(text: string) {
   }
 
   function unescapeLastBodyEl() {
-    const str = body.pop().replace(/\\([\\"'])/g, '$1');
+    const str = body.pop()!.replace(/\\([\\"'])/g, '$1');
     body.push(str);
   }
 

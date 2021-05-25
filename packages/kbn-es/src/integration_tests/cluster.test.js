@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const {
@@ -71,9 +71,15 @@ function mockEsBin({ exitCode, start }) {
   );
 }
 
+const initialEnv = { ...process.env };
+
 beforeEach(() => {
   jest.resetAllMocks();
   extractConfigFiles.mockImplementation((config) => config);
+});
+
+afterEach(() => {
+  process.env = { ...initialEnv };
 });
 
 describe('#installSource()', () => {
@@ -265,7 +271,8 @@ describe('#start(installPath)', () => {
       Array [
         Array [
           Array [
-            "indices.query.bool.max_nested_depth=100",
+            "action.destructive_requires_name=true",
+            "ingest.geoip.downloader.enabled=false",
           ],
           undefined,
           Object {
@@ -343,7 +350,8 @@ describe('#run()', () => {
       Array [
         Array [
           Array [
-            "indices.query.bool.max_nested_depth=100",
+            "action.destructive_requires_name=true",
+            "ingest.geoip.downloader.enabled=false",
           ],
           undefined,
           Object {
@@ -352,6 +360,25 @@ describe('#run()', () => {
         ],
       ]
     `);
+  });
+
+  it('sets default Java heap', async () => {
+    mockEsBin({ start: true });
+
+    const cluster = new Cluster({ log });
+    await cluster.run();
+
+    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toEqual('-Xms1g -Xmx1g');
+  });
+
+  it('allows Java heap to be overwritten', async () => {
+    mockEsBin({ start: true });
+    process.env.ES_JAVA_OPTS = '-Xms5g -Xmx5g';
+
+    const cluster = new Cluster({ log });
+    await cluster.run();
+
+    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toEqual('-Xms5g -Xmx5g');
   });
 });
 

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -17,10 +17,11 @@ import {
   SeriesName,
   Accessor,
   AccessorFn,
+  ColorVariant,
 } from '@elastic/charts';
-import { ColorVariant } from '@elastic/charts/dist/utils/commons';
 
 import { DatatableRow } from '../../../expressions/public';
+import { METRIC_TYPES } from '../../../data/public';
 
 import { ChartType } from '../../common';
 import { SeriesParam, VisConfig } from '../types';
@@ -50,7 +51,15 @@ const getCurveType = (type?: 'linear' | 'cardinal' | 'step-after'): CurveType =>
  * @param getSeriesColor
  */
 export const renderAllSeries = (
-  { aspects, yAxes, xAxis, showValueLabel, enableHistogramMode, fittingFunction }: VisConfig,
+  {
+    aspects,
+    yAxes,
+    xAxis,
+    showValueLabel,
+    enableHistogramMode,
+    fittingFunction,
+    fillOpacity,
+  }: VisConfig,
   seriesParams: SeriesParam[],
   data: DatatableRow[],
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
@@ -66,18 +75,29 @@ export const renderAllSeries = (
       data: { id: paramId },
       lineWidth: strokeWidth,
       showCircles,
+      circlesRadius,
       drawLinesBetweenPoints,
       mode,
       interpolate,
       type,
     }) => {
-      const yAspect = aspects.y.find(({ aggId }) => aggId === paramId);
-
-      if (!show || !yAspect || yAspect.accessor === null) {
+      const yAspects = aspects.y.filter(({ aggId, aggType, accessor }) => {
+        if (
+          aggType === METRIC_TYPES.PERCENTILES ||
+          aggType === METRIC_TYPES.PERCENTILE_RANKS ||
+          aggType === METRIC_TYPES.STD_DEV
+        ) {
+          return aggId?.includes(paramId) && accessor !== null;
+        } else {
+          return aggId === paramId && accessor !== null;
+        }
+      });
+      if (!show || !yAspects.length) {
         return null;
       }
+      const yAccessors = yAspects.map((aspect) => aspect.accessor) as string[];
 
-      const id = `${type}-${yAspect.accessor}`;
+      const id = `${type}-${yAccessors[0]}`;
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
       const isStacked = mode === 'stacked' || yAxisScale?.mode === 'percentage';
       const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;
@@ -94,13 +114,13 @@ export const renderAllSeries = (
               id={id}
               name={getSeriesName}
               color={getSeriesColor}
-              tickFormat={yAspect.formatter}
+              tickFormat={yAspects[0].formatter}
               groupId={pseudoGroupId}
               useDefaultGroupDomain={useDefaultGroupDomain}
               xScaleType={xAxis.scale.type}
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
-              yAccessors={[yAspect.accessor]}
+              yAccessors={yAccessors}
               splitSeriesAccessors={splitSeriesAccessors}
               data={data}
               timeZone={timeZone}
@@ -125,7 +145,7 @@ export const renderAllSeries = (
               id={id}
               fit={fittingFunction}
               color={getSeriesColor}
-              tickFormat={yAspect.formatter}
+              tickFormat={yAspects[0].formatter}
               name={getSeriesName}
               curve={getCurveType(interpolate)}
               groupId={pseudoGroupId}
@@ -133,7 +153,7 @@ export const renderAllSeries = (
               xScaleType={xAxis.scale.type}
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
-              yAccessors={[yAspect.accessor]}
+              yAccessors={yAccessors}
               markSizeAccessor={markSizeAccessor}
               markFormat={aspects.z?.formatter}
               splitSeriesAccessors={splitSeriesAccessors}
@@ -147,7 +167,7 @@ export const renderAllSeries = (
               stackMode={stackMode}
               areaSeriesStyle={{
                 area: {
-                  ...(type === ChartType.Line && { opacity: 0 }),
+                  ...(type === ChartType.Line ? { opacity: 0 } : { opacity: fillOpacity }),
                 },
                 line: {
                   strokeWidth,
@@ -156,6 +176,7 @@ export const renderAllSeries = (
                 point: {
                   visible: showCircles,
                   fill: markSizeAccessor ? ColorVariant.Series : undefined,
+                  radius: circlesRadius,
                 },
               }}
             />

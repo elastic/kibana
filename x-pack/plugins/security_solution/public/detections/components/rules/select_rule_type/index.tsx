@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import {
   isThresholdRule,
@@ -110,7 +111,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               icon={<EuiIcon size="xl" type="search" />}
               selectable={querySelectableConfig}
               layout="horizontal"
-              textAlign="left"
             />
           </EuiFlexItem>
         )}
@@ -130,7 +130,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               isDisabled={mlSelectableConfig.isDisabled && !mlSelectableConfig.isSelected}
               selectable={mlSelectableConfig}
               layout="horizontal"
-              textAlign="left"
             />
           </EuiFlexItem>
         )}
@@ -144,7 +143,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               icon={<EuiIcon size="l" type="indexFlush" />}
               selectable={thresholdSelectableConfig}
               layout="horizontal"
-              textAlign="left"
             />
           </EuiFlexItem>
         )}
@@ -158,7 +156,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               icon={<EuiIcon size="l" type="eql" />}
               selectable={eqlSelectableConfig}
               layout="horizontal"
-              textAlign="left"
             />
           </EuiFlexItem>
         )}
@@ -172,7 +169,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               icon={<EuiIcon size="l" type="list" />}
               selectable={threatMatchSelectableConfig}
               layout="horizontal"
-              textAlign="left"
             />
           </EuiFlexItem>
         )}

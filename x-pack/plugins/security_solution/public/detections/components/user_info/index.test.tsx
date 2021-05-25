@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useUserInfo, ManageUserInfo } from './index';
 
 import { useKibana } from '../../../common/lib/kibana';
 import * as api from '../../containers/detection_engine/alerts/api';
+import { TestProviders } from '../../../common/mock/test_providers';
+import { UserPrivilegesProvider } from '../user_privileges';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api');
@@ -29,25 +33,26 @@ describe('useUserInfo', () => {
   });
   it('returns default state', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useUserInfo());
+      const { result, waitForNextUpdate } = renderHook(() => useUserInfo(), {
+        wrapper: TestProviders,
+      });
       await waitForNextUpdate();
 
-      expect(result).toEqual({
-        current: {
-          canUserCRUD: null,
-          hasEncryptionKey: null,
-          hasIndexManage: null,
-          hasIndexMaintenance: null,
-          hasIndexWrite: null,
-          hasIndexUpdateDelete: null,
-          isAuthenticated: null,
-          isSignalIndexExists: null,
-          loading: true,
-          signalIndexName: null,
-          signalIndexMappingOutdated: null,
-        },
-        error: undefined,
+      expect(result.all).toHaveLength(1);
+      expect(result.current).toEqual({
+        canUserCRUD: null,
+        hasEncryptionKey: null,
+        hasIndexManage: null,
+        hasIndexMaintenance: null,
+        hasIndexWrite: null,
+        hasIndexUpdateDelete: null,
+        isAuthenticated: null,
+        isSignalIndexExists: null,
+        loading: true,
+        signalIndexName: null,
+        signalIndexMappingOutdated: null,
       });
+      expect(result.error).toBeUndefined();
     });
   });
 
@@ -57,8 +62,15 @@ describe('useUserInfo', () => {
       name: 'mock-signal-index',
       index_mapping_outdated: true,
     });
+    const wrapper = ({ children }: { children: JSX.Element }) => (
+      <TestProviders>
+        <UserPrivilegesProvider>
+          <ManageUserInfo>{children}</ManageUserInfo>
+        </UserPrivilegesProvider>
+      </TestProviders>
+    );
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useUserInfo(), { wrapper: ManageUserInfo });
+      const { waitForNextUpdate } = renderHook(() => useUserInfo(), { wrapper });
       await waitForNextUpdate();
       await waitForNextUpdate();
     });

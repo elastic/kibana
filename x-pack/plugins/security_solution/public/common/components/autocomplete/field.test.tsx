@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import {
@@ -18,21 +18,19 @@ import { FieldComponent } from './field';
 describe('FieldComponent', () => {
   test('it renders disabled if "isDisabled" is true', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <FieldComponent
-          placeholder="Placeholder text"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          selectedField={getField('machine.os.raw')}
-          isLoading={false}
-          isClearable={false}
-          isDisabled={true}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <FieldComponent
+        placeholder="Placeholder text"
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        selectedField={getField('machine.os.raw')}
+        isLoading={false}
+        isClearable={false}
+        isDisabled={true}
+        onChange={jest.fn()}
+      />
     );
 
     expect(
@@ -42,21 +40,19 @@ describe('FieldComponent', () => {
 
   test('it renders loading if "isLoading" is true', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <FieldComponent
-          placeholder="Placeholder text"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          selectedField={getField('machine.os.raw')}
-          isLoading={true}
-          isClearable={false}
-          isDisabled={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <FieldComponent
+        placeholder="Placeholder text"
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        selectedField={getField('machine.os.raw')}
+        isLoading={true}
+        isClearable={false}
+        isDisabled={false}
+        onChange={jest.fn()}
+      />
     );
     wrapper.find(`[data-test-subj="fieldAutocompleteComboBox"] button`).at(0).simulate('click');
     expect(
@@ -68,21 +64,19 @@ describe('FieldComponent', () => {
 
   test('it allows user to clear values if "isClearable" is true', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <FieldComponent
-          placeholder="Placeholder text"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          selectedField={getField('machine.os.raw')}
-          isLoading={false}
-          isClearable={true}
-          isDisabled={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <FieldComponent
+        placeholder="Placeholder text"
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        selectedField={getField('machine.os.raw')}
+        isLoading={false}
+        isClearable={true}
+        isDisabled={false}
+        onChange={jest.fn()}
+      />
     );
 
     expect(
@@ -94,21 +88,19 @@ describe('FieldComponent', () => {
 
   test('it correctly displays selected field', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <FieldComponent
-          placeholder="Placeholder text"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          selectedField={getField('machine.os.raw')}
-          isLoading={false}
-          isClearable={false}
-          isDisabled={false}
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
+      <FieldComponent
+        placeholder="Placeholder text"
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        selectedField={getField('machine.os.raw')}
+        isLoading={false}
+        isClearable={false}
+        isDisabled={false}
+        onChange={jest.fn()}
+      />
     );
 
     expect(
@@ -119,21 +111,19 @@ describe('FieldComponent', () => {
   test('it invokes "onChange" when option selected', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <FieldComponent
-          placeholder="Placeholder text"
-          indexPattern={{
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          }}
-          selectedField={getField('machine.os.raw')}
-          isLoading={false}
-          isClearable={false}
-          isDisabled={false}
-          onChange={mockOnChange}
-        />
-      </ThemeProvider>
+      <FieldComponent
+        placeholder="Placeholder text"
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        selectedField={getField('machine.os.raw')}
+        isLoading={false}
+        isClearable={false}
+        isDisabled={false}
+        onChange={mockOnChange}
+      />
     );
 
     ((wrapper.find(EuiComboBox).props() as unknown) as {

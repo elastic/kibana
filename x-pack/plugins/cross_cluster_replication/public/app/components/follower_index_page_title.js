@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -17,7 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { getFollowerIndexUrl } from '../services/documentation_links';
+import { documentationLinks } from '../services/documentation_links';
 
 export const FollowerIndexPageTitle = ({ title }) => (
   <Fragment>
@@ -35,7 +36,7 @@ export const FollowerIndexPageTitle = ({ title }) => (
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={getFollowerIndexUrl()}
+            href={documentationLinks.apis.createFollower}
             target="_blank"
             iconType="help"
             data-test-subj="docsButton"

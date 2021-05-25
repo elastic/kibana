@@ -23,7 +23,8 @@ The constructor for this class is marked as internal. Third-party code should no
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [generateRawId(namespace, type, id)](./kibana-plugin-core-server.savedobjectsserializer.generaterawid.md) |  | Given a saved object type and id, generates the compound id that is stored in the raw document. |
-|  [isRawSavedObject(rawDoc)](./kibana-plugin-core-server.savedobjectsserializer.israwsavedobject.md) |  | Determines whether or not the raw document can be converted to a saved object. |
-|  [rawToSavedObject(doc)](./kibana-plugin-core-server.savedobjectsserializer.rawtosavedobject.md) |  | Converts a document from the format that is stored in elasticsearch to the saved object client format. |
+|  [generateRawLegacyUrlAliasId(namespace, type, id)](./kibana-plugin-core-server.savedobjectsserializer.generaterawlegacyurlaliasid.md) |  | Given a saved object type and id, generates the compound id that is stored in the raw document for its legacy URL alias. |
+|  [isRawSavedObject(doc, options)](./kibana-plugin-core-server.savedobjectsserializer.israwsavedobject.md) |  | Determines whether or not the raw document can be converted to a saved object. |
+|  [rawToSavedObject(doc, options)](./kibana-plugin-core-server.savedobjectsserializer.rawtosavedobject.md) |  | Converts a document from the format that is stored in elasticsearch to the saved object client format. |
 |  [savedObjectToRaw(savedObj)](./kibana-plugin-core-server.savedobjectsserializer.savedobjecttoraw.md) |  | Converts a document from the saved object client format to the format that is stored in elasticsearch. |
 

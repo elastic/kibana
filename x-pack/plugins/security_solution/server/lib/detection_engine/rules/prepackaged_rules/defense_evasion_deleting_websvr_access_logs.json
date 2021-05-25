@@ -7,10 +7,11 @@
   "index": [
     "auditbeat-*",
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "WebServer Access Logs Deleted",
   "query": "file where event.type == \"deletion\" and\n  file.path : (\"C:\\\\inetpub\\\\logs\\\\LogFiles\\\\*.log\", \n               \"/var/log/apache*/access.log\",\n               \"/etc/httpd/logs/access_log\", \n               \"/var/log/httpd/access_log\", \n               \"/var/www/*/logs/access.log\")\n",
   "risk_score": 47,
@@ -42,6 +43,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

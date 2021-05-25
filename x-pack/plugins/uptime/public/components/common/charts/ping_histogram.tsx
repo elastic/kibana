@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -15,7 +16,7 @@ import {
   XYChartElementEvent,
   ElementClickListener,
 } from '@elastic/charts';
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,10 +26,12 @@ import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
 import { HistogramResult } from '../../../../common/runtime_types';
-import { useUrlParams } from '../../../hooks';
+import { useMonitorId, useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
 import { getDateRangeFromChartElement } from './utils';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../translations';
+import { createExploratoryViewUrl } from '../../../../../observability/public';
+import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export interface PingHistogramComponentProps {
   /**
@@ -68,7 +71,13 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
     chartTheme,
   } = useContext(UptimeThemeContext);
 
-  const [, updateUrlParams] = useUrlParams();
+  const monitorId = useMonitorId();
+
+  const { basePath } = useUptimeSettingsContext();
+
+  const [getUrlParams, updateUrlParams] = useUrlParams();
+
+  const { dateRangeStart, dateRangeEnd } = getUrlParams();
 
   let content: JSX.Element | undefined;
   if (!data?.histogram?.length) {
@@ -178,17 +187,41 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
     );
   }
 
+  const pingHistogramExploratoryViewLink = createExploratoryViewUrl(
+    {
+      'pings-over-time': {
+        dataType: 'synthetics',
+        reportType: 'upp',
+        time: { from: dateRangeStart, to: dateRangeEnd },
+        ...(monitorId ? { filters: [{ field: 'monitor.id', values: [monitorId] }] } : {}),
+      },
+    },
+    basePath
+  );
+
+  const showAnalyzeButton = false;
+
   return (
     <>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.uptime.snapshot.pingsOverTimeTitle"
-            defaultMessage="Pings over time"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.uptime.snapshot.pingsOverTimeTitle"
+                defaultMessage="Pings over time"
+              />
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {showAnalyzeButton && (
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" href={pingHistogramExploratoryViewLink}>
+              <FormattedMessage id="xpack.uptime.pingHistogram.analyze" defaultMessage="Analyze" />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       {content}
     </>
   );

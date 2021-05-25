@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './expanded_row_details_pane.scss';
@@ -18,6 +19,7 @@ export interface SectionConfig {
   title: string;
   position: 'left' | 'right';
   items: SectionItem[];
+  dataTestSubj: string;
 }
 
 interface SectionProps {
@@ -43,7 +45,7 @@ export const Section: FC<SectionProps> = ({ section }) => {
   ];
 
   return (
-    <>
+    <div data-test-subj={section.dataTestSubj}>
       <EuiTitle size="xs">
         <span>{section.title}</span>
       </EuiTitle>
@@ -54,18 +56,23 @@ export const Section: FC<SectionProps> = ({ section }) => {
         tableCaption={section.title}
         tableLayout="auto"
         className="mlExpandedRowDetailsSection"
+        data-test-subj={`${section.dataTestSubj}-table`}
       />
-    </>
+    </div>
   );
 };
 
 interface ExpandedRowDetailsPaneProps {
   sections: SectionConfig[];
+  dataTestSubj: string;
 }
 
-export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ sections }) => {
+export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
+  sections,
+  dataTestSubj,
+}) => {
   return (
-    <EuiFlexGroup className="mlExpandedRowDetails">
+    <EuiFlexGroup className="mlExpandedRowDetails" data-test-subj={dataTestSubj}>
       <EuiFlexItem style={{ width: '50%' }}>
         {sections
           .filter((s) => s.position === 'left')

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IIndexPatternFieldList } from '../../../data/common/index_patterns/fields';
@@ -52,6 +52,13 @@ const fields = [
     scripted: true,
     filterable: false,
   },
+  {
+    name: 'object.value',
+    type: 'number',
+    scripted: false,
+    filterable: true,
+    aggregatable: true,
+  },
 ] as IIndexPatternFieldList;
 
 fields.getByName = (name: string) => {
@@ -64,18 +71,19 @@ const indexPattern = ({
   metaFields: ['_index', '_score'],
   formatField: jest.fn(),
   flattenHit: undefined,
-  formatHit: jest.fn((hit) => hit._source),
+  formatHit: jest.fn((hit) => (hit.fields ? hit.fields : hit._source)),
   fields,
   getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
   getSourceFiltering: () => ({}),
-  getFieldByName: () => ({}),
+  getFieldByName: jest.fn(() => ({})),
   timeFieldName: '',
   docvalueFields: [],
+  getFormatterForField: () => ({ convert: () => 'formatted' }),
 } as unknown) as IndexPattern;
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
-indexPattern.formatField = (hit: Record<string, any>, fieldName: string) => {
+indexPattern.formatField = (hit: Record<string, unknown>, fieldName: string) => {
   return fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
 };
 

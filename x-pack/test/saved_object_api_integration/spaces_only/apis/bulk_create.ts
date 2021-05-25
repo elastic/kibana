@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SPACES } from '../../common/lib/spaces';
@@ -54,6 +55,16 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ...fail409(!overwrite || spaceId !== SPACE_2_ID),
       ...unresolvableConflict(spaceId !== SPACE_2_ID),
     },
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE,
+      ...fail409(!overwrite || spaceId !== DEFAULT_SPACE_ID),
+      ...unresolvableConflict(spaceId !== DEFAULT_SPACE_ID),
+    },
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1,
+      ...fail409(!overwrite || spaceId !== SPACE_1_ID),
+      ...unresolvableConflict(spaceId !== SPACE_1_ID),
+    },
     { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
     { ...CASES.HIDDEN, ...fail400() },
     { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },
@@ -67,9 +78,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
 
-  const { addTests, createTestDefinitions } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
+  const { addTests, createTestDefinitions } = bulkCreateTestSuiteFactory(esArchiver, supertest);
   const createTests = (overwrite: boolean, spaceId: string) => {
     const testCases = createTestCases(overwrite, spaceId);
     return createTestDefinitions(testCases, false, overwrite, {

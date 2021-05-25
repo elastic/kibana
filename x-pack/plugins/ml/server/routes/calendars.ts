@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { wrapError } from '../client/error_wrapper';
@@ -35,7 +36,7 @@ function deleteCalendar(mlClient: MlClient, calendarId: string) {
   return cal.deleteCalendar(calendarId);
 }
 
-function getCalendarsByIds(mlClient: MlClient, calendarIds: string) {
+function getCalendarsByIds(mlClient: MlClient, calendarIds: string[]) {
   const cal = new CalendarManager(mlClient);
   return cal.getCalendarsByIds(calendarIds);
 }
@@ -130,6 +131,7 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const body = request.body;
+        // @ts-expect-error event interface incorrect
         const resp = await newCalendar(mlClient, body);
 
         return response.ok({
@@ -166,6 +168,7 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       try {
         const { calendarId } = request.params;
         const body = request.body;
+        // @ts-expect-error event interface incorrect
         const resp = await updateCalendar(mlClient, calendarId, body);
 
         return response.ok({

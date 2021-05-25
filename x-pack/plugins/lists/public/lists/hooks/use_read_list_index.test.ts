@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { useReadListIndex } from '@kbn/securitysolution-list-hooks';
+import * as Api from '@kbn/securitysolution-list-api';
 
-import * as Api from '../api';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { getAcknowledgeSchemaResponseMock } from '../../../common/schemas/response/acknowledge_schema.mock';
 
-import { useReadListIndex } from './use_read_list_index';
+jest.mock('@kbn/securitysolution-list-api');
 
-jest.mock('../api');
+// TODO: Port this code over to the package: packages/kbn-securitysolution-list-hooks/src/use_read_list_index/index.test.ts once kibana has mocks in packages
 
 describe('useReadListIndex', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;

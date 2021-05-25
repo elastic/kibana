@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
   App,
   AppNavLinkStatus,
   AppStatus,
-  AppSearchDeepLink,
+  AppDeepLink,
   PublicAppInfo,
-  PublicAppSearchDeepLinkInfo,
+  PublicAppDeepLinkInfo,
 } from '../types';
 
 export function getAppInfo(app: App): PublicAppInfo {
@@ -28,29 +28,27 @@ export function getAppInfo(app: App): PublicAppInfo {
     status: app.status!,
     navLinkStatus,
     appRoute: app.appRoute!,
-    meta: {
-      keywords: app.meta?.keywords ?? [],
-      searchDeepLinks: getSearchDeepLinkInfos(app, app.meta?.searchDeepLinks),
-    },
+    keywords: app.keywords ?? [],
+    deepLinks: getDeepLinkInfos(app.deepLinks),
   };
 }
 
-function getSearchDeepLinkInfos(
-  app: App,
-  searchDeepLinks?: AppSearchDeepLink[]
-): PublicAppSearchDeepLinkInfo[] {
-  if (!searchDeepLinks) {
-    return [];
-  }
+function getDeepLinkInfos(deepLinks?: AppDeepLink[]): PublicAppDeepLinkInfo[] {
+  if (!deepLinks) return [];
 
-  return searchDeepLinks.map(
-    (rawDeepLink): PublicAppSearchDeepLinkInfo => {
+  return deepLinks.map(
+    (rawDeepLink): PublicAppDeepLinkInfo => {
+      const navLinkStatus =
+        rawDeepLink.navLinkStatus === AppNavLinkStatus.default
+          ? AppNavLinkStatus.hidden
+          : rawDeepLink.navLinkStatus!;
       return {
         id: rawDeepLink.id,
         title: rawDeepLink.title,
         path: rawDeepLink.path,
         keywords: rawDeepLink.keywords ?? [],
-        searchDeepLinks: getSearchDeepLinkInfos(app, rawDeepLink.searchDeepLinks),
+        navLinkStatus,
+        deepLinks: getDeepLinkInfos(rawDeepLink.deepLinks),
       };
     }
   );

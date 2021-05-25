@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { PluginInitializerContext } from '../../../core/public';
@@ -40,6 +40,7 @@ import {
 } from '../common';
 
 import { FilterLabel } from './ui';
+import { FilterItem } from './ui/filter_bar';
 
 import {
   generateFilters,
@@ -54,6 +55,7 @@ import {
 // Filter helpers namespace:
 export const esFilters = {
   FilterLabel,
+  FilterItem,
 
   FILTERS,
   FilterStateStore,
@@ -92,7 +94,7 @@ export const esFilters = {
   extractTimeRange,
 };
 
-export {
+export type {
   RangeFilter,
   RangeFilterMeta,
   RangeFilterParams,
@@ -158,6 +160,7 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 } from '../common/field_formats';
 
 import { DateNanosFormat, DateFormat } from './field_formats';
@@ -188,6 +191,7 @@ export const fieldFormats = {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 };
 
 export {
@@ -301,14 +305,15 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
-  Ipv4Address,
+  IpAddress,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
-  // expressions utils
-  getRequestInspectorStats,
+  boundsDescendingRaw,
+  getNumberHistogramIntervalByDatatableColumn,
+  getDateHistogramMetaDataByDatatableColumn,
   getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
@@ -343,10 +348,6 @@ export {
   ExpressionFunctionKibanaContext,
   ExpressionValueSearchContext,
   KibanaContext,
-  // tabify
-  TabbedAggColumn,
-  TabbedAggRow,
-  TabbedTable,
 } from '../common';
 
 export type { AggConfigs, AggConfig } from '../common';
@@ -379,10 +380,17 @@ export {
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
   // errors
+  IEsError,
   SearchError,
   SearchTimeoutError,
   TimeoutErrorMode,
   PainlessError,
+  Reason,
+  noSearchSessionStorageCapabilityMessage,
+  SEARCH_SESSIONS_MANAGEMENT_ID,
+  waitUntilNextSessionCompletes$,
+  WaitUntilNextSessionCompletesOptions,
+  isEsError,
 } from './search';
 
 export type {
@@ -390,6 +398,7 @@ export type {
   ISessionService,
   SearchSessionInfoProvider,
   ISessionsClient,
+  SearchUsageCollector,
 } from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
@@ -402,7 +411,7 @@ export const search = {
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
-    Ipv4Address,
+    IpAddress,
     isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
     isNumberType,
     isStringType,
@@ -416,8 +425,10 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    boundsDescendingRaw,
+    getNumberHistogramIntervalByDatatableColumn,
+    getDateHistogramMetaDataByDatatableColumn,
   },
-  getRequestInspectorStats,
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
@@ -458,6 +469,7 @@ export {
   TimeHistoryContract,
   QueryStateChange,
   QueryStart,
+  AutoRefreshDoneFn,
 } from './query';
 
 export { AggsStart } from './search/aggs';

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
+import { catchError, take } from 'rxjs/operators';
 import { Execution } from './execution';
 import { ExpressionValueError } from '../expression_types/specs';
 import { ExpressionAstExpression } from '../ast';
@@ -38,18 +40,21 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
    * This function never throws.
    */
   getData = async (): Promise<Output | ExpressionValueError> => {
-    try {
-      return await this.execution.result;
-    } catch (e) {
-      return {
-        type: 'error',
-        error: {
-          name: e.name,
-          message: e.message,
-          stack: e.stack,
-        },
-      };
-    }
+    return this.execution.result
+      .pipe(
+        take(1),
+        catchError(({ name, message, stack }) =>
+          of({
+            type: 'error',
+            error: {
+              name,
+              message,
+              stack,
+            },
+          } as ExpressionValueError)
+        )
+      )
+      .toPromise();
   };
 
   /**

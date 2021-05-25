@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
@@ -11,6 +11,7 @@ import Fs from 'fs';
 
 import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
+import { omit } from './obj_helpers';
 import { includes, ascending, entriesToObject } from './array_helpers';
 
 const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
@@ -36,6 +37,8 @@ export interface BundleSpec {
   readonly banner?: string;
   /** Absolute path to a kibana.json manifest file, if omitted we assume there are not dependenices */
   readonly manifestPath?: string;
+  /** Maximum allowed page load asset size for the bundles page load asset */
+  readonly pageLoadAssetSizeLimit?: number;
 }
 
 export class Bundle {
@@ -63,6 +66,8 @@ export class Bundle {
    * Every bundle mentioned in the `requiredBundles` must be built together.
    */
   public readonly manifestPath: BundleSpec['manifestPath'];
+  /** Maximum allowed page load asset size for the bundles page load asset */
+  public readonly pageLoadAssetSizeLimit: BundleSpec['pageLoadAssetSizeLimit'];
 
   public readonly cache: BundleCache;
 
@@ -75,8 +80,9 @@ export class Bundle {
     this.outputDir = spec.outputDir;
     this.manifestPath = spec.manifestPath;
     this.banner = spec.banner;
+    this.pageLoadAssetSizeLimit = spec.pageLoadAssetSizeLimit;
 
-    this.cache = new BundleCache(Path.resolve(this.outputDir, '.kbn-optimizer-cache'));
+    this.cache = new BundleCache(this.outputDir);
   }
 
   /**
@@ -85,7 +91,7 @@ export class Bundle {
    */
   createCacheKey(files: string[], mtimes: Map<string, number | undefined>): unknown {
     return {
-      spec: this.toSpec(),
+      spec: omit(this.toSpec(), ['pageLoadAssetSizeLimit']),
       mtimes: entriesToObject(
         files.map((p) => [p, mtimes.get(p)] as const).sort(ascending((e) => e[0]))
       ),
@@ -107,6 +113,7 @@ export class Bundle {
       outputDir: this.outputDir,
       manifestPath: this.manifestPath,
       banner: this.banner,
+      pageLoadAssetSizeLimit: this.pageLoadAssetSizeLimit,
     };
   }
 
@@ -222,6 +229,13 @@ export function parseBundles(json: string) {
           }
         }
 
+        const { pageLoadAssetSizeLimit } = spec;
+        if (pageLoadAssetSizeLimit !== undefined) {
+          if (!(typeof pageLoadAssetSizeLimit === 'number')) {
+            throw new Error('`bundles[]` must have a numeric `pageLoadAssetSizeLimit` property');
+          }
+        }
+
         return new Bundle({
           type,
           id,
@@ -231,6 +245,7 @@ export function parseBundles(json: string) {
           outputDir,
           banner,
           manifestPath,
+          pageLoadAssetSizeLimit,
         });
       }
     );

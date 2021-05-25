@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import fs from 'fs';
@@ -18,7 +19,9 @@ const MOCKED_PATHS = [
 
 beforeEach(() => {
   const spy = jest.spyOn(fs, 'readFileSync').mockImplementation();
-  MOCKED_PATHS.forEach((file) => when(spy).calledWith(file).mockReturnValue(`contents-of-${file}`));
+  MOCKED_PATHS.forEach((file) =>
+    when(spy).calledWith(file, 'utf8').mockReturnValue(`contents-of-${file}`)
+  );
 });
 
 describe('config schema', () => {
@@ -29,6 +32,9 @@ describe('config schema', () => {
           "interval": "10s",
         },
         "cluster_alerts": Object {
+          "allowedSpaces": Array [
+            "default",
+          ],
           "email_notifications": Object {
             "email_address": "",
             "enabled": true,
@@ -55,6 +61,9 @@ describe('config schema', () => {
             "enabled": true,
           },
           "container": Object {
+            "apm": Object {
+              "enabled": false,
+            },
             "elasticsearch": Object {
               "enabled": false,
             },

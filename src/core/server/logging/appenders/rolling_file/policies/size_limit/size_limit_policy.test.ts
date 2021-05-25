@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -15,7 +15,7 @@ describe('SizeLimitTriggeringPolicy', () => {
   let context: RollingFileContext;
 
   const createPolicy = (size: ByteSizeValue) =>
-    new SizeLimitTriggeringPolicy({ kind: 'size-limit', size }, context);
+    new SizeLimitTriggeringPolicy({ type: 'size-limit', size }, context);
 
   const createLogRecord = (parts: Partial<LogRecord> = {}): LogRecord => ({
     timestamp: new Date(),

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,13 +14,21 @@ import { getExceptionListSchemaMock } from '../../../../../../../../lists/common
 
 import { ExceptionListsTable } from './exceptions_table';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import { useApi, useExceptionLists } from '../../../../../../shared_imports';
+import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAllExceptionLists } from './use_all_exception_lists';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('./use_all_exception_lists');
-jest.mock('../../../../../../shared_imports');
+jest.mock('@kbn/securitysolution-list-hooks');
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 describe('ExceptionListsTable', () => {
   const exceptionList1 = getExceptionListSchemaMock();
   const exceptionList2 = { ...getExceptionListSchemaMock(), list_id: 'not_endpoint_list', id: '2' };

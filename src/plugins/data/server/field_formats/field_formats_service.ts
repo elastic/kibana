@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { has } from 'lodash';
@@ -33,8 +33,9 @@ export class FieldFormatsService {
     return {
       fieldFormatServiceFactory: async (uiSettings: IUiSettingsClient) => {
         const fieldFormatsRegistry = new FieldFormatsRegistry();
-        const uiConfigs = await uiSettings.getAll();
+        const coreUiConfigs = await uiSettings.getAll();
         const registeredUiSettings = uiSettings.getRegistered();
+        const uiConfigs = { ...coreUiConfigs };
 
         Object.keys(registeredUiSettings).forEach((key) => {
           if (has(uiConfigs, key) && registeredUiSettings[key].type === 'json') {

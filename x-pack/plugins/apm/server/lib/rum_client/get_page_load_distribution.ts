@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
@@ -143,12 +144,16 @@ export async function getPageLoadDistribution({
   }
 
   // calculate the diff to get actual page load on specific duration value
-  let pageDist = pageDistVals.map(({ key, value }, index: number, arr) => {
-    return {
-      x: microToSec(key),
-      y: index === 0 ? value : value - arr[index - 1].value,
-    };
-  });
+  let pageDist = pageDistVals.map(
+    ({ key, value: maybeNullValue }, index: number, arr) => {
+      // FIXME: values from percentile* aggs can be null
+      const value = maybeNullValue!;
+      return {
+        x: microToSec(key),
+        y: index === 0 ? value : value - arr[index - 1].value!,
+      };
+    }
+  );
 
   pageDist = removeZeroesFromTail(pageDist);
 

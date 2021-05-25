@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '../..';
+import { APP_WRAPPER_CLASS } from '../../../../../../src/core/server';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { omitBlockedHeaders } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
@@ -46,8 +48,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
           height: 2024,
         },
         selectors: {
-          screenshot: '.application',
-          renderComplete: '.application',
+          screenshot: `.${APP_WRAPPER_CLASS}`,
+          renderComplete: `.${APP_WRAPPER_CLASS}`,
           itemsCountAttribute: 'data-test-subj="kibanaChrome"',
           timefilterDurationAttribute: 'data-test-subj="kibanaChrome"',
         },

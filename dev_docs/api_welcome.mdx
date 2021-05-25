@@ -2,13 +2,80 @@
 id: kibDevDocsApiWelcome
 slug: /kibana-dev-docs/api-welcome
 title: Welcome
-summary: The home of automatically generated plugin API documentation using extracted TSDocs
-date: 2021-01-02
+summary: How to use our automatically generated API documentation
+date: 2021-02-25
 tags: ['kibana','dev', 'contributor', 'api docs']
 ---
 
-Welcome to Kibana's plugin API documentation. As a plugin developer, this is where you can 
-learn the details of every service you can take advantage of to help you build awe-inspiring creative solutions and applications!
+Welcome to our automatically generated typescript API 
+documentation for every plugin that exposes a <DocLink id="kibPlatformIntro" section="public-plugin-api" text="public API"/>!
 
-If you have any questions or issues, please reach out to the Kibana platform team or create an issue [here](https://github.com/elastic/kibana/issues).
+<DocCallOut color="warning" title="Experimental">
+This documentation is being automatically generated using an
+ [_experimental_ system](https://github.com/elastic/kibana/blob/master/rfcs/text/0014_api_documentation.md). That means
+ it may be removed or modified at any time. If you have any questions, feedback or concerns, please create an issue using
+  the label `APIDocs`, or reach out to the Kibana Tech Leads
+ who are temporarily owning and maintaining this system.
+ </DocCallOut>
+
+ ## What is included
+
+ Every plugin that 
+ <DocLink id="kibPlatformIntro" section="public-plugin-api" text="exposes functionality for other plugins to use"/> will have
+ API documentation automatically generated (note this system 
+ does *not* handle REST APIs).
+
+ <DocCallOut title="@internal tags">API items that have an `@internal` in the comment are not 
+ included in the documentation system.</DocCallOut> 
+
+ ## How it works
+
+ If you change or delete a public plugin API, or add a new one, you will have to run the command `node scripts/build_api_docs` in order to update the
+ docs in your PR, or CI will fail. When this happens, consider:
+ 
+ 1. If this affects an existing API item, have you emailed the `kibana-contributors` list with a heads up? It's important to give advance 
+ notice, since there may be corner cases you aren't aware of, even if your PR passes CI.
+ 2. If the change you are making aren't relevant to contributors, consider a) making the API private, or b) adding the `@internal` flag to it.
+
+## Q & A 
+
+### Why do I not see my plugin's public API?
+
+There is one extra step required to have your API docs show up in the _navigation_ of the docs system. Follow
+the instructions <DocLink id="docsSetup" section="configure-the-nav-for-your-content" text="here" /> to learn how to 
+configure the navigation menu.  The nav file you need to
+ edit is: [https://github.com/elastic/elastic-docs/blob/master/config/nav-kibana-dev.ts](https://github.com/elastic/elastic-docs/blob/master/config/nav-kibana-dev.ts)
+
+Your API docs will exist in the top level [`api_docs` folder](https://github.com/elastic/kibana/tree/master/api_docs) and will use a doc id of the pattern `kib${PluginName}PluginApi`.
+
+### Why is a referenced API item not showing up as clickable?
+
+There are a few reasons his could happen. First, check if you are exporting the API item. For example,
+if you have the following in your `my_plugin/public/index.ts` file:
+
+```
+type Bar = { id: string };
+export type Foo = Bar | string;
+```
+
+`Bar`, in the signature of `Foo`, will not be clickable because it would result in a broken link. `Bar` is not publically exported!
+
+If that isn't the case, please file an issue, it could be a bug with the system.
+
+### Why are the docs so slow?
+
+We are [aware of some performance issues](https://github.com/elastic/elastic-docs/issues/274) with deeply nested, or large APIs.
+
+In the short term, the best thing you can do is avoid deeply nested API items. Use interfaces rather than inlined objects. Also consider
+adding `serviceFolders` in your kibana.json. This will automatically split your docs up based on which APIs are defined within the service folders.
+They will get built into a doc with an id of
+`kib${PluginName}${ServiceName}PluginApi`. The data plugin does this, so you
+ can [check that out as an example](https://github.com/elastic/kibana/blob/master/src/plugins/data/kibana.json#L13).
+
+ If that isn't the case and you are still experiencing performance issues, please file an issue!
+
+### Where do I ask questions or give feedback?
+
+If you have any questions or issues, please reach out to the Kibana Tech Leads or create an issue [here](https://github.com/elastic/kibana/issues)
+and use the label `APIDocs`.
 

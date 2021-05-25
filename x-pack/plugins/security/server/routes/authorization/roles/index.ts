@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RouteDefinitionParams } from '../..';
+import type { RouteDefinitionParams } from '../..';
+import { defineDeleteRolesRoutes } from './delete';
 import { defineGetRolesRoutes } from './get';
 import { defineGetAllRolesRoutes } from './get_all';
-import { defineDeleteRolesRoutes } from './delete';
 import { definePutRolesRoutes } from './put';
 
 export function defineRolesRoutes(params: RouteDefinitionParams) {

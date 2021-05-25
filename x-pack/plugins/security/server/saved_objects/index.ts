@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  CoreSetup,
-  KibanaRequest,
-  LegacyRequest,
-  SavedObjectsClient,
-} from '../../../../../src/core/server';
+import type { CoreSetup, LegacyRequest } from 'src/core/server';
+
+import { KibanaRequest, SavedObjectsClient } from '../../../../../src/core/server';
+import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import type { AuthorizationServiceSetup } from '../authorization';
+import type { SpacesService } from '../plugin';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
-import { AuthorizationServiceSetup } from '../authorization';
-import { SecurityAuditLogger, AuditServiceSetup } from '../audit';
-import { SpacesService } from '../plugin';
 
 interface SetupSavedObjectsParams {
   legacyAuditLogger: SecurityAuditLogger;

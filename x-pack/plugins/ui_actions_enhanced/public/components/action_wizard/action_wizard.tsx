@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -98,23 +99,29 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   triggerPickerDocsLink,
 }) => {
   // auto pick action factory if there is only 1 available
-  if (
-    !currentActionFactory &&
-    actionFactories.length === 1 &&
-    actionFactories[0].isCompatibleLicense()
-  ) {
-    onActionFactoryChange(actionFactories[0]);
-  }
+  React.useEffect(() => {
+    if (
+      !currentActionFactory &&
+      actionFactories.length === 1 &&
+      actionFactories[0].isCompatibleLicense()
+    ) {
+      onActionFactoryChange(actionFactories[0]);
+    }
+  }, [currentActionFactory, actionFactories, actionFactories.length, onActionFactoryChange]);
 
   // auto pick selected trigger if none is picked
-  if (currentActionFactory && !((context.triggers?.length ?? 0) > 0)) {
-    const actionTriggers = getTriggersForActionFactory(currentActionFactory, triggers);
-    if (actionTriggers.length > 0) {
-      onSelectedTriggersChange([actionTriggers[0]]);
+  React.useEffect(() => {
+    if (currentActionFactory && !((context.triggers?.length ?? 0) > 0)) {
+      const actionTriggers = getTriggersForActionFactory(currentActionFactory, triggers);
+      if (actionTriggers.length > 0) {
+        onSelectedTriggersChange([actionTriggers[0]]);
+      }
     }
-  }
+  }, [currentActionFactory, triggers, context.triggers?.length, onSelectedTriggersChange]);
 
-  if (currentActionFactory && config) {
+  if (currentActionFactory) {
+    if (!config) return null;
+
     const allTriggers = getTriggersForActionFactory(currentActionFactory, triggers);
     return (
       <SelectedActionFactory
@@ -140,9 +147,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
     <ActionFactorySelector
       context={context}
       actionFactories={actionFactories}
-      onActionFactorySelected={(actionFactory) => {
-        onActionFactoryChange(actionFactory);
-      }}
+      onActionFactorySelected={onActionFactoryChange}
     />
   );
 };

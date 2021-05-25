@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { loginAndWaitForTimeline } from '../../tasks/login';
@@ -18,7 +19,8 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import { createCase } from '../../tasks/api_calls/cases';
 
-describe('attach timeline to case', () => {
+// TODO: enable once attach timeline to cases is re-enabled
+describe.skip('attach timeline to case', () => {
   context('without cases created', () => {
     beforeEach(() => {
       cleanKibana();

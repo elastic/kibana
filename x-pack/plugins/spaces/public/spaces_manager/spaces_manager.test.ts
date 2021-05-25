@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SpacesManager } from '.';
-import { coreMock } from 'src/core/public/mocks';
 import { nextTick } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import { SpacesManager } from './spaces_manager';
 
 describe('SpacesManager', () => {
   describe('#constructor', () => {

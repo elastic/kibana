@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { readFileSync } from 'fs';
+import path from 'path';
+
 import glob from 'glob';
 import { safeLoad } from 'js-yaml';
-import path from 'path';
-import { Field, Fields, getField, processFields } from './field';
+
+import { getField, processFields } from './field';
+import type { Field, Fields } from './field';
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({

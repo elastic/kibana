@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import chalk from 'chalk';
@@ -11,18 +11,10 @@ import { CliArgs, Env, RawConfigService } from './config';
 import { Root } from './root';
 import { CriticalError } from './errors';
 
-interface KibanaFeatures {
-  // Indicates whether we can run Kibana in dev mode in which Kibana is run as
-  // a child process together with optimizer "worker" processes that are
-  // orchestrated by a parent process (dev mode only feature).
-  isCliDevModeSupported: boolean;
-}
-
 interface BootstrapArgs {
   configs: string[];
   cliArgs: CliArgs;
   applyConfigOverrides: (config: Record<string, any>) => Record<string, any>;
-  features: KibanaFeatures;
 }
 
 /**
@@ -30,12 +22,7 @@ interface BootstrapArgs {
  * @internal
  * @param param0 - options
  */
-export async function bootstrap({
-  configs,
-  cliArgs,
-  applyConfigOverrides,
-  features,
-}: BootstrapArgs) {
+export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) {
   if (cliArgs.optimize) {
     // --optimize is deprecated and does nothing now, avoid starting up and just shutdown
     return;
@@ -52,7 +39,6 @@ export async function bootstrap({
   const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
-    isDevCliParent: cliArgs.dev && features.isCliDevModeSupported && !process.env.isDevCliChild,
   });
 
   const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
@@ -60,22 +46,22 @@ export async function bootstrap({
 
   const root = new Root(rawConfigService, env, onRootShutdown);
 
-  process.on('SIGHUP', () => reloadLoggingConfig());
+  process.on('SIGHUP', () => reloadConfiguration());
 
   // This is only used by the LogRotator service
   // in order to be able to reload the log configuration
   // under the cluster mode
   process.on('message', (msg) => {
-    if (!msg || msg.reloadLoggingConfig !== true) {
+    if (!msg || msg.reloadConfiguration !== true) {
       return;
     }
 
-    reloadLoggingConfig();
+    reloadConfiguration();
   });
 
-  function reloadLoggingConfig() {
+  function reloadConfiguration() {
     const cliLogger = root.logger.get('cli');
-    cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
+    cliLogger.info('Reloading Kibana configuration due to SIGHUP.', { tags: ['config'] });
 
     try {
       rawConfigService.reloadConfig();
@@ -83,7 +69,7 @@ export async function bootstrap({
       return shutdown(err);
     }
 
-    cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
+    cliLogger.info('Reloaded Kibana configuration due to SIGHUP.', { tags: ['config'] });
   }
 
   process.on('SIGINT', () => shutdown());
@@ -97,6 +83,11 @@ export async function bootstrap({
   try {
     await root.setup();
     await root.start();
+
+    // notify parent process know when we are ready for dev mode.
+    if (process.send) {
+      process.send(['SERVER_LISTENING']);
+    }
   } catch (err) {
     await shutdown(err);
   }

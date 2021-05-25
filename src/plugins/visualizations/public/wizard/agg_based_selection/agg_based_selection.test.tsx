@@ -1,26 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { TypesStart, VisType, VisGroups } from '../../vis_types';
+import { TypesStart, BaseVisType, VisGroups } from '../../vis_types';
 import { AggBasedSelection } from './agg_based_selection';
 
 describe('AggBasedSelection', () => {
   const defaultVisTypeParams = {
     hidden: false,
-    visualization: class Controller {
-      public render = jest.fn();
-      public destroy = jest.fn();
-    },
     requiresSearch: false,
-    requestHandler: 'none',
-    responseHandler: 'none',
   };
   const _visTypes = [
     {
@@ -50,22 +44,16 @@ describe('AggBasedSelection', () => {
       stage: 'production',
       ...defaultVisTypeParams,
     },
-  ] as VisType[];
+  ] as BaseVisType[];
 
   const visTypes: TypesStart = {
-    get<T>(id: string): VisType<T> {
-      return _visTypes.find((vis) => vis.name === id) as VisType<T>;
+    get<T>(id: string): BaseVisType<T> {
+      return (_visTypes.find((vis) => vis.name === id) as unknown) as BaseVisType<T>;
     },
-    all: () => {
-      return (_visTypes as unknown) as VisType[];
-    },
+    all: () => _visTypes,
     getAliases: () => [],
     unRegisterAlias: () => [],
-    getByGroup: (group: VisGroups) => {
-      return _visTypes.filter((type) => {
-        return type.group === group;
-      }) as VisType[];
-    },
+    getByGroup: (group: VisGroups) => _visTypes.filter((type) => type.group === group),
   };
 
   beforeAll(() => {

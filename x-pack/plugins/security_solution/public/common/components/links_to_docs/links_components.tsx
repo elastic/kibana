@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -19,5 +20,12 @@ export const DetectionsRequirementsLink = () => (
   <DocLink
     docPath={i18n.DETECTIONS_REQUIREMENTS_LINK_PATH}
     linkText={i18n.DETECTIONS_REQUIREMENTS_LINK_TEXT}
+  />
+);
+
+export const MlJobCompatibilityLink = () => (
+  <DocLink
+    docPath={i18n.ML_JOB_COMPATIBILITY_LINK_PATH}
+    linkText={i18n.ML_JOB_COMPATIBILITY_LINK_TEXT}
   />
 );

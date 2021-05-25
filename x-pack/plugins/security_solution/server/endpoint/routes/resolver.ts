@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IRouter } from 'kibana/server';
-import { EndpointAppContext } from '../types';
 import {
   validateEvents,
   validateEntities,
@@ -16,16 +16,14 @@ import { handleTree } from './resolver/tree/handler';
 import { handleEntities } from './resolver/entity';
 import { handleEvents } from './resolver/events';
 
-export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
-  const log = endpointAppContext.logFactory.get('resolver');
-
+export function registerResolverRoutes(router: IRouter) {
   router.post(
     {
       path: '/api/endpoint/resolver/tree',
       validate: validateTree,
       options: { authRequired: true },
     },
-    handleTree(log)
+    handleTree()
   );
 
   router.post(
@@ -34,7 +32,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateEvents,
       options: { authRequired: true },
     },
-    handleEvents(log)
+    handleEvents()
   );
 
   /**

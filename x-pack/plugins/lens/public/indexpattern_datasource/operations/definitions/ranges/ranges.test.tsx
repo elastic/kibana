@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -32,6 +33,30 @@ import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '../shared_components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
 
+// mocking random id generator function
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      let counter = 0;
+      return () => counter++;
+    },
+  };
+});
+
+jest.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
+
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ params }) => {
@@ -51,13 +76,15 @@ dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ p
 type ReactMouseEvent = React.MouseEvent<HTMLAnchorElement, MouseEvent> &
   React.MouseEvent<HTMLButtonElement, MouseEvent>;
 
+// need this for MAX_HISTOGRAM value
+const uiSettingsMock = ({
+  get: jest.fn().mockReturnValue(100),
+} as unknown) as IUiSettingsClient;
+
 const sourceField = 'MyField';
 const defaultOptions = {
   storage: {} as IStorageWrapper,
-  // need this for MAX_HISTOGRAM value
-  uiSettings: ({
-    get: () => 100,
-  } as unknown) as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: {
     fromDate: 'now-1y',
@@ -74,6 +101,7 @@ const defaultOptions = {
       { name: sourceField, type: 'number', displayName: sourceField },
     ]),
   },
+  operationDefinitionMap: {},
 };
 
 describe('ranges', () => {
@@ -143,7 +171,8 @@ describe('ranges', () => {
         layer.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
       expect(esAggsFn).toMatchInlineSnapshot(`
         Object {
@@ -166,6 +195,9 @@ describe('ranges', () => {
             "interval": Array [
               "auto",
             ],
+            "maxBars": Array [
+              49.5,
+            ],
             "min_doc_count": Array [
               false,
             ],
@@ -186,7 +218,8 @@ describe('ranges', () => {
         layer.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
 
       expect(esAggsFn).toEqual(
@@ -206,7 +239,8 @@ describe('ranges', () => {
         layer.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
 
       expect(esAggsFn).toEqual(
@@ -226,7 +260,8 @@ describe('ranges', () => {
         layer.columns.col1 as RangeIndexPatternColumn,
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
 
       expect((esAggsFn as { arguments: unknown }).arguments).toEqual(
@@ -275,7 +310,7 @@ describe('ranges', () => {
 
       it('should start update the state with the default maxBars value', () => {
         const updateLayerSpy = jest.fn();
-        mount(
+        const instance = mount(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -285,19 +320,7 @@ describe('ranges', () => {
           />
         );
 
-        expect(updateLayerSpy).toHaveBeenCalledWith({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            col1: {
-              ...layer.columns.col1,
-              params: {
-                ...layer.columns.col1.params,
-                maxBars: GRANULARITY_DEFAULT_VALUE,
-              },
-            },
-          },
-        });
+        expect(instance.find(EuiRange).prop('value')).toEqual(String(GRANULARITY_DEFAULT_VALUE));
       });
 
       it('should update state when changing Max bars number', () => {
@@ -313,8 +336,6 @@ describe('ranges', () => {
           />
         );
 
-        // There's a useEffect in the component that updates the value on bootstrap
-        // because there's a debouncer, wait a bit before calling onChange
         act(() => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
@@ -358,8 +379,6 @@ describe('ranges', () => {
           />
         );
 
-        // There's a useEffect in the component that updates the value on bootstrap
-        // because there's a debouncer, wait a bit before calling onChange
         act(() => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
           // minus button
@@ -368,6 +387,7 @@ describe('ranges', () => {
             .find('button')
             .prop('onClick')!({} as ReactMouseEvent);
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+          instance.update();
         });
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -391,6 +411,7 @@ describe('ranges', () => {
             .find('button')
             .prop('onClick')!({} as ReactMouseEvent);
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+          instance.update();
         });
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -788,7 +809,7 @@ describe('ranges', () => {
           instance.find(EuiLink).first().prop('onClick')!({} as ReactMouseEvent);
         });
 
-        expect(updateLayerSpy.mock.calls[1][0].columns.col1.params.format).toEqual({
+        expect(updateLayerSpy.mock.calls[0][0].columns.col1.params.format).toEqual({
           id: 'custom',
           params: { decimals: 3 },
         });

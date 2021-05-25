@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -74,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
                   createConflictError(visualization),
                   createConflictError(dashboard),
                 ],
+                warnings: [],
               });
             });
         });
@@ -93,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
                   { ...visualization, overwrite: true },
                   { ...dashboard, overwrite: true },
                 ],
+                warnings: [],
               });
             });
         });
@@ -119,6 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
                     error: { type: 'unsupported_type' },
                   },
                 ],
+                warnings: [],
               });
             });
         });
@@ -157,12 +160,13 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'dashboard',
               },
             ],
+            warnings: [],
           });
         });
 
         it('should return 400 when trying to import more than 10,000 objects', async () => {
           const fileChunks = [];
-          for (let i = 0; i < 10001; i++) {
+          for (let i = 0; i <= 10001; i++) {
             fileChunks.push(`{"type":"visualization","id":"${i}","attributes":{},"references":[]}`);
           }
           await supertest
@@ -173,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: "Can't import more than 10000 objects",
+                message: "Can't import more than 10001 objects",
               });
             });
         });
@@ -227,6 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
                     },
                   },
                 ],
+                warnings: [],
               });
             });
         });

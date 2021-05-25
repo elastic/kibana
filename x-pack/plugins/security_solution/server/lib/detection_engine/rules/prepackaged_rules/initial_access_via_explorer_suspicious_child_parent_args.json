@@ -6,13 +6,14 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Explorer Child Process",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : (\"cscript.exe\", \"wscript.exe\", \"powershell.exe\", \"rundll32.exe\", \"cmd.exe\", \"mshta.exe\", \"regsvr32.exe\") and\n  /* Explorer started via DCOM */\n  process.parent.name : \"explorer.exe\" and process.parent.args : \"-Embedding\"\n",
-  "risk_score": 43,
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (\n   process.name : (\"cscript.exe\", \"wscript.exe\", \"powershell.exe\", \"rundll32.exe\", \"cmd.exe\", \"mshta.exe\", \"regsvr32.exe\") or\n   process.pe.original_file_name in (\"cscript.exe\", \"wscript.exe\", \"PowerShell.EXE\", \"RUNDLL32.EXE\", \"Cmd.Exe\", \"MSHTA.EXE\", \"REGSVR32.EXE\")\n  ) and\n  /* Explorer started via DCOM */\n  process.parent.name : \"explorer.exe\" and process.parent.args : \"-Embedding\" and\n  not process.parent.args:\n          (\n            /* Noisy CLSID_SeparateSingleProcessExplorerHost Explorer COM Class IDs   */\n            \"/factory,{5BD95610-9434-43C2-886C-57852CC8A120}\",\n            \"/factory,{ceff45ee-c862-41de-aee2-a022c81eda92}\"\n          )\n",
+  "risk_score": 47,
   "rule_id": "9a5b4e31-6cde-4295-9ff7-6be1b8567e1b",
   "severity": "medium",
   "tags": [
@@ -20,7 +21,7 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Execution"
+    "Initial Access"
   ],
   "threat": [
     {
@@ -51,6 +52,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 4
 }

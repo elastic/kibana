@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { History } from 'history';
@@ -44,10 +45,6 @@ export interface LensAppState {
   isLoading: boolean;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
-  isSaveModalVisible: boolean;
-
-  // Used to show a popover that guides the user towards changing the date range when no data is available.
-  indicateNoData: boolean;
 
   // index patterns used to determine which filters are available in the top nav.
   indexPatternsForTopNav: IndexPattern[];

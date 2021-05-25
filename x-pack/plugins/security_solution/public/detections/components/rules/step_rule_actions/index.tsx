@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -35,6 +36,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getSchema } from './schema';
 import * as I18n from './translations';
 import { APP_ID } from '../../../../../common/constants';
+import { useManageCaseAction } from './use_manage_case_action';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
@@ -69,6 +71,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   setForm,
   actionMessageParams,
 }) => {
+  const [isLoadingCaseAction, hasErrorOnCreationCaseAction] = useManageCaseAction();
   const {
     services: {
       application,
@@ -137,13 +140,14 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     () => ({
       idAria: 'detectionEngineStepRuleActionsThrottle',
       isDisabled: isLoading,
+      isLoading: isLoadingCaseAction,
       dataTestSubj: 'detectionEngineStepRuleActionsThrottle',
       hasNoInitialSelection: false,
       euiFieldProps: {
         options: throttleOptions,
       },
     }),
-    [isLoading, throttleOptions]
+    [isLoading, isLoadingCaseAction, throttleOptions]
   );
 
   const displayActionsOptions = useMemo(
@@ -156,13 +160,14 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             component={RuleActionsField}
             componentProps={{
               messageVariables: actionMessageParams,
+              hasErrorOnCreationCaseAction,
             }}
           />
         </>
       ) : (
         <UseField path="actions" component={GhostFormField} />
       ),
-    [throttle, actionMessageParams]
+    [throttle, actionMessageParams, hasErrorOnCreationCaseAction]
   );
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {

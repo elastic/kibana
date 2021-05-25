@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -22,6 +23,7 @@ describe('EntryItem', () => {
     const wrapper = mount(
       <EntryItem
         entry={{
+          id: '123',
           field: undefined,
           value: undefined,
           type: 'mapping',
@@ -54,6 +56,7 @@ describe('EntryItem', () => {
     const wrapper = mount(
       <EntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           type: 'mapping',
           value: getField('ip'),
@@ -84,6 +87,7 @@ describe('EntryItem', () => {
 
     expect(mockOnChange).toHaveBeenCalledWith(
       {
+        id: '123',
         field: 'machine.os',
         type: 'mapping',
         value: 'ip',
@@ -97,6 +101,7 @@ describe('EntryItem', () => {
     const wrapper = mount(
       <EntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           type: 'mapping',
           value: getField('ip'),
@@ -125,6 +130,9 @@ describe('EntryItem', () => {
       onChange: (a: EuiComboBoxOptionOption[]) => void;
     }).onChange([{ label: 'is not' }]);
 
-    expect(mockOnChange).toHaveBeenCalledWith({ field: 'ip', type: 'mapping', value: '' }, 0);
+    expect(mockOnChange).toHaveBeenCalledWith(
+      { id: '123', field: 'ip', type: 'mapping', value: '' },
+      0
+    );
   });
 });

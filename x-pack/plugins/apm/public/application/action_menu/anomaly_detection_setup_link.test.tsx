@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { MissingJobsAlert } from './anomaly_detection_setup_link';
-import * as hooks from '../../hooks/use_fetcher';
+import * as hooks from '../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { FETCH_STATUS } from '../../hooks/use_fetcher';
 
 async function renderTooltipAnchor({
   jobs,
@@ -17,10 +19,10 @@ async function renderTooltipAnchor({
   environment?: string;
 }) {
   // mock api response
-  jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-    data: { jobs },
-    status: hooks.FETCH_STATUS.SUCCESS,
-    refetch: jest.fn(),
+  jest.spyOn(hooks, 'useAnomalyDetectionJobsContext').mockReturnValue({
+    anomalyDetectionJobsData: { jobs, hasLegacyJobs: false },
+    anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
+    anomalyDetectionJobsRefetch: () => {},
   });
 
   const { baseElement, container } = render(

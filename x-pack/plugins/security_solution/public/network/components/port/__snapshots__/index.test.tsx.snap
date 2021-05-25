@@ -11,6 +11,5 @@ exports[`Port renders correctly against snapshot 1`] = `
   <PortOrServiceNameLink
     portOrServiceName="443"
   />
-  <ExternalLinkIcon />
 </DefaultDraggable>
 `;

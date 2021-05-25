@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   LegacyEndpointEvent,
   ResolverEvent,
@@ -158,12 +160,12 @@ export function md5HashForProcess(event: SafeResolverEvent): string | undefined 
 /**
  * First non-null value for the `event.process.args` field.
  */
-export function argsForProcess(event: SafeResolverEvent): string | undefined {
+export function argsForProcess(event: SafeResolverEvent): string[] | undefined {
   if (isLegacyEventSafeVersion(event)) {
     // There is not currently a key for this on Legacy event types
     return undefined;
   }
-  return firstNonNullValue(event.process?.args);
+  return values(event.process?.args);
 }
 
 /**

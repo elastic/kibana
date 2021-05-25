@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useUrlParams } from '../context/url_params_context/use_url_params';
@@ -14,8 +15,9 @@ export function useErrorGroupDistributionFetcher({
   serviceName: string;
   groupId: string | undefined;
 }) {
-  const { urlParams, uiFilters } = useUrlParams();
-  const { start, end } = urlParams;
+  const {
+    urlParams: { environment, kuery, start, end },
+  } = useUrlParams();
   const { data } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -24,16 +26,17 @@ export function useErrorGroupDistributionFetcher({
           params: {
             path: { serviceName },
             query: {
+              environment,
+              kuery,
               start,
               end,
               groupId,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [serviceName, start, end, groupId, uiFilters]
+    [environment, kuery, serviceName, start, end, groupId]
   );
 
   return { errorDistributionData: data };

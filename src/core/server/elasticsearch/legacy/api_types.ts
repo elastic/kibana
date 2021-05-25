@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -140,6 +140,7 @@ import {
  *
  * @public
  * @deprecated
+ * @removeBy 7.16
  */
 export interface LegacyCallAPIOptions {
   /**
@@ -157,6 +158,7 @@ export interface LegacyCallAPIOptions {
 
 /**
  * @deprecated
+ * @removeBy 7.16
  * @public
  * */
 export interface LegacyAPICaller {
@@ -312,6 +314,7 @@ export interface LegacyAPICaller {
 
 /**
  * @deprecated
+ * @removeBy 7.16
  * @public
  * */
 export interface AssistantAPIClientParams extends GenericParams {
@@ -321,17 +324,20 @@ export interface AssistantAPIClientParams extends GenericParams {
 
 /**
  * @deprecated
+ * @removeBy 7.16
  * @public
  * */
 export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 /**
  * @deprecated
+ * @removeBy 7.16
  * @public
  * */
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 
 /**
  * @deprecated
+ * @removeBy 7.16
  * @public
  * */
 export interface AssistanceAPIResponse {
@@ -344,6 +350,7 @@ export interface AssistanceAPIResponse {
 
 /**
  * @deprecated
+ * @removeBy 7.16
  * @public
  * */
 export interface DeprecationAPIClientParams extends GenericParams {
@@ -353,6 +360,7 @@ export interface DeprecationAPIClientParams extends GenericParams {
 
 /**
  * @deprecated
+ * @removeBy 7.16
  * @public
  * */
 export interface DeprecationInfo {
@@ -364,6 +372,7 @@ export interface DeprecationInfo {
 
 /**
  * @deprecated
+ * @removeBy 7.16
  * @public
  * */
 export interface IndexSettingsDeprecationInfo {
@@ -372,6 +381,7 @@ export interface IndexSettingsDeprecationInfo {
 
 /**
  * @deprecated
+ * @removeBy 7.16
  * @public
  * */
 export interface DeprecationAPIResponse {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sampleDocNoSortId } from './__mocks__/es_results';
@@ -15,6 +16,7 @@ describe('buildEventTypeSignal', () => {
 
   test('it returns the event appended of kind signal if it does not exist', () => {
     const doc = sampleDocNoSortId();
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.event;
     const eventType = buildEventTypeSignal(doc);
     const expected: object = { kind: 'signal' };
@@ -23,6 +25,7 @@ describe('buildEventTypeSignal', () => {
 
   test('it returns the event appended of kind signal if it is an empty object', () => {
     const doc = sampleDocNoSortId();
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {};
     const eventType = buildEventTypeSignal(doc);
     const expected: object = { kind: 'signal' };
@@ -31,6 +34,7 @@ describe('buildEventTypeSignal', () => {
 
   test('it returns the event with kind signal and other properties if they exist', () => {
     const doc = sampleDocNoSortId();
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       module: 'system',

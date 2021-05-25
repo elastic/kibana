@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 require('../../src/setup_node_env');
 const _ = require('lodash');
+// eslint-disable-next-line no-restricted-modules
 const template = require('lodash/template');
 const fp = require('lodash/fp');
 const fpTemplate = require('lodash/fp/template');
@@ -24,6 +25,7 @@ test('test setup ok', (t) => {
   t.end();
 });
 
+// eslint-disable-next-line no-restricted-properties
 [_.template, template].forEach((fn) => {
   test(`_.template('<%= foo %>')`, (t) => {
     const output = fn('<%= foo %>')({ foo: 'bar' });

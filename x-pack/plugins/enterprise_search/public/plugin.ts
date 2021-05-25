@@ -1,24 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   AppMountParameters,
+  CoreStart,
   CoreSetup,
   HttpSetup,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
-import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 import {
   APP_SEARCH_PLUGIN,
@@ -26,6 +28,8 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { InitialAppData } from '../common/types';
+
+import { docLinks } from './applications/shared/doc_links';
 
 export interface ClientConfigType {
   host?: string;
@@ -110,6 +114,9 @@ export class EnterpriseSearchPlugin implements Plugin {
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
 
+        // The Workplace Search Personal dashboard needs the chrome hidden. We hide it globally
+        // here first to prevent a flash of chrome on the Personal dashboard and unhide it for admin routes.
+        if (this.config.host) chrome.setIsVisible(false);
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
@@ -153,7 +160,11 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public start() {}
+  public start(core: CoreStart) {
+    // This must be called here in start() and not in `applications/index.tsx` to prevent loading
+    // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
+    docLinks.setDocLinks(core.docLinks);
+  }
 
   public stop() {}
 

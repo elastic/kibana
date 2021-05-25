@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
-import { ShallowWrapper } from 'enzyme';
-import { shallowWithI18nProvider } from '@kbn/test/jest';
+import { ReactWrapper } from 'enzyme';
+import { mountWithI18nProvider } from '@kbn/test/jest';
+import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { ImportSummary, ImportSummaryProps } from './import_summary';
 import { FailedImport } from '../../../lib';
 
@@ -16,6 +17,20 @@ import { FailedImport } from '../../../lib';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('ImportSummary', () => {
+  let basePath: ReturnType<typeof httpServiceMock.createBasePath>;
+
+  const getProps = (parts: Partial<ImportSummaryProps>): ImportSummaryProps => ({
+    basePath,
+    failedImports: [],
+    successfulImports: [],
+    importWarnings: [],
+    ...parts,
+  });
+
+  beforeEach(() => {
+    basePath = httpServiceMock.createBasePath();
+  });
+
   const errorUnsupportedType: FailedImport = {
     obj: { type: 'error-obj-type', id: 'error-obj-id', meta: { title: 'Error object' } },
     error: { type: 'unsupported_type' },
@@ -28,19 +43,20 @@ describe('ImportSummary', () => {
     overwrite: true,
   };
 
-  const findHeader = (wrapper: ShallowWrapper) => wrapper.find('h3');
-  const findCountCreated = (wrapper: ShallowWrapper) =>
+  const findHeader = (wrapper: ReactWrapper) => wrapper.find('h3');
+  const findCountCreated = (wrapper: ReactWrapper) =>
     wrapper.find('h4.savedObjectsManagementImportSummary__createdCount');
-  const findCountOverwritten = (wrapper: ShallowWrapper) =>
+  const findCountOverwritten = (wrapper: ReactWrapper) =>
     wrapper.find('h4.savedObjectsManagementImportSummary__overwrittenCount');
-  const findCountError = (wrapper: ShallowWrapper) =>
+  const findCountError = (wrapper: ReactWrapper) =>
     wrapper.find('h4.savedObjectsManagementImportSummary__errorCount');
-  const findObjectRow = (wrapper: ShallowWrapper) =>
-    wrapper.find('.savedObjectsManagementImportSummary__row');
+  const findObjectRow = (wrapper: ReactWrapper) =>
+    wrapper.find('.savedObjectsManagementImportSummary__row').hostNodes();
+  const findWarnings = (wrapper: ReactWrapper) => wrapper.find('ImportWarning');
 
   it('should render as expected with no results', async () => {
-    const props: ImportSummaryProps = { failedImports: [], successfulImports: [] };
-    const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
+    const props = getProps({ failedImports: [], successfulImports: [] });
+    const wrapper = mountWithI18nProvider(<ImportSummary {...props} />);
 
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
       expect.objectContaining({ values: { importCount: 0 } })
@@ -52,14 +68,14 @@ describe('ImportSummary', () => {
   });
 
   it('should render as expected with a newly created object', async () => {
-    const props: ImportSummaryProps = {
+    const props = getProps({
       failedImports: [],
       successfulImports: [successNew],
-    };
-    const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
+    });
+    const wrapper = mountWithI18nProvider(<ImportSummary {...props} />);
 
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
-      expect.not.objectContaining({ values: expect.anything() }) // no importCount for singular
+      expect.objectContaining({ values: { importCount: 1 } })
     );
     const countCreated = findCountCreated(wrapper);
     expect(countCreated).toHaveLength(1);
@@ -68,18 +84,19 @@ describe('ImportSummary', () => {
     );
     expect(findCountOverwritten(wrapper)).toHaveLength(0);
     expect(findCountError(wrapper)).toHaveLength(0);
+
     expect(findObjectRow(wrapper)).toHaveLength(1);
   });
 
   it('should render as expected with an overwritten object', async () => {
-    const props: ImportSummaryProps = {
+    const props = getProps({
       failedImports: [],
       successfulImports: [successOverwritten],
-    };
-    const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
+    });
+    const wrapper = mountWithI18nProvider(<ImportSummary {...props} />);
 
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
-      expect.not.objectContaining({ values: expect.anything() }) // no importCount for singular
+      expect.objectContaining({ values: { importCount: 1 } })
     );
     expect(findCountCreated(wrapper)).toHaveLength(0);
     const countOverwritten = findCountOverwritten(wrapper);
@@ -92,14 +109,14 @@ describe('ImportSummary', () => {
   });
 
   it('should render as expected with an error object', async () => {
-    const props: ImportSummaryProps = {
+    const props = getProps({
       failedImports: [errorUnsupportedType],
       successfulImports: [],
-    };
-    const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
+    });
+    const wrapper = mountWithI18nProvider(<ImportSummary {...props} />);
 
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
-      expect.not.objectContaining({ values: expect.anything() }) // no importCount for singular
+      expect.objectContaining({ values: { importCount: 1 } })
     );
     expect(findCountCreated(wrapper)).toHaveLength(0);
     expect(findCountOverwritten(wrapper)).toHaveLength(0);
@@ -112,11 +129,11 @@ describe('ImportSummary', () => {
   });
 
   it('should render as expected with mixed objects', async () => {
-    const props: ImportSummaryProps = {
+    const props = getProps({
       failedImports: [errorUnsupportedType],
       successfulImports: [successNew, successOverwritten],
-    };
-    const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
+    });
+    const wrapper = mountWithI18nProvider(<ImportSummary {...props} />);
 
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
       expect.objectContaining({ values: { importCount: 3 } })
@@ -137,5 +154,25 @@ describe('ImportSummary', () => {
       expect.objectContaining({ values: { errorCount: 1 } })
     );
     expect(findObjectRow(wrapper)).toHaveLength(3);
+  });
+
+  it('should render warnings when present', async () => {
+    const props = getProps({
+      successfulImports: [successNew],
+      importWarnings: [
+        {
+          type: 'simple',
+          message: 'foo',
+        },
+        {
+          type: 'action_required',
+          message: 'bar',
+          actionPath: '/app/lost',
+        },
+      ],
+    });
+    const wrapper = mountWithI18nProvider(<ImportSummary {...props} />);
+
+    expect(findWarnings(wrapper)).toHaveLength(2);
   });
 });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectsClient } from './saved_objects_client';
@@ -52,6 +52,45 @@ test(`#bulkCreate`, async () => {
 
   expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options);
   expect(result).toBe(returnValue);
+});
+
+describe(`#createPointInTimeFinder`, () => {
+  test(`calls repository with options and default dependencies`, () => {
+    const returnValue = Symbol();
+    const mockRepository = {
+      createPointInTimeFinder: jest.fn().mockReturnValue(returnValue),
+    };
+    const client = new SavedObjectsClient(mockRepository);
+
+    const options = Symbol();
+    const result = client.createPointInTimeFinder(options);
+
+    expect(mockRepository.createPointInTimeFinder).toHaveBeenCalledWith(options, {
+      client,
+    });
+    expect(result).toBe(returnValue);
+  });
+
+  test(`calls repository with options and custom dependencies`, () => {
+    const returnValue = Symbol();
+    const mockRepository = {
+      createPointInTimeFinder: jest.fn().mockReturnValue(returnValue),
+    };
+    const client = new SavedObjectsClient(mockRepository);
+
+    const options = Symbol();
+    const dependencies = {
+      client: {
+        find: Symbol(),
+        openPointInTimeForType: Symbol(),
+        closePointInTime: Symbol(),
+      },
+    };
+    const result = client.createPointInTimeFinder(options, dependencies);
+
+    expect(mockRepository.createPointInTimeFinder).toHaveBeenCalledWith(options, dependencies);
+    expect(result).toBe(returnValue);
+  });
 });
 
 test(`#delete`, async () => {
@@ -115,6 +154,52 @@ test(`#get`, async () => {
   expect(result).toBe(returnValue);
 });
 
+test(`#openPointInTimeForType`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    openPointInTimeForType: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const options = Symbol();
+  const result = await client.openPointInTimeForType(type, options);
+
+  expect(mockRepository.openPointInTimeForType).toHaveBeenCalledWith(type, options);
+  expect(result).toBe(returnValue);
+});
+
+test(`#closePointInTime`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    closePointInTime: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const id = Symbol();
+  const options = Symbol();
+  const result = await client.closePointInTime(id, options);
+
+  expect(mockRepository.closePointInTime).toHaveBeenCalledWith(id, options);
+  expect(result).toBe(returnValue);
+});
+
+test(`#resolve`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    resolve: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const options = Symbol();
+  const result = await client.resolve(type, id, options);
+
+  expect(mockRepository.resolve).toHaveBeenCalledWith(type, id, options);
+  expect(result).toBe(returnValue);
+});
+
 test(`#update`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
@@ -152,52 +237,39 @@ test(`#bulkUpdate`, async () => {
   expect(result).toBe(returnValue);
 });
 
-test(`#addToNamespaces`, async () => {
+test(`#collectMultiNamespaceReferences`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    addToNamespaces: jest.fn().mockResolvedValue(returnValue),
+    collectMultiNamespaceReferences: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const type = Symbol();
-  const id = Symbol();
-  const namespaces = Symbol();
+  const objects = Symbol();
   const options = Symbol();
-  const result = await client.addToNamespaces(type, id, namespaces, options);
+  const result = await client.collectMultiNamespaceReferences(objects, options);
 
-  expect(mockRepository.addToNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
+  expect(mockRepository.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects, options);
   expect(result).toBe(returnValue);
 });
 
-test(`#deleteFromNamespaces`, async () => {
+test(`#updateObjectsSpaces`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    deleteFromNamespaces: jest.fn().mockResolvedValue(returnValue),
+    updateObjectsSpaces: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const type = Symbol();
-  const id = Symbol();
-  const namespaces = Symbol();
+  const objects = Symbol();
+  const spacesToAdd = Symbol();
+  const spacesToRemove = Symbol();
   const options = Symbol();
-  const result = await client.deleteFromNamespaces(type, id, namespaces, options);
+  const result = await client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
 
-  expect(mockRepository.deleteFromNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
-  expect(result).toBe(returnValue);
-});
-
-test(`#removeReferencesTo`, async () => {
-  const returnValue = Symbol();
-  const mockRepository = {
-    removeReferencesTo: jest.fn().mockResolvedValue(returnValue),
-  };
-  const client = new SavedObjectsClient(mockRepository);
-
-  const type = Symbol();
-  const id = Symbol();
-  const options = Symbol();
-  const result = await client.removeReferencesTo(type, id, options);
-
-  expect(mockRepository.removeReferencesTo).toHaveBeenCalledWith(type, id, options);
+  expect(mockRepository.updateObjectsSpaces).toHaveBeenCalledWith(
+    objects,
+    spacesToAdd,
+    spacesToRemove,
+    options
+  );
   expect(result).toBe(returnValue);
 });

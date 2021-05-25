@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -33,10 +34,13 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
       const {
         data: {
           sourceId,
+          anomalyThreshold,
           timeRange: { startTime, endTime },
           sort: sortParam,
           pagination: paginationParam,
           metric,
+          query,
+          hostName,
         },
       } = request.body;
 
@@ -50,15 +54,23 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
           paginationCursors,
           hasMoreEntries,
           timing,
-        } = await getMetricsHostsAnomalies(
-          requestContext,
+        } = await getMetricsHostsAnomalies({
+          context: requestContext.infra,
           sourceId,
+          anomalyThreshold,
           startTime,
           endTime,
           metric,
+          query,
           sort,
-          pagination
-        );
+          pagination,
+          influencerFilter: hostName
+            ? {
+                fieldName: 'host.name',
+                fieldValue: hostName,
+              }
+            : undefined,
+        });
 
         return response.ok({
           body: getMetricsHostsAnomaliesSuccessReponsePayloadRT.encode({

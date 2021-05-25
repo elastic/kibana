@@ -1,5 +1,5 @@
 {
-  "id": "feature_usage_test",
+  "id": "featureUsageTest",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "feature_usage_test"],

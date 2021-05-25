@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -82,6 +82,7 @@ describe('Aggs service', () => {
           "avg",
           "sum",
           "median",
+          "single_percentile",
           "min",
           "max",
           "std_dev",
@@ -97,6 +98,7 @@ describe('Aggs service', () => {
           "sum_bucket",
           "min_bucket",
           "max_bucket",
+          "filtered_metric",
           "geo_bounds",
           "geo_centroid",
         ]
@@ -127,6 +129,7 @@ describe('Aggs service', () => {
           "avg",
           "sum",
           "median",
+          "single_percentile",
           "min",
           "max",
           "std_dev",
@@ -142,6 +145,7 @@ describe('Aggs service', () => {
           "sum_bucket",
           "min_bucket",
           "max_bucket",
+          "filtered_metric",
           "geo_bounds",
           "geo_centroid",
         ]
@@ -192,9 +196,8 @@ describe('Aggs service', () => {
   describe('start()', () => {
     test('exposes proper contract', () => {
       const start = service.start(startDeps);
-      expect(Object.keys(start).length).toBe(5);
+      expect(Object.keys(start).length).toBe(4);
       expect(start).toHaveProperty('calculateAutoTimeExpression');
-      expect(start).toHaveProperty('getDateMetaByDatatableColumn');
       expect(start).toHaveProperty('createAggConfigs');
       expect(start).toHaveProperty('types');
       expect(start).toHaveProperty('datatableUtilities');

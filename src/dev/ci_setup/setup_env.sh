@@ -56,7 +56,13 @@ export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 nodeVersion="$(cat "$dir/.node-version")"
 nodeDir="$cacheDir/node/$nodeVersion"
 nodeBin="$nodeDir/bin"
-classifier="x64.tar.gz"
+hostArch="$(command uname -m)"
+case "${hostArch}" in
+  x86_64 | amd64) nodeArch="x64" ;;
+  aarch64) nodeArch="arm64" ;;
+  *) nodeArch="${hostArch}" ;;
+esac
+classifier="$nodeArch.tar.gz"
 
 UNAME=$(uname)
 OS="linux"
@@ -174,5 +180,25 @@ if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then
   echo "Setting JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA"
   export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA
 fi
+
+###
+### copy .bazelrc-ci into $HOME/.bazelrc
+###
+cp -f "$KIBANA_DIR/src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";
+
+###
+### remove write permissions on buildbuddy remote cache for prs
+###
+if [[ "$ghprbPullId" ]] ; then
+  echo "# Appended by $KIBANA_DIR/src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"
+  echo "# Uploads logs & artifacts without writing to cache" >> "$HOME/.bazelrc"
+  echo "build --noremote_upload_local_results" >> "$HOME/.bazelrc"
+fi
+
+###
+### append auth token to buildbuddy into "$HOME/.bazelrc";
+###
+echo "# Appended by $KIBANA_DIR/src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"
+echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" >> "$HOME/.bazelrc"
 
 export CI_ENV_SETUP=true

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -19,7 +19,7 @@ export const TimelionDeprecation = ({ links }: DocLinksStart) => {
         title={
           <FormattedMessage
             id="timelion.deprecation.message"
-            defaultMessage="Deprecated since 7.0, the Timelion app will be removed in 8.0. To continue using your Timelion worksheets, {timeLionDeprecationLink}."
+            defaultMessage="Deprecated since 7.0, the Timelion app will be removed in the last 7.x minor version. To continue using your Timelion worksheets, {timeLionDeprecationLink}."
             values={{
               timeLionDeprecationLink: (
                 <EuiLink href={timelionDeprecationLink} target="_blank" external>

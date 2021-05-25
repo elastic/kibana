@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { safeDump } from 'js-yaml';
-import { FullAgentPolicy } from '../types';
+
+import type { FullAgentPolicy } from '../types';
 
 const POLICY_KEYS_ORDER = [
   'id',
@@ -13,6 +16,7 @@ const POLICY_KEYS_ORDER = [
   'dataset',
   'type',
   'outputs',
+  'output_permissions',
   'agent',
   'inputs',
   'enabled',

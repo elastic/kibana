@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
-import { securityConfigDeprecationProvider } from './config_deprecations';
 import { cloneDeep } from 'lodash';
+
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+
+import { securityConfigDeprecationProvider } from './config_deprecations';
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = securityConfigDeprecationProvider(configDeprecationFactory);
@@ -17,7 +20,7 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
       deprecation,
       path: 'xpack.security',
     })),
-    (msg) => deprecationMessages.push(msg)
+    () => ({ message }) => deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,
@@ -47,6 +50,117 @@ describe('Config Deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "\\"xpack.security.sessionTimeout\\" is deprecated and has been replaced by \\"xpack.security.session.idleTimeout\\"",
+      ]
+    `);
+  });
+
+  it('renames audit.appender.kind to audit.appender.type', () => {
+    const config = {
+      xpack: {
+        security: {
+          audit: {
+            appender: {
+              kind: 'console',
+            },
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.xpack.security.audit.appender.kind).not.toBeDefined();
+    expect(migrated.xpack.security.audit.appender.type).toEqual('console');
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"xpack.security.audit.appender.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.type\\"",
+      ]
+    `);
+  });
+
+  it('renames audit.appender.layout.kind to audit.appender.layout.type', () => {
+    const config = {
+      xpack: {
+        security: {
+          audit: {
+            appender: {
+              layout: { kind: 'pattern' },
+            },
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.xpack.security.audit.appender.layout.kind).not.toBeDefined();
+    expect(migrated.xpack.security.audit.appender.layout.type).toEqual('pattern');
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"xpack.security.audit.appender.layout.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.layout.type\\"",
+      ]
+    `);
+  });
+
+  it('renames audit.appender.policy.kind to audit.appender.policy.type', () => {
+    const config = {
+      xpack: {
+        security: {
+          audit: {
+            appender: {
+              policy: { kind: 'time-interval' },
+            },
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.xpack.security.audit.appender.policy.kind).not.toBeDefined();
+    expect(migrated.xpack.security.audit.appender.policy.type).toEqual('time-interval');
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"xpack.security.audit.appender.policy.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.policy.type\\"",
+      ]
+    `);
+  });
+
+  it('renames audit.appender.strategy.kind to audit.appender.strategy.type', () => {
+    const config = {
+      xpack: {
+        security: {
+          audit: {
+            appender: {
+              strategy: { kind: 'numeric' },
+            },
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.xpack.security.audit.appender.strategy.kind).not.toBeDefined();
+    expect(migrated.xpack.security.audit.appender.strategy.type).toEqual('numeric');
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"xpack.security.audit.appender.strategy.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.strategy.type\\"",
+      ]
+    `);
+  });
+
+  it('renames audit.appender.path to audit.appender.fileName', () => {
+    const config = {
+      xpack: {
+        security: {
+          audit: {
+            appender: {
+              type: 'file',
+              path: './audit.log',
+            },
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.xpack.security.audit.appender.path).not.toBeDefined();
+    expect(migrated.xpack.security.audit.appender.fileName).toEqual('./audit.log');
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"xpack.security.audit.appender.path\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.fileName\\"",
       ]
     `);
   });

@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { parseExperimentalConfigValue } from '../../..//common/experimental_features';
 import { createInitialState } from './reducer';
 
 jest.mock('../lib/kibana', () => ({
@@ -21,6 +23,7 @@ describe('createInitialState', () => {
           kibanaIndexPatterns: [{ id: '1234567890987654321', title: 'mock-kibana' }],
           configIndexPatterns: ['auditbeat-*', 'filebeat'],
           signalIndexName: 'siem-signals-default',
+          enableExperimental: parseExperimentalConfigValue([]),
         }
       );
 
@@ -34,6 +37,7 @@ describe('createInitialState', () => {
           kibanaIndexPatterns: [{ id: '1234567890987654321', title: 'mock-kibana' }],
           configIndexPatterns: [],
           signalIndexName: 'siem-signals-default',
+          enableExperimental: parseExperimentalConfigValue([]),
         }
       );
 

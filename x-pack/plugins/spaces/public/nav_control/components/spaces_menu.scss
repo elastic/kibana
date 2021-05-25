@@ -15,3 +15,7 @@
   margin: $euiSizeM;
   width: calc(100% - #{$euiSizeM*2});
 }
+
+.spcMenu__item {
+  margin-left: $euiSizeM;
+}

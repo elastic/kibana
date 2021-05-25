@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ThreadPoolRejectionsAlertBase } from './thread_pool_rejections_alert_base';
 import { ALERT_THREAD_POOL_WRITE_REJECTIONS, ALERT_DETAILS } from '../../common/constants';
-import { Alert } from '../../../alerts/common';
+import { Alert } from '../../../alerting/common';
 
 export class ThreadPoolWriteRejectionsAlert extends ThreadPoolRejectionsAlertBase {
   private static TYPE = ALERT_THREAD_POOL_WRITE_REJECTIONS;

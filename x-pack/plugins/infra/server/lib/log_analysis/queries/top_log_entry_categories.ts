@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -14,13 +15,13 @@ import {
   createDatasetsFilters,
 } from './common';
 
-import { CategorySort } from '../../../../common/http_api/log_analysis';
+import { CategoriesSort } from '../../../../common/log_analysis';
 
 type CategoryAggregationOrder =
   | 'filter_record>maximum_record_score'
   | 'filter_model_plot>sum_actual';
 const getAggregationOrderForSortField = (
-  field: CategorySort['field']
+  field: CategoriesSort['field']
 ): CategoryAggregationOrder => {
   switch (field) {
     case 'maximumAnomalyScore':
@@ -40,7 +41,7 @@ export const createTopLogEntryCategoriesQuery = (
   endTime: number,
   size: number,
   datasets: string[],
-  sort: CategorySort
+  sort: CategoriesSort
 ) => ({
   ...defaultRequestParameters,
   body: {

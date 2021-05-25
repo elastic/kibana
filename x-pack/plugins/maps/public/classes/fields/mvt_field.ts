@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AbstractField, IField } from './field';
 import { FIELD_ORIGIN, MVT_FIELD_TYPE } from '../../../common/constants';
-import { ITiledSingleLayerVectorSource, IVectorSource } from '../sources/vector_source';
+import { IVectorSource } from '../sources/vector_source';
+import { ITiledSingleLayerVectorSource } from '../sources/tiled_single_layer_vector_source';
 import { MVTFieldDescriptor } from '../../../common/descriptor_types';
 
 export class MVTField extends AbstractField implements IField {

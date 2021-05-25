@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
@@ -85,6 +87,27 @@ export const getTestCases = (spaceId?: string): { [key: string]: ExportTestCase 
       )
         .concat([CONFLICT_1_OBJ, CONFLICT_2A_OBJ, CONFLICT_2B_OBJ, CONFLICT_3_OBJ, CONFLICT_4A_OBJ])
         .flat(),
+    ],
+  },
+  ...(spaceId !== SPACE_2_ID && {
+    // we do not have a multi-namespace isolated object in Space 2
+    multiNamespaceIsolatedObject: {
+      title: 'multi-namespace isolated object',
+      ...(spaceId === SPACE_1_ID
+        ? CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1
+        : CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE),
+    },
+  }),
+  multiNamespaceIsolatedType: {
+    title: 'multi-namespace isolated type',
+    type: 'sharecapabletype',
+    successResult: [
+      ...(spaceId === SPACE_1_ID
+        ? [CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1]
+        : spaceId === SPACE_2_ID
+        ? []
+        : [CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE]
+      ).flat(),
     ],
   },
   namespaceAgnosticObject: {

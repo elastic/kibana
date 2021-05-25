@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createSelector, defaultMemoize } from 'reselect';
@@ -18,7 +19,7 @@ import {
 import * as scalingConstants from './scaling_constants';
 import { Vector2, CameraState, AABB, Matrix3, CameraAnimationState } from '../../types';
 
-interface ClippingPlanes {
+export interface ClippingPlanes {
   renderWidth: number;
   renderHeight: number;
   clippingPlaneRight: number;

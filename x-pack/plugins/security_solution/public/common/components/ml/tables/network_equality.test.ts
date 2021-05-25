@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { networkEquality } from './network_equality';
 import { AnomaliesNetworkTableProps } from '../types';
 import { NetworkType } from '../../../../network/store/model';
-import { FlowTarget } from '../../../../graphql/types';
+import { FlowTarget } from '../../../../../common/search_strategy';
 
 describe('network_equality', () => {
   test('it returns true if start and end date are equal', () => {

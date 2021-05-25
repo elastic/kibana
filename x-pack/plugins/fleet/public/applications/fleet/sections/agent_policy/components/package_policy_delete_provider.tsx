@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useMemo, useRef, useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiOverlayMask, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useStartServices, sendRequest, sendDeletePackagePolicy, useConfig } from '../../../hooks';
 import { AGENT_API_ROUTES, AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
-import { AgentPolicy } from '../../../types';
+import type { AgentPolicy } from '../../../types';
 
 interface Props {
   agentPolicy: AgentPolicy;
@@ -141,78 +143,76 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="xpack.fleet.deletePackagePolicy.confirmModal.deleteMultipleTitle"
+            defaultMessage="Delete {count, plural, one {integration} other {# integrations}}?"
+            values={{ count: packagePolicies.length }}
+          />
+        }
+        onCancel={closeModal}
+        onConfirm={deletePackagePolicies}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.fleet.deletePackagePolicy.confirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          isLoading || isLoadingAgentsCount ? (
             <FormattedMessage
-              id="xpack.fleet.deletePackagePolicy.confirmModal.deleteMultipleTitle"
-              defaultMessage="Delete {count, plural, one {integration} other {# integrations}}?"
-              values={{ count: packagePolicies.length }}
+              id="xpack.fleet.deletePackagePolicy.confirmModal.loadingButtonLabel"
+              defaultMessage="Loading…"
             />
-          }
-          onCancel={closeModal}
-          onConfirm={deletePackagePolicies}
-          cancelButtonText={
+          ) : (
             <FormattedMessage
-              id="xpack.fleet.deletePackagePolicy.confirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
+              id="xpack.fleet.deletePackagePolicy.confirmModal.confirmButtonLabel"
+              defaultMessage="Delete {agentPoliciesCount, plural, one {integration} other {integrations}}"
+              values={{
+                agentPoliciesCount: packagePolicies.length,
+              }}
             />
-          }
-          confirmButtonText={
-            isLoading || isLoadingAgentsCount ? (
+          )
+        }
+        buttonColor="danger"
+        confirmButtonDisabled={isLoading || isLoadingAgentsCount}
+      >
+        {isLoadingAgentsCount ? (
+          <FormattedMessage
+            id="xpack.fleet.deletePackagePolicy.confirmModal.loadingAgentsCountMessage"
+            defaultMessage="Checking affected agents…"
+          />
+        ) : agentsCount ? (
+          <>
+            <EuiCallOut
+              color="danger"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsTitle"
+                  defaultMessage="This action will affect {agentsCount} {agentsCount, plural, one {agent} other {agents}}."
+                  values={{ agentsCount }}
+                />
+              }
+            >
               <FormattedMessage
-                id="xpack.fleet.deletePackagePolicy.confirmModal.loadingButtonLabel"
-                defaultMessage="Loading…"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.deletePackagePolicy.confirmModal.confirmButtonLabel"
-                defaultMessage="Delete {agentPoliciesCount, plural, one {integration} other {integrations}}"
+                id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
+                defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
                 values={{
-                  agentPoliciesCount: packagePolicies.length,
+                  agentPolicyName: <strong>{agentPolicy.name}</strong>,
                 }}
               />
-            )
-          }
-          buttonColor="danger"
-          confirmButtonDisabled={isLoading || isLoadingAgentsCount}
-        >
-          {isLoadingAgentsCount ? (
-            <FormattedMessage
-              id="xpack.fleet.deletePackagePolicy.confirmModal.loadingAgentsCountMessage"
-              defaultMessage="Checking affected agents…"
-            />
-          ) : agentsCount ? (
-            <>
-              <EuiCallOut
-                color="danger"
-                title={
-                  <FormattedMessage
-                    id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsTitle"
-                    defaultMessage="This action will affect {agentsCount} {agentsCount, plural, one {agent} other {agents}}."
-                    values={{ agentsCount }}
-                  />
-                }
-              >
-                <FormattedMessage
-                  id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
-                  defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
-                  values={{
-                    agentPolicyName: <strong>{agentPolicy.name}</strong>,
-                  }}
-                />
-              </EuiCallOut>
-              <EuiSpacer size="l" />
-            </>
-          ) : null}
-          {!isLoadingAgentsCount && (
-            <FormattedMessage
-              id="xpack.fleet.deletePackagePolicy.confirmModal.generalMessage"
-              defaultMessage="This action can not be undone. Are you sure you wish to continue?"
-            />
-          )}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
+        {!isLoadingAgentsCount && (
+          <FormattedMessage
+            id="xpack.fleet.deletePackagePolicy.confirmModal.generalMessage"
+            defaultMessage="This action can not be undone. Are you sure you wish to continue?"
+          />
+        )}
+      </EuiConfirmModal>
     );
   };
 

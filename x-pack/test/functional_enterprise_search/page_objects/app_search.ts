@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -19,12 +20,12 @@ export function AppSearchPageProvider({ getService, getPageObjects }: FtrProvide
 
     async getEngineLinks(): Promise<WebElementWrapper[]> {
       const engines = await testSubjects.find('appSearchEngines');
-      return await testSubjects.findAllDescendant('engineNameLink', engines);
+      return await testSubjects.findAllDescendant('EngineNameLink', engines);
     },
 
     async getMetaEngineLinks(): Promise<WebElementWrapper[]> {
       const metaEngines = await testSubjects.find('appSearchMetaEngines');
-      return await testSubjects.findAllDescendant('engineNameLink', metaEngines);
+      return await testSubjects.findAllDescendant('EngineNameLink', metaEngines);
     },
   };
 }

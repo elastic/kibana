@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -51,7 +52,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should reject API requests if client is not authenticated', async () => {
-      await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
+      await supertest
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .expect(401, { statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' });
     });
 
     it('does not prevent basic login', async () => {
@@ -90,6 +94,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
         expect(spnegoResponse.headers['www-authenticate']).to.be('Negotiate');
+
+        // If browser and Kibana can successfully negotiate this HTML won't rendered, but if not
+        // users will see a proper `Unauthenticated` page.
+        expect(spnegoResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(spnegoResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
       it('AJAX requests should not initiate SPNEGO', async () => {
@@ -283,7 +294,7 @@ export default function ({ getService }: FtrProviderContext) {
         const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
-        expect(logoutResponse.headers.location).to.be('/');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
       });
     });
 

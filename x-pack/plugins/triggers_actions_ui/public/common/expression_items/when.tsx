@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -12,7 +13,7 @@ import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
 import { ClosablePopoverTitle } from './components';
 
-interface WhenExpressionProps {
+export interface WhenExpressionProps {
   aggType: string;
   customAggTypesOptions?: { [key: string]: AggregationType };
   onChangeSelectedAggType: (selectedAggType: string) => void;
@@ -78,6 +79,7 @@ export const WhenExpression = ({
         </ClosablePopoverTitle>
         <EuiSelect
           data-test-subj="whenExpressionSelect"
+          id="aggTypeField"
           value={aggType}
           fullWidth
           onChange={(e) => {
@@ -95,3 +97,6 @@ export const WhenExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { WhenExpression as default };

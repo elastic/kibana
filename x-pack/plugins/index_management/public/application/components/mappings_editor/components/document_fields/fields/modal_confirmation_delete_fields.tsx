@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
-import { EuiConfirmModal, EuiOverlayMask, EuiBadge, EuiCode } from '@elastic/eui';
+import { EuiConfirmModal, EuiBadge, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedFields, NormalizedField } from '../../../types';
@@ -57,55 +59,53 @@ export const ModalConfirmationDeleteFields = ({
       : null;
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={title}
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-        cancelButtonText={i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.cancelButtonLabel',
-          {
-            defaultMessage: 'Cancel',
-          }
+    <EuiConfirmModal
+      title={title}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText={i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.cancelButtonLabel',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
+      buttonColor="danger"
+      confirmButtonText={confirmButtonText}
+    >
+      <>
+        {fieldsTree && (
+          <>
+            <p>
+              {i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.confirmationModal.deleteFieldsDescription',
+                {
+                  defaultMessage: 'This will also delete the following fields.',
+                }
+              )}
+            </p>
+            <FieldsTree fields={fieldsTree} />
+          </>
         )}
-        buttonColor="danger"
-        confirmButtonText={confirmButtonText}
-      >
-        <>
-          {fieldsTree && (
-            <>
-              <p>
-                {i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.confirmationModal.deleteFieldsDescription',
-                  {
-                    defaultMessage: 'This will also delete the following fields.',
-                  }
-                )}
-              </p>
-              <FieldsTree fields={fieldsTree} />
-            </>
-          )}
-          {aliases && (
-            <>
-              <p>
-                {i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.confirmationModal.deleteAliasesDescription',
-                  {
-                    defaultMessage: 'The following aliases will also be deleted.',
-                  }
-                )}
-              </p>
-              <ul>
-                {aliases.map((aliasPath) => (
-                  <li key={aliasPath}>
-                    <EuiCode>{aliasPath}</EuiCode>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+        {aliases && (
+          <>
+            <p>
+              {i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.confirmationModal.deleteAliasesDescription',
+                {
+                  defaultMessage: 'The following aliases will also be deleted.',
+                }
+              )}
+            </p>
+            <ul>
+              {aliases.map((aliasPath) => (
+                <li key={aliasPath}>
+                  <EuiCode>{aliasPath}</EuiCode>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </>
+    </EuiConfirmModal>
   );
 };

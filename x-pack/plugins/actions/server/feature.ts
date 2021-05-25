@@ -1,11 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './saved_objects';
+import {
+  ACTION_SAVED_OBJECT_TYPE,
+  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+} from './constants/saved_objects';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export const ACTIONS_FEATURE = {

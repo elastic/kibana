@@ -16,5 +16,7 @@ export interface SavedObjectMigrationContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [convertToMultiNamespaceTypeVersion](./kibana-plugin-core-server.savedobjectmigrationcontext.converttomultinamespacetypeversion.md) | <code>string</code> | The version in which this object type is being converted to a multi-namespace type |
 |  [log](./kibana-plugin-core-server.savedobjectmigrationcontext.log.md) | <code>SavedObjectsMigrationLogger</code> | logger instance to be used by the migration handler |
+|  [migrationVersion](./kibana-plugin-core-server.savedobjectmigrationcontext.migrationversion.md) | <code>string</code> | The migration version that this migration function is defined for |
 

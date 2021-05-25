@@ -1,15 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { APMClient, callApmApi } from '../services/rest/createCallApmApi';
+import {
+  callApmApi,
+  AutoAbortedAPMClient,
+} from '../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
+import { useUrlParams } from '../context/url_params_context/use_url_params';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -24,6 +29,29 @@ export interface FetcherResult<Data> {
   error?: IHttpFetchError;
 }
 
+function getDetailsFromErrorResponse(error: IHttpFetchError) {
+  const message = error.body?.message ?? error.response?.statusText;
+  return (
+    <>
+      {message} ({error.response?.status})
+      <h5>
+        {i18n.translate('xpack.apm.fetcher.error.url', {
+          defaultMessage: `URL`,
+        })}
+      </h5>
+      {error.response?.url}
+    </>
+  );
+}
+
+const createAutoAbortedAPMClient = (
+  signal: AbortSignal
+): AutoAbortedAPMClient => {
+  return ((options: Parameters<AutoAbortedAPMClient>[0]) => {
+    return callApmApi({ ...options, signal });
+  }) as AutoAbortedAPMClient;
+};
+
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
 // but it led to issues when using object destructuring with default values
 type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<
@@ -33,7 +61,7 @@ type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<
   : unknown;
 
 export function useFetcher<TReturn>(
-  fn: (callApmApi: APMClient) => TReturn,
+  fn: (callApmApi: AutoAbortedAPMClient) => TReturn,
   fnDeps: any[],
   options: {
     preservePreviousData?: boolean;
@@ -49,12 +77,19 @@ export function useFetcher<TReturn>(
     status: FETCH_STATUS.NOT_INITIATED,
   });
   const [counter, setCounter] = useState(0);
+  const { rangeId } = useUrlParams();
 
   useEffect(() => {
-    let didCancel = false;
+    let controller: AbortController = new AbortController();
 
     async function doFetch() {
-      const promise = fn(callApmApi);
+      controller.abort();
+
+      controller = new AbortController();
+
+      const signal = controller.signal;
+
+      const promise = fn(createAutoAbortedAPMClient(signal));
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
       // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
@@ -70,7 +105,11 @@ export function useFetcher<TReturn>(
 
       try {
         const data = await promise;
-        if (!didCancel) {
+        // when http fetches are aborted, the promise will be rejected
+        // and this code is never reached. For async operations that are
+        // not cancellable, we need to check whether the signal was
+        // aborted before updating the result.
+        if (!signal.aborted) {
           setResult({
             data,
             status: FETCH_STATUS.SUCCESS,
@@ -80,27 +119,16 @@ export function useFetcher<TReturn>(
       } catch (e) {
         const err = e as Error | IHttpFetchError;
 
-        if (!didCancel) {
+        if (!signal.aborted) {
           const errorDetails =
-            'response' in err ? (
-              <>
-                {err.response?.statusText} ({err.response?.status})
-                <h5>
-                  {i18n.translate('xpack.apm.fetcher.error.url', {
-                    defaultMessage: `URL`,
-                  })}
-                </h5>
-                {err.response?.url}
-              </>
-            ) : (
-              err.message
-            );
+            'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError) {
-            notifications.toasts.addWarning({
+            notifications.toasts.addDanger({
               title: i18n.translate('xpack.apm.fetcher.error.title', {
                 defaultMessage: `Error while fetching resource`,
               }),
+
               text: toMountPoint(
                 <div>
                   <h5>
@@ -126,12 +154,13 @@ export function useFetcher<TReturn>(
     doFetch();
 
     return () => {
-      didCancel = true;
+      controller.abort();
     };
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     counter,
     preservePreviousData,
+    rangeId,
     showToastOnError,
     ...fnDeps,
     /* eslint-enable react-hooks/exhaustive-deps */

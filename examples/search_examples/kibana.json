@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "data", "developerExamples", "kibanaUtils"],
+  "requiredPlugins": ["navigation", "data", "developerExamples", "kibanaUtils", "share"],
   "optionalPlugins": [],
-  "requiredBundles": []
+  "requiredBundles": ["kibanaReact"]
 }

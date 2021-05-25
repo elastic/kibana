@@ -1,0 +1,101 @@
+{
+  "id": "stackAlerts",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-server.ID",
+        "type": "string",
+        "tags": [],
+        "label": "ID",
+        "description": [],
+        "signature": [
+          "\".index-threshold\""
+        ],
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/server/alert_types/index_threshold/alert_type.ts",
+          "lineNumber": 20
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.Config",
+        "type": "Type",
+        "tags": [],
+        "label": "Config",
+        "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/common/config.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.STACK_ALERTS_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STACK_ALERTS_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"stackAlerts\""
+        ],
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/common/index.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.configSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "configSchema",
+        "description": [],
+        "signature": [
+          "ObjectType",
+          "<{ enabled: ",
+          "Type",
+          "<boolean>; }>"
+        ],
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/common/config.ts",
+          "lineNumber": 10
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -1,34 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiBasicTable,
+  EuiCode,
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiFieldNumber,
-  EuiSelect,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiTextColor,
-  EuiSpacer,
 } from '@elastic/eui';
 import { updateColumnParam } from '../layer_helpers';
 import { OperationDefinition } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import {
   AggFunctionsMapping,
+  DataPublicPluginStart,
   IndexPatternAggRestrictions,
   search,
+  UI_SETTINGS,
 } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
+import { HelpPopover, HelpPopoverButton } from '../../help_popover';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -52,11 +58,13 @@ export const dateHistogramOperation: OperationDefinition<
   }),
   input: 'field',
   priority: 5, // Highest priority level used
+  operationParams: [{ name: 'interval', type: 'string', required: false }],
   getErrorMessage: (layer, columnId, indexPattern) =>
     getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+  getHelpMessage: (props) => <AutoDateHistogramPopover {...props} />,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
-      type === 'date' &&
+      (type === 'date' || type === 'date_range') &&
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.date_histogram)
     ) {
@@ -68,8 +76,8 @@ export const dateHistogramOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, indexPattern) => getSafeName(column.sourceField, indexPattern),
-  buildColumn({ field }) {
-    let interval = autoInterval;
+  buildColumn({ field }, columnParams) {
+    let interval = columnParams?.interval ?? autoInterval;
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
       interval = restrictedInterval(field.aggregationRestrictions) as string;
@@ -334,3 +342,79 @@ function restrictedInterval(aggregationRestrictions?: Partial<IndexPatternAggRes
     aggregationRestrictions.date_histogram.fixed_interval
   );
 }
+
+const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const infiniteBound = i18n.translate('xpack.lens.indexPattern.dateHistogram.moreThanYear', {
+    defaultMessage: 'More than a year',
+  });
+  const upToLabel = i18n.translate('xpack.lens.indexPattern.dateHistogram.upTo', {
+    defaultMessage: 'Up to',
+  });
+
+  return (
+    <HelpPopover
+      anchorPosition="upCenter"
+      button={
+        <HelpPopoverButton
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+        >
+          {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoHelpText', {
+            defaultMessage: 'How it works',
+          })}
+        </HelpPopoverButton>
+      }
+      closePopover={() => setIsPopoverOpen(false)}
+      isOpen={isPopoverOpen}
+      title={i18n.translate('xpack.lens.indexPattern.dateHistogram.titleHelp', {
+        defaultMessage: 'How auto date histogram works',
+      })}
+    >
+      <p>
+        {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBasicExplanation', {
+          defaultMessage: 'The auto date histogram splits a data field into buckets by interval.',
+        })}
+      </p>
+
+      <p>
+        <FormattedMessage
+          id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
+          defaultMessage="To choose the interval, Lens divides the specified time range by the {targetBarSetting} setting. Lens calculates the best interval for your data. For example 30m, 1h, and 12. The maximum number of bars is set by the {maxBarSetting} value."
+          values={{
+            maxBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
+            targetBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_BAR_TARGET}</EuiCode>,
+          }}
+        />
+      </p>
+
+      <p>
+        {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoAdvancedExplanation', {
+          defaultMessage: 'The interval follows this logic:',
+        })}
+      </p>
+
+      <EuiBasicTable
+        items={search.aggs.boundsDescendingRaw.map(({ bound, boundLabel, intervalLabel }) => ({
+          bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${boundLabel}`,
+          interval: intervalLabel,
+        }))}
+        columns={[
+          {
+            field: 'bound',
+            name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBoundHeader', {
+              defaultMessage: 'Target interval measured',
+            }),
+          },
+          {
+            field: 'interval',
+            name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoIntervalHeader', {
+              defaultMessage: 'Interval used',
+            }),
+          },
+        ]}
+      />
+    </HelpPopover>
+  );
+};

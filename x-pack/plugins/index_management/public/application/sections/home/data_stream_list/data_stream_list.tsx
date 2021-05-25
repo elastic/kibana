@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useState } from 'react';
@@ -52,7 +53,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const {
     core: { getUrlForApp },
-    plugins: { fleet },
+    plugins: { isFleetEnabled },
   } = useAppContext();
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
@@ -203,7 +204,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               defaultMessage="Data streams store time-series data across multiple indices."
             />
             {' ' /* We need this space to separate these two sentences. */}
-            {fleet ? (
+            {isFleetEnabled ? (
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
                 defaultMessage="Get started with data streams in {link}."

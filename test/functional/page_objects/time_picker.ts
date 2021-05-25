@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
@@ -26,6 +26,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   const log = getService('log');
   const find = getService('find');
   const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const { header } = getPageObjects(['header']);
   const kibanaServer = getService('kibanaServer');
@@ -68,7 +69,9 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     private async getTimePickerPanel() {
-      return await find.byCssSelector('div.euiPopover__panel-isOpen');
+      return await retry.try(async () => {
+        return await find.byCssSelector('div.euiPopover__panel-isOpen');
+      });
     }
 
     private async waitPanelIsGone(panelElement: WebElementWrapper) {

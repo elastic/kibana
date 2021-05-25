@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel,
   GenericValidationResult,
   ConnectorValidationResult,
+  ALERT_HISTORY_PREFIX,
 } from '../../../../types';
 import { EsIndexActionConnector, EsIndexConfig, IndexActionParams } from '../types';
 
@@ -54,6 +57,7 @@ export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexAc
     ): GenericValidationResult<IndexActionParams> => {
       const errors = {
         documents: new Array<string>(),
+        indexOverride: new Array<string>(),
       };
       const validationResult = { errors };
       if (!actionParams.documents?.length || Object.keys(actionParams.documents[0]).length === 0) {
@@ -66,6 +70,32 @@ export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexAc
           )
         );
       }
+      if (actionParams.indexOverride) {
+        if (!actionParams.indexOverride.startsWith(ALERT_HISTORY_PREFIX)) {
+          errors.indexOverride.push(
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.error.badIndexOverrideValue',
+              {
+                defaultMessage: 'Alert history index must begin with "{alertHistoryPrefix}".',
+                values: { alertHistoryPrefix: ALERT_HISTORY_PREFIX },
+              }
+            )
+          );
+        }
+
+        const indexSuffix = actionParams.indexOverride.replace(ALERT_HISTORY_PREFIX, '');
+        if (indexSuffix.length === 0) {
+          errors.indexOverride.push(
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.error.badIndexOverrideSuffix',
+              {
+                defaultMessage: 'Alert history index must contain valid suffix.',
+              }
+            )
+          );
+        }
+      }
+
       return validationResult;
     },
   };

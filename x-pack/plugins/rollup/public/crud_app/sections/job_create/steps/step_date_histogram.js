@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -27,7 +28,7 @@ import {
 import { search } from '../../../../../../../../src/plugins/data/public';
 const { parseEsInterval } = search.aggs;
 
-import { getDateHistogramDetailsUrl, getDateHistogramAggregationUrl } from '../../../services';
+import { documentationLinks } from '../../../services/documentation_links';
 
 import { StepError } from './components';
 
@@ -193,7 +194,7 @@ export class StepDateHistogram extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={getDateHistogramDetailsUrl()}
+              href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateDateHistogramDocsButton"
@@ -219,7 +220,7 @@ export class StepDateHistogram extends Component {
                     defaultMessage="Define how {link} will operate on your rollup data."
                     values={{
                       link: (
-                        <EuiLink href={getDateHistogramAggregationUrl()} target="_blank">
+                        <EuiLink href={documentationLinks.aggs.date_histogram} target="_blank">
                           <FormattedMessage
                             id="xpack.rollupJobs.create.stepDateHistogramDescription.aggregationsLinkLabel"
                             defaultMessage="date histogram aggregations"

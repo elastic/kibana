@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash';
@@ -80,6 +81,109 @@ interface XYStatePre77 {
 
 interface XYStatePost77 {
   layers: Array<Partial<XYLayerPre77>>;
+}
+
+interface DatatableStatePre711 {
+  layers: Array<{
+    layerId: string;
+    columns: string[];
+  }>;
+  sorting?: {
+    columnId: string | undefined;
+    direction: 'asc' | 'desc' | 'none';
+  };
+}
+interface DatatableStatePost711 {
+  layerId: string;
+  columns: Array<{
+    columnId: string;
+    width?: number;
+    hidden?: boolean;
+  }>;
+  sorting?: {
+    columnId: string | undefined;
+    direction: 'asc' | 'desc' | 'none';
+  };
+}
+
+type OperationTypePre712 =
+  | 'avg'
+  | 'cardinality'
+  | 'derivative'
+  | 'filters'
+  | 'terms'
+  | 'date_histogram'
+  | 'min'
+  | 'max'
+  | 'sum'
+  | 'median'
+  | 'percentile'
+  | 'last_value'
+  | 'count'
+  | 'range'
+  | 'cumulative_sum'
+  | 'counter_rate'
+  | 'moving_average';
+type OperationTypePost712 = Exclude<
+  OperationTypePre712 | 'average' | 'unique_count' | 'differences',
+  'avg' | 'cardinality' | 'derivative'
+>;
+interface LensDocShapePre712<VisualizationState = unknown> {
+  visualizationType: string | null;
+  title: string;
+  expression: string | null;
+  state: {
+    datasourceStates: {
+      // This is hardcoded as our only datasource
+      indexpattern: {
+        layers: Record<
+          string,
+          {
+            columns: Record<
+              string,
+              {
+                operationType: OperationTypePre712;
+              }
+            >;
+          }
+        >;
+      };
+    };
+    visualization: VisualizationState;
+    query: Query;
+    filters: Filter[];
+  };
+}
+
+interface LensDocShapePost712<VisualizationState = unknown> {
+  visualizationType: string | null;
+  title: string;
+  expression: string | null;
+  state: {
+    datasourceMetaData: {
+      filterableIndexPatterns: Array<{ id: string; title: string }>;
+    };
+    datasourceStates: {
+      // This is hardcoded as our only datasource
+      indexpattern: {
+        currentIndexPatternId: string;
+        layers: Record<
+          string,
+          {
+            columns: Record<
+              string,
+              {
+                operationType: OperationTypePost712;
+              }
+            >;
+          }
+        >;
+      };
+    };
+    visualization: VisualizationState;
+    query: Query;
+    filters: Filter[];
+  };
 }
 
 /**
@@ -333,6 +437,74 @@ const removeSuggestedPriority: SavedObjectMigrationFn<LensDocShape, LensDocShape
   return newDoc;
 };
 
+const transformTableState: SavedObjectMigrationFn<
+  LensDocShape<DatatableStatePre711>,
+  LensDocShape<DatatableStatePost711>
+> = (doc) => {
+  // nothing to do for non-datatable visualizations
+  if (doc.attributes.visualizationType !== 'lnsDatatable')
+    return (doc as unknown) as SavedObjectUnsanitizedDoc<LensDocShape<DatatableStatePost711>>;
+  const oldState = doc.attributes.state.visualization;
+  const layer = oldState.layers[0] || {
+    layerId: '',
+    columns: [],
+  };
+  // put together new saved object format
+  const newDoc: SavedObjectUnsanitizedDoc<LensDocShape<DatatableStatePost711>> = {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      state: {
+        ...doc.attributes.state,
+        visualization: {
+          sorting: oldState.sorting,
+          layerId: layer.layerId,
+          columns: layer.columns.map((columnId) => ({ columnId })),
+        },
+      },
+    },
+  };
+  return newDoc;
+};
+
+const renameOperationsForFormula: SavedObjectMigrationFn<
+  LensDocShapePre712,
+  LensDocShapePost712
+> = (doc) => {
+  const renameMapping = {
+    avg: 'average',
+    cardinality: 'unique_count',
+    derivative: 'differences',
+  } as const;
+  function shouldBeRenamed(op: OperationTypePre712): op is keyof typeof renameMapping {
+    return op in renameMapping;
+  }
+  const newDoc = cloneDeep(doc);
+  const datasourceLayers = newDoc.attributes.state.datasourceStates.indexpattern.layers || {};
+  (newDoc.attributes as LensDocShapePost712).state.datasourceStates.indexpattern.layers = Object.fromEntries(
+    Object.entries(datasourceLayers).map(([layerId, layer]) => {
+      return [
+        layerId,
+        {
+          ...layer,
+          columns: Object.fromEntries(
+            Object.entries(layer.columns).map(([columnId, column]) => {
+              const copy = {
+                ...column,
+                operationType: shouldBeRenamed(column.operationType)
+                  ? renameMapping[column.operationType]
+                  : column.operationType,
+              };
+              return [columnId, copy];
+            })
+          ),
+        },
+      ];
+    })
+  );
+  return newDoc as SavedObjectUnsanitizedDoc<LensDocShapePost712>;
+};
+
 export const migrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -340,4 +512,6 @@ export const migrations: SavedObjectMigrationMap = {
   '7.8.0': (doc, context) => addTimeFieldToEsaggs(removeLensAutoDate(doc, context), context),
   '7.10.0': extractReferences,
   '7.11.0': removeSuggestedPriority,
+  '7.12.0': transformTableState,
+  '7.13.0': renameOperationsForFormula,
 };

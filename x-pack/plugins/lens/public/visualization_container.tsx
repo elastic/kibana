@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './visualization_container.scss';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import classNames from 'classnames';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
@@ -27,6 +28,8 @@ export function VisualizationContainer({
   className,
   ...rest
 }: Props) {
+  const counterRef = useRef(0);
+  counterRef.current++;
   const attributes: Partial<{ 'data-title': string; 'data-description': string }> = {};
   if (reportTitle) {
     attributes['data-title'] = reportTitle;
@@ -38,6 +41,8 @@ export function VisualizationContainer({
     <div
       data-shared-item
       data-render-complete={isReady}
+      data-rendering-count={counterRef.current}
+      data-test-subj="lnsVisualizationContainer"
       className={classNames(className, 'lnsVisualizationContainer')}
       {...attributes}
       {...rest}

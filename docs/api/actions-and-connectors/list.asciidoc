@@ -1,0 +1,67 @@
+[[list-connector-types-api]]
+=== List connector types API
+++++
+<titleabbrev>List all connector types</titleabbrev>
+++++
+
+Retrieves a list of all connector types.
+
+[[list-connector-types-api-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/actions/connector_types`
+
+`GET <kibana host>:<port>/s/<space_id>/api/actions/connector_types`
+
+[[list-connector-types-api-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[list-connector-types-api-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[list-connector-types-api-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/actions/connector_types
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+[
+  {
+    "id": ".email", <1>
+    "name": "Email", <2>
+    "minimum_license_required": "gold", <3>
+    "enabled": false, <4>
+    "enabled_in_config": true, <5>
+    "enabled_in_license": false <6>
+  },
+  {
+    "id": ".index",
+    "name": "Index",
+    "minimum_license_required": "basic",
+    "enabled": true,
+    "enabled_in_config": true,
+    "enabled_in_license": true
+  }
+]
+--------------------------------------------------
+
+
+<1> `id` - The unique ID of the connector type.
+<2> `name` - The name of the connector type.
+<3> `minimum_license_required` - The license required to use the connector type.
+<4> `enabled` - Specifies if the connector type is enabled or disabled in {kib}.
+<5> `enabled_in_config` - Specifies if the connector type is enabled or enabled in the {kib} .yml file.
+<6> `enabled_in_license` - Specifies if the connector type is enabled or disabled in the license.

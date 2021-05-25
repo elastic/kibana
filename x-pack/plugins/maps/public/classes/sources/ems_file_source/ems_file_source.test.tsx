@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EMSFileSource } from './ems_file_source';
 
-jest.mock('../../layers/vector_layer/vector_layer', () => {});
+jest.mock('../../layers/vector_layer', () => {});
 
 function makeEMSFileSource(tooltipProperties: string[]) {
   const emsFileSource = new EMSFileSource({ tooltipProperties });

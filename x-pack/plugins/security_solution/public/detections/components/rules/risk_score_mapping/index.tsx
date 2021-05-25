@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -18,13 +19,13 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
+import { RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { AboutStepRiskScore } from '../../../pages/detection_engine/rules/types';
 import { FieldComponent } from '../../../../common/components/autocomplete/field';
 import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
-import { RiskScoreMapping } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 const NestedContent = styled.div`
   margin-left: 24px;

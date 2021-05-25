@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import del from 'del';
 import fs from 'fs';
@@ -14,6 +16,7 @@ import * as Rx from 'rxjs';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { getChromiumDisconnectedError } from '../';
+import { ReportingCore } from '../../..';
 import { BROWSER_TYPE } from '../../../../common/constants';
 import { durationToNumber } from '../../../../common/schema_utils';
 import { CaptureConfig } from '../../../../server/types';
@@ -21,6 +24,7 @@ import { LevelLogger } from '../../../lib';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
+import { Metrics, getMetrics } from './metrics';
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 type ViewportConfig = CaptureConfig['viewport'];
@@ -31,11 +35,14 @@ export class HeadlessChromiumDriverFactory {
   private browserConfig: BrowserConfig;
   private userDataDir: string;
   private getChromiumArgs: (viewport: ViewportConfig) => string[];
+  private core: ReportingCore;
 
-  constructor(binaryPath: string, captureConfig: CaptureConfig, logger: LevelLogger) {
+  constructor(core: ReportingCore, binaryPath: string, logger: LevelLogger) {
+    this.core = core;
     this.binaryPath = binaryPath;
-    this.captureConfig = captureConfig;
-    this.browserConfig = captureConfig.browser.chromium;
+    const config = core.getConfig();
+    this.captureConfig = config.get('capture');
+    this.browserConfig = this.captureConfig.browser.chromium;
 
     if (this.browserConfig.disableSandbox) {
       logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
@@ -69,6 +76,9 @@ export class HeadlessChromiumDriverFactory {
 
       let browser: puppeteer.Browser;
       let page: puppeteer.Page;
+      let devTools: puppeteer.CDPSession | undefined;
+      let startMetrics: Metrics | undefined;
+
       try {
         browser = await puppeteer.launch({
           pipe: !this.browserConfig.inspect,
@@ -82,6 +92,16 @@ export class HeadlessChromiumDriverFactory {
         } as puppeteer.LaunchOptions);
 
         page = await browser.newPage();
+        devTools = await page.target().createCDPSession();
+
+        await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
+        startMetrics = await devTools.send('Performance.getMetrics');
+
+        // Log version info for debugging / maintenance
+        const versionInfo = await devTools.send('Browser.getVersion');
+        logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
+
+        await page.emulateTimezone(browserTimezone);
 
         // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
         // All waitFor methods have their own timeout config passed in to them
@@ -96,6 +116,24 @@ export class HeadlessChromiumDriverFactory {
 
       const childProcess = {
         async kill() {
+          try {
+            if (devTools && startMetrics) {
+              const endMetrics = await devTools.send('Performance.getMetrics');
+              const { cpu, cpuInPercentage, memory, memoryInMegabytes } = getMetrics(
+                startMetrics,
+                endMetrics
+              );
+
+              apm.currentTransaction?.setLabel('cpu', cpu, false);
+              apm.currentTransaction?.setLabel('memory', memory, false);
+              logger.debug(
+                `Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`
+              );
+            }
+          } catch (error) {
+            logger.error(error);
+          }
+
           try {
             await browser.close();
           } catch (err) {
@@ -130,7 +168,7 @@ export class HeadlessChromiumDriverFactory {
       this.getProcessLogger(browser, logger).subscribe();
 
       // HeadlessChromiumDriver: object to "drive" a browser page
-      const driver = new HeadlessChromiumDriver(page, {
+      const driver = new HeadlessChromiumDriver(this.core, page, {
         inspect: !!this.browserConfig.inspect,
         networkPolicy: this.captureConfig.networkPolicy,
       });
@@ -165,7 +203,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const pageRequestFailed$ = Rx.fromEvent<puppeteer.Request>(page, 'requestfailed').pipe(
+    const pageRequestFailed$ = Rx.fromEvent<puppeteer.HTTPRequest>(page, 'requestfailed').pipe(
       map((req) => {
         const failure = req.failure && req.failure();
         if (failure) {
@@ -184,6 +222,10 @@ export class HeadlessChromiumDriverFactory {
     // NOTE: The browser driver can not observe stdout and stderr of the child process
     // Puppeteer doesn't give a handle to the original ChildProcess object
     // See https://github.com/GoogleChrome/puppeteer/issues/1292#issuecomment-521470627
+
+    if (childProcess == null) {
+      throw new TypeError('childProcess is null or undefined!');
+    }
 
     // just log closing of the process
     const processClose$ = Rx.fromEvent<void>(childProcess, 'close').pipe(

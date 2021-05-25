@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -28,9 +29,16 @@ import {
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULE_REFRESH_IDLE_VALUE,
+  DEFAULT_TRANSFORMS,
+  DEFAULT_TRANSFORMS_SETTING,
 } from '../common/constants';
+import { transformConfigSchema } from '../common/transforms/types';
+import { ExperimentalFeatures } from '../common/experimental_features';
 
-export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
+export const initUiSettings = (
+  uiSettings: CoreSetup['uiSettings'],
+  experimentalFeatures: ExperimentalFeatures
+) => {
   uiSettings.register({
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
@@ -78,6 +86,8 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexLabel', {
         defaultMessage: 'Elasticsearch indices',
       }),
+      sensitive: true,
+
       value: DEFAULT_INDEX_PATTERN,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexDescription', {
         defaultMessage:
@@ -147,6 +157,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         defaultMessage: 'News feed URL',
       }),
       value: NEWS_FEED_URL_SETTING_DEFAULT,
+      sensitive: true,
       description: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrlDescription', {
         defaultMessage: '<p>News feed content will be retrieved from this URL</p>',
       }),
@@ -167,6 +178,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
             'Array of URL templates to build the list of reputation URLs to be displayed on the IP Details page.',
         }
       ),
+      sensitive: true,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(
@@ -176,5 +188,25 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         })
       ),
     },
+    // TODO: Remove this check once the experimental flag is removed
+    ...(experimentalFeatures.metricsEntitiesEnabled
+      ? {
+          [DEFAULT_TRANSFORMS]: {
+            name: i18n.translate('xpack.securitySolution.uiSettings.transforms', {
+              defaultMessage: 'Default transforms to use',
+            }),
+            value: DEFAULT_TRANSFORMS_SETTING,
+            type: 'json',
+            description: i18n.translate('xpack.securitySolution.uiSettings.transformDescription', {
+              // TODO: Add a hyperlink to documentation about this feature
+              defaultMessage: 'Experimental: Enable an application cache through transforms',
+            }),
+            sensitive: true,
+            category: [APP_ID],
+            requiresPageReload: false,
+            schema: transformConfigSchema,
+          },
+        }
+      : {}),
   });
 };

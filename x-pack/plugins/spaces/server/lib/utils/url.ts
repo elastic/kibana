@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // TEMPORARY UNTIL FIXED!
 // DIRECT COPY FROM `src/core/utils/url`, since it's not possible to import from there,
 // nor can I re-export from `src/core/server`...
 
-import { ParsedQuery } from 'query-string';
-import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
+import type { ParsedQuery } from 'query-string';
+import type { UrlObject } from 'url';
+import { format as formatUrl, parse as parseUrl } from 'url';
 
 export interface URLMeaningfulParts {
   auth: string | null;

@@ -1,15 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './spaces_description.scss';
+
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
-import React, { FC } from 'react';
-import { Capabilities, ApplicationStart } from 'src/core/public';
-import { ManageSpacesButton } from './manage_spaces_button';
+import type { FC } from 'react';
+import React from 'react';
+
+import type { ApplicationStart, Capabilities } from 'src/core/public';
+
 import { getSpacesFeatureDescription } from '../../constants';
+import { ManageSpacesButton } from './manage_spaces_button';
 
 interface Props {
   id: string;

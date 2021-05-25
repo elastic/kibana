@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IIndexPatternFieldList } from '../../../data/common/index_patterns/fields';
@@ -22,6 +22,8 @@ const fields = [
     type: 'date',
     scripted: false,
     filterable: true,
+    aggregatable: true,
+    sortable: true,
   },
   {
     name: 'message',
@@ -34,12 +36,14 @@ const fields = [
     type: 'string',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'bytes',
     type: 'number',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'scripted',
@@ -55,14 +59,14 @@ fields.getByName = (name: string) => {
 
 const indexPattern = ({
   id: 'index-pattern-with-timefield-id',
-  title: 'index-pattern-without-timefield',
+  title: 'index-pattern-with-timefield',
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
   fields,
   getComputedFields: () => ({}),
   getSourceFiltering: () => ({}),
-  getFieldByName: () => ({}),
+  getFieldByName: (name: string) => fields.getByName(name),
   timeFieldName: 'timestamp',
 } as unknown) as IndexPattern;
 

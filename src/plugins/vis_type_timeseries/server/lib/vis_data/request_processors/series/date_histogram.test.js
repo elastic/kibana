@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { DefaultSearchCapabilities } from '../../../search_strategies/default_search_capabilities';
+import { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
 import { dateHistogram } from './date_histogram';
 import { UI_SETTINGS } from '../../../../../../data/common';
 
@@ -16,14 +16,13 @@ describe('dateHistogram(req, panel, series)', () => {
   let req;
   let capabilities;
   let config;
-  let indexPatternObject;
+  let indexPattern;
   let uiSettings;
 
   beforeEach(() => {
     req = {
-      payload: {
+      body: {
         timerange: {
-          timezone: 'UTC',
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
         },
@@ -33,14 +32,15 @@ describe('dateHistogram(req, panel, series)', () => {
       index_pattern: '*',
       time_field: '@timestamp',
       interval: '10s',
+      id: 'panelId',
     };
     series = { id: 'test' };
     config = {
       allowLeadingWildcards: true,
       queryStringOptions: {},
     };
-    indexPatternObject = {};
-    capabilities = new DefaultSearchCapabilities(req);
+    indexPattern = {};
+    capabilities = new DefaultSearchCapabilities({ timezone: 'UTC', maxBucketsLimit: 2000 });
     uiSettings = {
       get: async (key) => (key === UI_SETTINGS.HISTOGRAM_MAX_BARS ? 100 : 50),
     };
@@ -49,15 +49,9 @@ describe('dateHistogram(req, panel, series)', () => {
   test('calls next when finished', async () => {
     const next = jest.fn();
 
-    await dateHistogram(
-      req,
-      panel,
-      series,
-      config,
-      indexPatternObject,
-      capabilities,
-      uiSettings
-    )(next)({});
+    await dateHistogram(req, panel, series, config, indexPattern, capabilities, uiSettings)(next)(
+      {}
+    );
 
     expect(next.mock.calls.length).toEqual(1);
   });
@@ -69,7 +63,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       uiSettings
     )(next)({});
@@ -96,6 +90,7 @@ describe('dateHistogram(req, panel, series)', () => {
             intervalString: '10s',
             timeField: '@timestamp',
             seriesId: 'test',
+            panelId: 'panelId',
           },
         },
       },
@@ -110,7 +105,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       uiSettings
     )(next)({});
@@ -137,6 +132,7 @@ describe('dateHistogram(req, panel, series)', () => {
             intervalString: '10s',
             timeField: '@timestamp',
             seriesId: 'test',
+            panelId: 'panelId',
           },
         },
       },
@@ -154,7 +150,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       uiSettings
     )(next)({});
@@ -181,6 +177,7 @@ describe('dateHistogram(req, panel, series)', () => {
             intervalString: '20s',
             timeField: 'timestamp',
             seriesId: 'test',
+            panelId: 'panelId',
           },
         },
       },
@@ -198,7 +195,7 @@ describe('dateHistogram(req, panel, series)', () => {
         panel,
         series,
         config,
-        indexPatternObject,
+        indexPattern,
         capabilities,
         uiSettings
       )(next)({});
@@ -216,7 +213,7 @@ describe('dateHistogram(req, panel, series)', () => {
         panel,
         series,
         config,
-        indexPatternObject,
+        indexPattern,
         capabilities,
         uiSettings
       )(next)({});
@@ -237,6 +234,7 @@ describe('dateHistogram(req, panel, series)', () => {
               seriesId: 'test',
               bucketSize: 10,
               intervalString: '10s',
+              panelId: 'panelId',
             },
           },
         },

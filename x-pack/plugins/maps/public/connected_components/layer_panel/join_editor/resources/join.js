@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -17,6 +18,7 @@ import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox'
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 import { getIndexPatternService } from '../../../../kibana_services';
+import { SOURCE_TYPES } from '../../../../../common/constants';
 
 export class Join extends Component {
   state = {
@@ -85,6 +87,7 @@ export class Join extends Component {
         ...restOfRight,
         indexPatternId,
         indexPatternTitle,
+        type: SOURCE_TYPES.ES_TERM_SOURCE,
       },
     });
   };

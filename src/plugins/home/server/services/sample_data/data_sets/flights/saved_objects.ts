@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /* eslint max-len: 0 */
@@ -45,7 +45,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Flights] Flight Count and Average Ticket Price',
       }),
       visState:
-        '{"title":"[Flights] Flight Count and Average Ticket Price","type":"area","params":{"type":"area","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100,"filter":true},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Average Ticket Price"}},{"id":"ValueAxis-2","name":"RightAxis-1","type":"value","position":"right","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Flight Count"}}],"seriesParams":[{"show":true,"mode":"stacked","type":"area","drawLinesBetweenPoints":true,"showCircles":false,"interpolate":"linear","lineWidth":2,"data":{"id":"5","label":"Flight Count"},"valueAxis":"ValueAxis-2"},{"show":true,"mode":"stacked","type":"line","drawLinesBetweenPoints":false,"showCircles":true,"interpolate":"linear","data":{"id":"4","label":"Average Ticket Price"},"valueAxis":"ValueAxis-1","lineWidth":2}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"radiusRatio":13,"detailedTooltip":true},"aggs":[{"id":"3","enabled":true,"type":"date_histogram","schema":"segment","params":{"field":"timestamp","interval":"auto","min_doc_count":1,"extended_bounds":{}}},{"id":"5","enabled":true,"type":"count","schema":"metric","params":{"customLabel":"Flight Count"}},{"id":"4","enabled":true,"type":"avg","schema":"metric","params":{"field":"AvgTicketPrice","customLabel":"Average Ticket Price"}},{"id":"2","enabled":true,"type":"avg","schema":"radius","params":{"field":"AvgTicketPrice"}}]}',
+        '{"title":"[Flights] Flight Count and Average Ticket Price","type":"area","params":{"type":"area","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100,"filter":true},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Average Ticket Price"}},{"id":"ValueAxis-2","name":"RightAxis-1","type":"value","position":"right","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Flight Count"}}],"seriesParams":[{"show":true,"mode":"stacked","type":"area","drawLinesBetweenPoints":true,"showCircles":false,"interpolate":"linear","lineWidth":2,"data":{"id":"5","label":"Flight Count"},"valueAxis":"ValueAxis-2"},{"show":true,"mode":"stacked","type":"line","drawLinesBetweenPoints":false,"showCircles":true,"interpolate":"linear","data":{"id":"4","label":"Average Ticket Price"},"valueAxis":"ValueAxis-1","lineWidth":2}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"radiusRatio":13,"detailedTooltip":true,"palette":{"type":"palette","name":"default"}},"aggs":[{"id":"3","enabled":true,"type":"date_histogram","schema":"segment","params":{"field":"timestamp","interval":"auto","min_doc_count":1,"extended_bounds":{}}},{"id":"5","enabled":true,"type":"count","schema":"metric","params":{"customLabel":"Flight Count"}},{"id":"4","enabled":true,"type":"avg","schema":"metric","params":{"field":"AvgTicketPrice","customLabel":"Average Ticket Price"}},{"id":"2","enabled":true,"type":"avg","schema":"radius","params":{"field":"AvgTicketPrice"}}]}',
       uiStateJSON:
         '{"vis":{"legendOpen":true,"colors":{"Average Ticket Price":"#629E51","Flight Count":"#AEA2E0"}}}',
       description: '',
@@ -122,7 +122,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Flights] Delay Type',
       }),
       visState:
-        '{"title":"[Flights] Delay Type","type":"area","params":{"type":"area","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100,"filter":true},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Count"}}],"seriesParams":[{"show":"true","type":"histogram","mode":"stacked","data":{"label":"Count","id":"1"},"drawLinesBetweenPoints":true,"showCircles":true,"interpolate":"cardinal","valueAxis":"ValueAxis-1"}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"detailedTooltip":true},"aggs":[{"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},{"id":"2","enabled":true,"type":"date_histogram","schema":"segment","params":{"field":"timestamp","interval":"auto","min_doc_count":1,"extended_bounds":{}}},{"id":"3","enabled":true,"type":"terms","schema":"group","params":{"field":"FlightDelayType","size":5,"order":"desc","orderBy":"1","otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"}}]}',
+      '{"title":"[Flights] Delay Type","type":"area","params":{"type":"area","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100,"filter":true},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Count"}}],"seriesParams":[{"show":"true","type":"histogram","mode":"stacked","data":{"label":"Count","id":"1"},"drawLinesBetweenPoints":true,"showCircles":true,"interpolate":"cardinal","valueAxis":"ValueAxis-1"}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"detailedTooltip":true,"palette":{"type":"palette","name":"default"}},"aggs":[{"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},{"id":"2","enabled":true,"type":"date_histogram","schema":"segment","params":{"field":"timestamp","interval":"auto","min_doc_count":1,"extended_bounds":{}}},{"id":"3","enabled":true,"type":"terms","schema":"group","params":{"field":"FlightDelayType","size":5,"order":"desc","orderBy":"1","otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"}}]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
@@ -144,7 +144,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Flights] Delays & Cancellations',
       }),
       visState:
-        '{"title":"[Flights] Delays & Cancellations","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"rgba(0,156,224,1)","split_mode":"everything","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"filter_ratio","numerator":"FlightDelay:true"}],"separate_axis":0,"axis_position":"right","formatter":"percent","chart_type":"line","line_width":"2","point_size":"0","fill":0.5,"stacked":"none","label":"Percent Delays"}],"time_field":"timestamp","index_pattern":"kibana_sample_data_flights","interval":">=1h","axis_position":"left","axis_formatter":"number","show_legend":1,"show_grid":1,"annotations":[{"fields":"FlightDelay,Cancelled,Carrier","template":"{{Carrier}}: Flight Delayed and Cancelled!","index_pattern":"kibana_sample_data_flights","query_string":"FlightDelay:true AND Cancelled:true","id":"53b7dff0-4c89-11e8-a66a-6989ad5a0a39","color":"rgba(0,98,177,1)","time_field":"timestamp","icon":"fa-exclamation-triangle","ignore_global_filters":1,"ignore_panel_filters":1}],"legend_position":"bottom"},"aggs":[]}',
+        '{"title":"[Flights] Delays & Cancellations","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"rgba(0,156,224,1)","split_mode":"everything","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"filter_ratio","numerator":"FlightDelay:true"}],"separate_axis":0,"axis_position":"right","formatter":"percent","chart_type":"line","line_width":"2","point_size":"0","fill":0.5,"stacked":"none","label":"Percent Delays"}],"time_field":"timestamp","index_pattern_ref_name":"ref_1_index_pattern","interval":">=1h","axis_position":"left","axis_formatter":"number","show_legend":1,"show_grid":1,"annotations":[{"fields":"FlightDelay,Cancelled,Carrier","template":"{{Carrier}}: Flight Delayed and Cancelled!","index_pattern_ref_name":"ref_2_index_pattern","query_string":"FlightDelay:true AND Cancelled:true","id":"53b7dff0-4c89-11e8-a66a-6989ad5a0a39","color":"rgba(0,98,177,1)","time_field":"timestamp","icon":"fa-exclamation-triangle","ignore_global_filters":1,"ignore_panel_filters":1}],"legend_position":"bottom","use_kibana_indexes":true},"aggs":[]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
@@ -152,7 +152,18 @@ export const getSavedObjects = (): SavedObject[] => [
         searchSourceJSON: '{}',
       },
     },
-    references: [],
+    references: [
+      {
+        name: 'ref_1_index_pattern',
+        type: 'index_pattern',
+        id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d'
+      },
+      {
+        name: 'ref_2_index_pattern',
+        type: 'index_pattern',
+        id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d'
+      }
+    ]
   },
   {
     id: '9886b410-4c8b-11e8-b3d7-01146121b73d',
@@ -165,7 +176,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Flights] Delay Buckets',
       }),
       visState:
-        '{"title":"[Flights] Delay Buckets","type":"histogram","params":{"type":"histogram","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100,"filter":true},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Count"}}],"seriesParams":[{"show":"true","type":"histogram","mode":"stacked","data":{"label":"Count","id":"1"},"valueAxis":"ValueAxis-1","drawLinesBetweenPoints":true,"showCircles":true}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"detailedTooltip":true},"aggs":[{"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},{"id":"2","enabled":true,"type":"histogram","schema":"segment","params":{"field":"FlightDelayMin","interval":30,"extended_bounds":{},"customLabel":"Flight Delay Minutes"}}]}',
+        '{"title":"[Flights] Delay Buckets","type":"histogram","params":{"type":"histogram","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100,"filter":true},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Count"}}],"seriesParams":[{"show":"true","type":"histogram","mode":"stacked","data":{"label":"Count","id":"1"},"valueAxis":"ValueAxis-1","drawLinesBetweenPoints":true,"showCircles":true}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"detailedTooltip":true,"palette":{"type":"palette","name":"default"}},"aggs":[{"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},{"id":"2","enabled":true,"type":"histogram","schema":"segment","params":{"field":"FlightDelayMin","interval":30,"extended_bounds":{},"customLabel":"Flight Delay Minutes"}}]}',
       uiStateJSON: '{"vis":{"legendOpen":false}}',
       description: '',
       version: 1,
@@ -187,7 +198,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Flights] Flight Delays',
       }),
       visState:
-        '{"title":"[Flights] Flight Delays","type":"histogram","params":{"type":"histogram","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"left","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100,"filter":true},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"BottomAxis-1","type":"value","position":"bottom","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Count"}}],"seriesParams":[{"show":"true","type":"histogram","mode":"stacked","data":{"label":"Count","id":"1"},"valueAxis":"ValueAxis-1","drawLinesBetweenPoints":true,"showCircles":true}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"detailedTooltip":true},"aggs":[{"id":"1","enabled":true,"type":"count","schema":"metric","params":{"customLabel":""}},{"id":"2","enabled":true,"type":"terms","schema":"segment","params":{"field":"FlightDelay","size":5,"order":"desc","orderBy":"1","otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Flight Delays"}}]}',
+        '{"title":"[Flights] Flight Delays","type":"histogram","params":{"type":"histogram","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"left","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100,"filter":true},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"BottomAxis-1","type":"value","position":"bottom","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Count"}}],"seriesParams":[{"show":"true","type":"histogram","mode":"stacked","data":{"label":"Count","id":"1"},"valueAxis":"ValueAxis-1","drawLinesBetweenPoints":true,"showCircles":true}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"detailedTooltip":true,"palette":{"type":"palette","name":"default"}},"aggs":[{"id":"1","enabled":true,"type":"count","schema":"metric","params":{"customLabel":""}},{"id":"2","enabled":true,"type":"terms","schema":"segment","params":{"field":"FlightDelay","size":5,"order":"desc","orderBy":"1","otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Flight Delays"}}]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
@@ -209,7 +220,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Flights] Flight Cancellations',
       }),
       visState:
-        '{"title":"[Flights] Flight Cancellations","type":"histogram","params":{"type":"histogram","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"left","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100,"filter":true},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"BottomAxis-1","type":"value","position":"bottom","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Count"}}],"seriesParams":[{"show":"true","type":"histogram","mode":"stacked","data":{"label":"Count","id":"1"},"valueAxis":"ValueAxis-1","drawLinesBetweenPoints":true,"showCircles":true}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"detailedTooltip":true},"aggs":[{"id":"1","enabled":true,"type":"count","schema":"metric","params":{"customLabel":""}},{"id":"2","enabled":true,"type":"terms","schema":"segment","params":{"field":"Cancelled","size":5,"order":"desc","orderBy":"1","otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Flight Cancellations"}}]}',
+        '{"title":"[Flights] Flight Cancellations","type":"histogram","params":{"type":"histogram","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"left","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100,"filter":true},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"BottomAxis-1","type":"value","position":"bottom","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Count"}}],"seriesParams":[{"show":"true","type":"histogram","mode":"stacked","data":{"label":"Count","id":"1"},"valueAxis":"ValueAxis-1","drawLinesBetweenPoints":true,"showCircles":true}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"detailedTooltip":true,"palette":{"type":"palette","name":"default"}},"aggs":[{"id":"1","enabled":true,"type":"count","schema":"metric","params":{"customLabel":""}},{"id":"2","enabled":true,"type":"terms","schema":"segment","params":{"field":"Cancelled","size":5,"order":"desc","orderBy":"1","otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Flight Cancellations"}}]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
@@ -427,10 +438,10 @@ export const getSavedObjects = (): SavedObject[] => [
     attributes: {
       title: 'kibana_sample_data_flights',
       timeFieldName: 'timestamp',
-      fields:
-        '[{"name":"hour_of_day","type":"number","count":0,"scripted":true,"script":"doc[\'timestamp\'].value.hourOfDay","lang":"painless","searchable":true,"aggregatable":true,"readFromDocValues":false}]',
       fieldFormatMap:
         '{"hour_of_day":{"id":"number","params":{"pattern":"00"}},"AvgTicketPrice":{"id":"number","params":{"pattern":"$0,0.[00]"}}}',
+        runtimeFieldMap:
+        '{"hour_of_day":{"type":"long","script":{"source":"emit(doc[\'timestamp\'].value.hourOfDay);"}}}',
     },
     references: [],
   },

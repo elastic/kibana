@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Role } from '../../../../../../../common/model';
+import type { Role } from '../../../../../../../common/model';
+import type { KibanaPrivileges, SubFeaturePrivilegeGroup } from '../../../../model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
-import { KibanaPrivileges, SubFeaturePrivilegeGroup } from '../../../../model';
 
 /**
  * Calculator responsible for determining the displayed and effective privilege values for the following interfaces:

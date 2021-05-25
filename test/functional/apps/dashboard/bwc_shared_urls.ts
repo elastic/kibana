@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -81,6 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await pieChart.expectPieSliceCount(0);
         await dashboardExpect.panelCount(2);
+        await PageObjects.dashboard.waitForRenderComplete();
       });
     });
 
@@ -96,6 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
+        await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
 
@@ -115,6 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
+        await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
 

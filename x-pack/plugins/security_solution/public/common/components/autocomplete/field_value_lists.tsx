@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useFindLists } from '@kbn/securitysolution-list-hooks';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
-import { useFindLists, ListSchema } from '../../../lists_plugin_deps';
 import { useKibana } from '../../../common/lib/kibana';
 import { filterFieldToList, getGenericComboBoxProps } from './helpers';
 import * as i18n from './translations';

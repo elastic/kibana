@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { createContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { UptimeAppProps } from '../apps/uptime_app';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../common/constants';
 import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
@@ -65,3 +66,5 @@ export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ childr
 
   return <UptimeSettingsContext.Provider value={value} children={children} />;
 };
+
+export const useUptimeSettingsContext = () => useContext(UptimeSettingsContext);

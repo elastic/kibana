@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Print Spooler Point and Print DLL",
   "query": "sequence by host.id with maxspan=30s\n[registry where\n registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Print\\\\Printers\\\\*\\\\SpoolDirectory\" and\n registry.data.strings : \"C:\\\\Windows\\\\System32\\\\spool\\\\drivers\\\\x64\\\\4\"]\n[registry where\n registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Print\\\\Printers\\\\*\\\\CopyFiles\\\\Payload\\\\Module\" and\n registry.data.strings : \"C:\\\\Windows\\\\System32\\\\spool\\\\drivers\\\\x64\\\\4\\\\*\"]\n",
   "references": [
@@ -17,7 +18,7 @@
     "https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Privilege%20Escalation/privesc_sysmon_cve_20201030_spooler.evtx",
     "https://msrc.microsoft.com/update-guide/en-US/vulnerability/CVE-2020-1030"
   ],
-  "risk_score": 74,
+  "risk_score": 73,
   "rule_id": "bd7eefee-f671-494e-98df-f01daf9e5f17",
   "severity": "high",
   "tags": [
@@ -45,5 +46,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

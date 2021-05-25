@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract, SimpleSavedObject, IUiSettingsClient } from 'src/core/public';
@@ -13,6 +14,8 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 
 import { matchAllQuery } from '../../common';
+
+import { isIndexPattern } from '../../../../common/types/index_pattern';
 
 export type SavedSearchQuery = object;
 
@@ -76,10 +79,6 @@ export function loadCurrentIndexPattern(
 export function loadCurrentSavedSearch(savedSearches: any, savedSearchId: SavedSearchId) {
   currentSavedSearch = savedSearches.get(savedSearchId);
   return currentSavedSearch;
-}
-
-function isIndexPattern(arg: any): arg is IndexPattern {
-  return arg !== undefined;
 }
 
 export interface SearchItems {

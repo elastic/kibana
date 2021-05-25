@@ -6,12 +6,14 @@
   "false_positives": [
     "Legitimate exchange system administration activity."
   ],
+  "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "New ActiveSyncAllowedDeviceID Added via PowerShell",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name: (\"powershell.exe\", \"pwsh.exe\") and process.args : \"Set-CASMailbox*ActiveSyncAllowedDeviceIDs*\"\n",
   "references": [
@@ -45,6 +47,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

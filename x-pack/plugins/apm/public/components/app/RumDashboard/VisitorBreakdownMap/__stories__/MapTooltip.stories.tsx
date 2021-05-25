@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { MapToolTip } from '../MapToolTip';
 import { COUNTRY_NAME, TRANSACTION_DURATION_COUNTRY } from '../useLayerList';
 
@@ -43,6 +44,7 @@ storiesOf('app/RumDashboard/VisitorsRegionMap', module)
                 '__kbnjoin__count__3657625d-17b0-41ef-99ba-3a2b2938655c': 439145,
                 '__kbnjoin__avg_of_transaction.duration.us__3657625d-17b0-41ef-99ba-3a2b2938655c': 2041665.6350131081,
               },
+              actions: [],
             },
           ]}
         />

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -16,20 +16,18 @@ import {
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
 
-import { BUCKET_TYPES } from '../../../data/public';
-
 import { Aspects } from '../types';
 
 import './_detailed_tooltip.scss';
 import { fillEmptyValue } from '../utils/get_series_name_fn';
-import { COMPLEX_SPLIT_ACCESSOR } from '../utils/accessors';
+import { COMPLEX_SPLIT_ACCESSOR, isRangeAggType } from '../utils/accessors';
 
 interface TooltipData {
   label: string;
   value: string;
 }
 
-const getTooltipData = (
+export const getTooltipData = (
   aspects: Aspects,
   header: TooltipValue | null,
   value: TooltipValue
@@ -37,10 +35,7 @@ const getTooltipData = (
   const data: TooltipData[] = [];
 
   if (header) {
-    const xFormatter =
-      aspects.x.aggType === BUCKET_TYPES.DATE_RANGE || aspects.x.aggType === BUCKET_TYPES.RANGE
-        ? null
-        : aspects.x.formatter;
+    const xFormatter = isRangeAggType(aspects.x.aggType) ? null : aspects.x.formatter;
     data.push({
       label: aspects.x.title,
       value: xFormatter ? xFormatter(header.value) : `${header.value}`,
@@ -79,6 +74,28 @@ const getTooltipData = (
       });
     }
   });
+
+  if (
+    aspects.splitColumn &&
+    valueSeries.smHorizontalAccessorValue !== undefined &&
+    valueSeries.smHorizontalAccessorValue !== undefined
+  ) {
+    data.push({
+      label: aspects.splitColumn.title,
+      value: `${valueSeries.smHorizontalAccessorValue}`,
+    });
+  }
+
+  if (
+    aspects.splitRow &&
+    valueSeries.smVerticalAccessorValue !== undefined &&
+    valueSeries.smVerticalAccessorValue !== undefined
+  ) {
+    data.push({
+      label: aspects.splitRow.title,
+      value: `${valueSeries.smVerticalAccessorValue}`,
+    });
+  }
 
   return data;
 };

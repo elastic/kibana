@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const fs = require('fs');
@@ -235,7 +235,8 @@ exports.Cluster = class Cluster {
    * @private
    * @param {String} installPath
    * @param {Object} options
-   * @property {Array} options.esArgs
+   * @property {string|Array} options.esArgs
+   * @property {string} options.esJavaOpts
    * @return {undefined}
    */
   _exec(installPath, options = {}) {
@@ -246,7 +247,10 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const esArgs = ['indices.query.bool.max_nested_depth=100'].concat(options.esArgs || []);
+    const esArgs = [
+      'action.destructive_requires_name=true',
+      'ingest.geoip.downloader.enabled=false',
+    ].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
@@ -265,22 +269,25 @@ exports.Cluster = class Cluster {
 
     this._log.debug('%s %s', ES_BIN, args.join(' '));
 
-    options.esEnvVars = options.esEnvVars || {};
+    let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
 
     // ES now automatically sets heap size to 50% of the machine's available memory
     // so we need to set it to a smaller size for local dev and CI
     // especially because we currently run many instances of ES on the same machine during CI
-    options.esEnvVars.ES_JAVA_OPTS =
-      (options.esEnvVars.ES_JAVA_OPTS ? `${options.esEnvVars.ES_JAVA_OPTS} ` : '') +
-      '-Xms1g -Xmx1g';
+    // inital and max must be the same, so we only need to check the max
+    if (!esJavaOpts.includes('Xmx')) {
+      esJavaOpts += ' -Xms1g -Xmx1g';
+    }
+
+    this._log.debug('ES_JAVA_OPTS: %s', esJavaOpts.trim());
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
       env: {
         ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
-        ...(options.bundledJDK ? { JAVA_HOME: '' } : {}),
-        ...(options.esEnvVars || {}),
+        JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
+        ES_JAVA_OPTS: esJavaOpts.trim(),
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });

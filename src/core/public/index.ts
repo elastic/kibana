@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -41,11 +41,11 @@ import {
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
-  ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  ChromeUserBanner,
   NavType,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
@@ -53,27 +53,31 @@ import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
+import {
+  Plugin,
+  AsyncPlugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginOpaqueId,
+} from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
+import { DeprecationsServiceStart } from './deprecations';
 
-export { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
-export { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
-export {
-  AppCategory,
-  UiSettingsParams,
-  UserProvidedValues,
-  UiSettingsType,
-  ImageValidation,
-  StringValidation,
-  StringValidationRegex,
-  StringValidationRegexString,
-} from '../types';
+export type {
+  PackageInfo,
+  EnvironmentMode,
+  IExternalUrlPolicy,
+  DomainDeprecationDetails,
+} from '../server/types';
+export type { CoreContext, CoreSystem } from './core_system';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
+export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
 
-export {
+export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
+export type {
   ApplicationSetup,
   ApplicationStart,
   App,
@@ -85,20 +89,16 @@ export {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  AppStatus,
-  AppNavLinkStatus,
-  AppMeta,
   AppUpdatableFields,
   AppUpdater,
-  AppSearchDeepLink,
+  AppDeepLink,
   PublicAppInfo,
-  PublicAppMetaInfo,
-  PublicAppSearchDeepLinkInfo,
-  ScopedHistory,
+  PublicAppDeepLinkInfo,
   NavigateToAppOptions,
 } from './application';
 
-export {
+export { SimpleSavedObject } from './saved_objects';
+export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
@@ -119,7 +119,6 @@ export {
   SavedObjectsMigrationVersion,
   SavedObjectsClientContract,
   SavedObjectsClient,
-  SimpleSavedObject,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -130,12 +129,18 @@ export {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectsNamespaceType,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './saved_objects';
 
-export {
+export { HttpFetchError } from './http';
+
+export type {
   HttpHeadersInit,
   HttpRequestInit,
-  HttpFetchError,
   HttpFetchOptions,
   HttpFetchOptionsWithPath,
   HttpFetchQuery,
@@ -152,7 +157,7 @@ export {
   IHttpResponseInterceptorOverrides,
 } from './http';
 
-export {
+export type {
   OverlayStart,
   OverlayBannersStart,
   OverlayRef,
@@ -163,7 +168,7 @@ export {
   OverlayModalStart,
 } from './overlays';
 
-export {
+export type {
   Toast,
   ToastInput,
   IToasts,
@@ -175,7 +180,9 @@ export {
   ErrorToastOptions,
 } from './notifications';
 
-export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
+
+export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 export { URL_MAX_LENGTH } from './core_app';
 
@@ -259,6 +266,8 @@ export interface CoreStart {
   uiSettings: IUiSettingsClient;
   /** {@link FatalErrorsStart} */
   fatalErrors: FatalErrorsStart;
+  /** {@link DeprecationsServiceStart} */
+  deprecations: DeprecationsServiceStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -270,7 +279,7 @@ export interface CoreStart {
   };
 }
 
-export {
+export type {
   Capabilities,
   ChromeBadge,
   ChromeBrand,
@@ -286,10 +295,10 @@ export {
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
-  ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  ChromeUserBanner,
   ChromeStart,
   DocLinksStart,
   FatalErrorInfo,
@@ -301,6 +310,7 @@ export {
   NotificationsSetup,
   NotificationsStart,
   Plugin,
+  AsyncPlugin,
   PluginInitializer,
   PluginInitializerContext,
   SavedObjectsStart,

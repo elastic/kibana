@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { createContext, FC } from 'react';
@@ -17,7 +17,7 @@ export const ApplicationUsageContext = createContext<IApplicationUsageTracker | 
 
 /**
  * React component to track the number of clicks and minutes on screen of the children components.
- * @param props {@Link TrackApplicationViewProps}
+ * @param props {@link TrackApplicationViewProps}
  * @constructor
  */
 export const TrackApplicationView: FC<TrackApplicationViewProps> = (props) => {

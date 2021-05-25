@@ -1,27 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 
-import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Header = () => (
   <>
-    <EuiTitle size="s">
-      <h3>
-        <FormattedMessage
-          id="indexPatternManagement.editIndexPattern.sourceHeader"
-          defaultMessage="Field filters"
-        />
-      </h3>
-    </EuiTitle>
-    <EuiText>
+    <EuiText size="s">
       <p>
         <FormattedMessage
           id="indexPatternManagement.editIndexPattern.sourceLabel"

@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { omit } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ISavedObjectsRepository, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { StatsCollectionContext } from 'src/plugins/telemetry_collection_manager/server';
 import { ElasticsearchClient } from 'src/core/server';
 
@@ -27,7 +27,7 @@ export interface KibanaUsageStats {
     };
   };
 
-  [plugin: string]: any;
+  [plugin: string]: Record<string, unknown>;
 }
 
 export function handleKibanaStats(
@@ -73,9 +73,9 @@ export function handleKibanaStats(
 export async function getKibana(
   usageCollection: UsageCollectionSetup,
   asInternalUser: ElasticsearchClient,
-  soClient: SavedObjectsClientContract | ISavedObjectsRepository,
+  soClient: SavedObjectsClientContract,
   kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
 ): Promise<KibanaUsageStats> {
   const usage = await usageCollection.bulkFetch(asInternalUser, soClient, kibanaRequest);
-  return usageCollection.toObject(usage);
+  return usageCollection.toObject<KibanaUsageStats>(usage);
 }

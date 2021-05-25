@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { OverviewPage } from './components/overview/overview_container';
 import { Props as PageHeaderProps, PageHeader } from './components/common/header/page_header';
 import {
   CERTIFICATES_ROUTE,
@@ -14,10 +14,13 @@ import {
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
+  SYNTHETIC_CHECK_STEPS_ROUTE,
 } from '../common/constants';
 import { MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
+import { OverviewPageComponent } from './pages/overview';
+import { SyntheticsCheckSteps } from './pages/synthetics/synthetics_checks';
 
 interface RouteProps {
   path: string;
@@ -72,8 +75,15 @@ const Routes: RouteProps[] = [
   },
   {
     title: baseTitle,
+    path: SYNTHETIC_CHECK_STEPS_ROUTE,
+    component: SyntheticsCheckSteps,
+    dataTestSubj: 'uptimeSyntheticCheckStepsPage',
+    telemetryId: UptimePage.SyntheticCheckStepsPage,
+  },
+  {
+    title: baseTitle,
     path: OVERVIEW_ROUTE,
-    component: OverviewPage,
+    component: OverviewPageComponent,
     dataTestSubj: 'uptimeOverviewPage',
     telemetryId: UptimePage.Overview,
     headerProps: {

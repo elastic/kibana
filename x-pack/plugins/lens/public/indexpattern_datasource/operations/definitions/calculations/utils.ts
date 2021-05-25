@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -35,7 +36,7 @@ export function checkForDateHistogram(layer: IndexPatternLayer, name: string) {
   return [
     i18n.translate('xpack.lens.indexPattern.calculations.dateHistogramErrorMessage', {
       defaultMessage:
-        '{name} requires a date histogram to work. Choose a different function or add a date histogram.',
+        '{name} requires a date histogram to work. Add a date histogram or select a different function.',
       values: {
         name,
       },

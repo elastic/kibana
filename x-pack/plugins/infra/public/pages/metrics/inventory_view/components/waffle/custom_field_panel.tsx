@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
@@ -26,7 +27,7 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-export const CustomFieldPanel = class extends React.PureComponent<Props, State> {
+export class CustomFieldPanel extends React.PureComponent<Props, State> {
   public static displayName = 'CustomFieldPanel';
   public readonly state: State = initialState;
   public render() {
@@ -85,4 +86,4 @@ export const CustomFieldPanel = class extends React.PureComponent<Props, State> 
   private handleFieldSelection = (selectedOptions: SelectedOption[]) => {
     this.setState({ selectedOptions });
   };
-};
+}

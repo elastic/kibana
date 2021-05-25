@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiCallOut,
   EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
@@ -19,7 +20,6 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
-  EuiText,
   EuiTitle,
   EuiSwitch,
   EuiButtonEmpty,
@@ -27,6 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { WebhookActionConnector } from '../types';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const HTTP_VERBS = ['post', 'put'];
 
@@ -307,7 +308,18 @@ const WebhookActionConnectorFields: React.FunctionComponent<
       </EuiFlexGroup>
       {hasAuth ? (
         <>
-          {getEncryptedFieldNotifyLabel(!action.id)}
+          {getEncryptedFieldNotifyLabel(
+            !action.id,
+            2,
+            action.isMissingSecrets ?? false,
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.reenterValuesLabel',
+              {
+                defaultMessage:
+                  'Username and password are encrypted. Please reenter values for these fields.',
+              }
+            )
+          )}
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiFormRow
@@ -412,41 +424,6 @@ const WebhookActionConnectorFields: React.FunctionComponent<
     </Fragment>
   );
 };
-
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
-  if (isCreate) {
-    return (
-      <Fragment>
-        <EuiSpacer size="s" />
-        <EuiText size="s" data-test-subj="rememberValuesMessage">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.rememberValuesLabel"
-            defaultMessage="Remember these values. You must reenter them each time you edit the connector."
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
-  }
-  return (
-    <Fragment>
-      <EuiSpacer size="m" />
-      <EuiCallOut
-        size="s"
-        iconType="iInCircle"
-        data-test-subj="reenterValuesMessage"
-        title={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.reenterValuesLabel',
-          {
-            defaultMessage:
-              'Username and password are encrypted. Please reenter values for these fields.',
-          }
-        )}
-      />
-      <EuiSpacer size="m" />
-    </Fragment>
-  );
-}
 
 // eslint-disable-next-line import/no-default-export
 export { WebhookActionConnectorFields as default };

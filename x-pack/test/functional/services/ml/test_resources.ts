@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ProvidedType } from '@kbn/test/types/ftr';
+import { ProvidedType } from '@kbn/test';
 import { savedSearches, dashboards } from './test_resources_data';
 import { COMMON_REQUEST_HEADERS } from './common_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -526,6 +527,28 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
         await this.deleteSavedObjectById(id, SavedObjectType.ML_JOB, true);
       }
       log.debug('> ML saved objects deleted.');
+    },
+
+    async installFleetPackage(packageIdentifier: string) {
+      log.debug(`Installing Fleet package'${packageIdentifier}'`);
+
+      await supertest
+        .post(`/api/fleet/epm/packages/${packageIdentifier}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      log.debug(` > Installed`);
+    },
+
+    async removeFleetPackage(packageIdentifier: string) {
+      log.debug(`Removing Fleet package'${packageIdentifier}'`);
+
+      await supertest
+        .delete(`/api/fleet/epm/packages/${packageIdentifier}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      log.debug(` > Removed`);
     },
   };
 }

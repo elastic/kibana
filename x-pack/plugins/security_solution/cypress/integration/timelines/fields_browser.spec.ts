@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -15,6 +16,7 @@ import {
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
   FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
   FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
+  FIELDS_BROWSER_FILTER_INPUT,
 } from '../../screens/fields_browser';
 import { TIMELINE_FIELDS_BUTTON } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
@@ -109,7 +111,7 @@ describe('Fields Browser', () => {
 
       filterFieldsBrowser(filterInput);
 
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).should('have.text', '4');
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).should('have.text', '5');
     });
   });
 
@@ -193,7 +195,7 @@ describe('Fields Browser', () => {
 
     it('restores focus to the Customize Columns button when Esc is pressed', () => {
       openTimelineFieldsBrowser();
-      cy.get('body').type('{esc}');
+      cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{esc}');
 
       cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
     });

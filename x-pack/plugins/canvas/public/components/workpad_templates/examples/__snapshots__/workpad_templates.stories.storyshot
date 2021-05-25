@@ -38,6 +38,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 aria-hidden="true"
                 className="euiFormControlLayoutCustomIcon__icon"
                 data-euiicon-type="search"
+                size="m"
               />
             </span>
           </div>
@@ -94,6 +95,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
   />
   <div
     className="euiBasicTable canvasWorkpad__dropzoneTable canvasWorkpad__dropzoneTable--tags"
+    data-test-subj="canvasTemplatesTable"
   >
     <div>
       <div
@@ -183,16 +185,15 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                     Template name
                   </span>
                   <span
-                    aria-label="Sorted in ascending order"
                     className="euiTableSortIcon"
                     data-euiicon-type="sortUp"
                     size="m"
                   />
-                  <span
-                    className="euiScreenReaderOnly"
-                  >
-                    Click to sort in descending order
-                  </span>
+                </span>
+                <span
+                  className="euiScreenReaderOnly"
+                >
+                  Click to sort in descending order
                 </span>
               </button>
             </th>
@@ -319,7 +320,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  className="euiHealth"
+                  className="euiHealth euiHealth--textSizeS"
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -340,7 +341,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                   </div>
                 </div>
                 <div
-                  className="euiHealth"
+                  className="euiHealth euiHealth--textSizeS"
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -441,7 +442,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  className="euiHealth"
+                  className="euiHealth euiHealth--textSizeS"
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -462,7 +463,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                   </div>
                 </div>
                 <div
-                  className="euiHealth"
+                  className="euiHealth euiHealth--textSizeS"
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -503,7 +504,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
       >
         <button
           aria-label="Previous page"
-          className="euiButtonIcon euiButtonIcon--text"
+          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
           data-test-subj="pagination-button-previous"
           disabled={true}
           onClick={[Function]}
@@ -525,7 +526,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
             <button
               aria-current={true}
               aria-label="Page 1 of 1"
-              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
               data-test-subj="pagination-button-0"
               disabled={true}
               onClick={[Function]}
@@ -545,7 +546,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
         </ul>
         <button
           aria-label="Next page"
-          className="euiButtonIcon euiButtonIcon--text"
+          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
           data-test-subj="pagination-button-next"
           disabled={true}
           onClick={[Function]}

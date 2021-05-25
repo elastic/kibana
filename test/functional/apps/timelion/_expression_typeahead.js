@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -15,14 +15,6 @@ export default function ({ getPageObjects }) {
     before(async () => {
       await PageObjects.timelion.initTests();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-    });
-
-    it('should display function suggestions filtered by function name', async () => {
-      await PageObjects.timelion.setExpression('.e');
-      const suggestions = await PageObjects.timelion.getSuggestionItemsText();
-      expect(suggestions.length).to.eql(2);
-      expect(suggestions[0].includes('.elasticsearch()')).to.eql(true);
-      expect(suggestions[1].includes('.es()')).to.eql(true);
     });
 
     it('should show argument suggestions when function suggestion is selected', async () => {
@@ -44,6 +36,14 @@ export default function ({ getPageObjects }) {
       expect(valueSuggestions.length).to.eql(5);
       expect(valueSuggestions[0].includes('disable legend')).to.eql(true);
       expect(valueSuggestions[1].includes('place legend in north east corner')).to.eql(true);
+    });
+
+    it('should display function suggestions filtered by function name', async () => {
+      await PageObjects.timelion.setExpression('.e');
+      const suggestions = await PageObjects.timelion.getSuggestionItemsText();
+      expect(suggestions.length).to.eql(2);
+      expect(suggestions[0].includes('.elasticsearch()')).to.eql(true);
+      expect(suggestions[1].includes('.es()')).to.eql(true);
     });
 
     describe('dynamic suggestions for argument values', () => {
@@ -75,18 +75,18 @@ export default function ({ getPageObjects }) {
           await PageObjects.timelion.updateExpression(',split');
           await PageObjects.timelion.clickSuggestion();
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
-          expect(suggestions.length).to.eql(51);
+          expect(suggestions.length).not.to.eql(0);
           expect(suggestions[0].includes('@message.raw')).to.eql(true);
-          await PageObjects.timelion.clickSuggestion(10, 2000);
+          await PageObjects.timelion.clickSuggestion(10);
         });
 
         it('should show field suggestions for metric argument when index pattern set', async () => {
           await PageObjects.timelion.updateExpression(',metric');
           await PageObjects.timelion.clickSuggestion();
           await PageObjects.timelion.updateExpression('avg:');
-          await PageObjects.timelion.clickSuggestion(0, 2000);
+          await PageObjects.timelion.clickSuggestion(0);
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
-          expect(suggestions.length).to.eql(2);
+          expect(suggestions.length).not.to.eql(0);
           expect(suggestions[0].includes('avg:bytes')).to.eql(true);
         });
       });

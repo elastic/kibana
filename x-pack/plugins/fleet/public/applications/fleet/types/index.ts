@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 export {
   // utility function
   entries,
@@ -11,7 +13,6 @@ export {
   AgentMetadata,
   AgentPolicy,
   NewAgentPolicy,
-  AgentEvent,
   SimplifiedAgentStatus,
   EnrollmentAPIKey,
   PackagePolicy,
@@ -47,6 +48,7 @@ export {
   CreatePackagePolicyResponse,
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
+  GetPackagePoliciesResponse,
   // API schemas - Data streams
   GetDataStreamsResponse,
   // API schemas - Agents
@@ -61,8 +63,6 @@ export {
   PostBulkAgentUpgradeRequest,
   PostAgentUpgradeResponse,
   PostBulkAgentUpgradeResponse,
-  GetOneAgentEventsRequest,
-  GetOneAgentEventsResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
   PutAgentReassignRequest,
@@ -85,6 +85,7 @@ export {
   PutSettingsResponse,
   // API schemas - app
   CheckPermissionsResponse,
+  GenerateServiceTokenResponse,
   // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,
@@ -120,6 +121,7 @@ export {
   InstallationStatus,
   Installable,
   RegistryRelease,
+  PackageSpecCategory,
 } from '../../../../common';
 
 export * from './intra_app_route_state';

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SHAREABLE_RUNTIME_NAME } from '../../shareable_runtime/constants_static';
@@ -43,3 +44,4 @@ export const API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD = `/public/canvas/${SHAREABLE_
 export const CANVAS_EMBEDDABLE_CLASSNAME = `canvasEmbeddable`;
 export const CONTEXT_MENU_TOP_BORDER_CLASSNAME = 'canvasContextMenu--topBorder';
 export const API_ROUTE_FUNCTIONS = `${API_ROUTE}/fns`;
+export const ESSQL_SEARCH_STRATEGY = 'essql';

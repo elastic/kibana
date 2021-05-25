@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { forOwn, keyBy, isNumber, isBoolean, isPlainObject, isString } from 'lodash';
@@ -11,11 +11,12 @@ import { SimpleSavedObject } from '../../../../core/public';
 import { castEsToKbnFieldTypeName } from '../../../data/public';
 import { ObjectField } from '../management_section/types';
 import { SavedObjectLoader } from '../../../saved_objects/public';
+import { SavedObjectWithMetadata } from '../types';
 
 const maxRecursiveIterations = 20;
 
 export function createFieldList(
-  object: SimpleSavedObject,
+  object: SimpleSavedObject | SavedObjectWithMetadata,
   service?: SavedObjectLoader
 ): ObjectField[] {
   let fields = Object.entries(object.attributes as Record<string, any>).reduce(

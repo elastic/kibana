@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -51,7 +52,11 @@ export default ({ getService }: FtrProviderContext) => {
       expect(createdCalendar.description).to.eql(requestBody.description);
       expect(createdCalendar.job_ids).to.eql(requestBody.job_ids);
 
-      await ml.api.waitForEventsToExistInCalendar(calendarId, requestBody.events);
+      await ml.api.waitForEventsToExistInCalendar(
+        calendarId,
+        // @ts-expect-error not full interface
+        requestBody.events
+      );
     });
 
     it('should not create new calendar for user without required permission', async () => {

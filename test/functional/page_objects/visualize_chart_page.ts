@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Position } from '@elastic/charts';
@@ -408,7 +408,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
 
         await this.waitForVisualizationRenderingStabilized();
         // arbitrary color chosen, any available would do
-        const isOpen = await this.doesLegendColorChoiceExist('#EF843C');
+        const arbitraryColor = (await this.isVisTypeXYChart()) ? '#d36086' : '#EF843C';
+        const isOpen = await this.doesLegendColorChoiceExist(arbitraryColor);
         if (!isOpen) {
           throw new Error('legend color selector not open');
         }
@@ -418,12 +419,13 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     public async filterOnTableCell(columnIndex: number, rowIndex: number) {
       await retry.try(async () => {
         const cell = await dataGrid.getCellElement(rowIndex, columnIndex);
-        await cell.moveMouseTo();
+        await cell.click();
         const filterBtn = await testSubjects.findDescendant(
           'tbvChartCell__filterForCellValue',
           cell
         );
-        await filterBtn.click();
+        await common.sleep(2000);
+        filterBtn.click();
       });
     }
 

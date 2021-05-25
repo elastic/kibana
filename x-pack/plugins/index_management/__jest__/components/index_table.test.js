@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -27,7 +28,7 @@ import { notificationService } from '../../public/application/services/notificat
 import { httpService } from '../../public/application/services/http';
 import { setUiMetricService } from '../../public/application/services/api';
 import { indexManagementStore } from '../../public/application/store';
-import { setExtensionsService } from '../../public/application/store/selectors';
+import { setExtensionsService } from '../../public/application/store/selectors/extension_service';
 import { BASE_PATH, API_BASE_PATH } from '../../common/constants';
 import { ExtensionsService } from '../../public/services';
 import sinon from 'sinon';
@@ -194,6 +195,20 @@ describe('index table', () => {
     rendered.update();
     button = findTestSubject(rendered, 'indexActionsContextMenuButton');
     expect(button.length).toEqual(1);
+  });
+  test('should update the Actions menu button text when more than one row is selected', () => {
+    const rendered = mountWithIntl(component);
+    let button = findTestSubject(rendered, 'indexTableContextMenuButton');
+    expect(button.length).toEqual(0);
+    const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
+    checkboxes.at(0).simulate('change', { target: { checked: true } });
+    rendered.update();
+    button = findTestSubject(rendered, 'indexActionsContextMenuButton');
+    expect(button.text()).toEqual('Manage index');
+    checkboxes.at(1).simulate('change', { target: { checked: true } });
+    rendered.update();
+    button = findTestSubject(rendered, 'indexActionsContextMenuButton');
+    expect(button.text()).toEqual('Manage 2 indices');
   });
   test('should show system indices only when the switch is turned on', () => {
     const rendered = mountWithIntl(component);

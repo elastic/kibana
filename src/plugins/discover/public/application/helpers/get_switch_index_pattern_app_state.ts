@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getSortArray } from '../angular/doc_table';
@@ -20,7 +20,7 @@ export function getSwitchIndexPatternAppState(
   currentColumns: string[],
   currentSort: SortPairArr[],
   modifyColumns: boolean = true,
-  useNewFieldsApi: boolean = false
+  sortDirection: string = 'desc'
 ) {
   const nextColumns = modifyColumns
     ? currentColumns.filter(
@@ -28,12 +28,20 @@ export function getSwitchIndexPatternAppState(
           nextIndexPattern.fields.getByName(column) || !currentIndexPattern.fields.getByName(column)
       )
     : currentColumns;
-  const nextSort = getSortArray(currentSort, nextIndexPattern);
-  const defaultColumns = useNewFieldsApi ? [] : ['_source'];
-  const columns = nextColumns.length ? nextColumns : defaultColumns;
+  const columns = nextColumns.length ? nextColumns : [];
+  // when switching from an index pattern with timeField to an index pattern without timeField
+  // filter out sorting by timeField in case it is set. index patterns without timeField don't
+  // prepend this field in the table, so in legacy grid you would need to add this column to
+  // remove sorting
+  const nextSort = getSortArray(currentSort, nextIndexPattern).filter((value) => {
+    return nextIndexPattern.timeFieldName || value[0] !== currentIndexPattern.timeFieldName;
+  });
   return {
     index: nextIndexPattern.id,
     columns,
-    sort: nextSort,
+    sort:
+      nextIndexPattern.timeFieldName && !nextSort.length
+        ? [[nextIndexPattern.timeFieldName, sortDirection]]
+        : nextSort,
   };
 }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -638,7 +638,7 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
         'Add the the agent package(s) from [NuGet]({allNuGetPackagesLink}) to your .NET application. There are multiple \
       NuGet packages available for different use cases. \n\nFor an ASP.NET Core application with Entity Framework \
       Core download the [Elastic.Apm.NetCoreAll]({netCoreAllApmPackageLink}) package. This package will automatically add every \
-      agent component to your application. \n\n In case you would like to to minimize the dependencies, you can use the \
+      agent component to your application. \n\n In case you would like to minimize the dependencies, you can use the \
       [Elastic.Apm.AspNetCore]({aspNetCorePackageLink}) package for just \
       ASP.NET Core monitoring or the [Elastic.Apm.EfCore]({efCorePackageLink}) package for just Entity Framework Core monitoring. \n\n \
       In case you only want to use the public Agent API for manual instrumentation use the [Elastic.Apm]({elasticApmPackageLink}) package.',
@@ -697,6 +697,57 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
       values: {
         documentationLink:
           '{config.docs.base_url}guide/en/apm/agent/dotnet/current/configuration.html',
+      },
+    }),
+  },
+];
+
+export const createPhpAgentInstructions = (apmServerUrl = '', secretToken = '') => [
+  {
+    title: i18n.translate('apmOss.tutorial.phpClient.download.title', {
+      defaultMessage: 'Download the APM agent',
+    }),
+    textPre: i18n.translate('apmOss.tutorial.phpClient.download.textPre', {
+      defaultMessage:
+        'Download the package corresponding to your platform from [GitHub releases]({githubReleasesLink}).',
+      values: {
+        githubReleasesLink: 'https://github.com/elastic/apm-agent-php/releases',
+      },
+    }),
+  },
+  {
+    title: i18n.translate('apmOss.tutorial.phpClient.installPackage.title', {
+      defaultMessage: 'Install the downloaded package',
+    }),
+    textPre: i18n.translate('apmOss.tutorial.phpClient.installPackage.textPre', {
+      defaultMessage: 'For example on Alpine Linux using APK package:',
+    }),
+    commands: ['apk add --allow-untrusted <package-file>.apk'],
+    textPost: i18n.translate('apmOss.tutorial.phpClient.installPackage.textPost', {
+      defaultMessage:
+        'See the [documentation]({documentationLink}) for installation commands on other supported platforms and advanced installation.',
+      values: {
+        documentationLink: '{config.docs.base_url}guide/en/apm/agent/php/current/setup.html',
+      },
+    }),
+  },
+  {
+    title: i18n.translate('apmOss.tutorial.phpClient.configureAgent.title', {
+      defaultMessage: 'Configure the agent',
+    }),
+    textPre: i18n.translate('apmOss.tutorial.phpClient.configureAgent.textPre', {
+      defaultMessage:
+        'APM is automatically started when your app boots. Configure the agent either via `php.ini` file:',
+    }),
+    commands: `elastic_apm.server_url=http://localhost:8200
+elastic_apm.service_name="My service"
+`.split('\n'),
+    textPost: i18n.translate('apmOss.tutorial.phpClient.configure.textPost', {
+      defaultMessage:
+        'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+      values: {
+        documentationLink:
+          '{config.docs.base_url}guide/en/apm/agent/php/current/configuration.html',
       },
     }),
   },

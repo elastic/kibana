@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { Fragment, useEffect } from 'react';
+
+import React, { useEffect } from 'react';
 import {
   EuiFieldText,
   EuiFlexItem,
@@ -12,10 +14,8 @@ import {
   EuiFieldPassword,
   EuiSwitch,
   EuiFormRow,
-  EuiText,
   EuiTitle,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -23,6 +23,7 @@ import { EuiLink } from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
@@ -38,7 +39,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
   }, []);
 
   return (
-    <Fragment>
+    <>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -53,10 +54,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               }
             )}
             helpText={
-              <EuiLink
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/email-action-type.html#configuring-email`}
-                target="_blank"
-              >
+              <EuiLink href={docLinks.links.alerting.emailActionConfig} target="_blank">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
                   defaultMessage="Configure email accounts"
@@ -205,7 +203,18 @@ export const EmailActionConnectorFields: React.FunctionComponent<
       </EuiFlexGroup>
       {hasAuth ? (
         <>
-          {getEncryptedFieldNotifyLabel(!action.id)}
+          {getEncryptedFieldNotifyLabel(
+            !action.id,
+            2,
+            action.isMissingSecrets ?? false,
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.reenterValuesLabel',
+              {
+                defaultMessage:
+                  'Username and password are encrypted. Please reenter values for these fields.',
+              }
+            )
+          )}
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiFormRow
@@ -272,7 +281,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
           </EuiFlexGroup>
         </>
       ) : null}
-    </Fragment>
+    </>
   );
 };
 
@@ -280,41 +289,6 @@ export const EmailActionConnectorFields: React.FunctionComponent<
 function nullableString(str: string | null | undefined) {
   if (str == null || str.trim() === '') return null;
   return str;
-}
-
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
-  if (isCreate) {
-    return (
-      <Fragment>
-        <EuiSpacer size="s" />
-        <EuiText size="s" data-test-subj="rememberValuesMessage">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.rememberValuesLabel"
-            defaultMessage="Remember these values. You must reenter them each time you edit the connector."
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
-  }
-  return (
-    <Fragment>
-      <EuiSpacer size="m" />
-      <EuiCallOut
-        size="s"
-        iconType="iInCircle"
-        data-test-subj="reenterValuesMessage"
-        title={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.reenterValuesLabel',
-          {
-            defaultMessage:
-              'Username and password are encrypted. Please reenter values for these fields.',
-          }
-        )}
-      />
-      <EuiSpacer size="m" />
-    </Fragment>
-  );
 }
 
 // eslint-disable-next-line import/no-default-export

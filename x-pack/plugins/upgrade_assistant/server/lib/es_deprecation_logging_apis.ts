@@ -1,20 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { get } from 'lodash';
-import { ILegacyScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient } from 'src/core/server';
 
 interface DeprecationLoggingStatus {
   isEnabled: boolean;
 }
 
 export async function getDeprecationLoggingStatus(
-  dataClient: ILegacyScopedClusterClient
+  dataClient: IScopedClusterClient
 ): Promise<DeprecationLoggingStatus> {
-  const response = await dataClient.callAsCurrentUser('cluster.getSettings', {
-    includeDefaults: true,
+  const { body: response } = await dataClient.asCurrentUser.cluster.getSettings({
+    include_defaults: true,
   });
 
   return {
@@ -23,10 +25,10 @@ export async function getDeprecationLoggingStatus(
 }
 
 export async function setDeprecationLogging(
-  dataClient: ILegacyScopedClusterClient,
+  dataClient: IScopedClusterClient,
   isEnabled: boolean
 ): Promise<DeprecationLoggingStatus> {
-  const response = await dataClient.callAsCurrentUser('cluster.putSettings', {
+  const { body: response } = await dataClient.asCurrentUser.cluster.putSettings({
     body: {
       transient: {
         'logger.deprecation': isEnabled ? 'WARN' : 'ERROR',

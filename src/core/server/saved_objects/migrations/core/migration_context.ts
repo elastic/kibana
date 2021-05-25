@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -25,6 +25,7 @@ import { buildActiveMappings } from './build_active_mappings';
 import { VersionedTransformer } from './document_migrator';
 import * as Index from './elastic_index';
 import { SavedObjectsMigrationLogger, MigrationLogger } from './migration_logger';
+import { KibanaMigratorStatus } from '../kibana';
 
 export interface MigrationOpts {
   batchSize: number;
@@ -32,7 +33,9 @@ export interface MigrationOpts {
   scrollDuration: string;
   client: MigrationEsClient;
   index: string;
+  kibanaVersion: string;
   log: Logger;
+  setStatus: (status: KibanaMigratorStatus) => void;
   mappingProperties: SavedObjectsTypeMappingDefinitions;
   documentMigrator: VersionedTransformer;
   serializer: SavedObjectsSerializer;
@@ -54,7 +57,9 @@ export interface Context {
   source: Index.FullIndexInfo;
   dest: Index.FullIndexInfo;
   documentMigrator: VersionedTransformer;
+  kibanaVersion: string;
   log: SavedObjectsMigrationLogger;
+  setStatus: (status: KibanaMigratorStatus) => void;
   batchSize: number;
   pollInterval: number;
   scrollDuration: string;
@@ -68,7 +73,7 @@ export interface Context {
  * and various info needed to migrate the source index.
  */
 export async function migrationContext(opts: MigrationOpts): Promise<Context> {
-  const { log, client } = opts;
+  const { log, client, setStatus } = opts;
   const alias = opts.index;
   const source = createSourceContext(await Index.fetchInfo(client, alias), alias);
   const dest = createDestContext(source, alias, opts.mappingProperties);
@@ -78,7 +83,9 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
     alias,
     source,
     dest,
+    kibanaVersion: opts.kibanaVersion,
     log: new MigrationLogger(log),
+    setStatus,
     batchSize: opts.batchSize,
     documentMigrator: opts.documentMigrator,
     pollInterval: opts.pollInterval,

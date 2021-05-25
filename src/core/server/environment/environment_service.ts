@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { take } from 'rxjs/operators';
@@ -30,11 +30,13 @@ export interface InternalEnvironmentServiceSetup {
 /** @internal */
 export class EnvironmentService {
   private readonly log: Logger;
+  private readonly processLogger: Logger;
   private readonly configService: IConfigService;
   private uuid: string = '';
 
   constructor(core: CoreContext) {
     this.log = core.logger.get('environment');
+    this.processLogger = core.logger.get('process');
     this.configService = core.configService;
   }
 
@@ -48,6 +50,14 @@ export class EnvironmentService {
     // was present in the legacy `pid` file.
     process.on('unhandledRejection', (reason) => {
       this.log.warn(`Detected an unhandled Promise rejection.\n${reason}`);
+    });
+
+    process.on('warning', (warning) => {
+      // deprecation warnings do no reflect a current problem for the user and should be filtered out.
+      if (warning.name === 'DeprecationWarning') {
+        return;
+      }
+      this.processLogger.warn(warning);
     });
 
     await createDataFolder({ pathConfig, logger: this.log });

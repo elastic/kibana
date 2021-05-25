@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ALLOWED_DATA_UNITS } from '../constants/validation';
+import { parseInterval } from './parse_interval';
+import { isPopulatedObject } from './object_utils';
 
 /**
  * Provides a validator function for maximum allowed input length.
@@ -60,17 +63,17 @@ export function composeValidators(
 }
 
 export function requiredValidator() {
-  return (value: any) => {
+  return <T extends string>(value: T) => {
     return value === '' || value === undefined || value === null ? { required: true } : null;
   };
 }
 
-export type ValidationResult = object | null;
+export type ValidationResult = Record<string, any> | null;
 
 export type MemoryInputValidatorResult = { invalidUnits: { allowedUnits: string } } | null;
 
 export function memoryInputValidator(allowedUnits = ALLOWED_DATA_UNITS) {
-  return (value: any) => {
+  return <T>(value: T) => {
     if (typeof value !== 'string' || value === '') {
       return null;
     }
@@ -78,5 +81,51 @@ export function memoryInputValidator(allowedUnits = ALLOWED_DATA_UNITS) {
     return regexp.test(value.trim())
       ? null
       : { invalidUnits: { allowedUnits: allowedUnits.join(', ') } };
+  };
+}
+
+export function timeIntervalInputValidator() {
+  return (value: string) => {
+    if (value === '') {
+      return null;
+    }
+
+    const r = parseInterval(value);
+    if (r === null) {
+      return {
+        invalidTimeInterval: true,
+      };
+    }
+
+    return null;
+  };
+}
+
+export interface NumberValidationResult {
+  min: boolean;
+  max: boolean;
+}
+
+export function numberValidator(conditions?: { min?: number; max?: number }) {
+  if (
+    conditions?.min !== undefined &&
+    conditions.max !== undefined &&
+    conditions.min > conditions.max
+  ) {
+    throw new Error('Invalid validator conditions');
+  }
+
+  return (value: number): NumberValidationResult | null => {
+    const result = {} as NumberValidationResult;
+    if (conditions?.min !== undefined && value < conditions.min) {
+      result.min = true;
+    }
+    if (conditions?.max !== undefined && value > conditions.max) {
+      result.max = true;
+    }
+    if (isPopulatedObject(result)) {
+      return result;
+    }
+    return null;
   };
 }

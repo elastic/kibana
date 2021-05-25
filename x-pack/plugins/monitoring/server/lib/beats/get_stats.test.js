@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { handleResponse } from './get_stats';
@@ -10,10 +11,10 @@ describe('beats/get_stats', () => {
   it('Handle empty response', () => {
     expect(handleResponse()).toEqual({
       stats: {
-        bytesSent: null,
-        totalEvents: null,
+        bytesSent: 0,
+        totalEvents: 0,
       },
-      total: null,
+      total: 0,
       types: [],
     });
   });

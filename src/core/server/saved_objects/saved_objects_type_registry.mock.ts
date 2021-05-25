@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from './saved_objects_type_registry';
@@ -20,6 +20,7 @@ const createRegistryMock = (): jest.Mocked<
     isNamespaceAgnostic: jest.fn(),
     isSingleNamespace: jest.fn(),
     isMultiNamespace: jest.fn(),
+    isShareable: jest.fn(),
     isHidden: jest.fn(),
     getIndex: jest.fn(),
     isImportableAndExportable: jest.fn(),
@@ -36,6 +37,7 @@ const createRegistryMock = (): jest.Mocked<
     (type: string) => type !== 'global' && type !== 'shared'
   );
   mock.isMultiNamespace.mockImplementation((type: string) => type === 'shared');
+  mock.isShareable.mockImplementation((type: string) => type === 'shared');
   mock.isImportableAndExportable.mockReturnValue(true);
 
   return mock;

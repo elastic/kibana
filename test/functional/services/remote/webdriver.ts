@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
@@ -11,7 +11,7 @@ import Fs from 'fs';
 
 import * as Rx from 'rxjs';
 import { mergeMap, map, takeUntil, catchError } from 'rxjs/operators';
-import { Lifecycle } from '@kbn/test/src/functional_test_runner/lib/lifecycle';
+import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/dev-utils';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available

@@ -1,19 +1,16 @@
-.source-row {
-  &__icon {
-    width: 24px;
-    height: 24px;
-  }
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-  &__name {
-    font-weight: 500;
-  }
+.source-row--error,
+.source-row--error:hover {
+  color: $euiColorDanger;
+  background: rgba($euiColorDanger, .1);
 
-  &__actions {
-    width: 100px;
-  }
-
-  &__actions a {
-    opacity: 1.0;
-    pointer-events: auto;
+  .euiLink {
+    color: $euiColorDanger;
   }
 }

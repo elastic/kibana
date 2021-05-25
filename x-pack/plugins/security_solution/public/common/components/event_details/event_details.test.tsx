@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { waitFor } from '@testing-library/dom';
@@ -27,10 +28,11 @@ describe('EventDetails', () => {
     data: mockDetailItemData,
     id: mockDetailItemDataId,
     isAlert: false,
-    onViewSelected: jest.fn(),
+    onEventViewSelected: jest.fn(),
+    onThreatViewSelected: jest.fn(),
     timelineTabType: TimelineTabs.query,
     timelineId: 'test',
-    view: EventsViewType.summaryView,
+    eventView: EventsViewType.summaryView,
   };
 
   const alertsProps = {
@@ -75,13 +77,14 @@ describe('EventDetails', () => {
   });
 
   describe('alerts tabs', () => {
-    ['Summary', 'Table', 'JSON View'].forEach((tab) => {
+    ['Summary', 'Threat Intel', 'Table', 'JSON View'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
+        const expectedCopy = tab === 'Threat Intel' ? `${tab} (1)` : tab;
         expect(
           alertsWrapper
             .find('[data-test-subj="eventDetails"]')
             .find('[role="tablist"]')
-            .containsMatchingElement(<span>{tab}</span>)
+            .containsMatchingElement(<span>{expectedCopy}</span>)
         ).toBeTruthy();
       });
     });

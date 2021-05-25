@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
@@ -15,8 +16,9 @@ function isObject(value: unknown) {
   return value != null && (type === 'object' || type === 'function');
 }
 
-// TODO: Copied from https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/common/format_errors.ts
-// We should figure out a better way to share this
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/format_errors/index.ts
+ */
 export const formatErrors = (errors: t.Errors): string[] => {
   return errors.map((error) => {
     if (error.message != null) {
@@ -66,7 +68,7 @@ class ApiService {
 
     const response = await this._http!.fetch({
       path: apiUrl,
-      query: { ...params, ...(debugEnabled ? { _debug: true } : {}) },
+      query: { ...params, ...(debugEnabled ? { _inspect: true } : {}) },
       asResponse,
     });
 

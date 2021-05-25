@@ -9,10 +9,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "PsExec Network Connection",
   "query": "sequence by process.entity_id\n  [process where process.name : \"PsExec.exe\" and event.type == \"start\"]\n  [network where process.name : \"PsExec.exe\"]\n",
   "risk_score": 21,
@@ -59,5 +60,5 @@
     }
   ],
   "type": "eql",
-  "version": 6
+  "version": 7
 }

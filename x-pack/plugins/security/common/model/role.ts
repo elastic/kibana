@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash';
+
 import { i18n } from '@kbn/i18n';
-import { FeaturesPrivileges } from './features_privileges';
+
+import type { FeaturesPrivileges } from './features_privileges';
 
 export interface RoleIndexPrivilege {
   names: string[];
@@ -68,7 +71,27 @@ export function isRoleReserved(role: Partial<Role>) {
  * @param {role} the Role as returned by roles API
  */
 export function isRoleDeprecated(role: Partial<Role>) {
-  return role.metadata?._deprecated ?? false;
+  return (role.metadata?._deprecated as boolean) ?? false;
+}
+
+/**
+ * Returns whether given role is a system role or not.
+ *
+ * @param {role} the Role as returned by roles API
+ */
+export function isRoleSystem(role: Partial<Role>) {
+  return (isRoleReserved(role) && role.name?.endsWith('_system')) ?? false;
+}
+
+/**
+ * Returns whether given role is an admin role or not.
+ *
+ * @param {role} the Role as returned by roles API
+ */
+export function isRoleAdmin(role: Partial<Role>) {
+  return (
+    (isRoleReserved(role) && (role.name?.endsWith('_admin') || role.name === 'superuser')) ?? false
+  );
 }
 
 /**

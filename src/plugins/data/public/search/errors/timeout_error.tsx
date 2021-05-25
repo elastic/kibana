@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -13,7 +13,6 @@ import { ApplicationStart } from 'kibana/public';
 import { KbnError } from '../../../../kibana_utils/common';
 
 export enum TimeoutErrorMode {
-  UPGRADE,
   CONTACT,
   CHANGE,
 }
@@ -24,18 +23,13 @@ export enum TimeoutErrorMode {
  */
 export class SearchTimeoutError extends KbnError {
   public mode: TimeoutErrorMode;
-  constructor(err: Error, mode: TimeoutErrorMode) {
+  constructor(err: Record<string, any>, mode: TimeoutErrorMode) {
     super(`Request timeout: ${JSON.stringify(err?.message)}`);
     this.mode = mode;
   }
 
   private getMessage() {
     switch (this.mode) {
-      case TimeoutErrorMode.UPGRADE:
-        return i18n.translate('data.search.upgradeLicense', {
-          defaultMessage:
-            'Your query has timed out. With our free Basic tier, your queries never time out.',
-        });
       case TimeoutErrorMode.CONTACT:
         return i18n.translate('data.search.timeoutContactAdmin', {
           defaultMessage:
@@ -51,11 +45,6 @@ export class SearchTimeoutError extends KbnError {
 
   private getActionText() {
     switch (this.mode) {
-      case TimeoutErrorMode.UPGRADE:
-        return i18n.translate('data.search.upgradeLicenseActionText', {
-          defaultMessage: 'Upgrade now',
-        });
-        break;
       case TimeoutErrorMode.CHANGE:
         return i18n.translate('data.search.timeoutIncreaseSettingActionText', {
           defaultMessage: 'Edit setting',
@@ -66,9 +55,6 @@ export class SearchTimeoutError extends KbnError {
 
   private onClick(application: ApplicationStart) {
     switch (this.mode) {
-      case TimeoutErrorMode.UPGRADE:
-        application.navigateToUrl('https://www.elastic.co/subscriptions');
-        break;
       case TimeoutErrorMode.CHANGE:
         application.navigateToApp('management', {
           path: `/kibana/settings`,

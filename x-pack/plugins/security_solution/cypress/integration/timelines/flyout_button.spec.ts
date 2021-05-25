@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON } from '../../screens/security_main';
 import {
   CREATE_NEW_TIMELINE,
+  IS_DRAGGING_DATA_PROVIDERS,
   TIMELINE_DATA_PROVIDERS,
   TIMELINE_FLYOUT_HEADER,
   TIMELINE_SETTINGS_ICON,
@@ -59,20 +61,28 @@ describe('timeline flyout button', () => {
 
   it('the `(+)` button popover menu owns focus', () => {
     cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
-    cy.get(CREATE_NEW_TIMELINE).should('have.focus');
+    cy.get(CREATE_NEW_TIMELINE).closest('.euiPanel').should('have.focus');
     cy.get('body').type('{esc}');
     cy.get(CREATE_NEW_TIMELINE).should('not.be.visible');
   });
 
-  it('sets the data providers background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers area', () => {
+  it('should render the global search dropdown when the input is focused', () => {
+    openTimelineUsingToggle();
+    cy.get('[data-test-subj="nav-search-input"]').focus();
+    cy.get('[data-test-subj="nav-search-input"]').should('be.focused');
+    cy.get('[data-test-subj="nav-search-option"]').should('be.visible');
+    cy.get('[data-test-subj="nav-search-option"]').first().trigger('mouseenter');
+    // check that at least one item is visible in the search bar after mousing over, i.e. it's still usable.
+    cy.get('[data-test-subj="nav-search-option"]').its('length').should('be.gte', 1);
+    closeTimelineUsingCloseButton();
+  });
+
+  it('sets correct classes when the user starts dragging a host, but is not hovering over the data providers', () => {
     dragFirstHostToTimeline();
 
-    cy.get(TIMELINE_DATA_PROVIDERS)
+    cy.get(IS_DRAGGING_DATA_PROVIDERS)
+      .find(TIMELINE_DATA_PROVIDERS)
       .filter(':visible')
-      .should(
-        'have.css',
-        'background',
-        'rgba(1, 125, 115, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
-      );
+      .should('have.class', 'drop-target-data-providers');
   });
 });

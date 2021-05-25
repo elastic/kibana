@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -13,11 +14,10 @@ import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
-import {
-  operationDefinitionMap,
-  getErrorMessages,
-  createMockedReferenceOperation,
-} from './operations';
+import { operationDefinitionMap, getErrorMessages } from './operations';
+import { createMockedFullReference } from './operations/mocks';
+import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -172,6 +172,8 @@ describe('IndexPattern Data Source', () => {
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
+      indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
+      uiActions: uiActionsPluginMock.createStartContract(),
     });
 
     baseState = {
@@ -284,6 +286,30 @@ describe('IndexPattern Data Source', () => {
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = await indexPatternDatasource.initialize();
+      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
+    });
+
+    it('should generate an empty expression when there is a formula without aggs', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'Formula',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'formula',
+                references: [],
+                params: {},
+              },
+            },
+          },
+        },
+      };
+      const state = enrichBaseState(queryBaseState);
       expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
     });
 
@@ -474,36 +500,42 @@ describe('IndexPattern Data Source', () => {
       expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
-    it('should add the suffix to the remap column id if provided by the operation', async () => {
+    it('should wrap filtered metrics in filtered metric aggregation', async () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
             indexPatternId: '1',
-            columnOrder: ['def', 'abc'],
+            columnOrder: ['col1', 'col2', 'col3'],
             columns: {
-              abc: {
-                label: '23rd percentile',
+              col1: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+                timeScale: 'h',
+                filter: {
+                  language: 'kuery',
+                  query: 'bytes > 5',
+                },
+              },
+              col2: {
+                label: 'Average of bytes',
                 dataType: 'number',
                 isBucketed: false,
                 sourceField: 'bytes',
-                operationType: 'percentile',
-                params: {
-                  percentile: 23,
-                },
+                operationType: 'average',
+                timeScale: 'h',
               },
-              def: {
-                label: 'Terms',
-                dataType: 'string',
+              col3: {
+                label: 'Date',
+                dataType: 'date',
                 isBucketed: true,
-                operationType: 'terms',
-                sourceField: 'source',
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
                 params: {
-                  size: 5,
-                  orderBy: {
-                    type: 'alphabetical',
-                  },
-                  orderDirection: 'asc',
+                  interval: 'auto',
                 },
               },
             },
@@ -514,11 +546,75 @@ describe('IndexPattern Data Source', () => {
       const state = enrichBaseState(queryBaseState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(Object.keys(JSON.parse(ast.chain[1].arguments.idMap[0] as string))).toEqual([
-        'col-0-def',
-        // col-1 is the auto naming of esasggs, abc is the specified column id, .23 is the generated suffix
-        'col-1-abc.23',
-      ]);
+      expect(ast.chain[0].arguments.aggs[0]).toMatchInlineSnapshot(`
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {
+                "customBucket": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "enabled": Array [
+                            true,
+                          ],
+                          "filter": Array [
+                            "{\\"language\\":\\"kuery\\",\\"query\\":\\"bytes > 5\\"}",
+                          ],
+                          "id": Array [
+                            "col1-filter",
+                          ],
+                          "schema": Array [
+                            "bucket",
+                          ],
+                        },
+                        "function": "aggFilter",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                ],
+                "customMetric": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "enabled": Array [
+                            true,
+                          ],
+                          "id": Array [
+                            "col1-metric",
+                          ],
+                          "schema": Array [
+                            "metric",
+                          ],
+                        },
+                        "function": "aggCount",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                ],
+                "enabled": Array [
+                  true,
+                ],
+                "id": Array [
+                  "col1",
+                ],
+                "schema": Array [
+                  "metric",
+                ],
+              },
+              "function": "aggFilteredMetric",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        }
+      `);
     });
 
     it('should add time_scale and format function if time scale is set and supported', async () => {
@@ -542,7 +638,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 isBucketed: false,
                 sourceField: 'bytes',
-                operationType: 'avg',
+                operationType: 'average',
                 timeScale: 'h',
               },
               col3: {
@@ -602,6 +698,55 @@ describe('IndexPattern Data Source', () => {
           "type": "function",
         }
       `);
+    });
+
+    it('should put column formatters after calculated columns', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['bucket', 'metric', 'calculated'],
+            columns: {
+              bucket: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'auto',
+                },
+              },
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+                timeScale: 'h',
+              },
+              calculated: {
+                label: 'Moving average of bytes',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'moving_average',
+                references: ['metric'],
+                params: {
+                  window: 5,
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
+      const calculationIndex = ast.chain.findIndex((fn) => fn.function === 'moving_average');
+      expect(calculationIndex).toBeLessThan(formatIndex);
     });
 
     it('should rename the output from esaggs when using flat query', () => {
@@ -669,7 +814,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'date',
                 isBucketed: false,
                 sourceField: 'timefield',
-                operationType: 'cardinality',
+                operationType: 'unique_count',
               },
               col2: {
                 label: 'Date',
@@ -696,7 +841,7 @@ describe('IndexPattern Data Source', () => {
     describe('references', () => {
       beforeEach(() => {
         // @ts-expect-error we are inserting an invalid type
-        operationDefinitionMap.testReference = createMockedReferenceOperation();
+        operationDefinitionMap.testReference = createMockedFullReference();
 
         // @ts-expect-error we are inserting an invalid type
         operationDefinitionMap.testReference.toExpression.mockReturnValue(['mock']);
@@ -719,7 +864,7 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'date',
                   isBucketed: false,
                   sourceField: 'timefield',
-                  operationType: 'cardinality',
+                  operationType: 'unique_count',
                 },
                 col2: {
                   label: 'Reference',
@@ -740,6 +885,129 @@ describe('IndexPattern Data Source', () => {
         // @ts-expect-error we can't isolate just the reference type
         expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
         expect(ast.chain[2]).toEqual('mock');
+      });
+
+      it('should keep correct column mapping keys with reference columns present', async () => {
+        const queryBaseState: IndexPatternBaseState = {
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col2', 'col1'],
+              columns: {
+                col1: {
+                  label: 'Count of records',
+                  dataType: 'date',
+                  isBucketed: false,
+                  sourceField: 'timefield',
+                  operationType: 'unique_count',
+                },
+                col2: {
+                  label: 'Reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  // @ts-expect-error not a valid type
+                  operationType: 'testReference',
+                  references: ['col1'],
+                },
+              },
+            },
+          },
+        };
+
+        const state = enrichBaseState(queryBaseState);
+
+        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
+          'col-0-col1': expect.objectContaining({
+            id: 'col1',
+          }),
+        });
+      });
+
+      it('should topologically sort references', () => {
+        // This is a real example of count() + count()
+        const queryBaseState: IndexPatternBaseState = {
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['date', 'count', 'formula', 'countX0', 'math'],
+              columns: {
+                count: {
+                  label: 'count',
+                  dataType: 'number',
+                  operationType: 'count',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  sourceField: 'Records',
+                  customLabel: true,
+                },
+                date: {
+                  label: 'timestamp',
+                  dataType: 'date',
+                  operationType: 'date_histogram',
+                  sourceField: 'timestamp',
+                  isBucketed: true,
+                  scale: 'interval',
+                  params: {
+                    interval: 'auto',
+                  },
+                },
+                formula: {
+                  label: 'Formula',
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    formula: 'count() + count()',
+                    isFormulaBroken: false,
+                  },
+                  references: ['math'],
+                },
+                countX0: {
+                  label: 'countX0',
+                  dataType: 'number',
+                  operationType: 'count',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  sourceField: 'Records',
+                  customLabel: true,
+                },
+                math: {
+                  label: 'math',
+                  dataType: 'number',
+                  operationType: 'math',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    tinymathAst: {
+                      type: 'function',
+                      name: 'add',
+                      // @ts-expect-error String args are not valid tinymath, but signals something unique to Lens
+                      args: ['countX0', 'count'],
+                      location: {
+                        min: 0,
+                        max: 17,
+                      },
+                      text: 'count() + count()',
+                    },
+                  },
+                  references: ['countX0', 'count'],
+                  customLabel: true,
+                },
+              },
+            },
+          },
+        };
+
+        const state = enrichBaseState(queryBaseState);
+
+        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        const chainLength = ast.chain.length;
+        expect(ast.chain[chainLength - 2].arguments.name).toEqual(['math']);
+        expect(ast.chain[chainLength - 1].arguments.id).toEqual(['formula']);
       });
     });
   });
@@ -1017,7 +1285,7 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'number',
                     isBucketed: false,
                     label: 'Foo',
-                    operationType: 'avg',
+                    operationType: 'average',
                     sourceField: 'bytes',
                   },
                 },
@@ -1044,7 +1312,7 @@ describe('IndexPattern Data Source', () => {
             columnOrder: [],
             columns: {},
             incompleteColumns: {
-              col1: { operationType: 'avg' as const },
+              col1: { operationType: 'average' as const },
               col2: { operationType: 'sum' as const },
             },
           },

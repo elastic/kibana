@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -20,7 +20,7 @@ import {
   YDomainRange,
 } from '@elastic/charts';
 
-import { Dimension, Scale, ThresholdLine } from './param';
+import type { Dimension, Scale, ThresholdLine } from './param';
 
 export interface Column {
   id: string | null;
@@ -43,6 +43,8 @@ export interface Aspects {
   y: Aspect[];
   z?: Aspect;
   series?: Aspect[];
+  splitColumn?: Aspect;
+  splitRow?: Aspect;
 }
 
 export interface AxisGrid {
@@ -114,6 +116,7 @@ export interface VisConfig {
   showValueLabel: boolean;
   enableHistogramMode: boolean;
   fittingFunction?: Exclude<Fit, 'explicit'>;
+  fillOpacity?: number;
   detailedTooltip?: boolean;
   isVislibVis?: boolean;
 }

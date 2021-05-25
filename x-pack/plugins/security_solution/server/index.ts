@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
@@ -15,6 +16,9 @@ export const plugin = (context: PluginInitializerContext) => {
 };
 
 export const config: PluginConfigDescriptor<ConfigType> = {
+  exposeToBrowser: {
+    enableExperimental: true,
+  },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.siem.enabled', 'xpack.securitySolution.enabled'),
@@ -44,16 +48,4 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 export { ConfigType, Plugin, PluginSetup, PluginStart };
 export { AppClient };
 
-// Exports to be shared with plugins such as x-pack/lists plugin
-export { deleteTemplate } from './lib/detection_engine/index/delete_template';
-export { deletePolicy } from './lib/detection_engine/index/delete_policy';
-export { deleteAllIndex } from './lib/detection_engine/index/delete_all_index';
-export { setPolicy } from './lib/detection_engine/index/set_policy';
-export { setTemplate } from './lib/detection_engine/index/set_template';
-export { getTemplateExists } from './lib/detection_engine/index/get_template_exists';
-export { getPolicyExists } from './lib/detection_engine/index/get_policy_exists';
-export { createBootstrapIndex } from './lib/detection_engine/index/create_bootstrap_index';
-export { getIndexExists } from './lib/detection_engine/index/get_index_exists';
-export { buildRouteValidation } from './utils/build_validation/route_validation';
-export { transformError, buildSiemResponse } from './lib/detection_engine/routes/utils';
-export { readPrivileges } from './lib/detection_engine/privileges/read_privileges';
+export type { AppRequestContext } from './types';

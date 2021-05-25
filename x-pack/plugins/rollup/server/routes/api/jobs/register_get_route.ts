@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { addBasePath } from '../../../services';
@@ -10,7 +11,7 @@ import { RouteDependencies } from '../../../types';
 export const registerGetRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.get(
     {
@@ -18,14 +19,12 @@ export const registerGetRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client: clusterClient } = context.core.elasticsearch;
       try {
-        const data = await context.rollup!.client.callAsCurrentUser('rollup.jobs');
+        const { body: data } = await clusterClient.asCurrentUser.rollup.getJobs({ id: '_all' });
         return response.ok({ body: data });
       } catch (err) {
-        if (isEsError(err)) {
-          return response.customError({ statusCode: err.statusCode, body: err });
-        }
-        return response.internalError({ body: err });
+        return handleEsError({ error: err, response });
       }
     })
   );

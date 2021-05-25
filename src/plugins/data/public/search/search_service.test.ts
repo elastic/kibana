@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
@@ -38,7 +38,6 @@ describe('Search service', () => {
       } as unknown) as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
       expect(setup).toHaveProperty('usageCollector');
-      expect(setup).toHaveProperty('__enhance');
       expect(setup).toHaveProperty('sessionsClient');
       expect(setup).toHaveProperty('session');
     });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { call, put } from 'redux-saga/effects';
@@ -17,9 +18,13 @@ describe('fetch saga effect factory', () => {
   let fetchEffect;
 
   it('works with success workflow', () => {
-    const indexStatusResult = { indexExists: true, docCount: 2712532 };
+    const indexStatusResult = {
+      indexExists: true,
+      docCount: 2712532,
+      indices: 'heartbeat-*,synthetics-*',
+    };
     const fetchStatus = async (): Promise<StatesIndexStatus> => {
-      return { indexExists: true, docCount: 2712532 };
+      return { indexExists: true, docCount: 2712532, indices: 'heartbeat-*,synthetics-*' };
     };
     fetchEffect = fetchEffectFactory(
       fetchStatus,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment } from 'react';
@@ -24,7 +25,7 @@ import { ANALYTICS_STEPS } from '../../page';
 const MAX_INCLUDES_LENGTH = 5;
 
 interface Props {
-  setCurrentStep: React.Dispatch<React.SetStateAction<any>>;
+  setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
   state: State;
 }
 
@@ -68,9 +69,16 @@ export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) =
       }),
       description:
         includes.length > MAX_INCLUDES_LENGTH
-          ? `${includes.slice(0, MAX_INCLUDES_LENGTH).join(', ')} ... (and ${
-              includes.length - MAX_INCLUDES_LENGTH
-            } more)`
+          ? i18n.translate(
+              'xpack.ml.dataframe.analytics.create.configDetails.includedFieldsAndMoreDescription',
+              {
+                defaultMessage: '{includedFields} ... (and {extraCount} more)',
+                values: {
+                  extraCount: includes.length - MAX_INCLUDES_LENGTH,
+                  includedFields: includes.slice(0, MAX_INCLUDES_LENGTH).join(', '),
+                },
+              }
+            )
           : includes.join(', '),
     },
   ];

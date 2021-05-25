@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,15 +16,22 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import { ApplicationStart, Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
-import { KibanaFeature, FeaturesPluginStart } from '../../../../features/public';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type {
+  ApplicationStart,
+  Capabilities,
+  NotificationsStart,
+  ScopedHistory,
+} from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
-import { SpacesManager } from '../../spaces_manager';
+import type { SpacesManager } from '../../spaces_manager';
 import { UnauthorizedPrompt } from '../components';
 import { toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';

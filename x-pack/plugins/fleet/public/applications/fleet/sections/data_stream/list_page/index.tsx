@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useMemo } from 'react';
+import type { EuiTableActionsColumnType, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -12,15 +15,15 @@ import {
   EuiFlexItem,
   EuiEmptyPrompt,
   EuiInMemoryTable,
-  EuiTableActionsColumnType,
-  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
-import { DataStream } from '../../../types';
+
+import type { DataStream } from '../../../types';
 import { WithHeaderLayout } from '../../../layouts';
 import { useGetDataStreams, useStartServices, usePagination, useBreadcrumbs } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
+
 import { DataStreamRowActions } from './components/data_stream_row_actions';
 
 const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
@@ -121,14 +124,14 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         },
       },
       {
-        field: 'last_activity',
+        field: 'last_activity_ms',
         sortable: true,
         width: '25%',
         dataType: 'date',
         name: i18n.translate('xpack.fleet.dataStreamList.lastActivityColumnTitle', {
           defaultMessage: 'Last activity',
         }),
-        render: (date: DataStream['last_activity']) => {
+        render: (date: DataStream['last_activity_ms']) => {
           try {
             const formatter = fieldFormats.getInstance('date');
             return formatter.convert(date);

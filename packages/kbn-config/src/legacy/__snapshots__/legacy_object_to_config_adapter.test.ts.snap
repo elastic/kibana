@@ -1,83 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#get correctly handles server config.: default 1`] = `
-Object {
-  "autoListen": true,
-  "basePath": "/abc",
-  "compression": Object {
-    "enabled": true,
-  },
-  "cors": false,
-  "customResponseHeaders": Object {
-    "custom-header": "custom-value",
-  },
-  "host": "host",
-  "keepaliveTimeout": 5000,
-  "maxPayload": 1000,
-  "name": "kibana-hostname",
-  "port": 1234,
-  "publicBaseUrl": "https://myhost.com/abc",
-  "rewriteBasePath": false,
-  "socketTimeout": 2000,
-  "ssl": Object {
-    "enabled": true,
-    "keyPassphrase": "some-phrase",
-    "someNewValue": "new",
-  },
-  "uuid": undefined,
-  "xsrf": Object {
-    "allowlist": Array [],
-    "disableProtection": false,
-  },
-}
-`;
-
-exports[`#get correctly handles server config.: disabled ssl 1`] = `
-Object {
-  "autoListen": true,
-  "basePath": "/abc",
-  "compression": Object {
-    "enabled": true,
-  },
-  "cors": false,
-  "customResponseHeaders": Object {
-    "custom-header": "custom-value",
-  },
-  "host": "host",
-  "keepaliveTimeout": 5000,
-  "maxPayload": 1000,
-  "name": "kibana-hostname",
-  "port": 1234,
-  "publicBaseUrl": "http://myhost.com/abc",
-  "rewriteBasePath": false,
-  "socketTimeout": 2000,
-  "ssl": Object {
-    "certificate": "cert",
-    "enabled": false,
-    "key": "key",
-  },
-  "uuid": undefined,
-  "xsrf": Object {
-    "allowlist": Array [],
-    "disableProtection": false,
-  },
-}
-`;
-
 exports[`#get correctly handles silent logging config. 1`] = `
 Object {
   "appenders": Object {
     "default": Object {
-      "kind": "legacy-appender",
       "legacyLoggingConfig": Object {
         "silent": true,
       },
+      "type": "legacy-appender",
     },
   },
   "loggers": undefined,
   "root": Object {
     "level": "off",
   },
+  "silent": true,
 }
 `;
 
@@ -85,18 +22,21 @@ exports[`#get correctly handles verbose file logging config with json format. 1`
 Object {
   "appenders": Object {
     "default": Object {
-      "kind": "legacy-appender",
       "legacyLoggingConfig": Object {
         "dest": "/some/path.log",
         "json": true,
         "verbose": true,
       },
+      "type": "legacy-appender",
     },
   },
+  "dest": "/some/path.log",
+  "json": true,
   "loggers": undefined,
   "root": Object {
     "level": "all",
   },
+  "verbose": true,
 }
 `;
 

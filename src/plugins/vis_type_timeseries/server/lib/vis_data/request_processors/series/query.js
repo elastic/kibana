@@ -1,25 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { offsetTime } from '../../offset_time';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { esQuery } from '../../../../../../data/server';
 
-export function query(req, panel, series, esQueryConfig, indexPatternObject) {
+export function query(req, panel, series, esQueryConfig, seriesIndex) {
   return (next) => (doc) => {
-    const { timeField } = getIntervalAndTimefield(panel, series, indexPatternObject);
+    const { timeField } = getIntervalAndTimefield(panel, series, seriesIndex);
     const { from, to } = offsetTime(req, series.offset_time);
 
     doc.size = 0;
     const ignoreGlobalFilter = panel.ignore_global_filter || series.ignore_global_filter;
-    const queries = !ignoreGlobalFilter ? req.payload.query : [];
-    const filters = !ignoreGlobalFilter ? req.payload.filters : [];
-    doc.query = esQuery.buildEsQuery(indexPatternObject, queries, filters, esQueryConfig);
+    const queries = !ignoreGlobalFilter ? req.body.query : [];
+    const filters = !ignoreGlobalFilter ? req.body.filters : [];
+    doc.query = esQuery.buildEsQuery(seriesIndex.indexPattern, queries, filters, esQueryConfig);
 
     const timerange = {
       range: {
@@ -34,13 +34,13 @@ export function query(req, panel, series, esQueryConfig, indexPatternObject) {
 
     if (panel.filter) {
       doc.query.bool.must.push(
-        esQuery.buildEsQuery(indexPatternObject, [panel.filter], [], esQueryConfig)
+        esQuery.buildEsQuery(seriesIndex.indexPattern, [panel.filter], [], esQueryConfig)
       );
     }
 
     if (series.filter) {
       doc.query.bool.must.push(
-        esQuery.buildEsQuery(indexPatternObject, [series.filter], [], esQueryConfig)
+        esQuery.buildEsQuery(seriesIndex.indexPattern, [series.filter], [], esQueryConfig)
       );
     }
 

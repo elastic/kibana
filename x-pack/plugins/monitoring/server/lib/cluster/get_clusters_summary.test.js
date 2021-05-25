@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import clusters from './__fixtures__/clusters';
@@ -9,7 +10,9 @@ import { getClustersSummary } from './get_clusters_summary';
 
 const mockLog = jest.fn();
 const mockServer = {
-  log: mockLog,
+  log: {
+    error: mockLog,
+  },
 };
 
 describe('getClustersSummary', () => {
@@ -33,7 +36,6 @@ describe('getClustersSummary', () => {
 
     expect(() => getClustersSummary(mockServer, fakeClusters)).toThrow('Monitoring License Error');
     expect(mockLog).toHaveBeenCalledWith(
-      ['error', 'monitoring'],
       "Could not find license information for cluster = 'Custom name'. " +
         "Please check the cluster's master node server logs for errors or warnings."
     );

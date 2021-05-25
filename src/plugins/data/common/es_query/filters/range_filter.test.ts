@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { each } from 'lodash';
@@ -45,6 +45,29 @@ describe('Range filter builder', () => {
     const field = getField('script number');
 
     expect(buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern)).toEqual({
+      meta: {
+        field: 'script number',
+        index: 'id',
+        params: {},
+      },
+      script: {
+        script: {
+          lang: 'expression',
+          source: '(' + field!.script + ')>=gte && (' + field!.script + ')<=lte',
+          params: {
+            value: '>=1 <=3',
+            gte: 1,
+            lte: 3,
+          },
+        },
+      },
+    });
+  });
+
+  it('should convert strings to numbers if the field is scripted and type number', () => {
+    const field = getField('script number');
+
+    expect(buildRangeFilter(field, { gte: '1', lte: '3' }, indexPattern)).toEqual({
       meta: {
         field: 'script number',
         index: 'id',

@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
+
+import { EuiErrorBoundary } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -63,13 +66,15 @@ export const renderApp = (element: HTMLElement, appDependencies: AppDependencies
   const I18nContext = appDependencies.i18n.Context;
 
   render(
-    <KibanaContextProvider services={appDependencies}>
-      <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
-        <I18nContext>
-          <App history={appDependencies.history} />
-        </I18nContext>
-      </AuthorizationProvider>
-    </KibanaContextProvider>,
+    <EuiErrorBoundary>
+      <KibanaContextProvider services={appDependencies}>
+        <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
+          <I18nContext>
+            <App history={appDependencies.history} />
+          </I18nContext>
+        </AuthorizationProvider>
+      </KibanaContextProvider>
+    </EuiErrorBoundary>,
     element
   );
 

@@ -7,11 +7,6 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": [
-    "public/**/*",
-    "../../../typings/**/*"
-  ],
-  "references": [
-    { "path": "../kibana_utils/tsconfig.json" }
-  ]
+  "include": ["common/**/*", "public/**/*", "../../../typings/**/*"],
+  "references": [{ "path": "../kibana_utils/tsconfig.json" }]
 }

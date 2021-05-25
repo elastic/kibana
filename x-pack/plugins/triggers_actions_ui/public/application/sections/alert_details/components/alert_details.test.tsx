@@ -1,11 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { act } from '@testing-library/react';
 import { AlertDetails } from './alert_details';
 import { Alert, ActionType, AlertTypeModel, AlertType } from '../../../../types';
 import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
@@ -14,7 +18,7 @@ import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
-} from '../../../../../../alerts/common';
+} from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
 
@@ -461,6 +465,74 @@ describe('disable button', () => {
     handler!({} as React.FormEvent);
     expect(enableAlert).toHaveBeenCalledTimes(1);
   });
+
+  it('should reset error banner dismissal after re-enabling the alert', async () => {
+    const alert = mockAlert({
+      enabled: true,
+      executionStatus: {
+        status: 'error',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: {
+          reason: AlertExecutionStatusErrorReasons.Execute,
+          message: 'Fail',
+        },
+      },
+    });
+
+    const alertType: AlertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
+    };
+
+    const disableAlert = jest.fn();
+    const enableAlert = jest.fn();
+    const wrapper = mountWithIntl(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        {...mockAlertApis}
+        disableAlert={disableAlert}
+        enableAlert={enableAlert}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Dismiss the error banner
+    await act(async () => {
+      wrapper.find('[data-test-subj="dismiss-execution-error"]').first().simulate('click');
+      await nextTick();
+    });
+
+    // Disable the alert
+    await act(async () => {
+      wrapper.find('[data-test-subj="disableSwitch"] .euiSwitch__button').first().simulate('click');
+      await nextTick();
+    });
+    expect(disableAlert).toHaveBeenCalled();
+
+    // Enable the alert
+    await act(async () => {
+      wrapper.find('[data-test-subj="disableSwitch"] .euiSwitch__button').first().simulate('click');
+      await nextTick();
+    });
+    expect(enableAlert).toHaveBeenCalled();
+
+    // Ensure error banner is back
+    expect(wrapper.find('[data-test-subj="dismiss-execution-error"]').length).toBeGreaterThan(0);
+  });
 });
 
 describe('mute button', () => {
@@ -793,6 +865,42 @@ describe('edit button', () => {
         .first()
         .exists()
     ).toBeTruthy();
+  });
+});
+
+describe('refresh button', () => {
+  it('should call requestRefresh when clicked', () => {
+    const alert = mockAlert();
+    const alertType: AlertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
+      enabledInLicense: true,
+    };
+
+    const requestRefresh = jest.fn();
+    const refreshButton = shallow(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        {...mockAlertApis}
+        requestRefresh={requestRefresh}
+      />
+    )
+      .find('[data-test-subj="refreshAlertsButton"]')
+      .first();
+
+    expect(refreshButton.exists()).toBeTruthy();
+
+    refreshButton.simulate('click');
+    expect(requestRefresh).toHaveBeenCalledTimes(1);
   });
 });
 

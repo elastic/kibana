@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isString } from 'lodash/fp';
@@ -10,7 +11,7 @@ import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { stopPropagationAndPreventDefault } from '../accessibility/helpers';
-import { alertsHeaders } from '../../../detections/components/alerts_table/default_config';
+import { alertsHeaders } from '../alerts_viewer/default_headers';
 import { BrowserField, BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { dragAndDropActions } from '../../store/actions';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
@@ -217,7 +218,7 @@ export const addFieldToTimelineColumns = ({
           linkField: linkFields[fieldId] ?? undefined,
           type: column.type,
           aggregatable: column.aggregatable,
-          width: DEFAULT_COLUMN_MIN_WIDTH,
+          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
           ...initColumnHeader,
         },
         id: timelineId,
@@ -231,7 +232,7 @@ export const addFieldToTimelineColumns = ({
         column: {
           columnHeaderType: 'not-filtered',
           id: fieldId,
-          width: DEFAULT_COLUMN_MIN_WIDTH,
+          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
         },
         id: timelineId,
         index: result.destination != null ? result.destination.index : 0,

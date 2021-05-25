@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -45,7 +46,7 @@ export function UptimeSection({ bucketSize }: Props) {
   const { data, status } = useFetcher(
     () => {
       if (bucketSize) {
-        return getDataHandler('uptime')?.fetchData({
+        return getDataHandler('synthetics')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
           bucketSize,
@@ -57,7 +58,7 @@ export function UptimeSection({ bucketSize }: Props) {
     [bucketSize, relativeStart, relativeEnd, forceUpdate]
   );
 
-  if (!hasData.uptime?.hasData) {
+  if (!hasData.synthetics?.hasData) {
     return null;
   }
 

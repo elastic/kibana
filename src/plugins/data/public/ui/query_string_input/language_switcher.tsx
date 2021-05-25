@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
   EuiButtonEmpty,
   EuiForm,
   EuiFormRow,
+  EuiIcon,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
@@ -19,16 +20,25 @@ import {
   PopoverAnchorPosition,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useKibana } from '../../../../kibana_react/public';
 
-interface Props {
+export interface QueryLanguageSwitcherProps {
   language: string;
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
 }
 
-export function QueryLanguageSwitcher(props: Props) {
+export function QueryLanguageSwitcher({
+  language,
+  anchorPosition,
+  onSelectLanguage,
+  nonKqlMode = 'lucene',
+  nonKqlModeHelpText,
+}: QueryLanguageSwitcherProps) {
   const kibana = useKibana();
   const kueryQuerySyntaxDocs = kibana.services.docLinks!.links.query.kueryQuerySyntax;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -38,12 +48,17 @@ export function QueryLanguageSwitcher(props: Props) {
   const kqlLabel = (
     <FormattedMessage id="data.query.queryBar.kqlLanguageName" defaultMessage="KQL" />
   );
+
   const kqlFullName = (
     <FormattedMessage
       id="data.query.queryBar.kqlFullLanguageName"
       defaultMessage="Kibana Query Language"
     />
   );
+
+  const kqlModeTitle = i18n.translate('data.query.queryBar.languageSwitcher.toText', {
+    defaultMessage: 'Switch to Kibana Query Language for search',
+  });
 
   const button = (
     <EuiButtonEmpty
@@ -52,7 +67,13 @@ export function QueryLanguageSwitcher(props: Props) {
       className="euiFormControlLayout__append kqlQueryBar__languageSwitcherButton"
       data-test-subj={'switchQueryLanguageButton'}
     >
-      {props.language === 'lucene' ? luceneLabel : kqlLabel}
+      {language === 'kuery' ? (
+        kqlLabel
+      ) : nonKqlMode === 'lucene' ? (
+        luceneLabel
+      ) : (
+        <EuiIcon type={'boxesVertical'} title={kqlModeTitle} aria-label={kqlModeTitle} />
+      )}
     </EuiButtonEmpty>
   );
 
@@ -60,11 +81,13 @@ export function QueryLanguageSwitcher(props: Props) {
     <EuiPopover
       id="queryLanguageSwitcherPopover"
       anchorClassName="euiFormControlLayout__append"
-      anchorPosition={props.anchorPosition || 'downRight'}
+      anchorPosition={anchorPosition || 'downRight'}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       repositionOnScroll
+      ownFocus={true}
+      initialFocus={'[role="switch"]'}
     >
       <EuiPopoverTitle>
         <FormattedMessage
@@ -73,19 +96,27 @@ export function QueryLanguageSwitcher(props: Props) {
         />
       </EuiPopoverTitle>
       <div style={{ width: '350px' }}>
-        <EuiText>
+        <EuiText size="s">
           <p>
             <FormattedMessage
               id="data.query.queryBar.syntaxOptionsDescription"
               defaultMessage="The {docsLink} (KQL) offers a simplified query
-              syntax and support for scripted fields. KQL also provides autocomplete if you have
-              a Basic license or above. If you turn off KQL, Kibana uses Lucene."
+              syntax and support for scripted fields. KQL also provides autocomplete.
+              If you turn off KQL, {nonKqlModeHelpText}"
               values={{
                 docsLink: (
                   <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
                     {kqlFullName}
                   </EuiLink>
                 ),
+                nonKqlModeHelpText:
+                  nonKqlModeHelpText ||
+                  i18n.translate(
+                    'data.query.queryBar.syntaxOptionsDescription.nonKqlModeHelpText',
+                    {
+                      defaultMessage: 'Kibana uses Lucene.',
+                    }
+                  ),
               }}
             />
           </p>
@@ -99,16 +130,16 @@ export function QueryLanguageSwitcher(props: Props) {
               id="queryEnhancementOptIn"
               name="popswitch"
               label={
-                props.language === 'kuery' ? (
+                language === 'kuery' ? (
                   <FormattedMessage id="data.query.queryBar.kqlOnLabel" defaultMessage="On" />
                 ) : (
                   <FormattedMessage id="data.query.queryBar.kqlOffLabel" defaultMessage="Off" />
                 )
               }
-              checked={props.language === 'kuery'}
+              checked={language === 'kuery'}
               onChange={() => {
-                const newLanguage = props.language === 'lucene' ? 'kuery' : 'lucene';
-                props.onSelectLanguage(newLanguage);
+                const newLanguage = language === 'kuery' ? nonKqlMode : 'kuery';
+                onSelectLanguage(newLanguage);
               }}
               data-test-subj="languageToggle"
             />

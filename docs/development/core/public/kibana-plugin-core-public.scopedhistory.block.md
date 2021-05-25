@@ -4,15 +4,10 @@
 
 ## ScopedHistory.block property
 
-Not supported. Use [AppMountParameters.onAppLeave](./kibana-plugin-core-public.appmountparameters.onappleave.md)<!-- -->.
+Add a block prompt requesting user confirmation when navigating away from the current page.
 
 <b>Signature:</b>
 
 ```typescript
 block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
 ```
-
-## Remarks
-
-We prefer that applications use the `onAppLeave` API because it supports a more graceful experience that prefers a modal when possible, falling back to a confirm dialog box in the beforeunload case.
-

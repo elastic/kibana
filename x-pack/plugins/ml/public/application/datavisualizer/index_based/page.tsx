@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useState, useCallback } from 'react';
 import { merge } from 'rxjs';
 import {
   EuiFlexGroup,
@@ -18,6 +19,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   IFieldType,
   KBN_FIELD_TYPES,
@@ -31,31 +34,34 @@ import { NavigationMenu } from '../../components/navigation_menu';
 import { DatePickerWrapper } from '../../components/navigation_menu/date_picker_wrapper';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../../../common/constants/search';
-import { isFullLicense } from '../../license';
-import { checkPermission } from '../../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useMlContext } from '../../contexts/ml';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
-import { useTimefilter } from '../../contexts/kibana';
+import { useNotifications, useTimefilter } from '../../contexts/kibana';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { getTimeBucketsFromCache } from '../../util/time_buckets';
-import { getToastNotifications } from '../../util/dependency_cache';
 import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { ActionsPanel } from './components/actions_panel';
 import { SearchPanel } from './components/search_panel';
-import { DocumentCountContent } from './components/field_data_card/content_types/document_count_content';
-import { DataVisualizerDataGrid } from '../stats_datagrid';
+import { DocumentCountContent } from './components/field_data_row/content_types/document_count_content';
+import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
 import { FieldCountPanel } from './components/field_count_panel';
 import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 import { DataLoader } from './data_loader';
-import type { FieldRequestConfig, FieldVisConfig } from './common';
+import type { FieldRequestConfig } from './common';
 import type { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
 import type { OverallStats } from '../../../../common/types/datavisualizer';
 import { MlJobFieldType } from '../../../../common/types/field_types';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
+import { IndexBasedDataVisualizerExpandedRow } from './components/expanded_row';
+import { FieldVisConfig } from '../stats_table/types';
+import type {
+  MetricFieldsStats,
+  TotalFieldsStats,
+} from '../stats_table/components/field_count_stats';
+import { getActions } from './components/field_data_row/action_menu/actions';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -109,18 +115,24 @@ export const getDefaultDataVisualizerListState = (): Required<DataVisualizerInde
 export const Page: FC = () => {
   const mlContext = useMlContext();
   const restorableDefaults = getDefaultDataVisualizerListState();
+  const {
+    services: { lens: lensPlugin, docLinks },
+  } = useMlKibana();
+
   const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(
     ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
     restorableDefaults
   );
+  const [currentSavedSearch, setCurrentSavedSearch] = useState(mlContext.currentSavedSearch);
 
-  const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = mlContext;
+  const { combinedQuery, currentIndexPattern, kibanaConfig } = mlContext;
   const timefilter = useTimefilter({
     timeRangeSelector: currentIndexPattern.timeFieldName !== undefined,
     autoRefreshSelector: true,
   });
 
-  const dataLoader = useMemo(() => new DataLoader(currentIndexPattern, getToastNotifications()), [
+  const { toasts } = useNotifications();
+  const dataLoader = useMemo(() => new DataLoader(currentIndexPattern, toasts), [
     currentIndexPattern,
   ]);
 
@@ -160,12 +172,6 @@ export const Page: FC = () => {
 
   const defaults = getDefaultPageState();
 
-  const showActionsPanel =
-    isFullLicense() &&
-    checkPermission('canCreateJob') &&
-    mlNodesAvailable() &&
-    currentIndexPattern.timeFieldName !== undefined;
-
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
     const searchData = extractSearchData(currentSavedSearch);
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
@@ -188,6 +194,12 @@ export const Page: FC = () => {
     searchString: Query['query'];
     queryLanguage: SearchQueryLanguage;
   }) => {
+    // When the user loads saved search and then clear or modify the query
+    // we should remove the saved search and replace it with the index pattern id
+    if (currentSavedSearch !== null) {
+      setCurrentSavedSearch(null);
+    }
+
     setDataVisualizerListState({
       ...dataVisualizerListState,
       searchQuery: searchParams.searchQuery,
@@ -228,9 +240,7 @@ export const Page: FC = () => {
   const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded, setMetricsLoaded] = useState(defaults.metricsLoaded);
-  const [metricsStats, setMetricsStats] = useState<
-    undefined | { visibleMetricFields: number; totalMetricFields: number }
-  >();
+  const [metricsStats, setMetricsStats] = useState<undefined | MetricFieldsStats>();
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
@@ -537,8 +547,8 @@ export const Page: FC = () => {
     });
 
     setMetricsStats({
-      totalMetricFields: allMetricFields.length,
-      visibleMetricFields: metricFieldsToShow.length,
+      totalMetricFieldsCount: allMetricFields.length,
+      visibleMetricsCount: metricFieldsToShow.length,
     });
     setMetricConfigs(configs);
   }
@@ -642,7 +652,7 @@ export const Page: FC = () => {
     return combinedConfigs;
   }, [nonMetricConfigs, metricConfigs, visibleFieldTypes, visibleFieldNames]);
 
-  const fieldsCountStats = useMemo(() => {
+  const fieldsCountStats: TotalFieldsStats | undefined = useMemo(() => {
     let _visibleFieldsCount = 0;
     let _totalFieldsCount = 0;
     Object.keys(overallStats).forEach((key) => {
@@ -661,9 +671,47 @@ export const Page: FC = () => {
     }
     return { visibleFieldsCount: _visibleFieldsCount, totalFieldsCount: _totalFieldsCount };
   }, [overallStats, showEmptyFields]);
-  const {
-    services: { docLinks },
-  } = useMlKibana();
+
+  const getItemIdToExpandedRowMap = useCallback(
+    function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
+      return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
+        const item = items.find((fieldVisConfig) => fieldVisConfig.fieldName === fieldName);
+        if (item !== undefined) {
+          m[fieldName] = (
+            <IndexBasedDataVisualizerExpandedRow
+              item={item}
+              indexPattern={currentIndexPattern}
+              combinedQuery={{ searchQueryLanguage, searchString }}
+            />
+          );
+        }
+        return m;
+      }, {} as ItemIdToExpandedRowMap);
+    },
+    [currentIndexPattern, searchQuery]
+  );
+
+  // Inject custom action column for the index based visualizer
+  const extendedColumns = useMemo(() => {
+    if (lensPlugin === undefined) {
+      // eslint-disable-next-line no-console
+      console.error('Lens plugin not available');
+      return;
+    }
+    const actionColumn: EuiTableActionsColumnType<FieldVisConfig> = {
+      name: (
+        <FormattedMessage
+          id="xpack.ml.dataVisualizer.indexBasedDataGrid.actionsColumnLabel"
+          defaultMessage="Actions"
+        />
+      ),
+      actions: getActions(currentIndexPattern, lensPlugin, { searchQueryLanguage, searchString }),
+      width: '100px',
+    };
+
+    return [actionColumn];
+  }, [currentIndexPattern, lensPlugin, searchQueryLanguage, searchString]);
+
   const helpLink = docLinks.links.ml.guide;
   return (
     <Fragment>
@@ -702,7 +750,7 @@ export const Page: FC = () => {
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
                 <EuiPanel>
-                  {documentCountStats && overallStats?.totalCount !== undefined && (
+                  {overallStats?.totalCount !== undefined && (
                     <EuiFlexItem grow={true}>
                       <DocumentCountContent
                         config={documentCountStats}
@@ -736,18 +784,22 @@ export const Page: FC = () => {
                     metricsStats={metricsStats}
                   />
                   <EuiSpacer size={'m'} />
-                  <DataVisualizerDataGrid
+                  <DataVisualizerTable<FieldVisConfig>
                     items={configs}
                     pageState={dataVisualizerListState}
                     updatePageState={setDataVisualizerListState}
+                    getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
+                    extendedColumns={extendedColumns}
                   />
                 </EuiPanel>
               </EuiFlexItem>
-              {showActionsPanel === true && (
-                <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
-                  <ActionsPanel indexPattern={currentIndexPattern} />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
+                <ActionsPanel
+                  indexPattern={currentIndexPattern}
+                  searchQueryLanguage={searchQueryLanguage}
+                  searchString={searchString}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentBody>
         </EuiPageBody>

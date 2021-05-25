@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -232,10 +232,16 @@ export class AggConfig {
     const output = this.write(aggConfigs) as any;
 
     const configDsl = {} as any;
-    configDsl[this.type.dslName || this.type.name] = output.params;
+    if (!this.type.hasNoDslParams) {
+      configDsl[this.type.dslName || this.type.name] = output.params;
+    }
 
     // if the config requires subAggs, write them to the dsl as well
-    if (this.subAggs.length && !output.subAggs) output.subAggs = this.subAggs;
+    if (this.subAggs.length) {
+      if (!output.subAggs) output.subAggs = this.subAggs;
+      else output.subAggs.push(...this.subAggs);
+    }
+
     if (output.subAggs) {
       const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
       output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig: any) {
@@ -433,10 +439,14 @@ export class AggConfig {
   }
 
   fieldIsTimeField() {
-    const indexPattern = this.getIndexPattern();
-    if (!indexPattern) return false;
-    const timeFieldName = indexPattern.timeFieldName;
-    return timeFieldName && this.fieldName() === timeFieldName;
+    const defaultTimeField = this.getIndexPattern()?.getTimeField?.()?.name;
+    const defaultTimeFields = defaultTimeField ? [defaultTimeField] : [];
+    const allTimeFields =
+      this.aggConfigs.timeFields && this.aggConfigs.timeFields.length > 0
+        ? this.aggConfigs.timeFields
+        : defaultTimeFields;
+    const currentFieldName = this.fieldName();
+    return allTimeFields.includes(currentFieldName);
   }
 
   public get type() {

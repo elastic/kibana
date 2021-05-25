@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // a11y tests for spaces, space selection and spacce creation and feature controls
@@ -24,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for manage spaces menu from top nav on Kibana home', async () => {
-      await PageObjects.spaceSelector.openSpacesNav();
+      await testSubjects.click('space-avatar-default');
       await retry.waitFor(
         'Manage spaces option visible',
         async () => await testSubjects.exists('manageSpaces')
@@ -110,14 +111,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.clickManageSpaces();
       await PageObjects.spaceSelector.clickOnDeleteSpaceButton('space_b');
       await a11y.testAppSnapshot();
-      // a11y test for no space name in confirm dialogue box
-      await PageObjects.spaceSelector.confirmDeletingSpace();
-      await a11y.testAppSnapshot();
     });
 
     // test starts with deleting space b so we can get the space selection page instead of logging out in the test
     it('a11y test for space selection page', async () => {
-      await PageObjects.spaceSelector.setSpaceNameTobeDeleted('space_b');
       await PageObjects.spaceSelector.confirmDeletingSpace();
       await a11y.testAppSnapshot();
       await PageObjects.spaceSelector.clickSpaceCard('default');

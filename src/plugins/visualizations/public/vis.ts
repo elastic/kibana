@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
-import { VisType } from './vis_types';
 import {
   IAggConfigs,
   IndexPattern,
@@ -30,6 +29,8 @@ import {
   AggConfigOptions,
   SearchSourceFields,
 } from '../../../plugins/data/public';
+import { BaseVisType } from './vis_types';
+import { VisParams } from '../common/types';
 
 export interface SerializedVisData {
   expression?: string;
@@ -38,12 +39,12 @@ export interface SerializedVisData {
   savedSearchId?: string;
 }
 
-export interface SerializedVis {
+export interface SerializedVis<T = VisParams> {
   id?: string;
   title: string;
   description?: string;
   type: string;
-  params: VisParams;
+  params: T;
   uiState?: any;
   data: SerializedVisData;
 }
@@ -54,10 +55,6 @@ export interface VisData {
   indexPattern?: IndexPattern;
   searchSource?: ISearchSource;
   savedSearchId?: string;
-}
-
-export interface VisParams {
-  [key: string]: any;
 }
 
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
@@ -74,19 +71,16 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
 export class Vis<TVisParams = VisParams> {
-  public readonly type: VisType<TVisParams>;
+  public readonly type: BaseVisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';
   public description: string = '';
   public params: TVisParams;
-  // Session state is for storing information that is transitory, and will not be saved with the visualization.
-  // For instance, map bounds, which depends on the view port, browser window size, etc.
-  public sessionState: Record<string, any> = {};
   public data: VisData = {};
 
   public readonly uiState: PersistedState;
 
-  constructor(visType: string, visState: SerializedVis = {} as any) {
+  constructor(visType: string, visState: SerializedVis<TVisParams> = {} as any) {
     this.type = this.getType(visType);
     this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
@@ -160,9 +154,9 @@ export class Vis<TVisParams = VisParams> {
     }
   }
 
-  clone() {
+  clone(): Vis<TVisParams> {
     const { data, ...restOfSerialized } = this.serialize();
-    const vis = new Vis(this.type.name, restOfSerialized as any);
+    const vis = new Vis<TVisParams>(this.type.name, restOfSerialized as any);
     vis.setState({ ...restOfSerialized, data: {} });
     const aggs = this.data.indexPattern
       ? getAggs().createAggConfigs(this.data.indexPattern, data.aggs)
@@ -181,7 +175,7 @@ export class Vis<TVisParams = VisParams> {
       title: this.title,
       description: this.description,
       type: this.type.name,
-      params: cloneDeep(this.params) as any,
+      params: cloneDeep(this.params),
       uiState: this.uiState.toJSON(),
       data: {
         aggs: aggs as any,
@@ -219,3 +213,6 @@ export class Vis<TVisParams = VisParams> {
     return newConfigs;
   }
 }
+
+// eslint-disable-next-line import/no-default-export
+export default Vis;

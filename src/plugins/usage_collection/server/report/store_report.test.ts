@@ -1,23 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import { storeApplicationUsageMock } from './store_report.test.mocks';
 
 import { savedObjectsRepositoryMock } from '../../../../core/server/mocks';
 import { storeReport } from './store_report';
 import { ReportSchemaType } from './schema';
 import { METRIC_TYPE } from '@kbn/analytics';
-import moment from 'moment';
+import { usageCountersServiceMock } from '../usage_counters/usage_counters_service.mock';
 
 describe('store_report', () => {
-  const momentTimestamp = moment();
-  const date = momentTimestamp.format('DDMMYYYY');
+  const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
+  const uiCountersUsageCounter = usageCountersServiceSetup.createUsageCounter('uiCounter');
+
+  let repository: ReturnType<typeof savedObjectsRepositoryMock.create>;
+
+  beforeEach(() => {
+    repository = savedObjectsRepositoryMock.create();
+  });
+
+  afterEach(() => {
+    storeApplicationUsageMock.mockReset();
+  });
 
   test('stores report for all types of data', async () => {
-    const savedObjectClient = savedObjectsRepositoryMock.create();
     const report: ReportSchemaType = {
       reportVersion: 3,
       userAgent: {
@@ -53,61 +64,77 @@ describe('store_report', () => {
         },
       },
     };
-    await storeReport(savedObjectClient, report);
+    await storeReport(repository, uiCountersUsageCounter, report);
 
-    expect(savedObjectClient.create).toHaveBeenCalledWith(
-      'ui-metric',
-      { count: 1 },
-      {
-        id: 'key-user-agent:test-user-agent',
-        overwrite: true,
-      }
+    expect(repository.create.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "ui-metric",
+          Object {
+            "count": 1,
+          },
+          Object {
+            "id": "key-user-agent:test-user-agent",
+            "overwrite": true,
+          },
+        ],
+      ]
+    `);
+
+    expect(repository.incrementCounter.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "ui-metric",
+          "test-app-name:test-event-name",
+          Array [
+            Object {
+              "fieldName": "count",
+              "incrementBy": 3,
+            },
+          ],
+        ],
+      ]
+    `);
+    expect((uiCountersUsageCounter.incrementCounter as jest.Mock).mock.calls)
+      .toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "counterName": "test-app-name:test-event-name",
+            "counterType": "loaded",
+            "incrementBy": 1,
+          },
+        ],
+        Array [
+          Object {
+            "counterName": "test-app-name:test-event-name",
+            "counterType": "click",
+            "incrementBy": 2,
+          },
+        ],
+      ]
+    `);
+
+    expect(storeApplicationUsageMock).toHaveBeenCalledTimes(1);
+    expect(storeApplicationUsageMock).toHaveBeenCalledWith(
+      repository,
+      Object.values(report.application_usage!),
+      expect.any(Date)
     );
-    expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
-      1,
-      'ui-metric',
-      'test-app-name:test-event-name',
-      [{ fieldName: 'count', incrementBy: 3 }]
-    );
-    expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
-      2,
-      'ui-counter',
-      `test-app-name:${date}:${METRIC_TYPE.LOADED}:test-event-name`,
-      [{ fieldName: 'count', incrementBy: 1 }]
-    );
-    expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
-      3,
-      'ui-counter',
-      `test-app-name:${date}:${METRIC_TYPE.CLICK}:test-event-name`,
-      [{ fieldName: 'count', incrementBy: 2 }]
-    );
-    expect(savedObjectClient.bulkCreate).toHaveBeenNthCalledWith(1, [
-      {
-        type: 'application_usage_transactional',
-        attributes: {
-          numberOfClicks: 3,
-          minutesOnScreen: 10,
-          appId: 'appId',
-          viewId: 'appId_view',
-          timestamp: expect.any(Date),
-        },
-      },
-    ]);
   });
 
   test('it should not fail if nothing to store', async () => {
-    const savedObjectClient = savedObjectsRepositoryMock.create();
     const report: ReportSchemaType = {
       reportVersion: 3,
       userAgent: void 0,
       uiCounter: void 0,
       application_usage: void 0,
     };
-    await storeReport(savedObjectClient, report);
+    await storeReport(repository, uiCountersUsageCounter, report);
 
-    expect(savedObjectClient.bulkCreate).not.toHaveBeenCalled();
-    expect(savedObjectClient.incrementCounter).not.toHaveBeenCalled();
-    expect(savedObjectClient.create).not.toHaveBeenCalled();
-    expect(savedObjectClient.create).not.toHaveBeenCalled();
+    expect(repository.bulkCreate).not.toHaveBeenCalled();
+    expect(repository.incrementCounter).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
   });
 });

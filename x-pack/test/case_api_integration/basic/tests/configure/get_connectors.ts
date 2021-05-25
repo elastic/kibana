@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../plugins/case/common/constants';
+import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../plugins/cases/common/constants';
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 import {
   getServiceNowConnector,
@@ -91,6 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
             projectKey: 'pkey',
           },
           isPreconfigured: false,
+          isMissingSecrets: false,
           referencedByCount: 0,
         },
         {
@@ -102,6 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
             orgId: 'pkey',
           },
           isPreconfigured: false,
+          isMissingSecrets: false,
           referencedByCount: 0,
         },
         {
@@ -112,6 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
             apiUrl: 'http://some.non.existent.com',
           },
           isPreconfigured: false,
+          isMissingSecrets: false,
           referencedByCount: 0,
         },
       ]);

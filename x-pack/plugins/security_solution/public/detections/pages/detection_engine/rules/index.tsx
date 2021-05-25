@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
@@ -21,7 +22,6 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
-import { ReadOnlyRulesCallOut } from '../../../components/callouts/read_only_rules_callout';
 import { ValueListsModal } from '../../../components/value_lists_management_modal';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
 import {
@@ -34,6 +34,9 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { LinkButton } from '../../../../common/components/links';
 import { useFormatUrl } from '../../../../common/components/link_to';
+import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
+import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_compatibility_callout';
+import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_privileges_callout';
 
 type Func = () => Promise<void>;
 
@@ -157,7 +160,9 @@ const RulesPageComponent: React.FC = () => {
 
   return (
     <>
-      <ReadOnlyRulesCallOut />
+      <NeedAdminForUpdateRulesCallOut />
+      <MissingPrivilegesCallOut />
+      <MlJobCompatibilityCallout />
       <ValueListsModal
         showModal={showValueListsModal}
         onClose={() => setShowValueListsModal(false)}

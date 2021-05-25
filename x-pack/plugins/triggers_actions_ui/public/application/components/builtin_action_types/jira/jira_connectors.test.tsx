@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import JiraConnectorFields from './jira_connectors';
@@ -106,6 +108,26 @@ describe('JiraActionConnectorFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message when secrets is missing', () => {
+    const actionConnector = {
+      actionTypeId: '.jira',
+      isPreconfigured: false,
+      isMissingSecrets: true,
+      secrets: {},
+      config: {},
+    } as JiraActionConnector;
+    const wrapper = mountWithIntl(
+      <JiraConnectorFields
+        action={actionConnector}
+        errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
   });
 
   test('should display a message on edit to re-enter credentials', () => {

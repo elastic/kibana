@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -90,8 +91,19 @@ const setupMlModuleRequestPayloadRT = rt.intersection([
   setupMlModuleRequestParamsRT,
 ]);
 
+const setupErrorRT = rt.type({
+  reason: rt.string,
+  type: rt.string,
+});
+
 const setupErrorResponseRT = rt.type({
-  msg: rt.string,
+  status: rt.number,
+  error: rt.intersection([
+    setupErrorRT,
+    rt.type({
+      root_cause: rt.array(setupErrorRT),
+    }),
+  ]),
 });
 
 const datafeedSetupResponseRT = rt.intersection([

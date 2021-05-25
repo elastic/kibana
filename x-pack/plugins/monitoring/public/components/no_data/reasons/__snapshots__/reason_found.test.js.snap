@@ -210,7 +210,7 @@ Array [
          section for a deployment to configure monitoring. For more information visit 
         <a
           class="euiLink euiLink--primary"
-          href="https://www.elastic.co/guide/en/cloud/current/ec-enable-monitoring.html"
+          href="https://www.elastic.co/guide/en/cloud/current/ec-enable-logging-and-monitoring.html"
           rel="noopener"
           target="_blank"
         >

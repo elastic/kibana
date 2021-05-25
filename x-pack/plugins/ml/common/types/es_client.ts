@@ -1,25 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SearchResponse, ShardsResponse } from 'elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 
-// The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
-interface SearchResponse7Hits<T> {
-  hits: SearchResponse<T>['hits']['hits'];
-  max_score: number;
-  total: {
-    value: number;
-    relation: string;
-  };
+import { buildEsQuery } from '../../../../../src/plugins/data/common/es_query/es_query';
+import type { DslQuery } from '../../../../../src/plugins/data/common/es_query/kuery';
+import type { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
+
+import { isPopulatedObject } from '../util/object_utils';
+
+export function isMultiBucketAggregate(arg: unknown): arg is estypes.MultiBucketAggregate {
+  return isPopulatedObject(arg, ['buckets']);
 }
-export interface SearchResponse7<T = any> {
-  took: number;
-  timed_out: boolean;
-  _scroll_id?: string;
-  _shards: ShardsResponse;
-  hits: SearchResponse7Hits<T>;
-  aggregations?: any;
-}
+
+export const ES_CLIENT_TOTAL_HITS_RELATION: Record<
+  Uppercase<estypes.TotalHitsRelation>,
+  estypes.TotalHitsRelation
+> = {
+  EQ: 'eq',
+  GTE: 'gte',
+} as const;
+
+export type InfluencersFilterQuery = ReturnType<typeof buildEsQuery> | DslQuery | JsonObject;

@@ -95,13 +95,14 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
         size="s"
       />
       <lazy
-        dockLinks={null}
+        dockLinks={Object {}}
         enableSaving={true}
         handleChange={[Function]}
         loading={false}
         setting={
           Object {
             "ariaName": "Provide usage statistics",
+            "category": Array [],
             "defVal": true,
             "description": <React.Fragment>
               <p>
@@ -156,12 +157,26 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
               </p>
             </React.Fragment>,
             "displayName": "Provide usage statistics",
+            "isCustom": true,
+            "isOverridden": false,
             "name": "telemetry:enabled",
+            "requiresPageReload": false,
             "type": "boolean",
             "value": true,
           }
         }
-        toasts={null}
+        toasts={
+          Object {
+            "add": [MockFunction],
+            "addDanger": [MockFunction],
+            "addError": [MockFunction],
+            "addInfo": [MockFunction],
+            "addSuccess": [MockFunction],
+            "addWarning": [MockFunction],
+            "get$": [MockFunction],
+            "remove": [MockFunction],
+          }
+        }
       />
     </EuiForm>
   </EuiPanel>
@@ -170,6 +185,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
 
 exports[`TelemetryManagementSectionComponent renders null because allowChangingOptInStatus is false 1`] = `
 <TelemetryManagementSection
+  docLinks={Object {}}
   enableSaving={true}
   intl={
     Object {

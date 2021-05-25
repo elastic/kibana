@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { validate } from '../../../../../common/validate';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { getIndexExists } from '@kbn/securitysolution-es-utils';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -16,16 +18,16 @@ import { throwHttpError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
 import { transformValidateBulkError } from './validate';
-import { getIndexExists } from '../../index/get_index_exists';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
-import { RuleTypeParams } from '../../types';
-import { Alert } from '../../../../../../alerts/common';
 
-export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
+export const createRulesBulkRoute = (
+  router: SecuritySolutionPluginRouter,
+  ml: SetupPlugins['ml']
+) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
@@ -39,7 +41,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const alertsClient = context.alerting?.getAlertsClient();
-      const clusterClient = context.core.elasticsearch.legacy.client;
+      const esClient = context.core.elasticsearch.client;
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.securitySolution?.getAppClient();
 
@@ -88,7 +90,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
 
               throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
               const finalIndex = internalRule.params.outputIndex;
-              const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
+              const indexExists = await getIndexExists(esClient.asCurrentUser, finalIndex);
               if (!indexExists) {
                 return createBulkErrorObject({
                   ruleId: internalRule.params.ruleId,
@@ -97,12 +99,9 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 });
               }
 
-              /**
-               * TODO: Remove this use of `as` by utilizing the proper type
-               */
-              const createdRule = (await alertsClient.create({
+              const createdRule = await alertsClient.create({
                 data: internalRule,
-              })) as Alert<RuleTypeParams>;
+              });
 
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: createdRule.id,

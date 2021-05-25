@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   const BULK_REQUESTS = [
     {
@@ -30,6 +31,12 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('_bulk_get', () => {
+    let KIBANA_VERSION: string;
+
+    before(async () => {
+      KIBANA_VERSION = await getKibanaVersion(getService);
+    });
+
     describe('with kibana index', () => {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -58,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
                       resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
                   },
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
                   namespaces: ['default'],
                   references: [
                     {
@@ -87,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                   namespaces: ['default'],
                   migrationVersion: resp.body.saved_objects[2].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
                   references: [],
                 },
               ],
@@ -99,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
+          await esDeleteAllIndices('.kibana*')
       );
 
       it('should return 200 with individual responses', async () =>

@@ -1,9 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
+
+import { UPDATE_BUTTON_LABEL, SAVE_BUTTON_LABEL, CANCEL_BUTTON_LABEL } from '../shared/constants';
+
+export const WORKPLACE_SEARCH_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.title',
+  {
+    defaultMessage: 'Workplace Search',
+  }
+);
 
 export const NAV = {
   OVERVIEW: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.overview', {
@@ -29,7 +40,7 @@ export const NAV = {
     defaultMessage: 'Content',
   }),
   ROLE_MAPPINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
-    defaultMessage: 'Role Mappings',
+    defaultMessage: 'Users & roles',
   }),
   SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
     defaultMessage: 'Security',
@@ -69,6 +80,30 @@ export const NAV = {
   ),
   SEARCH: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.searchApplication', {
     defaultMessage: 'Go to search application',
+  }),
+};
+
+export const ACCOUNT_NAV = {
+  SOURCES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.accountNav.sources.link', {
+    defaultMessage: 'Content sources',
+  }),
+  ORG_DASHBOARD: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.accountNav.orgDashboard.link',
+    {
+      defaultMessage: 'Go to organizational dashboard',
+    }
+  ),
+  SEARCH: i18n.translate('xpack.enterpriseSearch.workplaceSearch.accountNav.search.link', {
+    defaultMessage: 'Search',
+  }),
+  ACCOUNT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.accountNav.account.link', {
+    defaultMessage: 'My account',
+  }),
+  SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.accountNav.settings.link', {
+    defaultMessage: 'Account settings',
+  }),
+  LOGOUT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.accountNav.logout.link', {
+    defaultMessage: 'Logout',
   }),
 };
 
@@ -282,10 +317,93 @@ export const GITHUB_LINK_TITLE = i18n.translate(
 
 export const CUSTOM_SERVICE_TYPE = 'custom';
 
+export const WORKPLACE_SEARCH_URL_PREFIX = '/app/enterprise_search/workplace_search';
+
 export const DOCUMENTATION_LINK_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.documentation',
   {
     defaultMessage: 'Documentation',
+  }
+);
+
+export const PRIVATE_SOURCES_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.privateSources.description',
+  {
+    defaultMessage:
+      'Private sources are connected by users in your organization to create a personalized search experience.',
+  }
+);
+
+export const PRIVATE_SOURCES_TOGGLE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.privateSourcesToggle.description',
+  {
+    defaultMessage: 'Enable private sources for your organization',
+  }
+);
+
+export const REMOTE_SOURCES_TOGGLE_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.remoteSourcesToggle.text',
+  {
+    defaultMessage: 'Enable remote private sources',
+  }
+);
+
+export const REMOTE_SOURCES_TABLE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.remoteSourcesTable.description',
+  {
+    defaultMessage:
+      'Remote sources synchronize and store a limited amount of data on disk, with a low impact on storage resources.',
+  }
+);
+
+export const REMOTE_SOURCES_EMPTY_TABLE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.remoteSourcesEmptyTable.title',
+  {
+    defaultMessage: 'No remote private sources configured yet',
+  }
+);
+
+export const STANDARD_SOURCES_TOGGLE_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.standardSourcesToggle.text',
+  {
+    defaultMessage: 'Enable standard private sources',
+  }
+);
+
+export const STANDARD_SOURCES_TABLE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.standardSourcesTable.description',
+  {
+    defaultMessage:
+      'Standard sources synchronize and store all searchable data on disk, with a directly correlated impact on storage resources.',
+  }
+);
+
+export const STANDARD_SOURCES_EMPTY_TABLE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.standardSourcesEmptyTable.title',
+  {
+    defaultMessage: 'No standard private sources configured yet',
+  }
+);
+
+export const SECURITY_UNSAVED_CHANGES_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.unsavedChanges.message',
+  {
+    defaultMessage:
+      'Your private sources settings have not been saved. Are you sure you want to leave?',
+  }
+);
+
+export const PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.privateSourcesUpdateConfirmation.text',
+  {
+    defaultMessage: 'Updates to private source configuration will take effect immediately.',
+  }
+);
+
+export const SOURCE_RESTRICTIONS_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.sourceRestrictionsSuccess.message',
+  {
+    defaultMessage: 'Successfully updated source restrictions.',
   }
 );
 
@@ -382,6 +500,20 @@ export const SAVE_CHANGES_BUTTON = i18n.translate(
   }
 );
 
+export const SAVE_SETTINGS_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.saveSettings.button',
+  {
+    defaultMessage: 'Save settings',
+  }
+);
+
+export const KEEP_EDITING_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.keepEditing.button',
+  {
+    defaultMessage: 'Keep editing',
+  }
+);
+
 export const NAME_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.name.label', {
   defaultMessage: 'Name',
 });
@@ -475,7 +607,7 @@ export const CUSTOMIZE_HEADER_DESCRIPTION = i18n.translate(
 export const CUSTOMIZE_NAME_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.customize.name.label',
   {
-    defaultMessage: 'Personalize general organization settings.',
+    defaultMessage: 'Organization name',
   }
 );
 
@@ -486,12 +618,13 @@ export const CUSTOMIZE_NAME_BUTTON = i18n.translate(
   }
 );
 
-export const UPDATE_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.update.button',
-  {
-    defaultMessage: 'Update',
-  }
-);
+export const UPDATE_BUTTON = UPDATE_BUTTON_LABEL;
+export const SAVE_BUTTON = SAVE_BUTTON_LABEL;
+export const CANCEL_BUTTON = CANCEL_BUTTON_LABEL;
+
+export const RESET_BUTTON = i18n.translate('xpack.enterpriseSearch.workplaceSearch.reset.button', {
+  defaultMessage: 'Reset',
+});
 
 export const CONFIGURE_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.configure.button',
@@ -500,6 +633,10 @@ export const CONFIGURE_BUTTON = i18n.translate(
   }
 );
 
+export const OK_BUTTON = i18n.translate('xpack.enterpriseSearch.workplaceSearch.ok.button', {
+  defaultMessage: 'Ok',
+});
+
 export const PRIVATE_PLATINUM_LICENSE_CALLOUT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.privatePlatinumCallout.text',
   {
@@ -507,10 +644,28 @@ export const PRIVATE_PLATINUM_LICENSE_CALLOUT = i18n.translate(
   }
 );
 
+export const SOURCE = i18n.translate('xpack.enterpriseSearch.workplaceSearch.source.text', {
+  defaultMessage: 'Source',
+});
+
 export const PRIVATE_SOURCE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.privateSource.text',
   {
     defaultMessage: 'Private Source',
+  }
+);
+
+export const PRIVATE_SOURCES = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.privateSources.text',
+  {
+    defaultMessage: 'Private Sources',
+  }
+);
+
+export const CONFIRM_CHANGES_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.confirmChanges.text',
+  {
+    defaultMessage: 'Confirm changes',
   }
 );
 
@@ -525,5 +680,85 @@ export const CONNECTORS_HEADER_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.connectors.header.description',
   {
     defaultMessage: 'All of your configurable connectors.',
+  }
+);
+
+export const URL_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.url.label', {
+  defaultMessage: 'URL',
+});
+
+export const FIELD_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.field.label', {
+  defaultMessage: 'Field',
+});
+
+export const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.description.label',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {
+  defaultMessage: 'and',
+});
+
+export const UPDATE_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.update.label', {
+  defaultMessage: 'Update',
+});
+
+export const ADD_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.add.label', {
+  defaultMessage: 'Add',
+});
+
+export const ADD_FIELD_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.addField.label',
+  {
+    defaultMessage: 'Add field',
+  }
+);
+
+export const EDIT_FIELD_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.editField.label',
+  {
+    defaultMessage: 'Edit field',
+  }
+);
+
+export const REMOVE_FIELD_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.removeField.label',
+  {
+    defaultMessage: 'Remove field',
+  }
+);
+
+export const RECENT_ACTIVITY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.recentActivity.title',
+  {
+    defaultMessage: 'Recent activity',
+  }
+);
+
+export const CONFIRM_MODAL_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.comfirmModal.title',
+  {
+    defaultMessage: 'Please confirm',
+  }
+);
+
+export const REMOVE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.remove.button',
+  {
+    defaultMessage: 'Remove',
+  }
+);
+
+export const COPY_TEXT = i18n.translate('xpack.enterpriseSearch.workplaceSearch.copyText', {
+  defaultMessage: 'Copy',
+});
+
+export const STATUS_POPOVER_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.statusPopoverTooltip',
+  {
+    defaultMessage: 'Click to view info',
   }
 );

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiButtonEmpty, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
   canDelete: boolean;
@@ -45,44 +47,42 @@ export class DeleteRoleButton extends Component<Props, State> {
       return null;
     }
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.security.management.editRole.deleteRoleButton.deleteRoleTitle"
-              defaultMessage="Delete Role"
-            />
-          }
-          onCancel={this.closeModal}
-          onConfirm={this.onConfirmDelete}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.security.management.editRole.deleteRoleButton.cancelButtonLabel"
-              defaultMessage="No, don't delete"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.security.management.editRole.deleteRoleButton.confirmButtonLabel"
-              defaultMessage="Yes, delete role"
-            />
-          }
-          buttonColor={'danger'}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.security.management.editRole.deleteRoleButton.deletingRoleConfirmationText"
-              defaultMessage="Are you sure you want to delete this role?"
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.security.management.editRole.deleteRoleButton.deletingRoleWarningText"
-              defaultMessage="This action cannot be undone!"
-            />
-          </p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="xpack.security.management.editRole.deleteRoleButton.deleteRoleTitle"
+            defaultMessage="Delete Role"
+          />
+        }
+        onCancel={this.closeModal}
+        onConfirm={this.onConfirmDelete}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.security.management.editRole.deleteRoleButton.cancelButtonLabel"
+            defaultMessage="No, don't delete"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.security.management.editRole.deleteRoleButton.confirmButtonLabel"
+            defaultMessage="Yes, delete role"
+          />
+        }
+        buttonColor={'danger'}
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.security.management.editRole.deleteRoleButton.deletingRoleConfirmationText"
+            defaultMessage="Are you sure you want to delete this role?"
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.security.management.editRole.deleteRoleButton.deletingRoleWarningText"
+            defaultMessage="This action cannot be undone!"
+          />
+        </p>
+      </EuiConfirmModal>
     );
   };
 

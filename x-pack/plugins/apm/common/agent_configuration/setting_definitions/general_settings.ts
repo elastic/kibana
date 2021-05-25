@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -25,7 +26,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'The maximum total compressed size of the request body which is sent to the APM Server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.',
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs'],
+    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs', 'php'],
   },
 
   // API Request Time
@@ -43,7 +44,7 @@ export const generalSettings: RawSettingDefinition[] = [
           "Maximum time to keep an HTTP request to the APM Server open for.\n\nNOTE: This value has to be lower than the APM Server's `read_timeout` setting.",
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs'],
+    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs', 'php'],
   },
 
   // Capture body
@@ -68,7 +69,7 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'transactions', value: 'transactions' },
       { text: 'all', value: 'all' },
     ],
-    excludeAgents: ['js-base', 'rum-js'],
+    excludeAgents: ['js-base', 'rum-js', 'php'],
   },
 
   // Capture headers
@@ -86,7 +87,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'If set to `true`, the agent will capture HTTP request and response headers (including cookies), as well as message headers/properties when using messaging frameworks (like Kafka).\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.',
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs'],
+    excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php'],
   },
 
   // LOG_LEVEL
@@ -110,7 +111,7 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'critical', value: 'critical' },
       { text: 'off', value: 'off' },
     ],
-    includeAgents: ['dotnet', 'ruby', 'java', 'python', 'nodejs', 'go'],
+    includeAgents: ['dotnet', 'ruby', 'java', 'python', 'nodejs', 'go', 'php'],
   },
 
   // Recording
@@ -162,7 +163,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.',
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs'],
+    excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php'],
   },
 
   // STACK_TRACE_LIMIT
@@ -254,6 +255,6 @@ export const generalSettings: RawSettingDefinition[] = [
           'Used to restrict requests to certain URLs from being instrumented. This config accepts a comma-separated list of wildcard patterns of URL paths that should be ignored. When an incoming HTTP request is detected, its request path will be tested against each element in this list. For example, adding `/home/index` to this list would match and remove instrumentation from `http://localhost/home/index` as well as `http://whatever.com/home/index?value1=123`',
       }
     ),
-    includeAgents: ['java', 'nodejs', 'python', 'dotnet', 'ruby'],
+    includeAgents: ['java', 'nodejs', 'python', 'dotnet', 'ruby', 'go'],
   },
 ];

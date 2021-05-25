@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -13,7 +14,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { LicensePrompt } from '../../../shared/LicensePrompt';
+import { LicensePrompt } from '../../../shared/license_prompt';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
@@ -72,8 +73,8 @@ export function AnomalyDetection() {
           })}
         </h1>
       </EuiTitle>
-      <EuiSpacer size="l" />
-      <EuiText>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued">
         {i18n.translate('xpack.apm.settings.anomalyDetection.descriptionText', {
           defaultMessage: `Machine Learning's anomaly detection integration enables application health status indicators for services in each configured environment by identifying anomalies in latency.`,
         })}

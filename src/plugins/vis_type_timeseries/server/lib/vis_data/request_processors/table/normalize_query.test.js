@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { normalizeQuery } from './normalize_query';
@@ -11,6 +11,7 @@ import { normalizeQuery } from './normalize_query';
 describe('normalizeQuery', () => {
   const req = 'req';
   const seriesId = '61ca57f1-469d-11e7-af02-69e470af7417';
+  const panelId = '39d49073-a924-426b-aa32-35acb40a9bb7';
 
   let next;
   let panel;
@@ -56,6 +57,7 @@ describe('normalizeQuery', () => {
               timeField: 'order_date',
               intervalString: '10s',
               bucketSize: 10,
+              panelId,
             },
           },
         },
@@ -87,6 +89,7 @@ describe('normalizeQuery', () => {
       timeField: 'order_date',
       intervalString: '10s',
       bucketSize: 10,
+      panelId,
     });
   });
 

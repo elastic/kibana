@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiPanel, EuiBasicTable } from '@elastic/eui';
@@ -121,9 +122,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
 
     const onRefreshBtnClick = useCallback(() => {
       if (refetch != null) {
-        refetch(searchResults, totalSearchResultsCount);
+        refetch();
       }
-    }, [refetch, searchResults, totalSearchResultsCount]);
+    }, [refetch]);
 
     const handleCloseModal = useCallback(() => {
       if (setImportDataModalToggle != null) {
@@ -136,9 +137,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         setImportDataModalToggle(false);
       }
       if (refetch != null) {
-        refetch(searchResults, totalSearchResultsCount);
+        refetch();
       }
-    }, [setImportDataModalToggle, refetch, searchResults, totalSearchResultsCount]);
+    }, [setImportDataModalToggle, refetch]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
       const timelineActions: ActionTimelineToShow[] = ['createFrom', 'duplicate'];
@@ -220,6 +221,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                         : i18n.SELECTED_TIMELINES(selectedItems.length)}
                     </UtilityBarText>
                     <UtilityBarAction
+                      dataTestSubj="batchActions"
                       iconSide="right"
                       iconType="arrowDown"
                       popoverContent={getBatchItemsPopoverContent}
@@ -229,7 +231,12 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                     </UtilityBarAction>
                   </>
                 )}
-                <UtilityBarAction iconSide="right" iconType="refresh" onClick={onRefreshBtnClick}>
+                <UtilityBarAction
+                  dataTestSubj="refreshButton"
+                  iconSide="right"
+                  iconType="refresh"
+                  onClick={onRefreshBtnClick}
+                >
                   {i18n.REFRESH}
                 </UtilityBarAction>
               </UtilityBarGroup>

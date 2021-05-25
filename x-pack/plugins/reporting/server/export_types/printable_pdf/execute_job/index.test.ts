@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
@@ -10,11 +11,7 @@ import * as Rx from 'rxjs';
 import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../lib';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockReportingCore,
-} from '../../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 import { runTaskFnFactory } from './';
@@ -52,22 +49,7 @@ beforeEach(async () => {
     'kibanaServer.protocol': 'http',
   };
   const mockSchema = createMockConfigSchema(reportingConfig);
-  const mockReportingConfig = createMockConfig(mockSchema);
-
-  mockReporting = await createMockReportingCore(mockReportingConfig);
-
-  const mockElasticsearch = {
-    legacy: {
-      client: {
-        asScoped: () => ({ callAsCurrentUser: jest.fn() }),
-      },
-    },
-  };
-  const mockGetElasticsearch = jest.fn();
-  mockGetElasticsearch.mockImplementation(() => Promise.resolve(mockElasticsearch));
-  mockReporting.getElasticsearchService = mockGetElasticsearch;
-  // @ts-ignore over-riding config
-  mockReporting.config = mockReportingConfig;
+  mockReporting = await createMockReportingCore(mockSchema);
 
   (generatePdfObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });

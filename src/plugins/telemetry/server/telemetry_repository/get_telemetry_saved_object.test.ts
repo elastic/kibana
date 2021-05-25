@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getTelemetrySavedObject } from './get_telemetry_saved_object';
 import { SavedObjectsErrorHelpers } from '../../../../core/server';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('getTelemetrySavedObject', () => {
   it('returns null when saved object not found', async () => {
@@ -51,7 +52,7 @@ interface CallGetTelemetrySavedObjectParams {
   savedObjectNotFound: boolean;
   savedObjectForbidden: boolean;
   savedObjectOtherError: boolean;
-  result?: any;
+  result?: unknown;
 }
 
 const DefaultParams = {
@@ -68,26 +69,22 @@ function getCallGetTelemetrySavedObjectParams(
 
 async function callGetTelemetrySavedObject(params: CallGetTelemetrySavedObjectParams) {
   const savedObjectsClient = getMockSavedObjectsClient(params);
-  return await getTelemetrySavedObject(savedObjectsClient as any);
+  return await getTelemetrySavedObject(savedObjectsClient);
 }
 
 const SavedObjectForbiddenMessage = 'savedObjectForbidden';
 const SavedObjectOtherErrorMessage = 'savedObjectOtherError';
 
 function getMockSavedObjectsClient(params: CallGetTelemetrySavedObjectParams) {
-  return {
-    async get(type: string, id: string) {
-      if (params.savedObjectNotFound) throw SavedObjectsErrorHelpers.createGenericNotFoundError();
-      if (params.savedObjectForbidden)
-        throw SavedObjectsErrorHelpers.decorateForbiddenError(
-          new Error(SavedObjectForbiddenMessage)
-        );
-      if (params.savedObjectOtherError)
-        throw SavedObjectsErrorHelpers.decorateGeneralError(
-          new Error(SavedObjectOtherErrorMessage)
-        );
+  const savedObjectsClient = savedObjectsClientMock.create();
+  savedObjectsClient.get.mockImplementation(async (type, id) => {
+    if (params.savedObjectNotFound) throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+    if (params.savedObjectForbidden)
+      throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error(SavedObjectForbiddenMessage));
+    if (params.savedObjectOtherError)
+      throw SavedObjectsErrorHelpers.decorateGeneralError(new Error(SavedObjectOtherErrorMessage));
 
-      return { attributes: { enabled: null } };
-    },
-  };
+    return { id, type, attributes: { enabled: null }, references: [] };
+  });
+  return savedObjectsClient;
 }

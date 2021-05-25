@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IRouter } from 'src/core/server';
@@ -36,22 +36,20 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
         const dataIndexConfig = sampleDataset.dataIndices[i];
         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
         try {
-          const indexExists = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-            'indices.exists',
-            { index }
-          );
+          const {
+            body: indexExists,
+          } = await context.core.elasticsearch.client.asCurrentUser.indices.exists({
+            index,
+          });
           if (!indexExists) {
             sampleDataset.status = NOT_INSTALLED;
             return;
           }
 
-          const { count } = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-            'count',
-            {
-              index,
-            }
-          );
-          if (count === 0) {
+          const { body: count } = await context.core.elasticsearch.client.asCurrentUser.count({
+            index,
+          });
+          if (count.count === 0) {
             sampleDataset.status = NOT_INSTALLED;
             return;
           }

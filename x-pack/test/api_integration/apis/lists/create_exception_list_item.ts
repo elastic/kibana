@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect/expect.js';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ENDPOINT_LIST_ID } from '../../../../plugins/lists/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

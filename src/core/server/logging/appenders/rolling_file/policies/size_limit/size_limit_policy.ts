@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema, ByteSizeValue } from '@kbn/config-schema';
@@ -12,7 +12,7 @@ import { RollingFileContext } from '../../rolling_file_context';
 import { TriggeringPolicy } from '../policy';
 
 export interface SizeLimitTriggeringPolicyConfig {
-  kind: 'size-limit';
+  type: 'size-limit';
 
   /**
    * The minimum size the file must have to roll over.
@@ -21,7 +21,7 @@ export interface SizeLimitTriggeringPolicyConfig {
 }
 
 export const sizeLimitTriggeringPolicyConfigSchema = schema.object({
-  kind: schema.literal('size-limit'),
+  type: schema.literal('size-limit'),
   size: schema.byteSize({ min: '1b', defaultValue: '100mb' }),
 });
 

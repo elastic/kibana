@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { replaceVars } from './replace_vars';
+import { emptyLabel } from '../../../../common/empty_label';
 
 describe('replaceVars(str, args, vars)', () => {
   test('replaces vars with values', () => {
@@ -26,5 +27,12 @@ describe('replaceVars(str, args, vars)', () => {
     const args = { host: 'test-01' };
     const template = '# {{args.host}} {{total';
     expect(replaceVars(template, args, vars)).toEqual('# {{args.host}} {{total');
+  });
+
+  test('replaces (empty).some_path with values', () => {
+    const vars = { [emptyLabel]: { d: { raw: 100 } } };
+    const args = {};
+    const template = `# {{ ${emptyLabel}.d.raw }} {{ ${emptyLabel}.d.raw }}`;
+    expect(replaceVars(template, args, vars)).toEqual('# 100 100');
   });
 });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -51,26 +51,13 @@ describe('TSVB Filter Ratio', () => {
         field: 'histogram_value',
       };
       const wrapper = setup(metric);
-      expect(wrapper.find(EuiComboBox).at(1).props().options).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "label": "Average",
-            "value": "avg",
-          },
-          Object {
-            "label": "Count",
-            "value": "count",
-          },
-          Object {
-            "label": "Sum",
-            "value": "sum",
-          },
-          Object {
-            "label": "Value Count",
-            "value": "value_count",
-          },
-        ]
-      `);
+      expect(
+        wrapper
+          .find(EuiComboBox)
+          .at(1)
+          .props()
+          .options.map(({ value }) => value)
+      ).toEqual(['avg', 'count', 'max', 'min', 'sum', 'value_count']);
     });
     const shouldNotHaveHistogramField = (agg) => {
       it(`should not have histogram fields for ${agg}`, () => {
@@ -80,23 +67,19 @@ describe('TSVB Filter Ratio', () => {
           field: '',
         };
         const wrapper = setup(metric);
-        expect(wrapper.find(EuiComboBox).at(2).props().options).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "label": "number",
-              "options": Array [
-                Object {
-                  "label": "system.cpu.user.pct",
-                  "value": "system.cpu.user.pct",
-                },
-              ],
-            },
-          ]
-        `);
+        expect(wrapper.find(EuiComboBox).at(2).props().options).toEqual([
+          {
+            label: 'number',
+            options: [
+              {
+                label: 'system.cpu.user.pct',
+                value: 'system.cpu.user.pct',
+              },
+            ],
+          },
+        ]);
       });
     };
-    shouldNotHaveHistogramField('max');
-    shouldNotHaveHistogramField('min');
     shouldNotHaveHistogramField('positive_rate');
 
     it(`should not have histogram fields for cardinality`, () => {

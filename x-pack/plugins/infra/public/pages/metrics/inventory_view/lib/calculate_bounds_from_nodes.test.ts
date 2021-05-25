@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { calculateBoundsFromNodes } from './calculate_bounds_from_nodes';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 const nodes: SnapshotNode[] = [
@@ -37,14 +39,14 @@ describe('calculateBoundsFromNodes', () => {
     const bounds = calculateBoundsFromNodes(nodes);
     expect(bounds).toEqual({
       min: 0.2,
-      max: 1.5,
+      max: 0.5,
     });
   });
   it('should have a minimum of 0 for only a single node', () => {
     const bounds = calculateBoundsFromNodes([nodes[0]]);
     expect(bounds).toEqual({
       min: 0,
-      max: 1.5,
+      max: 0.5,
     });
   });
   it('should return zero for empty nodes', () => {

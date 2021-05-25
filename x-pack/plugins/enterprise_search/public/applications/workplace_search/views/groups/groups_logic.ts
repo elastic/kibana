@@ -1,25 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
+
 import { i18n } from '@kbn/i18n';
 
-import { HttpLogic } from '../../../shared/http';
-
+import { JSON_HEADER as headers } from '../../../../../common/constants';
+import { Meta } from '../../../../../common/types';
+import { DEFAULT_META } from '../../../shared/constants';
 import {
   clearFlashMessages,
   flashAPIErrors,
   setSuccessMessage,
 } from '../../../shared/flash_messages';
-
+import { HttpLogic } from '../../../shared/http';
 import { ContentSource, Group, User } from '../../types';
-
-import { JSON_HEADER as headers } from '../../../../../common/constants';
-import { DEFAULT_META } from '../../../shared/constants';
-import { Meta } from '../../../../../common/types';
 
 export const MAX_NAME_LENGTH = 40;
 

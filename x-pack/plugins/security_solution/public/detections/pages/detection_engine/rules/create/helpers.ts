@@ -1,26 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
 
-import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
-import { assertUnreachable } from '../../../../../../common/utility_types';
-import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import { List } from '../../../../../../common/detection_engine/schemas/types';
-import { ENDPOINT_LIST_ID, ExceptionListType, NamespaceType } from '../../../../../shared_imports';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import type {
+  ExceptionListType,
+  NamespaceType,
+  List,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   Threats,
   ThreatSubtechnique,
   ThreatTechnique,
   Type,
-} from '../../../../../../common/detection_engine/schemas/common/schemas';
-
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
+import { assertUnreachable } from '../../../../../../common/utility_types';
+import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
+import { Rule } from '../../../../containers/detection_engine/rules';
 import {
   AboutStepRule,
   DefineStepRule,
@@ -181,7 +185,7 @@ export const filterEmptyThreats = (threats: Threats): Threats => {
     .map((threat) => {
       return {
         ...threat,
-        technique: trimThreatsWithNoName(threat.technique).map((technique) => {
+        technique: trimThreatsWithNoName(threat.technique ?? []).map((technique) => {
           return {
             ...technique,
             subtechnique:
@@ -218,8 +222,18 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         saved_id: ruleFields.queryBar?.saved_id,
         ...(ruleType === 'threshold' && {
           threshold: {
-            field: ruleFields.threshold?.field[0] ?? '',
+            field: ruleFields.threshold?.field ?? [],
             value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
+            cardinality:
+              !isEmpty(ruleFields.threshold.cardinality?.field) &&
+              ruleFields.threshold.cardinality?.value != null
+                ? [
+                    {
+                      field: ruleFields.threshold.cardinality.field[0],
+                      value: parseInt(ruleFields.threshold.cardinality.value, 10),
+                    },
+                  ]
+                : [],
           },
         }),
       }
@@ -232,6 +246,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         saved_id: ruleFields.queryBar?.saved_id,
         threat_index: ruleFields.threatIndex,
         threat_query: ruleFields.threatQueryBar?.query?.query as string,
+        threat_filters: ruleFields.threatQueryBar?.filters,
         threat_mapping: ruleFields.threatMapping,
         threat_language: ruleFields.threatQueryBar?.query?.language,
       }
@@ -286,6 +301,7 @@ export const formatAboutStepData = (
     isBuildingBlock,
     note,
     ruleNameOverride,
+    threatIndicatorPath,
     timestampOverride,
     ...rest
   } = aboutStepData;
@@ -328,6 +344,7 @@ export const formatAboutStepData = (
       ...singleThreat,
       framework: 'MITRE ATT&CK',
     })),
+    threat_indicator_path: threatIndicatorPath,
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,

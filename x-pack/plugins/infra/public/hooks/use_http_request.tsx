@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useState } from 'react';
-import { IHttpFetchError } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { HttpHandler } from 'src/core/public';
 import { ToastInput } from 'src/core/public';
 import { useTrackedPromise, CanceledPromiseError } from '../utils/use_tracked_promise';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { InfraHttpError } from '../types';
 
 export function useHTTPRequest<Response>(
   pathname: string,
@@ -18,13 +19,13 @@ export function useHTTPRequest<Response>(
   body?: string | null,
   decode: (response: any) => Response = (response) => response,
   fetch?: HttpHandler,
-  toastWarning?: (input: ToastInput) => void
+  toastDanger?: (input: ToastInput) => void
 ) {
   const kibana = useKibana();
   const fetchService = fetch ? fetch : kibana.services.http?.fetch;
-  const toast = toastWarning ? toastWarning : kibana.notifications.toasts.warning;
+  const toast = toastDanger ? toastDanger : kibana.notifications.toasts.danger;
   const [response, setResponse] = useState<Response | null>(null);
-  const [error, setError] = useState<IHttpFetchError | null>(null);
+  const [error, setError] = useState<InfraHttpError | null>(null);
   const [request, makeRequest] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
@@ -39,7 +40,7 @@ export function useHTTPRequest<Response>(
       },
       onResolve: (resp) => setResponse(decode(resp)),
       onReject: (e: unknown) => {
-        const err = e as IHttpFetchError;
+        const err = e as InfraHttpError;
         if (e && e instanceof CanceledPromiseError) {
           return;
         }
@@ -65,9 +66,15 @@ export function useHTTPRequest<Response>(
                     })}
                   </h5>
                   {err.response?.url}
+                  <h5>
+                    {i18n.translate('xpack.infra.useHTTPRequest.error.body.message', {
+                      defaultMessage: `Message`,
+                    })}
+                  </h5>
+                  {err.body?.message || err.message}
                 </>
               ) : (
-                <h5>{err.message}</h5>
+                <h5>{err.body?.message || err.message}</h5>
               )}
             </div>
           ),

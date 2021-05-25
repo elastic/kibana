@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount, ReactWrapper } from 'enzyme';
@@ -10,7 +11,6 @@ import { waitFor } from '@testing-library/react';
 import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -156,18 +156,11 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-  apolloClientObservable,
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 let testProps = {
   browserFields: mockBrowserFields,
   field,
-  indexNames: [],
   indexPattern: mockIndexPattern,
   timelineId: TimelineId.hostsPageExternalAlerts,
   toggleTopN: jest.fn(),

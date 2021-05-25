@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
+  LogMeta,
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
@@ -11,6 +14,10 @@ import {
 } from '../../../../../src/core/server';
 import { RawAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+
+interface ActionsLogMeta extends LogMeta {
+  migrations: { actionDocument: SavedObjectUnsanitizedDoc<RawAction> };
+}
 
 type ActionMigration = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
@@ -21,21 +28,28 @@ export function getMigrations(
 ): SavedObjectMigrationMap {
   const migrationActionsTen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      !!doc.attributes.config?.casesConfiguration || doc.attributes.actionTypeId === '.email',
+      doc.attributes.config?.hasOwnProperty('casesConfiguration') ||
+      doc.attributes.actionTypeId === '.email',
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
 
   const migrationActionsEleven = encryptedSavedObjects.createMigration<RawAction, RawAction>(
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      !!doc.attributes.config?.isCaseOwned ||
-      !!doc.attributes.config?.incidentConfiguration ||
+      doc.attributes.config?.hasOwnProperty('isCaseOwned') ||
+      doc.attributes.config?.hasOwnProperty('incidentConfiguration') ||
       doc.attributes.actionTypeId === '.webhook',
     pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
+  );
+
+  const migrationActionsFourteen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => true,
+    pipeMigrations(addisMissingSecretsField)
   );
 
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
+    '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
   };
 }
 
@@ -47,9 +61,13 @@ function executeMigrationWithErrorHandling(
     try {
       return migrationFunc(doc, context);
     } catch (ex) {
-      context.log.error(
+      context.log.error<ActionsLogMeta>(
         `encryptedSavedObject ${version} migration failed for action ${doc.id} with error: ${ex.message}`,
-        { actionDocument: doc }
+        {
+          migrations: {
+            actionDocument: doc,
+          },
+        }
       );
     }
     return doc;
@@ -111,6 +129,18 @@ const addHasAuthConfigurationObject = (
         ...doc.attributes.config,
         hasAuth,
       },
+    },
+  };
+};
+
+const addisMissingSecretsField = (
+  doc: SavedObjectUnsanitizedDoc<RawAction>
+): SavedObjectUnsanitizedDoc<RawAction> => {
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      isMissingSecrets: false,
     },
   };
 };

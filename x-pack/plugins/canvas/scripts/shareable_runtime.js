@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 const fs = require('fs');
@@ -55,7 +56,7 @@ run(
           'webpack-dev-server',
           '--config',
           webpackConfig,
-          ...(process.stdout.isTTY ? ['--progress'] : []),
+          ...(process.stdout.isTTY && !process.env.CI ? ['--progress'] : []),
           '--hide-modules',
           '--display-entrypoints',
           'false',
@@ -92,7 +93,7 @@ run(
         '--config',
         webpackConfig,
         '--hide-modules',
-        ...(process.stdout.isTTY ? ['--progress'] : []),
+        ...(process.stdout.isTTY && !process.env.CI ? ['--progress'] : []),
       ],
       {
         ...options,

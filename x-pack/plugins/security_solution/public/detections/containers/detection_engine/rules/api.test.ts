@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -402,6 +403,15 @@ describe('Detections Rules API', () => {
           '[{"actions":[],"author":[],"description":"Elastic Endpoint detected Credential Dumping. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":73,"risk_score_mapping":[],"name":"Credential Dumping - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:cred_theft_event and endgame.metadata.type:detection","filters":[],"references":[],"severity":"high","severity_mapping":[],"tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"throttle":null,"version":1},{"actions":[],"author":[],"description":"Elastic Endpoint detected an Adversary Behavior. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.","enabled":false,"false_positives":[],"from":"now-660s","index":["endgame-*"],"interval":"10m","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":47,"risk_score_mapping":[],"name":"Adversary Behavior - Detected - Elastic Endpoint [Duplicate]","query":"event.kind:alert and event.module:endgame and event.action:rules_engine_event","filters":[],"references":[],"severity":"medium","severity_mapping":[],"tags":["Elastic","Endpoint"],"to":"now","type":"query","threat":[],"throttle":null,"version":1}]',
         method: 'POST',
       });
+    });
+
+    test('check duplicated rules are disabled by default', async () => {
+      await duplicateRules({ rules: rulesMock.data.map((rule) => ({ ...rule, enabled: true })) });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [path, options] = fetchMock.mock.calls[0];
+      expect(path).toBe('/api/detection_engine/rules/_bulk_create');
+      const rules = JSON.parse(options.body);
+      expect(rules).toMatchObject([{ enabled: false }, { enabled: false }]);
     });
 
     test('happy path', async () => {

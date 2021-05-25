@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -45,17 +45,24 @@ export const registerFindRoute = (
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
+      const { query } = req;
       const managementService = await managementServicePromise;
-      const { client } = context.core.savedObjects;
-      const searchTypes = Array.isArray(req.query.type) ? req.query.type : [req.query.type];
-      const includedFields = Array.isArray(req.query.fields)
-        ? req.query.fields
-        : [req.query.fields];
+      const { getClient, typeRegistry } = context.core.savedObjects;
+
+      const searchTypes = Array.isArray(query.type) ? query.type : [query.type];
+      const includedFields = Array.isArray(query.fields) ? query.fields : [query.fields];
+
       const importAndExportableTypes = searchTypes.filter((type) =>
-        managementService.isImportAndExportable(type)
+        typeRegistry.isImportableAndExportable(type)
       );
 
+      const includedHiddenTypes = importAndExportableTypes.filter((type) =>
+        typeRegistry.isHidden(type)
+      );
+
+      const client = getClient({ includedHiddenTypes });
       const searchFields = new Set<string>();
+
       importAndExportableTypes.forEach((type) => {
         const searchField = managementService.getDefaultSearchField(type);
         if (searchField) {
@@ -64,7 +71,7 @@ export const registerFindRoute = (
       });
 
       const findResponse = await client.find<any>({
-        ...req.query,
+        ...query,
         fields: undefined,
         searchFields: [...searchFields],
       });

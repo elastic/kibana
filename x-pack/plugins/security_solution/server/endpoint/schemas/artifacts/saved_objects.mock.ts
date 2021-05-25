@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -35,8 +36,8 @@ export const getInternalArtifactMock = async (
 ): Promise<InternalArtifactCompleteSchema> => {
   const artifact = await buildArtifact(
     getTranslatedExceptionListMock(),
-    os,
     schemaVersion,
+    os,
     artifactName
   );
   return opts?.compress ? compressArtifact(artifact) : artifact;
@@ -45,14 +46,10 @@ export const getInternalArtifactMock = async (
 export const getEmptyInternalArtifactMock = async (
   os: string,
   schemaVersion: string,
-  opts?: { compress: boolean }
+  opts?: { compress: boolean },
+  artifactName: string = ArtifactConstants.GLOBAL_ALLOWLIST_NAME
 ): Promise<InternalArtifactCompleteSchema> => {
-  const artifact = await buildArtifact(
-    { entries: [] },
-    os,
-    schemaVersion,
-    ArtifactConstants.GLOBAL_ALLOWLIST_NAME
-  );
+  const artifact = await buildArtifact({ entries: [] }, schemaVersion, os, artifactName);
   return opts?.compress ? compressArtifact(artifact) : artifact;
 };
 
@@ -65,15 +62,15 @@ export const getInternalArtifactMockWithDiffs = async (
   mock.entries.pop();
   const artifact = await buildArtifact(
     mock,
-    os,
     schemaVersion,
+    os,
     ArtifactConstants.GLOBAL_ALLOWLIST_NAME
   );
   return opts?.compress ? compressArtifact(artifact) : artifact;
 };
 
 export const getInternalManifestMock = (): InternalManifestSchema => ({
-  ids: [],
+  artifacts: [],
   schemaVersion: 'v1',
   semanticVersion: '1.0.0',
 });

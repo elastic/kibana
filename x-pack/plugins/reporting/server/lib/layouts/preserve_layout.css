@@ -23,11 +23,6 @@ filter-bar,
   display: none !important;
 }
 
-/* override open/closed positioning of the app wrapper/nav */
-.app-wrapper {
-  left: 0px !important;
-}
-
 /**
  *  Discover Tweaks
  */
@@ -55,7 +50,7 @@ discover-app .discover-table-footer {
 
 /* hide unusable controls
 *  !important is required to override resizable panel inline display */
-.visEditor__content .visEditor--default > :not(.visEditor__visualization) {
+.visEditor__content .visEditor--default > :not(.visEditor__visualization__wrapper) {
   display: none !important;
 }
 

@@ -1,39 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { SecurityOssPluginSetup, SecurityOssPluginStart } from 'src/plugins/security_oss/public';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '../../../../src/core/public';
-import { FeaturesPluginStart } from '../../features/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { LicensingPluginSetup } from '../../licensing/public';
-import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
-import {
-  ISessionTimeout,
-  SessionExpired,
-  SessionTimeout,
-  SessionTimeoutHttpInterceptor,
-  UnauthorizedResponseHttpInterceptor,
-} from './session';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { HomePublicPluginSetup } from 'src/plugins/home/public';
+import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
+import type {
+  SecurityOssPluginSetup,
+  SecurityOssPluginStart,
+} from 'src/plugins/security_oss/public';
+
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import type { FeaturesPluginStart } from '../../features/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 import { SecurityLicenseService } from '../common/licensing';
-import { SecurityNavControlService } from './nav_control';
-import { AuthenticationService, AuthenticationServiceSetup } from './authentication';
-import { ConfigType } from './config';
-import { ManagementService } from './management';
 import { accountManagementApp } from './account_management';
+import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
+import { AuthenticationService } from './authentication';
+import type { ConfigType } from './config';
+import { ManagementService } from './management';
+import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
+import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -47,6 +41,7 @@ export interface PluginStartDependencies {
   features: FeaturesPluginStart;
   securityOss: SecurityOssPluginStart;
   management?: ManagementStart;
+  spaces?: SpacesPluginStart;
 }
 
 export class SecurityPlugin
@@ -57,7 +52,7 @@ export class SecurityPlugin
       PluginSetupDependencies,
       PluginStartDependencies
     > {
-  private sessionTimeout!: ISessionTimeout;
+  private sessionTimeout!: SessionTimeout;
   private readonly authenticationService = new AuthenticationService();
   private readonly navControlService = new SecurityNavControlService();
   private readonly securityLicenseService = new SecurityLicenseService();
@@ -83,7 +78,6 @@ export class SecurityPlugin
     const sessionExpired = new SessionExpired(logoutUrl, tenant);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
     this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
-    http.intercept(new SessionTimeoutHttpInterceptor(this.sessionTimeout, anonymousPaths));
 
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
@@ -152,7 +146,10 @@ export class SecurityPlugin
       this.managementService.start({ capabilities: core.application.capabilities });
     }
 
-    return { navControlService: this.navControlService.start({ core }) };
+    return {
+      navControlService: this.navControlService.start({ core }),
+      authc: this.authc as AuthenticationServiceStart,
+    };
   }
 
   public stop() {

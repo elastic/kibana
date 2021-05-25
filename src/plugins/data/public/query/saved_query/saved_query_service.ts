@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { isObject } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
 import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
 
@@ -119,12 +120,15 @@ export const createSavedQueryService = (
     id: string;
     attributes: SerializedSavedQueryAttributes;
   }) => {
-    let queryString;
+    let queryString: string | object = savedQuery.attributes.query.query;
+
     try {
-      queryString = JSON.parse(savedQuery.attributes.query.query);
-    } catch (error) {
-      queryString = savedQuery.attributes.query.query;
-    }
+      const parsedQueryString: object = JSON.parse(savedQuery.attributes.query.query);
+      if (isObject(parsedQueryString)) {
+        queryString = parsedQueryString;
+      }
+    } catch (e) {} // eslint-disable-line no-empty
+
     const savedQueryItems: SavedQueryAttributes = {
       title: savedQuery.attributes.title || '',
       description: savedQuery.attributes.description || '',

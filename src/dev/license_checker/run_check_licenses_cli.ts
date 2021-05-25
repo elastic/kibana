@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { REPO_ROOT } from '@kbn/utils';
 import { run } from '@kbn/dev-utils';
 import { getInstalledPackages } from '../npm';
 
-import { LICENSE_WHITELIST, DEV_ONLY_LICENSE_WHITELIST, LICENSE_OVERRIDES } from './config';
+import { LICENSE_ALLOWED, DEV_ONLY_LICENSE_ALLOWED, LICENSE_OVERRIDES } from './config';
 import { assertLicensesValid } from './valid';
 
 run(
@@ -25,7 +25,7 @@ run(
     // packages are valid
     assertLicensesValid({
       packages: packages.filter((pkg) => !pkg.isDevOnly),
-      validLicenses: LICENSE_WHITELIST,
+      validLicenses: LICENSE_ALLOWED,
     });
     log.success('All production dependency licenses are allowed');
 
@@ -34,7 +34,7 @@ run(
     if (flags.dev) {
       assertLicensesValid({
         packages: packages.filter((pkg) => pkg.isDevOnly),
-        validLicenses: LICENSE_WHITELIST.concat(DEV_ONLY_LICENSE_WHITELIST),
+        validLicenses: LICENSE_ALLOWED.concat(DEV_ONLY_LICENSE_ALLOWED),
       });
       log.success('All development dependency licenses are allowed');
     }

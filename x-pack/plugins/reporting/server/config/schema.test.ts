@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ConfigSchema } from './schema';
@@ -106,6 +107,7 @@ describe('Reporting Config Schema', () => {
           "allow": Array [
             "reporting_user",
           ],
+          "enabled": true,
         },
       }
     `);
@@ -210,6 +212,7 @@ describe('Reporting Config Schema', () => {
           "allow": Array [
             "reporting_user",
           ],
+          "enabled": true,
         },
       }
     `);
@@ -299,7 +302,7 @@ describe('Reporting Config Schema', () => {
     // kibanaServer
     const throwValidationErr = () => ConfigSchema.validate({ kibanaServer: { hostname: '0' } });
     expect(throwValidationErr).toThrowError(
-      `[kibanaServer.hostname]: must not be "0" for the headless browser to correctly resolve the host`
+      `[kibanaServer.hostname]: value must be a valid hostname (see RFC 1123).`
     );
   });
 });

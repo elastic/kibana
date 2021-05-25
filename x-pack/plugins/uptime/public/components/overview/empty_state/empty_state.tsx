@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -32,36 +33,28 @@ export const EmptyStateComponent = ({
   }
   const { indexExists, docCount } = statesIndexStatus ?? {};
 
-  if (loading && (!indexExists || docCount === 0 || !statesIndexStatus)) {
-    return <EmptyStateLoading />;
-  }
+  const isLoading = loading && (!indexExists || docCount === 0 || !statesIndexStatus);
 
-  if (!indexExists) {
-    return (
-      <DataOrIndexMissing
-        settings={settings}
-        headingMessage={
-          <FormattedMessage
-            id="xpack.uptime.emptyState.noIndexTitle"
-            defaultMessage="No indices found matching pattern {indexName}"
-            values={{ indexName: <em>{settings?.heartbeatIndices}</em> }}
-          />
-        }
-      />
-    );
-  } else if (indexExists && docCount === 0) {
-    return (
-      <DataOrIndexMissing
-        settings={settings}
-        headingMessage={
-          <FormattedMessage
-            id="xpack.uptime.emptyState.noDataMessage"
-            defaultMessage="No uptime data found in index {indexName}"
-            values={{ indexName: <em>{settings?.heartbeatIndices}</em> }}
-          />
-        }
-      />
-    );
+  const noIndicesMessage = (
+    <FormattedMessage
+      id="xpack.uptime.emptyState.noIndexTitle"
+      defaultMessage="No indices found matching pattern {indexName}"
+      values={{ indexName: <em>{settings?.heartbeatIndices}</em> }}
+    />
+  );
+
+  const noUptimeDataMessage = (
+    <FormattedMessage
+      id="xpack.uptime.emptyState.noDataMessage"
+      defaultMessage="No uptime data found in index {indexName}"
+      values={{ indexName: <em>{settings?.heartbeatIndices}</em> }}
+    />
+  );
+
+  if (!indexExists && !isLoading) {
+    return <DataOrIndexMissing settings={settings} headingMessage={noIndicesMessage} />;
+  } else if (indexExists && docCount === 0 && !isLoading) {
+    return <DataOrIndexMissing settings={settings} headingMessage={noUptimeDataMessage} />;
   }
   /**
    * We choose to render the children any time the count > 0, even if
@@ -70,6 +63,11 @@ export const EmptyStateComponent = ({
    * jittery UX any time the components refresh. This way we'll keep the stale
    * state displayed during the fetching process.
    */
-  return <Fragment>{children}</Fragment>;
+  return (
+    <Fragment>
+      {isLoading && <EmptyStateLoading />}
+      <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>{children}</div>
+    </Fragment>
+  );
   // }
 };

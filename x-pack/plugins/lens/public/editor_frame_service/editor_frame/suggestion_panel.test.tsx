@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -289,5 +290,25 @@ describe('suggestion_panel', () => {
 
     expect(wrapper.find(EuiIcon)).toHaveLength(1);
     expect(wrapper.find(EuiIcon).prop('type')).toEqual(LensIconChartDatatable);
+  });
+
+  it('should return no suggestion if visualization has missing index-patterns', () => {
+    // create a layer that is referencing an indexPatterns not retrieved by the datasource
+    const missingIndexPatternsState = {
+      layers: { indexPatternId: 'a' },
+      indexPatterns: {},
+    };
+    mockDatasource.checkIntegrity.mockReturnValue(['a']);
+    const newProps = {
+      ...defaultProps,
+      datasourceStates: {
+        mock: {
+          ...defaultProps.datasourceStates.mock,
+          state: missingIndexPatternsState,
+        },
+      },
+    };
+    const wrapper = mount(<SuggestionPanel {...newProps} />);
+    expect(wrapper.html()).toEqual(null);
   });
 });

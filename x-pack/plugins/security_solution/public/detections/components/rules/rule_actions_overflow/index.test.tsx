@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow, mount } from 'enzyme';
@@ -10,6 +11,7 @@ import React from 'react';
 import {
   deleteRulesAction,
   duplicateRulesAction,
+  editRuleAction,
 } from '../../../pages/detection_engine/rules/all/actions';
 import { RuleActionsOverflow } from './index';
 import { mockRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
@@ -23,9 +25,17 @@ jest.mock('react-router-dom', () => ({
 jest.mock('../../../pages/detection_engine/rules/all/actions', () => ({
   deleteRulesAction: jest.fn(),
   duplicateRulesAction: jest.fn(),
+  editRuleAction: jest.fn(),
 }));
 
+const duplicateRulesActionMock = duplicateRulesAction as jest.Mock;
+const flushPromises = () => new Promise(setImmediate);
+
 describe('RuleActionsOverflow', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   describe('snapshots', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
@@ -205,6 +215,27 @@ describe('RuleActionsOverflow', () => {
         expect.anything()
       );
     });
+  });
+
+  test('it calls editRuleAction after the rule is duplicated', async () => {
+    const rule = mockRule('id');
+    const ruleDuplicate = mockRule('newRule');
+    duplicateRulesActionMock.mockImplementation(() => Promise.resolve([ruleDuplicate]));
+    const wrapper = mount(
+      <RuleActionsOverflow
+        rule={rule}
+        userHasNoPermissions={false}
+        canDuplicateRuleWithActions={true}
+      />
+    );
+    wrapper.find('[data-test-subj="rules-details-popover-button-icon"] button').simulate('click');
+    wrapper.update();
+    wrapper.find('[data-test-subj="rules-details-duplicate-rule"] button').simulate('click');
+    wrapper.update();
+    await flushPromises();
+
+    expect(duplicateRulesAction).toHaveBeenCalled();
+    expect(editRuleAction).toHaveBeenCalledWith(ruleDuplicate, expect.anything());
   });
 
   describe('rules details export rule', () => {

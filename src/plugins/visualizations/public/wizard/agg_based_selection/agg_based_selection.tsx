@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -25,17 +25,18 @@ import {
 } from '@elastic/eui';
 
 import { memoizeLast } from '../../legacy/memoize';
-import type { VisType, TypesStart } from '../../vis_types';
-import { VisGroups } from '../../vis_types';
+import { VisGroups } from '../../vis_types/vis_groups_enum';
+import type { BaseVisType, TypesStart } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
+import './agg_based_selection.scss';
 
 interface VisTypeListEntry {
-  type: VisType;
+  type: BaseVisType;
   highlighted: boolean;
 }
 
 interface AggBasedSelectionProps {
-  onVisTypeSelected: (visType: VisType) => void;
+  onVisTypeSelected: (visType: BaseVisType) => void;
   visTypesRegistry: TypesStart;
   toggleGroups: (flag: boolean) => void;
 }
@@ -137,6 +138,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
           layout="horizontal"
           isDisabled={isDisabled}
           icon={<EuiIcon type={visType.type.icon || 'empty'} size="l" color="secondary" />}
+          className="aggBasedDialog__card"
         />
       </EuiFlexItem>
     );

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { MountPoint } from 'kibana/public';
+import type { MountPoint } from 'src/core/public';
+import { docLinksServiceMock } from 'src/core/public/mocks';
+import { mockSecurityOssPlugin } from 'src/plugins/security_oss/public/mocks';
 
-import { docLinksServiceMock } from '../../../../../src/core/public/mocks';
-import { mockSecurityOssPlugin } from '../../../../../src/plugins/security_oss/public/mocks';
 import { insecureClusterAlertTitle } from './components';
 import { SecurityCheckupService } from './security_checkup_service';
 
@@ -72,7 +73,7 @@ describe('SecurityCheckupService', () => {
         ?.getAttribute('href');
 
       expect(docLink).toMatchInlineSnapshot(
-        `"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/get-started-enable-security.html?blade=kibanasecuritymessage"`
+        `"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/configuring-stack-security.html?blade=kibanasecuritymessage"`
       );
     });
   });

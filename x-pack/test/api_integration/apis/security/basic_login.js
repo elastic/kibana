@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -302,11 +303,11 @@ export default function ({ getService }) {
         expect(loginViewResponse.headers.location).to.be('/');
       });
 
-      it('should redirect to home page if cookie is not provided', async () => {
+      it('should redirect to login page if cookie is not provided', async () => {
         const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
-        expect(logoutResponse.headers.location).to.be('/');
+        expect(logoutResponse.headers.location).to.be('/login?msg=LOGGED_OUT');
       });
     });
   });

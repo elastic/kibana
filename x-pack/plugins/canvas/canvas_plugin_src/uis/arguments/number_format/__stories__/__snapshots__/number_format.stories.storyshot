@@ -56,6 +56,7 @@ Array [
             aria-hidden="true"
             className="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="arrowDown"
+            size="s"
           />
         </span>
       </div>
@@ -138,6 +139,7 @@ Array [
             aria-hidden="true"
             className="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="arrowDown"
+            size="s"
           />
         </span>
       </div>
@@ -219,6 +221,7 @@ exports[`Storyshots arguments/NumberFormat with preset format 1`] = `
           aria-hidden="true"
           className="euiFormControlLayoutCustomIcon__icon"
           data-euiicon-type="arrowDown"
+          size="s"
         />
       </span>
     </div>

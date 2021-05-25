@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -16,7 +17,7 @@ export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.emptyPrompt.emptyTitle"
-          defaultMessage="Create your first alert"
+          defaultMessage="Create your first rule"
         />
       </h2>
     }
@@ -37,7 +38,7 @@ export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
       >
         <FormattedMessage
           id="xpack.triggersActionsUI.components.emptyPrompt.emptyButton"
-          defaultMessage="Create alert"
+          defaultMessage="Create rule"
         />
       </EuiButton>
     }

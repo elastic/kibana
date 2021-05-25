@@ -67,7 +67,7 @@ Array [
 exports[`Storyshots components/Tags/TagList with health tags 1`] = `
 Array [
   <div
-    className="euiHealth"
+    className="euiHealth euiHealth--textSizeS"
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -88,7 +88,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiHealth"
+    className="euiHealth euiHealth--textSizeS"
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -109,7 +109,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiHealth"
+    className="euiHealth euiHealth--textSizeS"
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"

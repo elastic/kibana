@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
@@ -13,14 +13,7 @@ import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import {
-  htmlIdGenerator,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiFormLabel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
 
@@ -31,8 +24,9 @@ export function StandardAgg(props) {
   const handleSelectChange = createSelectHandler(handleChange);
 
   const restrictFields = getSupportedFieldsByMetricType(model.type);
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  const indexPattern = series.override_index_pattern
+    ? series.series_index_pattern
+    : panel.index_pattern;
   const htmlId = htmlIdGenerator();
 
   return (
@@ -66,24 +60,19 @@ export function StandardAgg(props) {
 
         {model.type !== 'count' ? (
           <EuiFlexItem>
-            <EuiFormRow
-              id={htmlId('field')}
+            <FieldSelect
               label={
                 <FormattedMessage id="visTypeTimeseries.stdAgg.fieldLabel" defaultMessage="Field" />
               }
+              fields={fields}
+              type={model.type}
+              restrict={restrictFields}
+              indexPattern={indexPattern}
+              value={model.field}
+              onChange={handleSelectChange('field')}
+              uiRestrictions={uiRestrictions}
               fullWidth
-            >
-              <FieldSelect
-                fields={fields}
-                type={model.type}
-                restrict={restrictFields}
-                indexPattern={indexPattern}
-                value={model.field}
-                onChange={handleSelectChange('field')}
-                uiRestrictions={uiRestrictions}
-                fullWidth
-              />
-            </EuiFormRow>
+            />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import type { SerializerOrUndefined, Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   EsDataTypeGeoPoint,
@@ -10,12 +13,10 @@ import {
   EsDataTypeRangeTerm,
   EsDataTypeSingle,
   EsDataTypeUnion,
-  SerializerOrUndefined,
-  Type,
   esDataTypeGeoShape,
   esDataTypeRangeTerm,
   esDataTypeSingle,
-} from '../../../common/schemas';
+} from '../../schemas/common/schemas';
 
 export const DEFAULT_DATE_REGEX = RegExp('(?<gte>.+),(?<lte>.+)|(?<value>.+)');
 export const DEFAULT_LTE_GTE_REGEX = RegExp('(?<gte>.+)-(?<lte>.+)|(?<value>.+)');

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Position } from '@elastic/charts';
@@ -210,6 +211,54 @@ export const axisTitlesVisibilityConfig: ExpressionFunctionDefinition<
   },
 };
 
+export interface AxisExtentConfig {
+  mode: 'full' | 'dataBounds' | 'custom';
+  lowerBound?: number;
+  upperBound?: number;
+}
+
+export const axisExtentConfig: ExpressionFunctionDefinition<
+  'lens_xy_axisExtentConfig',
+  null,
+  AxisExtentConfig,
+  AxisExtentConfigResult
+> = {
+  name: 'lens_xy_axisExtentConfig',
+  aliases: [],
+  type: 'lens_xy_axisExtentConfig',
+  help: `Configure the xy chart's axis extents`,
+  inputTypes: ['null'],
+  args: {
+    mode: {
+      types: ['string'],
+      options: ['full', 'dataBounds', 'custom'],
+      help: i18n.translate('xpack.lens.xyChart.extentMode.help', {
+        defaultMessage: 'The extent mode',
+      }),
+    },
+    lowerBound: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.extentMode.help', {
+        defaultMessage: 'The extent mode',
+      }),
+    },
+    upperBound: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.extentMode.help', {
+        defaultMessage: 'The extent mode',
+      }),
+    },
+  },
+  fn: function fn(input: unknown, args: AxisExtentConfig) {
+    return {
+      type: 'lens_xy_axisExtentConfig',
+      ...args,
+    };
+  },
+};
+
+export type AxisExtentConfigResult = AxisExtentConfig & { type: 'lens_xy_axisExtentConfig' };
+
 interface AxisConfig {
   title: string;
   hide?: boolean;
@@ -372,7 +421,7 @@ export interface YConfig {
   color?: string;
 }
 
-export interface LayerConfig {
+export interface XYLayerConfig {
   hide?: boolean;
   layerId: string;
   xAccessor?: string;
@@ -383,11 +432,11 @@ export interface LayerConfig {
   palette?: PaletteOutput;
 }
 
-export interface ValidLayer extends LayerConfig {
-  xAccessor: NonNullable<LayerConfig['xAccessor']>;
+export interface ValidLayer extends XYLayerConfig {
+  xAccessor: NonNullable<XYLayerConfig['xAccessor']>;
 }
 
-export type LayerArgs = LayerConfig & {
+export type LayerArgs = XYLayerConfig & {
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: 'time' | 'linear' | 'log' | 'sqrt';
   xScaleType: 'time' | 'linear' | 'ordinal';
@@ -403,6 +452,8 @@ export interface XYArgs {
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
+  yLeftExtent: AxisExtentConfigResult;
+  yRightExtent: AxisExtentConfigResult;
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   valueLabels: ValueLabelConfig;
   layers: LayerArgs[];
@@ -412,7 +463,12 @@ export interface XYArgs {
   };
   tickLabelsVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
   gridlinesVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
+  curveType?: XYCurveType;
+  fillOpacity?: number;
+  hideEndzones?: boolean;
 }
+
+export type XYCurveType = 'LINEAR' | 'CURVE_MONOTONE_X';
 
 // Persisted parts of the state
 export interface XYState {
@@ -420,24 +476,37 @@ export interface XYState {
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
-  layers: LayerConfig[];
+  yLeftExtent?: AxisExtentConfig;
+  yRightExtent?: AxisExtentConfig;
+  layers: XYLayerConfig[];
   xTitle?: string;
   yTitle?: string;
   yRightTitle?: string;
   axisTitlesVisibilitySettings?: AxesSettingsConfig;
   tickLabelsVisibilitySettings?: AxesSettingsConfig;
   gridlinesVisibilitySettings?: AxesSettingsConfig;
+  curveType?: XYCurveType;
+  fillOpacity?: number;
+  hideEndzones?: boolean;
 }
 
 export type State = XYState;
+const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
+  defaultMessage: 'Bar',
+});
+
+const groupLabelForLineAndArea = i18n.translate('xpack.lens.xyVisualization.lineGroupLabel', {
+  defaultMessage: 'Line and area',
+});
 
 export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar',
     icon: LensIconChartBar,
     label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
-      defaultMessage: 'Bar',
+      defaultMessage: 'Bar vertical',
     }),
+    groupLabel: groupLabelForBar,
   },
   {
     id: 'bar_horizontal',
@@ -446,22 +515,25 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'H. Bar',
     }),
     fullLabel: i18n.translate('xpack.lens.xyVisualization.barHorizontalFullLabel', {
-      defaultMessage: 'Horizontal bar',
+      defaultMessage: 'Bar horizontal',
     }),
+    groupLabel: groupLabelForBar,
   },
   {
     id: 'bar_stacked',
     icon: LensIconChartBarStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
-      defaultMessage: 'Stacked bar',
+      defaultMessage: 'Bar vertical stacked',
     }),
+    groupLabel: groupLabelForBar,
   },
   {
     id: 'bar_percentage_stacked',
     icon: LensIconChartBarPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
-      defaultMessage: 'Percentage bar',
+      defaultMessage: 'Bar vertical percentage',
     }),
+    groupLabel: groupLabelForBar,
   },
   {
     id: 'bar_horizontal_stacked',
@@ -470,8 +542,9 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'H. Stacked bar',
     }),
     fullLabel: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalFullLabel', {
-      defaultMessage: 'Horizontal stacked bar',
+      defaultMessage: 'Bar horizontal stacked',
     }),
+    groupLabel: groupLabelForBar,
   },
   {
     id: 'bar_horizontal_percentage_stacked',
@@ -482,9 +555,10 @@ export const visualizationTypes: VisualizationType[] = [
     fullLabel: i18n.translate(
       'xpack.lens.xyVisualization.stackedPercentageBarHorizontalFullLabel',
       {
-        defaultMessage: 'Horizontal percentage bar',
+        defaultMessage: 'Bar horizontal percentage',
       }
     ),
+    groupLabel: groupLabelForBar,
   },
   {
     id: 'area',
@@ -492,20 +566,23 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
       defaultMessage: 'Area',
     }),
+    groupLabel: groupLabelForLineAndArea,
   },
   {
     id: 'area_stacked',
     icon: LensIconChartAreaStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
-      defaultMessage: 'Stacked area',
+      defaultMessage: 'Area stacked',
     }),
+    groupLabel: groupLabelForLineAndArea,
   },
   {
     id: 'area_percentage_stacked',
     icon: LensIconChartAreaPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
-      defaultMessage: 'Percentage area',
+      defaultMessage: 'Area percentage',
     }),
+    groupLabel: groupLabelForLineAndArea,
   },
   {
     id: 'line',
@@ -513,5 +590,6 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
       defaultMessage: 'Line',
     }),
+    groupLabel: groupLabelForLineAndArea,
   },
 ];

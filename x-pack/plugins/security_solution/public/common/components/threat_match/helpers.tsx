@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  ThreatMap,
-  threatMap,
-  ThreatMapping,
-} from '../../../../common/detection_engine/schemas/types';
+import uuid from 'uuid';
+import { addIdToItem } from '@kbn/securitysolution-utils';
+import { ThreatMap, threatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { IndexPattern, IFieldType } from '../../../../../../../src/plugins/data/common';
 import { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
@@ -24,7 +23,8 @@ export const getFormattedEntry = (
   indexPattern: IndexPattern,
   threatIndexPatterns: IndexPattern,
   item: Entry,
-  itemIndex: number
+  itemIndex: number,
+  uuidGen: () => string = uuid.v4
 ): FormattedEntry => {
   const { fields } = indexPattern;
   const { fields: threatFields } = threatIndexPatterns;
@@ -34,7 +34,9 @@ export const getFormattedEntry = (
   const [threatFoundField] = threatFields.filter(
     ({ name }) => threatField != null && threatField === name
   );
+  const maybeId: typeof item & { id?: string } = item;
   return {
+    id: maybeId.id ?? uuidGen(),
     field: foundField,
     type: 'mapping',
     value: threatFoundField,
@@ -90,10 +92,11 @@ export const getEntryOnFieldChange = (
   const { entryIndex } = item;
   return {
     updatedEntry: {
+      id: item.id,
       field: newField != null ? newField.name : '',
       type: 'mapping',
       value: item.value != null ? item.value.name : '',
-    },
+    } as Entry, // Cast to Entry since id is only used as a react key prop and can be ignored elsewhere
     index: entryIndex,
   };
 };
@@ -112,30 +115,33 @@ export const getEntryOnThreatFieldChange = (
   const { entryIndex } = item;
   return {
     updatedEntry: {
+      id: item.id,
       field: item.field != null ? item.field.name : '',
       type: 'mapping',
       value: newField != null ? newField.name : '',
-    },
+    } as Entry, // Cast to Entry since id is only used as a react key prop and can be ignored elsewhere
     index: entryIndex,
   };
 };
 
-export const getDefaultEmptyEntry = (): EmptyEntry => ({
-  field: '',
-  type: 'mapping',
-  value: '',
-});
+export const getDefaultEmptyEntry = (): EmptyEntry => {
+  return addIdToItem({
+    field: '',
+    type: 'mapping',
+    value: '',
+  });
+};
 
 export const getNewItem = (): ThreatMap => {
-  return {
+  return addIdToItem({
     entries: [
-      {
+      addIdToItem({
         field: '',
         type: 'mapping',
         value: '',
-      },
+      }),
     ],
-  };
+  });
 };
 
 export const filterItems = (items: ThreatMapEntries[]): ThreatMapping => {

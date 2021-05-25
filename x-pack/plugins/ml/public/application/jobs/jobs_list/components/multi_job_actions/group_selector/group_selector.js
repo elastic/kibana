@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -151,7 +152,7 @@ export class GroupSelector extends Component {
       }
     }
 
-    const tempJobs = newJobs.map((j) => ({ job_id: j.id, groups: j.newGroups }));
+    const tempJobs = newJobs.map((j) => ({ jobId: j.id, groups: j.newGroups }));
     ml.jobs
       .updateGroups(tempJobs)
       .then((resp) => {

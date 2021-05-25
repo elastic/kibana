@@ -1,23 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import {
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-} from '../../../../../../src/core/server';
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { routeDefinitionParamsMock } from '../index.mock';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { RequestHandler } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 
 import type { AuthenticationServiceStart } from '../../authentication';
-import { defineEnabledApiKeysRoutes } from './enabled';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import type { SecurityRequestHandlerContext } from '../../types';
+import { routeDefinitionParamsMock } from '../index.mock';
+import { defineEnabledApiKeysRoutes } from './enabled';
 
 describe('API keys enabled', () => {
   function getMockContext(
@@ -25,7 +24,7 @@ describe('API keys enabled', () => {
   ) {
     return ({
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-    } as unknown) as RequestHandlerContext;
+    } as unknown) as SecurityRequestHandlerContext;
   }
 
   let routeHandler: RequestHandler<any, any, any, any>;

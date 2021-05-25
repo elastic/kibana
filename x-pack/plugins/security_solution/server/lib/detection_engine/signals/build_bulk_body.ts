@@ -1,81 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObject } from 'src/core/types';
 import {
+  AlertAttributes,
   SignalSourceHit,
   SignalHit,
   Signal,
-  RuleAlertAttributes,
   BaseSignalHit,
   SignalSource,
   WrappedSignalHit,
 } from './types';
-import { buildRule, buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
+import { buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
-import { EqlSequence, RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams } from '../types';
+import { EqlSequence } from '../../../../common/detection_engine/types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
 
-interface BuildBulkBodyParams {
-  doc: SignalSourceHit;
-  ruleParams: RuleTypeParams;
-  id: string;
-  actions: RuleAlertAction[];
-  name: string;
-  createdAt: string;
-  createdBy: string;
-  updatedAt: string;
-  updatedBy: string;
-  interval: string;
-  enabled: boolean;
-  tags: string[];
-  throttle: string;
-}
-
 // format search_after result for signals index.
-export const buildBulkBody = ({
-  doc,
-  ruleParams,
-  id,
-  name,
-  actions,
-  createdAt,
-  createdBy,
-  updatedAt,
-  updatedBy,
-  interval,
-  enabled,
-  tags,
-  throttle,
-}: BuildBulkBodyParams): SignalHit => {
-  const rule = buildRule({
-    actions,
-    ruleParams,
-    id,
-    name,
-    enabled,
-    createdAt,
-    createdBy,
-    doc,
-    updatedAt,
-    updatedBy,
-    interval,
-    tags,
-    throttle,
-  });
+export const buildBulkBody = (
+  ruleSO: SavedObject<AlertAttributes>,
+  doc: SignalSourceHit
+): SignalHit => {
+  const rule = buildRuleWithOverrides(ruleSO, doc._source!);
   const signal: Signal = {
     ...buildSignal([doc], rule),
     ...additionalSignalFields(doc),
   };
-  delete doc._source.threshold_result;
   const event = buildEventTypeSignal(doc);
+  const { threshold_result: thresholdResult, ...filteredSource } = doc._source || {
+    threshold_result: null,
+  };
   const signalHit: SignalHit = {
-    ...doc._source,
+    ...filteredSource,
     '@timestamp': new Date().toISOString(),
     event,
     signal,
@@ -93,7 +54,7 @@ export const buildBulkBody = ({
  */
 export const buildSignalGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,
-  ruleSO: SavedObject<RuleAlertAttributes>,
+  ruleSO: SavedObject<AlertAttributes>,
   outputIndex: string
 ): WrappedSignalHit[] => {
   const wrappedBuildingBlocks = wrapBuildingBlocks(
@@ -134,7 +95,7 @@ export const buildSignalGroupFromSequence = (
 
 export const buildSignalFromSequence = (
   events: WrappedSignalHit[],
-  ruleSO: SavedObject<RuleAlertAttributes>
+  ruleSO: SavedObject<AlertAttributes>
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
   const signal: Signal = buildSignal(events, rule);
@@ -158,11 +119,12 @@ export const buildSignalFromSequence = (
 
 export const buildSignalFromEvent = (
   event: BaseSignalHit,
-  ruleSO: SavedObject<RuleAlertAttributes>,
+  ruleSO: SavedObject<AlertAttributes>,
   applyOverrides: boolean
 ): SignalHit => {
   const rule = applyOverrides
-    ? buildRuleWithOverrides(ruleSO, event._source)
+    ? // @ts-expect-error @elastic/elasticsearch _source is optional
+      buildRuleWithOverrides(ruleSO, event._source)
     : buildRuleWithoutOverrides(ruleSO);
   const signal: Signal = {
     ...buildSignal([event], rule),

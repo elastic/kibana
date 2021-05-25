@@ -9,9 +9,9 @@
     "logs-azure*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Azure Conditional Access Policy Modified",
-  "note": "The Azure Filebeat module must be enabled to use this rule.",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "query": "event.dataset:(azure.activitylogs or azure.auditlogs) and ( azure.activitylogs.operation_name:\"Update policy\" or azure.auditlogs.operation_name:\"Update policy\" ) and event.outcome:(Success or success)",
   "references": [
     "https://docs.microsoft.com/en-us/azure/active-directory/conditional-access/overview"
@@ -44,6 +44,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 5
 }

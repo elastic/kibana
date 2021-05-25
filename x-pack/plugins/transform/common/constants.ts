@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -76,7 +77,7 @@ export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
 
 export const APP_INDEX_PRIVILEGES = ['monitor'];
 
-// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/dataframe/transforms/DataFrameTransformStats.java#L243
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
 export const TRANSFORM_STATE = {
   ABORTING: 'aborting',
   FAILED: 'failed',
@@ -84,6 +85,7 @@ export const TRANSFORM_STATE = {
   STARTED: 'started',
   STOPPED: 'stopped',
   STOPPING: 'stopping',
+  WAITING: 'waiting',
 } as const;
 
 const transformStates = Object.values(TRANSFORM_STATE);

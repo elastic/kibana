@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './data_panel_wrapper.scss';
@@ -11,9 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
-import { DragContext } from '../../drag_drop';
+import { DragContext, DragDropIdentifier } from '../../drag_drop';
 import { StateSetter, FramePublicAPI, DatasourceDataPanelProps, Datasource } from '../../types';
 import { Query, Filter } from '../../../../../../src/plugins/data/public';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;
@@ -26,6 +28,9 @@ interface DataPanelWrapperProps {
   query: Query;
   dateRange: FramePublicAPI['dateRange'];
   filters: Filter[];
+  dropOntoWorkspace: (field: DragDropIdentifier) => void;
+  hasSuggestionForField: (field: DragDropIdentifier) => boolean;
+  plugins: { uiActions: UiActionsStart };
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
@@ -51,6 +56,9 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dateRange: props.dateRange,
     filters: props.filters,
     showNoDataPopover: props.showNoDataPopover,
+    dropOntoWorkspace: props.dropOntoWorkspace,
+    hasSuggestionForField: props.hasSuggestionForField,
+    uiActions: props.plugins.uiActions,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);

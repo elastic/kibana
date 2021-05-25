@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -34,15 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: NetworkQueries.topNFlow,
             flowTarget: FlowTargetSourceDest.source,
             sort: { field: NetworkTopTablesFields.bytes_in, direction: Direction.desc },
@@ -59,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -80,15 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
@@ -107,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -128,15 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
@@ -155,6 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
@@ -170,15 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
@@ -197,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 

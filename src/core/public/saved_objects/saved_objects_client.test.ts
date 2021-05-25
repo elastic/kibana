@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectsClient } from './saved_objects_client';
@@ -215,6 +215,26 @@ describe('SavedObjectsClient', () => {
             "/api/saved_objects/index-pattern/logstash-*",
             Object {
               "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"version\\":\\"1\\"}",
+              "method": "PUT",
+              "query": undefined,
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('handles the `upsert` option', () => {
+      savedObjectsClient.update('index-pattern', 'logstash-*', attributes, {
+        upsert: {
+          hello: 'dolly',
+        },
+      });
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/index-pattern/logstash-*",
+            Object {
+              "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"upsert\\":{\\"hello\\":\\"dolly\\"}}",
               "method": "PUT",
               "query": undefined,
             },

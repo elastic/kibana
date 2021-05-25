@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import dateMath from '@elastic/datemath';
@@ -11,12 +12,19 @@ import { useLocation } from 'react-router-dom';
 
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
+import {
+  Threats,
+  Type,
+  SeverityMapping,
+  Severity,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
+import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
-import { ENDPOINT_LIST_ID } from '../../../../shared_imports';
 import { Rule } from '../../../containers/detection_engine/rules';
 import {
   AboutStepRule,
@@ -25,12 +33,6 @@ import {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
-import {
-  SeverityMapping,
-  Type,
-  Severity,
-  Threats,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
@@ -79,7 +81,7 @@ export const getActionsStepsData = (
 export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   ruleType: rule.type,
   anomalyThreshold: rule.anomaly_threshold ?? 50,
-  machineLearningJobId: rule.machine_learning_job_id ?? '',
+  machineLearningJobId: rule.machine_learning_job_id ?? [],
   index: rule.index ?? [],
   threatIndex: rule.threat_index ?? [],
   threatQueryBar: {
@@ -98,8 +100,16 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     title: rule.timeline_title ?? null,
   },
   threshold: {
-    field: rule.threshold?.field ? [rule.threshold.field] : [],
+    field: normalizeThresholdField(rule.threshold?.field),
     value: `${rule.threshold?.value || 100}`,
+    ...(rule.threshold?.cardinality?.length
+      ? {
+          cardinality: {
+            field: [`${rule.threshold.cardinality[0].field}`],
+            value: `${rule.threshold.cardinality[0].value}`,
+          },
+        }
+      : {}),
   },
 });
 
@@ -152,6 +162,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     risk_score: riskScore,
     tags,
     threat,
+    threat_indicator_path: threatIndicatorPath,
   } = rule;
 
   return {
@@ -178,6 +189,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     },
     falsePositives,
     threat: threat as Threats,
+    threatIndicatorPath,
   };
 };
 

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as ts from 'typescript';
@@ -35,6 +35,24 @@ export function isMakeUsageCollectorFunction(
     const isMakeUsageCollector = /makeUsageCollector$/.test(node.expression.getText(sourceFile));
     if (isMakeUsageCollector) {
       return true;
+    }
+  }
+
+  return false;
+}
+
+export function isMakeStatsCollectorFunctionWithSchema(
+  node: ts.Node,
+  sourceFile: ts.SourceFile
+): node is ts.CallExpression {
+  if (ts.isCallExpression(node)) {
+    const isMakeStatsCollector = /makeStatsCollector$/.test(node.expression.getText(sourceFile));
+    if (isMakeStatsCollector) {
+      const collectorConfig = getCollectionConfigNode(node, sourceFile);
+      const schemaProperty = getProperty(collectorConfig, 'schema');
+      if (schemaProperty) {
+        return true;
+      }
     }
   }
 
@@ -140,6 +158,7 @@ function extractCollectorDetails(
     throw Error(`usageCollector.schema must be be an object.`);
   }
 
+  // TODO: Try to infer the output type from fetch instead of being explicit
   const collectorNodeType = collectorNode.typeArguments;
   if (!collectorNodeType || collectorNodeType?.length === 0) {
     throw Error(`makeUsageCollector requires a Usage type makeUsageCollector<Usage>({ ... }).`);
@@ -172,7 +191,19 @@ export function sourceHasUsageCollector(sourceFile: ts.SourceFile) {
   }
 
   return false;
-  return true;
+}
+
+export function sourceHasStatsCollector(sourceFile: ts.SourceFile) {
+  if (sourceFile.isDeclarationFile === true || (sourceFile as any).identifierCount === 0) {
+    return false;
+  }
+
+  const identifiers = (sourceFile as any).identifiers;
+  if (identifiers.get('makeStatsCollector')) {
+    return true;
+  }
+
+  return false;
 }
 
 export type ParsedUsageCollection = [string, CollectorDetails];
@@ -182,9 +213,12 @@ export function* parseUsageCollection(
   program: ts.Program
 ): Generator<ParsedUsageCollection> {
   const relativePath = path.relative(process.cwd(), sourceFile.fileName);
-  if (sourceHasUsageCollector(sourceFile)) {
+  if (sourceHasUsageCollector(sourceFile) || sourceHasStatsCollector(sourceFile)) {
     for (const node of traverseNodes(sourceFile)) {
-      if (isMakeUsageCollectorFunction(node, sourceFile)) {
+      if (
+        isMakeUsageCollectorFunction(node, sourceFile) ||
+        isMakeStatsCollectorFunctionWithSchema(node, sourceFile)
+      ) {
         try {
           const collectorDetails = extractCollectorDetails(node, program, sourceFile);
           yield [relativePath, collectorDetails];

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -14,7 +14,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'header', 'timePicker']);
   const comboBox = getService('comboBox');
 
-  describe('dynamic options', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/98974
+  describe.skip('dynamic options', () => {
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
+
     describe('without chained controls', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('visualize');

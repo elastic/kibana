@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { loginAndWaitForPage } from '../../tasks/login';
@@ -28,7 +29,9 @@ import { populateTimeline } from '../../tasks/timeline';
 import { SERVER_SIDE_EVENT_COUNT } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 
-describe('Sourcerer', () => {
+// Skipped at the moment as this has flake due to click handler issues. This has been raised with team members
+// and the code is being re-worked and then these tests will be unskipped
+describe.skip('Sourcerer', () => {
   before(() => {
     cleanKibana();
   });

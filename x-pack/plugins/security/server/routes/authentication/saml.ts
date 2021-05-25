@@ -1,22 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { SAMLLogin } from '../../authentication';
-import { SAMLAuthenticationProvider } from '../../authentication/providers';
-import { RouteDefinitionParams } from '..';
+
+import type { RouteDefinitionParams } from '../';
+import { SAMLAuthenticationProvider, SAMLLogin } from '../../authentication';
+import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineSAMLRoutes({
-  router,
-  logger,
-  getAuthenticationService,
-}: RouteDefinitionParams) {
+export function defineSAMLRoutes({ router, getAuthenticationService }: RouteDefinitionParams) {
   router.post(
     {
       path: '/api/security/saml/callback',
@@ -26,31 +24,30 @@ export function defineSAMLRoutes({
           { unknowns: 'ignore' }
         ),
       },
-      options: { authRequired: false, xsrfRequired: false },
+      options: {
+        authRequired: false,
+        xsrfRequired: false,
+        tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+      },
     },
     async (context, request, response) => {
-      try {
-        // When authenticating using SAML we _expect_ to redirect to the Kibana target location.
-        const authenticationResult = await getAuthenticationService().login(request, {
-          provider: { type: SAMLAuthenticationProvider.type },
-          value: {
-            type: SAMLLogin.LoginWithSAMLResponse,
-            samlResponse: request.body.SAMLResponse,
-            relayState: request.body.RelayState,
-          },
+      // When authenticating using SAML we _expect_ to redirect to the Kibana target location.
+      const authenticationResult = await getAuthenticationService().login(request, {
+        provider: { type: SAMLAuthenticationProvider.type },
+        value: {
+          type: SAMLLogin.LoginWithSAMLResponse,
+          samlResponse: request.body.SAMLResponse,
+          relayState: request.body.RelayState,
+        },
+      });
+
+      if (authenticationResult.redirected()) {
+        return response.redirected({
+          headers: { location: authenticationResult.redirectURL! },
         });
-
-        if (authenticationResult.redirected()) {
-          return response.redirected({
-            headers: { location: authenticationResult.redirectURL! },
-          });
-        }
-
-        return response.unauthorized({ body: authenticationResult.error });
-      } catch (err) {
-        logger.error(err);
-        return response.internalError();
       }
+
+      return response.unauthorized({ body: authenticationResult.error });
     }
   );
 }

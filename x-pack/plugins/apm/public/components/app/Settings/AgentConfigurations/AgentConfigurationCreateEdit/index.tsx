@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
@@ -122,9 +123,7 @@ export function AgentConfigurationCreateEdit({
 
       <EuiText size="s">
         {i18n.translate('xpack.apm.agentConfig.newConfig.description', {
-          defaultMessage: `This allows you to fine-tune your agent configuration directly in
-        Kibana. Best of all, changes are automatically propagated to your APM
-        agents so there’s no need to redeploy.`,
+          defaultMessage: `Fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
         })}
       </EuiText>
 

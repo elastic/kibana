@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 
@@ -116,6 +118,7 @@ describe('actions_connectors_list component with items', () => {
           id: '3',
           actionTypeId: 'test2',
           description: 'My preconfigured test 2',
+          isMissingSecrets: true,
           referencedByCount: 1,
           isPreconfigured: true,
           config: {},
@@ -211,6 +214,16 @@ describe('actions_connectors_list component with items', () => {
     expect(
       wrapper.find('button[data-test-subj="runConnector"]').last().getDOMNode()
     ).toBeDisabled();
+  });
+
+  it('renders fix button when connector secrets is missing', async () => {
+    await setup();
+    expect(
+      wrapper.find('button[data-test-subj="deleteConnector"]').last().getDOMNode()
+    ).not.toBeDisabled();
+    expect(
+      wrapper.find('button[data-test-subj="fixConnectorButton"]').last().getDOMNode()
+    ).not.toBeDisabled();
   });
 
   it('supports pagination', async () => {

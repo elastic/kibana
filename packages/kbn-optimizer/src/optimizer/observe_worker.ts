@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { inspect } from 'util';
@@ -61,17 +61,26 @@ function usingWorkerProc<T>(
 ) {
   return Rx.using(
     (): ProcResource => {
-      const proc = execa.node(require.resolve('../worker/run_worker'), [], {
-        nodeOptions: [
-          ...(inspectFlag && config.inspectWorkers
-            ? [`${inspectFlag}=${inspectPortCounter++}`]
-            : []),
-          ...(config.maxWorkerCount <= 3 ? ['--max-old-space-size=2048'] : []),
-        ],
-        buffer: false,
-        stderr: 'pipe',
-        stdout: 'pipe',
-      });
+      const workerPath = require.resolve('../worker/run_worker');
+      const proc = execa.node(
+        workerPath.endsWith('.ts')
+          ? require.resolve('../worker/run_worker_from_source') // workerFromSourcePath
+          : workerPath,
+        [],
+        {
+          nodeOptions: [
+            '--preserve-symlinks',
+            '--preserve-symlinks-main',
+            ...(inspectFlag && config.inspectWorkers
+              ? [`${inspectFlag}=${inspectPortCounter++}`]
+              : []),
+            ...(config.maxWorkerCount <= 3 ? ['--max-old-space-size=2048'] : []),
+          ],
+          buffer: false,
+          stderr: 'pipe',
+          stdout: 'pipe',
+        }
+      );
 
       return {
         proc,

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import $ from 'jquery';
@@ -134,8 +134,8 @@ describe('Vislib Gauge Chart Test Suite', function () {
     });
     expect(fills).toEqual([
       'rgb(165,0,38)',
-      'rgb(255,255,190)',
-      'rgb(255,255,190)',
+      'rgb(254,254,189)',
+      'rgb(254,254,189)',
       'rgb(0,104,55)',
       'rgb(0,104,55)',
     ]);
@@ -154,8 +154,8 @@ describe('Vislib Gauge Chart Test Suite', function () {
     });
     expect(fills).toEqual([
       'rgb(8,48,107)',
-      'rgb(107,174,214)',
-      'rgb(107,174,214)',
+      'rgb(109,174,213)',
+      'rgb(109,174,213)',
       'rgb(247,251,255)',
       'rgb(247,251,255)',
     ]);

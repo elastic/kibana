@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
-import { LinkPreview } from '../CreateEditCustomLinkFlyout/LinkPreview';
+import { LinkPreview } from '../CreateEditCustomLinkFlyout/link_preview';
 import {
   render,
   getNodeText,
@@ -12,15 +14,18 @@ import {
   act,
   waitFor,
 } from '@testing-library/react';
-import * as apmApi from '../../../../../../services/rest/createCallApmApi';
+import {
+  getCallApmApiSpy,
+  CallApmApiSpy,
+} from '../../../../../../services/rest/callApmApiSpy';
 
 export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');
 
 describe('LinkPreview', () => {
-  let callApmApiSpy: jest.SpyInstance<any, any>;
+  let callApmApiSpy: CallApmApiSpy;
   beforeAll(() => {
-    callApmApiSpy = jest.spyOn(apmApi, 'callApmApi').mockResolvedValue({
+    callApmApiSpy = getCallApmApiSpy().mockResolvedValue({
       transaction: { id: 'foo' },
     });
   });

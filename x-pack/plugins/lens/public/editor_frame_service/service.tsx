@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'kibana/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import {
@@ -34,6 +34,7 @@ export interface EditorFrameSetupPlugins {
   embeddable?: EmbeddableSetup;
   expressions: ExpressionsSetup;
   charts: ChartsPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface EditorFrameStartPlugins {
@@ -41,7 +42,7 @@ export interface EditorFrameStartPlugins {
   embeddable?: EmbeddableStart;
   dashboard?: DashboardStart;
   expressions: ExpressionsStart;
-  uiActions?: UiActionsStart;
+  uiActions: UiActionsStart;
   charts: ChartsPluginSetup;
 }
 
@@ -71,7 +72,7 @@ export class EditorFrameService {
    * This is an asynchronous process and should only be triggered once for a saved object.
    * @param doc parsed Lens saved object
    */
-  private async documentToExpression(doc: Document) {
+  private documentToExpression = async (doc: Document) => {
     const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
       collectAsyncDefinitions(this.datasources),
       collectAsyncDefinitions(this.visualizations),
@@ -80,7 +81,7 @@ export class EditorFrameService {
     const { persistedStateToExpression } = await import('../async_services');
 
     return await persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc);
-  }
+  };
 
   public setup(
     core: CoreSetup<EditorFrameStartPlugins>,
@@ -97,9 +98,10 @@ export class EditorFrameService {
         coreHttp: coreStart.http,
         timefilter: deps.data.query.timefilter.timefilter,
         expressionRenderer: deps.expressions.ReactExpressionRenderer,
-        documentToExpression: this.documentToExpression.bind(this),
+        documentToExpression: this.documentToExpression,
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
+        usageCollection: plugins.usageCollection,
       };
     };
 
@@ -119,47 +121,33 @@ export class EditorFrameService {
 
   public start(core: CoreStart, plugins: EditorFrameStartPlugins): EditorFrameStart {
     const createInstance = async (): Promise<EditorFrameInstance> => {
-      let domElement: Element;
       const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
         collectAsyncDefinitions(this.datasources),
         collectAsyncDefinitions(this.visualizations),
       ]);
 
-      const unmount = () => {
-        if (domElement) {
-          unmountComponentAtNode(domElement);
-        }
-      };
+      const firstDatasourceId = Object.keys(resolvedDatasources)[0];
+      const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
+
+      const { EditorFrame, getActiveDatasourceIdFromDoc } = await import('../async_services');
+
+      const palettes = await plugins.charts.palettes.getPalettes();
 
       return {
-        mount: async (
-          element,
-          {
-            doc,
-            onError,
-            dateRange,
-            query,
-            filters,
-            savedQuery,
-            onChange,
-            showNoDataPopover,
-            initialContext,
-            searchSessionId,
-          }
-        ) => {
-          if (domElement !== element) {
-            unmount();
-          }
-          domElement = element;
-          const firstDatasourceId = Object.keys(resolvedDatasources)[0];
-          const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
-
-          const { EditorFrame, getActiveDatasourceIdFromDoc } = await import('../async_services');
-
-          const palettes = await plugins.charts.palettes.getPalettes();
-
-          render(
-            <I18nProvider>
+        EditorFrameContainer: ({
+          doc,
+          onError,
+          dateRange,
+          query,
+          filters,
+          savedQuery,
+          onChange,
+          showNoDataPopover,
+          initialContext,
+          searchSessionId,
+        }) => {
+          return (
+            <div className="lnsApp__frame">
               <EditorFrame
                 data-test-subj="lnsEditorFrame"
                 onError={onError}
@@ -184,11 +172,9 @@ export class EditorFrameService {
                 initialContext={initialContext}
                 searchSessionId={searchSessionId}
               />
-            </I18nProvider>,
-            domElement
+            </div>
           );
         },
-        unmount,
       };
     };
 

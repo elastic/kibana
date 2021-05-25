@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle, EuiTitleSize } from '@elastic/eui';
@@ -46,6 +47,7 @@ export interface HeaderSectionProps extends HeaderProps {
   titleSize?: EuiTitleSize;
   tooltip?: string;
   growLeftSplit?: boolean;
+  inspectMultiple?: boolean;
 }
 
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
@@ -59,6 +61,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   titleSize = 'm',
   tooltip,
   growLeftSplit = true,
+  inspectMultiple = false,
 }) => (
   <Header data-test-subj="header-section" border={border} height={height}>
     <EuiFlexGroup alignItems="center">
@@ -82,7 +85,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
 
           {id && (
             <EuiFlexItem grow={false}>
-              <InspectButton queryId={id} inspectIndex={0} title={title} />
+              <InspectButton queryId={id} multiple={inspectMultiple} title={title} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

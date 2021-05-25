@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { mockUuidv4 } from '../../import/lib/__mocks__';
@@ -66,7 +66,7 @@ describe(`POST ${URL}`, () => {
         } as any)
     );
 
-    savedObjectsClient = handlerContext.savedObjects.client;
+    savedObjectsClient = handlerContext.savedObjects.getClient();
     savedObjectsClient.checkConflicts.mockResolvedValue({ errors: [] });
 
     const importer = new SavedObjectsImporter({
@@ -74,9 +74,10 @@ describe(`POST ${URL}`, () => {
       typeRegistry: handlerContext.savedObjects.typeRegistry,
       importSizeLimit: 10000,
     });
-    handlerContext.savedObjects.importer.resolveImportErrors.mockImplementation((options) =>
-      importer.resolveImportErrors(options)
-    );
+
+    handlerContext.savedObjects.getImporter = jest
+      .fn()
+      .mockImplementation(() => importer as jest.Mocked<SavedObjectsImporter>);
 
     const router = httpSetup.createRouter('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
@@ -113,7 +114,7 @@ describe(`POST ${URL}`, () => {
       )
       .expect(200);
 
-    expect(result.body).toEqual({ success: true, successCount: 0 });
+    expect(result.body).toEqual({ success: true, successCount: 0, warnings: [] });
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
     expect(coreUsageStatsClient.incrementSavedObjectsResolveImportErrors).toHaveBeenCalledWith({
       request: expect.anything(),
@@ -153,6 +154,7 @@ describe(`POST ${URL}`, () => {
       success: true,
       successCount: 1,
       successResults: [{ type, id, meta }],
+      warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -190,6 +192,7 @@ describe(`POST ${URL}`, () => {
       success: true,
       successCount: 1,
       successResults: [{ type, id, meta }],
+      warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -228,6 +231,7 @@ describe(`POST ${URL}`, () => {
       success: true,
       successCount: 1,
       successResults: [{ type, id, meta, overwrite: true }],
+      warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -271,6 +275,7 @@ describe(`POST ${URL}`, () => {
           meta: { title: 'Look at my visualization', icon: 'visualization-icon' },
         },
       ],
+      warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -319,6 +324,7 @@ describe(`POST ${URL}`, () => {
           meta: { title: 'Look at my visualization', icon: 'visualization-icon' },
         },
       ],
+      warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -383,6 +389,7 @@ describe(`POST ${URL}`, () => {
             destinationId: obj2.id,
           },
         ],
+        warnings: [],
       });
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(

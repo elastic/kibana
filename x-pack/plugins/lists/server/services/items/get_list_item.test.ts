@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
-import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
 import {
   DATE_NOW,
   LIST_ID,
@@ -15,6 +17,7 @@ import {
   TIE_BREAKER,
   USER,
 } from '../../../common/constants.mock';
+import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import { getListItem } from './get_list_item';
 
@@ -29,8 +32,11 @@ describe('get_list_item', () => {
 
   test('it returns a list item as expected if the list item is found', async () => {
     const data = getSearchListItemMock();
-    const callCluster = getCallClusterMock(data);
-    const list = await getListItem({ callCluster, id: LIST_ID, listItemIndex: LIST_INDEX });
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
+    );
+    const list = await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
     const expected = getListItemResponseMock();
     expect(list).toEqual(expected);
   });
@@ -38,8 +44,11 @@ describe('get_list_item', () => {
   test('it returns null if the search is empty', async () => {
     const data = getSearchListItemMock();
     data.hits.hits = [];
-    const callCluster = getCallClusterMock(data);
-    const list = await getListItem({ callCluster, id: LIST_ID, listItemIndex: LIST_INDEX });
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
+    );
+    const list = await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
     expect(list).toEqual(null);
   });
 
@@ -79,8 +88,11 @@ describe('get_list_item', () => {
       updated_at: DATE_NOW,
       updated_by: USER,
     };
-    const callCluster = getCallClusterMock(data);
-    const list = await getListItem({ callCluster, id: LIST_ID, listItemIndex: LIST_INDEX });
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
+    );
+    const list = await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
     expect(list).toEqual(null);
   });
 });

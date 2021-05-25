@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment-timezone';
 
 import { getFormattedEntries, formatEntry, getDescriptionListContent } from './helpers';
@@ -219,6 +221,62 @@ describe('Exception viewer helpers', () => {
       ];
 
       expect(result).toEqual(expected);
+    });
+
+    test('it returns Modified By/On info. when `includeModified` is true', () => {
+      const result = getDescriptionListContent(getExceptionListItemSchemaMock(), true);
+      expect(result).toEqual([
+        {
+          description: 'Linux',
+          title: 'OS',
+        },
+        {
+          description: 'April 20th 2020 @ 15:25:31',
+          title: 'Date created',
+        },
+        {
+          description: 'some user',
+          title: 'Created by',
+        },
+        {
+          description: 'April 20th 2020 @ 15:25:31',
+          title: 'Date modified',
+        },
+        {
+          description: 'some user',
+          title: 'Modified by',
+        },
+        {
+          description: 'some description',
+          title: 'Description',
+        },
+      ]);
+    });
+
+    test('it returns Name when `includeName` is true', () => {
+      const result = getDescriptionListContent(getExceptionListItemSchemaMock(), false, true);
+      expect(result).toEqual([
+        {
+          description: 'some name',
+          title: 'Name',
+        },
+        {
+          description: 'Linux',
+          title: 'OS',
+        },
+        {
+          description: 'April 20th 2020 @ 15:25:31',
+          title: 'Date created',
+        },
+        {
+          description: 'some user',
+          title: 'Created by',
+        },
+        {
+          description: 'some description',
+          title: 'Description',
+        },
+      ]);
     });
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -393,6 +394,16 @@ const expectAssetsInstalled = ({
       id: 'sample_lens',
     });
     expect(resLens.id).equal('sample_lens');
+    const resMlModule = await kibanaServer.savedObjects.get({
+      type: 'ml-module',
+      id: 'sample_ml_module',
+    });
+    expect(resMlModule.id).equal('sample_ml_module');
+    const resSecurityRule = await kibanaServer.savedObjects.get({
+      type: 'security-rule',
+      id: 'sample_security_rule',
+    });
+    expect(resSecurityRule.id).equal('sample_security_rule');
     const resIndexPattern = await kibanaServer.savedObjects.get({
       type: 'index-pattern',
       id: 'test-*',
@@ -459,8 +470,16 @@ const expectAssetsInstalled = ({
           type: 'lens',
         },
         {
+          id: 'sample_ml_module',
+          type: 'ml-module',
+        },
+        {
           id: 'sample_search',
           type: 'search',
+        },
+        {
+          id: 'sample_security_rule',
+          type: 'security-rule',
         },
         {
           id: 'sample_visualization',
@@ -525,7 +544,9 @@ const expectAssetsInstalled = ({
         { id: '47758dc2-979d-5fbe-a2bd-9eded68a5a43', type: 'epm-packages-assets' },
         { id: '318959c9-997b-5a14-b328-9fc7355b4b74', type: 'epm-packages-assets' },
         { id: 'e21b59b5-eb76-5ab0-bef2-1c8e379e6197', type: 'epm-packages-assets' },
+        { id: '4c758d70-ecf1-56b3-b704-6d8374841b34', type: 'epm-packages-assets' },
         { id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58', type: 'epm-packages-assets' },
+        { id: 'd8b175c3-0d42-5ec7-90c1-d1e4b307a4c2', type: 'epm-packages-assets' },
         { id: '53c94591-aa33-591d-8200-cd524c2a0561', type: 'epm-packages-assets' },
         { id: 'b658d2d4-752e-54b8-afc2-4c76155c1466', type: 'epm-packages-assets' },
       ],

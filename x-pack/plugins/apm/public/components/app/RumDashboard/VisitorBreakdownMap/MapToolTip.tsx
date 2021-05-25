@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -19,7 +20,7 @@ import {
   TRANSACTION_DURATION_COUNTRY,
   TRANSACTION_DURATION_REGION,
 } from './useLayerList';
-import { RenderTooltipContentParams } from '../../../../../../maps/public';
+import type { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { I18LABELS } from '../translations';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;
@@ -58,7 +59,11 @@ function MapToolTipComponent({
   useEffect(() => {
     const loadRegionInfo = async () => {
       if (loadFeatureProperties) {
-        const items = await loadFeatureProperties({ layerId, featureId });
+        const items = await loadFeatureProperties({
+          layerId,
+          featureId,
+          mbProperties: {},
+        });
         items.forEach((item) => {
           if (
             item.getPropertyKey() === COUNTRY_NAME ||

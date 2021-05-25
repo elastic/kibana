@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -17,7 +18,7 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
       monitorId: schema.string(),
       dateStart: schema.maybe(schema.string()),
       dateEnd: schema.maybe(schema.string()),
-      _debug: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, context, request }): Promise<any> => {

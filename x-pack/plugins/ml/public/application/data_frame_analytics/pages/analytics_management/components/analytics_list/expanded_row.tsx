@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
@@ -191,6 +192,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     }),
     items: stateItems as SectionItem[],
     position: 'left',
+    dataTestSubj: 'mlAnalyticsTableRowDetailsSection state',
   };
 
   const { currentPhase, totalPhases } = getDataFrameAnalyticsProgressPhase(item.stats);
@@ -216,6 +218,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       }),
     ],
     position: 'right',
+    dataTestSubj: 'mlAnalyticsTableRowDetailsSection progress',
   };
 
   const stats: SectionConfig = {
@@ -233,6 +236,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       { title: 'version', description: item.config.version },
     ],
     position: 'left',
+    dataTestSubj: 'mlAnalyticsTableRowDetailsSection stats',
   };
 
   const analysisStats: SectionConfig | undefined = analysisStatsValues
@@ -262,6 +266,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           }),
         ],
         position: 'right',
+        dataTestSubj: 'mlAnalyticsTableRowDetailsSection analysisStats',
       }
     : undefined;
 
@@ -363,7 +368,13 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettingsLabel', {
         defaultMessage: 'Job details',
       }),
-      content: <ExpandedRowDetailsPane sections={detailsSections} />,
+      content: (
+        <ExpandedRowDetailsPane
+          sections={detailsSections}
+          dataTestSubj={`mlAnalyticsTableRowDetailsTabContent job-details ${item.config.id}`}
+        />
+      ),
+      'data-test-subj': `mlAnalyticsTableRowDetailsTab job-details ${item.config.id}`,
     },
     {
       id: 'ml-analytics-job-stats',
@@ -373,12 +384,24 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           defaultMessage: 'Job stats',
         }
       ),
-      content: <ExpandedRowDetailsPane sections={statsSections} />,
+      content: (
+        <ExpandedRowDetailsPane
+          sections={statsSections}
+          dataTestSubj={`mlAnalyticsTableRowDetailsTabContent job-stats ${item.config.id}`}
+        />
+      ),
+      'data-test-subj': `mlAnalyticsTableRowDetailsTab job-stats ${item.config.id}`,
     },
     {
       id: 'ml-analytics-job-json',
       name: 'JSON',
-      content: <ExpandedRowJsonPane json={item.config} />,
+      content: (
+        <ExpandedRowJsonPane
+          json={item.config}
+          dataTestSubj={`mlAnalyticsTableRowDetailsTabContent json ${item.config.id}`}
+        />
+      ),
+      'data-test-subj': `mlAnalyticsTableRowDetailsTab json ${item.config.id}`,
     },
     {
       id: 'ml-analytics-job-messages',
@@ -388,7 +411,13 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           defaultMessage: 'Job messages',
         }
       ),
-      content: <ExpandedRowMessagesPane analyticsId={item.id} />,
+      content: (
+        <ExpandedRowMessagesPane
+          analyticsId={item.id}
+          dataTestSubj={`mlAnalyticsTableRowDetailsTabContent job-messages ${item.config.id}`}
+        />
+      ),
+      'data-test-subj': `mlAnalyticsTableRowDetailsTab job-messages ${item.config.id}`,
     },
   ];
 
@@ -405,6 +434,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       onTabClick={() => {}}
       expand={false}
       style={{ width: '100%' }}
+      data-test-subj={`mlAnalyticsTableRowDetails-${item.config.id}`}
     />
   );
 };

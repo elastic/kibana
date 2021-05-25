@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '..';
@@ -27,6 +27,20 @@ test('includes namespace in failure', () => {
     schema.string().validate(undefined, {}, 'foo-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
     `"[foo-namespace]: expected value of type [string] but got [undefined]"`
+  );
+});
+
+test('returns error when not string', () => {
+  expect(() => schema.string().validate(123)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [number]"`
+  );
+
+  expect(() => schema.string().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [Array]"`
+  );
+
+  expect(() => schema.string().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [RegExp]"`
   );
 });
 
@@ -71,14 +85,13 @@ describe('#hostname', () => {
     expect(hostNameSchema.validate('www.example.com')).toBe('www.example.com');
     expect(hostNameSchema.validate('3domain.local')).toBe('3domain.local');
     expect(hostNameSchema.validate('hostname')).toBe('hostname');
-    expect(hostNameSchema.validate('2387628')).toBe('2387628');
     expect(hostNameSchema.validate('::1')).toBe('::1');
     expect(hostNameSchema.validate('0:0:0:0:0:0:0:1')).toBe('0:0:0:0:0:0:0:1');
     expect(hostNameSchema.validate('xn----ascii-7gg5ei7b1i.xn--90a3a')).toBe(
       'xn----ascii-7gg5ei7b1i.xn--90a3a'
     );
 
-    const hostNameWithMaxAllowedLength = 'a'.repeat(255);
+    const hostNameWithMaxAllowedLength = Array(4).fill('a'.repeat(63)).join('.');
     expect(hostNameSchema.validate(hostNameWithMaxAllowedLength)).toBe(
       hostNameWithMaxAllowedLength
     );
@@ -87,6 +100,12 @@ describe('#hostname', () => {
   test('returns error when value is not a valid hostname', () => {
     const hostNameSchema = schema.string({ hostname: true });
 
+    expect(() => hostNameSchema.validate('2387628')).toThrowErrorMatchingInlineSnapshot(
+      `"value must be a valid hostname (see RFC 1123)."`
+    );
+    expect(() =>
+      hostNameSchema.validate(Array(4).fill('a'.repeat(64)).join('.'))
+    ).toThrowErrorMatchingInlineSnapshot(`"value must be a valid hostname (see RFC 1123)."`);
     expect(() => hostNameSchema.validate('host:name')).toThrowErrorMatchingInlineSnapshot(
       `"value must be a valid hostname (see RFC 1123)."`
     );
@@ -99,16 +118,14 @@ describe('#hostname', () => {
     expect(() => hostNameSchema.validate('0:?:0:0:0:0:0:1')).toThrowErrorMatchingInlineSnapshot(
       `"value must be a valid hostname (see RFC 1123)."`
     );
-
-    const tooLongHostName = 'a'.repeat(256);
-    expect(() => hostNameSchema.validate(tooLongHostName)).toThrowErrorMatchingInlineSnapshot(
+    expect(() => hostNameSchema.validate('a'.repeat(256))).toThrowErrorMatchingInlineSnapshot(
       `"value must be a valid hostname (see RFC 1123)."`
     );
   });
 
   test('returns error when empty string', () => {
     expect(() => schema.string({ hostname: true }).validate('')).toThrowErrorMatchingInlineSnapshot(
-      `"any.empty"`
+      `"\\"value\\" is not allowed to be empty"`
     );
   });
 
@@ -175,18 +192,4 @@ describe('#validate', () => {
       `"validator failure"`
     );
   });
-});
-
-test('returns error when not string', () => {
-  expect(() => schema.string().validate(123)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [number]"`
-  );
-
-  expect(() => schema.string().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [Array]"`
-  );
-
-  expect(() => schema.string().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [RegExp]"`
-  );
 });

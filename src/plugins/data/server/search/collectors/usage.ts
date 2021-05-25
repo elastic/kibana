@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { once, debounce } from 'lodash';
 import type { CoreSetup, Logger } from 'kibana/server';
-import type { IEsSearchResponse } from '../../../common';
-import type { Usage } from './register';
+import type { IEsSearchResponse, ISearchOptions } from '../../../common';
+import { isCompleteResponse } from '../../../common';
+import { CollectedUsage } from './register';
 
 const SAVED_OBJECT_ID = 'search-telemetry';
 
@@ -18,59 +20,73 @@ export interface SearchUsage {
 }
 
 export function usageProvider(core: CoreSetup): SearchUsage {
-  const getTracker = (eventType: keyof Usage) => {
-    return async (duration?: number) => {
-      const repository = await core
-        .getStartServices()
-        .then(([coreStart]) => coreStart.savedObjects.createInternalRepository());
+  const getRepository = once(async () => {
+    const [coreStart] = await core.getStartServices();
+    return coreStart.savedObjects.createInternalRepository();
+  });
 
-      let attributes: Usage;
-      let doesSavedObjectExist: boolean = true;
-
-      try {
-        const response = await repository.get<Usage>(SAVED_OBJECT_ID, SAVED_OBJECT_ID);
-        attributes = response.attributes;
-      } catch (e) {
-        doesSavedObjectExist = false;
-        attributes = {
-          successCount: 0,
-          errorCount: 0,
-          averageDuration: 0,
-        };
-      }
-
-      attributes[eventType]++;
-
-      // Only track the average duration for successful requests
-      if (eventType === 'successCount') {
-        attributes.averageDuration =
-          ((duration ?? 0) + (attributes.averageDuration ?? 0)) / (attributes.successCount ?? 1);
-      }
-
-      try {
-        if (doesSavedObjectExist) {
-          await repository.update(SAVED_OBJECT_ID, SAVED_OBJECT_ID, attributes);
-        } else {
-          await repository.create(SAVED_OBJECT_ID, attributes, { id: SAVED_OBJECT_ID });
-        }
-      } catch (e) {
-        // Version conflict error, swallow
-      }
-    };
+  const collectedUsage: CollectedUsage = {
+    successCount: 0,
+    errorCount: 0,
+    totalDuration: 0,
   };
 
-  return {
-    trackError: () => getTracker('errorCount')(),
-    trackSuccess: getTracker('successCount'),
+  // Instead of updating the search count every time a search completes, we update some in-memory
+  // counts and only update the saved object every ~5 seconds
+  const updateSearchUsage = debounce(
+    async () => {
+      const repository = await getRepository();
+      const { successCount, errorCount, totalDuration } = collectedUsage;
+      const counterFields = Object.entries(collectedUsage)
+        .map(([fieldName, incrementBy]) => ({ fieldName, incrementBy }))
+        // Filter out any zero values because `incrementCounter` will still increment them
+        .filter(({ incrementBy }) => incrementBy > 0);
+
+      try {
+        await repository.incrementCounter<CollectedUsage>(
+          SAVED_OBJECT_ID,
+          SAVED_OBJECT_ID,
+          counterFields
+        );
+
+        // Since search requests may have completed while the saved object was being updated, we minus
+        // what was just updated in the saved object rather than resetting the values to 0
+        collectedUsage.successCount -= successCount;
+        collectedUsage.errorCount -= errorCount;
+        collectedUsage.totalDuration -= totalDuration;
+      } catch (e) {
+        // We didn't reset the counters so we'll retry when the next search request completes
+      }
+    },
+    5000,
+    { maxWait: 5000 }
+  );
+
+  const trackSuccess = (duration: number) => {
+    collectedUsage.successCount++;
+    collectedUsage.totalDuration += duration;
+    return updateSearchUsage();
   };
+
+  const trackError = () => {
+    collectedUsage.errorCount++;
+    return updateSearchUsage();
+  };
+
+  return { trackSuccess, trackError };
 }
 
 /**
  * Rxjs observer for easily doing `tap(searchUsageObserver(logger, usage))` in an rxjs chain.
  */
-export function searchUsageObserver(logger: Logger, usage?: SearchUsage) {
+export function searchUsageObserver(
+  logger: Logger,
+  usage?: SearchUsage,
+  { isRestore }: ISearchOptions = {}
+) {
   return {
     next(response: IEsSearchResponse) {
+      if (isRestore || !isCompleteResponse(response)) return;
       logger.debug(`trackSearchStatus:next  ${response.rawResponse.took}`);
       usage?.trackSuccess(response.rawResponse.took);
     },

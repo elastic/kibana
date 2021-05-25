@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -61,25 +62,18 @@ export const LogsToolbar = () => {
             iconType="search"
             indexPatterns={[derivedIndexPattern]}
             isInvalid={!isFilterQueryDraftValid}
-            onChange={(expression: Query) => {
-              if (typeof expression.query === 'string') {
-                setSurroundingLogsId(null);
-                setLogFilterQueryDraft(expression.query);
-              }
+            onChange={(query: Query) => {
+              setSurroundingLogsId(null);
+              setLogFilterQueryDraft(query);
             }}
-            onSubmit={(expression: Query) => {
-              if (typeof expression.query === 'string') {
-                setSurroundingLogsId(null);
-                applyLogFilterQuery(expression.query);
-              }
+            onSubmit={(query: Query) => {
+              setSurroundingLogsId(null);
+              applyLogFilterQuery(query);
             }}
             placeholder={i18n.translate('xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder', {
               defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
             })}
-            query={{
-              query: filterQueryDraft?.expression ?? '',
-              language: filterQueryDraft?.kind ?? 'kuery',
-            }}
+            query={filterQueryDraft}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

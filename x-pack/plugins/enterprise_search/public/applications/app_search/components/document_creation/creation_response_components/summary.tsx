@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { useValues, useActions } from 'kea';
 
-import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
   EuiTitle,
@@ -18,10 +19,12 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { FLYOUT_ARIA_LABEL_ID, FLYOUT_CLOSE_BUTTON, DOCUMENT_CREATION_ERRORS } from '../constants';
+import { CLOSE_BUTTON_LABEL } from '../../../../shared/constants';
+import { FLYOUT_ARIA_LABEL_ID, DOCUMENT_CREATION_ERRORS } from '../constants';
+import { DocumentCreationLogic } from '../index';
 import { DocumentCreationStep } from '../types';
-import { DocumentCreationLogic } from '../';
 
 import {
   InvalidDocumentsSummary,
@@ -78,7 +81,7 @@ export const FlyoutFooter: React.FC = () => {
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={closeDocumentCreation}>{FLYOUT_CLOSE_BUTTON}</EuiButton>
+          <EuiButton onClick={closeDocumentCreation}>{CLOSE_BUTTON_LABEL}</EuiButton>
         </EuiFlexItem>
         {hasInvalidDocuments && (
           <EuiFlexItem grow={false}>

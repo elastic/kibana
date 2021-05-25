@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -15,9 +16,11 @@ import { LastValueIndexPatternColumn } from './last_value';
 import { lastValueOperation } from './index';
 import type { IndexPattern, IndexPatternLayer } from '../../types';
 
+const uiSettingsMock = {} as IUiSettingsClient;
+
 const defaultProps = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
@@ -26,6 +29,7 @@ const defaultProps = {
     ...createMockedIndexPattern(),
     hasRestrictions: false,
   } as IndexPattern,
+  operationDefinitionMap: {},
 };
 
 describe('last_value', () => {
@@ -70,7 +74,8 @@ describe('last_value', () => {
         { ...lastValueColumn, params: { ...lastValueColumn.params } },
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -333,6 +338,60 @@ describe('last_value', () => {
     );
     expect(disabledStatus).toEqual(
       'This function requires the presence of a date field in your index'
+    );
+  });
+
+  it('should pick the previous format configuration if set', () => {
+    const indexPattern = createMockedIndexPattern();
+    expect(
+      lastValueOperation.buildColumn({
+        indexPattern,
+        layer: {
+          columns: {
+            col1: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+        previousColumn: {
+          label: 'Count',
+          dataType: 'number',
+          isBucketed: false,
+          sourceField: 'Records',
+          operationType: 'count',
+          params: {
+            format: {
+              id: 'number',
+              params: {
+                decimals: 2,
+              },
+            },
+          },
+        },
+      }).params
+    ).toEqual(
+      expect.objectContaining({
+        format: {
+          id: 'number',
+          params: {
+            decimals: 2,
+          },
+        },
+      })
     );
   });
 

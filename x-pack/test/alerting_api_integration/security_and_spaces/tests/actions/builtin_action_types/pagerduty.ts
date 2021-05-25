@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import httpProxy from 'http-proxy';
@@ -44,11 +45,11 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should return successfully when passed valid create parameters', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A pagerduty action',
-          actionTypeId: '.pagerduty',
+          connector_type_id: '.pagerduty',
           config: {
             apiUrl: pagerdutySimulatorURL,
           },
@@ -60,9 +61,10 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        isPreconfigured: false,
+        is_preconfigured: false,
         name: 'A pagerduty action',
-        actionTypeId: '.pagerduty',
+        connector_type_id: '.pagerduty',
+        is_missing_secrets: false,
         config: {
           apiUrl: pagerdutySimulatorURL,
         },
@@ -71,14 +73,15 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
       expect(typeof createdAction.id).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/actions/action/${createdAction.id}`)
+        .get(`/api/actions/connector/${createdAction.id}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        isPreconfigured: false,
+        is_preconfigured: false,
         name: 'A pagerduty action',
-        actionTypeId: '.pagerduty',
+        connector_type_id: '.pagerduty',
+        is_missing_secrets: false,
         config: {
           apiUrl: pagerdutySimulatorURL,
         },
@@ -87,11 +90,11 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should return unsuccessfully when passed invalid create parameters', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A pagerduty action',
-          actionTypeId: '.pagerduty',
+          connector_type_id: '.pagerduty',
           config: {
             apiUrl: pagerdutySimulatorURL,
           },
@@ -110,11 +113,11 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should return unsuccessfully when default pagerduty url is not present in allowedHosts', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A pagerduty action',
-          actionTypeId: '.pagerduty',
+          connector_type_id: '.pagerduty',
           secrets: {},
         })
         .expect(400)
@@ -130,11 +133,11 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should create pagerduty simulator action successfully', async () => {
       const { body: createdSimulatedAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A pagerduty simulator',
-          actionTypeId: '.pagerduty',
+          connector_type_id: '.pagerduty',
           config: {
             apiUrl: pagerdutySimulatorURL,
           },
@@ -149,7 +152,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should handle executing with a simulated success', async () => {
       const { body: result } = await supertest
-        .post(`/api/actions/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -161,7 +164,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
       expect(proxyHaveBeenCalled).to.equal(true);
       expect(result).to.eql({
         status: 'ok',
-        actionId: simulatedActionId,
+        connector_id: simulatedActionId,
         data: {
           message: 'Event processed',
           status: 'success',
@@ -171,7 +174,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should handle a 40x pagerduty error', async () => {
       const { body: result } = await supertest
-        .post(`/api/actions/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -185,7 +188,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should handle a 429 pagerduty error', async () => {
       const { body: result } = await supertest
-        .post(`/api/actions/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -203,7 +206,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should handle a 500 pagerduty error', async () => {
       const { body: result } = await supertest
-        .post(`/api/actions/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

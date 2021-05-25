@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
+// @ts-expect-error not full interface
 const JOB_CONFIG: Job = {
   job_id: `fq_single_1_smv`,
   description: 'mean(responsetime) on farequote dataset with 15m bucket span',
@@ -26,6 +28,7 @@ const JOB_CONFIG: Job = {
   model_plot_config: { enabled: true },
 };
 
+// @ts-expect-error not full interface
 const DATAFEED_CONFIG: Datafeed = {
   datafeed_id: 'datafeed-fq_single_1_smv',
   indices: ['ft_farequote'],
@@ -90,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with entity fields', function () {
+      // @ts-expect-error not full interface
       const jobConfig: Job = {
         job_id: `ecom_01`,
         description:
@@ -120,6 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
         model_plot_config: { enabled: true },
       };
 
+      // @ts-expect-error not full interface
       const datafeedConfig: Datafeed = {
         datafeed_id: 'datafeed-ecom_01',
         indices: ['ft_ecommerce'],

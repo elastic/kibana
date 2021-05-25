@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -61,12 +62,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.component_templates[0].component_template.template.mappings.dynamic).to.be(
           false
         );
-        // Make sure that the `@timestamp` field exists and is set to date
-        // this can be removed once https://github.com/elastic/elasticsearch/issues/58956 is resolved
-        expect(
-          body.component_templates[0].component_template.template.mappings.properties['@timestamp']
-            .type
-        ).to.be('date');
 
         ({ body } = await es.transport.request({
           method: 'GET',

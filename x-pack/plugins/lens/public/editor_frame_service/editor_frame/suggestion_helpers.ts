@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -16,8 +17,10 @@ import {
   TableChangeType,
   TableSuggestion,
   DatasourceSuggestion,
+  DatasourcePublicAPI,
 } from '../../types';
 import { Action } from './state_management';
+import { DragDropIdentifier } from '../../drag_drop';
 
 export interface Suggestion {
   visualizationId: string;
@@ -220,4 +223,36 @@ export function switchToSuggestion(
   };
 
   dispatch(action);
+}
+
+export function getTopSuggestionForField(
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  activeVisualizationId: string | null,
+  visualizationMap: Record<string, Visualization<unknown>>,
+  visualizationState: unknown,
+  datasource: Datasource,
+  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
+  field: DragDropIdentifier
+) {
+  const hasData = Object.values(datasourceLayers).some(
+    (datasourceLayer) => datasourceLayer.getTableSpec().length > 0
+  );
+
+  const mainPalette =
+    activeVisualizationId && visualizationMap[activeVisualizationId]?.getMainPalette
+      ? visualizationMap[activeVisualizationId].getMainPalette?.(visualizationState)
+      : undefined;
+  const suggestions = getSuggestions({
+    datasourceMap: { [datasource.id]: datasource },
+    datasourceStates,
+    visualizationMap:
+      hasData && activeVisualizationId
+        ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
+        : visualizationMap,
+    activeVisualizationId,
+    visualizationState,
+    field,
+    mainPalette,
+  });
+  return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
 }

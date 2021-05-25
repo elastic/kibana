@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -25,10 +26,6 @@ import { extractQueryParams } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 import { RemoteClusterPageTitle, RemoteClusterForm, ConfiguredByNodeWarning } from '../components';
-
-const disabledFields = {
-  name: true,
-};
 
 export class RemoteClusterEdit extends Component {
   static propTypes = {
@@ -201,8 +198,7 @@ export class RemoteClusterEdit extends Component {
           </>
         ) : null}
         <RemoteClusterForm
-          fields={cluster}
-          disabledFields={disabledFields}
+          cluster={cluster}
           isSaving={isEditingCluster}
           saveError={getEditClusterError}
           save={this.save}

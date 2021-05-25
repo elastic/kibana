@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -19,6 +19,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('gauge chart', function indexPatternCreation() {
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
     async function initGaugeVis() {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -51,11 +54,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickOptionsTab();
       await testSubjects.setValue('gaugeColorRange2__to', '10000');
       await testSubjects.click('gaugePercentageMode');
+      await testSubjects.setValue('gaugePercentageModeFormatPattern', '0.0%');
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       await PageObjects.visEditor.clickGo();
 
       await retry.try(async function tryingForTime() {
-        const expectedTexts = ['57.273%', 'Average bytes'];
+        const expectedTexts = ['57.3%', 'Average bytes'];
         const metricValue = await PageObjects.visChart.getGaugeValue();
         expect(expectedTexts).to.eql(metricValue);
       });

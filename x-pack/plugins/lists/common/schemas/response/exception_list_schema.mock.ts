@@ -1,8 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_NAME,
+} from '@kbn/securitysolution-list-constants';
 
 import {
   DATE_NOW,
@@ -18,14 +27,6 @@ import {
   VERSION,
   _VERSION,
 } from '../../constants.mock';
-import { ENDPOINT_LIST_ID } from '../..';
-import {
-  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_NAME,
-} from '../../constants';
-
-import { ExceptionListSchema } from './exception_list_schema';
 
 export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   _version: _VERSION,

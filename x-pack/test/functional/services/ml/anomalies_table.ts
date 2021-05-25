@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -19,6 +20,18 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
 
     async getTableRows() {
       return await testSubjects.findAll('mlAnomaliesTable > ~mlAnomaliesListRow');
+    },
+
+    /**
+     * Asserts the number of rows rendered in a table
+     * @param expectedCount
+     */
+    async assertTableRowsCount(expectedCount: number) {
+      const actualCount = (await this.getTableRows()).length;
+      expect(actualCount).to.eql(
+        expectedCount,
+        `Expect anomaly table rows count to be ${expectedCount}, got ${actualCount}`
+      );
     },
 
     async getRowSubjByRowIndex(rowIndex: number) {
@@ -108,6 +121,33 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
+    },
+
+    /**
+     * Asserts selected number of rows per page on the pagination control.
+     * @param rowsNumber
+     */
+    async assertRowsNumberPerPage(rowsNumber: 10 | 25 | 100) {
+      const textContent = await testSubjects.getVisibleText(
+        'mlAnomaliesTable > tablePaginationPopoverButton'
+      );
+      expect(textContent).to.be(`Rows per page: ${rowsNumber}`);
+    },
+
+    async ensurePagePopupOpen() {
+      await retry.tryForTime(5000, async () => {
+        const isOpen = await testSubjects.exists('tablePagination-10-rows');
+        if (!isOpen) {
+          await testSubjects.click('mlAnomaliesTable > tablePaginationPopoverButton');
+          await testSubjects.existOrFail('tablePagination-10-rows');
+        }
+      });
+    },
+
+    async setRowsNumberPerPage(rowsNumber: 10 | 25 | 100) {
+      await this.ensurePagePopupOpen();
+      await testSubjects.click(`tablePagination-${rowsNumber}-rows`);
+      await this.assertRowsNumberPerPage(rowsNumber);
     },
   };
 }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const TEST_FILTER_COLUMN_NAMES = [
@@ -19,15 +19,21 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('discover - context - back navigation', function contextSize() {
     before(async function () {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
       await PageObjects.common.navigateToApp('discover');
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItem(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
       }
+    });
+
+    after(async function () {
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should go back after loading', async function () {

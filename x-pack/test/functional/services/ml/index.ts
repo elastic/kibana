@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -43,6 +44,11 @@ import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewe
 import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
 import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
+import { MachineLearningAlertingProvider } from './alerting';
+import { SwimLaneProvider } from './swim_lane';
+import { MachineLearningDashboardJobSelectionTableProvider } from './dashboard_job_selection_table';
+import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embeddables';
+import { TrainedModelsProvider } from './trained_models';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -53,6 +59,14 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const api = MachineLearningAPIProvider(context);
   const commonConfig = MachineLearningCommonConfigsProvider(context);
   const customUrls = MachineLearningCustomUrlsProvider(context);
+
+  const dashboardJobSelectionTable = MachineLearningDashboardJobSelectionTableProvider(context);
+  const dashboardEmbeddables = MachineLearningDashboardEmbeddablesProvider(
+    context,
+    commonUI,
+    dashboardJobSelectionTable
+  );
+
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
   const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(
     context,
@@ -60,7 +74,10 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     api
   );
   const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, commonUI);
-  const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(context);
+  const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(
+    context,
+    commonUI
+  );
   const dataFrameAnalyticsMap = MachineLearningDataFrameAnalyticsMapProvider(context);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
 
@@ -90,15 +107,21 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
+  const alerting = MachineLearningAlertingProvider(context, commonUI);
+  const swimLane = SwimLaneProvider(context);
+  const trainedModels = TrainedModelsProvider(context, api, commonUI);
 
   return {
     anomaliesTable,
     anomalyExplorer,
+    alerting,
     api,
     commonAPI,
     commonConfig,
     commonUI,
     customUrls,
+    dashboardJobSelectionTable,
+    dashboardEmbeddables,
     dataFrameAnalytics,
     dataFrameAnalyticsCreation,
     dataFrameAnalyticsEdit,
@@ -127,7 +150,9 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     settingsCalendar,
     settingsFilterList,
     singleMetricViewer,
+    swimLane,
     testExecution,
     testResources,
+    trainedModels,
   };
 }

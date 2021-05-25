@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState, useContext, useCallback } from 'react';
@@ -248,6 +249,9 @@ export const Controls: FC<Props> = React.memo(
               icon="branch"
               onClick={() => {
                 getNodeData({ id: nodeLabel, type: nodeType });
+                if (cy) {
+                  cy.elements().unselect();
+                }
                 setShowFlyout(false);
                 setPopover(false);
               }}
@@ -263,12 +267,7 @@ export const Controls: FC<Props> = React.memo(
 
     return (
       <EuiPortal>
-        <EuiFlyout
-          ownFocus
-          size="m"
-          onClose={() => setShowFlyout(false)}
-          data-test-subj="mlAnalyticsJobMapFlyout"
-        >
+        <EuiFlyout ownFocus size="m" onClose={deselect} data-test-subj="mlAnalyticsJobMapFlyout">
           <EuiFlyoutHeader>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>

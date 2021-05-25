@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import {
+import type { RequestHandlerContext } from 'src/core/server';
+import type {
   IRouter,
   RouteConfig,
   IKibanaResponse,
@@ -72,13 +73,12 @@ export interface HttpResourcesServiceToolkit {
  * });
  * @public
  */
-export type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown> = RequestHandler<
-  P,
-  Q,
-  B,
-  'get',
-  KibanaResponseFactory & HttpResourcesServiceToolkit
->;
+export type HttpResourcesRequestHandler<
+  P = unknown,
+  Q = unknown,
+  B = unknown,
+  Context extends RequestHandlerContext = RequestHandlerContext
+> = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
 
 /**
  * Allows to configure HTTP response parameters
@@ -98,8 +98,8 @@ export interface InternalHttpResourcesSetup {
  */
 export interface HttpResources {
   /** To register a route handler executing passed function to form response. */
-  register: <P, Q, B>(
+  register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(
     route: RouteConfig<P, Q, B, 'get'>,
-    handler: HttpResourcesRequestHandler<P, Q, B>
+    handler: HttpResourcesRequestHandler<P, Q, B, Context>
   ) => void;
 }

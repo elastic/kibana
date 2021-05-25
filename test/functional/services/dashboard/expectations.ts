@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -208,14 +208,14 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       await this.textWithinTestSubjectsExists(values, 'markdownBody');
     }
 
-    async savedSearchRowCount(expectedCount: number) {
-      log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
+    async savedSearchRowCount(expectedMinCount: number) {
+      log.debug(`DashboardExpect.savedSearchRowCount(${expectedMinCount})`);
       await retry.try(async () => {
         const savedSearchRows = await testSubjects.findAll(
           'docTableExpandToggleColumn',
           findTimeout
         );
-        expect(savedSearchRows.length).to.be(expectedCount);
+        expect(savedSearchRows.length).to.be.above(expectedMinCount);
       });
     }
 

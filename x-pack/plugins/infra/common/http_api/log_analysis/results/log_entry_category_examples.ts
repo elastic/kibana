@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -12,7 +13,7 @@ import {
   timeRangeRT,
   routeTimingMetadataRT,
 } from '../../shared';
-import { logEntryContextRT } from '../../log_entries';
+import { logEntryContextRT } from '../../../log_entry';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_EXAMPLES_PATH =
   '/api/infra/log_analysis/results/log_entry_category_examples';

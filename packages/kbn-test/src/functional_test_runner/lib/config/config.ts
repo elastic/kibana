@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Schema } from 'joi';
@@ -50,20 +50,20 @@ export class Config {
       values: Record<string, any>,
       childSchema: any
     ): boolean {
-      if (!childSchema._inner) {
+      if (!childSchema.$_terms.keys && !childSchema.$_terms.patterns) {
         return false;
       }
 
       // normalize child and pattern checks so we can iterate the checks in a single loop
       const checks: Array<{ test: (k: string) => boolean; schema: Schema }> = [
         // match children first, they have priority
-        ...(childSchema._inner.children || []).map((child: { key: string; schema: Schema }) => ({
+        ...(childSchema.$_terms.keys || []).map((child: { key: string; schema: Schema }) => ({
           test: (k: string) => child.key === k,
           schema: child.schema,
         })),
 
         // match patterns on any key that doesn't match an explicit child
-        ...(childSchema._inner.patterns || []).map((pattern: { regex: RegExp; rule: Schema }) => ({
+        ...(childSchema.$_terms.patterns || []).map((pattern: { regex: RegExp; rule: Schema }) => ({
           test: (k: string) => pattern.regex.test(k) && has(values, k),
           schema: pattern.rule,
         })),

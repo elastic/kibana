@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mapValues, first, last, isNaN } from 'lodash';
+import { ElasticsearchClient } from 'kibana/server';
 import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../../common/alerting/metrics';
-import { InfraSource } from '../../../../../common/http_api/source_api';
+import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
-import { AlertServices } from '../../../../../../alerts/server';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
@@ -24,6 +25,7 @@ interface Aggregation {
     buckets: Array<{
       aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
       doc_count: number;
+      to_as_string: string;
       key_as_string: string;
     }>;
   };
@@ -42,7 +44,7 @@ export interface EvaluatedAlertParams {
 }
 
 export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAlertParams>(
-  callCluster: AlertServices['callCluster'],
+  esClient: ElasticsearchClient,
   params: Params,
   config: InfraSource['configuration'],
   timeframe?: { start: number; end: number }
@@ -51,7 +53,7 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
   return Promise.all(
     criteria.map(async (criterion) => {
       const currentValues = await getMetric(
-        callCluster,
+        esClient,
         criterion,
         config.metricAlias,
         config.fields.timestamp,
@@ -59,8 +61,18 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
         filterQuery,
         timeframe
       );
-      const { threshold, comparator } = criterion;
-      const comparisonFunction = comparatorMap[comparator];
+
+      const { threshold, warningThreshold, comparator, warningComparator } = criterion;
+      const pointsEvaluator = (points: any[] | typeof NaN | null, t?: number[], c?: Comparator) => {
+        if (!t || !c) return [false];
+        const comparisonFunction = comparatorMap[c];
+        return Array.isArray(points)
+          ? points.map(
+              (point) => t && typeof point.value === 'number' && comparisonFunction(point.value, t)
+            )
+          : [false];
+      };
+
       return mapValues(currentValues, (points: any[] | typeof NaN | null) => {
         if (isTooManyBucketsPreviewException(points)) throw points;
         return {
@@ -68,12 +80,8 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
           metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
           currentValue: Array.isArray(points) ? last(points)?.value : NaN,
           timestamp: Array.isArray(points) ? last(points)?.key : NaN,
-          shouldFire: Array.isArray(points)
-            ? points.map(
-                (point) =>
-                  typeof point.value === 'number' && comparisonFunction(point.value, threshold)
-              )
-            : [false],
+          shouldFire: pointsEvaluator(points, threshold, comparator),
+          shouldWarn: pointsEvaluator(points, warningThreshold, warningComparator),
           isNoData: Array.isArray(points)
             ? points.map((point) => point?.value === null || point === null)
             : [points === null],
@@ -85,7 +93,7 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
 };
 
 const getMetric: (
-  callCluster: AlertServices['callCluster'],
+  esClient: ElasticsearchClient,
   params: MetricExpressionParams,
   index: string,
   timefield: string,
@@ -93,7 +101,7 @@ const getMetric: (
   filterQuery: string | undefined,
   timeframe?: { start: number; end: number }
 ) => Promise<Record<string, number[]>> = async function (
-  callCluster,
+  esClient,
   params,
   index,
   timefield,
@@ -121,7 +129,8 @@ const getMetric: (
         (response) => response.aggregations?.groupings?.after_key
       );
       const compositeBuckets = (await getAllCompositeData(
-        (body) => callCluster('search', { body, index }),
+        // @ts-expect-error @elastic/elasticsearch SearchResponse.body.timeout is not required
+        (body) => esClient.search({ body, index }),
         searchBody,
         bucketSelector,
         afterKeyHandler
@@ -136,12 +145,17 @@ const getMetric: (
         {}
       );
     }
-    const result = await callCluster('search', {
+    const { body: result } = await esClient.search({
       body: searchBody,
       index,
     });
 
-    return { [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(result.aggregations, aggType) };
+    return {
+      [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(
+        (result.aggregations! as unknown) as Aggregation,
+        aggType
+      ),
+    };
   } catch (e) {
     if (timeframe) {
       // This code should only ever be reached when previewing the alert, not executing it
@@ -167,18 +181,21 @@ const getValuesFromAggregations = (
     const { buckets } = aggregations.aggregatedIntervals;
     if (!buckets.length) return null; // No Data state
     if (aggType === Aggregators.COUNT) {
-      return buckets.map((bucket) => ({ key: bucket.key_as_string, value: bucket.doc_count }));
+      return buckets.map((bucket) => ({
+        key: bucket.to_as_string,
+        value: bucket.doc_count,
+      }));
     }
     if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
       return buckets.map((bucket) => {
         const values = bucket.aggregatedValue?.values || [];
         const firstValue = first(values);
         if (!firstValue) return null;
-        return { key: bucket.key_as_string, value: firstValue.value };
+        return { key: bucket.to_as_string, value: firstValue.value };
       });
     }
     return buckets.map((bucket) => ({
-      key: bucket.key_as_string,
+      key: bucket.key_as_string ?? bucket.to_as_string,
       value: bucket.aggregatedValue?.value ?? null,
     }));
   } catch (e) {

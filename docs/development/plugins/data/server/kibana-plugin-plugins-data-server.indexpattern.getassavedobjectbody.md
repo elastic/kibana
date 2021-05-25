@@ -20,6 +20,7 @@ getAsSavedObjectBody(): {
         type: string | undefined;
         typeMeta: string | undefined;
         allowNoIndex: true | undefined;
+        runtimeFieldMap: string | undefined;
     };
 ```
 <b>Returns:</b>
@@ -35,5 +36,6 @@ getAsSavedObjectBody(): {
         type: string | undefined;
         typeMeta: string | undefined;
         allowNoIndex: true | undefined;
+        runtimeFieldMap: string | undefined;
     }`
 

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ApplicationStart } from 'kibana/public';
 import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
+export * from './actions';
 export * from './os';
 export * from './trusted_apps';
 
@@ -57,9 +59,14 @@ export type Immutable<T> = T extends undefined | null | boolean | string | numbe
   : ImmutableObject<T>;
 
 export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
-type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
-type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
-type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
+export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
+export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+
+/**
+ * Utility type that will return back a union of the given [T]ype and an Immutable version of it
+ */
+export type MaybeImmutable<T> = T | Immutable<T>;
 
 /**
  * Stats for related events for a particular node in a resolver graph.
@@ -374,12 +381,12 @@ export enum HostStatus {
    * Default state of the host when no host information is present or host information cannot
    * be retrieved. e.g. API error
    */
-  ERROR = 'error',
+  UNHEALTHY = 'unhealthy',
 
   /**
    * Host is online as indicated by its checkin status during the last checkin window
    */
-  ONLINE = 'online',
+  HEALTHY = 'healthy',
 
   /**
    * Host is offline as indicated by its checkin status during the last checkin window
@@ -387,9 +394,14 @@ export enum HostStatus {
   OFFLINE = 'offline',
 
   /**
-   * Host is unenrolling as indicated by its checkin status during the last checkin window
+   * Host is unenrolling, enrolling or updating as indicated by its checkin status during the last checkin window
    */
-  UNENROLLING = 'unenrolling',
+  UPDATING = 'updating',
+
+  /**
+   * Host is inactive as indicated by its checkin status during the last checkin window
+   */
+  INACTIVE = 'inactive',
 }
 
 export enum MetadataQueryStrategyVersions {
@@ -401,6 +413,11 @@ export type PolicyInfo = Immutable<{
   revision: number;
   id: string;
 }>;
+
+export interface HostMetaDataInfo {
+  metadata: HostMetadata;
+  query_strategy_version: MetadataQueryStrategyVersions;
+}
 
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
@@ -425,13 +442,8 @@ export type HostInfo = Immutable<{
   query_strategy_version: MetadataQueryStrategyVersions;
 }>;
 
-export type HostMetadataDetails = Immutable<{
-  agent: {
-    id: string;
-  };
-  HostDetails: HostMetadata;
-}>;
-
+// HostMetadataDetails is now just HostMetadata
+// HostDetails is also just HostMetadata
 export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
@@ -459,6 +471,12 @@ export type HostMetadata = Immutable<{
         endpoint_policy_version: number;
         version: number;
       };
+    };
+    configuration: {
+      isolation?: boolean;
+    };
+    state: {
+      isolation?: boolean;
     };
   };
   agent: {
@@ -816,12 +834,17 @@ export interface PolicyConfig {
       registry: boolean;
       security: boolean;
     };
-    malware: MalwareFields;
+    malware: ProtectionFields;
+    ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
     };
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      ransomware: {
         message: string;
         enabled: boolean;
       };
@@ -837,7 +860,7 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: MalwareFields;
+    malware: ProtectionFields;
     popup: {
       malware: {
         message: string;
@@ -855,6 +878,13 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
+    malware: ProtectionFields;
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
     logging: {
       file: string;
     };
@@ -870,7 +900,7 @@ export interface UIPolicyConfig {
    */
   windows: Pick<
     PolicyConfig['windows'],
-    'events' | 'malware' | 'popup' | 'antivirus_registration' | 'advanced'
+    'events' | 'malware' | 'ransomware' | 'popup' | 'antivirus_registration' | 'advanced'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
@@ -879,12 +909,17 @@ export interface UIPolicyConfig {
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'events' | 'advanced'>;
+  linux: Pick<PolicyConfig['linux'], 'malware' | 'events' | 'popup' | 'advanced'>;
 }
 
-/** Policy: Malware protection fields */
-export interface MalwareFields {
+/** Policy:  Protection fields */
+export interface ProtectionFields {
   mode: ProtectionModes;
+}
+
+/** Policy:  Supported fields */
+export interface SupportedFields {
+  supported: boolean;
 }
 
 /** Policy protection mode options */
@@ -927,6 +962,7 @@ export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+  unsupported = 'unsupported',
 }
 
 /**

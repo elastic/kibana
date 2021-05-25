@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -11,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreStart, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -18,6 +20,7 @@ import {
   Operation,
   DatasourceLayerPanelProps,
   PublicAPIProps,
+  InitializationOptions,
 } from '../types';
 import {
   loadInitialState,
@@ -29,7 +32,7 @@ import { toExpression } from './to_expression';
 import {
   IndexPatternDimensionTrigger,
   IndexPatternDimensionEditor,
-  canHandleDrop,
+  getDropProps,
   onDrop,
 } from './dimension_panel';
 import { IndexPatternDataPanel } from './datapanel';
@@ -50,14 +53,11 @@ import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
-import { Dragging } from '../drag_drop/providers';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
+import { DraggingIdentifier } from '../drag_drop';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
-
-export type DraggedField = Dragging & {
-  field: IndexPatternField;
-  indexPatternId: string;
-};
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
@@ -80,13 +80,16 @@ export function getIndexPatternDatasource({
   storage,
   data,
   charts,
+  indexPatternFieldEditor,
+  uiActions,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   charts: ChartsPluginSetup;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  uiActions: UiActionsStart;
 }) {
-  const savedObjectsClient = core.savedObjects.client;
   const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
     core.notifications.toasts.addError(err, {
@@ -97,6 +100,21 @@ export function getIndexPatternDatasource({
 
   const indexPatternsService = data.indexPatterns;
 
+  const handleChangeIndexPattern = (
+    id: string,
+    state: IndexPatternPrivateState,
+    setState: StateSetter<IndexPatternPrivateState>
+  ) => {
+    changeIndexPattern({
+      id,
+      state,
+      setState,
+      onError: onIndexPatternLoadError,
+      storage,
+      indexPatternsService,
+    });
+  };
+
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     id: 'indexpattern',
@@ -104,16 +122,17 @@ export function getIndexPatternDatasource({
     async initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
-      initialContext?: VisualizeFieldContext
+      initialContext?: VisualizeFieldContext,
+      options?: InitializationOptions
     ) {
       return loadInitialState({
         persistedState,
         references,
-        savedObjectsClient: await savedObjectsClient,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
         storage,
         indexPatternsService,
         initialContext,
+        options,
       });
     },
 
@@ -160,11 +179,15 @@ export function getIndexPatternDatasource({
       return mergeLayer({
         state: prevState,
         layerId,
-        newLayer: deleteColumn({ layer: prevState.layers[layerId], columnId, indexPattern }),
+        newLayer: deleteColumn({
+          layer: prevState.layers[layerId],
+          columnId,
+          indexPattern,
+        }),
       });
     },
 
-    toExpression,
+    toExpression: (state, layerId) => toExpression(state, layerId, uiSettings),
 
     renderDataPanel(
       domElement: Element,
@@ -173,23 +196,13 @@ export function getIndexPatternDatasource({
       render(
         <I18nProvider>
           <IndexPatternDataPanel
-            changeIndexPattern={(
-              id: string,
-              state: IndexPatternPrivateState,
-              setState: StateSetter<IndexPatternPrivateState>
-            ) => {
-              changeIndexPattern({
-                id,
-                state,
-                setState,
-                onError: onIndexPatternLoadError,
-                storage,
-                indexPatternsService,
-              });
-            }}
+            changeIndexPattern={handleChangeIndexPattern}
             data={data}
             charts={charts}
+            indexPatternFieldEditor={indexPatternFieldEditor}
             {...props}
+            core={core}
+            uiActions={uiActions}
           />
         </I18nProvider>,
         domElement
@@ -310,9 +323,36 @@ export function getIndexPatternDatasource({
         domElement
       );
     },
-
-    canHandleDrop,
+    getDropProps,
     onDrop,
+
+    getCustomWorkspaceRenderer: (state: IndexPatternPrivateState, dragging: DraggingIdentifier) => {
+      if (dragging.field === undefined || dragging.indexPatternId === undefined) {
+        return undefined;
+      }
+
+      const draggedField = dragging as DraggingIdentifier & {
+        field: IndexPatternField;
+        indexPatternId: string;
+      };
+      const geoFieldType =
+        draggedField.field.esTypes &&
+        draggedField.field.esTypes.find((esType) => {
+          return ['geo_point', 'geo_shape'].includes(esType);
+        });
+      return geoFieldType
+        ? () => {
+            return (
+              <GeoFieldWorkspacePanel
+                uiActions={uiActions}
+                fieldType={geoFieldType}
+                indexPatternId={draggedField.indexPatternId}
+                fieldName={draggedField.field.name}
+              />
+            );
+          }
+        : undefined;
+    },
 
     // Reset the temporary invalid state when closing the editor, but don't
     // update the state if it's not needed
@@ -367,11 +407,14 @@ export function getIndexPatternDatasource({
         return;
       }
 
+      // Forward the indexpattern as well, as it is required by some operationType checks
       const layerErrors = Object.values(state.layers).map((layer) =>
-        (getErrorMessages(layer) ?? []).map((message) => ({
-          shortMessage: '', // Not displayed currently
-          longMessage: message,
-        }))
+        (getErrorMessages(layer, state.indexPatterns[layer.indexPatternId]) ?? []).map(
+          (message) => ({
+            shortMessage: '', // Not displayed currently
+            longMessage: message,
+          })
+        )
       );
 
       // Single layer case, no need to explain more
@@ -406,6 +449,10 @@ export function getIndexPatternDatasource({
         });
       });
       return messages.length ? messages : undefined;
+    },
+    checkIntegrity: (state) => {
+      const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
+      return ids.filter((id) => !state.indexPatterns[id]);
     },
   };
 

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function InspectorProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const browser = getService('browser');
   const renderable = getService('renderable');
   const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
@@ -234,18 +233,6 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
 
     public getOpenRequestDetailResponseButton() {
       return testSubjects.find('inspectorRequestDetailResponse');
-    }
-
-    public async getCodeEditorValue() {
-      let request: string = '';
-
-      await retry.try(async () => {
-        request = await browser.execute(
-          () => (window as any).monaco.editor.getModels()[0].getValue() as string
-        );
-      });
-
-      return request;
     }
   }
 

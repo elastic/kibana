@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -35,11 +36,11 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
     it('should handle disable alert request appropriately', async () => {
       const { body: createdAlert } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: true }))
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
       await alertUtils.disable(createdAlert.id);
 
@@ -61,16 +62,47 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
     it(`shouldn't disable alert from another space`, async () => {
       const { body: createdAlert } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.other.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.other.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: true }))
         .expect(200);
-      objectRemover.add(Spaces.other.id, createdAlert.id, 'alert', 'alerts');
+      objectRemover.add(Spaces.other.id, createdAlert.id, 'rule', 'alerting');
 
       await alertUtils.getDisableRequest(createdAlert.id).expect(404, {
         statusCode: 404,
         error: 'Not Found',
         message: `Saved object [alert/${createdAlert.id}] not found`,
+      });
+    });
+
+    describe('legacy', () => {
+      it('should handle disable alert request appropriately', async () => {
+        const { body: createdAlert } = await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestAlertData({ enabled: true }))
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_disable`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
+
+        try {
+          await getScheduledTask(createdAlert.scheduledTaskId);
+          throw new Error('Should have removed scheduled task');
+        } catch (e) {
+          expect(e.status).to.eql(404);
+        }
+
+        // Ensure AAD isn't broken
+        await checkAAD({
+          supertest: supertestWithoutAuth,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdAlert.id,
+        });
       });
     });
   });

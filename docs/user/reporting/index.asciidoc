@@ -11,7 +11,7 @@ saved search, or Canvas workpad. Depending on the object type, you can export th
 a PDF, PNG, or CSV document, which you can keep for yourself, or share with others.
 
 Reporting is available from the *Share* menu
-in *Discover*, *Dashboard*, and *Canvas*.
+in *Discover*, *Dashboard*, *Visualize Library*, and *Canvas*.
 
 [role="screenshot"]
 image::user/reporting/images/share-menu.png["Share"]
@@ -31,38 +31,44 @@ for different operating systems.
 [[reporting-required-privileges]]
 == Roles and privileges
 
-To generate a report, you must have the `reporting_user` role. You also need
-the appropriate {kib} privileges to access the objects that you
-want to report on and the {es} indices.  See <<secure-reporting, Reporting and security>>
-for an example.
+When security is enabled, access to the {report-features} is controlled by security privileges. In versions 7.12 and earlier, you can grant access to the {report-features}
+by assigning users the `reporting_user` role in {es}. In 7.14 and later, you can configure *Reporting* to use
+<<kibana-privileges, {kib} privileges>>. It is recommended that *Reporting* is configured to
+use {kib} privileges by setting <<xpack-reporting-roles-enabled,`xpack.reporting.roles.enabled`>> to `false`. By using {kib} privileges, you can define
+custom roles that grant *Reporting* privileges as sub-features of {kib} applications in *Role Management*.
+
+Users must also have the {kib} privileges to access the saved objects and associated {es} indices included in the generated reports.
+For an example, refer to <<secure-reporting, Reporting and
+security>>.
 
 [float]
 [[manually-generate-reports]]
-== Generate a report manually
+== Manually generate and download reports
 
-. Open the dashboard, visualization, Canvas workpad, or saved search that you want to include in the report.
+Generate and download PDF, PNG, and CSV files of dashboards, visualizations, **Canvas** workpads, and saved searches.
 
-. In the {kib} toolbar, click *Share*.  If you are working in Canvas,
-click the share icon image:user/reporting/images/canvas-share-button.png["Canvas Share button"].
+. Open the dashboard, visualization, **Canvas** workpad, or saved search.
 
-. Select the option appropriate for your object. You can export:
-+
-** A dashboard or visualization as either a PNG or PDF document
-** A Canvas workpad as a PDF document
-** A saved search as a CSV document
+. From the {kib} toolbar, click **Share**, then select one of the following options:
+
+** **PDF Reports** &mdash; Generates a PDF file of the dashboard, visualization, or **Canvas** workpad.
+** **PNG Reports** &mdash; Generates a PNG file of the dashboard or visualization.
+** **CSV Reports** &mdash; Generates a CSV report of the saved search.
 
 . Generate the report.
 +
-A notification appears when the report is complete.
+When the report completes, a notification appears.
 
-NOTE: When you export a data table or saved search from a dashboard report, the PDF includes only the visible data.
+. Click **Download report**.
+
+NOTE: When you create a dashboard report that includes a data table or saved search, the PDF includes only the visible data.
 
 [float]
 [[reporting-layout-sizing]]
 == Layout and sizing
 The layout and size of the PDF or PNG image depends on the {kib} app
-with which the Reporting plugin is integrated. For Canvas, the
-worksheet dimensions determine the size for Reporting. In other apps,
+with which the Reporting plugin is integrated. For *Canvas*, the
+worksheet dimensions determine the size for reports. In other apps,
 the dimensions are taken on the fly by looking at
 the size of the visualization elements or panels on the page.
 
@@ -72,9 +78,9 @@ This resizes the shareable container before generating the
 report, so the desired dimensions are passed in the job parameters.
 
 In the following {kib} dashboard, the shareable container is highlighted.
-The shareable container is captured when you click the
-*Generate* or *Copy POST URL* button. It might take some trial and error
-before you're satisfied with the layout and dimensions in the resulting
+The shareable container is captured when you click
+*Generate* or *Copy POST URL* from the *Share* menu. It might take some trial and error
+before you're satisfied with the layout and dimensions in the
 PNG or PDF image.
 
 [role="screenshot"]
@@ -107,15 +113,8 @@ image::user/reporting/images/canvas-full-page-layout.png["Full Page Layout"]
 == View and manage report history
 
 For a list of your reports, open the main menu, then click *Stack Management > Reporting*.
-From this view, you can monitor the generation of a report and
+From this view, you can monitor the status of a report and
 download reports that you previously generated.
-
-[float]
-[[automatically-generate-reports]]
-== Automatically generate a report
-
-To automatically generate a report from a script or with
-{watcher}, see <<automating-report-generation, Automating report generation>>.
 
 --
 

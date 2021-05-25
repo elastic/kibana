@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useMemo } from 'react';
@@ -34,7 +35,7 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
         title: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetails.agentsSummary.totalTitle',
           {
-            defaultMessage: 'Endpoints',
+            defaultMessage: 'Agents',
           }
         ),
         health: '',
@@ -44,10 +45,20 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
         title: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetails.agentsSummary.onlineTitle',
           {
-            defaultMessage: 'Online',
+            defaultMessage: 'Healthy',
           }
         ),
         health: 'success',
+      },
+      {
+        key: 'error',
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetails.agentsSummary.errorTitle',
+          {
+            defaultMessage: 'Unhealthy',
+          }
+        ),
+        health: 'warning',
       },
       {
         key: 'offline',
@@ -57,17 +68,7 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
             defaultMessage: 'Offline',
           }
         ),
-        health: 'warning',
-      },
-      {
-        key: 'error',
-        title: i18n.translate(
-          'xpack.securitySolution.endpoint.policyDetails.agentsSummary.errorTitle',
-          {
-            defaultMessage: 'Error',
-          }
-        ),
-        health: 'danger',
+        health: 'subdued',
       },
     ];
   }, []);

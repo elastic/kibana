@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { groupBy } from 'lodash';
@@ -88,7 +89,11 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
           tracker.startGetBuffer();
           logger.debug(`Generating PDF Buffer...`);
           buffer = await pdfOutput.getBuffer();
-          logger.debug(`PDF buffer byte length: ${buffer?.byteLength || 0}`);
+
+          const byteLength = buffer?.byteLength ?? 0;
+          logger.debug(`PDF buffer byte length: ${byteLength}`);
+          tracker.setByteLength(byteLength);
+
           tracker.endGetBuffer();
         } catch (err) {
           logger.error(`Could not generate the PDF buffer!`);

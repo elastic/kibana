@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
@@ -62,12 +62,12 @@ export const createVersionCheckPostAuthHandler = (kibanaVersion: string): OnPost
 };
 
 export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPreResponseHandler => {
-  const serverName = config.name;
-  const customHeaders = config.customResponseHeaders;
+  const { name: serverName, securityResponseHeaders, customResponseHeaders } = config;
 
   return (request, response, toolkit) => {
     const additionalHeaders = {
-      ...customHeaders,
+      ...securityResponseHeaders,
+      ...customResponseHeaders,
       [KIBANA_NAME_HEADER]: serverName,
     };
 

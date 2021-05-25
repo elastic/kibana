@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -24,11 +25,11 @@ export default function getActionTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle get action request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -40,7 +41,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
+            .get(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -61,8 +62,9 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 id: createdAction.id,
-                isPreconfigured: false,
-                actionTypeId: 'test.index-record',
+                is_preconfigured: false,
+                connector_type_id: 'test.index-record',
+                is_missing_secrets: false,
                 name: 'My action',
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
@@ -76,11 +78,11 @@ export default function getActionTests({ getService }: FtrProviderContext) {
 
         it(`action shouldn't be acessible from another space`, async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -92,7 +94,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('other')}/api/actions/action/${createdAction.id}`)
+            .get(`${getUrlPrefix('other')}/api/actions/connector/${createdAction.id}`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -124,7 +126,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
 
         it('should handle get preconfigured action request appropriately', async () => {
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/actions/action/my-slack1`)
+            .get(`${getUrlPrefix(space.id)}/api/actions/connector/my-slack1`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -145,9 +147,9 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 id: 'my-slack1',
-                actionTypeId: '.slack',
+                connector_type_id: '.slack',
                 name: 'Slack#xyz',
-                isPreconfigured: true,
+                is_preconfigured: true,
               });
               break;
             default:

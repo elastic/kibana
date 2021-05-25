@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -21,11 +22,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const find = getService('find');
   const supertest = getService('supertest');
+  const comboBox = getService('comboBox');
   const objectRemover = new ObjectRemover(supertest);
 
   async function createActionManualCleanup(overwrites: Record<string, any> = {}) {
     const { body: createdAction } = await supertest
-      .post(`/api/actions/action`)
+      .post(`/api/actions/connector`)
       .set('kbn-xsrf', 'foo')
       .send(getTestActionData(overwrites))
       .expect(200);
@@ -40,7 +42,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
-      .post(`/api/alerts/alert`)
+      .post(`/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(getTestAlertData(overwrites))
       .expect(200);
@@ -50,11 +52,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createAlwaysFiringAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
-      .post(`/api/alerts/alert`)
+      .post(`/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(
         getTestAlertData({
-          alertTypeId: 'test.always-firing',
+          rule_type_id: 'test.always-firing',
           ...overwrites,
         })
       )
@@ -91,14 +93,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function getAlertInstanceSummary(alertId: string) {
     const { body: summary } = await supertest
-      .get(`/api/alerts/alert/${alertId}/_instance_summary`)
+      .get(`/internal/alerting/rule/${encodeURIComponent(alertId)}/_alert_summary`)
       .expect(200);
     return summary;
   }
 
   async function muteAlertInstance(alertId: string, alertInstanceId: string) {
     const { body: response } = await supertest
-      .post(`/api/alerts/alert/${alertId}/alert_instance/${alertInstanceId}/_mute`)
+      .post(
+        `/api/alerting/rule/${encodeURIComponent(alertId)}/alert/${encodeURIComponent(
+          alertInstanceId
+        )}/_mute`
+      )
       .set('kbn-xsrf', 'foo')
       .expect(204);
 
@@ -219,7 +225,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await createAlwaysFiringAlert({
           name: alertName,
-          alertTypeId: '.index-threshold',
+          rule_type_id: '.index-threshold',
           params: {
             aggType: 'count',
             termSize: 5,
@@ -228,7 +234,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             timeWindowUnit: 'm',
             groupBy: 'all',
             threshold: [1000, 5000],
-            index: ['.kibana_1'],
+            index: '.kibana_1',
             timeField: 'alert',
           },
           actions: [
@@ -313,13 +319,68 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Edit alert with deleted connector', function () {
       const testRunUuid = uuid.v4();
 
-      after(async () => {
+      afterEach(async () => {
         await objectRemover.removeAll();
       });
 
-      it('should show and update deleted connectors', async () => {
+      it('should show and update deleted connectors when there are existing connectors of the same type', async () => {
         const action = await createActionManualCleanup({
           name: `slack-${testRunUuid}-${0}`,
+        });
+
+        await pageObjects.common.navigateToApp('triggersActions');
+        const alert = await createAlwaysFiringAlert({
+          name: testRunUuid,
+          actions: [
+            {
+              group: 'default',
+              id: action.id,
+              params: { level: 'info', message: ' {{context.message}}' },
+            },
+          ],
+        });
+
+        // refresh to see alert
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // delete connector
+        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.triggersActionsUI.searchConnectors(action.name);
+        await testSubjects.click('deleteConnector');
+        await testSubjects.existOrFail('deleteIdsConfirmation');
+        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
+
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql('Deleted 1 connector');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        const editButton = await testSubjects.find('openEditAlertFlyoutButton');
+        await editButton.click();
+        expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
+
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(false);
+        expect(await testSubjects.exists('alertActionAccordion-0')).to.eql(true);
+
+        await comboBox.set('selectActionConnector-.slack-0', 'Slack#xyztest (preconfigured)');
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(true);
+      });
+
+      it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
+        const action = await createActionManualCleanup({
+          name: `index-${testRunUuid}-${0}`,
+          connector_type_id: '.index',
+          config: {
+            index: `index-${testRunUuid}-${0}`,
+          },
+          secrets: {},
         });
 
         await pageObjects.common.navigateToApp('triggersActions');
@@ -358,7 +419,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // click on first alert
-        await pageObjects.triggersActionsUI.changeTabs('alertsTab');
+        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
@@ -373,7 +434,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('createActionConnectorButton-0');
         await testSubjects.existOrFail('connectorAddModal');
         await testSubjects.setValue('nameInput', 'new connector');
-        await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+        await retry.try(async () => {
+          // At times we find the driver controlling the ComboBox in tests
+          // can select the wrong item, this ensures we always select the correct index
+          await comboBox.set('connectorIndexesComboBox', 'test-index');
+          expect(
+            await comboBox.isOptionSelected(
+              await testSubjects.find('connectorIndexesComboBox'),
+              'test-index'
+            )
+          ).to.be(true);
+        });
         await testSubjects.click('connectorAddModal > saveActionButtonModal');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 
@@ -413,7 +484,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.alertDetailsUI.clickViewInApp();
 
-        expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Alert ${alert.id}`);
+        expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Rule ${alert.id}`);
       });
 
       it('renders a disabled alert details view in app button', async () => {
@@ -459,7 +530,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+          const { alerts: alertInstances } = await getAlertInstanceSummary(alert.id);
           expect(Object.keys(alertInstances).length).to.eql(instances.length);
         });
       });
@@ -485,12 +556,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const summary = await getAlertInstanceSummary(alert.id);
         const dateOnAllInstancesFromApiResponse: Record<string, string> = mapValues(
-          summary.instances,
+          summary.alerts,
           (instance) => instance.activeStartDate
         );
 
         const actionGroupNameOnAllInstancesFromApiResponse = mapValues(
-          summary.instances,
+          summary.alerts,
           (instance) => {
             const name = actionGroupNameFromId(instance.actionGroupId);
             return name ? ` (${name})` : '';
@@ -573,18 +644,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the muted inactive alert instances', async () => {
         // mute an alert instance that doesn't exist
-        await muteAlertInstance(alert.id, 'eu-east');
+        await muteAlertInstance(alert.id, 'eu/east');
 
         // refresh to see alert
         await browser.refresh();
 
         const instancesList: any[] = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(
-          instancesList.filter((alertInstance) => alertInstance.instance === 'eu-east')
+          instancesList.filter((alertInstance) => alertInstance.instance === 'eu/east')
         ).to.eql([
           {
-            instance: 'eu-east',
-            status: 'OK',
+            instance: 'eu/east',
+            status: 'Recovered',
             start: '',
             duration: '',
           },
@@ -626,14 +697,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('allows the user unmute an inactive instance', async () => {
-        log.debug(`Ensuring eu-east is muted`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('eu-east', true);
+        log.debug(`Ensuring eu/east is muted`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('eu/east', true);
 
-        log.debug(`Unmuting eu-east`);
-        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('eu-east');
+        log.debug(`Unmuting eu/east`);
+        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('eu/east');
 
-        log.debug(`Ensuring eu-east is removed from list`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceExistance('eu-east', false);
+        log.debug(`Ensuring eu/east is removed from list`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceExistance('eu/east', false);
       });
     });
 
@@ -657,7 +728,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+          const { alerts: alertInstances } = await getAlertInstanceSummary(alert.id);
           expect(Object.keys(alertInstances).length).to.eql(instances.length);
         });
 
@@ -682,7 +753,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+        const { alerts: alertInstances } = await getAlertInstanceSummary(alert.id);
 
         const items = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(items.length).to.eql(PAGE_SIZE);
@@ -695,7 +766,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+        const { alerts: alertInstances } = await getAlertInstanceSummary(alert.id);
 
         await pageObjects.alertDetailsUI.clickPaginationNextPage();
 

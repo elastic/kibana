@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Unit } from '@elastic/datemath';
 import { EuiSelectOption } from '@elastic/eui';
 
+import { Type, Language } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 import { ESQuery } from '../../../../../common/typed_json';
-import { Language, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { FieldValueQueryBar } from '../query_bar';
 import { formatDate } from '../../../../common/components/super_date_picker';
 import { getInfoFromQueryBar, getTimeframeOptions } from './helpers';
@@ -129,7 +131,8 @@ export const queryPreviewReducer = () => (state: State, action: Action): State =
       const thresholdField =
         action.threshold != null &&
         action.threshold.field != null &&
-        action.threshold.field.trim() !== '';
+        action.threshold.field.length > 0 &&
+        action.threshold.field.every((field) => field.trim() !== '');
       const showNonEqlHist =
         action.ruleType === 'query' ||
         action.ruleType === 'saved_query' ||

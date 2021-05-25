@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -29,6 +30,7 @@ export async function getStats(req, apmIndexPattern, clusterUuid) {
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
   const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const cgroup = config.get('monitoring.ui.container.apm.enabled');
 
   const params = {
     index: apmIndexPattern,
@@ -41,7 +43,7 @@ export async function getStats(req, apmIndexPattern, clusterUuid) {
         end,
         clusterUuid,
       }),
-      aggs: apmUuidsAgg(maxBucketSize),
+      aggs: apmUuidsAgg(maxBucketSize, cgroup),
     },
   };
 

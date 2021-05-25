@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
-import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
-import {
+import type {
+  Type,
+  ListSchema,
   ListItemSchema,
   ExceptionListSchema,
   ExceptionListItemSchema,
-  Type,
-} from '../../plugins/lists/common/schemas';
-import { ListSchema } from '../../plugins/lists/common';
-import { LIST_INDEX, LIST_ITEM_URL } from '../../plugins/lists/common/constants';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_INDEX, LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
 import { countDownES, countDownTest } from '../detection_engine_api_integration/utils';
 
 /**
@@ -156,10 +157,11 @@ export const binaryToString = (res: any, callback: any): void => {
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllExceptions = async (es: Client): Promise<void> => {
+export const deleteAllExceptions = async (es: KibanaClient): Promise<void> => {
   return countDownES(async () => {
     return es.deleteByQuery({
       index: '.kibana',
+      // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
       q: 'type:exception-list or type:exception-list-agnostic',
       wait_for_completion: true,
       refresh: true,

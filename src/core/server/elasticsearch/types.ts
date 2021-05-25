@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
@@ -36,6 +36,7 @@ export interface ElasticsearchServiceSetup {
     readonly config$: Observable<ElasticsearchConfig>;
     /**
      * @deprecated
+     * @removeBy 7.16
      * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.createClient} instead.
      *
      * Create application specific Elasticsearch cluster API client with customized config. See {@link ILegacyClusterClient}.
@@ -60,6 +61,7 @@ export interface ElasticsearchServiceSetup {
     ) => ILegacyCustomClusterClient;
 
     /**
+     * @removeBy 7.16
      * @deprecated
      * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.client} instead.
      *
@@ -131,6 +133,9 @@ export interface ElasticsearchServiceStart {
     /**
      * Create application specific Elasticsearch cluster API client with customized config. See {@link ILegacyClusterClient}.
      *
+     * @deprecated
+     * @removeBy 7.16
+     *
      * @param type Unique identifier of the client
      * @param clientConfig A config consists of Elasticsearch JS client options and
      * valid sub-set of Elasticsearch service config.
@@ -153,6 +158,9 @@ export interface ElasticsearchServiceStart {
     /**
      * A pre-configured {@link ILegacyClusterClient | legacy Elasticsearch client}.
      *
+     * @deprecated
+     * @removeBy 7.16
+     *
      * @example
      * ```js
      * const client = core.elasticsearch.legacy.client;
@@ -171,6 +179,7 @@ export type InternalElasticsearchServiceStart = ElasticsearchServiceStart;
 export interface ElasticsearchStatusMeta {
   warningNodes: NodesVersionCompatibility['warningNodes'];
   incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
+  nodesInfoRequestError?: NodesVersionCompatibility['nodesInfoRequestError'];
 }
 
 /**

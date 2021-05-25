@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MouseEventHandler, useCallback } from 'react';
@@ -12,7 +13,7 @@ type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElem
 
 /**
  * Provides an event handler that can be used with (for example) `onClick` props to prevent the
- * event's default behaviour and instead navigate to to a route via the Router
+ * event's default behaviour and instead navigate to a route via the Router
  *
  * @param routeTo
  * @param onClick

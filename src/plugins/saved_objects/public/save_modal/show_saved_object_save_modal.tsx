@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -31,7 +31,8 @@ interface MinimalSaveModalProps {
 
 export function showSaveModal(
   saveModal: React.ReactElement<MinimalSaveModalProps>,
-  I18nContext: I18nStart['Context']
+  I18nContext: I18nStart['Context'],
+  Wrapper?: React.FC
 ) {
   const container = document.createElement('div');
   const closeModal = () => {
@@ -55,5 +56,13 @@ export function showSaveModal(
     onClose: closeModal,
   });
 
-  ReactDOM.render(<I18nContext>{element}</I18nContext>, container);
+  const wrappedElement = Wrapper ? (
+    <I18nContext>
+      <Wrapper>{element}</Wrapper>
+    </I18nContext>
+  ) : (
+    <I18nContext>{element}</I18nContext>
+  );
+
+  ReactDOM.render(wrappedElement, container);
 }

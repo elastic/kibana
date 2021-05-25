@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexItem, EuiText, EuiFlexGroup, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 import { partition } from 'lodash';
-import { ActionGroup, getBuiltinActionGroups } from '../../../../../alerts/common';
+import { ActionGroup, getBuiltinActionGroups } from '../../../../../alerting/common';
 
 const BUILT_IN_ACTION_GROUPS: Set<string> = new Set(getBuiltinActionGroups().map(({ id }) => id));
 
@@ -122,3 +124,6 @@ export const AlertConditions = <ConditionProps extends any, ActionGroupIds exten
     </EuiFlexGroup>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertConditions as default };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -11,6 +12,7 @@ import * as i18n from './translations';
 
 import { ExportDocumentsProps } from '../../../detections/containers/detection_engine/rules';
 import { useStateToaster, errorToToaster } from '../toasters';
+import { TimelineErrorResponse } from '../../../../common/types/timeline';
 
 const InvisibleAnchor = styled.a`
   display: none;
@@ -21,7 +23,7 @@ export type ExportSelectedData = ({
   filename,
   ids,
   signal,
-}: ExportDocumentsProps) => Promise<Blob>;
+}: ExportDocumentsProps) => Promise<Blob | TimelineErrorResponse>;
 
 export interface GenericDownloaderProps {
   filename: string;

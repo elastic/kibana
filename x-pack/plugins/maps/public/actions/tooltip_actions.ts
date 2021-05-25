@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
-import uuid from 'uuid/v4';
 import { Dispatch } from 'redux';
 import { Feature } from 'geojson';
 import { getOpenTooltips } from '../selectors/map_selectors';
@@ -35,11 +35,7 @@ export function openOnClickTooltip(tooltipState: TooltipState) {
       );
     });
 
-    openTooltips.push({
-      ...tooltipState,
-      isLocked: true,
-      id: uuid(),
-    });
+    openTooltips.push(tooltipState);
 
     dispatch({
       type: SET_OPEN_TOOLTIPS,
@@ -62,13 +58,7 @@ export function closeOnHoverTooltip() {
 export function openOnHoverTooltip(tooltipState: TooltipState) {
   return {
     type: SET_OPEN_TOOLTIPS,
-    openTooltips: [
-      {
-        ...tooltipState,
-        isLocked: false,
-        id: uuid(),
-      },
-    ],
+    openTooltips: [tooltipState],
   };
 }
 

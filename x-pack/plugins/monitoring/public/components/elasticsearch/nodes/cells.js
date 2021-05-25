@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -10,10 +11,9 @@ import { formatMetric } from '../../../lib/format_number';
 import {
   EuiText,
   EuiPopover,
-  EuiIcon,
+  EuiButtonIcon,
   EuiDescriptionList,
   EuiSpacer,
-  EuiKeyboardAccessible,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -39,7 +39,7 @@ const getDirection = (slope) => {
 
 const getIcon = (slope) => {
   if (slope || slope === 0) {
-    return slope > 0 ? 'arrowUp' : 'arrowDown';
+    return slope > 0 ? 'sortUp' : 'sortDown';
   }
   return null;
 };
@@ -82,17 +82,22 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
       },
     ];
 
+    const iconLabel = i18n.translate(
+      'xpack.monitoring.elasticsearch.node.cells.tooltip.iconLabel',
+      {
+        defaultMessage: 'More information about this metric',
+      }
+    );
+
     const button = (
-      <EuiKeyboardAccessible>
-        <EuiIcon
-          onClick={onButtonClick}
-          type={getIcon(slope)}
-          data-test-subj={`monitoringCellIcon-${props['data-test-subj']}`}
-          title={i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.iconLabel', {
-            defaultMessage: 'More information about this metric',
-          })}
-        />
-      </EuiKeyboardAccessible>
+      <EuiButtonIcon
+        color="text"
+        onClick={onButtonClick}
+        iconType={getIcon(slope)}
+        data-test-subj={`monitoringCellIcon-${props['data-test-subj']}`}
+        title={iconLabel}
+        aria-label={iconLabel}
+      />
     );
 
     return (

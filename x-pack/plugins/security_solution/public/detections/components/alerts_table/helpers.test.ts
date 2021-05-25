@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TimelineType } from '../../../../common/types/timeline';
@@ -28,6 +29,7 @@ describe('helpers', () => {
         {
           field: 'x',
           values: ['The nickname of the developer we all :heart:'],
+          isObjectArray: false,
           originalValue: 'The nickname of the developer we all :heart:',
         },
       ]);
@@ -39,6 +41,7 @@ describe('helpers', () => {
         {
           field: 'x',
           values: ['The nickname of the developer we all :heart:'],
+          isObjectArray: false,
           originalValue: 'The nickname of the developer we all :heart:',
         },
       ]);
@@ -50,6 +53,7 @@ describe('helpers', () => {
         {
           field: 'x',
           values: ['The nickname of the developer we all :heart:', 'We are all made of stars'],
+          isObjectArray: false,
           originalValue: 'The nickname of the developer we all :heart:',
         },
       ]);
@@ -64,6 +68,7 @@ describe('helpers', () => {
         {
           field: 'x.y.z',
           values: ['zed'],
+          isObjectArray: false,
           originalValue: 'zed',
         },
       ]);
@@ -75,6 +80,7 @@ describe('helpers', () => {
         {
           field: 'x.y.z',
           values: ['zed'],
+          isObjectArray: false,
           originalValue: 'zed',
         },
       ]);
@@ -89,6 +95,7 @@ describe('helpers', () => {
           {
             field: 'a',
             values: (5 as unknown) as string[],
+            isObjectArray: false,
             originalValue: 'zed',
           },
         ],
@@ -103,7 +110,7 @@ describe('helpers', () => {
         'when trying to access field:',
         'a',
         'from data object of:',
-        [{ field: 'a', originalValue: 'zed', values: 5 }]
+        [{ field: 'a', isObjectArray: false, originalValue: 'zed', values: 5 }]
       );
     });
 
@@ -115,6 +122,7 @@ describe('helpers', () => {
           {
             field: 'a',
             values: (['hi', 5] as unknown) as string[],
+            isObjectArray: false,
             originalValue: 'zed',
           },
         ],
@@ -129,7 +137,7 @@ describe('helpers', () => {
         'when trying to access field:',
         'a',
         'from data object of:',
-        [{ field: 'a', originalValue: 'zed', values: ['hi', 5] }]
+        [{ field: 'a', isObjectArray: false, originalValue: 'zed', values: ['hi', 5] }]
       );
     });
   });

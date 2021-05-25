@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ILegacyClusterClient, Logger } from '../../../../../src/core/server';
+import type { ElasticsearchClient, Logger } from 'src/core/server';
+
 import type { AuthenticationInfo } from '../elasticsearch';
-import { getErrorStatusCode } from '../errors';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
 /**
  * Represents a pair of access and refresh tokens.
@@ -42,9 +44,7 @@ export class Tokens {
    */
   private readonly logger: Logger;
 
-  constructor(
-    private readonly options: Readonly<{ client: ILegacyClusterClient; logger: Logger }>
-  ) {
+  constructor(private readonly options: Readonly<{ client: ElasticsearchClient; logger: Logger }>) {
     this.logger = options.logger;
   }
 
@@ -59,15 +59,25 @@ export class Tokens {
         access_token: accessToken,
         refresh_token: refreshToken,
         authentication: authenticationInfo,
-      } = await this.options.client.callAsInternalUser('shield.getAccessToken', {
-        body: { grant_type: 'refresh_token', refresh_token: existingRefreshToken },
-      });
+      } = (
+        await this.options.client.security.getToken({
+          body: {
+            grant_type: 'refresh_token',
+            refresh_token: existingRefreshToken,
+          },
+        })
+      ).body;
 
       this.logger.debug('Access token has been successfully refreshed.');
 
-      return { accessToken, refreshToken, authenticationInfo };
+      return {
+        accessToken,
+        refreshToken,
+        // @ts-expect-error @elastic/elasticsearch declared GetUserAccessTokenResponse.authentication: string
+        authenticationInfo: authenticationInfo as AuthenticationInfo,
+      };
     } catch (err) {
-      this.logger.debug(`Failed to refresh access token: ${err.message}`);
+      this.logger.debug(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
 
       // There are at least two common cases when refresh token request can fail:
       // 1. Refresh token is valid only for 24 hours and if it hasn't been used it expires.
@@ -108,12 +118,12 @@ export class Tokens {
       let invalidatedTokensCount;
       try {
         invalidatedTokensCount = (
-          await this.options.client.callAsInternalUser('shield.deleteAccessToken', {
+          await this.options.client.security.invalidateToken<{ invalidated_tokens: number }>({
             body: { refresh_token: refreshToken },
           })
-        ).invalidated_tokens;
+        ).body.invalidated_tokens;
       } catch (err) {
-        this.logger.debug(`Failed to invalidate refresh token: ${err.message}`);
+        this.logger.debug(`Failed to invalidate refresh token: ${getDetailedErrorMessage(err)}`);
 
         // When using already deleted refresh token, Elasticsearch responds with 404 and a body that
         // shows that no tokens were invalidated.
@@ -140,12 +150,12 @@ export class Tokens {
       let invalidatedTokensCount;
       try {
         invalidatedTokensCount = (
-          await this.options.client.callAsInternalUser('shield.deleteAccessToken', {
+          await this.options.client.security.invalidateToken<{ invalidated_tokens: number }>({
             body: { token: accessToken },
           })
-        ).invalidated_tokens;
+        ).body.invalidated_tokens;
       } catch (err) {
-        this.logger.debug(`Failed to invalidate access token: ${err.message}`);
+        this.logger.debug(`Failed to invalidate access token: ${getDetailedErrorMessage(err)}`);
 
         // When using already deleted access token, Elasticsearch responds with 404 and a body that
         // shows that no tokens were invalidated.

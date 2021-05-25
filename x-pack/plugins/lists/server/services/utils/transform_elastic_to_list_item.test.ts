@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
+import type { ListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
-import { ListItemArraySchema } from '../../../common/schemas';
+import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import {
   transformElasticHitsToListItem,

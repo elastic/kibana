@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 const bucketsA = [
@@ -12,7 +13,7 @@ const bucketsA = [
   {
     doc_count: 3,
     aggregatedValue: { value: 1.0, values: [{ key: 95.0, value: 1.0 }] },
-    key_as_string: new Date(1577858400000).toISOString(),
+    to_as_string: new Date(1577858400000).toISOString(),
   },
 ];
 
@@ -44,6 +45,7 @@ const previewBucketsWithNulls = [
   ...Array.from(Array(10), (_, i) => ({ aggregatedValue: { value: null } })),
   ...previewBucketsA.slice(10),
 ];
+const previewBucketsRepeat = Array.from(Array(60), (_, i) => bucketsA[Math.max(0, (i % 3) - 1)]);
 
 export const basicMetricResponse = {
   aggregations: {
@@ -170,6 +172,14 @@ export const alternateMetricPreviewResponse = {
   aggregations: {
     aggregatedIntervals: {
       buckets: previewBucketsWithNulls,
+    },
+  },
+};
+
+export const repeatingMetricPreviewResponse = {
+  aggregations: {
+    aggregatedIntervals: {
+      buckets: previewBucketsRepeat,
     },
   },
 };

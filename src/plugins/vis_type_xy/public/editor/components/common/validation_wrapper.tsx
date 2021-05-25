@@ -1,21 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
 
-import { VisOptionsProps } from '../../../../../vis_default_editor/public';
+import { VisEditorOptionsProps } from '../../../../../visualizations/public';
 
-export interface ValidationVisOptionsProps<T, E = unknown> extends VisOptionsProps<T> {
+export interface ValidationVisOptionsProps<T, E = unknown> extends VisEditorOptionsProps<T> {
   setMultipleValidity(paramName: string, isValid: boolean): void;
   extraProps?: E;
 }
 
-interface ValidationWrapperProps<T, E> extends VisOptionsProps<T> {
+interface ValidationWrapperProps<T, E> extends VisEditorOptionsProps<T> {
   component: React.ComponentType<ValidationVisOptionsProps<T, E>>;
   extraProps?: E;
 }

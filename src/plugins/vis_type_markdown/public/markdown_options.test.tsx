@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { MarkdownVisParams } from './types';
 import { MarkdownOptions } from './markdown_options';
 
@@ -21,7 +21,7 @@ describe('MarkdownOptions', () => {
       openLinksInNewTab: false,
     },
     setValue: jest.fn(),
-  } as unknown) as VisOptionsProps<MarkdownVisParams>;
+  } as unknown) as VisEditorOptionsProps<MarkdownVisParams>;
 
   it('should match snapshot', () => {
     const comp = shallow(<MarkdownOptions {...props} />);

@@ -381,6 +381,50 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
               },
             },
           },
+          "nestedField": Object {
+            "fields": Object {
+              "nestedField.firstAttributes": Object {
+                "aggregatable": false,
+                "category": "nestedField",
+                "description": "",
+                "example": "",
+                "format": "",
+                "indexes": Array [
+                  "auditbeat",
+                  "filebeat",
+                  "packetbeat",
+                ],
+                "name": "nestedField.firstAttributes",
+                "searchable": true,
+                "subType": Object {
+                  "nested": Object {
+                    "path": "nestedField",
+                  },
+                },
+                "type": "string",
+              },
+              "nestedField.secondAttributes": Object {
+                "aggregatable": false,
+                "category": "nestedField",
+                "description": "",
+                "example": "",
+                "format": "",
+                "indexes": Array [
+                  "auditbeat",
+                  "filebeat",
+                  "packetbeat",
+                ],
+                "name": "nestedField.secondAttributes",
+                "searchable": true,
+                "subType": Object {
+                  "nested": Object {
+                    "path": "nestedField",
+                  },
+                },
+                "type": "string",
+              },
+            },
+          },
           "source": Object {
             "fields": Object {
               "source.ip": Object {

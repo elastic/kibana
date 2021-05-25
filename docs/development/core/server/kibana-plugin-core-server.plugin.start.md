@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+start(core: CoreStart, plugins: TPluginsStart): TStart;
 ```
 
 ## Parameters
@@ -19,5 +19,5 @@ start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
 
 <b>Returns:</b>
 
-`TStart | Promise<TStart>`
+`TStart`
 

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { ReactElement, Component } from 'react';
@@ -57,10 +57,11 @@ export class CreateIndexPatternWizard extends Component<
     context.services.setBreadcrumbs(getCreateBreadcrumbs());
 
     const type = new URLSearchParams(props.location.search).get('type') || undefined;
+    const indexPattern = new URLSearchParams(props.location.search).get('name') || '';
 
     this.state = {
       step: 1,
-      indexPattern: '',
+      indexPattern,
       allIndices: [],
       remoteClustersExist: false,
       isInitiallyLoadingIndices: true,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export interface PackagePolicyPackage {
@@ -13,12 +14,14 @@ export interface PackagePolicyPackage {
 export interface PackagePolicyConfigRecordEntry {
   type?: string;
   value?: any;
+  frozen?: boolean;
 }
 
 export type PackagePolicyConfigRecord = Record<string, PackagePolicyConfigRecordEntry>;
 
 export interface NewPackagePolicyInputStream {
   enabled: boolean;
+  keep_enabled?: boolean;
   data_stream: {
     dataset: string;
     type: string;
@@ -35,6 +38,7 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 export interface NewPackagePolicyInput {
   type: string;
   enabled: boolean;
+  keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];

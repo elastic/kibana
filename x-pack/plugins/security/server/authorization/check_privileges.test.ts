@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uniq } from 'lodash';
+
+import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
-import { HasPrivilegesResponse } from './types';
-
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import type { HasPrivilegesResponse } from './types';
 
 const application = 'kibana-our_application';
 
@@ -66,8 +68,8 @@ describe('#atSpace', () => {
 
     const expectedIndexPrivilegePayload = Object.entries(
       options.elasticsearchPrivileges?.index ?? {}
-    ).map(([names, indexPrivileges]) => ({
-      names,
+    ).map(([name, indexPrivileges]) => ({
+      names: [name],
       privileges: indexPrivileges,
     }));
 
@@ -76,7 +78,7 @@ describe('#atSpace', () => {
       body: {
         cluster: options.elasticsearchPrivileges?.cluster,
         index: expectedIndexPrivilegePayload,
-        applications: [
+        application: [
           {
             application,
             resources: [`space:${options.spaceId}`],
@@ -315,7 +317,7 @@ describe('#atSpace', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_1" fails because ["saved_object:bar-type/get" is not allowed]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
       );
     });
 
@@ -337,7 +339,7 @@ describe('#atSpace', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_1" fails because [child "saved_object:foo-type/get" fails because ["saved_object:foo-type/get" is required]]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
       );
     });
   });
@@ -912,8 +914,8 @@ describe('#atSpaces', () => {
 
     const expectedIndexPrivilegePayload = Object.entries(
       options.elasticsearchPrivileges?.index ?? {}
-    ).map(([names, indexPrivileges]) => ({
-      names,
+    ).map(([name, indexPrivileges]) => ({
+      names: [name],
       privileges: indexPrivileges,
     }));
 
@@ -922,7 +924,7 @@ describe('#atSpaces', () => {
       body: {
         cluster: options.elasticsearchPrivileges?.cluster,
         index: expectedIndexPrivilegePayload,
-        applications: [
+        application: [
           {
             application,
             resources: options.spaceIds.map((spaceId) => `space:${spaceId}`),
@@ -1091,7 +1093,7 @@ describe('#atSpaces', () => {
       },
     });
     expect(result).toMatchInlineSnapshot(
-      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_1" fails because [child "mock-action:version" fails because ["mock-action:version" is required]]]]]`
+      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
     );
   });
 
@@ -1378,7 +1380,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_2" fails because ["space:space_2" is required]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
       );
     });
 
@@ -1406,7 +1408,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_2" fails because ["space:space_2" is required]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
       );
     });
 
@@ -1439,7 +1441,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because ["space:space_3" is not allowed]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
       );
     });
 
@@ -1462,7 +1464,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_2" fails because ["space:space_2" is required]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
       );
     });
   });
@@ -2116,8 +2118,8 @@ describe('#globally', () => {
 
     const expectedIndexPrivilegePayload = Object.entries(
       options.elasticsearchPrivileges?.index ?? {}
-    ).map(([names, indexPrivileges]) => ({
-      names,
+    ).map(([name, indexPrivileges]) => ({
+      names: [name],
       privileges: indexPrivileges,
     }));
 
@@ -2126,7 +2128,7 @@ describe('#globally', () => {
       body: {
         cluster: options.elasticsearchPrivileges?.cluster,
         index: expectedIndexPrivilegePayload,
-        applications: [
+        application: [
           {
             application,
             resources: [GLOBAL_RESOURCE],
@@ -2265,7 +2267,7 @@ describe('#globally', () => {
       },
     });
     expect(result).toMatchInlineSnapshot(
-      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "*" fails because [child "mock-action:version" fails because ["mock-action:version" is required]]]]]`
+      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
     );
   });
 
@@ -2383,7 +2385,7 @@ describe('#globally', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "*" fails because ["saved_object:bar-type/get" is not allowed]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
       );
     });
 
@@ -2404,7 +2406,7 @@ describe('#globally', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "*" fails because [child "saved_object:foo-type/get" fails because ["saved_object:foo-type/get" is required]]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
       );
     });
   });

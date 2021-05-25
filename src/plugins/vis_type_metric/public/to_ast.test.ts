@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { TimefilterContract } from 'src/plugins/data/public';
+import { Vis } from 'src/plugins/visualizations/public';
+
 import { toExpressionAst } from './to_ast';
-import { Vis } from '../../visualizations/public';
+import { VisParams } from './types';
 
 describe('metric vis toExpressionAst function', () => {
-  let vis: Vis;
+  let vis: Vis<VisParams>;
 
   beforeEach(() => {
-    vis = {
+    vis = ({
       isHierarchical: () => false,
       type: {},
       params: {
@@ -26,18 +29,22 @@ describe('metric vis toExpressionAst function', () => {
           aggs: [],
         } as any,
       },
-    } as any;
+    } as unknown) as Vis<VisParams>;
   });
 
   it('without params', () => {
-    vis.params = { metric: {} };
-    const actual = toExpressionAst(vis, {});
+    vis.params = { metric: {} } as VisParams;
+    const actual = toExpressionAst(vis, {
+      timefilter: {} as TimefilterContract,
+    });
     expect(actual).toMatchSnapshot();
   });
 
   it('with percentage mode should have percentage format', () => {
-    vis.params = { metric: { percentageMode: true } };
-    const actual = toExpressionAst(vis, {});
+    vis.params = { metric: { percentageMode: true } } as VisParams;
+    const actual = toExpressionAst(vis, {
+      timefilter: {} as TimefilterContract,
+    });
     expect(actual).toMatchSnapshot();
   });
 });

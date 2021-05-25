@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
@@ -27,6 +27,8 @@ interface State {
 }
 
 class FilterOptionsUI extends Component<Props, State> {
+  private buttonRef = React.createRef<HTMLButtonElement>();
+
   public state: State = {
     isPopoverOpen: false,
   };
@@ -39,6 +41,7 @@ class FilterOptionsUI extends Component<Props, State> {
 
   public closePopover = () => {
     this.setState({ isPopoverOpen: false });
+    this.buttonRef.current?.focus();
   };
 
   public render() {
@@ -151,13 +154,14 @@ class FilterOptionsUI extends Component<Props, State> {
               defaultMessage: 'Change all filters',
             })}
             data-test-subj="showFilterActions"
+            buttonRef={this.buttonRef}
           />
         }
         anchorPosition="rightUp"
         panelPaddingSize="none"
         repositionOnScroll
       >
-        <EuiPopoverTitle>
+        <EuiPopoverTitle paddingSize="m">
           <FormattedMessage
             id="data.filter.searchBar.changeAllFiltersTitle"
             defaultMessage="Change all filters"

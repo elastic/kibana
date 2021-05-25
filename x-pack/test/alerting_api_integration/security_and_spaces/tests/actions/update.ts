@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -24,11 +25,11 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle update action request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -40,7 +41,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -71,8 +72,9 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 id: createdAction.id,
-                isPreconfigured: false,
-                actionTypeId: 'test.index-record',
+                is_preconfigured: false,
+                connector_type_id: 'test.index-record',
+                is_missing_secrets: false,
                 name: 'My action updated',
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
@@ -93,11 +95,11 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't update action from another space`, async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -109,7 +111,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix('other')}/api/actions/action/${createdAction.id}`)
+            .put(`${getUrlPrefix('other')}/api/actions/connector/${createdAction.id}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -151,7 +153,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it('should handle update action request appropriately when passing a null config', async () => {
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/actions/action/1`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/connector/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -181,7 +183,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it(`should handle update action request appropriately when action doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/actions/action/1`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/connector/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -223,7 +225,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it('should handle update action request appropriately when payload is empty and invalid', async () => {
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/actions/action/1`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/connector/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({});
@@ -251,11 +253,11 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it('should handle update action request appropriately when secrets are not valid', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -267,7 +269,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -310,7 +312,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't update action from preconfigured list`, async () => {
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/actions/action/custom-system-abc-connector`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/connector/custom-system-abc-connector`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({

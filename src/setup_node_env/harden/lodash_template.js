@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 var hook = require('require-in-the-middle');
 var isIterateeCall = require('lodash/_isIterateeCall');
 
 hook(['lodash'], function (lodash) {
+  // we use lodash.template here to harden third-party usage of this otherwise banned function.
+  // eslint-disable-next-line no-restricted-properties
   lodash.template = createProxy(lodash.template);
   return lodash;
 });
@@ -52,6 +54,9 @@ function createFpProxy(template) {
       // > Iteratee arguments are capped to avoid gotchas with variadic iteratees.
       // this means that we can't specify the options in the second argument to fp.template because it's ignored.
       // Instead, we're going to use the non-FP _.template with only the first argument which has already been patched
+
+      // we use lodash.template here to harden third-party usage of this otherwise banned function.
+      // eslint-disable-next-line no-restricted-properties
       return _.template(args[0]);
     },
   });

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
@@ -260,7 +262,7 @@ describe('alertInstanceToListItem', () => {
     };
     expect(alertInstanceToListItem(fakeNow.getTime(), alertType, 'id', instance)).toEqual({
       instance: 'id',
-      status: { label: 'OK', healthColor: 'subdued' },
+      status: { label: 'Recovered', healthColor: 'subdued' },
       start: undefined,
       duration: 0,
       sortPriority: 1,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { debounce, pick } from 'lodash';
@@ -25,16 +26,16 @@ import {
   Aggregators,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../../common/alerting/metrics';
+import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import {
-  ForLastExpression,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../triggers_actions_ui/public/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
+  IErrorObject,
+  AlertTypeParams,
+  AlertTypeParamsExpressionProps,
+} from '../../../../../triggers_actions_ui/public';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
-import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
 import { ExpressionRow } from './expression_row';
@@ -45,15 +46,10 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
-interface Props {
-  errors: IErrorObject[];
-  alertParams: AlertParams;
-  alertInterval: string;
-  alertThrottle: string;
-  setAlertParams(key: string, value: any): void;
-  setAlertProperty(key: string, value: any): void;
-  metadata: AlertContextMeta;
-}
+type Props = Omit<
+  AlertTypeParamsExpressionProps<AlertTypeParams & AlertParams, AlertContextMeta>,
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
+>;
 
 const defaultExpression = {
   aggType: Aggregators.AVERAGE,
@@ -65,18 +61,25 @@ const defaultExpression = {
 export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors, alertInterval, alertThrottle, metadata } = props;
+  const {
+    setAlertParams,
+    alertParams,
+    errors,
+    alertInterval,
+    alertThrottle,
+    metadata,
+    alertNotifyWhen,
+  } = props;
   const { http, notifications } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
-    type: 'metrics',
     fetch: http.fetch,
     toastWarning: notifications.toasts.addWarning,
   });
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<Unit>('m');
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
+  const [timeUnit, setTimeUnit] = useState<Unit | undefined>('m');
+  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
     createDerivedIndexPattern,
   ]);
 
@@ -94,7 +97,7 @@ export const Expressions: React.FC<Props> = (props) => {
   const updateParams = useCallback(
     (id, e: MetricExpression) => {
       const exp = alertParams.criteria ? alertParams.criteria.slice() : [];
-      exp[id] = { ...exp[id], ...e };
+      exp[id] = e;
       setAlertParams('criteria', exp);
     },
     [setAlertParams, alertParams.criteria]
@@ -173,7 +176,7 @@ export const Expressions: React.FC<Props> = (props) => {
           timeUnit: tu,
         })) || [];
       setTimeUnit(tu as Unit);
-      setAlertParams('criteria', criteria);
+      setAlertParams('criteria', criteria as AlertParams['criteria']);
     },
     [alertParams.criteria, setAlertParams]
   );
@@ -190,7 +193,7 @@ export const Expressions: React.FC<Props> = (props) => {
           timeSize,
           timeUnit,
           aggType: metric.aggregation,
-        }))
+        })) as AlertParams['criteria']
       );
     } else {
       setAlertParams('criteria', [defaultExpression]);
@@ -279,7 +282,7 @@ export const Expressions: React.FC<Props> = (props) => {
               key={idx} // idx's don't usually make good key's but here the index has semantic meaning
               expressionId={idx}
               setAlertParams={updateParams}
-              errors={errors[idx] || emptyError}
+              errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
             >
               <ExpressionChart
@@ -395,6 +398,7 @@ export const Expressions: React.FC<Props> = (props) => {
       <AlertPreview
         alertInterval={alertInterval}
         alertThrottle={alertThrottle}
+        alertNotifyWhen={alertNotifyWhen}
         alertType={METRIC_THRESHOLD_ALERT_TYPE_ID}
         alertParams={pick(alertParams, 'criteria', 'groupBy', 'filterQuery', 'sourceId')}
         showNoDataResults={alertParams.alertOnNoData}

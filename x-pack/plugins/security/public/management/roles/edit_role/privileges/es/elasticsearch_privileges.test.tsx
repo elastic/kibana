@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import { licenseMock } from '../../../../../../common/licensing/index.mock';
+import { indicesAPIClientMock } from '../../../index.mock';
 import { RoleValidator } from '../../validate_role';
 import { ClusterPrivileges } from './cluster_privileges';
 import { ElasticsearchPrivileges } from './elasticsearch_privileges';
 import { IndexPrivileges } from './index_privileges';
-
-import { licenseMock } from '../../../../../../common/licensing/index.mock';
-import { indicesAPIClientMock } from '../../../index.mock';
-import { coreMock } from '../../../../../../../../../src/core/public/mocks';
 
 function getProps() {
   const license = licenseMock.create();

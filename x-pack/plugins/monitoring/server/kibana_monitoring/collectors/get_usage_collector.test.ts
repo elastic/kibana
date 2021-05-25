@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getMonitoringUsageCollector } from './get_usage_collector';
-import { fetchClusters } from '../../lib/alerts/fetch_clusters';
+import { fetchClustersLegacy } from '../../lib/alerts/fetch_clusters';
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 
 jest.mock('../../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn().mockImplementation(() => {
+  fetchClustersLegacy: jest.fn().mockImplementation(() => {
     return [
       {
         clusterUuid: '1abc',
@@ -152,7 +153,7 @@ describe('getMonitoringUsageCollector', () => {
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
-    (fetchClusters as jest.Mock).mockImplementation(() => {
+    (fetchClustersLegacy as jest.Mock).mockImplementation(() => {
       return [];
     });
 
@@ -172,7 +173,7 @@ describe('getMonitoringUsageCollector', () => {
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
-    (fetchClusters as jest.Mock).mockImplementation(() => {
+    (fetchClustersLegacy as jest.Mock).mockImplementation(() => {
       return [];
     });
 

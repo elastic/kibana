@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { extractDocumentation } from './schema_extractor';
@@ -60,12 +61,12 @@ describe('schema_extractor', () => {
           {
             name: 'mode',
             documentation: '',
-            type: 'string',
+            type: '"auto" | "manual" | "off"',
           },
           {
             name: 'time_span',
             documentation: '',
-            type: 'string',
+            type: 'string | number',
           },
         ],
       },
@@ -132,7 +133,7 @@ describe('schema_extractor', () => {
           {
             name: 'expand_wildcards',
             documentation: '',
-            type: 'string[]',
+            type: '"all" | "open" | "closed" | "hidden" | "none"[]',
           },
           {
             name: 'ignore_unavailable',
@@ -157,7 +158,7 @@ describe('schema_extractor', () => {
       {
         name: 'force',
         documentation: '',
-        type: 'any', // string
+        type: 'boolean',
       },
     ]);
   });

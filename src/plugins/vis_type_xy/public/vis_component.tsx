@@ -1,20 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, {
-  BaseSyntheticEvent,
-  KeyboardEvent,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   Chart,
@@ -28,7 +20,6 @@ import {
   AccessorFn,
   Accessor,
 } from '@elastic/charts';
-import { keys } from '@elastic/eui';
 
 import { compact } from 'lodash';
 import {
@@ -50,7 +41,7 @@ import {
   renderAllSeries,
   getSeriesNameFn,
   getLegendActions,
-  useColorPicker,
+  getColorPicker,
   getXAccessor,
   getAllSeries,
 } from './utils';
@@ -65,6 +56,7 @@ import {
   getComplexAccessor,
   getSplitSeriesAccessorFnMap,
 } from './utils/accessors';
+import { ChartSplitter } from './chart_splitter';
 
 export interface VisComponentProps {
   visParams: VisParams;
@@ -85,16 +77,6 @@ const VisComponent = (props: VisComponentProps) => {
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
-  useEffect(() => {
-    const fn = () => {
-      props?.uiState?.emit?.('reload');
-    };
-    props?.uiState?.on?.('change', fn);
-
-    return () => {
-      props?.uiState?.off?.('change', fn);
-    };
-  }, [props?.uiState]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -117,7 +99,8 @@ const VisComponent = (props: VisComponentProps) => {
     (
       visData: Datatable,
       xAccessor: Accessor | AccessorFn,
-      splitSeriesAccessors: Array<Accessor | AccessorFn>
+      splitSeriesAccessors: Array<Accessor | AccessorFn>,
+      splitChartAccessor?: Accessor | AccessorFn
     ): ElementClickListener => {
       const splitSeriesAccessorFnMap = getSplitSeriesAccessorFnMap(splitSeriesAccessors);
       return (elements) => {
@@ -125,7 +108,8 @@ const VisComponent = (props: VisComponentProps) => {
           const event = getFilterFromChartClickEventFn(
             visData,
             xAccessor,
-            splitSeriesAccessorFnMap
+            splitSeriesAccessorFnMap,
+            splitChartAccessor
           )(elements as XYChartElementEvent[]);
           props.fireEvent(event);
         }
@@ -200,11 +184,7 @@ const VisComponent = (props: VisComponentProps) => {
   }, [props.uiState]);
 
   const setColor = useCallback(
-    (newColor: string | null, seriesLabel: string | number, event: BaseSyntheticEvent) => {
-      if ((event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
-        return;
-      }
-
+    (newColor: string | null, seriesLabel: string | number) => {
       const colors = props.uiState?.get('vis.colors') || {};
       if (colors[seriesLabel] === newColor || !newColor) {
         delete colors[seriesLabel];
@@ -296,10 +276,56 @@ const VisComponent = (props: VisComponentProps) => {
     ]
   );
   const xAccessor = getXAccessor(config.aspects.x);
-  const splitSeriesAccessors = config.aspects.series
-    ? compact(config.aspects.series.map(getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)))
-    : [];
 
+  const splitSeriesAccessors = useMemo(
+    () =>
+      config.aspects.series
+        ? compact(config.aspects.series.map(getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)))
+        : [],
+    [config.aspects.series]
+  );
+  const splitChartColumnAccessor = config.aspects.splitColumn
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitColumn)
+    : undefined;
+  const splitChartRowAccessor = config.aspects.splitRow
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitRow)
+    : undefined;
+
+  const renderSeries = useMemo(
+    () =>
+      renderAllSeries(
+        config,
+        visParams.seriesParams,
+        visData.rows,
+        getSeriesName,
+        getSeriesColor,
+        timeZone,
+        xAccessor,
+        splitSeriesAccessors
+      ),
+    [
+      config,
+      getSeriesColor,
+      getSeriesName,
+      splitSeriesAccessors,
+      timeZone,
+      visData.rows,
+      visParams.seriesParams,
+      xAccessor,
+    ]
+  );
+
+  const legendColorPicker = useMemo(
+    () =>
+      getColorPicker(
+        legendPosition,
+        setColor,
+        getSeriesName,
+        visParams.palette.name,
+        props.uiState
+      ),
+    [getSeriesName, legendPosition, props.uiState, setColor, visParams.palette.name]
+  );
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
       <LegendToggle
@@ -308,14 +334,23 @@ const VisComponent = (props: VisComponentProps) => {
         legendPosition={legendPosition}
       />
       <Chart size="100%">
+        <ChartSplitter
+          splitColumnAccessor={splitChartColumnAccessor}
+          splitRowAccessor={splitChartRowAccessor}
+        />
         <XYSettings
           {...config}
           showLegend={showLegend}
           legendPosition={legendPosition}
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
-          legendColorPicker={useColorPicker(legendPosition, setColor, getSeriesName)}
-          onElementClick={handleFilterClick(visData, xAccessor, splitSeriesAccessors)}
+          legendColorPicker={legendColorPicker}
+          onElementClick={handleFilterClick(
+            visData,
+            xAccessor,
+            splitSeriesAccessors,
+            splitChartColumnAccessor ?? splitChartRowAccessor
+          )}
           onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params)}
           onRenderChange={onRenderChange}
           legendAction={
@@ -343,16 +378,7 @@ const VisComponent = (props: VisComponentProps) => {
         {config.yAxes.map((axisProps) => (
           <XYAxis key={axisProps.id} {...axisProps} />
         ))}
-        {renderAllSeries(
-          config,
-          visParams.seriesParams,
-          visData.rows,
-          getSeriesName,
-          getSeriesColor,
-          timeZone,
-          xAccessor,
-          splitSeriesAccessors
-        )}
+        {renderSeries}
       </Chart>
     </div>
   );

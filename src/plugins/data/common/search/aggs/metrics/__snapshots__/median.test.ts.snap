@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AggTypeMetricMedianProvider class supports scripted fields 1`] = `
+Object {
+  "median": Object {
+    "percentiles": Object {
+      "percents": Array [
+        50,
+      ],
+      "script": Object {
+        "lang": undefined,
+        "source": "return 456",
+      },
+    },
+  },
+}
+`;

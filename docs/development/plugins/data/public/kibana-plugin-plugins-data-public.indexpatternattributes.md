@@ -4,6 +4,8 @@
 
 ## IndexPatternAttributes interface
 
+Interface for an index pattern saved object
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,6 +21,7 @@ export interface IndexPatternAttributes
 |  [fieldFormatMap](./kibana-plugin-plugins-data-public.indexpatternattributes.fieldformatmap.md) | <code>string</code> |  |
 |  [fields](./kibana-plugin-plugins-data-public.indexpatternattributes.fields.md) | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpatternattributes.intervalname.md) | <code>string</code> |  |
+|  [runtimeFieldMap](./kibana-plugin-plugins-data-public.indexpatternattributes.runtimefieldmap.md) | <code>string</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-public.indexpatternattributes.sourcefilters.md) | <code>string</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpatternattributes.timefieldname.md) | <code>string</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpatternattributes.title.md) | <code>string</code> |  |

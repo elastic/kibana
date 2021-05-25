@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -26,7 +27,9 @@ export const useAlertInfo = ({ ruleId = null }: AlertInfo): Return => {
     <EuiLoadingSpinner size="m" />
   );
 
-  const { loading, data: alerts } = useQueryAlerts<unknown, Aggs>(buildLastAlertsQuery(ruleId));
+  const { loading, data: alerts } = useQueryAlerts<unknown, Aggs>({
+    query: buildLastAlertsQuery(ruleId),
+  });
 
   useEffect(() => {
     if (alerts != null) {

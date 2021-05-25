@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLoadingChart, EuiText } from '@elastic/eui';
@@ -14,9 +15,16 @@ interface Props {
   status: FETCH_STATUS;
   height: number;
   children: React.ReactNode;
+  id?: string;
 }
 
-export function ChartContainer({ children, height, status, hasData }: Props) {
+export function ChartContainer({
+  children,
+  height,
+  status,
+  hasData,
+  id,
+}: Props) {
   if (!hasData && status === FETCH_STATUS.LOADING) {
     return <LoadingChartPlaceholder height={height} />;
   }
@@ -25,7 +33,11 @@ export function ChartContainer({ children, height, status, hasData }: Props) {
     return <FailedChartPlaceholder height={height} />;
   }
 
-  return <div style={{ height }}>{children}</div>;
+  return (
+    <div style={{ height }} data-test-subj={id}>
+      {children}
+    </div>
+  );
 }
 
 function LoadingChartPlaceholder({ height }: { height: number }) {

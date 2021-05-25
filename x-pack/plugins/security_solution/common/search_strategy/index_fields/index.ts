@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
   IEsSearchRequest,
@@ -69,6 +71,12 @@ export interface BrowserField {
   name: string;
   searchable: boolean;
   type: string;
+  subType?: {
+    [key: string]: unknown;
+    nested?: {
+      path: string;
+    };
+  };
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;

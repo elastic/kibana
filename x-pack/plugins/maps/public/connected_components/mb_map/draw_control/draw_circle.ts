@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
@@ -10,12 +11,17 @@
 import turfDistance from '@turf/distance';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
+import { Position } from 'geojson';
+
+export interface DrawCircleProperties {
+  center: Position;
+  radiusKm: number;
+}
 
 type DrawCircleState = {
   circle: {
-    properties: {
-      center: {} | null;
-      radiusKm: number;
+    properties: Omit<DrawCircleProperties, 'center'> & {
+      center: Position | null;
     };
     id: string | number;
     incomingCoords: (coords: unknown[]) => void;
