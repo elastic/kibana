@@ -21,12 +21,28 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import type { IndexPattern, Query } from 'src/plugins/data/public';
+import { APP_ID } from '../../../../common/constants';
 import { getIndexPatternService, getData } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
+import { ILayer } from '../../../classes/layers/layer';
 
-export class FilterEditor extends Component {
-  state = {
+export interface Props {
+  layer: ILayer;
+  setLayerQuery: (id: string, query: Query) => void;
+  updateSourceProp: (layerId: string, propName: string, value: unknown) => void;
+}
+
+interface State {
+  isPopoverOpen: boolean;
+  indexPatterns: IndexPattern[];
+  isSourceTimeAware: boolean;
+}
+
+export class FilterEditor extends Component<Props, State> {
+  private _isMounted = false;
+  state: State = {
     isPopoverOpen: false,
     indexPatterns: [],
     isSourceTimeAware: false,
@@ -45,7 +61,7 @@ export class FilterEditor extends Component {
   async _loadIndexPatterns() {
     // Filter only effects source so only load source indices.
     const indexPatternIds = this.props.layer.getSource().getIndexPatternIds();
-    const indexPatterns = [];
+    const indexPatterns: IndexPattern[] = [];
     const getIndexPatternPromises = indexPatternIds.map(async (indexPatternId) => {
       try {
         const indexPattern = await getIndexPatternService().get(indexPatternId);
@@ -81,16 +97,19 @@ export class FilterEditor extends Component {
     this.setState({ isPopoverOpen: false });
   };
 
-  _onQueryChange = ({ query }) => {
+  _onQueryChange = ({ query }: { query?: Query }) => {
+    if (!query) {
+      return;
+    }
     this.props.setLayerQuery(this.props.layer.getId(), query);
     this._close();
   };
 
-  _onApplyGlobalQueryChange = (applyGlobalQuery) => {
+  _onApplyGlobalQueryChange = (applyGlobalQuery: boolean) => {
     this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalQuery', applyGlobalQuery);
   };
 
-  _onApplyGlobalTimeChange = (applyGlobalTime) => {
+  _onApplyGlobalTimeChange = (applyGlobalTime: boolean) => {
     this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalTime', applyGlobalTime);
   };
 
@@ -109,6 +128,7 @@ export class FilterEditor extends Component {
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <SearchBar
+            appName={APP_ID}
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
