@@ -18,6 +18,13 @@ export interface TimelinesPluginSetup {
   getCreatedTgridStore?: (
     type: 'standalone' | 'embedded'
   ) => ReduxDeps | ((type: 'standalone' | 'embedded') => Store);
+  getLoading: () => any;
+  getLastUpdated: () => any;
+  getDraggables: () => any;
+  getDragAndDrop: () => any;
+  getOnKeyDownFocusHandler: () => any;
+  getUseAddToTimelineSensor: () => any;
+  getOnFocusReFocusDraggable: () => any;
 }
 export interface ReduxDeps {
   actions: typeof tGridActions;

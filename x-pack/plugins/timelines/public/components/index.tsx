@@ -11,9 +11,9 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { getReduxDeps } from '../store/t_grid';
 
 import { TGrid } from './tgrid';
-import { TimelineProps } from '../types';
+import { TGridProps } from '../types';
 
-export const Timeline = (props: TimelineProps) => {
+export const Timeline = (props: TGridProps) => {
   const reduxStuff = getReduxDeps(props.type);
   if (props.type === 'standalone') {
     return (
@@ -34,3 +34,9 @@ export const Timeline = (props: TimelineProps) => {
 
 // eslint-disable-next-line import/no-default-export
 export { Timeline as default };
+
+export * from './accessibility';
+export * from './drag_and_drop';
+export * from './draggables';
+export * from './last_updated';
+export * from './loading';
