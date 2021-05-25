@@ -48,6 +48,7 @@ import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpo
 import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
 import { getEndpointListPath } from '../../../../common/routing';
 import { ActionsMenu } from './components/actions_menu';
+import { EndpointUnIsolateFlyoutPanel } from './components/endpoint_unisolate_flyout_panel';
 
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -127,6 +128,8 @@ export const EndpointDetailsFlyout = memo(() => {
           {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={details} />}
 
           {show === 'isolate' && <EndpointIsolateFlyoutPanel hostMeta={details} />}
+
+          {show === 'unisolate' && <EndpointUnIsolateFlyoutPanel hostMeta={details} />}
 
           {showFlyoutFooter && (
             <EuiFlyoutFooter className="eui-textRight" data-test-subj="endpointDetailsFlyoutFooter">
