@@ -61,52 +61,80 @@ const managementSchema = schema.recordOf(
   }),
   listOfCapabilitiesSchema
 );
-const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
-const alertingSchema = Joi.array().items(Joi.string());
+const catalogueSchema = listOfCapabilitiesSchema;
+const alertingSchema = schema.arrayOf(schema.string());
 
-const appCategorySchema = Joi.object({
-  id: Joi.string().required(),
-  label: Joi.string().required(),
-  ariaLabel: Joi.string(),
-  euiIconType: Joi.string(),
-  order: Joi.number(),
-}).required();
+const appCategorySchema = schema.object({
+  id: schema.string(),
+  label: schema.string(),
+  ariaLabel: schema.maybe(schema.string()),
+  euiIconType: schema.maybe(schema.string()),
+  order: schema.maybe(schema.number()),
+});
 
-const kibanaPrivilegeSchema = Joi.object({
-  excludeFromBasePrivileges: Joi.boolean(),
-  management: managementSchema,
-  catalogue: catalogueSchema,
-  api: Joi.array().items(Joi.string()),
-  app: Joi.array().items(Joi.string()),
-  alerting: Joi.object({
-    rule: {
-      all: alertingSchema,
-      read: alertingSchema,
-    },
-    alert: {
-      all: alertingSchema,
-      read: alertingSchema,
-    },
+const kibanaPrivilegeSchema = schema.object({
+  excludeFromBasePrivileges: schema.maybe(schema.boolean()),
+  management: schema.maybe(managementSchema),
+  catalogue: schema.maybe(catalogueSchema),
+  api: schema.maybe(schema.arrayOf(schema.string())),
+  app: schema.maybe(schema.arrayOf(schema.string())),
+  alerting: schema.maybe(
+    schema.object({
+      rule: schema.maybe(
+        schema.object({
+          all: schema.maybe(alertingSchema),
+          read: schema.maybe(alertingSchema),
+        })
+      ),
+      alert: schema.maybe(
+        schema.object({
+          all: schema.maybe(alertingSchema),
+          read: schema.maybe(alertingSchema),
+        })
+      ),
+    })
+  ),
+  savedObject: schema.object({
+    all: schema.arrayOf(schema.string()),
+    read: schema.arrayOf(schema.string()),
   }),
   ui: listOfCapabilitiesSchema,
 });
 
-const kibanaIndependentSubFeaturePrivilegeSchema = Joi.object({
-  id: Joi.string().regex(subFeaturePrivilegePartRegex).required(),
-  name: Joi.string().required(),
-  includeIn: Joi.string().allow('all', 'read', 'none').required(),
-  minimumLicense: Joi.string().valid(...validSubFeaturePrivilegeLicenses),
-  management: managementSchema,
-  catalogue: catalogueSchema,
-  alerting: Joi.object({
-    rule: {
-      all: alertingSchema,
-      read: alertingSchema,
+const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
+  id: schema.string({
+    validate(key: string) {
+      if (!subFeaturePrivilegePartRegex.test(key)) {
+        return `Does not satisfy regexp ${subFeaturePrivilegePartRegex.toString()}`;
+      }
     },
-    alert: {
-      all: alertingSchema,
-      read: alertingSchema,
-    },
+  }),
+  name: schema.string(),
+  includeIn: schema.oneOf([schema.literal('all'), schema.literal('read'), schema.literal('none')]),
+  minimumLicense: schema.maybe(validSubFeaturePrivilegeLicensesSchema),
+  management: schema.maybe(managementSchema),
+  catalogue: schema.maybe(catalogueSchema),
+  alerting: schema.maybe(
+    schema.object({
+      rule: schema.maybe(
+        schema.object({
+          all: schema.maybe(alertingSchema),
+          read: schema.maybe(alertingSchema),
+        })
+      ),
+      alert: schema.maybe(
+        schema.object({
+          all: schema.maybe(alertingSchema),
+          read: schema.maybe(alertingSchema),
+        })
+      ),
+    })
+  ),
+  api: schema.maybe(schema.arrayOf(schema.string())),
+  app: schema.maybe(schema.arrayOf(schema.string())),
+  savedObject: schema.object({
+    all: schema.arrayOf(schema.string()),
+    read: schema.arrayOf(schema.string()),
   }),
   ui: listOfCapabilitiesSchema,
 });
