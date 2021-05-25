@@ -306,6 +306,12 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
   }
 );
 
+export const getIsEndpointHostIsolated: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(detailsData, (details) => {
+  return Boolean(details?.Endpoint.configuration.isolation);
+});
+
 export const getCurrentIsolationRequestState = (
   state: Immutable<EndpointState>
 ): EndpointState['isolationRequestState'] => {

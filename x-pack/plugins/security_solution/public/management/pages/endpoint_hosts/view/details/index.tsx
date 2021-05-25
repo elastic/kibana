@@ -46,11 +46,8 @@ import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/comp
 import { EndpointIsolateFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpoint_details_flyout_subheader';
 import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
-import { getEndpointDetailsPath, getEndpointListPath } from '../../../../common/routing';
-import {
-  TakeActionDropdown,
-  TakeActionDropdownProps,
-} from '../../../../../detections/components/host_isolation/take_action_dropdown';
+import { getEndpointListPath } from '../../../../common/routing';
+import { ActionsMenu } from './components/actions_menu';
 
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -78,20 +75,6 @@ export const EndpointDetailsFlyout = memo(() => {
       })
     );
   }, [history, queryParamsWithoutSelectedEndpoint]);
-
-  const handleActionClick: TakeActionDropdownProps['onChange'] = useCallback(
-    (action) => {
-      if (details?.agent.id && action === 'isolateHost') {
-        history.push(
-          getEndpointDetailsPath({
-            name: 'endpointIsolate',
-            selected_endpoint: details.agent.id,
-          })
-        );
-      }
-    },
-    [details?.agent.id, history]
-  );
 
   useEffect(() => {
     if (error !== undefined) {
@@ -147,7 +130,7 @@ export const EndpointDetailsFlyout = memo(() => {
 
           {showFlyoutFooter && (
             <EuiFlyoutFooter className="eui-textRight" data-test-subj="endpointDetailsFlyoutFooter">
-              <TakeActionDropdown onChange={handleActionClick} />
+              <ActionsMenu />
             </EuiFlyoutFooter>
           )}
         </>

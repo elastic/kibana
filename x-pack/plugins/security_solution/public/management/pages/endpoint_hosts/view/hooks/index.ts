@@ -5,53 +5,5 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
-import { useMemo } from 'react';
-import { EndpointState } from '../../types';
-import { State } from '../../../../../common/store';
-import {
-  MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
-  MANAGEMENT_STORE_GLOBAL_NAMESPACE,
-} from '../../../../common/constants';
-import { useKibana } from '../../../../../common/lib/kibana';
-
-export function useEndpointSelector<TSelected>(selector: (state: EndpointState) => TSelected) {
-  return useSelector(function (state: State) {
-    return selector(
-      state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][
-        MANAGEMENT_STORE_ENDPOINTS_NAMESPACE
-      ] as EndpointState
-    );
-  });
-}
-
-/**
- * Returns an object that contains Fleet app and URL information
- */
-export const useIngestUrl = (subpath: string): { url: string; appId: string; appPath: string } => {
-  const { services } = useKibana();
-  return useMemo(() => {
-    const appPath = `#/${subpath}`;
-    return {
-      url: `${services.application.getUrlForApp('fleet')}${appPath}`,
-      appId: 'fleet',
-      appPath,
-    };
-  }, [services.application, subpath]);
-};
-/**
- * Returns an object that contains Fleet app and URL information
- */
-export const useAgentDetailsIngestUrl = (
-  agentId: string
-): { url: string; appId: string; appPath: string } => {
-  const { services } = useKibana();
-  return useMemo(() => {
-    const appPath = `#/fleet/agents/${agentId}/activity`;
-    return {
-      url: `${services.application.getUrlForApp('fleet')}${appPath}`,
-      appId: 'fleet',
-      appPath,
-    };
-  }, [services.application, agentId]);
-};
+export * from './hooks';
+export * from './use_endpoint_action_items';

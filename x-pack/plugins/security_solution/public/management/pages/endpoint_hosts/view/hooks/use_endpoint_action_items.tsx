@@ -1,0 +1,120 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { TableRowActionProps } from '../components/table_row_actions';
+import { MANAGEMENT_APP_ID } from '../../../../common/constants';
+import { APP_ID, SecurityPageName } from '../../../../../../common/constants';
+import { pagePathGetters } from '../../../../../../../fleet/public';
+import { getEndpointDetailsPath } from '../../../../common/routing';
+import { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
+import { useFormatUrl } from '../../../../../common/components/link_to';
+import { useEndpointSelector } from './hooks';
+import { agentPolicies } from '../../store/selectors';
+import { useKibana } from '../../../../../common/lib/kibana';
+
+export const useEndpointActionItems = (
+  endpointMetadata: MaybeImmutable<HostMetadata> | undefined
+): TableRowActionProps['items'] => {
+  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
+  const fleetAgentPolicies = useEndpointSelector(agentPolicies);
+  const {
+    services: {
+      application: { getUrlForApp },
+    },
+  } = useKibana();
+
+  return useMemo<TableRowActionProps['items']>(() => {
+    if (endpointMetadata) {
+      const endpointId = endpointMetadata.agent.id;
+      const endpointPolicyId = endpointMetadata.Endpoint.policy.applied.id;
+      const endpointHostName = endpointMetadata.host.hostname;
+      const fleetAgentId = endpointMetadata.elastic.agent.id;
+      const endpointIsolatePath = getEndpointDetailsPath({
+        name: 'endpointIsolate',
+        selected_endpoint: endpointId,
+      });
+
+      return [
+        {
+          'data-test-subj': 'isolateLink',
+          icon: 'logoSecurity',
+          key: 'isolateHost',
+          navigateAppId: MANAGEMENT_APP_ID,
+          navigateOptions: {
+            path: endpointIsolatePath,
+          },
+          href: formatUrl(endpointIsolatePath),
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.list.actions.isolateHost"
+              defaultMessage="Isolate Host"
+            />
+          ),
+        },
+        {
+          'data-test-subj': 'hostLink',
+          icon: 'logoSecurity',
+          key: 'hostDetailsLink',
+          navigateAppId: APP_ID,
+          navigateOptions: { path: `hosts/${endpointHostName}` },
+          href: `${getUrlForApp('securitySolution')}/hosts/${endpointHostName}`,
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.list.actions.hostDetails"
+              defaultMessage="View Host Details"
+            />
+          ),
+        },
+        {
+          icon: 'gear',
+          key: 'agentConfigLink',
+          'data-test-subj': 'agentPolicyLink',
+          navigateAppId: 'fleet',
+          navigateOptions: {
+            path: `#${pagePathGetters.policy_details({
+              policyId: fleetAgentPolicies[endpointPolicyId],
+            })}`,
+          },
+          href: `${getUrlForApp('fleet')}#${pagePathGetters.policy_details({
+            policyId: fleetAgentPolicies[endpointPolicyId],
+          })}`,
+          disabled: fleetAgentPolicies[endpointPolicyId] === undefined,
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.list.actions.agentPolicy"
+              defaultMessage="View Agent Policy"
+            />
+          ),
+        },
+        {
+          icon: 'gear',
+          key: 'agentDetailsLink',
+          'data-test-subj': 'agentDetailsLink',
+          navigateAppId: 'fleet',
+          navigateOptions: {
+            path: `#${pagePathGetters.fleet_agent_details({
+              agentId: fleetAgentId,
+            })}`,
+          },
+          href: `${getUrlForApp('fleet')}#${pagePathGetters.fleet_agent_details({
+            agentId: fleetAgentId,
+          })}`,
+          children: (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.list.actions.agentDetails"
+              defaultMessage="View Agent Details"
+            />
+          ),
+        },
+      ];
+    }
+
+    return [];
+  }, [endpointMetadata, fleetAgentPolicies, formatUrl, getUrlForApp]);
+};

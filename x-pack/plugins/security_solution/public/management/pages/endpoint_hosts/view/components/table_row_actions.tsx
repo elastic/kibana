@@ -8,16 +8,15 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiPopover,
   EuiContextMenuItemProps,
+  EuiContextMenuPanel,
   EuiContextMenuPanelProps,
-  EuiContextMenuItem,
+  EuiPopover,
   EuiPopoverProps,
 } from '@elastic/eui';
 import { NavigateToAppOptions } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { ContextMenuItemNavByRouter } from './context_menu_item_nav_by_rotuer';
 
 export interface TableRowActionProps {
   items: Array<
@@ -37,7 +36,7 @@ export const TableRowActions = memo<TableRowActionProps>(({ items }) => {
 
   const menuItems: EuiContextMenuPanelProps['items'] = useMemo(() => {
     return items.map((itemProps) => {
-      return <EuiContextMenuItemNavByRouter {...itemProps} onClick={handleCloseMenu} />;
+      return <ContextMenuItemNavByRouter {...itemProps} onClick={handleCloseMenu} />;
     });
   }, [handleCloseMenu, items]);
 
@@ -69,22 +68,4 @@ export const TableRowActions = memo<TableRowActionProps>(({ items }) => {
 });
 TableRowActions.displayName = 'EndpointTableRowActions';
 
-const EuiContextMenuItemNavByRouter = memo<
-  EuiContextMenuItemProps & {
-    navigateAppId: string;
-    navigateOptions: NavigateToAppOptions;
-    children: React.ReactNode;
-  }
->(({ navigateAppId, navigateOptions, onClick, children, ...otherMenuItemProps }) => {
-  const handleOnClick = useNavigateToAppEventHandler(navigateAppId, {
-    ...navigateOptions,
-    onClick,
-  });
-
-  return (
-    <EuiContextMenuItem {...otherMenuItemProps} onClick={handleOnClick}>
-      {children}
-    </EuiContextMenuItem>
-  );
-});
-EuiContextMenuItemNavByRouter.displayName = 'EuiContextMenuItemNavByRouter';
+ContextMenuItemNavByRouter.displayName = 'EuiContextMenuItemNavByRouter';
