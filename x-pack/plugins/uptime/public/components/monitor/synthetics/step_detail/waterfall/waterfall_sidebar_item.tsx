@@ -19,6 +19,8 @@ interface SidebarItemProps {
   onClick?: OnSidebarClick;
 }
 
+export const formatSidebarText = (offsetIndex: number, url: string) => `${offsetIndex}. ${url}`;
+
 export const WaterfallSidebarItem = ({
   item,
   renderFilterScreenReaderText,
@@ -42,7 +44,7 @@ export const WaterfallSidebarItem = ({
     return is400 || is500 || isSpecific300;
   };
 
-  const text = `${offsetIndex}. ${item.url}`;
+  const text = formatSidebarText(offsetIndex, item.url);
   const ariaLabel = `${
     isHighlighted && renderFilterScreenReaderText
       ? `${SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL} `

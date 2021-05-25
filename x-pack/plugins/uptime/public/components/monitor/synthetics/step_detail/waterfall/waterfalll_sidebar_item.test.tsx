@@ -11,7 +11,7 @@ import { fireEvent } from '@testing-library/react';
 
 import { SidebarItem } from '../waterfall/types';
 import { render } from '../../../../../lib/helper/rtl_helpers';
-import { WaterfallSidebarItem } from './waterfall_sidebar_item';
+import { formatSidebarText, WaterfallSidebarItem } from './waterfall_sidebar_item';
 import { SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL } from '../../waterfall/components/translations';
 
 describe('waterfall filter', () => {
@@ -51,5 +51,11 @@ describe('waterfall filter', () => {
 
     expect(button).toBeInTheDocument();
     expect(onClick).toBeCalled();
+  });
+
+  describe('formatSidebarText', () => {
+    it('puts index and url text together', () => {
+      expect(formatSidebarText(1, 'http://www.elastic.co')).toEqual('1. http://www.elastic.co');
+    });
   });
 });
