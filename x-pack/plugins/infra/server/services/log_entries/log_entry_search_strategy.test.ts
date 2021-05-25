@@ -9,6 +9,7 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { of, throwError } from 'rxjs';
 import {
   elasticsearchServiceMock,
+  httpServerMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from 'src/core/server/mocks';
@@ -282,6 +283,7 @@ const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => (
   esClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
   searchSessionsClient: createSearchSessionsClientMock(),
+  request: httpServerMock.createKibanaRequest(),
 });
 
 // using the official data mock from within x-pack doesn't type-check successfully,

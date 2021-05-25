@@ -6,14 +6,15 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { useImportList } from '@kbn/securitysolution-list-hooks';
+import * as Api from '@kbn/securitysolution-list-api';
 
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
-import * as Api from '../api';
 
-import { useImportList } from './use_import_list';
+jest.mock('@kbn/securitysolution-list-api');
 
-jest.mock('../api');
+// TODO: Port this test over to: packages/kbn-securitysolution-list-hooks/src/use_import_list/index.ts once mocks are moved to packages
 
 describe('useImportList', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;
