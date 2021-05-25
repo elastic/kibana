@@ -5,10 +5,8 @@
 [Unit]
 Description=Kibana 7
 BindsTo=probemanager.service
-Wants=elasticsearch.service
-After=elasticsearch.service
-Wants=cassandra.service
-After=cassandra.service
+Wants=licenseserver.service
+After=licenseserver.service
 Wants=probemanager.service
 Before=probemanager.service
 Wants=probetransmogrifier.service
@@ -42,6 +40,7 @@ ExecStart=/usr/local/kibana-7.5.2-linux-x64/bin/kibana
 
 ExecStartPost=/usr/bin/python /usr/local/kibana-7.5.2-linux-x64/scripts/configureKibana.py
 ExecStartPost=/usr/bin/bash scripts/kibana-post-start.sh
+ExecStartPost=/usr/bin/python scripts/removeOldKibanaIndices.py
 
 TimeoutStopSec=30
 
@@ -49,5 +48,5 @@ Restart=on-failure
 RestartSec=10
 
 [Install]
-WantedBy=elasticsearch.service
+WantedBy=netmon.service
 
