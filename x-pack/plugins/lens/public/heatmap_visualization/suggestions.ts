@@ -41,6 +41,10 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
 
   const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
 
+  if (groups.length >= 3) {
+    return [];
+  }
+
   const isSingleBucketDimension = groups.length === 1 && metrics.length === 0;
 
   /**
