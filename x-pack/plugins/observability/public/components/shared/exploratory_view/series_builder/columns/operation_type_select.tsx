@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSuperSelect } from '@elastic/eui';
 
-import { useSeriesStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { OperationType } from '../../../../../../../lens/public';
 
 export function OperationTypeSelect({

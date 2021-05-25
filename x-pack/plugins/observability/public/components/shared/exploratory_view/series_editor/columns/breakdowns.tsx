@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldLabels } from '../../configurations/constants';
-import { useSeriesStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;

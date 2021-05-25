@@ -10,7 +10,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { AppDataType } from '../../types';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useSeriesStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { ReportToDataTypeMap } from '../../configurations/constants';
 
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [

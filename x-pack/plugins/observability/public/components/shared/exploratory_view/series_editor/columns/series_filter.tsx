@@ -19,7 +19,7 @@ import { FilterExpanded } from './filter_expanded';
 import { DataSeries } from '../../types';
 import { FieldLabels } from '../../configurations/constants/constants';
 import { SelectedFilters } from '../selected_filters';
-import { useSeriesStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;

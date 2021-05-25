@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useSeriesStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { CustomReportField } from '../custom_report_field';
 import { DataSeries, URLReportDefinition } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';

@@ -8,7 +8,7 @@
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { useSeriesStorage } from '../hooks/use_url_storage';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 import { useQuickTimeRanges } from '../../../../hooks/use_quick_time_ranges';
 import { DEFAULT_TIME } from '../configurations/constants';
 

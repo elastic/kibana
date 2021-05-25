@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RemoveSeries } from './remove_series';
-import { NEW_SERIES_KEY, useSeriesStorage } from '../../hooks/use_url_storage';
+import { NEW_SERIES_KEY, useSeriesStorage } from '../../hooks/use_series_storage';
 import { ReportToDataTypeMap } from '../../configurations/constants';
 
 interface Props {

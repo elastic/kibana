@@ -23,13 +23,13 @@ import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { lensPluginMock } from '../../../../../lens/public/mocks';
 import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
-import { AllSeries, UrlStorageContextProvider } from './hooks/use_url_storage';
+import { AllSeries, UrlStorageContextProvider } from './hooks/use_series_storage';
 import {
   withNotifyOnErrors,
   createKbnUrlStateStorage,
 } from '../../../../../../../src/plugins/kibana_utils/public';
 import * as fetcherHook from '../../../hooks/use_fetcher';
-import * as useUrlHook from './hooks/use_url_storage';
+import * as useUrlHook from './hooks/use_series_storage';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
 import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';

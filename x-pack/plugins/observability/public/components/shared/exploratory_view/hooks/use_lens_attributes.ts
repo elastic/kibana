@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { LensAttributes } from '../configurations/lens_attributes';
-import { useSeriesStorage } from './use_url_storage';
+import { useSeriesStorage } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
 import { DataSeries, SeriesUrl, UrlFilter } from '../types';

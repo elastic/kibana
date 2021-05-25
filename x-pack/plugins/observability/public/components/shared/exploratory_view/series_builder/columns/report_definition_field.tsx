@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import FieldValueSuggestions from '../../../field_value_suggestions';
-import { useSeriesStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { ESFilter } from '../../../../../../../../../typings/elasticsearch';
 import { PersistableFilter } from '../../../../../../../lens/common';

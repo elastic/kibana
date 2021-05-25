@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { rgba } from 'polished';
 import { i18n } from '@kbn/i18n';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useSeriesStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { UrlFilter } from '../../types';
 import { FilterValueButton } from './filter_value_btn';
 import { useValuesList } from '../../../../../hooks/use_values_list';

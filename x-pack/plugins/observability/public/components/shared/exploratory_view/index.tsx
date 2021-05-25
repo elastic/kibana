@@ -19,7 +19,7 @@ import {
   withNotifyOnErrors,
   createSessionStorageStateStorage,
 } from '../../../../../../../src/plugins/kibana_utils/public/';
-import { UrlStorageContextProvider } from './hooks/use_url_storage';
+import { UrlStorageContextProvider } from './hooks/use_series_storage';
 import { useTrackPageview } from '../../..';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 

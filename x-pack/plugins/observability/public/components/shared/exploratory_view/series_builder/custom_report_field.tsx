@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
-import { useSeriesStorage } from '../hooks/use_url_storage';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 import { ReportDefinition } from '../types';
 
 interface Props {

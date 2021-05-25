@@ -12,7 +12,7 @@ import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { DataViewLabels } from '../configurations/constants';
-import { useSeriesStorage } from '../hooks/use_url_storage';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
