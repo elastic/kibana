@@ -106,7 +106,13 @@ This section summarizes the changes in each release.
 [[release-notes-6.8.16]]
 == {kib} 6.8.16
 
-The 6.8.16 release does not include any user-facing changes.
+The {kib} 6.8.16 release includes the following security update.
+
+*Details* +
+In {kib} 6.8.15 and earlier, when a logged in user visits a maliciously created URL, {kib} could redirect users to an arbitrary website. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22141[CVE-2021-22141]
+
+*Solution* +
+Upgrade to {kib} 6.8.16.
 
 [[release-notes-6.8.15]]
 == {kib} 6.8.15
