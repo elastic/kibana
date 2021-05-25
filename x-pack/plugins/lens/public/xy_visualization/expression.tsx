@@ -58,6 +58,7 @@ import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
+import { getLegendActions } from './legend_actions';
 
 declare global {
   interface Window {
@@ -616,6 +617,7 @@ export function XYChart({
         xDomain={xDomain}
         onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
         onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
+        legendAction={getLegendActions(filteredLayers, data.tables, onClickValue)}
       />
 
       <Axis
