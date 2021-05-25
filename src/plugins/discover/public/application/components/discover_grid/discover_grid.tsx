@@ -14,11 +14,11 @@ import {
   EuiDataGridStyle,
   EuiDataGridProps,
   EuiDataGrid,
-  EuiIcon,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -139,6 +139,10 @@ export interface DiscoverGridProps {
    * Manage pagination control
    */
   isPaginationEnabled?: boolean;
+  /**
+   * List of used control columns
+   */
+  controlColumnIds?: string[];
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -169,6 +173,7 @@ export const DiscoverGrid = ({
   useNewFieldsApi,
   isSortEnabled = true,
   isPaginationEnabled = true,
+  controlColumnIds = ['openDetails', 'select'],
 }: DiscoverGridProps) => {
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -294,7 +299,10 @@ export const DiscoverGrid = ({
     }
     return { columns: sortingColumns, onSort: () => {} };
   }, [sortingColumns, onTableSort, isSortEnabled]);
-  const lead = useMemo(() => getLeadControlColumns(), []);
+  const lead = useMemo(
+    () => getLeadControlColumns().filter(({ id }) => controlColumnIds.includes(id)),
+    [controlColumnIds]
+  );
 
   const additionalControls = useMemo(
     () =>
@@ -314,9 +322,9 @@ export const DiscoverGrid = ({
     return (
       <div className="euiDataGrid__noResults">
         <EuiText size="xs" color="subdued">
-          <EuiIcon type="discoverApp" size="m" color="subdued" />
+          <EuiLoadingSpinner />
           <EuiSpacer size="s" />
-          <FormattedMessage id="discover.noResultsFound" defaultMessage="No results found" />
+          <FormattedMessage id="discover.loadingResults" defaultMessage="Loading results" />
         </EuiText>
       </div>
     );

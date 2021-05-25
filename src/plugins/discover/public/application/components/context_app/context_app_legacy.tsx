@@ -133,6 +133,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       services,
       useNewFieldsApi,
       isPaginationEnabled: false,
+      controlColumnIds: ['openDetails'],
       setExpandedDoc,
       onFilter: filter,
       onAddColumn,
@@ -202,7 +203,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
               </EuiText>
               <EuiSpacer size="s" />
               <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
-              {loadingFeedback()}
+              {isLegacy && loadingFeedback()}
               <EuiHorizontalRule margin="xs" />
               {isLegacy ? (
                 isAnchorLoaded && (

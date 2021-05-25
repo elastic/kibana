@@ -13,4 +13,8 @@
 .dscDocsGrid {
   flex: 1 1 100%;
   overflow: auto;
+
+  .euiDataGridRowCell.euiDataGridRowCell--firstColumn {
+    padding: 0;
+  }
 }
