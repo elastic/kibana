@@ -28,7 +28,7 @@ export function ExploratoryViewPage({
   useSessionStorage = false,
 }: {
   useSessionStorage?: boolean;
-  saveAttributes: (attr: TypedLensByValueInput['attributes'] | null) => void;
+  saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
 }) {
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view', delay: 15000 });

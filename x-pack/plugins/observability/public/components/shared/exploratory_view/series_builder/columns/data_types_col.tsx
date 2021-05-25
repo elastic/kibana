@@ -22,7 +22,7 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
 ];
 
 export function DataTypesCol({ seriesId }: { seriesId: string }) {
-  const { getSeries, allSeries, setSeries, removeSeries } = useSeriesStorage();
+  const { getSeries, setSeries, removeSeries } = useSeriesStorage();
 
   const series = getSeries(seriesId);
   const { loading } = useAppIndexPatternContext();

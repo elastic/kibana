@@ -26,7 +26,7 @@ interface ContextValue {
   firstSeriesId: string;
   allSeriesIds: string[];
   allSeries: AllSeries;
-  setSeries: (seriesIdN: string, newValue: SeriesUrl) => void;
+  setSeries: (seriesIdN: string, newValue: SeriesUrl) => Promise<unknown>;
   getSeries: (seriesId: string) => SeriesUrl;
   removeSeries: (seriesId: string) => void;
 }

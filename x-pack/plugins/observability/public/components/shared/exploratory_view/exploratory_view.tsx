@@ -22,7 +22,7 @@ import { SeriesBuilder } from './series_builder/series_builder';
 export function ExploratoryView({
   saveAttributes,
 }: {
-  saveAttributes: (attr: TypedLensByValueInput['attributes'] | null) => void;
+  saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
 }) {
   const {
     services: { lens, notifications },

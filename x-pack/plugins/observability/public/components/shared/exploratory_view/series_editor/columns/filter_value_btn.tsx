@@ -37,7 +37,9 @@ export function FilterValueButton({
   nestedField,
   allSelectedValues,
 }: Props) {
-  const { series } = useSeriesStorage(seriesId);
+  const { getSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const { indexPattern } = useAppIndexPatternContext();
 
