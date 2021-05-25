@@ -18,7 +18,6 @@ import {
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
-import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, IFieldFormat } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
@@ -46,7 +45,6 @@ export interface PublicAPIProps<T> {
 
 export interface EditorFrameProps {
   onError: ErrorCallback;
-  doc?: Document;
   initialContext?: VisualizeFieldContext;
   showNoDataPopover: () => void;
 }

@@ -126,15 +126,11 @@ export class EditorFrameService {
         collectAsyncDefinitions(this.visualizations),
       ]);
 
-      const firstDatasourceId = Object.keys(resolvedDatasources)[0];
-      const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
-
-      const { EditorFrame, getActiveDatasourceIdFromDoc } = await import('../async_services');
-
+      const { EditorFrame } = await import('../async_services');
       const palettes = await plugins.charts.palettes.getPalettes();
 
       return {
-        EditorFrameContainer: ({ doc, onError, showNoDataPopover, initialContext }) => {
+        EditorFrameContainer: ({ onError, showNoDataPopover, initialContext }) => {
           return (
             <div className="lnsApp__frame">
               <EditorFrame
@@ -142,10 +138,6 @@ export class EditorFrameService {
                 onError={onError}
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}
-                initialDatasourceId={getActiveDatasourceIdFromDoc(doc) || firstDatasourceId || null}
-                initialVisualizationId={
-                  (doc && doc.visualizationType) || firstVisualizationId || null
-                }
                 core={core}
                 plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}

@@ -45,7 +45,12 @@ export const makeConfigureStore = (
   const middleware = [
     ...getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['app/setState', 'app/onChangeFromEditorFrame', 'app/onActiveDataChange'],
+        ignoredActions: [
+          'app/setState',
+          'app/onChangeFromEditorFrame',
+          'app/onActiveDataChange',
+          'app/navigateAway',
+        ],
       },
     }),
     customMiddleware(data),

@@ -82,7 +82,6 @@ export function App({
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-
   const { lastKnownDoc } = appState;
 
   const showNoDataPopover = useCallback(() => {
@@ -203,14 +202,14 @@ export function App({
     chrome.setBreadcrumbs(breadcrumbs);
   }, [
     dashboardFeatureFlag.allowByValueEmbeddables,
-    appState.isLinkedToOriginatingApp,
     getOriginatingAppName,
-    appState.persistedDoc,
     redirectToOrigin,
     getIsByValueMode,
-    initialInput,
     application,
     chrome,
+    initialInput,
+    appState.isLinkedToOriginatingApp,
+    appState.persistedDoc,
   ]);
 
   useEffect(() => {
@@ -448,7 +447,6 @@ export function App({
             onError={onError}
             showNoDataPopover={showNoDataPopover}
             initialContext={initialContext}
-            persistedDoc={appState.persistedDoc}
           />
         )}
       </div>
@@ -482,13 +480,11 @@ export function App({
 
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
-  persistedDoc,
   onError,
   showNoDataPopover,
   initialContext,
 }: {
   editorFrame: EditorFrameInstance;
-  persistedDoc?: Document | undefined;
   onError: (e: { message: string }) => Toast;
   showNoDataPopover: () => void;
   initialContext: VisualizeFieldContext | undefined;
@@ -496,7 +492,6 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   const { EditorFrameContainer } = editorFrame;
   return (
     <EditorFrameContainer
-      doc={persistedDoc}
       onError={onError}
       showNoDataPopover={showNoDataPopover}
       initialContext={initialContext}

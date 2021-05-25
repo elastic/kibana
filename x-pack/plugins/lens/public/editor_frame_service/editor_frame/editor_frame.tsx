@@ -43,8 +43,6 @@ import {
 export interface EditorFrameProps {
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
-  initialDatasourceId: string | null;
-  initialVisualizationId: string | null;
   ExpressionRenderer: ReactExpressionRendererType;
   palettes: PaletteRegistry;
   onError: (e: { message: string }) => void;

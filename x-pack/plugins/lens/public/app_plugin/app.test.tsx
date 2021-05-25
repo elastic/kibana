@@ -346,7 +346,6 @@ describe('Lens App', () => {
       Array [
         Array [
           Object {
-            "doc": undefined,
             "initialContext": undefined,
             "onError": [Function],
             "showNoDataPopover": [Function],

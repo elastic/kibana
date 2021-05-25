@@ -238,34 +238,12 @@ describe('editor_frame', () => {
         datasourceMap: {
           testDatasource: mockDatasource,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
 
       await mountWithProvider(props);
       expect(mockDatasource.initialize).toHaveBeenCalled();
-    });
-
-    it('should not initialize datasource and visualization if no initial one is specificed', async () => {
-      mockVisualization.getLayerIds.mockReturnValue([]);
-      const props = {
-        ...getDefaultProps(),
-        visualizationMap: {
-          testVis: mockVisualization,
-        },
-        datasourceMap: {
-          testDatasource: mockDatasource,
-        },
-        initialDatasourceId: null,
-        initialVisualizationId: null,
-        ExpressionRenderer: expressionRendererMock,
-      };
-
-      await mountWithProvider(props);
-
-      expect(mockVisualization.initialize).not.toHaveBeenCalled();
-      expect(mockDatasource.initialize).not.toHaveBeenCalled();
     });
 
     it('should initialize all datasources with state from doc', async () => {
@@ -282,8 +260,7 @@ describe('editor_frame', () => {
           testDatasource2: mockDatasource2,
           testDatasource3: mockDatasource3,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
 
@@ -322,8 +299,7 @@ describe('editor_frame', () => {
         datasourceMap: {
           testDatasource: mockDatasource,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
 
@@ -343,8 +319,7 @@ describe('editor_frame', () => {
         datasourceMap: {
           testDatasource: mockDatasource,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
 
@@ -365,8 +340,7 @@ describe('editor_frame', () => {
         datasourceMap: {
           testDatasource: mockDatasource,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       await act(async () => {
@@ -399,11 +373,24 @@ describe('editor_frame', () => {
           testDatasource: mockDatasource,
           testDatasource2: mockDatasource2,
         },
-        initialDatasourceId: 'testDatasource2',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(props);
+      await mountWithProvider(props, {
+        persistedDoc: {
+          visualizationType: 'testVis',
+          title: '',
+          state: {
+            datasourceStates: {
+              testDatasource2: mockDatasource2,
+            },
+            visualization: {},
+            query: { query: '', language: 'lucene' },
+            filters: [],
+          },
+          references: [],
+        },
+      });
       act(() => {
         mockVisualization.initialize.mock.calls[0][0].addNewLayer();
       });
@@ -428,12 +415,24 @@ describe('editor_frame', () => {
           testDatasource: mockDatasource,
           testDatasource2: mockDatasource2,
         },
-        initialDatasourceId: 'testDatasource2',
-        initialVisualizationId: 'testVis',
         ExpressionRenderer: expressionRendererMock,
       };
 
-      await mountWithProvider(props);
+      await mountWithProvider(props, {
+        persistedDoc: {
+          visualizationType: 'testVis',
+          title: '',
+          state: {
+            datasourceStates: {
+              testDatasource2: mockDatasource2,
+            },
+            visualization: {},
+            query: { query: '', language: 'lucene' },
+            filters: [],
+          },
+          references: [],
+        },
+      });
 
       act(() => {
         mockVisualization.initialize.mock.calls[0][0].removeLayers(['abc', 'def']);
@@ -461,8 +460,7 @@ describe('editor_frame', () => {
               }),
           },
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
 
@@ -492,8 +490,7 @@ describe('editor_frame', () => {
             initialize: () => Promise.resolve(),
           },
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
 
@@ -520,8 +517,7 @@ describe('editor_frame', () => {
             toExpression: () => 'datasource',
           },
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       instance = (await mountWithProvider(props)).instance;
@@ -551,8 +547,7 @@ describe('editor_frame', () => {
           testVis: { ...mockVisualization, toExpression: () => 'vis' },
         },
         datasourceMap: { testDatasource: mockDatasource, testDatasource2: mockDatasource2 },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
 
@@ -662,8 +657,7 @@ describe('editor_frame', () => {
         datasourceMap: {
           testDatasource: mockDatasource,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(props);
@@ -695,8 +689,7 @@ describe('editor_frame', () => {
         datasourceMap: {
           testDatasource: mockDatasource,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(props);
@@ -732,8 +725,7 @@ describe('editor_frame', () => {
         datasourceMap: {
           testDatasource: mockDatasource,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(props);
@@ -780,8 +772,7 @@ describe('editor_frame', () => {
           testDatasource: mockDatasource,
           testDatasource2: mockDatasource2,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(props, {
@@ -830,8 +821,7 @@ describe('editor_frame', () => {
           testDatasource: mockDatasource,
           testDatasource2: mockDatasource2,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(props, {
@@ -884,8 +874,7 @@ describe('editor_frame', () => {
         datasourceMap: {
           testDatasource: mockDatasource,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(props);
@@ -940,8 +929,7 @@ describe('editor_frame', () => {
           testDatasource: mockDatasource,
           testDatasource2: mockDatasource2,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       instance = (await mountWithProvider(props)).instance;
@@ -1054,8 +1042,7 @@ describe('editor_frame', () => {
           testDatasource: mockDatasource,
           testDatasource2: mockDatasource2,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(props);
@@ -1073,8 +1060,7 @@ describe('editor_frame', () => {
           testDatasource: mockDatasource,
           testDatasource2: mockDatasource2,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(props);
@@ -1107,8 +1093,7 @@ describe('editor_frame', () => {
           testDatasource: mockDatasource,
           testDatasource2: mockDatasource2,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(props);
@@ -1176,8 +1161,7 @@ describe('editor_frame', () => {
             getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
           },
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       instance = (await mountWithProvider(props)).instance;
@@ -1225,8 +1209,7 @@ describe('editor_frame', () => {
             getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
           },
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis2',
+
         ExpressionRenderer: expressionRendererMock,
       };
       instance = (await mountWithProvider(props)).instance;
@@ -1239,7 +1222,8 @@ describe('editor_frame', () => {
       });
 
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(5);
+      // TODO: why so many times?
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(10);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
@@ -1286,8 +1270,7 @@ describe('editor_frame', () => {
             getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
           },
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
       };
       instance = (await mountWithProvider(props)).instance;
@@ -1358,8 +1341,7 @@ describe('editor_frame', () => {
             },
           },
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis2',
+
         ExpressionRenderer: expressionRendererMock,
       } as EditorFrameProps;
       instance = (await mountWithProvider(props)).instance;
@@ -1460,8 +1442,7 @@ describe('editor_frame', () => {
             },
           },
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis2',
+
         ExpressionRenderer: expressionRendererMock,
       } as EditorFrameProps;
 
@@ -1519,8 +1500,7 @@ describe('editor_frame', () => {
         datasourceMap: {
           testDatasource: mockDatasource,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
         onChange,
       };
@@ -1605,8 +1585,7 @@ describe('editor_frame', () => {
         datasourceMap: {
           testDatasource: mockDatasource,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
         onChange,
       };
@@ -1674,8 +1653,7 @@ describe('editor_frame', () => {
         datasourceMap: {
           testDatasource: mockDatasource,
         },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
+
         ExpressionRenderer: expressionRendererMock,
         onChange,
       };
