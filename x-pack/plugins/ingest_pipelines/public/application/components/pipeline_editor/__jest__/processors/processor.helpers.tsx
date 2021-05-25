@@ -140,7 +140,6 @@ type TestSubject =
   | 'appendValueField.input'
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
-  | 'fieldNameField.input'
   | 'messageField.input'
   | 'mockCodeEditor'
   | 'tagField.input'
