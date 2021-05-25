@@ -421,7 +421,6 @@ function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInst
     retryAt: (doc.retryAt && doc.retryAt.toISOString()) || null,
     runAt: (doc.runAt || new Date()).toISOString(),
     status: (doc as ConcreteTaskInstance).status || 'idle',
-    traceparent: (doc as ConcreteTaskInstance).traceparent || '',
   } as SerializedConcreteTaskInstance;
 }
 
@@ -438,7 +437,6 @@ export function savedObjectToConcreteTaskInstance(
     retryAt: savedObject.attributes.retryAt ? new Date(savedObject.attributes.retryAt) : null,
     state: parseJSONField(savedObject.attributes.state, 'state', savedObject.id),
     params: parseJSONField(savedObject.attributes.params, 'params', savedObject.id),
-    traceparent: savedObject.attributes.traceparent,
   };
 }
 

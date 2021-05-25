@@ -53,7 +53,6 @@ describe('taskRunner', () => {
     ownerId: '234',
     taskType: 'foo',
     params: {},
-    traceparent: '',
   };
 
   beforeEach(() => {

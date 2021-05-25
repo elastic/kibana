@@ -54,7 +54,6 @@ describe('fillPool', () => {
       taskType: '',
       params: {},
       ownerId: null,
-      traceparent: '',
     }));
 
   test('fills task pool with all claimed tasks until fetchAvailableTasks stream closes', async () => {
