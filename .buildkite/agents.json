@@ -4,6 +4,8 @@
     "zones": ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"],
     "serviceAccount": "elastic-buildkite-agent@elastic-kibana-ci.iam.gserviceaccount.com",
     "imageFamily": "kb-ubuntu",
+    "subnetwork": "buildkite",
+    "disableExternalIp": true,
     "diskType": "pd-ssd",
     "diskSizeGb": 75,
     "overprovision": 0,
@@ -27,12 +29,13 @@
         "queue": "baseline",
         "name": "kb-baseline",
         "machineType": "c2-standard-8",
-        "diskSizeGb": 128
+        "localSsds": 1
       },
       {
         "queue": "baseline-small",
         "name": "kb-baseline-small",
-        "machineType": "c2-standard-4"
+        "machineType": "c2-standard-4",
+        "localSsds": 1
       },
       {
         "queue": "jest",
@@ -67,7 +70,7 @@
       {
         "queue": "packer",
         "name": "kb-packer",
-        "serviceAccount": "buildkite-packer-agent@elastic-kibana-184716.iam.gserviceaccount.com",
+        "serviceAccount": "buildkite-packer-agent@elastic-kibana-ci.iam.gserviceaccount.com",
         "maximumAgents": 10,
         "machineType": "e2-small"
       }
