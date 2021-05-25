@@ -18,6 +18,7 @@ import { ExploratoryViewPage } from '../components/shared/exploratory_view';
 import { CaseDetailsPage } from '../pages/cases/case_details';
 import { ConfigureCasesPage } from '../pages/cases/configure_cases';
 import { AllCasesPage } from '../pages/cases/all_cases';
+import { casesBreadcrumb } from '../hooks/use_breadcrumbs';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -84,13 +85,7 @@ export const routes = {
       return <AllCasesPage />;
     },
     params: {},
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.cases.breadcrumb', {
-          defaultMessage: 'Cases',
-        }),
-      },
-    ],
+    breadcrumb: [casesBreadcrumb],
   },
   '/cases/create': {
     handler: () => {
@@ -98,9 +93,10 @@ export const routes = {
     },
     params: {},
     breadcrumb: [
+      casesBreadcrumb,
       {
-        text: i18n.translate('xpack.observability.cases.breadcrumb', {
-          defaultMessage: 'Cases',
+        text: i18n.translate('xpack.observability.breadcrumbs.observability.cases.create', {
+          defaultMessage: 'Create',
         }),
       },
     ],
@@ -111,29 +107,24 @@ export const routes = {
     },
     params: {},
     breadcrumb: [
+      casesBreadcrumb,
       {
-        text: i18n.translate('xpack.observability.cases.breadcrumb', {
-          defaultMessage: 'Cases',
+        text: i18n.translate('xpack.observability.breadcrumbs.observability.cases.configure', {
+          defaultMessage: 'Configure',
         }),
       },
     ],
   },
   '/cases/:detailName': {
-    handler: (routeParams: any) => {
-      return <CaseDetailsPage routeParams={routeParams} />;
+    handler: () => {
+      return <CaseDetailsPage />;
     },
     params: {
       path: t.partial({
         detailName: t.string,
       }),
     },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.cases.breadcrumb', {
-          defaultMessage: 'Cases',
-        }),
-      },
-    ],
+    breadcrumb: [casesBreadcrumb],
   },
   '/alerts': {
     handler: (routeParams: any) => {

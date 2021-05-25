@@ -18,6 +18,7 @@ import { Case } from '../../../../../../cases/common';
 import { useFetchAlertData } from './helpers';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CASES_APP_ID } from '../constants';
+import { casesBreadcrumb, useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 
 interface Props {
   caseId: string;
@@ -39,17 +40,26 @@ export interface CaseProps extends Props {
 }
 
 export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
-  const [spyState, setSpyState] = useState<{ caseTitle: string | undefined }>({
-    caseTitle: undefined,
-  });
+  const [caseTitle, setCaseTitle] = useState<string | null>(null);
+
+  useBreadcrumbs([
+    casesBreadcrumb,
+    ...(caseTitle !== null
+      ? [
+          {
+            text: caseTitle,
+          },
+        ]
+      : []),
+  ]);
 
   const onCaseDataSuccess = useCallback(
     (data: Case) => {
-      if (spyState.caseTitle === undefined) {
-        setSpyState({ caseTitle: data.title });
+      if (caseTitle === null) {
+        setCaseTitle(data.title);
       }
     },
-    [spyState.caseTitle]
+    [caseTitle]
   );
 
   const {

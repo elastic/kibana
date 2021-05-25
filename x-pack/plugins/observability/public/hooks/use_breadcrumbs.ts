@@ -40,6 +40,12 @@ export const makeBaseBreadcrumb = (href: string): EuiBreadcrumb => {
   };
 };
 
+export const casesBreadcrumb: EuiBreadcrumb = {
+  text: i18n.translate('xpack.observability.breadcrumbs.observability.cases', {
+    defaultMessage: 'Cases',
+  }),
+};
+
 export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   const params = useQueryParams();
 
