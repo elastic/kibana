@@ -14,6 +14,10 @@ import { useFetcher } from '../../../../..';
 import { useUrlStorage } from '../../hooks/use_url_storage';
 import { SeriesType } from '../../../../../../../lens/public';
 
+const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.label', {
+  defaultMessage: 'Chart type',
+});
+
 export function SeriesChartTypesSelect({
   seriesId,
   defaultChartType,
@@ -38,9 +42,7 @@ export function SeriesChartTypesSelect({
       onChange={onChange}
       value={seriesType}
       excludeChartTypes={['bar_percentage_stacked']}
-      label={i18n.translate('xpack.observability.expView.chartTypes.label', {
-        defaultMessage: 'Chart type',
-      })}
+      label={CHART_TYPE_LABEL}
       includeChartTypes={['bar', 'bar_horizontal', 'line', 'area', 'bar_stacked', 'area_stacked']}
     />
   );
@@ -94,8 +96,9 @@ export function XYChartTypesSelect({
 
   return (
     <EuiSuperSelect
+      fullWidth
       compressed
-      prepend="Chart type"
+      prepend={CHART_TYPE_LABEL}
       valueOfSelected={value}
       isLoading={loading}
       options={options}

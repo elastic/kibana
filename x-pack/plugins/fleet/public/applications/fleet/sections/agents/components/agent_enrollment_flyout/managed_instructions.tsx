@@ -67,7 +67,7 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
 
   const apiKey = useGetOneEnrollmentAPIKey(selectedAPIKeyId);
   const settings = useGetSettings();
-  const fleetServerInstructions = useFleetServerInstructions();
+  const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
 
   const steps = useMemo(() => {
     const {

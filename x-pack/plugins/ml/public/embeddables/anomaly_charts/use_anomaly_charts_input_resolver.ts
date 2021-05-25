@@ -133,6 +133,7 @@ export function useAnomalyChartsInputResolver(
               return forkJoin({
                 chartsData: from(
                   anomalyExplorerService.getAnomalyData(
+                    undefined,
                     combinedJobRecords,
                     embeddableContainerWidth,
                     anomalyChartRecords,

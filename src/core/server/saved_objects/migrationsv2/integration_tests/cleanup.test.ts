@@ -53,7 +53,7 @@ function createRoot() {
   );
 }
 
-// CI FAILURE: https://github.com/elastic/kibana/issues/98352
+// FAILING: https://github.com/elastic/kibana/issues/98352
 describe.skip('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
@@ -101,7 +101,7 @@ describe.skip('migration v2', () => {
     await root.setup();
 
     await expect(root.start()).rejects.toThrow(
-      /Unable to migrate the corrupt saved object document with _id: 'index-pattern:test_index\*'/
+      'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: Corrupt saved object documents: index-pattern:test_index*. To allow migrations to proceed, please delete these documents.'
     );
 
     const logFileContent = await asyncReadFile(logFilePath, 'utf-8');

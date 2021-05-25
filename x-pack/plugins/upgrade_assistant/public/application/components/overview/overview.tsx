@@ -17,8 +17,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiSpacer,
+  EuiTitle,
   EuiLink,
-  EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,38 +27,45 @@ import { RouteComponentProps } from 'react-router-dom';
 import { useAppContext } from '../../app_context';
 import { LatestMinorBanner } from '../latest_minor_banner';
 import { ESDeprecationStats } from './es_stats';
+import { KibanaDeprecationStats } from './kibana_stats';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
 const i18nTexts = {
-  pageTitle: i18n.translate('xpack.upgradeAssistant.pageTitle', {
+  pageTitle: i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
     defaultMessage: 'Upgrade Assistant',
   }),
-  getPageDescription: (nextMajor: string) =>
-    i18n.translate('xpack.upgradeAssistant.pageDescription', {
-      defaultMessage:
-        'Prepare to upgrade by identifying deprecated settings and updating your configuration. Enable deprecation logging to see if your are using deprecated features that will not be available after you upgrade to Elastic {nextMajor}.',
-      values: {
-        nextMajor,
-      },
-    }),
-  getDeprecationLoggingLabel: (href: string) => (
+  pageDescription: i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
+    defaultMessage:
+      'Prepare to upgrade by identifying deprecated settings and updating your configuration.',
+  }),
+  docLink: i18n.translate('xpack.upgradeAssistant.overview.documentationLinkText', {
+    defaultMessage: 'Documentation',
+  }),
+  deprecationLoggingTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationLoggingTitle',
+    {
+      defaultMessage: 'Deprecation logs',
+    }
+  ),
+  getDeprecationLoggingDescription: (nextMajor: string, href: string) => (
     <FormattedMessage
-      id="xpack.upgradeAssistant.deprecationLoggingDescription"
-      defaultMessage="Log deprecated actions. {learnMore}"
+      id="xpack.upgradeAssistant.overview.deprecationLoggingDescription"
+      defaultMessage="Enable {deprecationLoggingLink} to see if you are using deprecated features that will not be available after you upgrade to Elastic {nextMajor}."
       values={{
-        learnMore: (
+        nextMajor,
+        deprecationLoggingLink: (
           <EuiLink href={href} target="_blank">
-            {i18n.translate('xpack.upgradeAssistant.deprecationLoggingDescription.learnMoreLink', {
-              defaultMessage: 'Learn more.',
-            })}
+            {i18n.translate(
+              'xpack.upgradeAssistant.deprecationLoggingDescription.deprecationLoggingLink',
+              {
+                defaultMessage: 'deprecation logging',
+              }
+            )}
           </EuiLink>
         ),
       }}
     />
   ),
-  docLink: i18n.translate('xpack.upgradeAssistant.documentationLinkText', {
-    defaultMessage: 'Documentation',
-  }),
 };
 
 interface Props {
@@ -103,7 +110,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
         <EuiPageContentBody>
           <>
             <EuiText data-test-subj="overviewDetail" grow={false}>
-              <p>{i18nTexts.getPageDescription(`${nextMajor}.x`)}</p>
+              <p>{i18nTexts.pageDescription}</p>
             </EuiText>
 
             <EuiSpacer />
@@ -113,20 +120,38 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
 
             <EuiSpacer size="xl" />
 
+            {/* Deprecation stats */}
             <EuiFlexGroup>
-              <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
+              <EuiFlexItem>
                 <ESDeprecationStats history={history} />
+              </EuiFlexItem>
 
-                <EuiSpacer />
+              <EuiFlexItem>
+                <KibanaDeprecationStats history={history} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-                <EuiFormRow
-                  helpText={i18nTexts.getDeprecationLoggingLabel(
-                    docLinks.links.elasticsearch.deprecationLogging
-                  )}
-                  data-test-subj="deprecationLoggingFormRow"
-                >
-                  <DeprecationLoggingToggle />
-                </EuiFormRow>
+            <EuiSpacer />
+
+            {/* Deprecation logging */}
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h2>{i18nTexts.deprecationLoggingTitle}</h2>
+                </EuiTitle>
+
+                <EuiText>
+                  <p>
+                    {i18nTexts.getDeprecationLoggingDescription(
+                      `${nextMajor}.x`,
+                      docLinks.links.elasticsearch.deprecationLogging
+                    )}
+                  </p>
+                </EuiText>
+
+                <EuiSpacer size="m" />
+
+                <DeprecationLoggingToggle />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>

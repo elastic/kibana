@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { EditAlertRule } from '../../../../../alerting/ml_alerting_flyout';
 
-export function extractJobDetails(job, basePath) {
+export function extractJobDetails(job, basePath, refreshJobList) {
   if (Object.keys(job).length === 0) {
     return {};
   }
@@ -82,7 +82,7 @@ export function extractJobDetails(job, basePath) {
     }),
     position: 'right',
     items: (job.alerting_rules ?? []).map((v) => {
-      return ['', <EditAlertRule initialAlert={v} />];
+      return ['', <EditAlertRule initialAlert={v} onSave={refreshJobList} />];
     }),
   };
 

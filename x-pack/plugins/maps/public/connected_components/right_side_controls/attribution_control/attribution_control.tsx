@@ -9,7 +9,7 @@ import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
 import { EuiText, EuiLink } from '@elastic/eui';
 import classNames from 'classnames';
-import { Attribution } from '../../../classes/sources/source';
+import { Attribution } from '../../../../common/descriptor_types';
 import { ILayer } from '../../../classes/layers/layer';
 
 export interface Props {
@@ -65,6 +65,7 @@ export class AttributionControl extends Component<Props, State> {
         }
       }
     }
+
     // Reflect top-to-bottom layer order as left-to-right in attribs
     uniqueAttributions.reverse();
     if (!_.isEqual(this.state.uniqueAttributions, uniqueAttributions)) {

@@ -76,13 +76,13 @@
   "apm": {
     "totalEvents": 0,
     "memRss": 0,
-    "memTotal": 0,
     "apms": {
       "total": 0
     },
     "config": {
       "container": false
-    }
+    },
+    "versions": []
   },
   "alerts": {
     "alertsMeta": {
@@ -152,13 +152,13 @@
   "apm": {
     "totalEvents": 0,
     "memRss": 0,
-    "memTotal": 0,
     "apms": {
       "total": 0
     },
     "config": {
       "container": false
-    }
+    },
+    "versions": []
   },
   "alerts": {
     "alertsMeta": {

@@ -100,6 +100,17 @@ describe('EnterpriseSearchRequestHandler', () => {
         });
       });
 
+      it('passes a body if that body is a string buffer', async () => {
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/example',
+        });
+        await makeAPICall(requestHandler, { body: Buffer.from('{"bodacious":true}') });
+
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/example', {
+          body: '{"bodacious":true}',
+        });
+      });
+
       it('passes request params', async () => {
         const requestHandler = enterpriseSearchRequestHandler.createRequest({
           path: '/api/example',

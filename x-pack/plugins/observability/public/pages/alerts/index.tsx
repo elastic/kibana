@@ -11,27 +11,37 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPage,
-  EuiPageHeader,
+  EuiPageTemplate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { format, parse } from 'url';
-import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
+import {
+  ALERT_START,
+  EVENT_ACTION,
+  RULE_ID,
+  RULE_NAME,
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import {
+  ParsedTechnicalFields,
+  parseTechnicalFields,
+} from '../../../../rule_registry/common/parse_technical_fields';
+import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
 import { callObservabilityApi } from '../../services/call_observability_api';
+import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
 import { getAbsoluteDateRange } from '../../utils/date';
-import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTable } from './alerts_table';
 
 export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
 
-export interface TopAlert extends TopAlertResponse {
+export interface TopAlert {
+  fields: ParsedTechnicalFields;
   start: number;
   reason: string;
   link?: string;
@@ -43,7 +53,7 @@ interface AlertsPageProps {
 }
 
 export function AlertsPage({ routeParams }: AlertsPageProps) {
-  const { core, observabilityRuleRegistry } = usePluginContext();
+  const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const { prepend } = core.http.basePath;
   const history = useHistory();
   const {
@@ -75,18 +85,19 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
         },
       }).then((alerts) => {
         return alerts.map((alert) => {
-          const ruleType = observabilityRuleRegistry.getTypeByRuleId(alert['rule.id']);
+          const parsedFields = parseTechnicalFields(alert);
+          const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
           const formatted = {
             link: undefined,
-            reason: alert['rule.name'],
-            ...(ruleType?.format?.({ alert, formatters: { asDuration, asPercent } }) ?? {}),
+            reason: parsedFields[RULE_NAME]!,
+            ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
           };
 
           const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;
 
           return {
-            ...alert,
             ...formatted,
+            fields: parsedFields,
             link: parsedLink
               ? format({
                   ...parsedLink,
@@ -97,82 +108,81 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
                   },
                 })
               : undefined,
-            active: alert['event.action'] !== 'close',
-            start: new Date(alert['kibana.rac.alert.start']).getTime(),
+            active: parsedFields[EVENT_ACTION] !== 'close',
+            start: new Date(parsedFields[ALERT_START]!).getTime(),
           };
         });
       });
     },
-    [kuery, observabilityRuleRegistry, rangeFrom, rangeTo]
+    [kuery, observabilityRuleTypeRegistry, rangeFrom, rangeTo]
   );
 
   return (
-    <EuiPage>
-      <EuiPageHeader
-        pageTitle={
+    <EuiPageTemplate
+      pageHeader={{
+        pageTitle: (
           <>
             {i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}{' '}
             <ExperimentalBadge />
           </>
-        }
-        rightSideItems={[
+        ),
+
+        rightSideItems: [
           <EuiButton fill href={manageDetectionRulesHref} iconType="gear">
             {i18n.translate('xpack.observability.alerts.manageDetectionRulesButtonLabel', {
               defaultMessage: 'Manage detection rules',
             })}
           </EuiButton>,
-        ]}
-      >
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <EuiCallOut
-              title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
-                defaultMessage: 'Experimental',
+        ],
+      }}
+    >
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiCallOut
+            title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
+              defaultMessage: 'Experimental',
+            })}
+            color="warning"
+            iconType="beaker"
+          >
+            <p>
+              {i18n.translate('xpack.observability.alertsDisclaimerText', {
+                defaultMessage:
+                  'This page shows an experimental alerting view. The data shown here will probably not be an accurate representation of alerts. A non-experimental list of alerts is available in the Alerts and Actions settings in Stack Management.',
               })}
-              color="warning"
-              iconType="beaker"
-            >
-              <p>
-                {i18n.translate('xpack.observability.alertsDisclaimerText', {
-                  defaultMessage:
-                    'This page shows an experimental alerting view. The data shown here will probably not be an accurate representation of alerts. A non-experimental list of alerts is available in the Alerts and Actions settings in Stack Management.',
+            </p>
+            <p>
+              <EuiLink href={prepend('/app/management/insightsAndAlerting/triggersActions/alerts')}>
+                {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
+                  defaultMessage: 'Alerts and Actions',
                 })}
-              </p>
-              <p>
-                <EuiLink
-                  href={prepend('/app/management/insightsAndAlerting/triggersActions/alerts')}
-                >
-                  {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
-                    defaultMessage: 'Alerts and Actions',
-                  })}
-                </EuiLink>
-              </p>
-            </EuiCallOut>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <AlertsSearchBar
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              query={kuery}
-              onQueryChange={({ dateRange, query }) => {
-                const nextSearchParams = new URLSearchParams(history.location.search);
+              </EuiLink>
+            </p>
+          </EuiCallOut>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <AlertsSearchBar
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            query={kuery}
+            onQueryChange={({ dateRange, query }) => {
+              const nextSearchParams = new URLSearchParams(history.location.search);
 
-                nextSearchParams.set('rangeFrom', dateRange.from);
-                nextSearchParams.set('rangeTo', dateRange.to);
-                nextSearchParams.set('kuery', query ?? '');
+              nextSearchParams.set('rangeFrom', dateRange.from);
+              nextSearchParams.set('rangeTo', dateRange.to);
+              nextSearchParams.set('kuery', query ?? '');
 
-                history.push({
-                  ...history.location,
-                  search: nextSearchParams.toString(),
-                });
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <AlertsTable items={topAlerts ?? []} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageHeader>
-    </EuiPage>
+              history.push({
+                ...history.location,
+                search: nextSearchParams.toString(),
+              });
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <AlertsTable items={topAlerts ?? []} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageTemplate>
   );
 }

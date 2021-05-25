@@ -277,6 +277,7 @@ export class JobsList extends Component {
           defaultMessage: 'Actions',
         }),
         render: (item) => <ResultLinks jobs={[item]} />,
+        width: '8%',
       },
     ];
 
@@ -340,6 +341,7 @@ export class JobsList extends Component {
           this.props.refreshJobs,
           this.props.showCreateAlertFlyout
         ),
+        width: '40px',
       });
     }
 

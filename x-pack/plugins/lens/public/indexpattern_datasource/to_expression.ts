@@ -6,6 +6,7 @@
  */
 
 import type { IUiSettingsClient } from 'kibana/public';
+import { partition } from 'lodash';
 import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
@@ -57,14 +58,28 @@ function getExpressionForLayer(
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
 
-  if (columnEntries.length) {
+  const [referenceEntries, esAggEntries] = partition(
+    columnEntries,
+    ([, col]) =>
+      operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
+      operationDefinitionMap[col.operationType]?.input === 'managedReference'
+  );
+
+  if (referenceEntries.length || esAggEntries.length) {
     const aggs: ExpressionAstExpressionBuilder[] = [];
     const expressions: ExpressionAstFunction[] = [];
-    columnEntries.forEach(([colId, col]) => {
+
+    sortedReferences(referenceEntries).forEach((colId) => {
+      const col = columns[colId];
       const def = operationDefinitionMap[col.operationType];
-      if (def.input === 'fullReference') {
+      if (def.input === 'fullReference' || def.input === 'managedReference') {
         expressions.push(...def.toExpression(layer, colId, indexPattern));
-      } else {
+      }
+    });
+
+    esAggEntries.forEach(([colId, col]) => {
+      const def = operationDefinitionMap[col.operationType];
+      if (def.input !== 'fullReference' && def.input !== 'managedReference') {
         const wrapInFilter = Boolean(def.filterable && col.filter);
         let aggAst = def.toEsAggsFn(
           col,
@@ -101,8 +116,12 @@ function getExpressionForLayer(
       }
     });
 
-    const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
-      const esAggsId = `col-${columnEntries.length === 1 ? 0 : index}-${colId}`;
+    if (esAggEntries.length === 0) {
+      // Return early if there are no aggs, for example if the user has an empty formula
+      return null;
+    }
+    const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
+      const esAggsId = `col-${index}-${colId}`;
       return {
         ...currentIdMap,
         [esAggsId]: {
@@ -232,6 +251,33 @@ function getExpressionForLayer(
   }
 
   return null;
+}
+
+// Topologically sorts references so that we can execute them in sequence
+function sortedReferences(columns: Array<readonly [string, IndexPatternColumn]>) {
+  const allNodes: Record<string, string[]> = {};
+  columns.forEach(([id, col]) => {
+    allNodes[id] = 'references' in col ? col.references : [];
+  });
+  // remove real metric references
+  columns.forEach(([id]) => {
+    allNodes[id] = allNodes[id].filter((refId) => !!allNodes[refId]);
+  });
+  const ordered: string[] = [];
+
+  while (ordered.length < columns.length) {
+    Object.keys(allNodes).forEach((id) => {
+      if (allNodes[id].length === 0) {
+        ordered.push(id);
+        delete allNodes[id];
+        Object.keys(allNodes).forEach((k) => {
+          allNodes[k] = allNodes[k].filter((i) => i !== id);
+        });
+      }
+    });
+  }
+
+  return ordered;
 }
 
 export function toExpression(

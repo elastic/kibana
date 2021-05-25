@@ -6,7 +6,6 @@
  */
 
 import Hapi from '@hapi/hapi';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { kbnTestConfig } from '@kbn/test';
 import { take } from 'rxjs/operators';
 import Url from 'url';

@@ -6,26 +6,26 @@
  */
 
 import React from 'react';
-import { SourceErrorPage } from '../../../components/source_error_page';
+import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogsPageLogsContent } from './page_logs_content';
 import { LogsPageNoIndicesContent } from './page_no_indices_content';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
 
 export const StreamPageContent: React.FunctionComponent = () => {
   const {
-    hasFailedLoadingSource,
+    hasFailedLoading,
     isLoading,
     isUninitialized,
     loadSource,
-    loadSourceFailureMessage,
+    latestLoadSourceFailures,
     sourceStatus,
   } = useLogSourceContext();
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
-  } else if (hasFailedLoadingSource) {
-    return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
+  } else if (hasFailedLoading) {
+    return <LogSourceErrorPage errors={latestLoadSourceFailures} onRetry={loadSource} />;
   } else if (sourceStatus?.logIndexStatus !== 'missing') {
     return <LogsPageLogsContent />;
   } else {

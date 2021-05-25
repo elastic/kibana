@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expectSuccess: false,
         });
         const errorMessage = await PageObjects.security.loginPage.getErrorMessage();
-        expect(errorMessage).to.be('Invalid username or password. Please try again.');
+        expect(errorMessage).to.be('Username or password is incorrect. Please try again.');
       });
 
       it('displays message acknowledging logout', async () => {

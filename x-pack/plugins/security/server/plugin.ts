@@ -246,7 +246,12 @@ export class SecurityPlugin
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
     this.sessionManagementService.setup({ config, http: core.http, taskManager });
-    this.authenticationService.setup({ http: core.http, license });
+    this.authenticationService.setup({
+      http: core.http,
+      config,
+      license,
+      buildNumber: this.initializerContext.env.packageInfo.buildNum,
+    });
 
     registerSecurityUsageCollector({ usageCollection, config, license });
 

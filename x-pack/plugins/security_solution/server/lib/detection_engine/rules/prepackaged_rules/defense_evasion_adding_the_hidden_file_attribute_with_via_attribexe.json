@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Adding Hidden File Attribute via Attrib",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:attrib.exe and process.args:+h",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"attrib.exe\" and process.args : \"+h\"\n",
   "risk_score": 21,
   "rule_id": "4630d948-40d4-4cef-ac69-4002e29bc3db",
   "severity": "low",
@@ -57,6 +57,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 8
+  "type": "eql",
+  "version": 9
 }
