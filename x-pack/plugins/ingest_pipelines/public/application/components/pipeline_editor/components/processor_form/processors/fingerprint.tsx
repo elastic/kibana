@@ -30,7 +30,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Fields',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.fingerprint.fieldNameHelpText', {
-      defaultMessage: 'Fields to remove.',
+      defaultMessage: 'Fields that should be included in the fingerprint.',
     }),
     validations: [
       {
