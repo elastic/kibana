@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 export function replaceVars(str, args = {}, vars = {}) {
   try {
     // we need add '[]' for emptyLabel because this value contains special characters. (https://handlebarsjs.com/guide/expressions.html#literal-segments)
-    // ''.split(...).join(...) as a save alternative of the replaceAll...
     const template = handlebars.compile(str.split(emptyLabel).join(`[${emptyLabel}]`), {
       strict: true,
       knownHelpersOnly: true,
