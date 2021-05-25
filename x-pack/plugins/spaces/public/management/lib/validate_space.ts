@@ -111,7 +111,7 @@ export class SpaceValidator {
 
     if (space.avatarType !== 'image' && !space.initials) {
       return invalid(
-        i18n.translate('xpack.spaces.management.validateSpace.describeMaxLengthErrorMessage', {
+        i18n.translate('xpack.spaces.management.validateSpace.requiredInitialsErrorMessage', {
           defaultMessage: 'Enter initials.',
         })
       );
@@ -128,7 +128,7 @@ export class SpaceValidator {
     if (space.avatarType !== 'image') {
       if (!space.color) {
         return invalid(
-          i18n.translate('xpack.spaces.management.validateSpace.describeMaxLengthErrorMessage', {
+          i18n.translate('xpack.spaces.management.validateSpace.requiredColorErrorMessage', {
             defaultMessage: 'Select a color.',
           })
         );
@@ -136,7 +136,7 @@ export class SpaceValidator {
 
       if (!isValidHex(space.color)) {
         return invalid(
-          i18n.translate('xpack.spaces.management.validateSpace.describeMaxLengthErrorMessage', {
+          i18n.translate('xpack.spaces.management.validateSpace.invalidColorErrorMessage', {
             defaultMessage: 'Enter a valid HEX color code.',
           })
         );
@@ -153,7 +153,7 @@ export class SpaceValidator {
 
     if (space.avatarType === 'image' && !space.imageUrl) {
       return invalid(
-        i18n.translate('xpack.spaces.management.validateSpace.describeMaxLengthErrorMessage', {
+        i18n.translate('xpack.spaces.management.validateSpace.requiredImageErrorMessage', {
           defaultMessage: 'Upload an image.',
         })
       );

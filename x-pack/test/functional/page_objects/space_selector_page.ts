@@ -111,10 +111,6 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
       await testSubjects.click('cancel-space-button');
     }
 
-    async clickOnCustomizeURL() {
-      await testSubjects.click('CustomizeOrReset');
-    }
-
     async clickOnSpaceURLDisplay() {
       await testSubjects.click('spaceURLDisplay');
     }

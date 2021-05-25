@@ -15,7 +15,7 @@ exports[`renders correctly 1`] = `
         <h3>
           <FormattedMessage
             defaultMessage="Describe this space"
-            id="xpack.spaces.management.manageSpacePage.customizeSpacePanelDescription"
+            id="xpack.spaces.management.manageSpacePage.describeSpaceTitle"
             values={Object {}}
           />
         </h3>

@@ -5,6 +5,7 @@ exports[`renders without crashing 1`] = `
   onSubmit={[Function]}
 >
   <EuiFormRow
+    aria-owns="avatar_type_initials avatar_type_image"
     describedByIds={Array []}
     display="row"
     fullWidth={true}
@@ -12,12 +13,9 @@ exports[`renders without crashing 1`] = `
     hasEmptyLabelSpace={false}
     label="Avatar type"
     labelType="label"
+    role="radiogroup"
   >
-    <EuiKeyPadMenu
-      aria-labelledby="rg1_label"
-      aria-owns="avatar_type_initials avatar_type_image"
-      role="radiogroup"
-    >
+    <EuiKeyPadMenu>
       <EuiKeyPadMenuItem
         aria-checked={true}
         id="avatar_type_initials"

@@ -46,12 +46,9 @@ export class CustomizeSpace extends Component<Props, State> {
   public render() {
     const { validator, editingExistingSpace } = this.props;
     const { name = '', description = '' } = this.props.space;
-    const panelTitle = i18n.translate(
-      'xpack.spaces.management.manageSpacePage.customizeSpaceTitle',
-      {
-        defaultMessage: 'General',
-      }
-    );
+    const panelTitle = i18n.translate('xpack.spaces.management.manageSpacePage.generalTitle', {
+      defaultMessage: 'General',
+    });
 
     return (
       <SectionPanel title={panelTitle} description={panelTitle}>
@@ -60,15 +57,18 @@ export class CustomizeSpace extends Component<Props, State> {
             <EuiTitle size="xs">
               <h3>
                 <FormattedMessage
-                  id="xpack.spaces.management.manageSpacePage.customizeSpacePanelDescription"
+                  id="xpack.spaces.management.manageSpacePage.describeSpaceTitle"
                   defaultMessage="Describe this space"
                 />
               </h3>
             </EuiTitle>
           }
-          description={i18n.translate('xpack.spaces.management.manageSpacePage.nameFormRowLabel', {
-            defaultMessage: 'Give your space a name and description for easy identification.',
-          })}
+          description={i18n.translate(
+            'xpack.spaces.management.manageSpacePage.describeSpaceDescription',
+            {
+              defaultMessage: 'Give your space a name and description for easy identification.',
+            }
+          )}
           fullWidth
         >
           <EuiFormRow

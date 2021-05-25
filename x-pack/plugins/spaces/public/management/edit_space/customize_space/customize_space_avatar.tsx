@@ -127,15 +127,15 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
               defaultMessage: 'Avatar type',
             }
           )}
+          role="radiogroup"
+          aria-owns="avatar_type_initials avatar_type_image"
           fullWidth
         >
-          <EuiKeyPadMenu
-            role="radiogroup"
-            aria-owns="avatar_type_initials avatar_type_image"
-            aria-labelledby="rg1_label"
-          >
+          <EuiKeyPadMenu>
             <EuiKeyPadMenuItem
-              label="Initials"
+              label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.initialsLabel', {
+                defaultMessage: 'Initials',
+              })}
               role="radio"
               id="avatar_type_initials"
               aria-checked={space.avatarType !== 'image'}
@@ -156,12 +156,9 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
               <InitialsIcon />
             </EuiKeyPadMenuItem>
             <EuiKeyPadMenuItem
-              label={i18n.translate(
-                'xpack.spaces.management.customizeSpaceAvatar.initialItemsFormRowLabel',
-                {
-                  defaultMessage: 'Image',
-                }
-              )}
+              label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.imageLabel', {
+                defaultMessage: 'Image',
+              })}
               role="radio"
               id="avatar_type_image"
               aria-checked={space.avatarType === 'image'}
@@ -191,13 +188,13 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
                 <EuiFlexItem>
                   <EuiFormRow
                     label={i18n.translate(
-                      'xpack.spaces.management.customizeSpaceAvatar.initialItemsFormRowLabel',
+                      'xpack.spaces.management.customizeSpaceAvatar.initialsLabel',
                       {
                         defaultMessage: 'Initials',
                       }
                     )}
                     helpText={i18n.translate(
-                      'xpack.spaces.management.customizeSpaceAvatar.initialItemsFormRowLabel',
+                      'xpack.spaces.management.customizeSpaceAvatar.initialsHelpText',
                       {
                         defaultMessage: 'Enter a maximum of two characters.',
                       }
@@ -218,7 +215,7 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
                 <EuiFlexItem>
                   <EuiFormRow
                     label={i18n.translate(
-                      'xpack.spaces.management.customizeSpaceAvatar.colorFormRowLabel',
+                      'xpack.spaces.management.customizeSpaceAvatar.colorLabel',
                       {
                         defaultMessage: 'Color',
                       }
@@ -238,9 +235,12 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
             ) : (
               <EuiFlexItem>
                 <EuiFormRow
-                  label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.imageUrl', {
-                    defaultMessage: 'Image',
-                  })}
+                  label={i18n.translate(
+                    'xpack.spaces.management.customizeSpaceAvatar.imageUrlLabel',
+                    {
+                      defaultMessage: 'Image',
+                    }
+                  )}
                   {...this.props.validator.validateAvatarImage(space)}
                   fullWidth
                 >
@@ -248,7 +248,7 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
                     display="default"
                     data-test-subj="uploadCustomImageFile"
                     initialPromptText={i18n.translate(
-                      'xpack.spaces.management.customizeSpaceAvatar.selectImageUrl',
+                      'xpack.spaces.management.customizeSpaceAvatar.imageUrlPromptText',
                       {
                         defaultMessage: 'Select image file',
                       }

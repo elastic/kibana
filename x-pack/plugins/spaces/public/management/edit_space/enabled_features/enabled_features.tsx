@@ -27,15 +27,12 @@ interface Props {
 
 export const EnabledFeatures: FunctionComponent<Props> = (props) => (
   <SectionPanel
-    title={i18n.translate('xpack.spaces.management.manageSpacePage.customizeVisibleFeatures', {
+    title={i18n.translate('xpack.spaces.management.manageSpacePage.featuresTitle', {
       defaultMessage: 'Features',
     })}
-    description={i18n.translate(
-      'xpack.spaces.management.manageSpacePage.customizeVisibleFeatures',
-      {
-        defaultMessage: 'Customize visible features',
-      }
-    )}
+    description={i18n.translate('xpack.spaces.management.manageSpacePage.featuresDescription', {
+      defaultMessage: 'Customize visible features',
+    })}
     data-test-subj="enabled-features-panel"
   >
     <EuiFlexGroup>
