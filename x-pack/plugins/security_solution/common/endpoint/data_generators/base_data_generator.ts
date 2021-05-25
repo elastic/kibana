@@ -9,6 +9,7 @@ import seedrandom from 'seedrandom';
 import uuid from 'uuid';
 
 const OS_FAMILY = ['windows', 'macos', 'linux'];
+const BOOLEANS = [true, false];
 
 /**
  * A generic base class to assist in creating domain specific data generators. It includes
@@ -31,6 +32,11 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
    */
   public generate(): GeneratedDoc {
     throw new Error('method not implemented!');
+  }
+
+  /** Generate either `true` or `false` */
+  protected randomBoolean(): boolean {
+    return this.randomChoice(BOOLEANS);
   }
 
   /** generate random OS family value */
