@@ -148,6 +148,9 @@ export const WaterfallChartTooltip = euiStyled.div`
   border-radius: ${(props) => props.theme.eui.euiBorderRadius};
   color: ${(props) => props.theme.eui.euiColorLightestShade};
   padding: ${(props) => props.theme.eui.paddingSizes.s};
+  .euiToolTip__arrow {
+    background-color: ${(props) => props.theme.eui.euiColorDarkestShade};
+  }
 `;
 
 export const NetworkRequestsTotalStyle = euiStyled(EuiText)`
