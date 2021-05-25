@@ -15,6 +15,7 @@
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
+    { "path": "../vis_type_timeseries/tsconfig.json" },
     { "path": "../expressions/tsconfig.json" },
     { "path": "../ui_actions/tsconfig.json" },
     { "path": "../embeddable/tsconfig.json" },
