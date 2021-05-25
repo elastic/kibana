@@ -18,7 +18,7 @@ import {
 
 import { TimeRange } from '../../../../data/public';
 
-import { SearchInput, SearchOutput, SearchEmbeddable } from './types';
+import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 
@@ -70,10 +70,7 @@ export class SearchEmbeddableFactory
     if (!this.$injector) {
       this.$injector = await this.getInjector();
     }
-    const $injector = this.$injector as auto.IInjectorService;
 
-    const $compile = $injector.get<ng.ICompileService>('$compile');
-    const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
     const filterManager = getServices().filterManager;
 
     const url = await getServices().getSavedSearchUrlById(savedObjectId);
@@ -82,7 +79,6 @@ export class SearchEmbeddableFactory
       const savedObject = await getServices().getSavedSearchById(savedObjectId);
       const indexPattern = savedObject.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
-      //  const { SearchEmbeddable: SearchEmbeddableClass } = await import('./search_embeddable');
       const { SavedSearchEmbeddable: SavedSearchEmbeddableClass } = await import(
         './saved_search_embeddable'
       );

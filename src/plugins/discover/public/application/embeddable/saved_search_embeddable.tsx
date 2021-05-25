@@ -375,14 +375,7 @@ export class SavedSearchEmbeddable
     }
     this.searchProps.refs = domNode;
     await this.pushContainerStateParamsToProps(this.searchProps);
-    ReactDOM.render(
-      <SavedSearchEmbeddableComponent
-        {...this.searchProps}
-        props={this.searchProps}
-        embeddable={this}
-      />,
-      domNode
-    );
+    ReactDOM.render(<SavedSearchEmbeddableComponent {...this.searchProps} />, domNode);
   }
 
   public reload() {
