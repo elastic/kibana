@@ -107,6 +107,17 @@
   }
 }
 
+.lnsFormula__docsSidebar {
+  height: 100%;
+}
+
+.lnsFormula__docsSearch {
+  border: none;
+  border-bottom: $euiBorderThin;
+  box-shadow: none;
+  border-radius: 0;
+}
+
 .lnsFormula__docsNav {
   @include euiYScroll;
   background: $euiColorLightestShade;

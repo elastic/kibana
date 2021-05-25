@@ -18,6 +18,8 @@ import {
   EuiMarkdownFormat,
   EuiTitle,
   EuiButtonIcon,
+  EuiFieldSearch,
+  EuiHighlight,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../../types';
 import { tinymathFunctions } from '../util';
@@ -59,6 +61,13 @@ function FormulaHelp({
   }> = [];
 
   helpGroups.push({
+    label: i18n.translate('xpack.lens.formulaDocumentationHeading', {
+      defaultMessage: 'How it works',
+    }),
+    items: [],
+  });
+
+  helpGroups.push({
     label: i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSection', {
       defaultMessage: 'Elasticsearch',
     }),
@@ -76,7 +85,7 @@ function FormulaHelp({
   const availableFunctions = getPossibleFunctions(indexPattern);
 
   // Es aggs
-  helpGroups[0].items.push(
+  helpGroups[1].items.push(
     ...availableFunctions
       .filter(
         (key) =>
@@ -119,7 +128,7 @@ function FormulaHelp({
   });
 
   // Calculations aggs
-  helpGroups[1].items.push(
+  helpGroups[2].items.push(
     ...availableFunctions
       .filter(
         (key) =>
@@ -179,7 +188,7 @@ function FormulaHelp({
       });
   }, [indexPattern]);
 
-  helpGroups[2].items.push(
+  helpGroups[3].items.push(
     ...tinymathFns.map(({ label, description, examples }) => {
       return {
         label,
@@ -194,6 +203,8 @@ function FormulaHelp({
       };
     })
   );
+
+  const [searchText, setSearchText] = useState('');
 
   return (
     <>
@@ -221,48 +232,87 @@ function FormulaHelp({
         </EuiFlexGroup>
       </EuiPopoverTitle>
 
-      <EuiFlexGroup className="lnsFormula__docsContent" gutterSize="none" responsive={false}>
-        <EuiFlexItem className="lnsFormula__docsNav" grow={1}>
-          {helpGroups.map((helpGroup, index) => {
-            return (
-              <nav className="lnsFormula__docsNavGroup" key={helpGroup.label}>
-                <EuiTitle size="xxs">
-                  <h6>
-                    <EuiLink
-                      className="lnsFormula__docsNavGroupLink"
-                      color="text"
-                      onClick={() => {
-                        setSelectedFunction(helpGroup.label);
-                      }}
-                    >
-                      {helpGroup.label}
-                    </EuiLink>
-                  </h6>
-                </EuiTitle>
+      <EuiFlexGroup
+        className="lnsFormula__docsContent"
+        gutterSize="none"
+        responsive={false}
+        alignItems="stretch"
+      >
+        <EuiFlexItem grow={1}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            responsive={false}
+            className="lnsFormula__docsSidebar"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiFieldSearch
+                className="lnsFormula__docsSearch"
+                value={searchText}
+                onChange={(e) => {
+                  setSearchText(e.target.value);
+                }}
+                placeholder={i18n.translate('xpack.lens.formulaSearchPlaceholder', {
+                  defaultMessage: 'Search functions',
+                })}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem className="lnsFormula__docsNav" grow={true}>
+              {helpGroups.map((helpGroup, index) => {
+                return (
+                  <nav className="lnsFormula__docsNavGroup" key={helpGroup.label}>
+                    <EuiTitle size="xxs">
+                      <h6>
+                        <EuiLink
+                          className="lnsFormula__docsNavGroupLink"
+                          color="text"
+                          onClick={() => {
+                            setSelectedFunction(helpGroup.label);
+                          }}
+                        >
+                          {helpGroup.label}
+                        </EuiLink>
+                      </h6>
+                    </EuiTitle>
 
-                <EuiListGroup gutterSize="none">
-                  {helpGroups[index].items.map((helpItem) => {
-                    return (
-                      <EuiListGroupItem
-                        key={helpItem.label}
-                        label={helpItem.label}
-                        size="s"
-                        onClick={() => {
-                          setSelectedFunction(helpItem.label);
-                        }}
-                      />
-                    );
-                  })}
-                </EuiListGroup>
-              </nav>
-            );
-          })}
+                    <EuiListGroup gutterSize="none">
+                      {helpGroups[index].items
+                        .filter((helpItem) => {
+                          return !searchText || helpItem.label.includes(searchText);
+                        })
+                        .map((helpItem) => {
+                          return (
+                            <EuiListGroupItem
+                              key={helpItem.label}
+                              label={
+                                <EuiHighlight search={searchText}>{helpItem.label}</EuiHighlight>
+                              }
+                              size="s"
+                              onClick={() => {
+                                setSelectedFunction(helpItem.label);
+                              }}
+                            />
+                          );
+                        })}
+                    </EuiListGroup>
+                  </nav>
+                );
+              })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
 
         <EuiFlexItem className="lnsFormula__docsText" grow={2}>
-          <EuiMarkdownFormat>
-            {i18n.translate('xpack.lens.formulaDocumentation', {
-              defaultMessage: `
+          <section
+            ref={(el) => {
+              if (el) {
+                scrollTargets.current[helpGroups[0].label] = el;
+              }
+            }}
+          >
+            <EuiMarkdownFormat>
+              {i18n.translate('xpack.lens.formulaDocumentation', {
+                defaultMessage: `
 ## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
@@ -295,12 +345,13 @@ Math functions can take positional arguments, like pow(count(), 3) is the same a
 
 Use the symbols +, -, /, and * to perform basic math.
                   `,
-              description:
-                'Text is in markdown. Do not translate function names or field names like sum(bytes)',
-            })}
-          </EuiMarkdownFormat>
+                description:
+                  'Text is in markdown. Do not translate function names or field names like sum(bytes)',
+              })}
+            </EuiMarkdownFormat>
+          </section>
 
-          {helpGroups.map((helpGroup, index) => {
+          {helpGroups.slice(1).map((helpGroup, index) => {
             return (
               <section
                 className="lnsFormula__docsTextGroup"
@@ -317,7 +368,7 @@ Use the symbols +, -, /, and * to perform basic math.
 
                 {helpGroup.description}
 
-                {helpGroups[index].items.map((helpItem) => {
+                {helpGroups[index + 1].items.map((helpItem) => {
                   return (
                     <article
                       className="lnsFormula__docsTextItem"
