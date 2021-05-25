@@ -1037,7 +1037,7 @@ describe('terms', () => {
         expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
           expect.objectContaining({
             message:
-              "Can't use multiple time shifts in a single layer together with dynamic top values. Either use the same time shift for all metrics or use filters instead of top values.",
+              'In a single layer, you are unable to combine multiple time shifts and dynamic top values. Use the same value for all time shifts, or use filters instead of top values.',
           }),
         ]);
       });
