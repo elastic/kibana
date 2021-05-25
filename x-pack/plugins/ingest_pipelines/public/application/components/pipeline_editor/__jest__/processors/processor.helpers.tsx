@@ -149,4 +149,9 @@ type TestSubject =
   | 'ifField.textarea'
   | 'targetField.input'
   | 'keepOriginalField.input'
-  | 'removeIfSuccessfulField.input';
+  | 'removeIfSuccessfulField.input'
+  | 'targetFieldsField.input'
+  | 'separatorValueField.input'
+  | 'quoteValueField.input'
+  | 'emptyValueField.input'
+  | 'trimSwitch.input';

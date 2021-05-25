@@ -154,7 +154,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeBreadcrumb](./kibana-plugin-core-public.chromebreadcrumb.md) |  |
 |  [ChromeHelpExtensionLinkBase](./kibana-plugin-core-public.chromehelpextensionlinkbase.md) |  |
 |  [ChromeHelpExtensionMenuLink](./kibana-plugin-core-public.chromehelpextensionmenulink.md) |  |
-|  [ChromeNavLinkUpdateableFields](./kibana-plugin-core-public.chromenavlinkupdateablefields.md) |  |
 |  [FatalErrorsStart](./kibana-plugin-core-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HttpStart](./kibana-plugin-core-public.httpstart.md) | See [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
 |  [IToasts](./kibana-plugin-core-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-core-public.toastsapi.md)<!-- -->. |

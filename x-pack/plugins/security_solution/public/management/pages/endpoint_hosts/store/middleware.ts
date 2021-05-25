@@ -6,9 +6,15 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import { HostInfo, HostResultList } from '../../../../../common/endpoint/types';
+import {
+  HostInfo,
+  HostIsolationRequestBody,
+  HostIsolationResponse,
+  HostResultList,
+  Immutable,
+} from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
-import { ImmutableMiddlewareFactory } from '../../../../common/store';
+import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import {
   isOnEndpointPage,
   hasSelectedEndpoint,
@@ -19,6 +25,8 @@ import {
   patterns,
   searchBarQuery,
   isTransformEnabled,
+  getIsIsolationRequestPending,
+  getCurrentIsolationRequestState,
 } from './selectors';
 import { EndpointState, PolicyIds } from '../types';
 import {
@@ -30,6 +38,15 @@ import {
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
+import {
+  createFailedResourceState,
+  createLoadedResourceState,
+  createLoadingResourceState,
+} from '../../../state';
+import { isolateHost } from '../../../../common/lib/host_isolation';
+import { AppAction } from '../../../../common/store/actions';
+
+type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
@@ -47,8 +64,10 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     return [indexPattern];
   }
   // eslint-disable-next-line complexity
-  return ({ getState, dispatch }) => (next) => async (action) => {
+  return (store) => (next) => async (action) => {
     next(action);
+
+    const { getState, dispatch } = store;
 
     // Endpoint list
     if (
@@ -328,6 +347,11 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         });
       }
     }
+
+    // Isolate Host
+    if (action.type === 'endpointIsolationRequest') {
+      return handleIsolateEndpointHost(store, action);
+    }
   };
 };
 
@@ -427,4 +451,37 @@ const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
     console.error(error);
   }
   return false;
+};
+
+const handleIsolateEndpointHost = async (
+  { getState, dispatch }: EndpointPageStore,
+  action: Immutable<AppAction & { type: 'endpointIsolationRequest' }>
+) => {
+  const state = getState();
+
+  if (getIsIsolationRequestPending(state)) {
+    return;
+  }
+
+  dispatch({
+    type: 'endpointIsolationRequestStateChange',
+    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+    // @ts-ignore
+    payload: createLoadingResourceState(getCurrentIsolationRequestState(state)),
+  });
+
+  try {
+    // Cast needed below due to the value of payload being `Immutable<>`
+    const response = await isolateHost(action.payload as HostIsolationRequestBody);
+
+    dispatch({
+      type: 'endpointIsolationRequestStateChange',
+      payload: createLoadedResourceState<HostIsolationResponse>(response),
+    });
+  } catch (error) {
+    dispatch({
+      type: 'endpointIsolationRequestStateChange',
+      payload: createFailedResourceState<HostIsolationResponse>(error.body ?? error),
+    });
+  }
 };
