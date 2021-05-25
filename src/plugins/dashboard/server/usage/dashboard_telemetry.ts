@@ -121,7 +121,7 @@ export const collectEmbeddableData = (
   embeddableService: EmbeddablePersistableStateService
 ) => {
   for (const panel of panels) {
-    embeddableService.telemetry(
+    const embeddableServiceStats = embeddableService.telemetry(
       {
         ...panel.embeddableConfig,
         id: panel.id || '',
@@ -129,6 +129,7 @@ export const collectEmbeddableData = (
       },
       collectorData
     );
+    Object.assign(collectorData, embeddableServiceStats);
   }
 };
 
