@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { LayerPanel } from './view';
+import { EditLayerPanel } from './edit_layer_panel';
+import { LAYER_TYPE } from '../../../common/constants';
 import { getSelectedLayer } from '../../selectors/map_selectors';
 import { updateSourceProp } from '../../actions';
+import { MapStoreState } from '../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   const selectedLayer = getSelectedLayer(state);
   return {
     key: selectedLayer ? `${selectedLayer.getId()}${selectedLayer.showJoinEditor()}` : '',
@@ -18,12 +22,12 @@ function mapStateToProps(state = {}) {
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    updateSourceProp: (id, propName, value, newLayerType) =>
+    updateSourceProp: (id: string, propName: string, value: unknown, newLayerType?: LAYER_TYPE) =>
       dispatch(updateSourceProp(id, propName, value, newLayerType)),
   };
 }
 
-const connectedLayerPanel = connect(mapStateToProps, mapDispatchToProps)(LayerPanel);
-export { connectedLayerPanel as LayerPanel };
+const connected = connect(mapStateToProps, mapDispatchToProps)(EditLayerPanel);
+export { connected as EditLayerPanel };
