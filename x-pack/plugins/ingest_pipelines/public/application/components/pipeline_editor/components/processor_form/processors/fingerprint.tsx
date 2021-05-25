@@ -35,9 +35,12 @@ const fieldsConfig: FieldsConfig = {
     validations: [
       {
         validator: fieldValidators.emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.fingerprint.fieldNameRequiredError', {
-            defaultMessage: 'A field value is required.',
-          })
+          i18n.translate(
+            'xpack.ingestPipelines.pipelineEditor.fingerprint.fieldNameRequiredError',
+            {
+              defaultMessage: 'A field value is required.',
+            }
+          )
         ),
       },
     ],
@@ -67,7 +70,7 @@ const fieldsConfig: FieldsConfig = {
         defaultMessage="The hash method used to compute the fingerprint. Defaults to {value}."
         values={{ value: <EuiCode>{'SHA-1'}</EuiCode> }}
       />
-    )
+    ),
   },
 };
 
@@ -90,10 +93,9 @@ export const Fingerprint: FunctionComponent = () => {
             options: [
               {
                 value: 'MD5',
-                text: i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.fingerprint.md5Option',
-                  { defaultMessage: 'MD5' }
-                ),
+                text: i18n.translate('xpack.ingestPipelines.pipelineEditor.fingerprint.md5Option', {
+                  defaultMessage: 'MD5',
+                }),
               },
               {
                 value: 'SHA-1',

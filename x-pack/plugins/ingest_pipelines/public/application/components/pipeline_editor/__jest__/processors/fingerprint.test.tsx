@@ -17,7 +17,7 @@ const defaultFingerprintParameters = {
   description: undefined,
   ignore_missing: undefined,
   ignore_failure: undefined,
-  target_field: undefined
+  target_field: undefined,
 };
 
 const FINGERPRINT_TYPE = 'fingerprint';

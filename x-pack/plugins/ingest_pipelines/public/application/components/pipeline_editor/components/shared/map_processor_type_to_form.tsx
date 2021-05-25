@@ -316,13 +316,12 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'Fingerprint',
     }),
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.fingerprint', {
-      defaultMessage:
-      'Computes a hash of the document’s content.',
-    }),
-    getDefaultDescription: () =>
-    i18n.translate('xpack.ingestPipelines.processors.defaultDescription.fingerprint', {
       defaultMessage: 'Computes a hash of the document’s content.',
     }),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.fingerprint', {
+        defaultMessage: 'Computes a hash of the document’s content.',
+      }),
   },
   foreach: {
     FieldsComponent: Foreach,
