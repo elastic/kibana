@@ -41,7 +41,7 @@ export function DataTypesCol({ seriesId }: { seriesId: string }) {
     <FlexGroup direction="column" gutterSize="xs">
       {dataTypes.map(({ id: dataTypeId, label }) => (
         <EuiFlexItem key={dataTypeId}>
-          <EuiButton
+          <Button
             size="s"
             iconSide="right"
             iconType="arrowRight"
@@ -54,7 +54,7 @@ export function DataTypesCol({ seriesId }: { seriesId: string }) {
             }}
           >
             {label}
-          </EuiButton>
+          </Button>
         </EuiFlexItem>
       ))}
     </FlexGroup>
@@ -63,4 +63,8 @@ export function DataTypesCol({ seriesId }: { seriesId: string }) {
 
 const FlexGroup = styled(EuiFlexGroup)`
   width: 100%;
+`;
+
+const Button = styled(EuiButton)`
+  will-change: transform;
 `;

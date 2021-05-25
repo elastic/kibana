@@ -1,10 +1,10 @@
 [[timelion]]
 === Timelion
 
-Instead of using a visual editor to create charts, you define a graph by chaining functions together, using the *Timelion*-specific syntax. 
+To use *Timelion*, you define a graph by chaining functions together, using the *Timelion*-specific syntax. 
 The syntax enables some features that classical point series charts don't offer, such as pulling data from different indices or data sources into one graph.
 
-deprecated::[7.0.0,"*Timelion* is still supported. The *Timelion app* is deprecated in 7.0, replaced by dashboard features. In 8.0 and later, the *Timelion app* is removed from {kib}. To prepare for the removal of *Timelion app*, you must migrate *Timelion app* worksheets to a dashboard. For information on how to migrate *Timelion app* worksheets, refer to the link:https://www.elastic.co/guide/en/kibana/7.10/release-notes-7.10.0.html#deprecation-v7.10.0[7.10.0 Release Notes]."]
+deprecated::[7.0.0,"*Timelion* is still supported. The *Timelion app* is deprecated in 7.0, replaced by dashboard features. In the last 7.x minor version and later, the *Timelion app* is removed from {kib}. To prepare for the removal of *Timelion app*, you must migrate *Timelion app* worksheets to a dashboard. For information on how to migrate *Timelion app* worksheets, refer to the link:https://www.elastic.co/guide/en/kibana/7.10/release-notes-7.10.0.html#deprecation-v7.10.0[7.10.0 Release Notes]."]
 
 [float]
 ==== Timelion expressions
@@ -90,11 +90,9 @@ Set up Metricbeat, then create the dashboard.
 
 Open *Timelion* and change the time range. 
 
-. On the dashboard, click *Create panel*.
+. On the dashboard, click *All types > Aggregation based*, then select *Timelion*.
 
-. On the *New visualization* window, click *Aggregation based > Timelion*.
-
-. Change the <<set-time-filter,time range>> to *Last 7 days*.
+. Make sure the <<set-time-filter,time filter>> is *Last 7 days*.
 
 [float]
 [[timelion-tutorial-create-time-series-visualizations]]
@@ -242,20 +240,7 @@ Move the legend to the north west position  with two columns, then click *Update
 image::images/timelion-customize04.png[Final time series visualization]
 {nbsp}
 
-[float]
-==== Save the panel
-
-Save and add the panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. Enter the *Title* and optional *Description*. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
-. Click *Save and return*.
+To save the panel, click *Save and return* in the toolbar.
 
 [float]
 [[timelion-tutorial-create-visualizations-with-mathematical-functions]]
@@ -364,20 +349,7 @@ Customize and format the visualization using the following functions, then click
 image::images/timelion-math05.png[Final visualization that displays inbound and outbound network traffic]
 {nbsp}
 
-[float]
-==== Save the panel
-
-Save and add the panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. Enter the *Title* and optional *Description*. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
-. Click *Save and return*.
+To save the panel, click *Save and return* in the toolbar.
 
 [float]
 [[timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends]]
@@ -539,19 +511,6 @@ Customize and format the visualization using the following functions, then click
 image::images/timelion-conditional04.png[Final visualization that displays outliers and patterns over time]
 {nbsp}
 
-[float]
-==== Save the panel
-
-Save and add the panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. Enter the *Title* and optional *Description*. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
-. Click *Save and return*.
+To save the panel, click *Save and return* in the toolbar.
 
 For more information about *Timelion* conditions, refer to https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].

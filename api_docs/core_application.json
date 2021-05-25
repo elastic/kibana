@@ -173,7 +173,7 @@
               "\nThe last action dispatched on the history stack."
             ],
             "signature": [
-              "Action"
+              "\"PUSH\" | \"POP\" | \"REPLACE\""
             ],
             "source": {
               "path": "src/core/public/application/scoped_history.ts",
@@ -834,20 +834,63 @@
               "\nA mount function called when the user navigates to this app's route."
             ],
             "signature": [
+              "(params: ",
               {
                 "pluginId": "core",
                 "scope": "public",
                 "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppMount",
-                "text": "AppMount"
+                "section": "def-public.AppMountParameters",
+                "text": "AppMountParameters"
               },
-              "<HistoryLocationState>"
+              "<HistoryLocationState>) => ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.AppUnmount",
+                "text": "AppUnmount"
+              },
+              " | Promise<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.AppUnmount",
+                "text": "AppUnmount"
+              },
+              ">"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 187
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreApplicationPluginApi",
+                    "section": "def-public.AppMountParameters",
+                    "text": "AppMountParameters"
+                  },
+                  "<HistoryLocationState>"
+                ],
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 339
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "core",
@@ -1191,7 +1234,7 @@
               "\nGets the read-only capabilities."
             ],
             "signature": [
-              "Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>"
+              "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; }"
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
@@ -1693,21 +1736,21 @@
                 "plugin": "dashboard",
                 "link": {
                   "path": "src/plugins/dashboard/public/application/dashboard_router.tsx",
-                  "lineNumber": 55
+                  "lineNumber": 56
                 }
               },
               {
                 "plugin": "dashboard",
                 "link": {
                   "path": "src/plugins/dashboard/public/plugin.tsx",
-                  "lineNumber": 305
+                  "lineNumber": 298
                 }
               },
               {
                 "plugin": "lens",
                 "link": {
                   "path": "x-pack/plugins/lens/public/app_plugin/types.ts",
-                  "lineNumber": 75
+                  "lineNumber": 71
                 }
               },
               {
@@ -1728,7 +1771,7 @@
                 "plugin": "maps",
                 "link": {
                   "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx",
-                  "lineNumber": 60
+                  "lineNumber": 59
                 }
               },
               {
@@ -1812,8 +1855,36 @@
                 "plugin": "maps",
                 "link": {
                   "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts",
-                  "lineNumber": 14
+                  "lineNumber": 13
                 }
+              }
+            ],
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.handler",
+                "type": "Function",
+                "tags": [],
+                "label": "handler",
+                "description": [],
+                "signature": [
+                  "(factory: ",
+                  "AppLeaveActionFactory",
+                  ", nextAppId?: string | undefined) => ",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreApplicationPluginApi",
+                    "section": "def-public.AppLeaveAction",
+                    "text": "AppLeaveAction"
+                  }
+                ],
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 484
+                },
+                "deprecated": false
               }
             ]
           },
@@ -1841,7 +1912,33 @@
               "path": "src/core/public/application/types.ts",
               "lineNumber": 515
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.menuMount",
+                "type": "Function",
+                "tags": [],
+                "label": "menuMount",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.MountPoint",
+                    "text": "MountPoint"
+                  },
+                  "<HTMLElement> | undefined"
+                ],
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 515
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -2035,7 +2132,7 @@
         "signature": [
           "(factory: ",
           "AppLeaveActionFactory",
-          ", nextAppId: string | undefined) => ",
+          ", nextAppId?: string | undefined) => ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2169,7 +2266,7 @@
           "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `searchDeepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible."
         ],
         "signature": [
-          "{ id: string; title: string; } & { path: string; searchDeepLinks?: ",
+          "({ id: string; title: string; } & { path: string; searchDeepLinks?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2177,7 +2274,7 @@
             "section": "def-public.AppSearchDeepLink",
             "text": "AppSearchDeepLink"
           },
-          "[] | undefined; keywords?: string[] | undefined; } | { id: string; title: string; } & { path?: string | undefined; searchDeepLinks: ",
+          "[] | undefined; keywords?: string[] | undefined; }) | ({ id: string; title: string; } & { path?: string | undefined; searchDeepLinks: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2185,7 +2282,7 @@
             "section": "def-public.AppSearchDeepLink",
             "text": "AppSearchDeepLink"
           },
-          "[]; keywords?: string[] | undefined; }"
+          "[]; keywords?: string[] | undefined; })"
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
@@ -2223,7 +2320,31 @@
           "\nDefines the list of fields that can be updated via an {@link AppUpdater}."
         ],
         "signature": [
-          "{ status?: AppStatus | undefined; meta?: AppMeta | undefined; navLinkStatus?: AppNavLinkStatus | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
+          "{ status?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppStatus",
+            "text": "AppStatus"
+          },
+          " | undefined; meta?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppMeta",
+            "text": "AppMeta"
+          },
+          " | undefined; navLinkStatus?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavLinkStatus",
+            "text": "AppNavLinkStatus"
+          },
+          " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
@@ -2277,7 +2398,39 @@
           "\nPublic information about a registered {@link App | application}\n"
         ],
         "signature": [
-          "Pick<App<unknown>, \"status\" | \"title\" | \"id\" | \"order\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\" | \"euiIconType\" | \"icon\" | \"capabilities\" | \"chromeless\" | \"appRoute\" | \"exactRoute\"> & { status: AppStatus; navLinkStatus: AppNavLinkStatus; appRoute: string; meta: PublicAppMetaInfo; }"
+          "Pick<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.App",
+            "text": "App"
+          },
+          "<unknown>, \"status\" | \"title\" | \"id\" | \"order\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\" | \"euiIconType\" | \"icon\" | \"capabilities\" | \"chromeless\" | \"appRoute\" | \"exactRoute\"> & { status: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppStatus",
+            "text": "AppStatus"
+          },
+          "; navLinkStatus: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppNavLinkStatus",
+            "text": "AppNavLinkStatus"
+          },
+          "; appRoute: string; meta: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.PublicAppMetaInfo",
+            "text": "PublicAppMetaInfo"
+          },
+          "; }"
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
@@ -2296,7 +2449,23 @@
           "\nPublic information about a registered app's {@link AppMeta | keywords }\n"
         ],
         "signature": [
-          "Pick<AppMeta, never> & { keywords: string[]; searchDeepLinks: PublicAppSearchDeepLinkInfo[]; }"
+          "Pick<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppMeta",
+            "text": "AppMeta"
+          },
+          ", never> & { keywords: string[]; searchDeepLinks: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.PublicAppSearchDeepLinkInfo",
+            "text": "PublicAppSearchDeepLinkInfo"
+          },
+          "[]; }"
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
@@ -2315,7 +2484,23 @@
           "\nPublic information about a registered app's {@link AppSearchDeepLink | searchDeepLinks}\n"
         ],
         "signature": [
-          "Pick<AppSearchDeepLink, \"title\" | \"id\" | \"path\"> & { searchDeepLinks: PublicAppSearchDeepLinkInfo[]; keywords: string[]; }"
+          "Pick<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppSearchDeepLink",
+            "text": "AppSearchDeepLink"
+          },
+          ", \"title\" | \"id\" | \"path\"> & { searchDeepLinks: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.PublicAppSearchDeepLinkInfo",
+            "text": "PublicAppSearchDeepLinkInfo"
+          },
+          "[]; keywords: string[]; }"
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
