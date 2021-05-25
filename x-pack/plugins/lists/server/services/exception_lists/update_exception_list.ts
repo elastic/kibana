@@ -6,26 +6,25 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import {
+import type {
   DescriptionOrUndefined,
+  ExceptionListSchema,
   ExceptionListTypeOrUndefined,
   IdOrUndefined,
+  ListIdOrUndefined,
   MetaOrUndefined,
   NameOrUndefined,
   NamespaceType,
   OsTypeArray,
   TagsOrUndefined,
+  _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
-import {
-  ExceptionListSchema,
-  ListIdOrUndefined,
-  _VersionOrUndefined,
-} from '../../../common/schemas';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { getSavedObjectType, transformSavedObjectUpdateToExceptionList } from './utils';
+import { transformSavedObjectUpdateToExceptionList } from './utils';
 import { getExceptionList } from './get_exception_list';
 
 interface UpdateExceptionListOptions {

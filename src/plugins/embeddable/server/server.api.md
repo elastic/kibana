@@ -24,6 +24,8 @@ export interface EmbeddableRegistryDefinition<P extends EmbeddableStateWithType 
 // @public (undocumented)
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
     // (undocumented)
+    getMigrationVersions: () => string[];
+    // (undocumented)
     registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
     // (undocumented)
     registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;

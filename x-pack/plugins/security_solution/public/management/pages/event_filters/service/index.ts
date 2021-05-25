@@ -6,16 +6,17 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import {
+import type {
+  FoundExceptionListItemSchema,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
   UpdateExceptionListItemSchema,
-} from '../../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+
 import { Immutable } from '../../../../../common/endpoint/types';
 
 import { EVENT_FILTER_LIST, EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../constants';
-import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { EventFiltersService } from '../types';
 
 export class EventFiltersHttpService implements EventFiltersService {
