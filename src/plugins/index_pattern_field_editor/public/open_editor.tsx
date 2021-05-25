@@ -59,7 +59,11 @@ export const getFieldEditorOpener = ({
 
   let overlayRef: OverlayRef | null = null;
 
-  const openEditor = ({ onSave, fieldName, ctx }: OpenFieldEditorOptions): CloseEditor => {
+  const openEditor = ({
+    onSave,
+    fieldName,
+    ctx: { indexPattern },
+  }: OpenFieldEditorOptions): CloseEditor => {
     const closeEditor = () => {
       if (overlayRef) {
         overlayRef.close();
@@ -75,7 +79,7 @@ export const getFieldEditorOpener = ({
       }
     };
 
-    const field = fieldName ? ctx.indexPattern.getFieldByName(fieldName) : undefined;
+    const field = fieldName ? indexPattern.getFieldByName(fieldName) : undefined;
 
     if (fieldName && !field) {
       const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
@@ -99,14 +103,16 @@ export const getFieldEditorOpener = ({
             onCancel={closeEditor}
             docLinks={docLinks}
             field={field}
-            ctx={{ ...ctx, fieldTypeToProcess, search }}
+            fieldTypeToProcess={fieldTypeToProcess}
+            indexPattern={indexPattern}
+            search={search}
             indexPatternService={indexPatternService}
             notifications={notifications}
+            usageCollection={usageCollection}
+            apiService={apiService}
             fieldFormatEditors={fieldFormatEditors}
             fieldFormats={fieldFormats}
             uiSettings={uiSettings}
-            usageCollection={usageCollection}
-            apiService={apiService}
           />
         </KibanaReactContextProvider>
       )

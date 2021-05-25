@@ -8,26 +8,12 @@
 
 import { registerTestBed, TestBed } from '@kbn/test/jest';
 
+import { Context } from '../../public/components/field_editor_context';
 import { FieldEditor, Props } from '../../public/components/field_editor/field_editor';
 import { WithFieldEditorDependencies, getCommonActions } from './helpers';
 
 export const defaultProps: Props = {
   onChange: jest.fn(),
-  links: {
-    runtimePainless: 'https://elastic.co',
-  },
-  ctx: {
-    existingConcreteFields: [],
-    namesNotAllowed: [],
-    fieldTypeToProcess: 'runtime',
-  },
-  indexPattern: { fields: [] } as any,
-  fieldFormatEditors: {
-    getAll: () => [],
-    getById: () => undefined,
-  },
-  fieldFormats: {} as any,
-  uiSettings: {} as any,
   syntaxError: {
     error: null,
     clear: () => {},
@@ -36,8 +22,8 @@ export const defaultProps: Props = {
 
 export type FieldEditorTestBed = TestBed & { actions: ReturnType<typeof getCommonActions> };
 
-export const setup = (props?: Partial<Props>) => {
-  const testBed = registerTestBed(WithFieldEditorDependencies(FieldEditor), {
+export const setup = (props?: Partial<Props>, deps?: Partial<Context>) => {
+  const testBed = registerTestBed(WithFieldEditorDependencies(FieldEditor, deps), {
     memoryRouter: {
       wrapComponent: false,
     },

@@ -17,6 +17,7 @@ import {
   Props,
 } from '../../public/components/field_editor/field_editor';
 import type { Field } from '../../public/types';
+import type { RuntimeFieldPainlessError } from '../../public/lib';
 import { setup, FieldEditorTestBed, defaultProps } from './field_editor.helpers';
 
 describe('<FieldEditor />', () => {
@@ -122,14 +123,16 @@ describe('<FieldEditor />', () => {
   describe('validation', () => {
     test('should accept an optional list of existing fields and prevent creating duplicates', async () => {
       const existingFields = ['myRuntimeField'];
-      testBed = setup({
-        onChange,
-        ctx: {
+      testBed = setup(
+        {
+          onChange,
+        },
+        {
           namesNotAllowed: existingFields,
           existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
-        },
-      });
+        }
+      );
 
       const { form, component, actions } = testBed;
 
@@ -161,15 +164,17 @@ describe('<FieldEditor />', () => {
         script: { source: 'emit("hello"' },
       };
 
-      testBed = setup({
-        field,
-        onChange,
-        ctx: {
+      testBed = setup(
+        {
+          field,
+          onChange,
+        },
+        {
           namesNotAllowed: existingRuntimeFieldNames,
           existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
-        },
-      });
+        }
+      );
 
       const { form, component } = testBed;
       const lastState = getLastStateUpdate();

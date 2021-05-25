@@ -26,11 +26,9 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { DocLinksStart, CoreStart } from 'src/core/public';
-
-import type { Field, InternalFieldType, PluginStart, EsRuntimeField } from '../types';
-import { getLinks, RuntimeFieldPainlessError } from '../lib';
-import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
+import type { Field, EsRuntimeField } from '../types';
+import { RuntimeFieldPainlessError } from '../lib';
+import { useFieldEditorContext } from './field_editor_context';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
 
 const geti18nTexts = (field?: Field) => {
@@ -91,24 +89,13 @@ export interface Props {
    */
   onCancel: () => void;
   /**
-   * The docLinks start service from core
-   */
-  docLinks: DocLinksStart;
-  /**
    * The Field editor component that contains the form to create or edit a field
    */
   FieldEditor: React.ComponentType<FieldEditorProps> | null;
-  /** The internal field type we are dealing with (concrete|runtime)*/
-  fieldTypeToProcess: InternalFieldType;
   /** Handler to validate the script  */
   runtimeFieldValidator: (field: EsRuntimeField) => Promise<RuntimeFieldPainlessError | null>;
   /** Optional field to process */
   field?: Field;
-
-  indexPattern: IndexPattern;
-  fieldFormatEditors: PluginStart['fieldFormatEditors'];
-  fieldFormats: DataPublicPluginStart['fieldFormats'];
-  uiSettings: CoreStart['uiSettings'];
   isSavingField: boolean;
 }
 
@@ -117,17 +104,12 @@ const FieldEditorFlyoutContentComponent = ({
   onSave,
   onCancel,
   FieldEditor,
-  docLinks,
-  indexPattern,
-  fieldFormatEditors,
-  fieldFormats,
-  uiSettings,
-  fieldTypeToProcess,
   runtimeFieldValidator,
   isSavingField,
 }: Props) => {
   const isEditingExistingField = !!field;
   const i18nTexts = geti18nTexts(field);
+  const { indexPattern } = useFieldEditorContext();
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,
@@ -146,7 +128,6 @@ const FieldEditorFlyoutContentComponent = ({
   const [confirmContent, setConfirmContent] = useState<string>('');
 
   const { submit, isValid: isFormValid, isSubmitted } = formState;
-  const { fields } = indexPattern;
   const isSaveButtonDisabled = isFormValid === false || painlessSyntaxError !== null;
 
   const clearSyntaxError = useCallback(() => setPainlessSyntaxError(null), []);
@@ -188,35 +169,6 @@ const FieldEditorFlyoutContentComponent = ({
       }
     }
   }, [onSave, submit, runtimeFieldValidator, field, isEditingExistingField]);
-
-  const namesNotAllowed = useMemo(() => fields.map((fld) => fld.name), [fields]);
-
-  const existingConcreteFields = useMemo(() => {
-    const existing: Array<{ name: string; type: string }> = [];
-
-    fields
-      .filter((fld) => {
-        const isFieldBeingEdited = field?.name === fld.name;
-        return !isFieldBeingEdited && fld.isMapped;
-      })
-      .forEach((fld) => {
-        existing.push({
-          name: fld.name,
-          type: (fld.esTypes && fld.esTypes[0]) || '',
-        });
-      });
-
-    return existing;
-  }, [fields, field]);
-
-  const ctx = useMemo(
-    () => ({
-      fieldTypeToProcess,
-      namesNotAllowed,
-      existingConcreteFields,
-    }),
-    [fieldTypeToProcess, namesNotAllowed, existingConcreteFields]
-  );
 
   const modal = isModalVisible ? (
     <EuiConfirmModal
@@ -287,17 +239,7 @@ const FieldEditorFlyoutContentComponent = ({
 
       <EuiFlyoutBody>
         {FieldEditor && (
-          <FieldEditor
-            indexPattern={indexPattern}
-            fieldFormatEditors={fieldFormatEditors}
-            fieldFormats={fieldFormats}
-            uiSettings={uiSettings}
-            links={getLinks(docLinks)}
-            field={field}
-            onChange={setFormState}
-            ctx={ctx}
-            syntaxError={syntaxError}
-          />
+          <FieldEditor field={field} onChange={setFormState} syntaxError={syntaxError} />
         )}
       </EuiFlyoutBody>
 

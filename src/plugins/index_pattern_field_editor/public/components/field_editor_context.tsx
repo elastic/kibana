@@ -7,19 +7,38 @@
  */
 
 import React, { createContext, useContext, FunctionComponent, useMemo } from 'react';
-import { NotificationsStart } from 'src/core/public';
+import { NotificationsStart, CoreStart } from 'src/core/public';
 import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
 import { ApiService } from '../lib/api';
-import type { InternalFieldType } from '../types';
+import type { InternalFieldType, PluginStart } from '../types';
 
 export interface Context {
   indexPattern: IndexPattern;
   fieldTypeToProcess: InternalFieldType;
+  uiSettings: CoreStart['uiSettings'];
+  links: {
+    runtimePainless: string;
+  };
   services: {
     search: DataPublicPluginStart['search'];
     api: ApiService;
     notifications: NotificationsStart;
   };
+  fieldFormatEditors: PluginStart['fieldFormatEditors'];
+  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  /**
+   * An array of field names not allowed.
+   * e.g we probably don't want a user to give a name of an existing
+   * runtime field (for that the user should edit the existing runtime field).
+   */
+  namesNotAllowed: string[];
+  /**
+   * An array of existing concrete fields. If the user gives a name to the runtime
+   * field that matches one of the concrete fields, a callout will be displayed
+   * to indicate that this runtime field will shadow the concrete field.
+   * It is also used to provide the list of field autocomplete suggestions to the code editor.
+   */
+  existingConcreteFields: Array<{ name: string; type: string }>;
 }
 
 const fieldEditorContext = createContext<Context | undefined>(undefined);
@@ -27,16 +46,38 @@ const fieldEditorContext = createContext<Context | undefined>(undefined);
 export const FieldEditorProvider: FunctionComponent<Context> = ({
   services,
   indexPattern,
+  links,
+  uiSettings,
   fieldTypeToProcess,
+  fieldFormats,
+  fieldFormatEditors,
+  namesNotAllowed,
+  existingConcreteFields,
   children,
 }) => {
   const ctx = useMemo<Context>(
     () => ({
       indexPattern,
       fieldTypeToProcess,
+      links,
+      uiSettings,
       services,
+      fieldFormats,
+      fieldFormatEditors,
+      namesNotAllowed,
+      existingConcreteFields,
     }),
-    [indexPattern, fieldTypeToProcess, services]
+    [
+      indexPattern,
+      fieldTypeToProcess,
+      services,
+      links,
+      uiSettings,
+      fieldFormats,
+      fieldFormatEditors,
+      namesNotAllowed,
+      existingConcreteFields,
+    ]
   );
 
   return <fieldEditorContext.Provider value={ctx}>{children}</fieldEditorContext.Provider>;

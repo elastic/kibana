@@ -8,29 +8,24 @@
 
 import { registerTestBed, TestBed } from '@kbn/test/jest';
 
+import { Context } from '../../public/components/field_editor_context';
 import { FieldEditor } from '../../public/components/field_editor/field_editor';
 import {
   FieldEditorFlyoutContent,
   Props,
 } from '../../public/components/field_editor_flyout_content';
-import { WithFieldEditorDependencies, getCommonActions, noop, docLinks } from './helpers';
+import { WithFieldEditorDependencies, getCommonActions } from './helpers';
 
 const defaultProps: Props = {
-  onSave: noop,
-  onCancel: noop,
-  docLinks,
+  onSave: () => {},
+  onCancel: () => {},
   FieldEditor,
-  indexPattern: { fields: [] } as any,
-  uiSettings: {} as any,
-  fieldFormats: {} as any,
-  fieldFormatEditors: {} as any,
-  fieldTypeToProcess: 'runtime',
   runtimeFieldValidator: () => Promise.resolve(null),
   isSavingField: false,
 };
 
-export const setup = (props?: Partial<Props>) => {
-  const testBed = registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent), {
+export const setup = (props?: Partial<Props>, deps?: Partial<Context>) => {
+  const testBed = registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
     memoryRouter: {
       wrapComponent: false,
     },
