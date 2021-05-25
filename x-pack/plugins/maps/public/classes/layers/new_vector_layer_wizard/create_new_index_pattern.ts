@@ -12,7 +12,7 @@ export const createNewIndexAndPattern = async (indexName: string) => {
   return await getHttp().fetch<CreateDocSourceResp>({
     path: `/${INDEX_SOURCE_API_PATH}`,
     method: 'POST',
-    body: convertObjectToBlob({
+    body: JSON.stringify({
       index: indexName,
       // Initially set to static mappings
       mappings: {
@@ -24,8 +24,4 @@ export const createNewIndexAndPattern = async (indexName: string) => {
       },
     }),
   });
-};
-
-const convertObjectToBlob = (obj: unknown) => {
-  return new Blob([JSON.stringify(obj)], { type: 'application/json' });
 };
