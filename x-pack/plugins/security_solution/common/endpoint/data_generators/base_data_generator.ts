@@ -10,6 +10,8 @@ import uuid from 'uuid';
 
 const OS_FAMILY = ['windows', 'macos', 'linux'];
 const BOOLEANS = [true, false];
+/** Array of 14 day offsets */
+const DAY_OFFSETS = Array.from({ length: 14 }, (_, i) => 8.64e7 * (i + 1));
 
 /**
  * A generic base class to assist in creating domain specific data generators. It includes
@@ -32,6 +34,18 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
    */
   public generate(): GeneratedDoc {
     throw new Error('method not implemented!');
+  }
+
+  /** Returns a future ISO date string */
+  protected randomFutureDate(from?: Date): string {
+    const now = from ? from.getTime() : Date.now();
+    return new Date(now + this.randomChoice(DAY_OFFSETS)).toISOString();
+  }
+
+  /** Returns a past ISO date string */
+  protected randomPastDate(from?: Date): string {
+    const now = from ? from.getTime() : Date.now();
+    return new Date(now - this.randomChoice(DAY_OFFSETS)).toISOString();
   }
 
   /** Generate either `true` or `false` */
