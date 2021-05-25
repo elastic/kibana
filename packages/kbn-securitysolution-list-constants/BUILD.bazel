@@ -1,9 +1,9 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
-PKG_BASE_NAME = "kbn-securitysolution-constants"
+PKG_BASE_NAME = "kbn-securitysolution-list-constants"
 
-PKG_REQUIRE_NAME = "@kbn/securitysolution-constants"
+PKG_REQUIRE_NAME = "@kbn/securitysolution-list-constants"
 
 SOURCE_FILES = glob(
   [
