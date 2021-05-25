@@ -10,7 +10,7 @@ import { EuiPanel } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
 import { useKibana } from '../../../../utils/kibana_react';
-import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../../pages/cases/links';
+import { getCaseDetailsUrl } from '../../../../pages/cases/links';
 import { CASES_APP_ID, CASES_OWNER } from '../constants';
 
 export const Create = React.memo(() => {
@@ -35,6 +35,7 @@ export const Create = React.memo(() => {
   return (
     <EuiPanel>
       {cases.getCreateCase({
+        disableAlerts: true,
         onCancel: handleSetIsCancel,
         onSuccess,
         owner: [CASES_OWNER],

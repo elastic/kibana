@@ -40,6 +40,7 @@ interface CaseActionBarProps {
   caseData: Case;
   currentExternalIncident: CaseService | null;
   disabled?: boolean;
+  isAlerting: boolean;
   isLoading: boolean;
   onRefresh: () => void;
   onUpdateField: (args: OnUpdateFields) => void;
@@ -48,6 +49,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   caseData,
   currentExternalIncident,
   disabled = false,
+  isAlerting,
   isLoading,
   onRefresh,
   onUpdateField,
@@ -103,25 +105,27 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed>
           <EuiFlexGroup gutterSize="l" alignItems="center">
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiFlexGroup component="span" alignItems="center" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <span>{i18n.SYNC_ALERTS}</span>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                <SyncAlertsSwitch
-                  disabled={disabled || isLoading}
-                  isSynced={caseData.settings.syncAlerts}
-                  onSwitchChange={onSyncAlertsChanged}
-                />
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
+            {isAlerting && (
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiFlexGroup component="span" alignItems="center" gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <span>{i18n.SYNC_ALERTS}</span>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  <SyncAlertsSwitch
+                    disabled={disabled || isLoading}
+                    isSynced={caseData.settings.syncAlerts}
+                    onSwitchChange={onSyncAlertsChanged}
+                  />
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiButtonEmpty data-test-subj="case-refresh" iconType="refresh" onClick={onRefresh}>
                 {i18n.CASE_REFRESH}

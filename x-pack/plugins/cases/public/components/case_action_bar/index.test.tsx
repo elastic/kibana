@@ -17,6 +17,7 @@ describe('CaseActionBar', () => {
   const onUpdateField = jest.fn();
   const defaultProps = {
     caseData: basicCase,
+    isAlerting: true,
     isLoading: false,
     onRefresh,
     onUpdateField,

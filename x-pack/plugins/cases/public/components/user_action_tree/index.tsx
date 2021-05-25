@@ -21,7 +21,7 @@ import { isRight } from 'fp-ts/Either';
 
 import * as i18n from './translations';
 
-import { Case, CaseUserActions } from '../../containers/types';
+import { Case, CaseUserActions } from '../../../common';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
@@ -56,7 +56,7 @@ export interface UserActionTreeProps {
   caseUserActions: CaseUserActions[];
   connectors: ActionConnector[];
   data: Case;
-  getRuleDetailsHref: (ruleId: string | null | undefined) => string;
+  getRuleDetailsHref?: (ruleId: string | null | undefined) => string;
   fetchUserActions: () => void;
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
@@ -397,7 +397,7 @@ export const UserActionTree = React.memo(
 
                 return [
                   ...comments,
-                  getRuleDetailsHref != null && getRuleDetailsHref != null
+                  ...(getRuleDetailsHref != null
                     ? [
                         getAlertAttachment({
                           action,
@@ -412,7 +412,7 @@ export const UserActionTree = React.memo(
                           onShowAlertDetails,
                         }),
                       ]
-                    : [],
+                    : []),
                 ];
               } else if (comment != null && comment.type === CommentType.generatedAlert) {
                 // TODO: clean this up
@@ -426,16 +426,20 @@ export const UserActionTree = React.memo(
 
                 return [
                   ...comments,
-                  getGeneratedAlertsAttachment({
-                    action,
-                    alertIds,
-                    getCaseDetailHrefWithCommentId,
-                    getRuleDetailsHref,
-                    onRuleDetailsClick,
-                    renderInvestigateInTimelineActionComponent,
-                    ruleId: comment.rule?.id ?? '',
-                    ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
-                  }),
+                  ...(getRuleDetailsHref != null
+                    ? [
+                        getGeneratedAlertsAttachment({
+                          action,
+                          alertIds,
+                          getCaseDetailHrefWithCommentId,
+                          getRuleDetailsHref,
+                          onRuleDetailsClick,
+                          renderInvestigateInTimelineActionComponent,
+                          ruleId: comment.rule?.id ?? '',
+                          ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
+                        }),
+                      ]
+                    : []),
                 ];
               }
             }

@@ -62,5 +62,5 @@ export const toStringArray = (value: unknown): string[] => {
 };
 
 // no alerts in observability so far
-// dummy hook for now
+// dummy hook for now as hooks cannot be called conditionally
 export const useFetchAlertData = (): [boolean, Record<string, Ecs>] => [false, {}];

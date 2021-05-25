@@ -7,12 +7,11 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 
-import '../../../common/mock/match_media';
 import { CreateCaseFlyout } from './flyout';
-import { TestProviders } from '../../../common/mock';
 
-jest.mock('../../../common/lib/kibana', () => ({
+jest.mock('../../../../utils/kibana_react', () => ({
   useKibana: () => ({
     services: {
       cases: {
@@ -35,9 +34,9 @@ describe('CreateCaseFlyout', () => {
 
   it('renders', () => {
     const wrapper = mount(
-      <TestProviders>
+      <EuiThemeProvider>
         <CreateCaseFlyout {...defaultProps} />
-      </TestProviders>
+      </EuiThemeProvider>
     );
 
     expect(wrapper.find(`[data-test-subj='create-case-flyout']`).exists()).toBeTruthy();
@@ -45,9 +44,9 @@ describe('CreateCaseFlyout', () => {
 
   it('Closing modal calls onCloseCaseModal', () => {
     const wrapper = mount(
-      <TestProviders>
+      <EuiThemeProvider>
         <CreateCaseFlyout {...defaultProps} />
-      </TestProviders>
+      </EuiThemeProvider>
     );
 
     wrapper.find('.euiFlyout__closeButton').first().simulate('click');

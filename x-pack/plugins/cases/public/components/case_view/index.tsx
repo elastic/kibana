@@ -361,9 +361,10 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             title={caseData.title}
           >
             <CaseActionBar
-              currentExternalIncident={currentExternalIncident}
               caseData={caseData}
+              currentExternalIncident={currentExternalIncident}
               disabled={!userCanCrud}
+              isAlerting={ruleDetailsNavigation != null}
               isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
               onRefresh={handleRefresh}
               onUpdateField={onUpdateField}
@@ -382,8 +383,12 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   <>
                     <UserActionTree
                       getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-                      getRuleDetailsHref={ruleDetailsNavigation.href}
-                      onRuleDetailsClick={ruleDetailsNavigation.onClick}
+                      getRuleDetailsHref={
+                        ruleDetailsNavigation ? ruleDetailsNavigation.href : undefined
+                      }
+                      onRuleDetailsClick={
+                        ruleDetailsNavigation ? ruleDetailsNavigation.onClick : undefined
+                      }
                       caseServices={caseServices}
                       caseUserActions={caseUserActions}
                       connectors={connectors}
