@@ -14,7 +14,7 @@ import { State, CanvasWorkpadBoundingBox } from '../../../../types';
 import { fetchAllRenderables } from '../../../state/actions/elements';
 // @ts-expect-error untyped local
 import { setZoomScale, selectToplevelNodes } from '../../../state/actions/transient';
-import { setWriteable, enableAutoplay } from '../../../state/actions/workpad';
+import { setWriteable } from '../../../state/actions/workpad';
 import { getZoomScale, canUserWrite } from '../../../state/selectors/app';
 import {
   getWorkpadBoundingBox,
@@ -37,8 +37,16 @@ interface StateProps {
 interface DispatchProps {
   setWriteable: (isWorkpadWriteable: boolean) => void;
   setZoomScale: (scale: number) => void;
-  setFullscreen: (showFullscreen: boolean) => void;
+  doRefresh: () => void;
 }
+
+type PropsFromContext =
+  | 'enterFullscreen'
+  | 'setAutoplayInterval'
+  | 'autoplayEnabled'
+  | 'autoplayInterval'
+  | 'setRefreshInterval'
+  | 'refreshInterval';
 
 const mapStateToProps = (state: State) => {
   return {
@@ -54,7 +62,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   setZoomScale: (scale: number) => dispatch(setZoomScale(scale)),
   setWriteable: (isWorkpadWriteable: boolean) => dispatch(setWriteable(isWorkpadWriteable)),
   doRefresh: () => dispatch(fetchAllRenderables()),
-  enableAutoplay: (autoplay: number) => dispatch(enableAutoplay(!!autoplay)),
 });
 
 const mergeProps = (
@@ -74,7 +81,7 @@ const mergeProps = (
   };
 };
 
-const ViewMenuWithContext: FC<ComponentProps> = (props) => {
+const ViewMenuWithContext: FC<Omit<ComponentProps, PropsFromContext>> = (props) => {
   const dispatch = useDispatch();
   const {
     autoplayInterval,
@@ -102,7 +109,7 @@ const ViewMenuWithContext: FC<ComponentProps> = (props) => {
   );
 };
 
-export const ViewMenu = compose<ComponentProps, {}>(
+export const ViewMenu = compose<Omit<ComponentProps, PropsFromContext>, {}>(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withHandlers(zoomHandlerCreators)
 )(ViewMenuWithContext);

@@ -9,7 +9,6 @@ import React, { FC, useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
@@ -25,7 +24,7 @@ import { Tray } from './tray';
 
 import { CanvasElement } from '../../../types';
 import { ComponentStrings } from '../../../i18n';
-import { RoutingLink, RoutingButtonIcon } from '../routing';
+import { RoutingButtonIcon } from '../routing';
 
 import { WorkpadRoutingContext } from '../../routes/workpad';
 
@@ -52,7 +51,7 @@ export const Toolbar: FC<Props> = ({
 }) => {
   const [activeTray, setActiveTray] = useState<TrayType | null>(null);
   const [showWorkpadManager, setShowWorkpadManager] = useState(false);
-  const { getUrl, nextPage, previousPage } = useContext(WorkpadRoutingContext);
+  const { getUrl, previousPage } = useContext(WorkpadRoutingContext);
 
   // While the tray doesn't get activated if the workpad isn't writeable,
   // this effect will ensure that if the tray is open and the workpad

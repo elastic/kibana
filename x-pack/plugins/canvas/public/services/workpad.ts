@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  API_ROUTE_WORKPAD,
-  API_ROUTE_WORKPAD_ASSETS,
-  API_ROUTE_WORKPAD_STRUCTURES,
-  DEFAULT_WORKPAD_CSS,
-} from '../../common/lib/constants';
+import { API_ROUTE_WORKPAD, DEFAULT_WORKPAD_CSS } from '../../common/lib/constants';
 import { CanvasWorkpad } from '../../types';
 import { CanvasServiceFactory } from './';
 
@@ -101,20 +96,4 @@ export const workpadServiceFactory: CanvasServiceFactory<WorkpadService> = (
       return coreStart.http.delete(`${getApiPath()}/${id}`);
     },
   };
-
-  const { reporting } = startPlugins;
-  if (!reporting) {
-    // Reporting is not enabled
-    return { includeReporting: () => false };
-  }
-
-  if (reporting.usesUiCapabilities()) {
-    // Canvas has declared Reporting as a subfeature with the `generatePdf` UI Capability
-    return {
-      includeReporting: () => coreStart.application.capabilities.canvas?.generatePdf === true,
-    };
-  }
-
-  // Reporting is enabled as an Elasticsearch feature (Legacy/Deprecated)
-  return { includeReporting: () => true };
 };

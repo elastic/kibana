@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, MouseEventHandler } from 'react';
+import React, { FC } from 'react';
 import { EuiLink, EuiLinkProps, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 

@@ -8,7 +8,6 @@
 import React, { useCallback, useState, useEffect, FunctionComponent } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { RouterContext } from '../router';
 
 import { ComponentStrings } from '../../../i18n/components';
 // @ts-expect-error

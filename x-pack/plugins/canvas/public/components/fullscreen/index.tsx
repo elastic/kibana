@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useContext } from 'react';
+// @ts-expect-error
 import { Fullscreen as Component } from './fullscreen';
 
 import { WorkpadRoutingContext } from '../../routes/workpad';

@@ -32,7 +32,7 @@ const { getSecondsText, getMinutesText } = timeStrings;
 
 interface Props {
   autoplayInterval: number;
-  onSetInterval: (interval: number | undefined) => void;
+  onSetInterval: (interval: number) => void;
 }
 
 interface ListGroupProps {
