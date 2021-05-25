@@ -31,7 +31,7 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
     logger: loggingSystemMock.create().get(),
     isProductionMode: true,
     configInitialValue: {
-      agents: { enabled: true, elasticsearch: {} },
+      agents: { enabled: true, elasticsearch: {}, agentPolicyTightPermissions: true },
       enabled: true,
     },
     kibanaVersion: '8.0.0',
