@@ -46,6 +46,32 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.getStubPluginServices",
+        "type": "Function",
+        "tags": [],
+        "label": "getStubPluginServices",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PresentationUtilPluginStart",
+            "text": "PresentationUtilPluginStart"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/services/index.ts",
+          "lineNumber": 27
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.LazyDashboardPicker",
         "type": "Function",
         "tags": [],
@@ -358,6 +384,32 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.useLabs",
+        "type": "Function",
+        "tags": [],
+        "label": "useLabs",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PresentationLabsService",
+            "text": "PresentationLabsService"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/index.ts",
+          "lineNumber": 47
+        },
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.withSuspense",
         "type": "Function",
         "tags": [],
@@ -583,7 +635,7 @@
             "label": "isProjectEnabled",
             "description": [],
             "signature": [
-              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\") => boolean"
+              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\") => boolean"
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
@@ -599,7 +651,7 @@
             "label": "getProjectIDs",
             "description": [],
             "signature": [
-              "() => readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\"]"
+              "() => readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\", \"labs:dashboard:deferBelowFold\"]"
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
@@ -615,7 +667,7 @@
             "label": "getProject",
             "description": [],
             "signature": [
-              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\") => ",
+              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\") => ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -638,7 +690,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\", ",
+              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -662,7 +714,7 @@
             "label": "setProjectStatus",
             "description": [],
             "signature": [
-              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
+              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
@@ -899,7 +951,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 79
+          "lineNumber": 94
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -912,11 +964,11 @@
         "label": "ProjectID",
         "description": [],
         "signature": [
-          "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\""
+          "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 55
+          "lineNumber": 70
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -931,11 +983,11 @@
         "label": "projectIDs",
         "description": [],
         "signature": [
-          "readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\"]"
+          "readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\", \"labs:dashboard:deferBelowFold\"]"
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 15
+          "lineNumber": 16
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1050,11 +1102,11 @@
         "label": "getProjectIDs",
         "description": [],
         "signature": [
-          "() => readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\"]"
+          "() => readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\", \"labs:dashboard:deferBelowFold\"]"
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 81
+          "lineNumber": 96
         },
         "deprecated": false,
         "children": [],
@@ -1081,7 +1133,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 83
+          "lineNumber": 98
         },
         "deprecated": false,
         "children": [
@@ -1097,7 +1149,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 83
+              "lineNumber": 98
             },
             "deprecated": false,
             "isRequired": true
@@ -1120,7 +1172,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 83
+              "lineNumber": 98
             },
             "deprecated": false,
             "isRequired": true
@@ -1140,7 +1192,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 69
+          "lineNumber": 84
         },
         "deprecated": false,
         "children": [
@@ -1152,11 +1204,11 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\""
+              "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 70
+              "lineNumber": 85
             },
             "deprecated": false
           },
@@ -1169,7 +1221,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 71
+              "lineNumber": 86
             },
             "deprecated": false
           },
@@ -1182,7 +1234,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 72
+              "lineNumber": 87
             },
             "deprecated": false
           },
@@ -1195,7 +1247,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 73
+              "lineNumber": 88
             },
             "deprecated": false
           },
@@ -1211,7 +1263,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 74
+              "lineNumber": 89
             },
             "deprecated": false
           },
@@ -1224,7 +1276,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 75
+              "lineNumber": 90
             },
             "deprecated": false
           },
@@ -1240,7 +1292,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 76
+              "lineNumber": 91
             },
             "deprecated": false
           }
@@ -1250,6 +1302,23 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.DEFER_BELOW_FOLD",
+        "type": "string",
+        "tags": [],
+        "label": "DEFER_BELOW_FOLD",
+        "description": [],
+        "signature": [
+          "\"labs:dashboard:deferBelowFold\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "presentationUtil",
         "id": "def-common.EnvironmentName",
@@ -1262,7 +1331,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 56
+          "lineNumber": 71
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1279,7 +1348,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 59
+          "lineNumber": 74
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1347,7 +1416,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 79
+          "lineNumber": 94
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1360,11 +1429,11 @@
         "label": "ProjectID",
         "description": [],
         "signature": [
-          "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\""
+          "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\" | \"labs:dashboard:deferBelowFold\""
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 55
+          "lineNumber": 70
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1381,7 +1450,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 63
+          "lineNumber": 78
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1398,7 +1467,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 57
+          "lineNumber": 72
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1451,7 +1520,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 16
+          "lineNumber": 17
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1464,11 +1533,11 @@
         "label": "projectIDs",
         "description": [],
         "signature": [
-          "readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\"]"
+          "readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\", \"labs:dashboard:deferBelowFold\"]"
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 15
+          "lineNumber": 16
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1484,7 +1553,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 23
+          "lineNumber": 24
         },
         "deprecated": false,
         "children": [
@@ -1497,7 +1566,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 24
+              "lineNumber": 25
             },
             "deprecated": false,
             "children": [
@@ -1513,7 +1582,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 25
+                  "lineNumber": 26
                 },
                 "deprecated": false
               },
@@ -1529,7 +1598,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 26
+                  "lineNumber": 27
                 },
                 "deprecated": false
               },
@@ -1545,7 +1614,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 27
+                  "lineNumber": 28
                 },
                 "deprecated": false
               },
@@ -1561,7 +1630,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 28
+                  "lineNumber": 29
                 },
                 "deprecated": false
               },
@@ -1574,7 +1643,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 29
+                  "lineNumber": 30
                 },
                 "deprecated": false
               },
@@ -1587,7 +1656,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 32
+                  "lineNumber": 33
                 },
                 "deprecated": false
               },
@@ -1603,7 +1672,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 35
+                  "lineNumber": 36
                 },
                 "deprecated": false
               }
@@ -1618,7 +1687,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 37
+              "lineNumber": 38
             },
             "deprecated": false,
             "children": [
@@ -1634,7 +1703,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 38
+                  "lineNumber": 39
                 },
                 "deprecated": false
               },
@@ -1650,7 +1719,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 39
+                  "lineNumber": 40
                 },
                 "deprecated": false
               },
@@ -1666,7 +1735,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 40
+                  "lineNumber": 41
                 },
                 "deprecated": false
               },
@@ -1682,7 +1751,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 41
+                  "lineNumber": 42
                 },
                 "deprecated": false
               },
@@ -1695,7 +1764,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 42
+                  "lineNumber": 43
                 },
                 "deprecated": false
               },
@@ -1708,7 +1777,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 45
+                  "lineNumber": 46
                 },
                 "deprecated": false
               },
@@ -1724,7 +1793,128 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 51
+                  "lineNumber": 52
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.projects.DEFER_BELOW_FOLD",
+            "type": "Object",
+            "tags": [],
+            "label": "[DEFER_BELOW_FOLD]",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:dashboard:deferBelowFold\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 55
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.isActive",
+                "type": "boolean",
+                "tags": [],
+                "label": "isActive",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 56
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.isDisplayed",
+                "type": "boolean",
+                "tags": [],
+                "label": "isDisplayed",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 57
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.environments",
+                "type": "Array",
+                "tags": [],
+                "label": "environments",
+                "description": [],
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 58
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 59
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 62
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"dashboard\"[]"
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 66
                 },
                 "deprecated": false
               }
@@ -1745,7 +1935,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 17
+          "lineNumber": 18
         },
         "deprecated": false,
         "initialIsOpen": false

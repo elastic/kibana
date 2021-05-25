@@ -2417,7 +2417,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/features/server/feature_schema.ts",
-          "lineNumber": 23
+          "lineNumber": 27
         },
         "deprecated": false,
         "initialIsOpen": false

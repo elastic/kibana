@@ -2017,7 +2017,7 @@
         ],
         "source": {
           "path": "src/plugins/data/server/search/types.ts",
-          "lineNumber": 89
+          "lineNumber": 90
         },
         "deprecated": false,
         "children": [
@@ -2035,7 +2035,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 90
+              "lineNumber": 91
             },
             "deprecated": false
           },
@@ -2053,7 +2053,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 91
+              "lineNumber": 92
             },
             "deprecated": false
           },
@@ -2085,7 +2085,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 92
+              "lineNumber": 93
             },
             "deprecated": false
           },
@@ -2109,7 +2109,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 93
+              "lineNumber": 94
             },
             "deprecated": false
           },
@@ -2125,7 +2125,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 94
+              "lineNumber": 95
             },
             "deprecated": false
           },
@@ -2141,7 +2141,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 95
+              "lineNumber": 96
             },
             "deprecated": false
           },
@@ -2165,7 +2165,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 96
+              "lineNumber": 97
             },
             "deprecated": false
           }
@@ -2241,7 +2241,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/server/search/types.ts",
-          "lineNumber": 42
+          "lineNumber": 43
         },
         "deprecated": false,
         "children": [
@@ -2257,7 +2257,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 43
+              "lineNumber": 44
             },
             "deprecated": false
           },
@@ -2314,7 +2314,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 48
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -2339,7 +2339,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 59
+              "lineNumber": 60
             },
             "deprecated": false
           }
@@ -2365,7 +2365,7 @@
         ],
         "source": {
           "path": "src/plugins/data/server/search/types.ts",
-          "lineNumber": 99
+          "lineNumber": 100
         },
         "deprecated": false,
         "children": [
@@ -2381,7 +2381,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 103
+              "lineNumber": 104
             },
             "deprecated": false
           },
@@ -2407,7 +2407,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 109
+              "lineNumber": 110
             },
             "deprecated": false
           },
@@ -2438,7 +2438,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 112
+              "lineNumber": 113
             },
             "deprecated": false
           },
@@ -2470,7 +2470,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 113
+              "lineNumber": 114
             },
             "deprecated": false
           }
@@ -2498,7 +2498,7 @@
         ],
         "source": {
           "path": "src/plugins/data/server/search/types.ts",
-          "lineNumber": 71
+          "lineNumber": 72
         },
         "deprecated": false,
         "children": [
@@ -2532,7 +2532,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 75
+              "lineNumber": 76
             },
             "deprecated": false
           },
@@ -2564,7 +2564,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 80
+              "lineNumber": 81
             },
             "deprecated": false
           },
@@ -2596,7 +2596,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 81
+              "lineNumber": 82
             },
             "deprecated": false
           }
@@ -2632,7 +2632,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
@@ -2698,6 +2698,29 @@
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
               "lineNumber": 39
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchStrategyDependencies.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>"
+            ],
+            "source": {
+              "path": "src/plugins/data/server/search/types.ts",
+              "lineNumber": 40
             },
             "deprecated": false
           }
@@ -2789,7 +2812,7 @@
         ],
         "source": {
           "path": "src/plugins/data/server/search/types.ts",
-          "lineNumber": 118
+          "lineNumber": 119
         },
         "deprecated": false,
         "initialIsOpen": false

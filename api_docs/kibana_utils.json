@@ -880,8 +880,7 @@
             "section": "def-public.ResizeChecker",
             "text": "ResizeChecker"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",

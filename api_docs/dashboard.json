@@ -46,7 +46,7 @@
         ],
         "source": {
           "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-          "lineNumber": 103
+          "lineNumber": 105
         },
         "deprecated": false,
         "children": [
@@ -62,7 +62,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 104
+              "lineNumber": 106
             },
             "deprecated": false
           },
@@ -86,7 +86,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 105
+              "lineNumber": 107
             },
             "deprecated": false
           },
@@ -102,7 +102,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 107
+              "lineNumber": 109
             },
             "deprecated": false,
             "children": [],
@@ -120,7 +120,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 111
+              "lineNumber": 113
             },
             "deprecated": false,
             "children": [
@@ -142,7 +142,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 112
+                  "lineNumber": 114
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -159,7 +159,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 113
+                  "lineNumber": 115
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -199,7 +199,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 114
+                  "lineNumber": 116
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -246,7 +246,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 127
+              "lineNumber": 129
             },
             "deprecated": false,
             "children": [
@@ -271,7 +271,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 131
+                  "lineNumber": 133
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -288,7 +288,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 132
+                  "lineNumber": 134
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -320,7 +320,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 138
+              "lineNumber": 140
             },
             "deprecated": false,
             "children": [
@@ -344,7 +344,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 139
+                  "lineNumber": 141
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -362,7 +362,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 140
+                  "lineNumber": 142
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -379,7 +379,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 141
+                  "lineNumber": 143
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -417,7 +417,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 179
+              "lineNumber": 181
             },
             "deprecated": false,
             "children": [
@@ -442,7 +442,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 180
+                  "lineNumber": 182
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -467,7 +467,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 181
+                  "lineNumber": 183
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -484,7 +484,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 182
+                  "lineNumber": 184
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -543,7 +543,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 226
+              "lineNumber": 228
             },
             "deprecated": false,
             "children": [
@@ -559,7 +559,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 230
+                  "lineNumber": 232
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -576,7 +576,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 230
+                  "lineNumber": 232
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -593,7 +593,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 230
+                  "lineNumber": 232
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -613,7 +613,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 244
+              "lineNumber": 246
             },
             "deprecated": false,
             "children": [
@@ -629,7 +629,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 244
+                  "lineNumber": 246
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -650,7 +650,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 255
+              "lineNumber": 259
             },
             "deprecated": false,
             "children": [
@@ -666,7 +666,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-                  "lineNumber": 255
+                  "lineNumber": 259
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1223,7 +1223,7 @@
         ],
         "source": {
           "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-          "lineNumber": 42
+          "lineNumber": 43
         },
         "deprecated": false,
         "children": [
@@ -1240,7 +1240,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 43
+              "lineNumber": 44
             },
             "deprecated": false
           },
@@ -1263,7 +1263,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 44
+              "lineNumber": 45
             },
             "deprecated": false
           },
@@ -1279,7 +1279,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 45
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -1292,7 +1292,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 46
+              "lineNumber": 47
             },
             "deprecated": false
           },
@@ -1308,7 +1308,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 47
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -1330,7 +1330,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 48
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -1346,7 +1346,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 49
+              "lineNumber": 50
             },
             "deprecated": false
           },
@@ -1359,7 +1359,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 50
+              "lineNumber": 51
             },
             "deprecated": false
           },
@@ -1375,7 +1375,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 51
+              "lineNumber": 52
             },
             "deprecated": false
           },
@@ -1397,7 +1397,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 52
+              "lineNumber": 53
             },
             "deprecated": false
           },
@@ -1420,7 +1420,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 53
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -1433,7 +1433,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 54
+              "lineNumber": 55
             },
             "deprecated": false
           },
@@ -1455,7 +1455,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 55
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -1481,7 +1481,7 @@
             ],
             "source": {
               "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
-              "lineNumber": 56
+              "lineNumber": 57
             },
             "deprecated": false
           }
@@ -2390,7 +2390,7 @@
             "section": "def-server.SavedObjectsRepository",
             "text": "SavedObjectsRepository"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">, embeddableType: string) => Promise<{ [key: string]: unknown; }[]>"
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">, embeddableType: string) => Promise<{ [key: string]: unknown; }[]>"
         ],
         "source": {
           "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
@@ -2414,7 +2414,7 @@
                 "section": "def-server.SavedObjectsRepository",
                 "text": "SavedObjectsRepository"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">"
             ],
             "source": {
               "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
@@ -2933,6 +2933,36 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.UI_SETTINGS",
+        "type": "Object",
+        "tags": [],
+        "label": "UI_SETTINGS",
+        "description": [],
+        "source": {
+          "path": "src/plugins/dashboard/common/index.ts",
+          "lineNumber": 28
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.UI_SETTINGS.ENABLE_LABS_UI",
+            "type": "string",
+            "tags": [],
+            "label": "ENABLE_LABS_UI",
+            "description": [],
+            "source": {
+              "path": "src/plugins/dashboard/common/index.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

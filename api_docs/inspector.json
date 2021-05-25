@@ -291,8 +291,7 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
@@ -1402,8 +1401,7 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",

@@ -3244,8 +3244,7 @@
             "section": "def-common.ExpressionsInspectorAdapter",
             "text": "ExpressionsInspectorAdapter"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/expressions/common/util/expressions_inspector_adapter.ts",
@@ -5574,8 +5573,7 @@
             "section": "def-common.TablesAdapter",
             "text": "TablesAdapter"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/expressions/common/util/tables_adapter.ts",
@@ -21885,8 +21883,7 @@
             "section": "def-common.ExpressionsInspectorAdapter",
             "text": "ExpressionsInspectorAdapter"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/expressions/common/util/expressions_inspector_adapter.ts",
@@ -23761,8 +23758,7 @@
             "section": "def-common.TablesAdapter",
             "text": "TablesAdapter"
           },
-          " extends ",
-          "EventEmitter"
+          " extends EventEmitter"
         ],
         "source": {
           "path": "src/plugins/expressions/common/util/tables_adapter.ts",

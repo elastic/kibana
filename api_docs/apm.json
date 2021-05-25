@@ -289,7 +289,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 269
+              "lineNumber": 270
             },
             "deprecated": false,
             "children": [
@@ -311,7 +311,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 269
+                  "lineNumber": 270
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -331,7 +331,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 288
+              "lineNumber": 289
             },
             "deprecated": false,
             "children": [],

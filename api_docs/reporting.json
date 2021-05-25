@@ -896,7 +896,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/reporting/server/core.ts",
-          "lineNumber": 58
+          "lineNumber": 60
         },
         "deprecated": false,
         "children": [
@@ -919,7 +919,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 70
+              "lineNumber": 72
             },
             "deprecated": false
           },
@@ -935,7 +935,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 72
+              "lineNumber": 74
             },
             "deprecated": false,
             "children": [
@@ -951,7 +951,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 72
+                  "lineNumber": 74
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -977,7 +977,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 72
+                  "lineNumber": 74
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -999,7 +999,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 90
+              "lineNumber": 92
             },
             "deprecated": false,
             "children": [
@@ -1015,7 +1015,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 90
+                  "lineNumber": 92
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1037,7 +1037,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 104
+              "lineNumber": 106
             },
             "deprecated": false,
             "children": [
@@ -1053,7 +1053,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 104
+                  "lineNumber": 106
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1073,7 +1073,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 117
+              "lineNumber": 119
             },
             "deprecated": false,
             "children": [],
@@ -1091,7 +1091,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 128
+              "lineNumber": 130
             },
             "deprecated": false,
             "children": [],
@@ -1109,7 +1109,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 135
+              "lineNumber": 137
             },
             "deprecated": false,
             "children": [],
@@ -1135,7 +1135,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 142
+              "lineNumber": 144
             },
             "deprecated": false,
             "children": [
@@ -1157,7 +1157,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 142
+                  "lineNumber": 144
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1179,7 +1179,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 151
+              "lineNumber": 153
             },
             "deprecated": false,
             "children": [],
@@ -1204,7 +1204,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 185
+              "lineNumber": 187
             },
             "deprecated": false,
             "children": [],
@@ -1222,7 +1222,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 197
+              "lineNumber": 199
             },
             "deprecated": false,
             "children": [],
@@ -1242,7 +1242,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 204
+              "lineNumber": 206
             },
             "deprecated": false,
             "children": [],
@@ -1261,7 +1261,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 212
+              "lineNumber": 214
             },
             "deprecated": false,
             "children": [],
@@ -1291,7 +1291,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 216
+              "lineNumber": 218
             },
             "deprecated": false,
             "children": [
@@ -1310,7 +1310,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 216
+                  "lineNumber": 218
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1332,7 +1332,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 220
+              "lineNumber": 222
             },
             "deprecated": false,
             "children": [],
@@ -1352,7 +1352,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 224
+              "lineNumber": 226
             },
             "deprecated": false,
             "children": [],
@@ -1372,7 +1372,25 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 234
+              "lineNumber": 236
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingCore.getEnableScreenshotMode",
+            "type": "Function",
+            "tags": [],
+            "label": "getEnableScreenshotMode",
+            "description": [],
+            "signature": [
+              "() => () => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 242
             },
             "deprecated": false,
             "children": [],
@@ -1391,7 +1409,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 243
+              "lineNumber": 250
             },
             "deprecated": false,
             "children": [],
@@ -1413,7 +1431,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Promise<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1425,7 +1443,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 255
+              "lineNumber": 262
             },
             "deprecated": false,
             "children": [
@@ -1445,11 +1463,11 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 255
+                  "lineNumber": 262
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1479,7 +1497,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 261
+              "lineNumber": 268
             },
             "deprecated": false,
             "children": [
@@ -1502,7 +1520,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 261
+                  "lineNumber": 268
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1519,7 +1537,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 261
+                  "lineNumber": 268
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1549,7 +1567,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 275
+              "lineNumber": 282
             },
             "deprecated": false,
             "children": [
@@ -1565,7 +1583,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 275
+                  "lineNumber": 282
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1582,7 +1600,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 275
+                  "lineNumber": 282
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -1599,7 +1617,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 275
+                  "lineNumber": 282
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1637,7 +1655,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 295
+              "lineNumber": 302
             },
             "deprecated": false,
             "children": [
@@ -1660,7 +1678,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 295
+                  "lineNumber": 302
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1677,7 +1695,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 295
+                  "lineNumber": 302
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1705,7 +1723,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 305
+              "lineNumber": 312
             },
             "deprecated": false,
             "children": [],
@@ -1731,7 +1749,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 310
+              "lineNumber": 317
             },
             "deprecated": false,
             "children": [],
@@ -1749,7 +1767,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 315
+              "lineNumber": 322
             },
             "deprecated": false,
             "children": [
@@ -1765,7 +1783,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 315
+                  "lineNumber": 322
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1785,7 +1803,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 319
+              "lineNumber": 326
             },
             "deprecated": false,
             "children": [
@@ -1801,7 +1819,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 319
+                  "lineNumber": 326
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1821,7 +1839,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 323
+              "lineNumber": 330
             },
             "deprecated": false,
             "children": [],
@@ -2053,7 +2071,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 86
+              "lineNumber": 87
             },
             "deprecated": false,
             "children": [
@@ -2075,7 +2093,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 86
+                  "lineNumber": 87
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2098,7 +2116,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 86
+                  "lineNumber": 87
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2165,7 +2183,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/reporting/server/types.ts",
-          "lineNumber": 28
+          "lineNumber": 29
         },
         "deprecated": false,
         "children": [
@@ -2187,7 +2205,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 29
+              "lineNumber": 30
             },
             "deprecated": false
           },
@@ -2209,7 +2227,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 30
+              "lineNumber": 31
             },
             "deprecated": false
           },
@@ -2232,7 +2250,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 31
+              "lineNumber": 32
             },
             "deprecated": false
           },
@@ -2255,7 +2273,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 32
+              "lineNumber": 33
             },
             "deprecated": false
           },
@@ -2277,7 +2295,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 33
+              "lineNumber": 34
             },
             "deprecated": false
           },
@@ -2300,7 +2318,29 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 34
+              "lineNumber": 35
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingSetupDeps.screenshotMode",
+            "type": "Object",
+            "tags": [],
+            "label": "screenshotMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "screenshotMode",
+                "scope": "server",
+                "docId": "kibScreenshotModePluginApi",
+                "section": "def-server.ScreenshotModePluginSetup",
+                "text": "ScreenshotModePluginSetup"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 36
             },
             "deprecated": false
           }
@@ -2316,7 +2356,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/reporting/server/types.ts",
-          "lineNumber": 37
+          "lineNumber": 39
         },
         "deprecated": false,
         "children": [
@@ -2338,7 +2378,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 38
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -2360,7 +2400,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 39
+              "lineNumber": 41
             },
             "deprecated": false
           }
@@ -2380,7 +2420,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/reporting/server/types.ts",
-        "lineNumber": 42
+        "lineNumber": 44
       },
       "deprecated": false,
       "children": [
@@ -2396,7 +2436,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/reporting/server/types.ts",
-            "lineNumber": 43
+            "lineNumber": 45
           },
           "deprecated": false
         }
