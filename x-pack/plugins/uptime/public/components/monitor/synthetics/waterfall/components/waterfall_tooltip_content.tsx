@@ -34,7 +34,7 @@ export const WaterfallTooltipContent: React.FC<Props> = ({ text, url }) => {
   );
   return (
     <>
-      <StyledText id="tooltiphead">{text}</StyledText>
+      <StyledText>{text}</StyledText>
       <StyledHorizontalRule margin="none" />
       <EuiFlexGroup direction="column" gutterSize="none">
         {tooltipMetrics.map((item, idx) => (
