@@ -8,21 +8,21 @@
 
 import { gt, gte, lt, lte, isNull } from 'lodash';
 
-type OPERATOR = 'gte' | 'lte' | 'gt' | 'lt' | 'empty';
+type Operator = 'gte' | 'lte' | 'gt' | 'lt' | 'empty';
 
-export const GTE: OPERATOR = 'gte';
-export const LTE: OPERATOR = 'lte';
-export const GT: OPERATOR = 'gt';
-export const LT: OPERATOR = 'lt';
-export const EMPTY: OPERATOR = 'empty';
+export const GTE: Operator = 'gte';
+export const LTE: Operator = 'lte';
+export const GT: Operator = 'gt';
+export const LT: Operator = 'lt';
+export const EMPTY: Operator = 'empty';
 
 export interface Rule {
-  operator: OPERATOR;
+  operator: Operator;
   value: unknown;
 }
 
-type OPERATORS_ALLOW_NULL_TYPE = {
-  [p in OPERATOR]?: boolean;
+type OperatorsAllowNullType = {
+  [name in Operator]?: boolean;
 };
 
 const OPERATORS = {
@@ -33,11 +33,11 @@ const OPERATORS = {
   [EMPTY]: isNull,
 };
 
-const OPERATORS_ALLOW_NULL: OPERATORS_ALLOW_NULL_TYPE = {
+const OPERATORS_ALLOW_NULL: OperatorsAllowNullType = {
   [EMPTY]: true,
 };
 
-export const getOperator = (operator: OPERATOR) => {
+export const getOperator = (operator: Operator) => {
   return OPERATORS[operator];
 };
 
