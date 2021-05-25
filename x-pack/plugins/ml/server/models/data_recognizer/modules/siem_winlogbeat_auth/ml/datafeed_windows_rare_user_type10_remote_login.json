@@ -11,11 +11,6 @@
           "term": {
             "winlog.event_data.LogonType": "10"
           }
-        },
-        {
-          "term": {
-            "event.code": "4624"
-          }
         }
       ],
       "must": [
