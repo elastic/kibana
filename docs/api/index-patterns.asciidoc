@@ -6,7 +6,7 @@ experimental[] Manage {kib} index patterns using REST API.
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly
 to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
 
-WARNING: Prefer using index patterns API for managing {kib} index patterns instead of lower-level <<saved-objects-api>, saved objects API>.
+WARNING: Prefer using index patterns API for managing {kib} index patterns instead of lower-level <<saved-objects-api>, saved objects API>>.
 
 The following index patterns APIs are available: 
 
@@ -16,7 +16,7 @@ The following index patterns APIs are available:
     ** <<index-patterns-api-update, Update index pattern API>> to partially updated {kib} index pattern
     ** <<index-patterns-api-delete, Delete index pattern API>> to delete {kib} index pattern
 * Fields
-    ** <<index-patterns-fields-api-update,Update index pattern field>> to change field metadata, such as `count, `customLabel` and `format`.
+    ** <<index-patterns-fields-api-update, Update index pattern field>> to change field metadata, such as `count`, `customLabel` and `format`.
 
 
 

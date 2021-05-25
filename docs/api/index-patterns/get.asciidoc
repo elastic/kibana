@@ -42,7 +42,7 @@ $ curl -X GET api/index_patterns/index_pattern/my-pattern
 --------------------------------------------------
 // KIBANA
 
-The API returns the index pattern object:
+The API returns an index pattern object:
 
 [source,sh]
 --------------------------------------------------
