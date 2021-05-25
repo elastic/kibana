@@ -24,9 +24,9 @@ describe('ActionMenuContent', () => {
   });
 
   it('renders settings link', () => {
-    const { getByLabelText, getByText } = render(<ActionMenuContent />);
+    const { getByRole, getByText } = render(<ActionMenuContent />);
 
-    const settingsAnchor = getByLabelText('Navigate to the Uptime settings page');
+    const settingsAnchor = getByRole('link', { name: 'Navigate to the Uptime settings page' });
     expect(settingsAnchor.getAttribute('href')).toBe('/settings');
     expect(getByText('Settings'));
   });
