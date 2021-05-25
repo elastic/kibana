@@ -69,7 +69,7 @@ Review the security updates that were found in previous versions of {kib}.
 ==== URL redirection flaw
 
 *Details* +
-In {kib} 7.13.0 and earlier, when a logged in user visits a maliciously created URL, {kib} could redirect users to an arbitrary website. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22141[CVE-2021-22141]
+In {kib} 7.12.1 and earlier, when a logged in user visits a maliciously created URL, {kib} could redirect users to an arbitrary website. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22141[CVE-2021-22141]
 
 *Solution* +
 Upgrade to {kib} 7.13.0.
