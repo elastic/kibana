@@ -4531,20 +4531,32 @@
                 "custom": {
                   "properties": {
                     "enabled": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of custom detection rules enabled"
+                      }
                     },
                     "disabled": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of custom detection rules disabled"
+                      }
                     }
                   }
                 },
                 "elastic": {
                   "properties": {
                     "enabled": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of elastic prebuilt detection rules enabled"
+                      }
                     },
                     "disabled": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of elastic prebuilt detection rules disabled"
+                      }
                     }
                   }
                 }
@@ -4555,20 +4567,32 @@
                 "custom": {
                   "properties": {
                     "enabled": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of custom ML jobs rules enabled"
+                      }
                     },
                     "disabled": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of custom ML jobs rules disabled"
+                      }
                     }
                   }
                 },
                 "elastic": {
                   "properties": {
                     "enabled": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of elastic provided ML jobs rules enabled"
+                      }
                     },
                     "disabled": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of elastic provided ML jobs rules disabled"
+                      }
                     }
                   }
                 }
@@ -5055,26 +5079,44 @@
         "endpoints": {
           "properties": {
             "total_installed": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of installed endpoints"
+              }
             },
             "active_within_last_24_hours": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of active endpoints"
+              }
             },
             "os": {
               "type": "array",
               "items": {
                 "properties": {
                   "full_name": {
-                    "type": "keyword"
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Full name of the operating system"
+                    }
                   },
                   "platform": {
-                    "type": "keyword"
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "OS Platform. eg Centos, Ubuntu"
+                    }
                   },
                   "version": {
-                    "type": "keyword"
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The version of the operating system, eg 16.04.7 LTS (Xenial Xerus), 8 (Core)"
+                    }
                   },
                   "count": {
-                    "type": "long"
+                    "type": "long",
+                    "_meta": {
+                      "description": "The total number of endpoints from that platform"
+                    }
                   }
                 }
               }
@@ -5084,13 +5126,22 @@
                 "malware": {
                   "properties": {
                     "active": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The total number of active malware policies"
+                      }
                     },
                     "inactive": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The total number of inactive malware policies"
+                      }
                     },
                     "failure": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "The total number of failing malware policies"
+                      }
                     }
                   }
                 }
