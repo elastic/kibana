@@ -267,7 +267,6 @@ export class Server {
 
     startTransaction?.end();
 
-    coreUsageDataStart.getCoreUsageData();
     return this.coreStart;
   }
 
