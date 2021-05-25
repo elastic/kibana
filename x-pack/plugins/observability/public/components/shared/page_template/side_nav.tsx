@@ -9,7 +9,7 @@ import { EuiAvatar, EuiSideNav, EuiSideNavItemType, EuiTitle } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import type { ApplicationStart } from '../../../../../../../src/core/public';
 import type { NavigationSection } from '../../../services/navigation_registry';
