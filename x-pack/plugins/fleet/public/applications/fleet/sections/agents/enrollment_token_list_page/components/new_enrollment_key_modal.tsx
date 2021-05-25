@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EuiForm, EuiFormRow, EuiFieldText, EuiSelect } from '@elastic/eui';
 
 import type { AgentPolicy, EnrollmentAPIKey } from '../../../../types';
-import { useInput, useStartServices, sendRequest } from '../../../../hooks';
-import { enrollmentAPIKeyRouteService } from '../../../../services';
+import { useInput, useStartServices, sendCreateEnrollmentAPIKey } from '../../../../hooks';
 
 function useCreateApiKeyForm(
   policyIdDefaultValue: string | undefined,
@@ -26,13 +25,9 @@ function useCreateApiKeyForm(
     event.preventDefault();
     setIsLoading(true);
     try {
-      const res = await sendRequest({
-        method: 'post',
-        path: enrollmentAPIKeyRouteService.getCreatePath(),
-        body: JSON.stringify({
-          name: apiKeyNameInput.value,
-          policy_id: policyIdInput.value,
-        }),
+      const res = await sendCreateEnrollmentAPIKey({
+        name: apiKeyNameInput.value,
+        policy_id: policyIdInput.value,
       });
 
       if (res.error) {
@@ -41,7 +36,9 @@ function useCreateApiKeyForm(
       policyIdInput.clear();
       apiKeyNameInput.clear();
       setIsLoading(false);
-      onSuccess(res.data.item);
+      if (res.data?.item) {
+        onSuccess(res.data.item);
+      }
     } catch (error) {
       setIsLoading(false);
       onError(error);

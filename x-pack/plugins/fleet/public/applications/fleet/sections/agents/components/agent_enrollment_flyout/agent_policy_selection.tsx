@@ -238,7 +238,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
                 <EuiCallOut
                   color="warning"
                   title={i18n.translate(
-                    'xpack.fleet.agentEnrollment.noEnrollmentTokensForSelectedPolicyCallout',
+                    'xpack.fleet.enrollmentStepAgentPolicy.noEnrollmentTokensForSelectedPolicyCallout',
                     {
                       defaultMessage:
                         'There are no enrollment tokens for the selected agent policy',
@@ -247,7 +247,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
                 >
                   <div className="eui-textBreakWord">
                     <FormattedMessage
-                      id="xpack.fleet.agentEnrollment.noEnrollmentTokensForSelectedPolicyCalloutDescription"
+                      id="xpack.fleet.agentEnrenrollmentStepAgentPolicyollment.noEnrollmentTokensForSelectedPolicyCalloutDescription"
                       defaultMessage="You must create and enrollment token in order to enroll agents with this policy"
                     />
                   </div>
@@ -288,7 +288,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
                     }}
                   >
                     <FormattedMessage
-                      id="xpack.fleet.agentEnrollment.setUpAgentsLink"
+                      id="xpack.fleet.enrollmentStepAgentPolicy.setUpAgentsLink"
                       defaultMessage="Create enrollment token"
                     />
                   </EuiButton>
