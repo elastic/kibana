@@ -2678,6 +2678,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl/npm_module":
+  version "0.0.0"
+  uid ""
+
 "@kbn/monaco@link:packages/kbn-monaco":
   version "0.0.0"
   uid ""
@@ -2702,10 +2706,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-constants@link:bazel-bin/packages/kbn-securitysolution-constants/npm_module":
-  version "0.0.0"
-  uid ""
-
 "@kbn/securitysolution-es-utils@link:bazel-bin/packages/kbn-securitysolution-es-utils/npm_module":
   version "0.0.0"
   uid ""
@@ -2727,6 +2727,10 @@
   uid ""
 
 "@kbn/securitysolution-list-api@link:bazel-bin/packages/kbn-securitysolution-list-api/npm_module":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-list-constants@link:bazel-bin/packages/kbn-securitysolution-list-constants/npm_module":
   version "0.0.0"
   uid ""
 
