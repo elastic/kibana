@@ -6,6 +6,7 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import _ from 'lodash';
 import { LensAppState } from './types';
 
 export const initialState: LensAppState = {
@@ -35,6 +36,15 @@ export const appSlice = createSlice({
         ...state,
         ...payload,
       };
+    },
+    onActiveDataChange: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
+      if (!_.isEqual(state.activeData, payload?.activeData)) {
+        return {
+          ...state,
+          ...payload,
+        };
+      }
+      return state;
     },
     navigateAway: (state) => state,
   },

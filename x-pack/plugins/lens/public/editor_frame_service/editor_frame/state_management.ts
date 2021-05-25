@@ -36,10 +36,6 @@ export type Action =
       title: string;
     }
   | {
-      type: 'UPDATE_ACTIVE_DATA';
-      tables: TableInspectorAdapter;
-    }
-  | {
       type: 'UPDATE_STATE';
       // Just for diagnostics, so we can determine what action
       // caused this update.
@@ -148,11 +144,6 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
       return { ...state, title: action.title };
     case 'UPDATE_STATE':
       return action.updater(state);
-    case 'UPDATE_ACTIVE_DATA':
-      return {
-        ...state,
-        activeData: { ...action.tables },
-      };
     case 'UPDATE_LAYER':
       return {
         ...state,

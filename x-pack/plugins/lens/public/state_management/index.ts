@@ -19,7 +19,12 @@ export const reducer = {
   app: appSlice.reducer,
 };
 
-export const { setState, navigateAway, onChangeFromEditorFrame } = appSlice.actions;
+export const {
+  setState,
+  navigateAway,
+  onChangeFromEditorFrame,
+  onActiveDataChange,
+} = appSlice.actions;
 
 export const getPreloadedState = (initializedState: Partial<LensAppState>) => {
   const state = {
@@ -40,14 +45,7 @@ export const makeConfigureStore = (
   const middleware = [
     ...getDefaultMiddleware({
       serializableCheck: {
-        ignoredPaths: [
-          'app.indexPatternsForTopNav',
-          'payload.indexPatternsForTopNav',
-          'app.indexPatterns',
-          'payload.indexPatterns',
-          'app.filters',
-        ],
-        ignoredActions: ['app/setState'],
+        ignoredActions: ['app/setState', 'app/onChangeFromEditorFrame', 'app/onActiveDataChange'],
       },
     }),
     customMiddleware(data),

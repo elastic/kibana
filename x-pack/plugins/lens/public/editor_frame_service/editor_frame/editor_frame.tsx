@@ -39,7 +39,6 @@ import {
   DispatchSetState,
   onChangeFromEditorFrame,
 } from '../../state_management';
-import { TableInspectorAdapter } from '../types';
 
 export interface EditorFrameProps {
   datasourceMap: Record<string, Datasource>;
@@ -122,7 +121,7 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
-    activeData: state.activeData,
+    activeData,
     dateRange,
     query,
     filters,
@@ -238,22 +237,15 @@ export function EditorFrame(props: EditorFrameProps) {
       filterableIndexPatterns: string[];
       doc: Document;
       isSaveable: boolean;
-      activeData?: TableInspectorAdapter;
     },
     oldState: {
       isSaveable: boolean;
       indexPatternsForTopNav: IndexPattern[];
       persistedDoc?: Document;
       lastKnownDoc?: Document;
-      activeData?: TableInspectorAdapter;
     }
   ) => Promise<Partial<LensAppState> | undefined> = async (
-    {
-      filterableIndexPatterns,
-      doc,
-      isSaveable: incomingIsSaveable,
-      activeData: incomingActiveData,
-    },
+    { filterableIndexPatterns, doc, isSaveable: incomingIsSaveable },
     prevState
   ) => {
     const batchedStateToUpdate: Partial<LensAppState> = {};
@@ -264,9 +256,6 @@ export function EditorFrame(props: EditorFrameProps) {
 
     if (!_.isEqual(prevState.persistedDoc, doc) && !_.isEqual(prevState.lastKnownDoc, doc)) {
       batchedStateToUpdate.lastKnownDoc = doc;
-    }
-    if (!_.isEqual(prevState.activeData, incomingActiveData)) {
-      batchedStateToUpdate.activeData = incomingActiveData;
     }
     const hasIndexPatternsChanged =
       prevState.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
@@ -325,7 +314,6 @@ export function EditorFrame(props: EditorFrameProps) {
         persistedDoc,
         indexPatternsForTopNav,
         lastKnownDoc,
-        activeData,
       }).then((batchedStateToUpdate) => {
         if (batchedStateToUpdate) {
           onChange(batchedStateToUpdate);
@@ -337,7 +325,7 @@ export function EditorFrame(props: EditorFrameProps) {
       activeVisualization,
       state.datasourceStates,
       state.visualization,
-      state.activeData,
+      activeData,
       query,
       filters,
       savedQuery,

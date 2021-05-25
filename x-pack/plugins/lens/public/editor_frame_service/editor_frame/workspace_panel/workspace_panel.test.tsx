@@ -29,12 +29,21 @@ import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { fromExpression } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
-import { esFilters, IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import {
+  esFilters,
+  IFieldType,
+  IIndexPattern,
+  TimefilterContract,
+} from '../../../../../../../src/plugins/data/public';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { getPreloadedState, LensAppState, makeConfigureStore } from '../../../state_management';
+import { Provider } from 'react-redux';
+import { Observable } from 'rxjs';
+import moment from 'moment';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -50,8 +59,38 @@ function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
   return core;
 }
 
-function getDefaultProps() {
+function createMockTimefilter() {
+  const unsubscribe = jest.fn();
+
+  let timeFilter = { from: 'now-7d', to: 'now' };
+  let subscriber: () => void;
   return {
+    getTime: jest.fn(() => timeFilter),
+    setTime: jest.fn((newTimeFilter) => {
+      timeFilter = newTimeFilter;
+      if (subscriber) {
+        subscriber();
+      }
+    }),
+    getTimeUpdate$: () => ({
+      subscribe: ({ next }: { next: () => void }) => {
+        subscriber = next;
+        return unsubscribe;
+      },
+    }),
+    calculateBounds: jest.fn(() => ({
+      min: moment('2021-01-10T04:00:00.000Z'),
+      max: moment('2021-01-10T08:00:00.000Z'),
+    })),
+    getBounds: jest.fn(() => timeFilter),
+    getRefreshInterval: () => {},
+    getRefreshIntervalDefaults: () => {},
+    getAutoRefreshFetch$: () => new Observable(),
+  };
+}
+
+function getDefaultProps() {
+  const defaultProps = {
     activeDatasourceId: 'mock',
     datasourceStates: {},
     datasourceMap: {},
@@ -67,7 +106,55 @@ function getDefaultProps() {
     },
     getSuggestionForField: () => undefined,
   };
+  defaultProps.plugins.data.query.timefilter.timefilter = (createMockTimefilter() as unknown) as TimefilterContract;
+
+  defaultProps.plugins.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
+    return [];
+  });
+  defaultProps.plugins.data.query.filterManager.getGlobalFilters = jest
+    .fn()
+    .mockImplementation(() => {
+      return [];
+    });
+
+  defaultProps.plugins.data.query.queryString.getQuery = jest.fn().mockImplementation(() => {
+    return {
+      language: 'lucene',
+      query: '',
+    };
+  });
+
+  defaultProps.plugins.data.search.session.start = jest.fn().mockImplementation(() => 'sessionId');
+
+  return defaultProps;
 }
+
+const mountWithProvider = (
+  component: React.ReactElement,
+  storePreloadedState?: Partial<LensAppState>
+) => {
+  const lensStore = makeConfigureStore(
+    getPreloadedState({
+      ...storePreloadedState,
+    }),
+    {
+      data: getDefaultProps().plugins.data,
+    }
+  );
+
+  const origDispatch = lensStore.dispatch;
+  lensStore.dispatch = jest.fn(origDispatch);
+
+  const wrappingComponent: React.FC<{
+    children: React.ReactNode;
+  }> = ({ children }) => <Provider store={lensStore}>{children}</Provider>;
+
+  const instance = mount(component, ({
+    wrappingComponent,
+  } as unknown) as ReactWrapper);
+
+  return { instance, lensStore };
+};
 
 describe('workspace_panel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
@@ -96,7 +183,7 @@ describe('workspace_panel', () => {
   });
 
   it('should render an explanatory text if no visualization is active', () => {
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         activeVisualizationId={null}
@@ -106,12 +193,13 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
       />
     );
+    instance = mounted.instance;
     expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
   it('should render an explanatory text if the visualization does not produce an expression', () => {
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         visualizationMap={{
@@ -119,13 +207,14 @@ describe('workspace_panel', () => {
         }}
       />
     );
+    instance = mounted.instance;
 
     expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
   it('should render an explanatory text if the datasource does not produce an expression', () => {
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         visualizationMap={{
@@ -133,6 +222,7 @@ describe('workspace_panel', () => {
         }}
       />
     );
+    instance = mounted.instance;
 
     expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
@@ -146,7 +236,7 @@ describe('workspace_panel', () => {
     mockDatasource.toExpression.mockReturnValue('datasource');
     mockDatasource.getLayers.mockReturnValue(['first']);
 
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         datasourceStates={{
@@ -166,6 +256,8 @@ describe('workspace_panel', () => {
       />
     );
 
+    instance = mounted.instance;
+
     expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
       "kibana
       | lens_merge_tables layerIds=\\"first\\" tables={datasource}
@@ -182,7 +274,7 @@ describe('workspace_panel', () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
     const props = getDefaultProps();
 
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...props}
         datasourceStates={{
@@ -202,6 +294,7 @@ describe('workspace_panel', () => {
         plugins={{ ...props.plugins, uiActions: uiActionsMock }}
       />
     );
+    instance = mounted.instance;
 
     const onEvent = expressionRendererMock.mock.calls[0][0].onEvent!;
 
@@ -221,7 +314,7 @@ describe('workspace_panel', () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
     const dispatch = jest.fn();
 
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         datasourceStates={{
@@ -242,12 +335,17 @@ describe('workspace_panel', () => {
       />
     );
 
+    instance = mounted.instance;
+
     const onData = expressionRendererMock.mock.calls[0][0].onData$!;
 
     const tableData = { table1: { columns: [], rows: [] } };
     onData(undefined, { tables: { tables: tableData } });
 
-    expect(dispatch).toHaveBeenCalledWith({ type: 'UPDATE_ACTIVE_DATA', tables: tableData });
+    expect(mounted.lensStore.dispatch).toHaveBeenCalledWith({
+      type: 'app/onActiveDataChange',
+      payload: { activeData: tableData },
+    });
   });
 
   it('should include data fetching for each layer in the expression', () => {
@@ -263,7 +361,7 @@ describe('workspace_panel', () => {
     mockDatasource2.toExpression.mockReturnValue('datasource2');
     mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
 
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         datasourceStates={{
@@ -287,6 +385,7 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
       />
     );
+    instance = mounted.instance;
 
     const ast = fromExpression(instance.find(expressionRendererMock).prop('expression') as string);
 
@@ -341,7 +440,7 @@ describe('workspace_panel', () => {
     expressionRendererMock = jest.fn((_arg) => <span />);
 
     await act(async () => {
-      instance = mount(
+      const mounted = mountWithProvider(
         <WorkspacePanel
           {...getDefaultProps()}
           datasourceStates={{
@@ -360,6 +459,7 @@ describe('workspace_panel', () => {
           ExpressionRenderer={expressionRendererMock}
         />
       );
+      instance = mounted.instance;
     });
     instance.update();
 
@@ -392,7 +492,7 @@ describe('workspace_panel', () => {
 
     expressionRendererMock = jest.fn((_arg) => <span />);
     await act(async () => {
-      instance = mount(
+      const mounted = mountWithProvider(
         <WorkspacePanel
           {...getDefaultProps()}
           datasourceStates={{
@@ -411,6 +511,7 @@ describe('workspace_panel', () => {
           ExpressionRenderer={expressionRendererMock}
         />
       );
+      instance = mounted.instance;
     });
 
     instance.update();
@@ -441,7 +542,7 @@ describe('workspace_panel', () => {
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
     };
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         datasourceStates={{
@@ -460,6 +561,7 @@ describe('workspace_panel', () => {
         }}
       />
     );
+    instance = mounted.instance;
 
     expect(instance.find('[data-test-subj="missing-refs-failure"]').exists()).toBeTruthy();
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
@@ -472,7 +574,7 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
 
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         datasourceStates={{
@@ -497,6 +599,7 @@ describe('workspace_panel', () => {
         })}
       />
     );
+    instance = mounted.instance;
 
     expect(
       instance.find('[data-test-subj="configuration-failure-reconfigure-indexpatterns"]').exists()
@@ -510,7 +613,7 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
 
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         datasourceStates={{
@@ -534,6 +637,7 @@ describe('workspace_panel', () => {
         })}
       />
     );
+    instance = mounted.instance;
 
     expect(
       instance.find('[data-test-subj="configuration-failure-reconfigure-indexpatterns"]').exists()
@@ -550,7 +654,7 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
 
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         datasourceStates={{
@@ -568,6 +672,7 @@ describe('workspace_panel', () => {
         }}
       />
     );
+    instance = mounted.instance;
 
     expect(instance.find('[data-test-subj="configuration-failure"]').exists()).toBeTruthy();
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
@@ -585,7 +690,7 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
 
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         datasourceStates={{
@@ -603,6 +708,7 @@ describe('workspace_panel', () => {
         }}
       />
     );
+    instance = mounted.instance;
 
     expect(instance.find('[data-test-subj="configuration-failure"]').exists()).toBeTruthy();
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
@@ -622,7 +728,7 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
 
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         datasourceStates={{
@@ -640,6 +746,7 @@ describe('workspace_panel', () => {
         }}
       />
     );
+    instance = mounted.instance;
 
     // EuiFlexItem duplicates internally the attribute, so we need to filter only the most inner one here
     expect(
@@ -656,7 +763,7 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
 
-    instance = mount(
+    const mounted = mountWithProvider(
       <WorkspacePanel
         {...getDefaultProps()}
         datasourceStates={{
@@ -674,6 +781,7 @@ describe('workspace_panel', () => {
         }}
       />
     );
+    instance = mounted.instance;
 
     expect(instance.find('[data-test-subj="expression-failure"]').exists()).toBeTruthy();
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
@@ -688,7 +796,7 @@ describe('workspace_panel', () => {
     };
 
     await act(async () => {
-      instance = mount(
+      const mounted = mountWithProvider(
         <WorkspacePanel
           {...getDefaultProps()}
           datasourceStates={{
@@ -707,6 +815,7 @@ describe('workspace_panel', () => {
           ExpressionRenderer={expressionRendererMock}
         />
       );
+      instance = mounted.instance;
     });
 
     instance.update();
@@ -727,7 +836,7 @@ describe('workspace_panel', () => {
     };
 
     await act(async () => {
-      instance = mount(
+      const mounted = mountWithProvider(
         <WorkspacePanel
           {...getDefaultProps()}
           datasourceStates={{
@@ -746,6 +855,7 @@ describe('workspace_panel', () => {
           ExpressionRenderer={expressionRendererMock}
         />
       );
+      instance = mounted.instance;
     });
 
     instance.update();
