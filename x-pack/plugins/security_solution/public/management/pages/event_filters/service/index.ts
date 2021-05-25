@@ -12,7 +12,7 @@ import type {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../../../../shared_imports';
+import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 import { Immutable } from '../../../../../common/endpoint/types';
 

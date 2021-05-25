@@ -7,7 +7,7 @@
     "outDir": "target",
     "rootDir": "src",
     "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-securitysolution-constants/src",
+    "sourceRoot": "../../../../packages/kbn-securitysolution-list-constants/src",
     "types": [
       "jest",
       "node"
