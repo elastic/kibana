@@ -18,13 +18,11 @@ import {
   TickFormatter,
   TooltipInfo,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { BAR_HEIGHT } from './constants';
 import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
 import { useWaterfallContext, WaterfallData } from '..';
+import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 
 const getChartHeight = (data: WaterfallData): number => {
   // We get the last item x(number of bars) and adds 1 to cater for 0 index
@@ -33,16 +31,8 @@ const getChartHeight = (data: WaterfallData): number => {
   return noOfXBars * BAR_HEIGHT;
 };
 
-const StyledText = euiStyled(EuiText)`
-  font-weight: bold;
-`;
-
-const StyledHorizontalRule = euiStyled(EuiHorizontalRule)`
-  background-color: ${(props) => props.theme.eui.euiColorDarkShade};
-`;
-
 const Tooltip = (tooltipInfo: TooltipInfo) => {
-  const { data, renderTooltipItem, sidebarItems } = useWaterfallContext();
+  const { data, sidebarItems } = useWaterfallContext();
   return useMemo(() => {
     const sidebarItem = sidebarItems?.find((item) => item.index === tooltipInfo.header?.value);
     const relevantItems = data.filter((item) => {
@@ -52,32 +42,15 @@ const Tooltip = (tooltipInfo: TooltipInfo) => {
     });
     return relevantItems.length ? (
       <WaterfallChartTooltip>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {sidebarItem && (
-            <>
-              <StyledText>
-                <FormattedMessage
-                  id="xpack.uptime.synthetics.waterfall.tooltipHeading"
-                  defaultMessage={`{index}. {url}`}
-                  description="Simply formats a URL with its index in a numbered list."
-                  values={{
-                    index: sidebarItem.offsetIndex,
-                    url: sidebarItem.url,
-                  }}
-                />
-              </StyledText>
-              <StyledHorizontalRule margin="none" />
-            </>
-          )}
-          {relevantItems.map((item, index) => {
-            return (
-              <EuiFlexItem key={index}>{renderTooltipItem(item.config.tooltipProps)}</EuiFlexItem>
-            );
-          })}
-        </EuiFlexGroup>
+        {sidebarItem && (
+          <WaterfallTooltipContent
+            text={`${sidebarItem.index + 1}. ${sidebarItem.url}`}
+            url={sidebarItem.url}
+          />
+        )}
       </WaterfallChartTooltip>
     ) : null;
-  }, [data, renderTooltipItem, sidebarItems, tooltipInfo.header?.value]);
+  }, [data, sidebarItems, tooltipInfo.header?.value]);
 };
 
 interface Props {
@@ -111,7 +84,10 @@ export const WaterfallBarChart = ({
         <Settings
           showLegend={false}
           rotation={90}
-          tooltip={{ customTooltip: Tooltip }}
+          tooltip={{
+            boundary: document.getElementById('app-fixed-viewport') ?? undefined,
+            customTooltip: Tooltip,
+          }}
           theme={theme}
           onProjectionClick={handleProjectionClick}
           onElementClick={handleElementClick}
