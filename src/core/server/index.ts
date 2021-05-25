@@ -376,11 +376,7 @@ export type {
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
   UserProvidedValues,
-  ImageValidation,
   DeprecationSettings,
-  StringValidation,
-  StringValidationRegex,
-  StringValidationRegexString,
 } from './ui_settings';
 
 export type {

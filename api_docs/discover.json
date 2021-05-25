@@ -539,7 +539,9 @@
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 22
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "discover",
@@ -563,7 +565,32 @@
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 23
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.saveOptions",
+                "type": "Object",
+                "tags": [],
+                "label": "saveOptions",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "savedObjects",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsPluginApi",
+                    "section": "def-public.SavedObjectSaveOpts",
+                    "text": "SavedObjectSaveOpts"
+                  }
+                ],
+                "source": {
+                  "path": "src/plugins/discover/public/saved_searches/types.ts",
+                  "lineNumber": 23
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "discover",
@@ -651,7 +678,23 @@
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 29
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/discover/public/saved_searches/types.ts",
+                  "lineNumber": 29
+                },
+                "deprecated": false
+              }
+            ]
           },
           {
             "parentPluginId": "discover",
@@ -667,7 +710,23 @@
               "path": "src/plugins/discover/public/saved_searches/types.ts",
               "lineNumber": 30
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/discover/public/saved_searches/types.ts",
+                  "lineNumber": 30
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -710,13 +769,7 @@
             "label": "timeRange",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              }
+              "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",

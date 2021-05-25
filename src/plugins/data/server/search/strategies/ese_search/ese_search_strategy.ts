@@ -21,11 +21,13 @@ import { shimAbortSignal, shimHitsTotal } from '../es_search';
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
   logger: Logger,
-  usage?: SearchUsage
+  usage?: SearchUsage,
+  useInternalUser: boolean = false
 ): ISearchStrategy => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     try {
-      await esClient.asCurrentUser.asyncSearch.delete({ id });
+      const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+      await client.asyncSearch.delete({ id });
     } catch (e) {
       throw getKbnServerError(e);
     }
@@ -36,7 +38,7 @@ export const enhancedEsSearchStrategyProvider = (
     options: IAsyncSearchOptions,
     { esClient, uiSettingsClient, searchSessionsClient }: SearchStrategyDependencies
   ) {
-    const client = esClient.asCurrentUser.asyncSearch;
+    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
 
     const search = async () => {
       const params = id
@@ -49,7 +51,9 @@ export const enhancedEsSearchStrategyProvider = (
             )),
             ...request.params,
           };
-      const promise = id ? client.get({ ...params, id }) : client.submit(params);
+      const promise = id
+        ? client.asyncSearch.get({ ...params, id })
+        : client.asyncSearch.submit(params);
       const { body } = await shimAbortSignal(promise, options.abortSignal);
       const response = shimHitsTotal(body.response, options);
 
@@ -110,7 +114,11 @@ export const enhancedEsSearchStrategyProvider = (
     extend: async (id, keepAlive, options, { esClient }) => {
       logger.debug(`extend ${id} by ${keepAlive}`);
       try {
-        await esClient.asCurrentUser.asyncSearch.get({ id, body: { keep_alive: keepAlive } });
+        const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+        await client.asyncSearch.get({
+          id,
+          body: { keep_alive: keepAlive },
+        });
       } catch (e) {
         throw getKbnServerError(e);
       }
