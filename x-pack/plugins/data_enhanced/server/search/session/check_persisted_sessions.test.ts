@@ -22,6 +22,7 @@ describe('checkPersistedSessions', () => {
     maxUpdateRetries: 3,
     defaultExpiration: moment.duration(7, 'd'),
     trackingInterval: moment.duration(10, 's'),
+    cleanupInterval: moment.duration(10, 's'),
     monitoringTaskTimeout: moment.duration(5, 'm'),
     management: {} as any,
   };

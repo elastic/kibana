@@ -38,6 +38,7 @@ describe('checkNonPersistedSessions', () => {
     defaultExpiration: moment.duration(7, 'd'),
     trackingInterval: moment.duration(10, 's'),
     monitoringTaskTimeout: moment.duration(5, 'm'),
+    cleanupInterval: moment.duration(10, 's'),
     management: {} as any,
   };
   const mockLogger: any = {

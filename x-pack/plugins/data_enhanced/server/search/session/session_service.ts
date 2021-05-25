@@ -157,7 +157,7 @@ export class SearchSessionService
         taskDeps,
         SEARCH_SESSIONS_CLEANUP_TASK_ID,
         SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
-        duration('60', 's')
+        this.sessionConfig.cleanupInterval
       );
 
       scheduleSearchSessionsTask(
