@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/99006
-  describe.skip('Stack Management -Advanced Settings', () => {
+  // running it in flaky test runner to figure out where is the failure.
+  describe('Stack Management -Advanced Settings', () => {
     // click on Management > Advanced settings
     it('click on advanced settings ', async () => {
       await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
