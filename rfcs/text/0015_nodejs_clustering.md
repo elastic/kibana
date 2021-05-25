@@ -23,40 +23,75 @@
 
 # 1. Summary
 
-Leveraging NodeJS clustering API to have multi-processes Kibana instances.
+This RFC proposes a new core service which leverages the [Node.js cluster API](https://nodejs.org/api/cluster.html)
+to support multi-process Kibana instances.
 
 # 2. Motivation
 
-Kibana currently uses a single Node process/thread to serve HTTP traffic.
-This means Kibana cannot take advantage of multi-core hardware making it expensive to scale out Kibana.
+The Kibana server currently uses a single Node process to serve HTTP traffic.
+This is a byproduct of the single-threaded nature of Node's event loop.
 
-Clustering mode would allow spawning multiple Kibana processes ('workers') from a single Kibana instance. See the `alternatives`
-section for the difference between clustering and worker pool.
+As a consequence, Kibana cannot take advantage of multi-core hardware: If you run Kibana on an
+8-core machine, it will only utilize one of those cores. This makes it expensive to scale out
+Kibana, as server hardware will typically have multiple cores, so you end up paying for power
+you never use. Since Kibana is generally more CPU-intensive than memory-intensive, it would be
+advantageous to use all available cores to maximize the performance we can get out of a single
+machine.
 
-This should be an optional way to run Kibana since users running Kibana inside docker containers might
-choose to rather use their container orchestration to run a container (with a single kibana process)per host CPU.
+Another benefit of this approach would be improving Kibana's overall performance for most users
+without requiring an operator to scale out the server, as it would allow the server to handle
+more http requests at once, making it less likely that a single bad request could delay the
+event loop and impact subsequent requests.
+
+The introduction of a clustering mode would allow spawning multiple Kibana processes ('workers')
+from a single Kibana instance. (See [Alternatives](#8-alternatives) to learn more about the
+difference between clustering and worker pools). You can think of these processes as individual
+instances of the Kibana server which listen on the same port on the same machine, and serve
+incoming traffic in a round-robin fashion.
+
+Our intent is to eventually make clustering the default behavior in Kibana, taking advantage of
+all available CPUs out of the box. However, this should still be an optional way to run Kibana
+since users might have use cases for single-process instances (for example, users running Kibana
+inside Docker containers might choose to rather use their container orchestration to run a
+container per host CPU with a single Kibana process per container).
 
 # 3. Architecture
 
-In 'classic' mode, the Kibana server is started in the main NodeJS process.
+In 'classic' mode, the Kibana server is started in the main Node.js process.
 
 ![image](../images/15_clustering/no-cluster-mode.png)
 
-In clustering mode, the main NodeJS process would only start the coordinator, which would then fork workers using 
-Node's `cluster` API. NodeJS underlying socket implementation allows multiple processes to listen to the same ports, 
-performing http traffic balancing between the workers for us.
+In clustering mode, the main Node.js process would only start the coordinator, which would then
+fork workers using Node's `cluster` API. Node's underlying socket implementation allows multiple
+processes to listen to the same ports, effectively performing http traffic balancing between the
+workers for us.
 
 ![image](../images/15_clustering/cluster-mode.png)
 
-The coordinator sole responsibility is to orchestrate the workers. It would not be a 'super' worker handling both 
-the job of a worker while being in charge of managing the other workers.
+The coordinator's primary responsibility is to orchestrate the workers. It would not be a 'super'
+worker handling both the job of a worker while being in charge of managing the other workers.
+
+In addition, the coordinator would be responsible for some specific activities that need to be
+handled in a centralized manner:
+- collecting logs from each of the workers & writing them to a single file or stdout
+- gathering basic status information from each worker for use in the `/status` and `/stats` APIs
+
+Over time, it is possible that the role of the coordinator would expand to serve more purposes,
+especially if we start implementing custom routing logic to run different services on specialized
+processes.
 
 # 4. Testing
 
+Thorough performance testing is critical in evaluating the success of this plan. The results
+below reflect some initial testing that was performed against an experimental
+[proof-of-concept](https://github.com/elastic/kibana/pull/93380). Should we move forward with this
+RFC, one of the first tasks will be to update the POC and build out a more detailed test plan that
+covers all of the scenarios we are concerned with.
+
 ## 4.1 Local testing
 
-These tests were performed against a local development machine, with a 8-core cpu (2.4 GHz 8-Core Intel Core i9 - 32 GB 2400 MHz DDR4),
-using the default configuration of the `kibana-load-testing` tool.
+These tests were performed against a local development machine, with an 8-core CPU(2.4 GHz 8-Core
+Intel Core i9 - 32 GB 2400 MHz DDR4), using the default configuration of the `kibana-load-testing` tool.
 
 ### 4.1.1 Raw results
 
@@ -93,7 +128,7 @@ deploy custom builds or branches on Cloud at the moment.
 On Cloud, Kibana is running in a containerised environment using CPU CFS quota and CPU shares. 
 
 If we want to investigate the potential perf improvement on Cloud further, our only option would be to setup a 
-similar-ish environment locally (which wasn't done during the initial investigation)
+similar-ish environment locally (which wasn't done during the initial investigation).
 
 # 5. Detailed design
 
@@ -101,33 +136,30 @@ similar-ish environment locally (which wasn't done during the initial investigat
 
 Enabling clustering mode will be done using the `clustering.enabled` configuration property.
 
-The whole `clustering` configuration would look like:
-
-```ts
-export const config = {
-  path: 'clustering',
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-    workers: schema.conditional(
-      schema.siblingRef('enabled'),
-      false,
-      schema.number({ defaultValue: 1 }),
-      schema.number()
-    )
-  }),
-};
+If clustering is enabled by default, then no configuration would be required by users, and
+Kibana would automatically use all available cores. However, more detailed configuration
+would be available for users with more advanced use cases:
+```yaml
+clustering:
+  enabled: true               # enabled by default
+  workers:                    # when provided, total # of workers would be based on # of items in this list
+    - name: foo               # not technically necessary, but useful for logging purposes
+      max_old_space_size: 1gb # optional, allows to configure memory limits per-worker
+    - name: bar
+      max_old_space_size: 1gb
 ```
 
-Notes:
-- As there isn't really a good way to automatically choose the correct number of workers automatically, It will be required 
-  for the user to manually specify `clustering.workers` when clustering is enabled.
-  
+This per-worker design would give us the flexibility to eventually provide more fine-grained configuration,
+like dedicated workers for http requests or background jobs. We could also eventually add `coordinator`
+specific config.
+
 ## 5.2 Cross-worker communication
 
-For some of our changes (such as the /status API, see below), we will need some kind of cross-worker communication. This 
-will need to pass through the coordinator, which will also serve as an 'event bus', or IPC forwarder.
+For some of our changes (such as the `/status` API, see below), we will need some kind of cross-worker
+communication. This will need to pass through the coordinator, which will also serve as an 'event bus',
+or IPC forwarder.
 
-This IPC API will be exposed from the clustering service.
+This IPC API will be exposed from the clustering service:
 
 ```ts
 export interface ClusteringServiceSetup {
@@ -137,26 +169,26 @@ export interface ClusteringServiceSetup {
 }
 ```
 
-To preserve isolation and to avoid creating an implicit cross-plugin API, handlers registered from a given plugin will only be
-invoked for messages sent by the same plugin.
+To preserve isolation and to avoid creating an implicit cross-plugin API, handlers registered from a
+given plugin will only be invoked for messages sent by the same plugin.
 
 Notes:
--  to reduce clustered and non-clustered mode divergence, in non-clustered mode, these APIs would just be no-ops. 
-   It will avoid to force (most) code to check in which mode Kibana is running before calling them.
+-  To reduce clustered and non-clustered mode divergence, in non-clustered mode, these APIs would just be no-ops. 
+   It will avoid forcing (most) code to check which mode Kibana is running before calling them.
 -  We could eventually use an Observable pattern instead of a handler pattern to subscribe to messages.
 
 ## 5.3 Executing code on a single worker
 
 In some scenarios, we would like to have parts of the code executed only from a single process. 
 
-The SO migration would be a good example: 
-we don't need to have each worker try to perform the migration, and we'd prefer to have one performing/trying the migration, 
-and the others wait for it. Due to the architecture, we can't have the coordinator perform such single-process jobs, 
-as it doesn't actually run a Kibana server.
+Saved object migrations would be a good example: 
+we don't need to have each worker try to perform the migration, and we'd prefer to have one performing/trying
+the migration, and the others waiting for it. Due to the architecture, we can't have the coordinator perform
+such single-process jobs, as it doesn't actually run a Kibana server.
 
-There are various ways to address such use-cases. What seems to be the best compromise right now would be the concept of 
-'main worker'. The coordinator would arbitrary elect a worker as the 'main' one at startup. The clustering service would then expose 
-an API to let workers identify themselves as main or not.
+There are various ways to address such use-cases. What seems to be the best compromise right now would be the
+concept of 'main worker'. The coordinator would arbitrarily elect a worker as the 'main' one at startup. The
+clustering service would then expose an API to let workers identify themselves as main or not.
 
 ```ts
 export interface ClusteringServiceSetup {
@@ -166,16 +198,18 @@ export interface ClusteringServiceSetup {
 ```
 
 Notes:
-- in non-clustered mode, `isMainWorker` would always return true, to reduce the divergence between clustered and 
+- In non-clustered mode, `isMainWorker` would always return true, to reduce the divergence between clustered and 
   non-clustered modes.
 
 ## 5.4 The clustering service API
 
-We will be adding a new clustering service to core, that will add the necessary cluster APIs, and would be accessible via core's setup and start contracts (`coreSetup.clustering` and `coreStart.clustering`).
+We propose adding a new clustering service to Core, which will be responsible for adding the necessary cluster APIs,
+and handling interaction with Node's `cluster` API. This service would be accessible via Core's setup and start contracts
+(`coreSetup.clustering` and `coreStart.clustering`).
 
 At the moment, no need to extend Core's request handler context with clustering related APIs has been identified.
 
-The contract interface would look like (more APIs could be added depending on the discussions on this RFC)
+The initial contract interface would look like this:
 
 ```ts
 type ClusterMessagePayload = Serializable;
@@ -204,35 +238,36 @@ export interface ClusteringServiceSetup {
   getWorkerId: () => number;
   /**
    * Broadcast a message to other workers.
-   * In non-clustered mode, this is a no-op
+   * In non-clustered mode, this is a no-op.
    */
   broadcast: (type: string, payload?: ClusterMessagePayload, options?: BroadcastOptions) => void;
   /**
-   * Registered a handler for given `type` of IPC messages
+   * Registers a handler for given `type` of IPC messages
    * In non-clustered mode, this is a no-op that returns a no-op unsubscription callback.
    */
   addMessageHandler: (type: string, handler: MessageHandler) => MessageHandlerUnsubscribeFn;
   /**
-   * Returns true if the current worker has been elected as the main one. In non-clustered mode, will always return true
+   * Returns true if the current worker has been elected as the main one.
+   * In non-clustered mode, will always return true
    */
   isMainWorker: () => boolean;
 }
 ```
 
-### 5.4.1 Example: SO Migration
+### 5.4.1 Example: Saved Object Migrations
 
 To take the example of SO migration, the `KibanaMigrator.runMigrations` implementation could change to
 (naive implementation, the function is supposed to return a promise here, did not include that for simplicity):
 
 ```ts
 runMigration() {
-   if(clustering.isMainWorker()) {
+   if (clustering.isMainWorker()) {
      this.runMigrationsInternal().then((result) => {
         applyMigrationState(result);
-        clustering.broadcast('migration-complete', { payload: result }, { persist: true }); // persist: true will send message even if subscriber subscribe after the message was actually sent
+        // persist: true will send message even if subscriber subscribes after the message was actually sent
+        clustering.broadcast('migration-complete', { payload: result }, { persist: true });
       })
-   }
-   else {
+   } else {
      const unsubscribe = clustering.addMessageHandler('migration-complete', ({ payload: result }) => {
        applyMigrationState(result);
        unsubscribe();
@@ -242,23 +277,22 @@ runMigration() {
 ```
 
 Notes:
-  - to be sure that we do not encounter a race condition with the event subscribing / sending (workers subscribing after 
-    the main worker actually send the `migration-complete` event and then waiting indefinitely), we are using the `persist` option of the `broadcast` API.
-    I'm honestly not sure this is the best pattern, but I couldn't come with anything better (maybe shared state instead?). 
-    This is probably something else we should discuss.
-
+  - To be sure that we do not encounter a race condition with the event subscribing / sending (workers subscribing after 
+    the main worker actually sent the `migration-complete` event and then waiting indefinitely), we are using the `persist`
+    option of the `broadcast` API. We felt this was a better approach than the alternative of having shared state among workers.
 
 ## 5.5 Sharing state between workers
 
-This is not identified as necessary at the moment, and IPC broadcast should be sufficient, hopefully. 
+This is not identified as necessary at the moment, and IPC broadcast should be sufficient, hopefully. We prefer to avoid
+the added complexity and risk of implicit dependencies if possible.
 
-If we do need shared state, we will probably have to use syscall libraries to share buffers such as [mmap-io](https://www.npmjs.com/package/mmap-io), 
-and expose a higher level API for that from the `clustering` service.
+If we do eventually need shared state, we would probably have to use syscall libraries to share buffers such as
+[mmap-io](https://www.npmjs.com/package/mmap-io), and expose a higher level API for that from the `clustering` service. More
+research would be required if this proved to be a necessity.
 
 # 6. Technical impact
 
-This section is meant to be an exhaustive (even if realistically not at the moment) inventory  of the changes that would
-be required to support clustering mode.
+This section attempts to be an exhaustive inventory of the changes that would be required to support clustering mode.
 
 ## 6.1 Technical impact on Core
 
@@ -276,46 +310,48 @@ This is an example of log output in a 2 workers cluster, coming from the POC:
 The workers logs are interleaved, and, most importantly, there is no way to see which process each log entry is coming from. 
 We will need to address that.
 
-Our (non-exclusive) options are:
+#### Options we considered:
 
-1. Have a distinct logging configuration for each worker
+1. Having a distinct logging configuration (with separate log files) for each worker
+2. Centralizing log collection in the coordinator and writing all logs to a single file (or stdout)
 
-We could do that by automatically adding a suffix depending on the process to the appropriate file appenders configuration. 
-Note that this doesn’t solve the problem for the console appender, which is probably a no-go.
+#### Our recommended approach:
 
-2. Add the process info to the log pattern and output it with the log message
+Overall we recommend keeping a single log file (option 2), and centralizing the logging system in the coordinator,
+with each worker sending the coordinator log messages via IPC. While this is a more complex implementation in terms
+of our logging system, it solves several problems:
+- Preserves backwards compatibility.
+- Avoids the issue of interleaved log messages that could occur with multiple processes writing to the same file or stdout.
+- Provides a solution for the rolling-file appender (see below), as the coordinator would handle rolling all log file
+(small caveat being a slight loss in file size precision).
+- The changes to BaseLogger could potentially have the added benefit of paving the way for our future logging MDC.
 
 We could add the process name information to the log messages, and add a new conversion to be able to display it with 
 the pattern layout, such as `%worker` for example.
 
-the default pattern could evolve to (ideally, only when clustering is enabled)
-
+The default pattern could evolve to (ideally, only when clustering is enabled):
 ```
 [%date][%level][%worker][%logger] %message
 ```
 
-The logging output would then look like
-
+The logging output would then look like:
 ```
 [2021-03-02T10:23:41.834+01:00][INFO ][worker-1][plugins-service] Plugin initialization disabled.
 [2021-03-02T10:23:41.840+01:00][INFO ][worker-2][plugins-service] Plugin initialization disabled.
 ```
 
-This will require some non-trivial changes in the logging system implementation, as currently the BaseLogger has no logic to 
-enhance the log record with context information before forwarding it to its appenders, but this still
-seems to be the best solution. (This may even be the first step to implement our MDC)
-
 Notes:
 - The coordinator will probably need to output logs too. `%worker` would be interpolated to `coordinator` 
-  for the coordinator process
-- Even if we add the `%worker` pattern, do we want to also allow users to specify per-worker log files? 
+  for the coordinator process.
+- Even if we add the `%worker` pattern, we could still consider letting users configure per-worker log
+files as a future enhancement.
 
 ### 6.1.2 The rolling-file appender
 
 The rolling process of the `rolling-file` appender is going to be problematic in clustered mode, as it will cause 
 concurrency issues during the rolling. We need to find a way to have this rolling stage clustered-proof.
 
-Identified options are:
+#### Options we considered:
 
 1. have the rolling file appenders coordinate themselves when rolling
 
@@ -343,9 +379,9 @@ the logging system. The worker’s logger implementation would just send message
 correct design, the main downside is that the logging implementation would be totally different in cluster and 
 non cluster mode, and seems to be way more work that the other options.
 
-Overall, if no option is trivial, I feel like option `1.` is still the most pragmatic one. Option `3.` may be a better 
-design, but represents more work. It would probably be fine if all our appenders were impacted, but as only the 
-rolling-file one is, I feel like going with `3.` would be ok.
+#### Our recommended approach:
+Even though it's more complex, we feel that centralizing the logging system in the coordinator is the right move here,
+as it will also solve for how to enable the coordinator to log its own messages.
 
 ### 6.1.3 The status API
 
@@ -353,10 +389,11 @@ In clustering mode, the workers will all have an individual status. One could ha
 while the other ones are green. Hitting the `/status` endpoint will reach a random (and different each time) worker, 
 meaning that it would not be possible to know the status of the cluster as a whole.
 
-We will need to add a centralized status service in the coordinator. Also, as the `/status` endpoint cannot be served 
+We will need to add some centralized status state in the coordinator. Also, as the `/status` endpoint cannot be served 
 from the coordinator, we will also need to have the workers retrieve the global status from the coordinator to serve 
 the status endpoint.
 
+TODO: 
 We may also want to have the `/status` endpoint display each individual worker status in addition to the 
 global status, which may be breaking change in the `/status` API response format.
 
@@ -368,7 +405,7 @@ usage, as the PID stored in the file will be a arbitrary worker’s PID, instead
 In clustering mode, we will need to have to coordinator handle the PID file logic, and to disable pid file handling 
 in the worker's environment service.
 
-### 6.1.5 SavedObjects migration
+### 6.1.5 Saved Objects migration
 
 In the current state, all workers are going to try to perform the migration. Ideally, we would have only one process 
 perform the migration, and the other ones just wait for a ready signal. We can’t easily have the coordinator do it, 
@@ -377,17 +414,16 @@ so we would probably have to leverage the ‘main worker’ concept here.
 The SO migration v2 is supposed to be resilient to concurrent attempts though, as we already support multi-instances 
 Kibana, so this can probably be considered an improvement.
 
-### 6.1.6 Open questions and things to solve
-
-#### Memory consumption
+### 6.1.6 Memory consumption
 
 In clustered mode, node options such as `max-old-space-size` will be used by all processes. 
 
-E.g using `--max-old-space-size=1024` in a 2 workers cluster would have a maximum memory usage of 3gb (1 coordinator + 2 workers). 
+e.g. using `--max-old-space-size=1024` in a 2 workers cluster would have a maximum memory usage of 3gb (1 coordinator + 2 workers). 
 
-If this something we will need to document somewhere?
+TODO: 
+Our recommendation is to _disable clustering by default when a user has set `max-old-space-size` in the `node.options` file_.
 
-#### Workers error handling
+### 6.1.7 Workers error handling
 
 When using `cluster`, the common best practice is to have the coordinator recreate ('restart') workers when they terminate unexpectedly. 
 However, given Kibana's architecture, some failures are not recoverable (workers failing because of config validation, failed migration...). 
@@ -395,72 +431,54 @@ However, given Kibana's architecture, some failures are not recoverable (workers
 For instance, if a worker (well, all workers) terminates because of an invalid configuration property, it doesn't make
 any sense to have the coordinator recreate them indefinitely, as the error requires manual intervention. 
 
-Should we try to distinguish recoverable and non-recoverable errors, or are we good terminating the main Kibana process 
-when any worker terminates unexpectedly for any reason (After all, this is already the behavior in non-cluster mode)?
+As a first step, we plan to terminate the main Kibana process when any worker terminates unexpectedly for any reason (after all,
+this is already the behavior in non-cluster mode). In the future, we will look toward distinguishing between recoverable
+and non-recoverable errors as an enhancement, so that we can automatically restart workers on any recoverable error.
 
-#### Data folder
+### 6.1.8 Data folder
 
 The data folder (`path.data`) is currently the same for all workers. 
 
 We still have to identify with the teams if this is going to be a problem. It could be, for example, if some plugins
 are accessing files in write mode, which could result in concurrency issues between the workers.
 
-If that was confirmed, we would have to create and use a distinct data folder for each worker.
+If that was confirmed, we would plan to create and use a distinct data folder for each worker, which would be non-breaking
+as we don't consider the layout of this directory to be part of our public API.
 
-One pragmatic solution could be, when clustering is enabled, to create a sub folder under path.data for each worker. 
-
-The data folder is not considered part of our public API, and the implementation and path already changed in previous
-minor releases, so this should not be considered a breaking change.
-
-#### instanceUUID
+### 6.1.9 instanceUUID
 
 The same instance UUID (`server.uuid` / `{dataFolder}/uuid`) is currently used by all the workers. 
 
-We still need to identify with the teams if this is going to be a problem, in which case we would need to have distinct 
-instance uuid per workers.
+So far, we have not identified any places where this will be problematic, however, we will look to other teams to
+help validate this.
 
-Note that this could be a breaking change, as the single `server.uuid` configuration property would not be enough. 
-Could the new `clustering.getWorkerId()` API be used here somehow? We could have a unique worker id with `{serverUUid}-{workerId}`. 
-
-#### The Dev CLI
-
-In development mode, we are already spawning processes from the main process: The Kibana server running in the main process 
-actually just kickstarts core to get the configuration and services required to instantiate the `CliDevMode` 
-(from the legacy service), which itself spawns a child process to run the actual Kibana server.
-
-Even if not technically blocking, it would greatly simplify parts of the workers and coordinator logic if we were able 
-to finally extract the dev cli from Core and to avoid having it create a temporary server just to access the Legacy service
-and configuration.
-
-Note that extracting and refactoring the dev cli is going to be required anyway to remove the last bits of legacy, 
-as it currently relies on the legacy configuration to run (and is running from the legacy service). This task is currently
-planned for 7.13 or early 7.14, see [the associated GH issue](https://github.com/elastic/kibana/issues/76935)
+Note that if we did need to have per-worker UUIDs, this could be a breaking change, as the single `server.uuid`
+configuration property would not be enough. If this change becomes necessary, one approach could be to have unique worker
+IDs with `${serverUuid}-${workerId}`.
 
 ## 6.2 Technical impact on Plugins
 
-### 6.2.1 Identifying things that may break
+### 6.2.1 What types of things could break?
 
-- Concurrent access to the same resources
+#### Concurrent access to the same resources
 
 Is there, for example, some part of the code that is accessing and writing files from the data folder (or anywhere else) 
 and makes the assumption that it is the sole process actually writing to that file?
 
-- Using instanceUUID as a unique Kibana process identifier
+#### Using instanceUUID as a unique Kibana process identifier
 
 Is there, for example, schedulers that are using the instanceUUID a single process id, in opposition to a single 
 Kibana instance id? Are there situations where having the same instance UUID for all the workers is going to be a problem?
 
-- Things needing to run only once per Kibana instance
+#### Things needing to run only once per Kibana instance
 
 Is there any part of the code that needs to be executed only once in a multi-worker mode, such as initialization code, 
 or starting schedulers? 
 
-An example would be reporting's queueFactory pooling. As we want to only be running a single headless at a time per 
+An example would be Reporting's queueFactory pooling. As we want to only be running a single headless at a time per 
 Kibana instance, only one worker should have pooling enabled.
 
 ### 6.2.2 Identified required changes
-
-(Probably not exhaustive at the moment)
 
 #### Reporting
 
@@ -492,14 +510,22 @@ amount of network bandwidth used, and potentially affecting our customers.
 
 We could address that by making sure that the queues are held only in the main worker.
 
-#### TaskManager
+#### Task Manager
 
-Currently, task manager does "claims" for jobs to run based on the server uuid. I think this would still work with 
-workers - each task manager in the worker would be doing "claims" for the same server uuid, which I think is basically
-the same as setting your max_workers to "current max_workers * number of workers"
+Currently, task manager does "claims" for jobs to run based on the server uuid. We think this could still work with 
+a multi-process setup - each task manager in the worker would be doing "claims" for the same server uuid, which
+seems functionally the same as setting max_workers to `current max_workers * number of workers`.
 
-We probably only want one worker doing the task claims, and then when it gets tasks to run, sends them to a worker to run.
-Short term, having only the 'main' worker perform the task claims and executions should be good enough.
+However, as a first step we can simply run Task Manager on the main worker. This doesn't completely solve potential
+noisy neighbor problems as the main worker will still be receiving & serving http requests, however it will at least
+ensure that other worker processes are free to serve http requests without risk of TM interference. Long term, we
+could explore manually spawning a dedicated child process for background tasks that can be called from workers, and
+thinking of a way for plugins to tell Core when they need to run things in the background.
+
+It would be ideal if we could eventually solve this with our multi-process setup, however this needs more design work
+and could necessitate an RFC in its own right. The key thing to take away here is that the work we are doing in this
+RFC would not prevent us from exploring this path further in a subsequent phase. In fact, it could prove to be a
+helpful first step in that direction.
 
 #### Alerting
 
@@ -515,57 +541,79 @@ status API in clustering mode.
 Note that the new format for /api/status is still behind a v8format flag, meaning that if we do these changes before 8.0, 
 we won't be introducing any breaking change later.
 
-### 6.3.2 instanceUUID
+### 6.3.2 stats API
 
-Depending on our decision regarding the instanceUUID problematic, we may have to change the server.uuid configuration 
-property when clustering mode is enabled, which would be a breaking change.
+TODO:
 
-### 6.3.3 distinct logging configuration
+### 6.3.3 instanceUUID
 
-If we decide to have each worker output log in distinct files, we would have to change the logging configuration to 
-add a prefix/suffix to each log file, which would be a breaking change. Note that this option is probably not the one 
-we'll choose.
+Depending on whether we are able to identify any cases where a shared uuid would be problematic, we may have to change
+the server.uuid configuration property when clustering mode is enabled, which would be a breaking change.
 
 # 7. Drawbacks
 
-- Implementation cost is going to be significant, both in core and in plugins. Also, this will have to be a collaborative
-  effort, as we can't enable the clustered mode in production until all the identified breaking changes have been addressed.
-  
-- Even if easier to deploy, it doesn't really provide anything more than a multi-instances Kibana setup.
-  
-- This will complexify the code, especially in Core were some part of the logic will drastically change between clustered and 
-non-clustered modes (e.g the status API, rolling-file appender).
-  
-- It could introduce subtle bugs in clustered mode, as we may overlook some breaking changes, or developers may omit to
-ensure clustered mode compatibility when adding new features.
-  
-- Proper testing of all the edge cases is going to be tedious, if not just realistically impossible. We can't really
-  automate the testing of the clustered mode.
+- Implementation cost is going to be significant as this will require multiple phases, both in core and in plugins.
+  Also, this will have to be a collaborative effort, as we can't enable cluster mode in production until all of the
+  identified breaking changes have been addressed.
+- Even if it is easier to deploy, at a technical level it doesn't really provide anything more than a multi-instance Kibana setup.
+- This will add complexity to the code, especially in Core where some parts of the logic will drastically diverge between
+  clustered and non-clustered modes (most notably our logging system).
+- There is a risk of introducing subtle bugs in clustered mode, as we may overlook some breaking changes, or developers
+  may neglect to ensure clustered mode compatibility when adding new features.
+- Proper testing of all the edge cases is going to be tedious, and in some cases realistically impossible. Proper
+  education of developers is going to be critical to ensure we are building new features with clustering in mind.
 
 # 8. Alternatives
 
-One alternative of the `cluster` module is using a worker pool via `worker_threads`. Both have distinct use cases
+One alternative to the `cluster` module is using a worker pool via `worker_threads`. Both have distinct use cases
 though. Clustering is meant to have multiple workers with the same codebase, often sharing a network socket to balance
 network traffic. Worker threads is a way to create specialized workers in charge of executing isolated, CPU intensive
-tasks on demand (e.g encrypting or descrypting a file). If we were to identify that under heavy load, the actual bottleneck
-is ES, maybe exposing a worker thread service and API from core (task_manager would be a perfect example of potential consumer) 
+tasks on demand (e.g. encrypting or descrypting a file). If we were to identify that under heavy load, the actual bottleneck
+is ES, maybe exposing a worker thread service and API from Core (task_manager would be a perfect example of potential consumer) 
 would make more sense.
 
+However, we believe the simplicity and broad acceptance of the `cluster` API in the Node community makes it the
+better approach over `worker_threads`, and would prefer to only go down the road of a worker pool as a last resort.
+
 Another alternative would be to provide tooling to ease the deployment of multi-instance Kibana setups, and only support
-multi-instance mode.
+multi-instance mode moving forward.
 
 # 9. Adoption strategy
 
-Phase 1: we perform the required changes in `Core`, and add the `clustering.enabled` configuration property for development mode only.
-That way, we allow developers to test their features against clustering mode and to adapt their code to use the new `clustering` API
-and service.
+Because the changes proposed in this RFC touch the lowest levels of Kibana's core, and therefore have potential to impact
+large swaths of Kibana's codebase, we propse a multi-phase strategy:
 
-Phase 2: when all the required changes have been performed in plugins code, we enable the `clustering` configuration on production mode as a `beta` feature.
-We would ideally also add telemetry collection for the clustering usages (relevant metrics TBD) to have a precise vision of the adoption of the feature.
+## Phase 0
+In the prepratory phase, we will evolve the existing POC to validate the finer details of this RFC, while also putting together
+a more detailed testing strategy that can be used to benchmark our future work.
+
+## Phase 1
+To start implementation, we will make the required changes in Core, adding the `clustering.enabled` configuration property
+in development mode only. This way, we allow developers to test their features against clustering mode and to adapt their code
+to use the new `clustering` API and service. At this point we will also aim to document any identified breaking changes and
+add deprecation notices where applicable, to allow developers time to prepare for 8.0.
+
+## Phase 2
+When all the required changes have been performed in plugin code, we will enable the `clustering` configuration on production
+mode as a `beta` feature. We would ideally also add telemetry collection for the clustering usages (relevant metrics TBD)
+to have a precise vision of the adoption of the feature.
+
+## Phase 3
+Once the new feature has been validated and we are comfortable considering it GA, we will enable `clustering` by default.
+(We could alternatively enable it by default from the outset, still with a `beta` label).
 
 # 10. How we teach this
 
-During phase 1, we should create documentation on the clustering mode: best practices, how to identify code that may breaks in clustered mode, and so on.
+During Phase 1, we should create documentation on the clustering mode: best practices, how to identify code that may break in
+clustered mode, and so on.
+
+We will specifically look to make changes to our docs around contributing to Kibana, specifically we can add a section
+in the [best practices](https://www.elastic.co/guide/en/kibana/master/development-best-practices.html#_testing_stability) to
+remind contributers to be thinking about the fact that you cannot rely on a 1:1 relationship between the Kibana process and
+an individual machine.
+
+Lastly, we'll take advantage of internal communications to kibana-contributors, and make an effort to individually check in
+with the teams who we think will most likely be affected by these changes.
 
 # 11. Unresolved questions
 
