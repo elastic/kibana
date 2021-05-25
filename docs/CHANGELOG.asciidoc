@@ -59,6 +59,42 @@ Review important information about the {kib} 7.13.x releases.
 For information about the {kib} 7.13.0 release, review the following information.
 
 [float]
+[[security-update-7.13.0]]
+=== Security updates
+
+Review the security updates that were found in previous versions of {kib}.
+
+[float]
+[[url-redirection-flaw]]
+==== URL redirection flaw
+
+*Details* +
+In {kib} 7.13.0 and earlier, when a logged in user visits a maliciously created URL, {kib} could redirect users to an arbitrary website. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22141[CVE-2021-22141]
+
+*Solution* +
+Upgrade to {kib} 7.13.0.
+
+[float]
+[[reporting-vulnerability]]
+==== Reporting vulnerability
+
+*Details* +
+In {kib} 7.0.0 to 7.12.1, To generate downloadable reports, {kib} uses an embedded version of the Chromium browser. When a user with permissions to generate reports is able to render arbitrary HTML with the browser, they may be able to leverage known Chromium vulnerabilities to conduct further attacks. {kib} contains a number of protections to prevent the browser from rendering arbitrary content. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22142[CVE-2021-22142]
+
+*Solution* +
+Upgrade to {kib} 7.13.0.
+
+[float]
+[[known-issue-7.13.0]]
+=== Known issue
+
+*Details* +
+When pages load, {kib} calls the Fleet packages API. For more information, refer to {kibana-issue}100285[#100285].
+
+*Impact* +
+In some cases, *Dev Tools* displays a 403 error with the `Access to Fleet API require the superuser role` message, but you can continue to access *Fleet*.
+
+[float]
 [[breaking-changes-7.13.0]]
 === Breaking changes
 
@@ -92,16 +128,6 @@ The existing agent API keys are invalidated and display as `Inactive` on the *Ag
 ====
 
 // end::notable-breaking-changes[]
-
-[float]
-[[known-issue-7.13.0]]
-=== Known issue
-
-*Details* +
-When pages load, {kib} calls the Fleet packages API. For more information, refer to {kibana-issue}100285[#100285].
-
-*Impact* +
-In some cases, *Dev Tools* displays a 403 error with the `Access to Fleet API require the superuser role` message, but you can continue to access *Fleet*.
 
 [float]
 [[deprecations-7.13.0]]
