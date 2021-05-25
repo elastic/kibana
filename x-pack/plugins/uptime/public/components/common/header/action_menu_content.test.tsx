@@ -34,7 +34,9 @@ describe('ActionMenuContent', () => {
   it('renders exploratory view link', () => {
     const { getByLabelText, getByText } = render(<ActionMenuContent />);
 
-    const analyzeAnchor = getByLabelText('Navigate to the exploratory view to visualize data');
+    const analyzeAnchor = getByLabelText(
+      'Navigate to the "Analyze Data" view to visualize Synthetics/User data'
+    );
 
     expect(analyzeAnchor.getAttribute('href')).toContain('/app/observability/exploratory-view');
     expect(getByText('Analyze data'));
