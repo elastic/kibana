@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
+import type { Query } from 'src/plugins/data/public';
 import { FilterEditor } from './filter_editor';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
 import { setLayerQuery, updateSourceProp } from '../../../actions';
+import { MapStoreState } from '../../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
-    layer: getSelectedLayer(state),
+    layer: getSelectedLayer(state)!,
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    setLayerQuery: (layerId, query) => {
+    setLayerQuery: (layerId: string, query: Query) => {
       dispatch(setLayerQuery(layerId, query));
     },
-    updateSourceProp: (id, propName, value) => dispatch(updateSourceProp(id, propName, value)),
+    updateSourceProp: (id: string, propName: string, value: unknown) =>
+      dispatch(updateSourceProp(id, propName, value)),
   };
 }
 
