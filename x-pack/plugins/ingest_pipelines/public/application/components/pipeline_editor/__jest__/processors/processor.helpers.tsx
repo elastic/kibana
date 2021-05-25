@@ -153,4 +153,7 @@ type TestSubject =
   | 'separatorValueField.input'
   | 'quoteValueField.input'
   | 'emptyValueField.input'
+  | 'fieldsValueField.input'
+  | 'saltValueField.input'
+  | 'methodsValueField'
   | 'trimSwitch.input';

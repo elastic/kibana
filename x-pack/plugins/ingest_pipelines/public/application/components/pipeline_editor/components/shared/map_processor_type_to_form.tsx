@@ -23,6 +23,7 @@ import {
   Drop,
   Enrich,
   Fail,
+  Fingerprint,
   Foreach,
   GeoIP,
   Grok,
@@ -307,6 +308,21 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.fail', {
         defaultMessage: 'Raises an exception that halts execution',
       }),
+  },
+  fingerprint: {
+    FieldsComponent: Fingerprint,
+    docLinkPath: '/fingerprint-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.fingerprint', {
+      defaultMessage: 'Fingerprint',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.fingerprint', {
+      defaultMessage:
+      'Computes a hash of the document’s content.',
+    }),
+    getDefaultDescription: () =>
+    i18n.translate('xpack.ingestPipelines.processors.defaultDescription.fingerprint', {
+      defaultMessage: 'Computes a hash of the document’s content.',
+    }),
   },
   foreach: {
     FieldsComponent: Foreach,
