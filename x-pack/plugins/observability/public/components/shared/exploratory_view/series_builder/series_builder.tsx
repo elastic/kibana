@@ -157,9 +157,8 @@ export function SeriesBuilder({
         reportDefinitions,
       };
 
-      setSeries(newSeriesId, newSeriesN).then(() => {
-        removeSeries(NEW_SERIES_KEY);
-      });
+      setSeries(newSeriesId, newSeriesN);
+      removeSeries(NEW_SERIES_KEY);
     }
   };
 
