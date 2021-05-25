@@ -311,83 +311,80 @@ export const ActionTypeForm = ({
   );
 
   return (
-    <>
-      <EuiAccordion
-        initialIsOpen={true}
-        key={index}
-        id={index.toString()}
-        onToggle={setIsOpen}
-        paddingSize="l"
-        className="actAccordionActionForm"
-        buttonContentClassName="actAccordionActionForm__button"
-        data-test-subj={`alertActionAccordion-${index}`}
-        buttonContent={
-          <EuiFlexGroup gutterSize="l" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                <div>
-                  <EuiFlexGroup gutterSize="s">
+    <EuiAccordion
+      initialIsOpen={true}
+      key={index}
+      id={index.toString()}
+      onToggle={setIsOpen}
+      paddingSize="l"
+      className="actAccordionActionForm"
+      buttonContentClassName="actAccordionActionForm__button"
+      data-test-subj={`alertActionAccordion-${index}`}
+      buttonContent={
+        <EuiFlexGroup gutterSize="l" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <div>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      defaultMessage="{actionConnectorName}"
+                      id="xpack.triggersActionsUI.sections.actionTypeForm.existingAlertActionTypeEditTitle"
+                      values={{
+                        actionConnectorName: `${actionConnector.name} ${
+                          actionConnector.isPreconfigured ? preconfiguredMessage : ''
+                        }`,
+                      }}
+                    />
+                  </EuiFlexItem>
+                  {selectedActionGroup && !isOpen && (
                     <EuiFlexItem grow={false}>
-                      <FormattedMessage
-                        defaultMessage="{actionConnectorName}"
-                        id="xpack.triggersActionsUI.sections.actionTypeForm.existingAlertActionTypeEditTitle"
-                        values={{
-                          actionConnectorName: `${actionConnector.name} ${
-                            actionConnector.isPreconfigured ? preconfiguredMessage : ''
-                          }`,
-                        }}
-                      />
+                      <EuiBadge>{selectedActionGroup.name}</EuiBadge>
                     </EuiFlexItem>
-                    {selectedActionGroup && !isOpen && (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge>{selectedActionGroup.name}</EuiBadge>
-                      </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    {checkEnabledResult.isEnabled === false && (
+                      <>
+                        <EuiIconTip
+                          type="alert"
+                          color="danger"
+                          content={i18n.translate(
+                            'xpack.triggersActionsUI.sections.actionTypeForm.actionDisabledTitle',
+                            {
+                              defaultMessage: 'This action is disabled',
+                            }
+                          )}
+                          position="right"
+                        />
+                      </>
                     )}
-                    <EuiFlexItem grow={false}>
-                      {checkEnabledResult.isEnabled === false && (
-                        <>
-                          <EuiIconTip
-                            type="alert"
-                            color="danger"
-                            content={i18n.translate(
-                              'xpack.triggersActionsUI.sections.actionTypeForm.actionDisabledTitle',
-                              {
-                                defaultMessage: 'This action is disabled',
-                              }
-                            )}
-                            position="right"
-                          />
-                        </>
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </div>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        extraAction={
-          <EuiButtonIcon
-            iconType="minusInCircle"
-            color="danger"
-            className="actAccordionActionForm__extraAction"
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
-              {
-                defaultMessage: 'Delete',
-              }
-            )}
-            onClick={onDeleteAction}
-          />
-        }
-      >
-        {accordionContent}
-      </EuiAccordion>
-      <EuiSpacer size="m" />
-    </>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      extraAction={
+        <EuiButtonIcon
+          iconType="minusInCircle"
+          color="danger"
+          className="actAccordionActionForm__extraAction"
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
+            {
+              defaultMessage: 'Delete',
+            }
+          )}
+          onClick={onDeleteAction}
+        />
+      }
+    >
+      {accordionContent}
+    </EuiAccordion>
   );
 };
 

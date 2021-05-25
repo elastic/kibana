@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFilterGroup,
@@ -63,12 +63,8 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
       >
         <div className="euiFilterSelect__items">
           {options.map((groupItem, groupIndex) => (
-            <>
-              <EuiTitle
-                data-test-subj={`alertType${groupIndex}Group`}
-                size="xxs"
-                key={`group${groupIndex}`}
-              >
+            <Fragment key={`group${groupIndex}`}>
+              <EuiTitle data-test-subj={`alertType${groupIndex}Group`} size="xxs">
                 <h3>{groupItem.groupName}</h3>
               </EuiTitle>
               {groupItem.subOptions.map((item, index) => (
@@ -88,7 +84,7 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
                   {item.name}
                 </EuiFilterSelectItem>
               ))}
-            </>
+            </Fragment>
           ))}
         </div>
       </EuiPopover>
