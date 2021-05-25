@@ -85,11 +85,19 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     if (!dateInterval) return null;
     const intervalDuration = search.aggs.parseInterval(dateInterval);
     if (!intervalDuration) return null;
+    const minInterval = intervalDuration.as('milliseconds');
+    const dateRangeMin = data.dateRange?.fromDate.getTime();
+
+    if (!dateRangeMin) {
+      return;
+    }
+
+    const actualMin = dateRangeMin - (dateRangeMin % minInterval);
 
     return {
-      min: data.dateRange?.fromDate.getTime(),
+      min: actualMin,
       max: data.dateRange?.toDate.getTime(),
-      minInterval: intervalDuration.as('milliseconds'),
+      minInterval,
     };
   })();
 
