@@ -11,7 +11,7 @@ import { GET_ISOLATION_SUCCESS_MESSAGE, GET_UNISOLATION_SUCCESS_MESSAGE } from '
 
 export interface EndpointIsolateSuccessProps {
   hostName: string;
-  isolateAction?: string;
+  isolateAction?: 'isolateHost' | 'unisolateHost';
   completeButtonLabel: string;
   onComplete: () => void;
   additionalInfo?: ReactNode;

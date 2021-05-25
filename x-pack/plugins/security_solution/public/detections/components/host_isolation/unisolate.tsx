@@ -57,7 +57,7 @@ export const UnisolateHost = React.memo(
           <EuiSpacer size="m" />
           <EndpointIsolateSuccess
             hostName={hostName}
-            isolateAction="unisolate"
+            isolateAction="unisolateHost"
             completeButtonLabel={RETURN_TO_ALERT_DETAILS}
             onComplete={backToAlertDetails}
             additionalInfo={cases}

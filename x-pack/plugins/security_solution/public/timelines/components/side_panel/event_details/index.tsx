@@ -118,7 +118,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           </EuiText>
         </EuiButtonEmpty>
         <EuiTitle>
-          {isolateAction === 'isolateHost' ? <h2>{ISOLATE_HOST}</h2> : <h2>{UNISOLATE_HOST}</h2>}
+          <h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>
         </EuiTitle>
       </>
     );

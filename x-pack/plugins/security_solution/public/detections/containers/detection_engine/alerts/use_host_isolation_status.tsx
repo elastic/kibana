@@ -42,10 +42,10 @@ export const useHostIsolationStatus = ({
       } catch (error) {
         addError(error.message, { title: ISOLATION_STATUS_FAILURE });
       }
+      if (isMounted) {
+        setLoading(false);
+      }
     };
-    if (isMounted) {
-      setLoading(false);
-    }
 
     if (!isEmpty(agentId)) {
       fetchData();
