@@ -32,7 +32,6 @@ import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { MapRefreshConfig } from '../../../common/descriptor_types';
 import { ILayer } from '../../classes/layers/layer';
-import 'mapbox-gl/dist/mapbox-gl.css';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
