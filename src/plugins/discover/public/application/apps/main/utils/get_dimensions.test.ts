@@ -10,7 +10,7 @@ import { dataPluginMock } from '../../../../../../data/public/mocks';
 import { getDimensions } from './get_dimensions';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
 import { SearchSource, calculateBounds } from '../../../../../../data/common';
-import { applyAggsToSearchSource } from './apply_aggs_to_search_source';
+import { getChartAggConfigs } from './get_chart_agg_configs';
 
 test('getDimensions', () => {
   const indexPattern = indexPatternWithTimefieldMock;
@@ -33,7 +33,7 @@ test('getDimensions', () => {
     return calculateBounds(timeRange);
   };
 
-  const aggsConfig = applyAggsToSearchSource(searchSource, 'auto', dataMock);
+  const aggsConfig = getChartAggConfigs(searchSource, 'auto', dataMock);
   const actual = getDimensions(aggsConfig!, dataMock);
   expect(actual).toMatchInlineSnapshot(`
     Object {

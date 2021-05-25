@@ -21,7 +21,6 @@ export function updateSearchSource({
   services,
   sort,
   useNewFieldsApi,
-  showUnmappedFields,
   persistentSearchSource,
   volatileSearchSource,
 }: {
@@ -29,7 +28,6 @@ export function updateSearchSource({
   services: DiscoverServices;
   sort: SortOrder[];
   useNewFieldsApi: boolean;
-  showUnmappedFields?: boolean;
   persistentSearchSource?: ISearchSource;
   volatileSearchSource?: ISearchSource;
 }) {
@@ -69,9 +67,9 @@ export function updateSearchSource({
     if (useNewFieldsApi) {
       volatileSearchSource.removeField('fieldsFromSource');
       const fields: Record<string, string> = { field: '*' };
-      if (showUnmappedFields) {
-        fields.include_unmapped = 'true';
-      }
+
+      fields.include_unmapped = 'true';
+
       volatileSearchSource.setField('fields', [fields]);
     } else {
       volatileSearchSource.removeField('fields');

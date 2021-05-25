@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { applyAggsToSearchSource } from './apply_aggs_to_search_source';
+export { getChartAggConfigs } from './get_chart_agg_configs';
 export { getDimensions } from './get_dimensions';

@@ -8,9 +8,9 @@
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
 import { SearchSource } from '../../../../../../data/public';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
-import { applyAggsToSearchSource } from './apply_aggs_to_search_source';
+import { getChartAggConfigs } from './get_chart_agg_configs';
 
-describe('applyAggsToSearchSource', () => {
+describe('getChartAggConfigs', () => {
   test('is working', () => {
     const indexPattern = indexPatternWithTimefieldMock;
     const setField = jest.fn();
@@ -26,7 +26,7 @@ describe('applyAggsToSearchSource', () => {
 
     const dataMock = dataPluginMock.createStartContract();
 
-    const aggsConfig = applyAggsToSearchSource(searchSource, 'auto', dataMock);
+    const aggsConfig = getChartAggConfigs(searchSource, 'auto', dataMock);
 
     expect(aggsConfig!.aggs).toMatchInlineSnapshot(`
       Array [
@@ -55,19 +55,5 @@ describe('applyAggsToSearchSource', () => {
         },
       ]
     `);
-
-    expect(setField).toHaveBeenCalledWith('aggs', expect.any(Function));
-    const dslFn = setField.mock.calls[0][1];
-    expect(dslFn()).toMatchInlineSnapshot(`
-          Object {
-            "2": Object {
-              "date_histogram": Object {
-                "field": "timestamp",
-                "min_doc_count": 1,
-                "time_zone": "America/New_York",
-              },
-            },
-          }
-      `);
   });
 });

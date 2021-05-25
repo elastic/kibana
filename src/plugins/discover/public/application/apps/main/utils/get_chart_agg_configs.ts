@@ -12,7 +12,7 @@ import { DataPublicPluginStart } from '../../../../../../data/public';
  * Helper function to apply or remove aggregations to a given search source used for gaining data
  * for Discover's histogram vis
  */
-export function applyAggsToSearchSource(
+export function getChartAggConfigs(
   searchSource: SearchSource,
   histogramInterval: string,
   data: DataPublicPluginStart
@@ -33,8 +33,5 @@ export function applyAggsToSearchSource(
       },
     },
   ];
-  const chartAggConfigs = data.search.aggs.createAggConfigs(indexPattern, visStateAggs);
-
-  searchSource.setField('aggs', () => chartAggConfigs.toDsl());
-  return chartAggConfigs;
+  return data.search.aggs.createAggConfigs(indexPattern, visStateAggs);
 }

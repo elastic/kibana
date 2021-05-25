@@ -73,38 +73,6 @@ describe('updateSearchSource', () => {
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
     expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);
-    expect(volatileSearchSourceMock.getField('fields')).toEqual([{ field: '*' }]);
-    expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
-  });
-
-  test('requests unmapped fields when the flag is provided, using the new fields api', async () => {
-    const persistentSearchSourceMock = createSearchSourceMock({});
-    const volatileSearchSourceMock = createSearchSourceMock({});
-    volatileSearchSourceMock.setParent(persistentSearchSourceMock);
-    const sampleSize = 250;
-    updateSearchSource({
-      volatileSearchSource: volatileSearchSourceMock,
-      indexPattern: indexPatternMock,
-      services: ({
-        data: dataPluginMock.createStartContract(),
-        timefilter: {
-          createFilter: jest.fn(),
-        },
-        uiSettings: ({
-          get: (key: string) => {
-            if (key === SAMPLE_SIZE_SETTING) {
-              return sampleSize;
-            }
-            return false;
-          },
-        } as unknown) as IUiSettingsClient,
-      } as unknown) as DiscoverServices,
-      sort: [] as SortOrder[],
-      useNewFieldsApi: true,
-      showUnmappedFields: true,
-    });
-    expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
-    expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
       { field: '*', include_unmapped: 'true' },
     ]);
@@ -135,7 +103,6 @@ describe('updateSearchSource', () => {
       } as unknown) as DiscoverServices,
       sort: [] as SortOrder[],
       useNewFieldsApi: true,
-      showUnmappedFields: true,
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
     expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);
@@ -169,7 +136,6 @@ describe('updateSearchSource', () => {
       } as unknown) as DiscoverServices,
       sort: [] as SortOrder[],
       useNewFieldsApi: false,
-      showUnmappedFields: false,
     });
     expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
     expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);

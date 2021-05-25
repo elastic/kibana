@@ -29,7 +29,7 @@ import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../../common';
 import { validateTimeRange } from '../utils/validate_time_range';
 import { updateSearchSource } from '../utils/update_search_source';
 import { SortOrder } from '../../../../saved_searches/types';
-import { applyAggsToSearchSource, getDimensions } from '../utils';
+import { getDimensions, getChartAggConfigs } from '../utils';
 import { buildPointSeriesData, Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
 
@@ -86,6 +86,10 @@ export const useSavedSearch = ({
     );
   }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
 
+  /**
+   * The observable the UI (aka React component) subscribes to get notified about
+   * the changes in the data fetching process (high level: fetching started, data was received)
+   */
   const savedSearch$: SavedSearchSubject = useMemo(
     () =>
       new BehaviorSubject({
@@ -93,23 +97,42 @@ export const useSavedSearch = ({
       }),
     [shouldSearchOnPageLoad]
   );
+  /**
+   * The observable to trigger data fetching in UI
+   * By refetch$.next('reset') rows and fieldcounts are reset to allow e.g. editing of runtime fields
+   * to be processed correctly
+   */
+  const refetch$ = useMemo(() => new Subject(), []);
 
+  /**
+   * Values that shouldn't trigger re-rendering when changed
+   */
   const refs = useRef<{
     abortController?: AbortController;
+    /**
+     * used to compare a new state against an old one, to evaluate if data needs to be fetched
+     */
     appState: AppState;
     // handler emitted by `timefilter.getAutoRefreshFetch$()`
     // to notify when data completed loading and to start a new autorefresh loop
     autoRefreshDoneCb?: AutoRefreshDoneFn;
     fetchCounter: number;
+    /**
+     * needed to right auto refresh behavior, a new auto refresh shouldnt be triggered when
+     * loading is still ongoing
+     */
     fetchStatus: string;
+    /**
+     * needed for merging new with old field counts, high likely legacy, but kept this behavior
+     * because not 100% sure in this case
+     */
     fieldCounts: Record<string, number>;
   }>({
+    appState: state,
     fetchCounter: 0,
     fieldCounts: {},
-    appState: state,
     fetchStatus: shouldSearchOnPageLoad() ? fetchStatuses.LOADING : fetchStatuses.UNINITIALIZED,
   });
-  const refetch$ = useMemo(() => new Subject(), []);
 
   const fetchAll = useCallback(
     (reset = false) => {
@@ -121,21 +144,19 @@ export const useSavedSearch = ({
       if (refs.current.abortController) refs.current.abortController.abort();
       refs.current.abortController = new AbortController();
 
-      refs.current.fetchStatus = fetchStatuses.LOADING;
+      // Let the UI know, data fetching started
+      const loadingMessage: SavedSearchSubjectMessage = {
+        state: fetchStatuses.LOADING,
+        fetchCounter: ++refs.current.fetchCounter,
+      };
+
       if (reset) {
-        // triggered e.g. when runtime field was added, changed, deleted, index pattern was switched
-        savedSearch$.next({
-          state: fetchStatuses.LOADING,
-          rows: [],
-          fieldCounts: {},
-          fetchCounter: ++refs.current.fetchCounter,
-        });
-      } else {
-        savedSearch$.next({
-          state: fetchStatuses.LOADING,
-          fetchCounter: ++refs.current.fetchCounter,
-        });
+        // when runtime field was added, changed, deleted, index pattern was switched
+        loadingMessage.rows = [];
+        loadingMessage.fieldCounts = {};
       }
+      savedSearch$.next(loadingMessage);
+      refs.current.fetchStatus = loadingMessage.state;
 
       const { sort } = stateContainer.appStateContainer.getState();
       updateSearchSource({
@@ -144,15 +165,16 @@ export const useSavedSearch = ({
         services,
         sort: sort as SortOrder[],
         useNewFieldsApi,
-        showUnmappedFields: useNewFieldsApi,
       });
       const chartAggConfigs =
-        indexPattern.timeFieldName && !state.hideChart
-          ? applyAggsToSearchSource(searchSource, state.interval!, data)
+        indexPattern.timeFieldName && !state.hideChart && state.interval
+          ? getChartAggConfigs(searchSource, state.interval, data)
           : undefined;
 
       if (!chartAggConfigs) {
         searchSource.removeField('aggs');
+      } else {
+        searchSource.setField('aggs', chartAggConfigs.toDsl());
       }
 
       const searchSourceFetch$ = searchSource.fetch$({
@@ -176,36 +198,31 @@ export const useSavedSearch = ({
           }
           const documents = res.rawResponse.hits.hits;
 
-          const newFieldCounts = calcFieldCounts(
-            reset ? {} : refs.current.fieldCounts,
-            documents,
-            indexPattern
-          );
-
           const message: SavedSearchSubjectMessage = {
             state: fetchStatuses.COMPLETE,
             rows: documents,
             inspectorAdapters,
-            fieldCounts: newFieldCounts,
+            fieldCounts: calcFieldCounts(
+              reset ? {} : refs.current.fieldCounts,
+              documents,
+              indexPattern
+            ),
             hits: res.rawResponse.hits.total as number,
           };
-
-          refs.current.fieldCounts = newFieldCounts;
-          refs.current.fetchStatus = fetchStatuses.COMPLETE;
 
           if (chartAggConfigs) {
             const bucketAggConfig = chartAggConfigs!.aggs[1];
             const tabifiedData = tabifyAggResponse(chartAggConfigs, res.rawResponse);
             const dimensions = getDimensions(chartAggConfigs, data);
-            if (!dimensions) {
-              return;
+            if (dimensions) {
+              if (bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)) {
+                message.bucketInterval = bucketAggConfig.buckets?.getInterval();
+              }
+              message.chartData = buildPointSeriesData(tabifiedData, dimensions);
             }
-            message.bucketInterval =
-              bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
-                ? bucketAggConfig.buckets?.getInterval()
-                : undefined;
-            message.chartData = buildPointSeriesData(tabifiedData, dimensions);
           }
+          refs.current.fieldCounts = message.fieldCounts!;
+          refs.current.fetchStatus = message.state;
           savedSearch$.next(message);
         },
         (error) => {
