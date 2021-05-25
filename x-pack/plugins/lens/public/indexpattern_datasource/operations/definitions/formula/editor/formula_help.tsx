@@ -15,12 +15,12 @@ import {
   EuiText,
   EuiListGroupItem,
   EuiListGroup,
-  EuiMarkdownFormat,
   EuiTitle,
   EuiButtonIcon,
   EuiFieldSearch,
   EuiHighlight,
 } from '@elastic/eui';
+import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { IndexPattern } from '../../../../types';
 import { tinymathFunctions } from '../util';
 import { getPossibleFunctions } from './math_completion';
@@ -56,7 +56,7 @@ function FormulaHelp({
 
   const helpGroups: Array<{
     label: string;
-    description?: JSX.Element;
+    description?: string;
     items: Array<{ label: string; description?: JSX.Element }>;
   }> = [];
 
@@ -71,14 +71,10 @@ function FormulaHelp({
     label: i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSection', {
       defaultMessage: 'Elasticsearch',
     }),
-    description: (
-      <EuiText size="s">
-        {i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSectionDescription', {
-          defaultMessage:
-            'These functions will be executed on the raw documents for each row of the resulting table, aggregating all documents matching the break down dimensions into a single value.',
-        })}
-      </EuiText>
-    ),
+    description: i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSectionDescription', {
+      defaultMessage:
+        'These functions will be executed on the raw documents for each row of the resulting table, aggregating all documents matching the break down dimensions into a single value.',
+    }),
     items: [],
   });
 
@@ -97,15 +93,12 @@ function FormulaHelp({
         label: key,
         description: (
           <>
-            <EuiTitle size="s">
-              <h3>
-                {key}({operationDefinitionMap[key].documentation?.signature})
-              </h3>
-            </EuiTitle>
+            <h3>
+              {key}({operationDefinitionMap[key].documentation?.signature})
+            </h3>
+
             {operationDefinitionMap[key].documentation?.description ? (
-              <EuiMarkdownFormat>
-                {operationDefinitionMap[key].documentation!.description}
-              </EuiMarkdownFormat>
+              <Markdown markdown={operationDefinitionMap[key].documentation!.description} />
             ) : null}
           </>
         ),
@@ -116,13 +109,12 @@ function FormulaHelp({
     label: i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSection', {
       defaultMessage: 'Column-wise calculation',
     }),
-    description: (
-      <EuiText size="s">
-        {i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSectionDescription', {
-          defaultMessage:
-            'These functions will be executed for reach row of the resulting table, using data from cells from other rows as well as the current value.',
-        })}
-      </EuiText>
+    description: i18n.translate(
+      'xpack.lens.formulaDocumentation.columnCalculationSectionDescription',
+      {
+        defaultMessage:
+          'These functions will be executed for reach row of the resulting table, using data from cells from other rows as well as the current value.',
+      }
     ),
     items: [],
   });
@@ -140,15 +132,12 @@ function FormulaHelp({
         label: key,
         description: (
           <>
-            <EuiTitle size="s">
-              <h3>
-                {key}({operationDefinitionMap[key].documentation?.signature})
-              </h3>
-            </EuiTitle>
+            <h3>
+              {key}({operationDefinitionMap[key].documentation?.signature})
+            </h3>
+
             {operationDefinitionMap[key].documentation?.description ? (
-              <EuiMarkdownFormat>
-                {operationDefinitionMap[key].documentation!.description}
-              </EuiMarkdownFormat>
+              <Markdown markdown={operationDefinitionMap[key].documentation!.description} />
             ) : null}
           </>
         ),
@@ -163,14 +152,10 @@ function FormulaHelp({
     label: i18n.translate('xpack.lens.formulaDocumentation.mathSection', {
       defaultMessage: 'Math',
     }),
-    description: (
-      <EuiText size="s">
-        {i18n.translate('xpack.lens.formulaDocumentation.mathSectionDescription', {
-          defaultMessage:
-            'These functions will be executed for reach row of the resulting table using single values from the same row calculated using other functions.',
-        })}
-      </EuiText>
-    ),
+    description: i18n.translate('xpack.lens.formulaDocumentation.mathSectionDescription', {
+      defaultMessage:
+        'These functions will be executed for reach row of the resulting table using single values from the same row calculated using other functions.',
+    }),
     items: [],
   });
 
@@ -194,10 +179,9 @@ function FormulaHelp({
         label,
         description: (
           <>
-            <EuiTitle size="s">
-              <h3>{getFunctionSignatureLabel(label, operationDefinitionMap)}</h3>
-            </EuiTitle>
-            <EuiMarkdownFormat>{`${description}${examples}`}</EuiMarkdownFormat>
+            <h3>{getFunctionSignatureLabel(label, operationDefinitionMap)}</h3>
+
+            <Markdown markdown={`${description}${examples}`} />
           </>
         ),
       };
@@ -302,16 +286,18 @@ function FormulaHelp({
         </EuiFlexItem>
 
         <EuiFlexItem className="lnsFormula__docsText" grow={2}>
-          <section
-            ref={(el) => {
-              if (el) {
-                scrollTargets.current[helpGroups[0].label] = el;
-              }
-            }}
-          >
-            <EuiMarkdownFormat>
-              {i18n.translate('xpack.lens.formulaDocumentation', {
-                defaultMessage: `
+          <EuiText size="s">
+            <section
+              className="lnsFormula__docsTextIntro"
+              ref={(el) => {
+                if (el) {
+                  scrollTargets.current[helpGroups[0].label] = el;
+                }
+              }}
+            >
+              <Markdown
+                markdown={i18n.translate('xpack.lens.formulaDocumentation', {
+                  defaultMessage: `
 ## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
@@ -344,47 +330,46 @@ Math functions can take positional arguments, like pow(count(), 3) is the same a
 
 Use the symbols +, -, /, and * to perform basic math.
                   `,
-                description:
-                  'Text is in markdown. Do not translate function names or field names like sum(bytes)',
-              })}
-            </EuiMarkdownFormat>
-          </section>
-
-          {helpGroups.slice(1).map((helpGroup, index) => {
-            return (
-              <section
-                className="lnsFormula__docsTextGroup"
-                key={helpGroup.label}
-                ref={(el) => {
-                  if (el) {
-                    scrollTargets.current[helpGroup.label] = el;
-                  }
-                }}
-              >
-                <EuiTitle size="xxs">
-                  <h2>{helpGroup.label}</h2>
-                </EuiTitle>
-
-                {helpGroup.description}
-
-                {helpGroups[index + 1].items.map((helpItem) => {
-                  return (
-                    <article
-                      className="lnsFormula__docsTextItem"
-                      key={helpItem.label}
-                      ref={(el) => {
-                        if (el) {
-                          scrollTargets.current[helpItem.label] = el;
-                        }
-                      }}
-                    >
-                      {helpItem.description}
-                    </article>
-                  );
+                  description:
+                    'Text is in markdown. Do not translate function names or field names like sum(bytes)',
                 })}
-              </section>
-            );
-          })}
+              />
+            </section>
+
+            {helpGroups.slice(1).map((helpGroup, index) => {
+              return (
+                <section
+                  className="lnsFormula__docsTextGroup"
+                  key={helpGroup.label}
+                  ref={(el) => {
+                    if (el) {
+                      scrollTargets.current[helpGroup.label] = el;
+                    }
+                  }}
+                >
+                  <h2>{helpGroup.label}</h2>
+
+                  <p>{helpGroup.description}</p>
+
+                  {helpGroups[index + 1].items.map((helpItem) => {
+                    return (
+                      <article
+                        className="lnsFormula__docsTextItem"
+                        key={helpItem.label}
+                        ref={(el) => {
+                          if (el) {
+                            scrollTargets.current[helpItem.label] = el;
+                          }
+                        }}
+                      >
+                        {helpItem.description}
+                      </article>
+                    );
+                  })}
+                </section>
+              );
+            })}
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
