@@ -29,7 +29,6 @@
       "kibanaUtils",
       "lens",
       "maps",
-      "reporting",
       "savedObjects",
       "visualizations"
     ]

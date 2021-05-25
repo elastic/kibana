@@ -7,16 +7,12 @@
 
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-import { jobCompletionNotifications } from '../../../../../../plugins/reporting/public';
-import { getWorkpad, getPages } from '../../../state/selectors/workpad';
-import { getWindow } from '../../../lib/get_window';
-import { downloadWorkpad } from '../../../lib/download_workpad';
-import { ShareMenu as Component, Props as ComponentProps } from './share_menu.component';
-import { getPdfUrl, createPdf } from './utils';
-import { State, CanvasWorkpad } from '../../../../types';
-import { withServices, WithServicesProps } from '../../../services';
-
 import { ComponentStrings } from '../../../../i18n';
+import { CanvasWorkpad, State } from '../../../../types';
+import { downloadWorkpad } from '../../../lib/download_workpad';
+import { withServices, WithServicesProps } from '../../../services';
+import { getPages, getWorkpad } from '../../../state/selectors/workpad';
+import { Props as ComponentProps, ShareMenu as Component } from './share_menu.component';
 
 const { WorkpadHeaderShareMenu: strings } = ComponentStrings;
 
@@ -24,17 +20,6 @@ const mapStateToProps = (state: State) => ({
   workpad: getWorkpad(state),
   pageCount: getPages(state).length,
 });
-
-const getAbsoluteUrl = (path: string) => {
-  const { location } = getWindow();
-
-  if (!location) {
-    return path;
-  } // fallback for mocked window object
-
-  const { protocol, hostname, port } = location;
-  return `${protocol}//${hostname}:${port}${path}`;
-};
 
 interface Props {
   workpad: CanvasWorkpad;
@@ -45,63 +30,28 @@ export const ShareMenu = compose<ComponentProps, {}>(
   connect(mapStateToProps),
   withServices,
   withProps(
-    ({ workpad, pageCount, services }: Props & WithServicesProps): ComponentProps => ({
-      includeReporting: services.reporting.includeReporting(),
-      getExportUrl: (type, layout) => {
-        if (type === 'pdf') {
-          const pdfUrl = getPdfUrl(
-            workpad,
-            layout,
-            { pageCount },
-            services.platform.getBasePathInterface()
-          );
-          return getAbsoluteUrl(pdfUrl);
-        }
+    ({ workpad, pageCount, services }: Props & WithServicesProps): ComponentProps => {
+      const {
+        platform,
+        reporting: { start: reporting },
+      } = services;
 
-        throw new Error(strings.getUnknownExportErrorMessage(type));
-      },
-      onCopy: (type) => {
-        switch (type) {
-          case 'pdf':
-            services.notify.info(strings.getCopyPDFMessage());
-            break;
-          case 'reportingConfig':
-            services.notify.info(strings.getCopyReportingConfigMessage());
-            break;
-          default:
-            throw new Error(strings.getUnknownExportErrorMessage(type));
-        }
-      },
-      onExport: (type, layout) => {
-        switch (type) {
-          case 'pdf':
-            return createPdf(
-              workpad,
-              layout || 'preserve_layout',
-              { pageCount },
-              services.platform.getBasePathInterface()
-            )
-              .then(({ data }: { data: { job: { id: string } } }) => {
-                services.notify.info(strings.getExportPDFMessage(), {
-                  title: strings.getExportPDFTitle(workpad.name),
-                });
-
-                // register the job so a completion notification shows up when it's ready
-                jobCompletionNotifications.add(data.job.id);
-              })
-              .catch((err: Error) => {
-                services.notify.error(err, {
-                  title: strings.getExportPDFErrorTitle(workpad.name),
-                  'data-test-subj': 'queueReportError',
-                });
-              });
-          case 'json':
-            downloadWorkpad(workpad.id);
-            return;
-          default:
-            throw new Error(strings.getUnknownExportErrorMessage(type));
-        }
-      },
-    })
+      return {
+        sharingServices: { basePath: platform.getBasePathInterface(), reporting },
+        sharingData: { workpad, pageCount },
+        onExport: (type) => {
+          switch (type) {
+            case 'pdf':
+              // notifications are automatically handled by the Reporting plugin
+              break;
+            case 'json':
+              downloadWorkpad(workpad.id);
+              return;
+            default:
+              throw new Error(strings.getUnknownExportErrorMessage(type));
+          }
+        },
+      };
+    }
   )
 )(Component);
