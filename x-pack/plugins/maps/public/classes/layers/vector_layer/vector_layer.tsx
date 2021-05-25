@@ -8,7 +8,7 @@
 import React from 'react';
 import type {
   Map as MbMap,
-  Layer as MbLayer,
+  AnyLayer as MbLayer,
   GeoJSONSource as MbGeoJSONSource,
 } from '@kbn/mapbox-gl';
 import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
