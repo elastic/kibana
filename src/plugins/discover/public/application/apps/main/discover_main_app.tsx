@@ -14,6 +14,7 @@ import { setBreadcrumbsTitle } from '../../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './services/use_discover_state';
 import { useSearchSession } from './services/use_search_session';
+import { useUrl } from './services/use_url';
 import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
@@ -54,10 +55,11 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const { services, history, navigateTo, indexPatternList } = props.opts;
   const { chrome, docLinks, uiSettings: config, data } = services;
 
-  const useNewFieldsApi = useMemo(() => !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [
-    services,
-  ]);
+  const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
 
+  /**
+   * State related logic
+   */
   const {
     stateContainer,
     state,
@@ -75,24 +77,16 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * Url / Routing logic
    */
-  useEffect(() => {
-    // this listener is waiting for such a path http://localhost:5601/app/discover#/
-    // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
-    // to reload the page in a right way
-    const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
-      if (!search && !hash && pathname === '/') {
-        resetSavedSearch('');
-      }
-    });
-    return () => unlistenHistoryBasePath();
-  }, [history, resetSavedSearch]);
+  useUrl({ history, resetSavedSearch });
 
+  /**
+   * Search session logic
+   */
   const searchSessionManager = useSearchSession({ services, history, stateContainer, savedSearch });
 
   /**
    * Data fetching logic
    */
-
   const { shouldSearchOnPageLoad, savedSearch$, refetch$ } = useSavedSearchData({
     indexPattern,
     savedSearch,
@@ -105,9 +99,8 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   });
 
   /**
-   * Initializing saved search
+   * SavedSearch depended initializing
    */
-
   useEffect(() => {
     const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
@@ -133,7 +126,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * Initializing syncing with state and help menu
    */
-
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
     stateContainer.replaceUrlAppState({}).then(() => {

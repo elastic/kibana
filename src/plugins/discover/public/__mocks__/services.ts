@@ -7,26 +7,32 @@
  */
 import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '../../../data/public/mocks';
-import { coreMock } from '../../../../core/public/mocks';
+import { chromeServiceMock, coreMock, docLinksServiceMock } from '../../../../core/public/mocks';
 import { DEFAULT_COLUMNS_SETTING } from '../../common';
 import { savedSearchMock } from './saved_search';
 import { UI_SETTINGS } from '../../../data/common';
+import { TopNavMenu } from '../../../navigation/public';
 const dataPlugin = dataPluginMock.createStartContract();
 
 export const discoverServiceMock = ({
   core: coreMock.createStart(),
+  chrome: chromeServiceMock.createStartContract(),
   history: () => ({
     location: {
       search: '',
     },
   }),
   data: dataPlugin,
+  docLinks: docLinksServiceMock.createStartContract(),
   capabilities: {
     visualize: {
       show: true,
     },
     discover: {
       save: false,
+    },
+    advancedSettings: {
+      save: true,
     },
   },
   filterManager: dataPlugin.query.filterManager,
@@ -48,4 +54,7 @@ export const discoverServiceMock = ({
     },
   },
   getSavedSearchById: (id?: string) => Promise.resolve(savedSearchMock),
+  navigation: {
+    ui: { TopNavMenu },
+  },
 } as unknown) as DiscoverServices;
