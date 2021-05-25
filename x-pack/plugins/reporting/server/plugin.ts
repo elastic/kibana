@@ -48,12 +48,13 @@ export class ReportingPlugin
     registerUiSettings(core);
 
     const { http } = core;
-    const { features, licensing, security, spaces, taskManager } = plugins;
+    const { screenshotMode, features, licensing, security, spaces, taskManager } = plugins;
 
     const router = http.createRouter<ReportingRequestHandlerContext>();
     const basePath = http.basePath;
 
     reportingCore.pluginSetup({
+      screenshotMode,
       features,
       licensing,
       basePath,
@@ -91,9 +92,8 @@ export class ReportingPlugin
     // async background start
     (async () => {
       await reportingCore.pluginSetsUp();
-      const config = reportingCore.getConfig();
 
-      const browserDriverFactory = await initializeBrowserDriverFactory(config, this.logger);
+      const browserDriverFactory = await initializeBrowserDriverFactory(reportingCore, this.logger);
       const store = new ReportingStore(reportingCore, this.logger);
 
       await reportingCore.pluginStart({

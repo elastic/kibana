@@ -81,6 +81,9 @@ export function extractReferences(
   }
 
   const { panels, state } = dashboardAttributesToState(attributes);
+  if (!Array.isArray(panels)) {
+    return { attributes, references };
+  }
 
   if (((panels as unknown) as Array<Record<string, string>>).some(isPre730Panel)) {
     return pre730ExtractReferences({ attributes, references }, deps);
