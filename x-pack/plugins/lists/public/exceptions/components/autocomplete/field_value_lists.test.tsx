@@ -30,8 +30,8 @@ const mockKeywordList: ListSchema = {
 };
 const mockResult = { ...getFoundListSchemaMock() };
 mockResult.data = [...mockResult.data, mockKeywordList];
-jest.mock('../../..', () => {
-  const originalModule = jest.requireActual('../../..');
+jest.mock('@kbn/securitysolution-list-hooks', () => {
+  const originalModule = jest.requireActual('@kbn/securitysolution-list-hooks');
 
   return {
     ...originalModule,

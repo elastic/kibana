@@ -74,6 +74,9 @@ describe('EndpointList store concerns', () => {
         endpointsTotalError: undefined,
         queryStrategyVersion: undefined,
         policyVersionInfo: undefined,
+        isolationRequestState: {
+          type: 'UninitialisedResourceState',
+        },
       });
     });
 
