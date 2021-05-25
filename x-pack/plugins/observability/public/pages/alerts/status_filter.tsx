@@ -19,16 +19,6 @@ export function StatusFilter({ status = 'open', onChange }: StatusFilterProps) {
   return (
     <EuiFilterGroup>
       <EuiFilterButton
-        data-test-subj="StatusFilter all button"
-        hasActiveFilters={status === 'all'}
-        onClick={() => onChange('all')}
-        withNext={true}
-      >
-        {i18n.translate('xpack.observability.alerts.statusFilter.allButtonLabel', {
-          defaultMessage: 'All',
-        })}
-      </EuiFilterButton>
-      <EuiFilterButton
         data-test-subj="StatusFilter open button"
         hasActiveFilters={status === 'open'}
         onClick={() => onChange('open')}
@@ -42,9 +32,19 @@ export function StatusFilter({ status = 'open', onChange }: StatusFilterProps) {
         data-test-subj="StatusFilter closed button"
         hasActiveFilters={status === 'closed'}
         onClick={() => onChange('closed')}
+        withNext={true}
       >
         {i18n.translate('xpack.observability.alerts.statusFilter.recoveredButtonLabel', {
           defaultMessage: 'Recovered',
+        })}
+      </EuiFilterButton>
+      <EuiFilterButton
+        data-test-subj="StatusFilter all button"
+        hasActiveFilters={status === 'all'}
+        onClick={() => onChange('all')}
+      >
+        {i18n.translate('xpack.observability.alerts.statusFilter.allButtonLabel', {
+          defaultMessage: 'All',
         })}
       </EuiFilterButton>
     </EuiFilterGroup>

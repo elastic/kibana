@@ -60,7 +60,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const { prepend } = core.http.basePath;
   const history = useHistory();
   const {
-    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'all' },
+    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'active' },
   } = routeParams;
 
   // In a future milestone we'll have a page dedicated to rule management in
