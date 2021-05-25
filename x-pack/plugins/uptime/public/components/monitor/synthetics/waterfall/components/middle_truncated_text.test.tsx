@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { getChunks, MiddleTruncatedText } from './middle_truncated_text';
-import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import { within, fireEvent, waitFor } from '@testing-library/react';
+import { getChunks, MiddleTruncatedText } from './middle_truncated_text';
+import { render } from '../../../../../lib/helper/rtl_helpers';
 
 const longString =
   'this-is-a-really-really-really-really-really-really-really-really-long-string.madeup.extension';
