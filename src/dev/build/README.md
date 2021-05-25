@@ -13,7 +13,7 @@ node scripts/build --help
 node scripts/build --release
 
 # reuse already downloaded node executables, turn on debug logging, and only build the default distributable
-node scripts/build --skip-node-download --debug --no-oss
+node scripts/build --skip-node-download --debug
 ```
 
 # Fixing out of memory issues

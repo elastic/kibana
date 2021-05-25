@@ -77,14 +77,14 @@ export const CreateArchives: Task = {
     const metrics: CiStatsMetric[] = [];
     for (const { format, path, fileCount } of archives) {
       metrics.push({
-        group: `${build.isOss() ? 'oss ' : ''}distributable size`,
+        group: `distributable size`,
         id: format,
         value: (await asyncStat(path)).size,
       });
 
       metrics.push({
         group: 'distributable file count',
-        id: build.isOss() ? 'oss' : 'default',
+        id: 'default',
         value: fileCount,
       });
     }
