@@ -10,8 +10,10 @@ import { Filter } from '../../../../data/public';
 import { EsHitRecord } from './context/api/context';
 import { EsHitRecordList } from './context/api/context';
 import { SortDirection } from './context/api/utils/sorting';
+import { createInitialLoadingStatusState } from './context/query';
+import { createInitialQueryParametersState } from './context/query_parameters';
 
-export interface ContextAppState {
+export interface ContextQueryState {
   loadingStatus: LoadingStatusState;
   queryParameters: QueryParameters;
   rows: ContextRows;
@@ -55,6 +57,35 @@ export interface QueryParameters {
 interface ContextRows {
   all: EsHitRecordList;
   anchor: EsHitRecord;
-  predecessors: EsHitRecordList;
-  successors: EsHitRecordList;
+  // predecessors: EsHitRecordList;
+  // successors: EsHitRecordList;
+}
+
+export function getContextQueryDefaults(
+  indexPatternId: string,
+  anchorId: string,
+  defaultStepSize: number,
+  tieBreakerField: string,
+  useNewFieldsApi: boolean
+): ContextQueryState {
+  return {
+    queryParameters: createInitialQueryParametersState(
+      indexPatternId,
+      anchorId,
+      defaultStepSize,
+      tieBreakerField
+    ),
+    rows: {
+      all: [],
+      anchor: {
+        fields: [],
+        sort: [],
+        _id: '',
+      },
+      // predecessors: [],
+      // successors: [],
+    },
+    loadingStatus: createInitialLoadingStatusState(),
+    useNewFieldsApi,
+  };
 }

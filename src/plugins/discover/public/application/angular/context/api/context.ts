@@ -18,10 +18,7 @@ import { getServices } from '../../../../kibana_services';
 
 export type SurrDocType = 'successors' | 'predecessors';
 export type EsHitRecord = Required<
-  Pick<
-    estypes.SearchResponse['hits']['hits'][number],
-    '_id' | 'fields' | 'sort' | '_index' | '_version'
-  >
+  Pick<estypes.SearchResponse['hits']['hits'][number], '_id' | 'fields' | 'sort'>
 > & {
   _source?: Record<string, unknown>;
   _score?: number;

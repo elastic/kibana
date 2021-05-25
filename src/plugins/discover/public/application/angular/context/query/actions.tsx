@@ -17,13 +17,13 @@ import { fetchAnchorProvider } from '../api/anchor';
 import { EsHitRecord, EsHitRecordList, fetchContextProvider, SurrDocType } from '../api/context';
 import { getQueryParameterActions } from '../query_parameters';
 import {
-  ContextAppState,
+  ContextQueryState,
   FailureReason,
   LoadingStatus,
   LoadingStatusEntry,
   LoadingStatusState,
   QueryParameters,
-} from '../../context_app_state';
+} from '../../context_query_state';
 
 interface DiscoverPromise extends PromiseConstructor {
   try: <T>(fn: () => Promise<T>) => Promise<T>;
@@ -43,7 +43,7 @@ export function QueryActionsProvider(Promise: DiscoverPromise) {
     indexPatterns
   );
 
-  const setFailedStatus = (state: ContextAppState) => (
+  const setFailedStatus = (state: ContextQueryState) => (
     subject: keyof LoadingStatusState,
     details: LoadingStatusEntry = {}
   ) =>
@@ -53,17 +53,17 @@ export function QueryActionsProvider(Promise: DiscoverPromise) {
       ...details,
     });
 
-  const setLoadedStatus = (state: ContextAppState) => (subject: keyof LoadingStatusState) =>
+  const setLoadedStatus = (state: ContextQueryState) => (subject: keyof LoadingStatusState) =>
     (state.loadingStatus[subject] = {
       status: LoadingStatus.LOADED,
     });
 
-  const setLoadingStatus = (state: ContextAppState) => (subject: keyof LoadingStatusState) =>
+  const setLoadingStatus = (state: ContextQueryState) => (subject: keyof LoadingStatusState) =>
     (state.loadingStatus[subject] = {
       status: LoadingStatus.LOADING,
     });
 
-  const fetchAnchorRow = (state: ContextAppState) => () => {
+  const fetchAnchorRow = (state: ContextQueryState) => () => {
     const {
       queryParameters: { indexPatternId, anchorId, sort, tieBreakerField },
     } = state;
@@ -100,7 +100,7 @@ export function QueryActionsProvider(Promise: DiscoverPromise) {
     );
   };
 
-  const fetchSurroundingRows = (type: SurrDocType, state: ContextAppState) => {
+  const fetchSurroundingRows = (type: SurrDocType, state: ContextQueryState) => {
     const {
       queryParameters: { indexPatternId, sort, tieBreakerField },
       rows: { anchor },
@@ -153,40 +153,40 @@ export function QueryActionsProvider(Promise: DiscoverPromise) {
     );
   };
 
-  const fetchContextRows = (state: ContextAppState) => () =>
+  const fetchContextRows = (state: ContextQueryState) => () =>
     Promise.all([
       fetchSurroundingRows('predecessors', state),
       fetchSurroundingRows('successors', state),
     ]);
 
-  const fetchAllRows = (state: ContextAppState) => () =>
+  const fetchAllRows = (state: ContextQueryState) => () =>
     Promise.try(fetchAnchorRow(state)).then(fetchContextRows(state));
 
-  const fetchContextRowsWithNewQueryParameters = (state: ContextAppState) => (
+  const fetchContextRowsWithNewQueryParameters = (state: ContextQueryState) => (
     queryParameters: QueryParameters
   ) => {
     setQueryParameters(state)(queryParameters);
     return fetchContextRows(state)();
   };
 
-  const fetchAllRowsWithNewQueryParameters = (state: ContextAppState) => (
+  const fetchAllRowsWithNewQueryParameters = (state: ContextQueryState) => (
     queryParameters: QueryParameters
   ) => {
     setQueryParameters(state)(queryParameters);
     return fetchAllRows(state)();
   };
 
-  const fetchGivenPredecessorRows = (state: ContextAppState) => (count: number) => {
+  const fetchGivenPredecessorRows = (state: ContextQueryState) => (count: number) => {
     setPredecessorCount(state)(count);
     return fetchSurroundingRows('predecessors', state);
   };
 
-  const fetchGivenSuccessorRows = (state: ContextAppState) => (count: number) => {
+  const fetchGivenSuccessorRows = (state: ContextQueryState) => (count: number) => {
     setSuccessorCount(state)(count);
     return fetchSurroundingRows('successors', state);
   };
 
-  const setAllRows = (state: ContextAppState) => (
+  const setAllRows = (state: ContextQueryState) => (
     predecessorRows: EsHitRecordList,
     anchorRow: EsHitRecord,
     successorRows: EsHitRecordList

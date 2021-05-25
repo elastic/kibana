@@ -16,26 +16,27 @@ import {
   withNotifyOnErrors,
   ReduxLikeStateContainer,
 } from '../../../../kibana_utils/public';
-import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
+import { esFilters, FilterManager, Filter, Query, SortDirection } from '../../../../data/public';
 import { handleSourceColumnState } from './helpers';
+import { ContextQueryState } from './context_query_state';
 
-export interface AppState {
+export interface AppState extends ContextQueryState {
   /**
    * Columns displayed in the table, cannot be changed by UI, just in discover's main app
    */
-  columns: string[];
+  columns?: string[];
   /**
    * Array of filters
    */
-  filters: Filter[];
+  filters?: Filter[];
   /**
    * Number of records to be fetched before anchor records (newer records)
    */
-  predecessorCount: number;
+  predecessorCount?: number;
   /**
    * Sorting of the records to be fetched, assumed to be a legacy parameter
    */
-  sort: string[][];
+  sort: [[string, SortDirection]];
   /**
    * Number of records to be fetched after the anchor records (older records)
    */
@@ -54,7 +55,7 @@ export interface GetStateParams {
   /**
    * Number of records to be fetched when 'Load' link/button is clicked
    */
-  defaultStepSize: string;
+  defaultStepSize: number;
   /**
    * The timefield used for sorting
    */
@@ -79,6 +80,11 @@ export interface GetStateParams {
    * core ui settings service
    */
   uiSettings: IUiSettingsClient;
+
+  /**
+   * Default state used for data querying
+   */
+  getContextQueryDefaults: () => ContextQueryState;
 }
 
 export interface GetStateReturn {
@@ -130,6 +136,7 @@ export function getState({
   history,
   toasts,
   uiSettings,
+  getContextQueryDefaults,
 }: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
@@ -145,7 +152,8 @@ export function getState({
     defaultStepSize,
     timeFieldName,
     appStateFromUrl,
-    uiSettings
+    uiSettings,
+    getContextQueryDefaults
   );
   const appStateContainer = createStateContainer<AppState>(appStateInitial);
 
@@ -267,17 +275,19 @@ function getFilters(state: AppState | GlobalState): Filter[] {
  * default state. The default size is the default number of successor/predecessor records to fetch
  */
 function createInitialAppState(
-  defaultSize: string,
+  defaultSize: number,
   timeFieldName: string,
   urlState: AppState,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  getContextQueryDefaults: () => ContextQueryState
 ): AppState {
-  const defaultState = {
+  const defaultState: AppState = {
     columns: ['_source'],
     filters: [],
-    predecessorCount: parseInt(defaultSize, 10),
-    sort: [[timeFieldName, 'desc']],
-    successorCount: parseInt(defaultSize, 10),
+    predecessorCount: defaultSize,
+    sort: [[timeFieldName, SortDirection.desc]],
+    successorCount: defaultSize,
+    ...getContextQueryDefaults(),
   };
   if (typeof urlState !== 'object') {
     return defaultState;

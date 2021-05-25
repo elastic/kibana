@@ -16,14 +16,14 @@ import {
   IndexPatternField,
 } from '../../../../../../data/public';
 import { popularizeField } from '../../../helpers/popularize_field';
-import { ContextAppState, QueryParameters } from '../../context_app_state';
+import { ContextQueryState, QueryParameters } from '../../context_query_state';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE, QUERY_PARAMETER_KEYS } from './constants';
 
 export function getQueryParameterActions(
   filterManager: FilterManager,
   indexPatterns?: IndexPatternsContract
 ) {
-  const setPredecessorCount = (state: ContextAppState) => (predecessorCount: number) => {
+  const setPredecessorCount = (state: ContextQueryState) => (predecessorCount: number) => {
     return (state.queryParameters.predecessorCount = clamp(
       MIN_CONTEXT_SIZE,
       MAX_CONTEXT_SIZE,
@@ -31,7 +31,7 @@ export function getQueryParameterActions(
     ));
   };
 
-  const setSuccessorCount = (state: ContextAppState) => (successorCount: number) => {
+  const setSuccessorCount = (state: ContextQueryState) => (successorCount: number) => {
     return (state.queryParameters.successorCount = clamp(
       MIN_CONTEXT_SIZE,
       MAX_CONTEXT_SIZE,
@@ -39,7 +39,7 @@ export function getQueryParameterActions(
     ));
   };
 
-  const setQueryParameters = (state: ContextAppState) => (queryParameters: QueryParameters) => {
+  const setQueryParameters = (state: ContextQueryState) => (queryParameters: QueryParameters) => {
     return Object.assign(state.queryParameters, pick(queryParameters, QUERY_PARAMETER_KEYS));
   };
 
@@ -47,7 +47,7 @@ export function getQueryParameterActions(
     filterManager.setFilters(filters);
   };
 
-  const addFilter = (state: ContextAppState) => async (
+  const addFilter = (state: ContextQueryState) => async (
     field: IndexPatternField | string,
     values: unknown,
     operation: string

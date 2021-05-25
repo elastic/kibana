@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState, Fragment, useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import './context_app_legacy.scss';
 import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
+import { cloneDeep, isEqual } from 'lodash';
 import { DOC_HIDE_TIME_COLUMN_SETTING, DOC_TABLE_LEGACY } from '../../../../common';
 import { ContextErrorMessage } from '../context_error_message';
 import {
@@ -18,7 +19,7 @@ import {
   DocTableLegacyProps,
 } from '../../angular/doc_table/create_doc_table_react';
 import { IndexPattern } from '../../../../../data/common/index_patterns';
-import { LoadingStatus } from '../../angular/context_app_state';
+import { LoadingStatus } from '../../angular/context_query_state';
 import { ActionBar, ActionBarProps } from '../../angular/context/components/action_bar/action_bar';
 import { TopNavMenuProps } from '../../../../../navigation/public';
 import { DiscoverGrid, DiscoverGridProps } from '../discover_grid/discover_grid';
@@ -27,17 +28,22 @@ import { getServices, SortDirection } from '../../../kibana_services';
 import { GetStateReturn, AppState } from '../../angular/context_state';
 import { useDataGridColumns } from '../../helpers/use_data_grid_columns';
 import { EsHitRecord, EsHitRecordList } from '../../angular/context/api/context';
+import { useContextAppState } from './use_context_app_state';
+import { useContextAppQuery } from './use_context_app_query';
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../angular/context/query_parameters';
 
 export interface ContextAppProps {
   topNavMenu: React.ComponentType<TopNavMenuProps>;
   columns: string[];
   hits: EsHitRecordList;
   indexPattern: IndexPattern;
+  indexPatternId: string;
   appState: AppState;
   stateContainer: GetStateReturn;
   filter: DocViewFilterFn;
   minimumVisibleRows: number;
   sorting: Array<[string, SortDirection]>;
+  anchorId: string;
   anchorStatus: string;
   anchorReason: string;
   predecessorStatus: string;
@@ -60,18 +66,22 @@ function isLoading(status: string) {
   return status !== LoadingStatus.LOADED && status !== LoadingStatus.FAILED;
 }
 
+function clamp(minimum: number, maximum: number, value: number) {
+  return Math.max(Math.min(maximum, value), minimum);
+}
+
 export function ContextAppLegacy(renderProps: ContextAppProps) {
   const services = getServices();
   const { uiSettings: config, capabilities, indexPatterns } = services;
   const {
     indexPattern,
+    indexPatternId,
     anchorStatus,
     predecessorStatus,
     successorStatus,
-    appState,
-    stateContainer,
-    hits: rows,
+    // hits: rows,
     sorting,
+    anchorId,
     filter,
     minimumVisibleRows,
     useNewFieldsApi,
@@ -84,15 +94,64 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     predecessorStatus === LoadingStatus.LOADED &&
     successorStatus === LoadingStatus.LOADED;
   const isLegacy = config.get(DOC_TABLE_LEGACY);
-  const anchorId = rows?.find(({ isAnchor }) => isAnchor)?._id;
+  // const anchorId = rows?.find(({ isAnchor }) => isAnchor)?._id;
 
+  const { state, stateContainer, setAppState } = useContextAppState({
+    indexPattern,
+    indexPatternId,
+    anchorId,
+    services,
+  });
+  const prevState = useRef<AppState>();
+
+  useEffect(() => {
+    stateContainer.startSync();
+
+    return () => stateContainer.stopSync();
+  }, [stateContainer]);
+
+  const { context$, fetchAnchorRow, fetchAllRows } = useContextAppQuery({
+    services,
+    useNewFieldsApi: !!useNewFieldsApi,
+    state,
+  });
+
+  /**
+   * Fetch docs
+   */
+  useEffect(() => {
+    if (!prevState.current) {
+      fetchAllRows();
+    } else if (
+      prevState.current.predecessorCount !== state.predecessorCount ||
+      prevState.current.successorCount !== state.successorCount ||
+      !isEqual(prevState.current.filters, state.filters)
+    ) {
+      fetchAllRows();
+    }
+
+    prevState.current = cloneDeep(state);
+  }, [state, fetchAllRows, fetchAnchorRow, indexPatternId]);
+
+  /**
+   * Sync app state with context$
+   */
+  useEffect(() => {
+    context$.subscribe((next) => {
+      setAppState(next);
+    });
+
+    return () => context$.unsubscribe();
+  }, [context$, setAppState]);
+
+  const rows = state.rows;
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDataGridColumns({
     capabilities,
     config,
     indexPattern,
     indexPatterns,
-    setAppState: stateContainer.setAppState,
-    state: appState,
+    setAppState,
+    state,
     useNewFieldsApi: !!useNewFieldsApi,
   });
 
@@ -122,7 +181,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     return {
       ariaLabelledBy: 'surDocumentsAriaLabel',
       columns,
-      rows: allRowsLoaded && rows,
+      rows: rows.all.length !== 0 && rows.all,
       indexPattern,
       expandedDoc,
       isLoading: !allRowsLoaded,

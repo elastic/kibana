@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LoadingStatus, LoadingStatusState } from '../../context_app_state';
+import { LoadingStatus, LoadingStatusState } from '../../context_query_state';
 
 export function createInitialLoadingStatusState(): LoadingStatusState {
   return {

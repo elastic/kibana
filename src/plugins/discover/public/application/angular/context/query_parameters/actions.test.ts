@@ -9,11 +9,11 @@
 import { getQueryParameterActions } from './actions';
 import { FilterManager, SortDirection } from '../../../../../../data/public';
 import { coreMock } from '../../../../../../../core/public/mocks';
-import { ContextAppState, LoadingStatus, QueryParameters } from '../../context_app_state';
+import { ContextQueryState, LoadingStatus, QueryParameters } from '../../context_query_state';
 import { EsHitRecord } from '../api/context';
 const setupMock = coreMock.createSetup();
 
-let state: ContextAppState;
+let state: ContextQueryState;
 let filterManager: FilterManager;
 let filterManagerSpy: jest.SpyInstance;
 

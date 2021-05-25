@@ -7,17 +7,19 @@
  */
 
 export function createInitialQueryParametersState(
+  indexPatternId: string,
+  anchorId: string,
   defaultStepSize: number = 5,
   tieBreakerField: string = '_doc'
 ) {
   return {
-    anchorId: null,
+    anchorId,
     columns: [],
     defaultStepSize,
     filters: [],
-    indexPatternId: null,
-    predecessorCount: 0,
-    successorCount: 0,
+    indexPatternId,
+    predecessorCount: 5,
+    successorCount: 5,
     sort: [],
     tieBreakerField,
   };

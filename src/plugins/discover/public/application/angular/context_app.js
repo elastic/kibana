@@ -34,6 +34,7 @@ getAngularModule().directive('contextApp', function ContextApp() {
       anchorId: '=',
       columns: '=',
       indexPattern: '=',
+      indexPatternId: '=',
       appState: '=',
       stateContainer: '=',
       filters: '=',
@@ -89,13 +90,13 @@ function ContextAppController($scope, Private) {
         newQueryParameters.anchorId !== queryParameters.anchorId ||
         !_.isEqual(newQueryParameters.sort, queryParameters.sort)
       ) {
-        this.actions.fetchAllRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
+        // this.actions.fetchAllRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
       } else if (
         newQueryParameters.predecessorCount !== queryParameters.predecessorCount ||
         newQueryParameters.successorCount !== queryParameters.successorCount ||
         !_.isEqual(newQueryParameters.filters, queryParameters.filters)
       ) {
-        this.actions.fetchContextRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
+        // this.actions.fetchContextRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
       }
     }
   );
