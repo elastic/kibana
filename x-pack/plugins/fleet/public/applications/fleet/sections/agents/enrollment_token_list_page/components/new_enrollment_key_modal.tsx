@@ -7,32 +7,17 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiFlyoutFooter,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiSelect,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiConfirmModal, EuiForm, EuiFormRow, EuiFieldText, EuiSelect } from '@elastic/eui';
 
-import type { AgentPolicy } from '../../../../types';
+import type { AgentPolicy, EnrollmentAPIKey } from '../../../../types';
 import { useInput, useStartServices, sendRequest } from '../../../../hooks';
 import { enrollmentAPIKeyRouteService } from '../../../../services';
 
 function useCreateApiKeyForm(
   policyIdDefaultValue: string | undefined,
-  onSuccess: (keyId: string) => void
+  onSuccess: (key: EnrollmentAPIKey) => void,
+  onError: (error: Error) => void
 ) {
-  const { notifications } = useStartServices();
   const [isLoading, setIsLoading] = useState(false);
   const apiKeyNameInput = useInput('');
   const policyIdInput = useInput(policyIdDefaultValue);
@@ -49,23 +34,17 @@ function useCreateApiKeyForm(
           policy_id: policyIdInput.value,
         }),
       });
+
       if (res.error) {
         throw res.error;
       }
       policyIdInput.clear();
       apiKeyNameInput.clear();
       setIsLoading(false);
-      onSuccess(res.data.item.id);
-      notifications.toasts.addSuccess(
-        i18n.translate('xpack.fleet.newEnrollmentKey.keyCreatedToasts', {
-          defaultMessage: 'Enrollment token created.',
-        })
-      );
-    } catch (err) {
-      notifications.toasts.addError(err as Error, {
-        title: 'Error',
-      });
+      onSuccess(res.data.item);
+    } catch (error) {
       setIsLoading(false);
+      onError(error);
     }
   };
 
@@ -78,18 +57,32 @@ function useCreateApiKeyForm(
 }
 
 interface Props {
-  onClose: () => void;
-  agentPolicies: AgentPolicy[];
+  onClose: (key?: EnrollmentAPIKey) => void;
+  agentPolicies?: AgentPolicy[];
 }
 
-export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
+export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
   onClose,
   agentPolicies = [],
 }) => {
+  const { notifications } = useStartServices();
   const policyIdDefaultValue = agentPolicies.find((agentPolicy) => agentPolicy.is_default)?.id;
-  const form = useCreateApiKeyForm(policyIdDefaultValue, () => {
-    onClose();
-  });
+  const form = useCreateApiKeyForm(
+    policyIdDefaultValue,
+    (key: EnrollmentAPIKey) => {
+      onClose(key);
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.fleet.newEnrollmentKey.keyCreatedToasts', {
+          defaultMessage: 'Enrollment token created',
+        })
+      );
+    },
+    (error: Error) => {
+      notifications.toasts.addError(error, {
+        title: 'Error',
+      });
+    }
+  );
 
   const body = (
     <EuiForm>
@@ -124,41 +117,26 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
               }))}
           />
         </EuiFormRow>
-        <EuiButton type="submit" fill isLoading={form.isLoading}>
-          <FormattedMessage
-            id="xpack.fleet.newEnrollmentKey.submitButton"
-            defaultMessage="Create enrollment token"
-          />
-        </EuiButton>
       </form>
     </EuiForm>
   );
 
   return (
-    <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
-      <EuiFlyoutHeader hasBorder aria-labelledby="FleetNewEnrollmentKeyFlyoutTitle">
-        <EuiTitle size="m">
-          <h2 id="FleetNewEnrollmentKeyFlyoutTitle">
-            <FormattedMessage
-              id="xpack.fleet.newEnrollmentKey.flyoutTitle"
-              defaultMessage="Create enrollment token"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>{body}</EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} flush="left">
-              <FormattedMessage
-                id="xpack.fleet.newEnrollmentKey.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+    <EuiConfirmModal
+      isLoading={form.isLoading}
+      title={i18n.translate('xpack.fleet.newEnrollmentKey.modalTitle', {
+        defaultMessage: 'Create enrollment token',
+      })}
+      onCancel={() => onClose()}
+      cancelButtonText={i18n.translate('xpack.fleet.newEnrollmentKey.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      })}
+      onConfirm={form.onSubmit}
+      confirmButtonText={i18n.translate('xpack.fleet.newEnrollmentKey.submitButton', {
+        defaultMessage: 'Create enrollment token',
+      })}
+    >
+      {body}
+    </EuiConfirmModal>
   );
 };

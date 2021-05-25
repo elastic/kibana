@@ -11,6 +11,8 @@ import type {
   GetOneEnrollmentAPIKeyResponse,
   GetEnrollmentAPIKeysResponse,
   GetEnrollmentAPIKeysRequest,
+  PostEnrollmentAPIKeyRequest,
+  PostEnrollmentAPIKeyResponse,
 } from '../../types';
 
 import { useRequest, sendRequest, useConditionalRequest } from './use_request';
@@ -63,5 +65,13 @@ export function useGetEnrollmentAPIKeys(
     path: enrollmentAPIKeyRouteService.getListPath(),
     query,
     ...options,
+  });
+}
+
+export function sendCreateEnrollmentAPIKey(body: PostEnrollmentAPIKeyRequest['body']) {
+  return sendRequest<PostEnrollmentAPIKeyResponse>({
+    method: 'post',
+    path: enrollmentAPIKeyRouteService.getCreatePath(),
+    body,
   });
 }
