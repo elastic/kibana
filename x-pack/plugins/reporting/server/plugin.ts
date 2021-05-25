@@ -108,6 +108,9 @@ export class ReportingPlugin
         logger: this.logger,
       });
 
+      // Note: this must be called after ReportingCore.pluginStart
+      await store.start();
+
       this.logger.debug('Start complete');
     })().catch((e) => {
       this.logger.error(`Error in Reporting start, reporting may not function properly`);
