@@ -14,7 +14,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { fetchExceptionLists } from '@kbn/securitysolution-list-api';
 
-import { getFilters } from '../utils';
+import { getFilters } from '@kbn/securitysolution-list-utils';
 
 export type Func = () => void;
 export type ReturnExceptionLists = [boolean, ExceptionListSchema[], Pagination, Func | null];
