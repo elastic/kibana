@@ -11,7 +11,7 @@ import { Subject } from 'rxjs';
 import { AppUpdater } from 'src/core/public';
 import { LicenseType } from '../../../../licensing/common/types';
 import { SecuritySubPluginNames, SecurityDeepLinks } from '../types';
-import { AppMeta } from '../../../../../../src/core/public';
+import { App } from '../../../../../../src/core/public';
 
 const securityDeepLinks: SecurityDeepLinks = {
   detections: {
@@ -198,10 +198,10 @@ const subpluginKeywords: { [key in SecuritySubPluginNames]: string[] } = {
  * @param subPluginName SubPluginName of the app to retrieve meta information for.
  * @param licenseType optional string for license level, if not provided basic is assumed.
  */
-export function getSearchDeepLinksAndKeywords(
+export function getDeepLinksAndKeywords(
   subPluginName: SecuritySubPluginNames,
   licenseType?: LicenseType
-): AppMeta {
+): Pick<App, 'deepLinks' | 'keywords'> {
   const baseRoutes = [...securityDeepLinks[subPluginName].base];
   if (
     licenseType === 'gold' ||
@@ -214,29 +214,27 @@ export function getSearchDeepLinksAndKeywords(
     if (premiumRoutes !== undefined) {
       return {
         keywords: subpluginKeywords[subPluginName],
-        searchDeepLinks: [...baseRoutes, ...premiumRoutes],
+        deepLinks: [...baseRoutes, ...premiumRoutes],
       };
     }
   }
   return {
     keywords: subpluginKeywords[subPluginName],
-    searchDeepLinks: baseRoutes,
+    deepLinks: baseRoutes,
   };
 }
 /**
  * A function that updates a subplugin's meta property as appropriate when license level changes.
- * @param subPluginName SubPluginName of the app to register searchDeepLinks for
+ * @param subPluginName SubPluginName of the app to register deepLinks for
  * @param appUpdater an instance of appUpdater$ observable to update search links when needed.
  * @param licenseType A string representing the current license level.
  */
-export function registerSearchLinks(
+export function registerDeepLinks(
   subPluginName: SecuritySubPluginNames,
   appUpdater?: Subject<AppUpdater>,
   licenseType?: LicenseType
 ) {
   if (appUpdater !== undefined) {
-    appUpdater.next(() => ({
-      meta: getSearchDeepLinksAndKeywords(subPluginName, licenseType),
-    }));
+    appUpdater.next(() => ({ ...getDeepLinksAndKeywords(subPluginName, licenseType) }));
   }
 }
