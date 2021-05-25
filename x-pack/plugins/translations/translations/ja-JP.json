@@ -4215,7 +4215,7 @@
     "visDefaultEditor.controls.ranges.fromLabel": "開始：",
     "visDefaultEditor.controls.ranges.greaterThanOrEqualPrepend": "≧",
     "visDefaultEditor.controls.ranges.greaterThanOrEqualTooltip": "よりも大きいまたは等しい",
-    "visDefaultEditor.controls.ranges.lessThanPrepend": "&lt;",
+    "visDefaultEditor.controls.ranges.lessThanPrepend": "<",
     "visDefaultEditor.controls.ranges.lessThanTooltip": "より小さい",
     "visDefaultEditor.controls.ranges.removeRangeButtonAriaLabel": "{from}から{to}の範囲を削除",
     "visDefaultEditor.controls.ranges.toLabel": "終了：",
