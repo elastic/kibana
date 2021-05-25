@@ -21,12 +21,14 @@ import {
 } from '../../../../../../../src/plugins/kibana_utils/public/';
 import { UrlStorageContextProvider } from './hooks/use_url_storage';
 import { useTrackPageview } from '../../..';
+import { TypedLensByValueInput } from '../../../../../lens/public';
 
 export function ExploratoryViewPage({
   saveAttributes,
-  useSessionStorage = true,
+  useSessionStorage = false,
 }: {
   useSessionStorage?: boolean;
+  saveAttributes: (attr: TypedLensByValueInput['attributes'] | null) => void;
 }) {
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view', delay: 15000 });

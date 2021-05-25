@@ -6,7 +6,10 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
+import {
+  IKbnUrlStateStorage,
+  ISessionStorageStateStorage,
+} from '../../../../../../../../src/plugins/kibana_utils/public';
 import type {
   AppDataType,
   ReportViewTypeId,
@@ -30,17 +33,14 @@ interface ContextValue {
 export const UrlStorageContext = createContext<ContextValue>({} as ContextValue);
 
 interface ProviderProps {
-  storage: IKbnUrlStateStorage;
+  storage: IKbnUrlStateStorage | ISessionStorageStateStorage;
 }
 
 export function UrlStorageContextProvider({
   children,
   storage,
 }: ProviderProps & { children: JSX.Element }) {
-  // const allSeriesKey = 'sr';
-  // const [series, updateSeries] = useState({} as SeriesUrl);
-
-  // const allShortSeries = storage.get<AllShortSeries>(allSeriesKey) ?? {};
+  const allSeriesKey = 'sr';
 
   const [allShortSeries, setAllShortSeries] = useState<AllShortSeries>({});
   const [allSeries, setAllSeries] = useState<AllSeries>({});
@@ -48,14 +48,15 @@ export function UrlStorageContextProvider({
 
   useEffect(() => {
     const allSeriesIds = Object.keys(allShortSeries);
-    const allseriesN: AllSeries = {};
+    const allSeriesN: AllSeries = {};
     allSeriesIds.forEach((seriesKey) => {
-      allseriesN[seriesKey] = convertFromShortUrl(allShortSeries[seriesKey]);
+      allSeriesN[seriesKey] = convertFromShortUrl(allShortSeries[seriesKey]);
     });
 
-    setAllSeries(allseriesN);
+    setAllSeries(allSeriesN);
     setFirstSeriesId(allSeriesIds?.[0]);
-  }, [allShortSeries]);
+    (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
+  }, [allShortSeries, storage]);
 
   const setSeries = (seriesIdN: string, newValue: SeriesUrl) => {
     setAllShortSeries((prevState) => {
