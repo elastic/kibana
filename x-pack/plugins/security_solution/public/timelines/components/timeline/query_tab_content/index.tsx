@@ -22,7 +22,6 @@ import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { RowRenderer } from '../body/renderers/row_renderer';
 import { CellValueElementProps } from '../cell_rendering';
 import { Direction, TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
@@ -37,6 +36,7 @@ import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data
 import {
   ControlColumnProps,
   KueryFilterQueryKind,
+  RowRenderer,
   TimelineEventsType,
   TimelineId,
   TimelineTabs,

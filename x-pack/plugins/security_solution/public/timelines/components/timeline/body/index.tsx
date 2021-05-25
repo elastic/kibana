@@ -23,6 +23,7 @@ import {
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRendererId,
+  RowRenderer,
   TimelineId,
   TimelineTabs,
 } from '../../../../../common/types/timeline';
@@ -37,7 +38,6 @@ import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helper
 import { getEventIdToDataMapping } from './helpers';
 import { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
-import { RowRenderer } from './renderers/row_renderer';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { Events } from './events';

@@ -10,7 +10,12 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 're
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { TimelineTabs, TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import {
+  RowRenderer,
+  TimelineTabs,
+  TimelineId,
+  TimelineType,
+} from '../../../../../common/types/timeline';
 import {
   useShallowEqualSelector,
   useDeepEqualSelector,
@@ -20,7 +25,6 @@ import {
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
-import { RowRenderer } from '../body/renderers/row_renderer';
 import { CellValueElementProps } from '../cell_rendering';
 import {
   getActiveTabSelector,

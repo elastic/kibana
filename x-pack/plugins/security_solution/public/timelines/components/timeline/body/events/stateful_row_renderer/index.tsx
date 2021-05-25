@@ -14,10 +14,10 @@ import {
   ARIA_ROWINDEX_ATTRIBUTE,
   getRowRendererClassName,
 } from '@kbn/securitysolution-t-grid';
+import { RowRenderer } from '../../../../../../../common';
 import { BrowserFields } from '../../../../../../common/containers/source';
 import { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
 import { getRowRenderer } from '../../renderers/get_row_renderer';
-import { RowRenderer } from '../../renderers/row_renderer';
 import { useStatefulEventFocus } from '../use_stateful_event_focus';
 
 import * as i18n from '../translations';

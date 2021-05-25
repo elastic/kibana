@@ -27,12 +27,12 @@ import { TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
-import { RowRenderer } from '../body/renderers/row_renderer';
 import { Footer, footerHeight } from '../footer';
 import { calculateTotalPages } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
 import {
   ControlColumnProps,
+  RowRenderer,
   TimelineEventsType,
   TimelineId,
   TimelineTabs,

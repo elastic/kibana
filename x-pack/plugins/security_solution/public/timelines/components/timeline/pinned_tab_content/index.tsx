@@ -19,7 +19,6 @@ import { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
-import { RowRenderer } from '../body/renderers/row_renderer';
 import { Footer, footerHeight } from '../footer';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
@@ -33,6 +32,7 @@ import { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
 import {
   ControlColumnProps,
+  RowRenderer,
   TimelineTabs,
   ToggleDetailPanel,
 } from '../../../../../common/types/timeline';

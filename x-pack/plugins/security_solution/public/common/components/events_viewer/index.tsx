@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { ControlColumnProps, TimelineId } from '../../../../common/types/timeline';
+import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Filter } from '../../../../../../../src/plugins/data/public';
@@ -21,7 +21,6 @@ import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
-import { RowRenderer } from '../../../timelines/components/timeline/body/renderers/row_renderer';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
 import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
