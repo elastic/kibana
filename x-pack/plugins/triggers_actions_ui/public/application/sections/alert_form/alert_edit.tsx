@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useReducer, useState } from 'react';
+import React, { Fragment, useReducer, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -28,8 +28,9 @@ import {
   Alert,
   AlertFlyoutCloseReason,
   AlertTypeRegistryContract,
+  IErrorObject,
 } from '../../../types';
-import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
+import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
@@ -69,6 +70,7 @@ export const AlertEdit = ({
     false
   );
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
+  const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
 
   const {
     http,
@@ -80,9 +82,15 @@ export const AlertEdit = ({
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
 
-  const { alertActionsErrors, alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
+  useEffect(() => {
+    (async () => {
+      const res = await getAlertActionErrors(alert as Alert, actionTypeRegistry);
+      setAlertActionsErrors([...res]);
+    })();
+  }, [alert, actionTypeRegistry]);
+
+  const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
-    actionTypeRegistry,
     alertType
   );
 

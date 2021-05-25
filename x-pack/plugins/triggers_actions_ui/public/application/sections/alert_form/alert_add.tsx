@@ -17,8 +17,9 @@ import {
   AlertTypeParams,
   AlertUpdates,
   AlertFlyoutCloseReason,
+  IErrorObject,
 } from '../../../types';
-import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
+import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
@@ -117,6 +118,15 @@ const AlertAdd = ({
     }
   }, [alert.params, initialAlertParams, setInitialAlertParams]);
 
+  const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const res = await getAlertActionErrors(alert as Alert, actionTypeRegistry);
+      setAlertActionsErrors([...res]);
+    })();
+  }, [alert, actionTypeRegistry]);
+
   const checkForChangesAndCloseFlyout = () => {
     if (
       hasAlertChanged(alert, initialAlert, false) ||
@@ -140,9 +150,8 @@ const AlertAdd = ({
   };
 
   const alertType = alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null;
-  const { alertActionsErrors, alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
+  const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
-    actionTypeRegistry,
     alertType
   );
 
