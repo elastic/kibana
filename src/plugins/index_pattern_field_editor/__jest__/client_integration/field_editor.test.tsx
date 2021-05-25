@@ -5,67 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import React, { useState, useMemo } from 'react';
 import { act } from 'react-dom/test-utils';
+import { registerTestBed, TestBed } from '@kbn/test/jest';
 
-import '../../test_utils/setup_environment';
-import { registerTestBed, TestBed, getCommonActions } from '../../test_utils';
-import { RuntimeFieldPainlessError } from '../../lib';
-import { Field } from '../../types';
-import { FieldEditor, Props, FieldEditorFormState } from './field_editor';
+// This import needs to come first as it contains the jest.mocks
+import { setupEnvironment, getCommonActions, WithFieldEditorDependencies } from './helpers';
+import {
+  FieldEditor,
+  FieldEditorFormState,
+  Props,
+} from '../../public/components/field_editor/field_editor';
+import type { Field } from '../../public/types';
+import { setup, FieldEditorTestBed, defaultProps } from './field_editor.helpers';
 
-const defaultProps: Props = {
-  onChange: jest.fn(),
-  links: {
-    runtimePainless: 'https://elastic.co',
-  },
-  ctx: {
-    existingConcreteFields: [],
-    namesNotAllowed: [],
-    fieldTypeToProcess: 'runtime',
-  },
-  indexPattern: { fields: [] } as any,
-  fieldFormatEditors: {
-    getAll: () => [],
-    getById: () => undefined,
-  },
-  fieldFormats: {} as any,
-  uiSettings: {} as any,
-  syntaxError: {
-    error: null,
-    clear: () => {},
-  },
-};
+describe('<FieldEditor />', () => {
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
-const setup = (props?: Partial<Props>) => {
-  const testBed = registerTestBed(FieldEditor, {
-    memoryRouter: {
-      wrapComponent: false,
-    },
-  })({ ...defaultProps, ...props }) as TestBed;
-
-  const actions = {
-    ...getCommonActions(testBed),
-  };
-
-  return {
-    ...testBed,
-    actions,
-  };
-};
-
-// Skipping for now, I will unskip after migrating to the __jest__/client_integration folder
-describe.skip('<FieldEditor />', () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  let testBed: TestBed & { actions: ReturnType<typeof getCommonActions> };
+  let testBed: FieldEditorTestBed;
   let onChange: jest.Mock<Props['onChange']> = jest.fn();
 
   const lastOnChangeCall = (): FieldEditorFormState[] =>
@@ -106,8 +63,18 @@ describe.skip('<FieldEditor />', () => {
     return formState!;
   };
 
-  beforeEach(() => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+    server.restore();
+  });
+
+  beforeEach(async () => {
     onChange = jest.fn();
+    httpRequestsMockHelpers.setFieldPreviewResponse({ message: 'TODO: set by Jest test' });
   });
 
   test('initial state should have "set custom label", "set value" and "set format" turned off', () => {
@@ -242,7 +209,7 @@ describe.skip('<FieldEditor />', () => {
         );
       };
 
-      const customTestbed = registerTestBed(TestComponent, {
+      const customTestbed = registerTestBed(WithFieldEditorDependencies(TestComponent), {
         memoryRouter: {
           wrapComponent: false,
         },

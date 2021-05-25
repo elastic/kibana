@@ -8,36 +8,29 @@
 
 import { registerTestBed, TestBed } from '@kbn/test/jest';
 
-import { FieldEditor, Props } from '../../public/components/field_editor/field_editor';
-import { WithFieldEditorDependencies, getCommonActions } from './helpers';
+import { FieldEditor } from '../../public/components/field_editor/field_editor';
+import {
+  FieldEditorFlyoutContent,
+  Props,
+} from '../../public/components/field_editor_flyout_content';
+import { WithFieldEditorDependencies, getCommonActions, noop, docLinks } from './helpers';
 
-export const defaultProps: Props = {
-  onChange: jest.fn(),
-  links: {
-    runtimePainless: 'https://elastic.co',
-  },
-  ctx: {
-    existingConcreteFields: [],
-    namesNotAllowed: [],
-    fieldTypeToProcess: 'runtime',
-  },
+const defaultProps: Props = {
+  onSave: noop,
+  onCancel: noop,
+  docLinks,
+  FieldEditor,
   indexPattern: { fields: [] } as any,
-  fieldFormatEditors: {
-    getAll: () => [],
-    getById: () => undefined,
-  },
-  fieldFormats: {} as any,
   uiSettings: {} as any,
-  syntaxError: {
-    error: null,
-    clear: () => {},
-  },
+  fieldFormats: {} as any,
+  fieldFormatEditors: {} as any,
+  fieldTypeToProcess: 'runtime',
+  runtimeFieldValidator: () => Promise.resolve(null),
+  isSavingField: false,
 };
 
-export type FieldEditorTestBed = TestBed & { actions: ReturnType<typeof getCommonActions> };
-
 export const setup = (props?: Partial<Props>) => {
-  const testBed = registerTestBed(WithFieldEditorDependencies(FieldEditor), {
+  const testBed = registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent), {
     memoryRouter: {
       wrapComponent: false,
     },

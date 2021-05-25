@@ -7,49 +7,24 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import '../test_utils/setup_environment';
-import { registerTestBed, TestBed, noop, docLinks, getCommonActions } from '../test_utils';
+import type { Props } from '../../public/components/field_editor_flyout_content';
+import { setupEnvironment } from './helpers';
+import { setup } from './field_editor_flyout_content.helpers';
 
-import { FieldEditor } from './field_editor';
-import { FieldEditorFlyoutContent, Props } from './field_editor_flyout_content';
+describe('<FieldEditorFlyoutContent />', () => {
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
-const defaultProps: Props = {
-  onSave: noop,
-  onCancel: noop,
-  docLinks,
-  FieldEditor,
-  indexPattern: { fields: [] } as any,
-  uiSettings: {} as any,
-  fieldFormats: {} as any,
-  fieldFormatEditors: {} as any,
-  fieldTypeToProcess: 'runtime',
-  runtimeFieldValidator: () => Promise.resolve(null),
-  isSavingField: false,
-};
-
-const setup = (props: Props = defaultProps) => {
-  const testBed = registerTestBed(FieldEditorFlyoutContent, {
-    memoryRouter: { wrapComponent: false },
-  })(props) as TestBed;
-
-  const actions = {
-    ...getCommonActions(testBed),
-  };
-
-  return {
-    ...testBed,
-    actions,
-  };
-};
-
-// Skipping for now, I will unskip after migrating to the __jest__/client_integration folder
-describe.skip('<FieldEditorFlyoutContent />', () => {
   beforeAll(() => {
     jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
+    server.restore();
+  });
+
+  beforeEach(() => {
+    httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['Set by Jest test'] });
   });
 
   test('should have the correct title', () => {
@@ -67,7 +42,7 @@ describe.skip('<FieldEditorFlyoutContent />', () => {
       },
     };
 
-    const { find } = setup({ ...defaultProps, field });
+    const { find } = setup({ field });
 
     expect(find('flyoutTitle').text()).toBe(`Edit field 'foo'`);
     expect(find('nameField.input').props().value).toBe(field.name);
@@ -83,7 +58,7 @@ describe.skip('<FieldEditorFlyoutContent />', () => {
     };
     const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-    const { find } = setup({ ...defaultProps, onSave, field });
+    const { find } = setup({ onSave, field });
 
     await act(async () => {
       find('fieldSaveButton').simulate('click');
@@ -102,7 +77,7 @@ describe.skip('<FieldEditorFlyoutContent />', () => {
 
   test('should accept an onCancel prop', () => {
     const onCancel = jest.fn();
-    const { find } = setup({ ...defaultProps, onCancel });
+    const { find } = setup({ onCancel });
 
     find('closeFlyoutButton').simulate('click');
 
@@ -113,7 +88,7 @@ describe.skip('<FieldEditorFlyoutContent />', () => {
     test('should validate the fields and prevent saving invalid form', async () => {
       const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-      const { find, exists, form, component } = setup({ ...defaultProps, onSave });
+      const { find, exists, form, component } = setup({ onSave });
 
       expect(find('fieldSaveButton').props().disabled).toBe(false);
 
@@ -142,7 +117,7 @@ describe.skip('<FieldEditorFlyoutContent />', () => {
         component,
         form,
         actions: { toggleFormRow, changeFieldType },
-      } = setup({ ...defaultProps, onSave });
+      } = setup({ onSave });
 
       act(() => {
         form.setInputValue('nameField.input', 'someName');
