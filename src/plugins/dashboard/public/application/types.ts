@@ -49,7 +49,7 @@ export interface DashboardSaveOptions {
   isTitleDuplicateConfirmed: boolean;
 }
 
-export interface DashboardCapabilities {
+export interface DashboardAppCapabilities {
   visualizeCapabilities: { save: boolean };
   mapsCapabilities: { save: boolean };
   hideWriteControls: boolean;
@@ -77,7 +77,7 @@ export interface DashboardAppServices {
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;
   dashboardPanelStorage: DashboardPanelStorage;
-  dashboardCapabilities: DashboardCapabilities;
+  dashboardCapabilities: DashboardAppCapabilities;
   initializerContext: PluginInitializerContext;
   onAppLeave: AppMountParameters['onAppLeave'];
   savedObjectsTagging?: SavedObjectsTaggingApi;

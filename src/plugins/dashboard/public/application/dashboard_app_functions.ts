@@ -21,7 +21,7 @@ import {
   switchMap,
 } from 'rxjs/operators';
 
-import { DashboardCapabilities } from './types';
+import { DashboardAppCapabilities } from './types';
 import { DashboardConstants } from '../dashboard_constants';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { convertSavedDashboardPanelToPanelState } from '../../common/embeddable/embeddable_saved_object_converters';
@@ -103,7 +103,7 @@ export const getDashboardContainerInput = ({
   dashboardStateManager,
   dashboardCapabilities,
 }: {
-  dashboardCapabilities: DashboardCapabilities;
+  dashboardCapabilities: DashboardAppCapabilities;
   dashboardStateManager: DashboardStateManager;
   incomingEmbeddable?: EmbeddablePackageState;
   lastReloadRequestTime?: number;

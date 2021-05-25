@@ -29,8 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
   const find = getService('find');
 
-  // flaky https://github.com/elastic/kibana/issues/98249
-  describe.skip('dashboard time to visualize security', () => {
+  describe('dashboard time to visualize security', () => {
     before(async () => {
       await esArchiver.load('dashboard/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');
