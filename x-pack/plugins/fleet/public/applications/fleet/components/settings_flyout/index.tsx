@@ -20,7 +20,6 @@ import {
   EuiFlyoutFooter,
   EuiForm,
   EuiFormRow,
-  EuiComboBox,
   EuiCode,
   EuiCodeEditor,
   EuiLink,
@@ -41,6 +40,7 @@ import { isDiffPathProtocol } from '../../../../../common/';
 
 import { SettingsConfirmModal } from './confirm_modal';
 import type { SettingsConfirmModalProps } from './confirm_modal';
+import { HostsInput } from './hosts_input';
 
 import 'brace/mode/yaml';
 import 'brace/theme/textmate';
@@ -59,7 +59,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   const [isLoading, setIsloading] = React.useState(false);
   const { notifications } = useStartServices();
 
-  const fleetServerHostsInput = useComboInput([], (value) => {
+  const fleetServerHostsInput = useComboInput('fleetServerHostsComboBox', [], (value) => {
     if (value.length === 0) {
       return [
         i18n.translate('xpack.fleet.settings.fleetServerHostsEmptyError', {
@@ -83,7 +83,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     }
   });
 
-  const elasticsearchUrlInput = useComboInput([], (value) => {
+  const elasticsearchUrlInput = useComboInput('esHostsComboxBox', [], (value) => {
     if (value.some((v) => !v.match(URL_REGEX))) {
       return [
         i18n.translate('xpack.fleet.settings.elasticHostError', {
@@ -265,8 +265,8 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       </EuiText>
       <EuiSpacer size="m" />
 
-      <EuiFormRow
-        fullWidth
+      <HostsInput
+        {...inputs.fleetServerHosts.props}
         label={i18n.translate('xpack.fleet.settings.fleetServerHostsLabel', {
           defaultMessage: 'Fleet Server hosts',
         })}
@@ -290,24 +290,19 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
             }}
           />
         }
-        {...inputs.fleetServerHosts.formRowProps}
-      >
-        <EuiComboBox fullWidth noSuggestions {...inputs.fleetServerHosts.props} />
-      </EuiFormRow>
+      />
 
       <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
+      <HostsInput
+        {...inputs.elasticsearchUrl.props}
         label={i18n.translate('xpack.fleet.settings.elasticsearchUrlLabel', {
           defaultMessage: 'Elasticsearch hosts',
         })}
         helpText={i18n.translate('xpack.fleet.settings.elasticsearchUrlsHelpTect', {
           defaultMessage: 'Specify the Elasticsearch URLs where agents send data.',
         })}
-        {...inputs.elasticsearchUrl.formRowProps}
-      >
-        <EuiComboBox fullWidth noSuggestions {...inputs.elasticsearchUrl.props} />
-      </EuiFormRow>
+      />
+
       <EuiSpacer size="m" />
       <EuiFormRow
         {...inputs.additionalYamlConfig.formRowProps}
