@@ -384,8 +384,16 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
         ...fields,
         // status and navLinkStatus enums are ordered by reversed priority
         // if multiple updaters wants to change these fields, we will always follow the priority order.
-        status: Math.max(changes.status ?? 0, fields.status ?? 0),
-        navLinkStatus: Math.max(changes.navLinkStatus ?? 0, fields.navLinkStatus ?? 0),
+        status: Math.max(
+          changes.status ?? AppStatus.accessible,
+          fields.status ?? AppStatus.accessible
+        ),
+        navLinkStatus: Math.max(
+          changes.navLinkStatus ?? AppNavLinkStatus.default,
+          fields.navLinkStatus ?? AppNavLinkStatus.default
+        ),
+        // deepLinks takes last update
+        deepLinks: populateDeepLinkDefaults(fields.deepLinks),
       };
     }
   });
@@ -399,7 +407,9 @@ const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
   if (!deepLinks) return [];
   return deepLinks.map((deepLink) => ({
     ...deepLink,
-    navLinkStatus: deepLink.navLinkStatus ?? AppNavLinkStatus.default,
+    navLinkStatus: deepLink.path
+      ? deepLink.navLinkStatus ?? AppNavLinkStatus.default
+      : AppNavLinkStatus.hidden,
     deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
   }));
 };

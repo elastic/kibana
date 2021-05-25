@@ -108,6 +108,7 @@ export function CollapsibleNav({
       appId,
       dataTestSubj: 'collapsibleNavAppLink',
       navigateToApp,
+      navigateToUrl,
       onClick: closeNav,
       ...(needsIcon && { basePath }),
     });
@@ -138,6 +139,7 @@ export function CollapsibleNav({
                     link: customNavLink,
                     basePath,
                     navigateToApp,
+                    navigateToUrl,
                     dataTestSubj: 'collapsibleNavCustomNavLink',
                     onClick: closeNav,
                     externalLink: true,

@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { PublicAppInfo, AppNavLinkStatus, AppStatus } from '../../application';
+import {
+  PublicAppInfo,
+  AppNavLinkStatus,
+  AppStatus,
+  PublicAppDeepLinkInfo,
+} from '../../application';
 import { IBasePath } from '../../http';
 import { NavLinkWrapper } from './nav_link';
 import { appendAppPath } from '../../application/utils';
@@ -23,6 +28,28 @@ export function toNavLink(app: PublicAppInfo, basePath: IBasePath): NavLinkWrapp
       ? app.status === AppStatus.inaccessible
       : app.navLinkStatus === AppNavLinkStatus.hidden,
     disabled: useAppStatus ? false : app.navLinkStatus === AppNavLinkStatus.disabled,
+    baseUrl,
+    href: url,
+    url,
+  });
+}
+
+export function toNavDeepLink(
+  app: PublicAppInfo,
+  deepLink: PublicAppDeepLinkInfo,
+  basePath: IBasePath
+): NavLinkWrapper {
+  const defaultNavStatus = deepLink.navLinkStatus === AppNavLinkStatus.default;
+  const relativeBaseUrl = basePath.prepend(`${app.appRoute!}${deepLink.path!}`);
+  const url = relativeToAbsolute(appendAppPath(relativeBaseUrl, app.defaultPath));
+  const baseUrl = relativeToAbsolute(relativeBaseUrl);
+
+  return new NavLinkWrapper({
+    ...deepLink,
+    ...(app.category ? { category: app.category } : {}),
+    deepLinkPath: relativeBaseUrl,
+    hidden: defaultNavStatus || deepLink.navLinkStatus === AppNavLinkStatus.hidden,
+    disabled: deepLink.navLinkStatus === AppNavLinkStatus.disabled,
     baseUrl,
     href: url,
     url,

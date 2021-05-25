@@ -10,10 +10,10 @@ import { sortBy } from 'lodash';
 import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-import { InternalApplicationStart } from '../../application';
+import { InternalApplicationStart, PublicAppDeepLinkInfo, PublicAppInfo } from '../../application';
 import { HttpStart } from '../../http';
 import { ChromeNavLink, NavLinkWrapper } from './nav_link';
-import { toNavLink } from './to_nav_link';
+import { toNavDeepLink, toNavLink } from './to_nav_link';
 
 interface StartDeps {
   application: InternalApplicationStart;
@@ -89,7 +89,13 @@ export class NavLinksService {
         return new Map(
           [...apps]
             .filter(([, app]) => !app.chromeless)
-            .map(([appId, app]) => [appId, toNavLink(app, http.basePath)])
+            .reduce((navLinks: Array<[string, NavLinkWrapper]>, [appId, app]) => {
+              navLinks.push(
+                [appId, toNavLink(app, http.basePath)],
+                ...toNavDeepLinks(app, app.deepLinks, http)
+              );
+              return navLinks;
+            }, [])
         );
       })
     );
@@ -162,4 +168,19 @@ function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
     [...navLinks.values()].map((link) => link.properties),
     'order'
   );
+}
+
+function toNavDeepLinks(
+  app: PublicAppInfo,
+  deepLinks: PublicAppDeepLinkInfo[],
+  http: HttpStart
+): Array<[string, NavLinkWrapper]> {
+  if (!deepLinks) return [];
+  return deepLinks.reduce((navDeepLinks: Array<[string, NavLinkWrapper]>, deepLink) => {
+    if (deepLink.path) {
+      navDeepLinks.push([deepLink.id, toNavDeepLink(app, deepLink, http.basePath)]);
+    }
+    navDeepLinks.push(...toNavDeepLinks(app, deepLink.deepLinks, http));
+    return navDeepLinks;
+  }, []);
 }

@@ -66,6 +66,11 @@ export interface ChromeNavLink {
   readonly href: string;
 
   /**
+   * Path used by deepLinks to navigate, composed by the main app's `baseUrl` and the deepLink `path`.
+   */
+  readonly deepLinkPath?: string;
+
+  /**
    * Disables a link from being clickable.
    *
    * @internalRemarks
