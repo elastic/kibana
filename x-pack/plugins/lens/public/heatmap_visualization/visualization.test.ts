@@ -8,7 +8,6 @@
 import {
   filterOperationsAxis,
   getHeatmapVisualization,
-  isBucketed,
   isCellValueSupported,
 } from './visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
@@ -115,7 +114,7 @@ describe('heatmap', () => {
             groupId: GROUP_ID.Y,
             groupLabel: 'Vertical axis',
             accessors: [{ columnId: 'y-accessor' }],
-            filterOperations: isBucketed,
+            filterOperations: filterOperationsAxis,
             supportsMoreColumns: false,
             required: false,
             dataTestSubj: 'lnsHeatmap_yDimensionPanel',
@@ -160,7 +159,7 @@ describe('heatmap', () => {
             groupId: GROUP_ID.Y,
             groupLabel: 'Vertical axis',
             accessors: [],
-            filterOperations: isBucketed,
+            filterOperations: filterOperationsAxis,
             supportsMoreColumns: true,
             required: false,
             dataTestSubj: 'lnsHeatmap_yDimensionPanel',
