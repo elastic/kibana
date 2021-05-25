@@ -9,8 +9,9 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiLink, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import { WaterfallChartTooltip } from './styles';
 import { FIXED_AXIS_HEIGHT } from './constants';
-import { SidebarTooltip } from './sidebar_tooltip';
+import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 
 interface Props {
   ariaLabel: string;
@@ -81,8 +82,9 @@ export const MiddleTruncatedText = ({ ariaLabel, text, onClick, setButtonRef, ur
       <EuiScreenReaderOnly>
         <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
       </EuiScreenReaderOnly>
-      <EuiToolTip
-        content={<SidebarTooltip {...{ text, url }} />}
+      <WaterfallChartTooltip
+        as={EuiToolTip}
+        content={<WaterfallTooltipContent {...{ text, url }} />}
         position="top"
         data-test-subj="middleTruncatedTextToolTip"
       >
@@ -105,7 +107,7 @@ export const MiddleTruncatedText = ({ ariaLabel, text, onClick, setButtonRef, ur
             </InnerContainer>
           )}
         </>
-      </EuiToolTip>
+      </WaterfallChartTooltip>
       <span>
         <EuiLink href={url} external target="_blank">
           <EuiScreenReaderOnly>
