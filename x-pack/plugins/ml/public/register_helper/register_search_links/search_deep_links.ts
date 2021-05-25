@@ -7,35 +7,35 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { AppSearchDeepLink } from 'src/core/public';
+import type { AppDeepLink } from 'src/core/public';
 import { ML_PAGES } from '../../../common/constants/ml_url_generator';
 
-const OVERVIEW_LINK_SEARCH_DEEP_LINK: AppSearchDeepLink = {
-  id: 'mlOverviewSearchDeepLink',
-  title: i18n.translate('xpack.ml.searchDeepLink.overview', {
+const OVERVIEW_LINK_DEEP_LINK: AppDeepLink = {
+  id: 'mlOverviewDeepLink',
+  title: i18n.translate('xpack.ml.deepLink.overview', {
     defaultMessage: 'Overview',
   }),
   path: `/${ML_PAGES.OVERVIEW}`,
 };
 
-const ANOMALY_DETECTION_SEARCH_DEEP_LINK: AppSearchDeepLink = {
-  id: 'mlAnomalyDetectionSearchDeepLink',
-  title: i18n.translate('xpack.ml.searchDeepLink.anomalyDetection', {
+const ANOMALY_DETECTION_DEEP_LINK: AppDeepLink = {
+  id: 'mlAnomalyDetectionDeepLink',
+  title: i18n.translate('xpack.ml.deepLink.anomalyDetection', {
     defaultMessage: 'Anomaly Detection',
   }),
   path: `/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`,
 };
 
-const DATA_FRAME_ANALYTICS_SEARCH_DEEP_LINK: AppSearchDeepLink = {
-  id: 'mlDataFrameAnalyticsSearchDeepLink',
-  title: i18n.translate('xpack.ml.searchDeepLink.dataFrameAnalytics', {
+const DATA_FRAME_ANALYTICS_DEEP_LINK: AppDeepLink = {
+  id: 'mlDataFrameAnalyticsDeepLink',
+  title: i18n.translate('xpack.ml.deepLink.dataFrameAnalytics', {
     defaultMessage: 'Data Frame Analytics',
   }),
   path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`,
-  searchDeepLinks: [
+  deepLinks: [
     {
-      id: 'mlTrainedModelsSearchDeepLink',
-      title: i18n.translate('xpack.ml.searchDeepLink.trainedModels', {
+      id: 'mlTrainedModelsDeepLink',
+      title: i18n.translate('xpack.ml.deepLink.trainedModels', {
         defaultMessage: 'Trained Models',
       }),
       path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_MODELS_MANAGE}`,
@@ -43,47 +43,47 @@ const DATA_FRAME_ANALYTICS_SEARCH_DEEP_LINK: AppSearchDeepLink = {
   ],
 };
 
-const DATA_VISUALIZER_SEARCH_DEEP_LINK: AppSearchDeepLink = {
-  id: 'mlDataVisualizerSearchDeepLink',
-  title: i18n.translate('xpack.ml.searchDeepLink.dataVisualizer', {
+const DATA_VISUALIZER_DEEP_LINK: AppDeepLink = {
+  id: 'mlDataVisualizerDeepLink',
+  title: i18n.translate('xpack.ml.deepLink.dataVisualizer', {
     defaultMessage: 'Data Visualizer',
   }),
   path: `/${ML_PAGES.DATA_VISUALIZER}`,
 };
 
-const FILE_UPLOAD_SEARCH_DEEP_LINK: AppSearchDeepLink = {
-  id: 'mlFileUploadSearchDeepLink',
-  title: i18n.translate('xpack.ml.searchDeepLink.fileUpload', {
+const FILE_UPLOAD_DEEP_LINK: AppDeepLink = {
+  id: 'mlFileUploadDeepLink',
+  title: i18n.translate('xpack.ml.deepLink.fileUpload', {
     defaultMessage: 'File Upload',
   }),
   path: `/${ML_PAGES.DATA_VISUALIZER_FILE}`,
 };
 
-const INDEX_DATA_VISUALIZER_SEARCH_DEEP_LINK: AppSearchDeepLink = {
-  id: 'mlIndexDataVisualizerSearchDeepLink',
-  title: i18n.translate('xpack.ml.searchDeepLink.indexDataVisualizer', {
+const INDEX_DATA_VISUALIZER_DEEP_LINK: AppDeepLink = {
+  id: 'mlIndexDataVisualizerDeepLink',
+  title: i18n.translate('xpack.ml.deepLink.indexDataVisualizer', {
     defaultMessage: 'Index Data Visualizer',
   }),
   path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_SELECT}`,
 };
 
-const SETTINGS_SEARCH_DEEP_LINK: AppSearchDeepLink = {
-  id: 'mlSettingsSearchDeepLink',
-  title: i18n.translate('xpack.ml.searchDeepLink.settings', {
+const SETTINGS_DEEP_LINK: AppDeepLink = {
+  id: 'mlSettingsDeepLink',
+  title: i18n.translate('xpack.ml.deepLink.settings', {
     defaultMessage: 'Settings',
   }),
   path: `/${ML_PAGES.SETTINGS}`,
-  searchDeepLinks: [
+  deepLinks: [
     {
-      id: 'mlCalendarSettingsSearchDeepLink',
-      title: i18n.translate('xpack.ml.searchDeepLink.calendarSettings', {
+      id: 'mlCalendarSettingsDeepLink',
+      title: i18n.translate('xpack.ml.deepLink.calendarSettings', {
         defaultMessage: 'Calendars',
       }),
       path: `/${ML_PAGES.CALENDARS_MANAGE}`,
     },
     {
-      id: 'mlFilterListsSettingsSearchDeepLink',
-      title: i18n.translate('xpack.ml.searchDeepLink.filterListsSettings', {
+      id: 'mlFilterListsSettingsDeepLink',
+      title: i18n.translate('xpack.ml.deepLink.filterListsSettings', {
         defaultMessage: 'Filter Lists',
       }),
       path: `/${ML_PAGES.SETTINGS}`, // Link to settings page as read only users cannot view filter lists.
@@ -91,19 +91,19 @@ const SETTINGS_SEARCH_DEEP_LINK: AppSearchDeepLink = {
   ],
 };
 
-export function getSearchDeepLinks(isFullLicense: boolean) {
-  const deepLinks: AppSearchDeepLink[] = [
-    DATA_VISUALIZER_SEARCH_DEEP_LINK,
-    FILE_UPLOAD_SEARCH_DEEP_LINK,
-    INDEX_DATA_VISUALIZER_SEARCH_DEEP_LINK,
+export function getDeepLinks(isFullLicense: boolean) {
+  const deepLinks: AppDeepLink[] = [
+    DATA_VISUALIZER_DEEP_LINK,
+    FILE_UPLOAD_DEEP_LINK,
+    INDEX_DATA_VISUALIZER_DEEP_LINK,
   ];
 
   if (isFullLicense === true) {
     deepLinks.push(
-      OVERVIEW_LINK_SEARCH_DEEP_LINK,
-      ANOMALY_DETECTION_SEARCH_DEEP_LINK,
-      DATA_FRAME_ANALYTICS_SEARCH_DEEP_LINK,
-      SETTINGS_SEARCH_DEEP_LINK
+      OVERVIEW_LINK_DEEP_LINK,
+      ANOMALY_DETECTION_DEEP_LINK,
+      DATA_FRAME_ANALYTICS_DEEP_LINK,
+      SETTINGS_DEEP_LINK
     );
   }
 
