@@ -8,6 +8,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   EuiBasicTable,
+  EuiBadge,
   EuiButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -357,6 +358,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       render: (host: string, agent: Agent) => (
         <EuiLink href={getHref('fleet_agent_details', { agentId: agent.id })}>
           {safeMetadata(host)}
+          {agent.type === 'EPHEMERAL' && (
+            <EuiBadge color="secondary" style={{ marginLeft: '1em' }}>
+              <FormattedMessage
+                id="xpack.fleet.agentList.hostAgentType"
+                defaultMessage="Ephmeral"
+              />
+            </EuiBadge>
+          )}
         </EuiLink>
       ),
     },

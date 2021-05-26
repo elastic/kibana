@@ -58,6 +58,13 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             ),
           },
           {
+            title: i18n.translate('xpack.fleet.agentDetails.agentTypeLabel', {
+              defaultMessage: 'Agent type',
+            }),
+            // Title case. Leave first character unchanged. Lowercase the rest.
+            description: `${agent.type[0]}${agent.type.slice(1).toLowerCase()}`,
+          },
+          {
             title: i18n.translate('xpack.fleet.agentDetails.versionLabel', {
               defaultMessage: 'Agent version',
             }),
