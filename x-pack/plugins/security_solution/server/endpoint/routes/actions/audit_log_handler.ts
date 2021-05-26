@@ -33,6 +33,13 @@ export const actionsLogRequestHandler = (
               agents: req.params.agent_id,
             },
           },
+          sort: [
+            {
+              '@timestamp': {
+                order: 'desc',
+              },
+            },
+          ],
         },
       });
     } catch (error) {
