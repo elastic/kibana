@@ -6,10 +6,21 @@
  */
 
 export const uptimeRuleFieldMap = {
+  // common fields
   'monitor.id': {
     type: 'keyword',
   },
-  'monitor.url': {
+  'url.full': {
+    type: 'keyword',
+  },
+  reason: {
+    type: 'text',
+  },
+  // monitor status alert fields
+  'error.message': {
+    type: 'text',
+  },
+  'agent.name': {
     type: 'keyword',
   },
   'monitor.name': {
@@ -18,14 +29,49 @@ export const uptimeRuleFieldMap = {
   'monitor.type': {
     type: 'keyword',
   },
-  reason: {
-    type: 'text',
-  },
   'observer.geo.name': {
     type: 'keyword',
   },
-  'error.message': {
+  // tls alert fields
+  'cert.count': {
+    type: 'number',
+  },
+  'cert_status.aging_count': {
+    type: 'number',
+  },
+  'cert_status.aging_common_name_and_date': {
     type: 'text',
+  },
+  'cert_status.expiring_count': {
+    type: 'number',
+  },
+  'cert_status.expiring_common_name_and_date': {
+    type: 'text',
+  },
+  'cert_status.has_aging': {
+    type: 'boolean',
+  },
+  'cert_status.has_expired': {
+    type: 'boolean',
+  },
+  // anomaly alert fields
+  'anomaly.severity': {
+    type: 'keyword',
+  },
+  'anomaly.severity_score': {
+    type: 'number',
+  },
+  'anomaly.start': {
+    type: 'date',
+  },
+  'anomaly.slowest_response': {
+    type: 'number',
+  },
+  'anomaly.expected_response': {
+    type: 'number',
+  },
+  'anomaly.observer_location': {
+    type: 'keyword',
   },
 } as const;
 
