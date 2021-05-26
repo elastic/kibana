@@ -13,7 +13,7 @@ import _ from 'lodash';
 import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
-import { FeatureCollection } from 'geojson';
+import { FeatureCollection, Feature } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import {
   AGG_TYPE,
@@ -103,7 +103,7 @@ export interface ILayer {
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
-  queryForTileMeta(mbMap: MbMap): any;
+  queryForTileMeta(mbMap: MbMap): Feature[] | null;
   getDescriptor(): LayerDescriptor;
   getGeoFieldNames(): string[];
   getStyleMetaDescriptor(): Promise<StyleMetaDescriptor | null>;
@@ -170,7 +170,7 @@ export class AbstractLayer implements ILayer {
     return this._descriptor;
   }
 
-  queryForTileMeta(mbMap: MbMap): any {
+  queryForTileMeta(mbMap: MbMap): Feature[] | null {
     return null;
   }
 

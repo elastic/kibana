@@ -8,6 +8,7 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
+import { Feature } from 'geojson';
 import { MbMap } from './mb_map';
 import {
   mapExtentChanged,
@@ -74,8 +75,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
       dispatch(setAreTilesLoaded(layerId, areTilesLoaded));
     },
-    updateCounts(layerId: string, foobar: any) {
-      dispatch(updateCounts(layerId, foobar));
+    updateCounts(layerId: string, features: Feature[]) {
+      dispatch(updateCounts(layerId, features));
     },
   };
 }

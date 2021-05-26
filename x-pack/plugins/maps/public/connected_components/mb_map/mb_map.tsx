@@ -16,6 +16,7 @@ import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { Feature } from 'geojson';
 
 import { mapboxgl } from '@kbn/mapbox-gl';
 
@@ -71,7 +72,7 @@ export interface Props {
   geoFields: GeoFieldWithIndex[];
   renderTooltipContent?: RenderToolTipContent;
   setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
-  updateCounts: (layerId: string, foobar: any) => void;
+  updateCounts: (layerId: string, features: Feature[]) => void;
 }
 
 interface State {
@@ -145,7 +146,9 @@ export class MbMap extends Component<Props, State> {
         if (this.state.mbMap) {
           if (layer.isVisible()) {
             const mbFeatures = layer.queryForTileMeta(this.state.mbMap);
-            this.props.updateCounts(layerId, mbFeatures);
+            if (mbFeatures !== null) {
+              this.props.updateCounts(layerId, mbFeatures);
+            }
           }
         }
       });

@@ -8,6 +8,7 @@
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { Query } from 'src/plugins/data/public';
+import { Feature } from 'geojson';
 import { MapStoreState } from '../reducers/store';
 import {
   getLayerById,
@@ -581,7 +582,7 @@ export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
   };
 }
 
-export function updateCounts(layerId: string, mbMetaFeatures: any) {
+export function updateCounts(layerId: string, mbMetaFeatures: Feature[]) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState

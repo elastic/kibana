@@ -61,7 +61,6 @@ export class TiledVectorLayer extends VectorLayer {
 
   getCustomIconAndTooltipContent() {
     const tileMetas = this.getMetaFromTiles();
-
     if (!tileMetas) {
       return {
         icon: this.getCurrentStyle().getIcon(),
@@ -69,6 +68,8 @@ export class TiledVectorLayer extends VectorLayer {
         areResultsTrimmed: false,
       };
     }
+
+    // todo - use no results icon
 
     const shapeTypeCountMeta: IVectorShapeTypeCounts = tileMetas.reduce(
       (accumulator: IVectorShapeTypeCounts, tileMeta: any) => {
@@ -101,10 +102,11 @@ export class TiledVectorLayer extends VectorLayer {
       shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
       shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] > 0 &&
       shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
+
     return {
       icon: this.getCurrentStyle().getIconFromGeometryTypes(isLinesOnly, isPointsOnly),
-      tooltipContent: 'foobar',
-      areResultsTrimmed: false,
+      tooltipContent: 'foobar', // todo - actually construct tooltip content
+      areResultsTrimmed: false, // todo - actually get trimmed info
     };
   }
 
@@ -232,7 +234,7 @@ export class TiledVectorLayer extends VectorLayer {
     this._setMbCentroidProperties(mbMap, sourceMeta.layerName);
   }
 
-  queryForTileMeta(mbMap: MbMap): any {
+  queryForTileMeta(mbMap: MbMap): Feature[] | null {
     // @ts-ignore
     const mbSource = mbMap.getSource(this._getMbSourceId());
     if (!mbSource) {
@@ -241,11 +243,11 @@ export class TiledVectorLayer extends VectorLayer {
 
     const sourceDataRequest = this.getSourceDataRequest();
     if (!sourceDataRequest) {
-      return;
+      return null;
     }
     const sourceMeta: MVTSingleLayerVectorSourceConfig = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
     if (sourceMeta.layerName === '') {
-      return;
+      return null;
     }
 
     const mbFeatures = mbMap.querySourceFeatures(this._getMbSourceId(), {
@@ -253,7 +255,7 @@ export class TiledVectorLayer extends VectorLayer {
       filter: ['==', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], true],
     });
 
-    return mbFeatures;
+    return mbFeatures as Feature[];
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
