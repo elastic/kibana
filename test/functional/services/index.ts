@@ -29,7 +29,7 @@ import { DocTableService } from './doc_table';
 import { EmbeddingProvider } from './embedding';
 import { FilterBarService } from './filter_bar';
 import { FlyoutProvider } from './flyout';
-import { GlobalNavProvider } from './global_nav';
+import { GlobalNavService } from './global_nav';
 import { InspectorProvider } from './inspector';
 import { FieldEditorService } from './field_editor';
 import { ManagementMenuProvider } from './management';
@@ -78,7 +78,7 @@ export const services = {
   fieldEditor: FieldEditorService,
   vegaDebugInspector: VegaDebugInspectorViewProvider,
   appsMenu: AppsMenuProvider,
-  globalNav: GlobalNavProvider,
+  globalNav: GlobalNavService,
   toasts: ToastsProvider,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
   elasticChart: ElasticChartProvider,
