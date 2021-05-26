@@ -14,7 +14,6 @@ export {
 export {
   FieldEditorFlyoutContentContainer,
   Props as FieldEditorFlyoutContentContainerProps,
-  FieldEditorContext,
 } from './field_editor_flyout_content_container';
 
 export { getDeleteFieldProvider, Props as DeleteFieldProviderProps } from './delete_field_provider';
