@@ -29,16 +29,12 @@ export interface Props {
   drawState?: DrawState;
   isDrawingFilter: boolean;
   mbMap: MbMap;
+  geoFieldNames: string[];
 }
 
 export class DrawFilterControl extends Component<Props, {}> {
   _onDraw = async (e: { features: Feature[] }) => {
-    if (
-      !e.features.length ||
-      !this.props.drawState ||
-      !this.props.drawState.geoFieldName ||
-      !this.props.drawState.indexPatternId
-    ) {
+    if (!e.features.length || !this.props.drawState) {
       return;
     }
 
@@ -61,7 +57,7 @@ export class DrawFilterControl extends Component<Props, {}> {
       filter = createDistanceFilterWithMeta({
         alias: this.props.drawState.filterLabel ? this.props.drawState.filterLabel : '',
         distanceKm,
-        geoFieldNames: [this.props.drawState.geoFieldName],
+        geoFieldNames: this.props.geoFieldNames,
         point: [
           _.round(circle.properties.center[0], precision),
           _.round(circle.properties.center[1], precision),
@@ -77,7 +73,7 @@ export class DrawFilterControl extends Component<Props, {}> {
           this.props.drawState.drawType === DRAW_TYPE.BOUNDS
             ? getBoundingBoxGeometry(geometry)
             : geometry,
-        geoFieldNames: [this.props.drawState.geoFieldName],
+        geoFieldNames: this.props.geoFieldNames,
         geometryLabel: this.props.drawState.geometryLabel ? this.props.drawState.geometryLabel : '',
         relation: this.props.drawState.relation
           ? this.props.drawState.relation

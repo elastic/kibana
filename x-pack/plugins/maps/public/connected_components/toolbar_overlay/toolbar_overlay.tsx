@@ -12,29 +12,24 @@ import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
 import { FitToData } from './fit_to_data';
-import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 
 export interface Props {
   addFilters?: ((filters: Filter[], actionId: string) => Promise<void>) | null;
-  geoFields: GeoFieldWithIndex[];
+  showToolsControl: boolean;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
 }
 
 export function ToolbarOverlay(props: Props) {
   function renderToolsControl() {
-    const { addFilters, geoFields, getFilterActions, getActionContext } = props;
-    if (!addFilters || !geoFields.length) {
+    const { addFilters, showToolsControl, getFilterActions, getActionContext } = props;
+    if (!addFilters || !showToolsControl) {
       return null;
     }
 
     return (
       <EuiFlexItem>
-        <ToolsControl
-          geoFields={geoFields}
-          getFilterActions={getFilterActions}
-          getActionContext={getActionContext}
-        />
+        <ToolsControl getFilterActions={getFilterActions} getActionContext={getActionContext} />
       </EuiFlexItem>
     );
   }

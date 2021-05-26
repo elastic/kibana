@@ -20,21 +20,15 @@ jest.mock('../../kibana_services', () => {
 import { ToolbarOverlay } from './toolbar_overlay';
 
 test('Must render zoom tools', async () => {
-  const component = shallow(<ToolbarOverlay geoFields={[]} />);
+  const component = shallow(<ToolbarOverlay showToolsControl={false} />);
   expect(component).toMatchSnapshot();
 });
 
 test('Must zoom tools and draw filter tools', async () => {
-  const geoFieldWithIndex = {
-    geoFieldName: 'myGeoFieldName',
-    geoFieldType: 'geo_point',
-    indexPatternTitle: 'myIndex',
-    indexPatternId: '1',
-  };
   const component = shallow(
     <ToolbarOverlay
       addFilters={async (filters: Filter[], actionId: string) => {}}
-      geoFields={[geoFieldWithIndex]}
+      showToolsControl={true}
     />
   );
   expect(component).toMatchSnapshot();
