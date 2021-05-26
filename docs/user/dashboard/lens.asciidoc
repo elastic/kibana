@@ -13,11 +13,9 @@ image:dashboard/images/lens.png[Lens]
 
 Open *Lens*, then explore the fields in your data. The list of fields are determined by the index pattern and time filter.
 
-. On the dashboard, click *Create panel*.
+. On the dashboard, click *Create visualization*.
 
-. On the *New visualization* window, click *Lens*.
-
-. <<set-time-filter,Set the time filter>>. 
+. In *Lens*, <<set-time-filter,set the time filter>>. 
 
 . To view the fields in the a different index pattern, click the index pattern, then select a different index pattern from the dropdown.
 
@@ -56,11 +54,11 @@ TIP: *Other* can equal more than 100% by a small amount.
 
 [float]
 [[create-the-visualization-panel]]
-==== Create the visualization panel
+==== Create visualizations
 
-Drag and drop the fields on to the visualization builder, then 
+Drag and drop the fields on to the visualization builder, then customize the visualization.
 
-. Drag and drop the fields to the visualization builder.
+. Drag and drop the fields on to the visualization builder.
 
 . To change the visualization type, use the following options:
 
@@ -102,7 +100,7 @@ For more information about adding fields to index patterns and Painless scriptin
 
 [float]
 [[drag-and-drop-keyboard-navigation]]
-===== Create visualization panels with keyboard navigation
+===== Create visualizations with keyboard navigation
 
 *Lens* has a fully accessible, continuously improved drag and drop system, which allows you to use a keyboard instead of a mouse.
 
