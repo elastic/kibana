@@ -14,6 +14,8 @@ import {
   EuiPageContentBody,
   EuiSpacer,
   EuiTitle,
+  hexToHsv,
+  hsvToHex,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
@@ -381,7 +383,7 @@ export class ManageSpacePage extends Component<Props, State> {
       id,
       description,
       initials: avatarType !== 'image' ? initials : '',
-      color,
+      color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : color, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits
       disabledFeatures,
       imageUrl: avatarType === 'image' ? imageUrl : '',
     };

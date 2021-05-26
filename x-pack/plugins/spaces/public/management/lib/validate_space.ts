@@ -109,12 +109,21 @@ export class SpaceValidator {
       return valid();
     }
 
-    if (space.avatarType !== 'image' && !space.initials) {
-      return invalid(
-        i18n.translate('xpack.spaces.management.validateSpace.requiredInitialsErrorMessage', {
-          defaultMessage: 'Enter initials.',
-        })
-      );
+    if (space.avatarType !== 'image') {
+      if (!space.initials) {
+        return invalid(
+          i18n.translate('xpack.spaces.management.validateSpace.requiredInitialsErrorMessage', {
+            defaultMessage: 'Enter initials.',
+          })
+        );
+      }
+      if (space.initials.length > 2) {
+        return invalid(
+          i18n.translate('xpack.spaces.management.validateSpace.maxLengthInitialsErrorMessage', {
+            defaultMessage: 'Enter no more than 2 characters.',
+          })
+        );
+      }
     }
 
     return valid();

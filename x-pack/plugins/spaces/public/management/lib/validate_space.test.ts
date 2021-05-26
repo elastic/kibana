@@ -134,7 +134,7 @@ describe('validateURLIdentifier', () => {
 describe('validateAvatarInitials', () => {
   it('it allows valid initials', () => {
     const space = {
-      initials: 'foo',
+      initials: 'FF',
     };
 
     expect(validator.validateAvatarInitials(space)).toHaveProperty('isInvalid', false);
@@ -143,6 +143,14 @@ describe('validateAvatarInitials', () => {
   it('it requires a non-empty value', () => {
     const space = {
       initials: '',
+    };
+
+    expect(validator.validateAvatarInitials(space)).toHaveProperty('isInvalid', true);
+  });
+
+  it('must not exceed 2 characters', () => {
+    const space = {
+      initials: 'FFF',
     };
 
     expect(validator.validateAvatarInitials(space)).toHaveProperty('isInvalid', true);

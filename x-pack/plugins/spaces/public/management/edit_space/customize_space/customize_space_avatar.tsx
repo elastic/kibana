@@ -27,7 +27,7 @@ import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 import { MAX_SPACE_INITIALS } from '../../../../common';
 import { encode, imageTypes } from '../../../../common/lib/dataurl';
-import { getSpaceAvatarComponent, getSpaceInitials } from '../../../space_avatar';
+import { getSpaceAvatarComponent } from '../../../space_avatar';
 import type { SpaceValidator } from '../../lib';
 import type { FormValues } from '../manage_space_page';
 
@@ -37,26 +37,12 @@ interface Props {
   validator: SpaceValidator;
 }
 
-interface State {
-  initialsHasFocus: boolean;
-  pendingInitials?: string | null;
-}
-
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))
 );
 
-export class CustomizeSpaceAvatar extends Component<Props, State> {
-  private initialsRef: HTMLInputElement | null = null;
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      initialsHasFocus: false,
-    };
-  }
-
+export class CustomizeSpaceAvatar extends Component<Props> {
   private storeImageChanges(imageUrl: string) {
     this.props.onChange({
       ...this.props.space,
@@ -304,40 +290,8 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
     );
   }
 
-  public initialsInputRef = (ref: HTMLInputElement) => {
-    if (ref) {
-      this.initialsRef = ref;
-      this.initialsRef.addEventListener('focus', this.onInitialsFocus);
-      this.initialsRef.addEventListener('blur', this.onInitialsBlur);
-    } else {
-      if (this.initialsRef) {
-        this.initialsRef.removeEventListener('focus', this.onInitialsFocus);
-        this.initialsRef.removeEventListener('blur', this.onInitialsBlur);
-        this.initialsRef = null;
-      }
-    }
-  };
-
-  public onInitialsFocus = () => {
-    this.setState({
-      initialsHasFocus: true,
-      pendingInitials: getSpaceInitials(this.props.space),
-    });
-  };
-
-  public onInitialsBlur = () => {
-    this.setState({
-      initialsHasFocus: false,
-      pendingInitials: null,
-    });
-  };
-
   public onInitialsChange = (e: ChangeEvent<HTMLInputElement>) => {
     const initials = (e.target.value || '').substring(0, MAX_SPACE_INITIALS);
-
-    this.setState({
-      pendingInitials: initials,
-    });
 
     this.props.onChange({
       ...this.props.space,

@@ -81,7 +81,7 @@ export class CustomizeSpace extends Component<Props, State> {
             <EuiFieldText
               name="name"
               data-test-subj="addSpaceName"
-              value={name}
+              value={name ?? ''}
               onChange={this.onNameChange}
               isInvalid={validator.validateSpaceName(this.props.space).isInvalid}
               fullWidth
@@ -108,7 +108,7 @@ export class CustomizeSpace extends Component<Props, State> {
             <EuiTextArea
               data-test-subj="descriptionSpaceText"
               name="description"
-              value={description}
+              value={description ?? ''}
               onChange={this.onDescriptionChange}
               isInvalid={validator.validateSpaceDescription(this.props.space).isInvalid}
               fullWidth
@@ -135,7 +135,7 @@ export class CustomizeSpace extends Component<Props, State> {
             >
               <EuiFieldText
                 data-test-subj="spaceURLDisplay"
-                value={this.props.space.id}
+                value={this.props.space.id ?? ''}
                 onChange={this.onSpaceIdentifierChange}
                 isInvalid={this.props.validator.validateURLIdentifier(this.props.space).isInvalid}
                 fullWidth
