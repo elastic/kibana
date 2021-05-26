@@ -59,10 +59,10 @@ describe('Processor: Convert', () => {
       form,
     } = testBed;
 
-    // Click submit button with only the type defined
+    // Click submit button with only the processor type defined
     await saveNewProcessor();
 
-    // Expect form error as "field" is required parameter
+    // Expect form error as "field" and "type" are required parameters
     expect(form.getErrorsMessages()).toEqual([
       'A field value is required.',
       'A type value is required.',
