@@ -7,7 +7,7 @@
  */
 
 import './typings';
-import {
+import type {
   Map,
   GeoJSONSource,
   VectorSource,
