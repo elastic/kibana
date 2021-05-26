@@ -90,8 +90,6 @@ export interface IVectorStyle extends IStyle {
     previousFields: IField[],
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
-  pluckStyleMetaFromTileMeta(foobar: any): Promise<StyleMetaDescriptor>;
-  pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
   isTimeAware: () => boolean;
   getIcon: () => ReactElement<any>;
   getIconFromGeometryTypes: (isLinesOnly: boolean, isPointsOnly: boolean) => ReactElement<any>;

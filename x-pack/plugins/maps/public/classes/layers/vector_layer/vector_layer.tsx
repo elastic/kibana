@@ -45,6 +45,7 @@ import {
   DynamicStylePropertyOptions,
   MapFilters,
   MapQuery,
+  StyleMetaDescriptor,
   VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
@@ -82,21 +83,30 @@ export interface VectorLayerArguments {
 
 export interface IVectorLayer extends ILayer {
   getFields(): Promise<IField[]>;
+
   getStyleEditorFields(): Promise<IField[]>;
+
   getJoins(): InnerJoin[];
+
   getValidJoins(): InnerJoin[];
+
   getSource(): IVectorSource;
+
   getFeatureById(id: string | number): Feature | null;
+
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+
   hasJoins(): boolean;
+
   canShowTooltip(): boolean;
+
   getLeftJoinFields(): Promise<IField[]>;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static type = LAYER_TYPE.VECTOR;
 
-  protected readonly _style: IVectorStyle;
+  protected readonly _style: VectorStyle;
   private readonly _joins: InnerJoin[];
 
   static createDescriptor(
@@ -149,7 +159,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this._style;
   }
 
-  getCurrentStyle(): IVectorStyle {
+  getCurrentStyle(): VectorStyle {
     return this._style;
   }
 
@@ -1053,5 +1063,14 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   async getLicensedFeatures() {
     return await this._source.getLicensedFeatures();
+  }
+
+  async getStyleMetaDescriptor(): Promise<StyleMetaDescriptor | null> {
+    const sourceDataRequest = this.getSourceDataRequest();
+    const style = this.getCurrentStyle();
+    if (!style || !sourceDataRequest) {
+      return null;
+    }
+    return await style.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
   }
 }

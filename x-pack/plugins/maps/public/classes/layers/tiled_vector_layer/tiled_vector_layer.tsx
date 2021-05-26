@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   GeoJSONSource as MbGeoJSONSource,
   Map as MbMap,
@@ -26,6 +25,7 @@ import { VectorLayer, VectorLayerArguments } from '../vector_layer';
 import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
 import { DataRequestContext } from '../../../actions';
 import {
+  StyleMetaDescriptor,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -319,5 +319,15 @@ export class TiledVectorLayer extends VectorLayer {
 
   getFeatureById(id: string | number): Feature | null {
     return null;
+  }
+
+  async getStyleMetaDescriptor(): Promise<StyleMetaDescriptor | null> {
+    const style = this.getCurrentStyle();
+    if (!style) {
+      return null;
+    }
+
+    const metaFromTiles = this.getMetaFromTiles();
+    return await style.pluckStyleMetaFromTileMeta(metaFromTiles);
   }
 }

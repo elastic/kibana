@@ -16,7 +16,6 @@ import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
 import {
   KBN_IS_CENTROID_FEATURE,
-  LAYER_STYLE_TYPE,
   LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
 } from '../../common/constants';
@@ -49,7 +48,6 @@ import { IVectorLayer } from '../classes/layers/vector_layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
 import { scaleBounds, turfBboxToBounds } from '../../common/elasticsearch_util';
-import { IVectorStyle } from '../classes/styles/vector/vector_style';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
@@ -95,38 +93,16 @@ export function updateStyleMeta(layerId: string | null) {
       return;
     }
 
-    if (
-      layer.getType() === LAYER_TYPE.VECTOR ||
-      layer.getType() === LAYER_TYPE.HEATMAP ||
-      layer.getType() === LAYER_TYPE.BLENDED_VECTOR
-    ) {
-      const sourceDataRequest = layer.getSourceDataRequest();
-      const style = layer.getCurrentStyle();
-      if (!style || !sourceDataRequest || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
-        return;
-      }
-      const styleMeta = await (style as IVectorStyle).pluckStyleMetaFromSourceDataRequest(
-        sourceDataRequest
-      );
-      dispatch({
-        type: SET_LAYER_STYLE_META,
-        layerId,
-        styleMeta,
-      });
-    } else if (layer.getType() === LAYER_TYPE.TILED_VECTOR) {
-      const style = layer.getCurrentStyle();
-      if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
-        return;
-      }
-
-      const metaFromTiles = layer.getMetaFromTiles();
-      const styleMeta = await (style as IVectorStyle).pluckStyleMetaFromTileMeta(metaFromTiles);
-      dispatch({
-        type: SET_LAYER_STYLE_META,
-        layerId,
-        styleMeta,
-      });
+    const styleMeta = await layer.getStyleMetaDescriptor();
+    if (!styleMeta) {
+      return;
     }
+
+    dispatch({
+      type: SET_LAYER_STYLE_META,
+      layerId,
+      styleMeta,
+    });
   };
 }
 
