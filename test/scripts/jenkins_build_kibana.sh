@@ -38,5 +38,25 @@ node scripts/ship_ci_stats \
   --metrics target/optimizer_bundle_metrics.json \
   --metrics packages/kbn-ui-shared-deps/target/metrics.json
 
+linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
+installDir="$KIBANA_DIR/install/kibana"
+mkdir -p "$installDir"
+tar -xzf "$linuxBuild" -C "$installDir" --strip=1
+
 mkdir -p "$WORKSPACE/kibana-build"
-cp -pR build/default/kibana-*-SNAPSHOT-linux-x86_64/. $WORKSPACE/kibana-build/
+cp -pR install/kibana/. $WORKSPACE/kibana-build/
+cp "$linuxBuild" "$WORKSPACE/kibana-default.tar.gz"
+
+mkdir -p "$WORKSPACE/kibana-build"
+cp -pR install/kibana/. $WORKSPACE/kibana-build/
+
+echo " -> Archive built plugins"
+shopt -s globstar
+tar -zcf \
+  "$WORKSPACE/kibana-default-plugins.tar.gz" \
+  x-pack/plugins/**/target/public \
+  x-pack/test/**/target/public \
+  examples/**/target/public \
+  x-pack/examples/**/target/public \
+  test/**/target/public
+shopt -u globstar
