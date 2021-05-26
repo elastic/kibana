@@ -12,7 +12,7 @@ import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 const defaultFingerprintParameters = {
   if: undefined,
   tag: undefined,
-  method: 'SHA-1',
+  method: undefined,
   salt: undefined,
   description: undefined,
   ignore_missing: undefined,

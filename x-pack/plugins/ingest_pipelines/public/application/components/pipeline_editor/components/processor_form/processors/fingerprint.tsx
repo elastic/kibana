@@ -59,9 +59,9 @@ const fieldsConfig: FieldsConfig = {
     ),
   },
   method: {
-    type: FIELD_TYPES.TEXT,
+    type: FIELD_TYPES.SELECT,
     defaultValue: 'SHA-1',
-    serializer: from.emptyStringToUndefined,
+    serializer: (v) => (v === 'SHA-1' || v === '' ? undefined : v),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.fingerprint.methodFieldLabel', {
       defaultMessage: 'Method',
     }),
