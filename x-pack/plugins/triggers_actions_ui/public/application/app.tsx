@@ -26,7 +26,7 @@ import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common
 import { setSavedObjectsClient } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';
 
-const TriggersActionsUIHome = lazy(async () => import('./home'));
+const TriggersActionsUIHome = lazy(() => import('./home'));
 const AlertDetailsRoute = lazy(
   () => import('./sections/alert_details/components/alert_details_route')
 );
