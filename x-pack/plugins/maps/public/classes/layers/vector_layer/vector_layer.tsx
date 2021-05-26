@@ -89,6 +89,7 @@ export interface IVectorLayer extends ILayer {
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
   canShowTooltip(): boolean;
+  getLeftJoinFields(): Promise<IField[]>;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
