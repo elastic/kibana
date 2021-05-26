@@ -69,8 +69,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     skip: !expandedEvent.eventId,
   });
 
-  const isHostIsolationEnabled = true;
-
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
   const showAlertDetails = useCallback(() => {
@@ -138,7 +136,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           />
         )}
       </StyledEuiFlyoutBody>
-      {isHostIsolationEnabled && isEndpointAlert && isHostIsolationPanelOpen === false && (
+      {isEndpointAlert && isHostIsolationPanelOpen === false && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
