@@ -18,7 +18,8 @@ export const lensEmbeddableFactory = (
   return {
     id: DOC_TYPE,
     migrations: {
-      '7.13.0': (state) =>
+      // This migration is run in 7.13.1 for `by value` panels because the 7.13 release window was missed.
+      '7.13.1': (state) =>
         (commonRenameOperationsForFormula(
           (state as unknown) as { attributes: LensDocShapePre712 }
         ) as unknown) as SerializableState,
