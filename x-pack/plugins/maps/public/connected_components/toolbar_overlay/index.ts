@@ -12,9 +12,9 @@ import { ToolbarOverlay } from './toolbar_overlay';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    showToolsControl: getGeoFieldNames(state).length,
+    showToolsControl: getGeoFieldNames(state).length !== 0,
   };
 }
 
-const connected = connect(mapStateToProps, null)(ToolbarOverlay);
+const connected = connect(mapStateToProps)(ToolbarOverlay);
 export { connected as ToolbarOverlay };
