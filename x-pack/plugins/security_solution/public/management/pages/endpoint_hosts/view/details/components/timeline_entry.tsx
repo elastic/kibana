@@ -8,17 +8,28 @@
 import React, { memo } from 'react';
 import moment from 'moment';
 
-import { EuiComment, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiComment, EuiText } from '@elastic/eui';
 import { Immutable, EndpointAction } from '../../../../../../../common/endpoint/types';
 
 export const TimelineEntry = memo(
   ({ endpointAction }: { endpointAction: Immutable<EndpointAction> }) => {
     const isIsolated = endpointAction?.data.command === 'isolate';
-    const timelineIcon = isIsolated ? 'lock' : 'lockOpen';
+
+    // do this better when we can distinguish between endpoint events vs user events
+    const iconType = endpointAction.user_id === 'sys' ? 'dot' : isIsolated ? 'lock' : 'lockOpen';
+    const commentType = endpointAction.user_id === 'sys' ? 'update' : 'regular';
+    const timelineIcon = (
+      <EuiAvatar
+        name="Timeline Icon"
+        size={endpointAction.user_id === 'sys' ? 's' : 'm'}
+        color="#f5f7fa"
+        iconColor="subdued"
+        iconType={iconType}
+      />
+    );
     const event = `${isIsolated ? 'isolated' : 'unisolated'} host`;
     const hasComment = !!endpointAction.data.comment;
-    // do this better when we can distinguish between endpoint events vs user events
-    const commentType = endpointAction.user_id === 'sys' ? 'update' : 'regular';
+
     return (
       <EuiComment
         type={commentType}
