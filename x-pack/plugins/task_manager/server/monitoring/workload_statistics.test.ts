@@ -74,6 +74,9 @@ describe('Workload Statistics Aggregator', () => {
             doc_count: 0,
             overdue: {
               doc_count: 0,
+              nonRecurring: {
+                doc_count: 0,
+              },
             },
             scheduleDensity: {
               buckets: [
@@ -159,6 +162,11 @@ describe('Workload Statistics Aggregator', () => {
                   filter: {
                     range: {
                       'task.runAt': { lt: 'now' },
+                    },
+                  },
+                  aggs: {
+                    nonRecurring: {
+                      missing: { field: 'task.schedule' },
                     },
                   },
                 },
@@ -266,6 +274,9 @@ describe('Workload Statistics Aggregator', () => {
           doc_count: 13,
           overdue: {
             doc_count: 6,
+            nonRecurring: {
+              doc_count: 6,
+            },
           },
           scheduleDensity: {
             buckets: [
@@ -595,6 +606,9 @@ describe('Workload Statistics Aggregator', () => {
             doc_count: 13,
             overdue: {
               doc_count: 6,
+              nonRecurring: {
+                doc_count: 0,
+              },
             },
             scheduleDensity: {
               buckets: [
@@ -615,22 +629,15 @@ describe('Workload Statistics Aggregator', () => {
       loggingSystemMock.create().get()
     );
 
-    const perMinuteCapacityOfCurrentKibana = maxWorkers * (60 / pollingIntervalInSeconds);
-
     return new Promise<void>((resolve) => {
       workloadAggregator.pipe(first()).subscribe((result) => {
         expect(result.key).toEqual('workload');
 
         expect(result.value).toMatchObject({
-          capacity_estimation: {
-            buckets: {
-              per_minute: 150,
-              per_hour: 360,
-              per_day: 820,
-            },
-            avg_per_minute: 157,
-            minutes_to_drain: 1,
-            min_required_kibana: Math.ceil(157 / perMinuteCapacityOfCurrentKibana),
+          capacity_requirments: {
+            per_minute: 150,
+            per_hour: 360,
+            per_day: 820,
           },
         });
         resolve();

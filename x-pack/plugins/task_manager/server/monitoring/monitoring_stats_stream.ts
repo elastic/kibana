@@ -27,6 +27,7 @@ import { ConfigStat, createConfigurationAggregator } from './configuration_stati
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
+import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
 
 export { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 
@@ -49,7 +50,8 @@ interface MonitoredStat<T> {
   timestamp: string;
   value: T;
 }
-type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
+
+export type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
   status: HealthStatus;
 };
 
@@ -59,6 +61,7 @@ export interface RawMonitoringStats {
     configuration?: RawMonitoredStat<ConfigStat>;
     workload?: RawMonitoredStat<WorkloadStat>;
     runtime?: RawMonitoredStat<SummarizedTaskRunStat>;
+    capacity_estimation?: RawMonitoredStat<CapacityEstimationStat>;
   };
 }
 
@@ -121,33 +124,35 @@ export function summarizeMonitoringStats(
   }: MonitoringStats,
   config: TaskManagerConfig
 ): RawMonitoringStats {
+  const summarizedStats = withCapacityEstimate({
+    ...(configuration
+      ? {
+          configuration: {
+            ...configuration,
+            status: HealthStatus.OK,
+          },
+        }
+      : {}),
+    ...(runtime
+      ? {
+          runtime: {
+            timestamp: runtime.timestamp,
+            ...summarizeTaskRunStat(runtime.value, config),
+          },
+        }
+      : {}),
+    ...(workload
+      ? {
+          workload: {
+            timestamp: workload.timestamp,
+            ...summarizeWorkloadStat(workload.value),
+          },
+        }
+      : {}),
+  });
+
   return {
     last_update,
-    stats: {
-      ...(configuration
-        ? {
-            configuration: {
-              ...configuration,
-              status: HealthStatus.OK,
-            },
-          }
-        : {}),
-      ...(runtime
-        ? {
-            runtime: {
-              timestamp: runtime.timestamp,
-              ...summarizeTaskRunStat(runtime.value, config),
-            },
-          }
-        : {}),
-      ...(workload
-        ? {
-            workload: {
-              timestamp: workload.timestamp,
-              ...summarizeWorkloadStat(workload.value),
-            },
-          }
-        : {}),
-    },
+    stats: summarizedStats,
   };
 }

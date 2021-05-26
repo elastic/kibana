@@ -325,7 +325,15 @@ function mockHealthStats(overrides = {}) {
             },
             schedule: {},
             overdue: 0,
+            overdue_non_recurring: 0,
             estimatedScheduleDensity: [],
+            non_recurring: 20,
+            owner_ids: 2,
+            capacity_requirments: {
+              per_minute: 150,
+              per_hour: 360,
+              per_day: 820,
+            },
           },
         },
         runtime: {
@@ -335,6 +343,7 @@ function mockHealthStats(overrides = {}) {
             load: [0, 100, 75],
             execution: {
               duration: [],
+              persistence: [],
               result_frequency_percent_as_number: [],
             },
             polling: {
@@ -348,6 +357,15 @@ function mockHealthStats(overrides = {}) {
                 'NoTasksClaimed',
               ],
             },
+          },
+        },
+        capacity_estimation: {
+          timestamp: new Date().toISOString(),
+          value: {
+            min_required_kibana: 1,
+            minutes_to_drain_overdue: 0,
+            max_throughput_per_minute: 200,
+            avg_required_throughput_per_minute: 150,
           },
         },
       },

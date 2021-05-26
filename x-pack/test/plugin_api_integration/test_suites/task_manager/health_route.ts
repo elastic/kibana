@@ -30,15 +30,10 @@ interface MonitoringStats {
         non_recurring: number;
         owner_ids: number;
         estimated_schedule_density: number[];
-        capacity_estimation: {
-          buckets: {
-            per_minute: number;
-            per_hour: number;
-            per_day: number;
-          };
-          avg_per_minute: number;
-          minutes_to_drain: number;
-          min_required_kibana: number;
+        capacity_requirments: {
+          per_minute: number;
+          per_hour: number;
+          per_day: number;
         };
       };
     };
@@ -60,6 +55,16 @@ interface MonitoringStats {
           claim_duration: Record<string, object>;
           result_frequency_percent_as_number: Record<string, number>;
         };
+      };
+    };
+    capacity_estimation: {
+      timestamp: string;
+      value: {
+        minutes_to_drain_overdue: number;
+        max_throughput_per_minute: number;
+        min_required_kibana: number;
+        avg_required_throughput_per_minute: number;
+        avg_recurring_required_throughput_per_minute: number;
       };
     };
   };
@@ -169,6 +174,20 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return a breakdown of idleTasks in the task manager workload', async () => {
       const {
+        capacity_estimation: { value: capacityEstimation },
+      } = (await getHealth()).stats;
+
+      expect(typeof capacityEstimation.minutes_to_drain_overdue).to.eql('number');
+      expect(typeof capacityEstimation.max_throughput_per_minute).to.eql('number');
+      expect(typeof capacityEstimation.min_required_kibana).to.eql('number');
+      expect(typeof capacityEstimation.avg_required_throughput_per_minute).to.eql('number');
+      expect(typeof capacityEstimation.avg_recurring_required_throughput_per_minute).to.eql(
+        'number'
+      );
+    });
+
+    it('should return an estimation of task manager capacity', async () => {
+      const {
         workload: { value: workload },
       } = (await getHealth()).stats;
 
@@ -177,12 +196,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof workload.non_recurring).to.eql('number');
       expect(typeof workload.owner_ids).to.eql('number');
 
-      expect(typeof workload.capacity_estimation.buckets.per_minute).to.eql('number');
-      expect(typeof workload.capacity_estimation.buckets.per_hour).to.eql('number');
-      expect(typeof workload.capacity_estimation.buckets.per_day).to.eql('number');
-      expect(typeof workload.capacity_estimation.avg_per_minute).to.eql('number');
-      expect(typeof workload.capacity_estimation.minutes_to_drain).to.eql('number');
-      expect(typeof workload.capacity_estimation.min_required_kibana).to.eql('number');
+      expect(typeof workload.capacity_requirments.per_minute).to.eql('number');
+      expect(typeof workload.capacity_requirments.per_hour).to.eql('number');
+      expect(typeof workload.capacity_requirments.per_day).to.eql('number');
 
       expect(Array.isArray(workload.estimated_schedule_density)).to.eql(true);
 
