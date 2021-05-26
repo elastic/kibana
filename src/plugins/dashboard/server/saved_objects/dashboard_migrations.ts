@@ -161,13 +161,13 @@ const migrateByValuePanels = (
   // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
   // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
   // object has panelsJSON in all previous versions of kibana.
-  if (typeof attributes.panelsJSON !== 'string') {
-    return attributes;
+  if (typeof attributes?.panelsJSON !== 'string') {
+    return doc;
   }
   const panels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
   // Same here, prevent failing saved object import if ever panels aren't an array.
   if (!Array.isArray(panels)) {
-    return attributes;
+    return doc;
   }
   const newPanels: SavedDashboardPanel[] = [];
   panels.forEach((panel) => {
