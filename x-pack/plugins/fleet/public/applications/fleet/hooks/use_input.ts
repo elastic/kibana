@@ -53,10 +53,10 @@ export function useInput(defaultValue = '', validate?: (value: string) => string
 export function useComboInput(
   id: string,
   defaultValue = [],
-  validate?: (value: string[]) => string[] | undefined
+  validate?: (value: string[]) => Array<{ message: string; index?: number }> | undefined
 ) {
   const [value, setValue] = useState<string[]>(defaultValue);
-  const [errors, setErrors] = useState<string[] | undefined>();
+  const [errors, setErrors] = useState<Array<{ message: string; index?: number }> | undefined>();
 
   const isInvalid = errors !== undefined;
 

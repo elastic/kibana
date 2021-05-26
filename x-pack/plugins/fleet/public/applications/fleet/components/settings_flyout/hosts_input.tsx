@@ -6,6 +6,7 @@
  */
 import React, { useMemo, useCallback, useState } from 'react';
 import type { ReactNode, FunctionComponent, ChangeEvent } from 'react';
+import sytled from 'styled-components';
 
 import {
   EuiFlexGroup,
@@ -23,6 +24,7 @@ import {
   euiDragDropReorder,
   EuiFormErrorText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
@@ -31,7 +33,7 @@ interface Props {
   onChange: (newValue: string[]) => void;
   label: string;
   helpText: ReactNode;
-  errors?: string[];
+  errors?: Array<{ message: string; index?: number }>;
   isInvalid?: boolean;
 }
 
@@ -41,14 +43,30 @@ interface SortableTextFieldProps {
   value: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onDelete: (index: number) => void;
+  errors?: string[];
   autoFocus?: boolean;
 }
 
+const DraggableDiv = sytled.div`
+  margin: ${(props) => props.theme.eui.euiSizeS};
+`;
+
+function displayErrors(errors?: string[]) {
+  return errors?.length
+    ? errors.map((error, errorIndex) => (
+        <EuiFormErrorText key={errorIndex}>{error}</EuiFormErrorText>
+      ))
+    : null;
+}
+
 const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
-  ({ id, index, value, onChange, onDelete, autoFocus }) => {
+  ({ id, index, value, onChange, onDelete, autoFocus, errors }) => {
     const onDeleteHandler = useCallback(() => {
       onDelete(index);
     }, [onDelete, index]);
+
+    const isInvalid = (errors?.length ?? 0) > 0;
+
     return (
       <EuiDraggable
         spacing="m"
@@ -68,9 +86,14 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
             style={state.isDragging ? { background: '#fff' } : {}}
           >
             <EuiFlexItem grow={false}>
-              <div {...provided.dragHandleProps} aria-label="Drag Handle" style={{ margin: '4px' }}>
-                <EuiIcon color="text" type="grab" aria-label="Next" />
-              </div>
+              <DraggableDiv
+                {...provided.dragHandleProps}
+                aria-label={i18n.translate('xpack.fleet.settings.sortHandle', {
+                  defaultMessage: 'Sort host handle',
+                })}
+              >
+                <EuiIcon color="text" type="grab" />
+              </DraggableDiv>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFieldText
@@ -79,14 +102,18 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
                 value={value}
                 onChange={onChange}
                 autoFocus={autoFocus}
+                isInvalid={isInvalid}
               />
+              {displayErrors(errors)}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 color="text"
                 onClick={onDeleteHandler}
                 iconType="cross"
-                aria-label="Next"
+                aria-label={i18n.translate('xpack.fleet.settings.deleteHostButton', {
+                  defaultMessage: 'Delete host',
+                })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -143,6 +170,29 @@ export const HostsInput: FunctionComponent<Props> = ({
     [value, onChange]
   );
 
+  const globalErrors = useMemo(() => {
+    return errors && errors.filter((err) => err.index === undefined).map(({ message }) => message);
+  }, [errors]);
+
+  const indexedErrors = useMemo(() => {
+    if (!errors) {
+      return [];
+    }
+    return errors.reduce((acc, err) => {
+      if (err.index === undefined) {
+        return acc;
+      }
+
+      if (!acc[err.index]) {
+        acc[err.index] = [];
+      }
+
+      acc[err.index].push(err.message);
+
+      return acc;
+    }, [] as string[][]);
+  }, [errors]);
+
   const isSortable = rows.length > 1;
   return (
     <EuiFormRow fullWidth label={label} isInvalid={isInvalid}>
@@ -151,31 +201,36 @@ export const HostsInput: FunctionComponent<Props> = ({
         <EuiSpacer size="m" />
         <EuiDragDropContext onDragEnd={onDragEndHandler}>
           <EuiDroppable droppableId={`${id}Droppable`} spacing="none">
-            {rows.map((row, idx) =>
-              isSortable ? (
-                <SortableTextField
-                  key={idx}
-                  id={`${id}${idx}Draggable`}
-                  index={idx}
-                  onChange={row.onChange}
-                  onDelete={onDelete}
-                  value={row.value}
-                  autoFocus={autoFocus}
-                />
-              ) : (
-                <EuiFieldText
-                  key={idx}
-                  fullWidth
-                  compressed
-                  value={row.value}
-                  onChange={row.onChange}
-                />
-              )
-            )}
+            {rows.map((row, idx) => (
+              <React.Fragment key={idx}>
+                {isSortable ? (
+                  <SortableTextField
+                    id={`${id}${idx}Draggable`}
+                    index={idx}
+                    onChange={row.onChange}
+                    onDelete={onDelete}
+                    value={row.value}
+                    autoFocus={autoFocus}
+                    errors={indexedErrors[idx]}
+                  />
+                ) : (
+                  <>
+                    <EuiFieldText
+                      fullWidth
+                      compressed
+                      value={row.value}
+                      onChange={row.onChange}
+                      isInvalid={!!indexedErrors[idx]}
+                    />
+                    {displayErrors(indexedErrors[idx])}
+                  </>
+                )}
+              </React.Fragment>
+            ))}
           </EuiDroppable>
         </EuiDragDropContext>
-        {errors &&
-          errors.map((error, idx) => <EuiFormErrorText key={idx}>{error}</EuiFormErrorText>)}
+        {globalErrors}
+        {displayErrors(globalErrors)}
         <EuiSpacer size="m" />
         <EuiButtonEmpty size="xs" flush="left" iconType="plusInCircle" onClick={addRowHandler}>
           <FormattedMessage id="xpack.fleet.hostsInput.addRow" defaultMessage="Add row" />
