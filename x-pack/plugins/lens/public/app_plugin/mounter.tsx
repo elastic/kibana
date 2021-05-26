@@ -51,7 +51,7 @@ export async function mountApp(
     getPresentationUtilContext,
   } = mountProps;
   const [coreStart, startDependencies] = await core.getStartServices();
-  const { data, navigation, embeddable, savedObjectsTagging } = startDependencies;
+  const { data, navigation, embeddable, savedObjectsTagging, usageCollection } = startDependencies;
 
   const instance = await createEditorFrame();
   const storage = new Storage(localStorage);
@@ -64,6 +64,7 @@ export async function mountApp(
     storage,
     navigation,
     stateTransfer,
+    usageCollection,
     savedObjectsTagging,
     attributeService: await attributeService(),
     http: coreStart.http,

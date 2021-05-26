@@ -40,6 +40,7 @@ import {
 } from '../../../../../src/plugins/embeddable/public';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { EditorFrameInstance } from '../types';
+import { UsageCollectionStart } from '../../../../../src/plugins/usage_collection/public';
 
 export interface LensAppState {
   isLoading: boolean;
@@ -96,6 +97,7 @@ export interface LensAppServices {
   uiSettings: IUiSettingsClient;
   application: ApplicationStart;
   notifications: NotificationsStart;
+  usageCollection?: UsageCollectionStart;
   stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
   attributeService: LensAttributeService;

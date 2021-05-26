@@ -6,6 +6,7 @@
  */
 
 import './app.scss';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import _ from 'lodash';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -72,6 +73,7 @@ export function App({
     application,
     stateTransfer,
     notifications,
+    usageCollection,
     attributeService,
     savedObjectsClient,
     savedObjectsTagging,
@@ -406,6 +408,14 @@ export function App({
   ) => {
     if (!lastKnownDoc) {
       return;
+    }
+
+    if (usageCollection) {
+      usageCollection.reportUiCounter(
+        saveProps.returnToOrigin ? 'dashboard' : 'visualize',
+        METRIC_TYPE.CLICK,
+        'lens:save'
+      );
     }
 
     let references = lastKnownDoc.references;
