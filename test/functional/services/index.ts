@@ -31,7 +31,7 @@ import { FilterBarProvider } from './filter_bar';
 import { FlyoutProvider } from './flyout';
 import { GlobalNavProvider } from './global_nav';
 import { InspectorProvider } from './inspector';
-import { FieldEditorProvider } from './field_editor';
+import { FieldEditorService } from './field_editor';
 import { ManagementMenuProvider } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
@@ -75,7 +75,7 @@ export const services = {
   browser: BrowserProvider,
   pieChart: PieChartProvider,
   inspector: InspectorProvider,
-  fieldEditor: FieldEditorProvider,
+  fieldEditor: FieldEditorService,
   vegaDebugInspector: VegaDebugInspectorViewProvider,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
