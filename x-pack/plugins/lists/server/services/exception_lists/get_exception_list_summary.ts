@@ -6,7 +6,6 @@
  */
 
 import type {
-  FoundExceptionListItemSchema,
   IdOrUndefined,
   ListIdOrUndefined,
   NamespaceType,
@@ -20,13 +19,22 @@ import {
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { GetExceptionListSummaryResponse } from './exception_list_client_types';
-import { findExceptionListsItem } from './find_exception_list_items';
 
 interface GetExceptionListSummaryOptions {
   id: IdOrUndefined;
   listId: ListIdOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
+}
+
+interface ByOsAggBucketType {
+  key: string;
+  doc_count: number;
+}
+interface ByOsAggType {
+  by_os: {
+    buckets: ByOsAggBucketType[];
+  };
 }
 
 export const getExceptionListSummary = async ({
@@ -36,11 +44,13 @@ export const getExceptionListSummary = async ({
   namespaceType,
 }: GetExceptionListSummaryOptions): Promise<GetExceptionListSummaryResponse | null> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
-  let finalListId: string[] = listId ? [listId] : [];
+  let finalListId: string = listId ?? '';
+
+  // If id and no listId, get the list by id to use the list_id for the find below
   if (listId === null && id != null) {
     try {
       const savedObject = await savedObjectsClient.get<ExceptionListSoSchema>(savedObjectType, id);
-      finalListId = [savedObject.attributes.list_id];
+      finalListId = savedObject.attributes.list_id;
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         return null;
@@ -48,56 +58,33 @@ export const getExceptionListSummary = async ({
         throw err;
       }
     }
-  } else if (listId != null) {
-    const savedObject = await savedObjectsClient.find<ExceptionListSoSchema>({
-      filter: `${savedObjectType}.attributes.list_type: list`,
-      perPage: 1,
-      search: listId,
-      searchFields: ['list_id'],
-      sortField: 'tie_breaker_id',
-      sortOrder: 'desc',
-      type: savedObjectType,
-    });
-    if (savedObject.saved_objects[0] == null) {
-      return null;
-    }
-  } else {
-    return null;
   }
 
-  const summary = {
-    linux: 0,
-    macos: 0,
-    total: 0,
-    windows: 0,
-  };
-  const perPage = 100;
-  let paging = true;
-  let page = 1;
+  const savedObject = await savedObjectsClient.find<ExceptionListSoSchema>({
+    aggs: {
+      by_os: {
+        terms: {
+          field: `${savedObjectType}.attributes.os_types`,
+        },
+      },
+    },
+    filter: `${savedObjectType}.attributes.list_type: item`,
+    perPage: 0,
+    search: finalListId,
+    searchFields: ['list_id'],
+    sortField: 'tie_breaker_id',
+    sortOrder: 'desc',
+    type: savedObjectType,
+  });
 
-  while (paging) {
-    const items: FoundExceptionListItemSchema | null = await findExceptionListsItem({
-      filter: [],
-      listId: finalListId,
-      namespaceType: ['agnostic'],
-      page,
-      perPage,
-      savedObjectsClient,
-      sortField: undefined,
-      sortOrder: undefined,
-    });
-
-    if (!items) break;
-
-    summary.total = items.total;
-
-    for (const item of items.data) {
-      summary[item.os_types[0]]++;
-    }
-
-    paging = (page - 1) * perPage + items.data.length < items.total;
-    page++;
-  }
+  const summary: GetExceptionListSummaryResponse = (savedObject.aggregations as ByOsAggType).by_os.buckets.reduce(
+    (acc, item: ByOsAggBucketType) => ({
+      ...acc,
+      [item.key]: item.doc_count,
+      total: acc.total + item.doc_count,
+    }),
+    { linux: 0, macos: 0, total: 0, windows: 0 }
+  );
 
   return summary;
 };
