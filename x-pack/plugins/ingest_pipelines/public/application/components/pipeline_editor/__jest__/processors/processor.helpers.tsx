@@ -143,6 +143,7 @@ type TestSubject =
   | 'messageField.input'
   | 'mockCodeEditor'
   | 'tagField.input'
+  | 'typeSelectorField'
   | 'ignoreMissingSwitch.input'
   | 'ignoreFailureSwitch.input'
   | 'ifField.textarea'

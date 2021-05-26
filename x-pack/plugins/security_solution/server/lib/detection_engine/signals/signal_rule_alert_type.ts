@@ -12,8 +12,8 @@ import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
 import * as t from 'io-ts';
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { toError, toPromise } from '../../../../common/fp_utils';
+import { validateNonExact, parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import { toError, toPromise } from '@kbn/securitysolution-list-api';
 
 import {
   SIGNALS_ID,
@@ -27,7 +27,6 @@ import {
   isThreatMatchRule,
   isQueryRule,
 } from '../../../../common/detection_engine/utils';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
 import { AlertAttributes, SignalRuleAlertTypeDefinition } from './types';

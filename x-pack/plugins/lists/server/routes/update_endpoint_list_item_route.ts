@@ -12,9 +12,9 @@ import {
   exceptionListItemSchema,
   updateEndpointListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
-import { ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
 
