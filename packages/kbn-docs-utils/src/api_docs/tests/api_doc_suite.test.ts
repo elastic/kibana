@@ -84,14 +84,19 @@ beforeAll(() => {
   expect(project.getSourceFiles().length).toBeGreaterThan(0);
 
   const pluginA = getKibanaPlatformPlugin('pluginA');
+  const pluginB = getKibanaPlatformPlugin(
+    'pluginB',
+    Path.resolve(__dirname, '__fixtures__/src/plugin_b')
+  );
   pluginA.manifest.serviceFolders = ['foo'];
-  const plugins: KibanaPlatformPlugin[] = [pluginA];
+  const plugins: KibanaPlatformPlugin[] = [pluginA, pluginB];
 
-  const { pluginApiMap } = getPluginApiMap(project, plugins, log);
+  const { pluginApiMap } = getPluginApiMap(project, plugins, log, { collectReferences: false });
 
   doc = pluginApiMap.pluginA;
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
   writePluginDocs(mdxOutputFolder, doc, log);
+  writePluginDocs(mdxOutputFolder, pluginApiMap.pluginB, log);
 });
 
 it('Setup type is extracted', () => {
@@ -195,8 +200,7 @@ describe('objects', () => {
 
     const fn = obj?.children?.find((c) => c.label === 'notAnArrowFn');
     expect(fn?.signature).toBeDefined();
-    // Should just be typeof notAnArrowFn.
-    expect(linkCount(fn?.signature!)).toBe(1);
+    expect(linkCount(fn?.signature!)).toBe(3);
     // Comment should be the inline one.
     expect(fn?.description).toMatchInlineSnapshot(`
       Array [
@@ -223,6 +227,25 @@ describe('objects', () => {
 });
 
 describe('Misc types', () => {
+  it('Type using ReactElement has the right signature', () => {
+    const api = doc.client.find((c) => c.label === 'AReactElementFn');
+    expect(api).toBeDefined();
+    expect(api?.signature).toBeDefined();
+    expect(api?.signature!).toMatchInlineSnapshot(`
+      Array [
+        "() => React.ReactElement<",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.MyProps",
+          "text": "MyProps",
+        },
+        ">",
+      ]
+    `);
+  });
+
   it('Type referencing not exported type has the link removed', () => {
     const api = doc.client.find((c) => c.label === 'IRefANotExportedType');
     expect(api).toBeDefined();
@@ -269,7 +292,7 @@ describe('Misc types', () => {
     expect(fnType?.type).toBe(TypeKind.TypeKind);
     expect(fnType?.signature!).toMatchInlineSnapshot(`
       Array [
-        "(t: T) => ",
+        "<T>(t: T) => ",
         Object {
           "docId": "kibPluginAPluginApi",
           "pluginId": "pluginA",
@@ -336,6 +359,16 @@ describe('interfaces and classes', () => {
     expect(anInterface?.signature).toBeUndefined();
   });
 
+  it('deprecated interface exported correctly', () => {
+    const anInterface = doc.client.find((c) => c.label === 'AnotherInterface');
+    expect(anInterface).toBeDefined();
+
+    expect(anInterface?.deprecated).toBeTruthy();
+    expect(anInterface?.references).toBeDefined();
+    expect(anInterface?.references!.length).toBe(2);
+    expect(anInterface?.removeBy).toEqual('8.0');
+  });
+
   it('Interface which extends exported correctly', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
@@ -344,9 +377,6 @@ describe('interfaces and classes', () => {
 
     expect(linkCount(exampleInterface?.signature!)).toBe(2);
 
-    // TODO: uncomment if the bug is fixed.
-    // This is wrong, the link should be to `AnotherInterface`
-    // Another bug, this link is not being captured.
     expect(exampleInterface?.signature).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -418,9 +448,19 @@ describe('interfaces and classes', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
 
+    // This covers FunctionType nodes.
     const fnWithGeneric = exampleInterface?.children?.find((c) => c.label === 'aFnWithGen');
     expect(fnWithGeneric).toBeDefined();
+    expect(fnWithGeneric?.children).toBeDefined();
+    expect(fnWithGeneric?.children!.length).toBe(1);
     expect(fnWithGeneric?.type).toBe(TypeKind.FunctionKind);
+
+    const param = fnWithGeneric?.children?.find((c) => c.label === 't');
+    expect(fnWithGeneric?.returnComment![0]).toBe('nothing!');
+    expect(param).toBeDefined();
+    expect(param?.description).toBeDefined();
+    expect(param?.description?.length).toBe(1);
+    expect(param!.description![0]).toBe('This a parameter.');
   });
 
   it('interfaces with internal tags are not exported', () => {

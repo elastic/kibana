@@ -39,12 +39,14 @@ describe('createActionRoute', () => {
       actionTypeId: 'abc',
       config: { foo: true },
       isPreconfigured: false,
+      isMissingSecrets: false,
     };
 
     const createApiResult = {
-      ...omit(createResult, ['actionTypeId', 'isPreconfigured']),
+      ...omit(createResult, ['actionTypeId', 'isPreconfigured', 'isMissingSecrets']),
       connector_type_id: createResult.actionTypeId,
       is_preconfigured: createResult.isPreconfigured,
+      is_missing_secrets: createResult.isMissingSecrets,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -99,6 +101,7 @@ describe('createActionRoute', () => {
       id: '1',
       name: 'My name',
       actionTypeId: 'abc',
+      isMissingSecrets: false,
       config: { foo: true },
       isPreconfigured: false,
     });
@@ -138,6 +141,7 @@ describe('createActionRoute', () => {
       name: 'My name',
       actionTypeId: 'abc',
       config: { foo: true },
+      isMissingSecrets: false,
       isPreconfigured: false,
     });
 

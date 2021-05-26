@@ -68,6 +68,7 @@ export function dateHistogram(
       bucketSize,
       seriesId: series.id,
       index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
+      panelId: panel.id,
     });
 
     return next(doc);

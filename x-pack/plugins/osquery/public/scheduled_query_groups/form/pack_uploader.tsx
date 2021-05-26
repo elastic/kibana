@@ -88,7 +88,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
 
       if (
         inputFiles.length &&
-        ((!!inputFiles[0].type.length && !SUPPORTED_PACK_EXTENSIONS.includes(inputFiles[0].type)) ||
+        ((!!inputFiles[0].type.length && !SUPPORTED_PACK_EXTENSIONS.includes(inputFiles[0].type)) ??
           !inputFiles[0].name.endsWith('.conf'))
       ) {
         packName.current = '';

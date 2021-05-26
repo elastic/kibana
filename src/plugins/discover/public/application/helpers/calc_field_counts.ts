@@ -14,7 +14,7 @@ import { IndexPattern } from '../../kibana_services';
  */
 export function calcFieldCounts(
   counts = {} as Record<string, number>,
-  rows: Array<Record<string, any>>,
+  rows: Array<Record<string, unknown>>,
   indexPattern: IndexPattern
 ) {
   for (const hit of rows) {

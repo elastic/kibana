@@ -117,7 +117,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           {backOptions && (
             <LinkBack>
               <LinkIcon
-                dataTestSubj={backOptions.dataTestSubj}
+                dataTestSubj={backOptions.dataTestSubj ?? 'link-back'}
                 onClick={goTo}
                 href={formatUrl(backOptions.href ?? '')}
                 iconType="arrowLeft"

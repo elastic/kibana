@@ -33,4 +33,8 @@ export const config = {
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
   }),
   deprecations,
+  exposeToUsage: {
+    autocompleteTerminateAfter: true,
+    autocompleteTimeout: true,
+  },
 };

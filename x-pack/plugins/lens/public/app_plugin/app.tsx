@@ -26,7 +26,6 @@ import {
   checkForDuplicateTitle,
 } from '../../../../../src/plugins/saved_objects/public';
 import { injectFilterReferences } from '../persistence';
-import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   DataPublicPluginStart,
@@ -82,7 +81,7 @@ export function App({
     dashboardFeatureFlag,
   } = useKibana<LensAppServices>().services;
 
-  const startSession = useCallback(() => data.search.session.start(), [data]);
+  const startSession = useCallback(() => data.search.session.start(), [data.search.session]);
 
   const [state, setState] = useState<LensAppState>(() => {
     return {
@@ -95,26 +94,28 @@ export function App({
       isLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
       isLinkedToOriginatingApp: Boolean(incomingState?.originatingApp),
-      isSaveModalVisible: false,
-      indicateNoData: false,
       isSaveable: false,
       searchSessionId: startSession(),
     };
   });
 
+  // Used to show a popover that guides the user towards changing the date range when no data is available.
+  const [indicateNoData, setIndicateNoData] = useState(false);
+  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
+
   const { lastKnownDoc } = state;
 
   const showNoDataPopover = useCallback(() => {
-    setState((prevState) => ({ ...prevState, indicateNoData: true }));
-  }, [setState]);
+    setIndicateNoData(true);
+  }, [setIndicateNoData]);
 
   useEffect(() => {
-    if (state.indicateNoData) {
-      setState((prevState) => ({ ...prevState, indicateNoData: false }));
+    if (indicateNoData) {
+      setIndicateNoData(false);
     }
   }, [
-    setState,
-    state.indicateNoData,
+    setIndicateNoData,
+    indicateNoData,
     state.query,
     state.filters,
     state.indexPatternsForTopNav,
@@ -134,26 +135,6 @@ export function App({
         title: e.message,
       }),
     [notifications.toasts]
-  );
-
-  const getLastKnownDocWithoutPinnedFilters = useCallback(
-    function () {
-      if (!lastKnownDoc) return undefined;
-      const [pinnedFilters, appFilters] = _.partition(
-        injectFilterReferences(lastKnownDoc.state?.filters || [], lastKnownDoc.references),
-        esFilters.isFilterPinned
-      );
-      return pinnedFilters?.length
-        ? {
-            ...lastKnownDoc,
-            state: {
-              ...lastKnownDoc.state,
-              filters: appFilters,
-            },
-          }
-        : lastKnownDoc;
-    },
-    [lastKnownDoc]
   );
 
   const getIsByValueMode = useCallback(
@@ -263,7 +244,10 @@ export function App({
       // or when the user has configured something without saving
       if (
         application.capabilities.visualize.save &&
-        !_.isEqual(state.persistedDoc?.state, getLastKnownDocWithoutPinnedFilters()?.state) &&
+        !_.isEqual(
+          state.persistedDoc?.state,
+          getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state
+        ) &&
         (state.isSaveable || state.persistedDoc)
       ) {
         return actions.confirm(
@@ -283,7 +267,6 @@ export function App({
     lastKnownDoc,
     state.isSaveable,
     state.persistedDoc,
-    getLastKnownDocWithoutPinnedFilters,
     application.capabilities.visualize.save,
   ]);
 
@@ -374,7 +357,7 @@ export function App({
             setState((s) => ({
               ...s,
               isLoading: false,
-              persistedDoc: doc,
+              ...(!_.isEqual(state.persistedDoc, doc) ? { persistedDoc: doc } : null),
               lastKnownDoc: doc,
               query: doc.state.query,
               indexPatternsForTopNav: indexPatterns,
@@ -403,8 +386,7 @@ export function App({
     attributeService,
     redirectTo,
     chrome.recentlyAccessed,
-    state.persistedDoc?.savedObjectId,
-    state.persistedDoc?.state,
+    state.persistedDoc,
   ]);
 
   const tagsIds =
@@ -435,7 +417,7 @@ export function App({
     }
 
     const docToSave = {
-      ...getLastKnownDocWithoutPinnedFilters()!,
+      ...getLastKnownDocWithoutPinnedFilters(lastKnownDoc)!,
       description: saveProps.newDescription,
       title: saveProps.newTitle,
       references,
@@ -522,9 +504,10 @@ export function App({
         );
         setState((s) => ({
           ...s,
-          isSaveModalVisible: false,
           isLinkedToOriginatingApp: false,
         }));
+
+        setIsSaveModalVisible(false);
         // remove editor state so the connection is still broken after reload
         stateTransfer.clearEditorState(APP_ID);
 
@@ -540,14 +523,15 @@ export function App({
         ...s,
         persistedDoc: newDoc,
         lastKnownDoc: newDoc,
-        isSaveModalVisible: false,
         isLinkedToOriginatingApp: false,
       }));
+
+      setIsSaveModalVisible(false);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.dir(e);
       trackUiEvent('save_failed');
-      setState((s) => ({ ...s, isSaveModalVisible: false }));
+      setIsSaveModalVisible(false);
     }
   };
 
@@ -634,7 +618,7 @@ export function App({
       },
       showSaveModal: () => {
         if (savingToDashboardPermitted || savingToLibraryPermitted) {
-          setState((s) => ({ ...s, isSaveModalVisible: true }));
+          setIsSaveModalVisible(true);
         }
       },
       cancel: () => {
@@ -648,68 +632,66 @@ export function App({
   return (
     <>
       <div className="lnsApp">
-        <div className="lnsApp__header">
-          <TopNavMenu
-            setMenuMountPoint={setHeaderActionMenu}
-            config={topNavConfig}
-            showSearchBar={true}
-            showDatePicker={true}
-            showQueryBar={true}
-            showFilterBar={true}
-            indexPatterns={state.indexPatternsForTopNav}
-            showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
-            savedQuery={state.savedQuery}
-            data-test-subj="lnsApp_topNav"
-            screenTitle={'lens'}
-            appName={'lens'}
-            onQuerySubmit={(payload) => {
-              const { dateRange, query } = payload;
-              const currentRange = data.query.timefilter.timefilter.getTime();
-              if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
-                data.query.timefilter.timefilter.setTime(dateRange);
-                trackUiEvent('app_date_change');
-              } else {
-                // Query has changed, renew the session id.
-                // Time change will be picked up by the time subscription
-                setState((s) => ({
-                  ...s,
-                  searchSessionId: startSession(),
-                }));
-                trackUiEvent('app_query_change');
-              }
+        <TopNavMenu
+          setMenuMountPoint={setHeaderActionMenu}
+          config={topNavConfig}
+          showSearchBar={true}
+          showDatePicker={true}
+          showQueryBar={true}
+          showFilterBar={true}
+          indexPatterns={state.indexPatternsForTopNav}
+          showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
+          savedQuery={state.savedQuery}
+          data-test-subj="lnsApp_topNav"
+          screenTitle={'lens'}
+          appName={'lens'}
+          onQuerySubmit={(payload) => {
+            const { dateRange, query } = payload;
+            const currentRange = data.query.timefilter.timefilter.getTime();
+            if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
+              data.query.timefilter.timefilter.setTime(dateRange);
+              trackUiEvent('app_date_change');
+            } else {
+              // Query has changed, renew the session id.
+              // Time change will be picked up by the time subscription
               setState((s) => ({
                 ...s,
-                query: query || s.query,
+                searchSessionId: startSession(),
               }));
-            }}
-            onSaved={(savedQuery) => {
-              setState((s) => ({ ...s, savedQuery }));
-            }}
-            onSavedQueryUpdated={(savedQuery) => {
-              const savedQueryFilters = savedQuery.attributes.filters || [];
-              const globalFilters = data.query.filterManager.getGlobalFilters();
-              data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
-              setState((s) => ({
-                ...s,
-                savedQuery: { ...savedQuery }, // Shallow query for reference issues
-                query: savedQuery.attributes.query,
-              }));
-            }}
-            onClearSavedQuery={() => {
-              data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
-              setState((s) => ({
-                ...s,
-                savedQuery: undefined,
-                filters: data.query.filterManager.getGlobalFilters(),
-                query: data.query.queryString.getDefaultQuery(),
-              }));
-            }}
-            query={state.query}
-            dateRangeFrom={fromDate}
-            dateRangeTo={toDate}
-            indicateNoData={state.indicateNoData}
-          />
-        </div>
+              trackUiEvent('app_query_change');
+            }
+            setState((s) => ({
+              ...s,
+              query: query || s.query,
+            }));
+          }}
+          onSaved={(savedQuery) => {
+            setState((s) => ({ ...s, savedQuery }));
+          }}
+          onSavedQueryUpdated={(savedQuery) => {
+            const savedQueryFilters = savedQuery.attributes.filters || [];
+            const globalFilters = data.query.filterManager.getGlobalFilters();
+            data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
+            setState((s) => ({
+              ...s,
+              savedQuery: { ...savedQuery }, // Shallow query for reference issues
+              query: savedQuery.attributes.query,
+            }));
+          }}
+          onClearSavedQuery={() => {
+            data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
+            setState((s) => ({
+              ...s,
+              savedQuery: undefined,
+              filters: data.query.filterManager.getGlobalFilters(),
+              query: data.query.queryString.getDefaultQuery(),
+            }));
+          }}
+          query={state.query}
+          dateRangeFrom={fromDate}
+          dateRangeTo={toDate}
+          indicateNoData={indicateNoData}
+        />
         {(!state.isLoading || state.persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}
@@ -732,7 +714,7 @@ export function App({
         )}
       </div>
       <SaveModal
-        isVisible={state.isSaveModalVisible}
+        isVisible={isSaveModalVisible}
         originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
         savingToLibraryPermitted={savingToLibraryPermitted}
         allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
@@ -740,7 +722,7 @@ export function App({
         tagsIds={tagsIds}
         onSave={runSave}
         onClose={() => {
-          setState((s) => ({ ...s, isSaveModalVisible: false }));
+          setIsSaveModalVisible(false);
         }}
         getAppNameFromId={() => getOriginatingAppName()}
         lastKnownDoc={lastKnownDoc}
@@ -792,47 +774,44 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   lastKnownDoc: React.MutableRefObject<Document | undefined>;
   activeData: React.MutableRefObject<Record<string, Datatable> | undefined>;
 }) {
+  const { EditorFrameContainer } = editorFrame;
   return (
-    <NativeRenderer
-      className="lnsApp__frame"
-      render={editorFrame.mount}
-      nativeProps={{
-        searchSessionId,
-        dateRange: resolvedDateRange,
-        query,
-        filters,
-        savedQuery,
-        doc: persistedDoc,
-        onError,
-        showNoDataPopover,
-        initialContext,
-        onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
-          if (isSaveable !== oldIsSaveable) {
-            setState((s) => ({ ...s, isSaveable }));
-          }
-          if (!_.isEqual(persistedDoc, doc) && !_.isEqual(lastKnownDoc.current, doc)) {
-            setState((s) => ({ ...s, lastKnownDoc: doc }));
-          }
-          if (!_.isEqual(activeDataRef.current, activeData)) {
-            setState((s) => ({ ...s, activeData }));
-          }
+    <EditorFrameContainer
+      doc={persistedDoc}
+      searchSessionId={searchSessionId}
+      dateRange={resolvedDateRange}
+      query={query}
+      filters={filters}
+      savedQuery={savedQuery}
+      onError={onError}
+      showNoDataPopover={showNoDataPopover}
+      initialContext={initialContext}
+      onChange={({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
+        if (isSaveable !== oldIsSaveable) {
+          setState((s) => ({ ...s, isSaveable }));
+        }
+        if (!_.isEqual(persistedDoc, doc) && !_.isEqual(lastKnownDoc.current, doc)) {
+          setState((s) => ({ ...s, lastKnownDoc: doc }));
+        }
+        if (!_.isEqual(activeDataRef.current, activeData)) {
+          setState((s) => ({ ...s, activeData }));
+        }
 
-          // Update the cached index patterns if the user made a change to any of them
-          if (
-            indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
-            filterableIndexPatterns.some(
-              (id) => !indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
-            )
-          ) {
-            getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
-              ({ indexPatterns }) => {
-                if (indexPatterns) {
-                  setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
-                }
+        // Update the cached index patterns if the user made a change to any of them
+        if (
+          indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
+          filterableIndexPatterns.some(
+            (id) => !indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
+          )
+        ) {
+          getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
+            ({ indexPatterns }) => {
+              if (indexPatterns) {
+                setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
               }
-            );
-          }
-        },
+            }
+          );
+        }
       }}
     />
   );
@@ -852,4 +831,21 @@ export async function getAllIndexPatterns(
     .filter((id, i) => responses[i].status === 'rejected');
   // return also the rejected ids in case we want to show something later on
   return { indexPatterns: fullfilled.map((response) => response.value), rejectedIds };
+}
+
+function getLastKnownDocWithoutPinnedFilters(doc?: Document) {
+  if (!doc) return undefined;
+  const [pinnedFilters, appFilters] = _.partition(
+    injectFilterReferences(doc.state?.filters || [], doc.references),
+    esFilters.isFilterPinned
+  );
+  return pinnedFilters?.length
+    ? {
+        ...doc,
+        state: {
+          ...doc.state,
+          filters: appFilters,
+        },
+      }
+    : doc;
 }

@@ -21,12 +21,7 @@ import {
   getQueryParameterActions,
   QUERY_PARAMETER_KEYS,
 } from './context/query_parameters';
-import {
-  createInitialLoadingStatusState,
-  FAILURE_REASONS,
-  LOADING_STATUS,
-  QueryActionsProvider,
-} from './context/query';
+import { createInitialLoadingStatusState, QueryActionsProvider } from './context/query';
 import { callAfterBindingsWorkaround } from './context/helpers/call_after_bindings_workaround';
 
 getAngularModule().directive('contextApp', function ContextApp() {
@@ -68,11 +63,6 @@ function ContextAppController($scope, Private) {
     },
     (action) => (...args) => action(this.state)(...args)
   );
-
-  this.constants = {
-    FAILURE_REASONS,
-    LOADING_STATUS,
-  };
 
   $scope.$watchGroup(
     [

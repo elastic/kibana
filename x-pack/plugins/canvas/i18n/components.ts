@@ -514,6 +514,20 @@ export const ComponentStrings = {
         defaultMessage: 'Keyboard shortcuts',
       }),
   },
+  LabsControl: {
+    getLabsButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsButtonLabel', {
+        defaultMessage: 'Labs',
+      }),
+    getAriaLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsAriaLabel', {
+        defaultMessage: 'View labs projects',
+      }),
+    getTooltip: () =>
+      i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsTooltip', {
+        defaultMessage: 'View labs projects',
+      }),
+  },
   Link: {
     getErrorMessage: (message: string) =>
       i18n.translate('xpack.canvas.link.errorMessage', {

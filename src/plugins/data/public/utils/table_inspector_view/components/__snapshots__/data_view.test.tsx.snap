@@ -1112,19 +1112,19 @@ exports[`Inspector Data View component should render single table without select
                                     </span>
                                   </EuiI18n>
                                 </EuiInnerText>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
-                                    <EuiI18n
-                                      default="Click to sort in ascending order"
-                                      token="euiTableHeaderCell.clickForAscending"
-                                    >
-                                      Click to sort in ascending order
-                                    </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
                               </span>
+                              <EuiScreenReaderOnly>
+                                <span
+                                  className="euiScreenReaderOnly"
+                                >
+                                  <EuiI18n
+                                    default="Click to sort in ascending order"
+                                    token="euiTableHeaderCell.clickForAscending"
+                                  >
+                                    Click to sort in ascending order
+                                  </EuiI18n>
+                                </span>
+                              </EuiScreenReaderOnly>
                             </button>
                           </th>
                         </EuiTableHeaderCell>
@@ -2666,19 +2666,19 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                     </span>
                                   </EuiI18n>
                                 </EuiInnerText>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
-                                    <EuiI18n
-                                      default="Click to sort in ascending order"
-                                      token="euiTableHeaderCell.clickForAscending"
-                                    >
-                                      Click to sort in ascending order
-                                    </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
                               </span>
+                              <EuiScreenReaderOnly>
+                                <span
+                                  className="euiScreenReaderOnly"
+                                >
+                                  <EuiI18n
+                                    default="Click to sort in ascending order"
+                                    token="euiTableHeaderCell.clickForAscending"
+                                  >
+                                    Click to sort in ascending order
+                                  </EuiI18n>
+                                </span>
+                              </EuiScreenReaderOnly>
                             </button>
                           </th>
                         </EuiTableHeaderCell>

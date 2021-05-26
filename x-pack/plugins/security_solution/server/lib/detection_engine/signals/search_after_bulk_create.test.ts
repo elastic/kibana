@@ -23,7 +23,7 @@ import uuid from 'uuid';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { BulkResponse, RuleRangeTuple } from './types';
-import { SearchListItemArraySchema } from '../../../../../lists/common/schemas';
+import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSearchListItemResponseMock } from '../../../../../lists/common/schemas/response/search_list_item_schema.mock';
 import { getRuleRangeTuples } from './utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -423,6 +423,84 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
     expect(createdSignalsCount).toEqual(0); // should not create any signals because all events were in the allowlist
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
+  });
+
+  test('should return success when empty string sortId present', async () => {
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            create: {
+              _id: someGuids[0],
+              _index: 'myfakeindex',
+              status: 201,
+            },
+          },
+          {
+            create: {
+              _id: someGuids[1],
+              _index: 'myfakeindex',
+              status: 201,
+            },
+          },
+          {
+            create: {
+              _id: someGuids[2],
+              _index: 'myfakeindex',
+              status: 201,
+            },
+          },
+          {
+            create: {
+              _id: someGuids[3],
+              _index: 'myfakeindex',
+              status: 201,
+            },
+          },
+        ],
+      })
+    );
+    mockService.scopedClusterClient.asCurrentUser.search
+      .mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          repeatedSearchResultsWithSortId(
+            4,
+            4,
+            someGuids.slice(0, 3),
+            ['1.1.1.1', '2.2.2.2', '2.2.2.2', '2.2.2.2'],
+            // this is the case we are testing, if we receive an empty string for one of the sort ids.
+            ['', '2222222222222']
+          )
+        )
+      )
+      .mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsNoSortIdNoHits()
+        )
+      );
+
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+      ruleSO,
+      tuples,
+      listClient,
+      exceptionsList: [],
+      services: mockService,
+      logger: mockLogger,
+      eventsTelemetry: undefined,
+      id: sampleRuleGuid,
+      inputIndexPattern,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      pageSize: 1,
+      filter: undefined,
+      refresh: false,
+      buildRuleMessage,
+    });
+    expect(success).toEqual(true);
+    expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
+    expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 

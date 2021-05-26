@@ -42,4 +42,9 @@ describe('get_signals_template', () => {
     const template = getSignalsTemplate('test-index');
     expect(template.settings.mapping.total_fields.limit).toBeGreaterThanOrEqual(10000);
   });
+
+  test('it should match snapshot', () => {
+    const template = getSignalsTemplate('test-index');
+    expect(template).toMatchSnapshot();
+  });
 });

@@ -13,6 +13,11 @@ import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
+import { SortResults } from '@elastic/elasticsearch/api/types';
+import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import {
   TimestampOverrideOrUndefined,
   Privilege,
@@ -25,8 +30,6 @@ import {
   parseDuration,
 } from '../../../../../alerting/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
 import {
   BulkResponseErrorAggregation,
   SignalHit,
@@ -37,9 +40,6 @@ import {
   RuleRangeTuple,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
-import { hasLargeValueList } from '../../../../common/detection_engine/utils';
-import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
 import { ShardError } from '../../types';
 import { RuleStatusService } from './rule_status_service';
 import {
@@ -846,3 +846,25 @@ export const isThreatParams = (params: RuleParams): params is ThreatRuleParams =
   params.type === 'threat_match';
 export const isMachineLearningParams = (params: RuleParams): params is MachineLearningRuleParams =>
   params.type === 'machine_learning';
+
+/**
+ * Prevent javascript from returning Number.MAX_SAFE_INTEGER when Elasticsearch expects
+ * Java's Long.MAX_VALUE. This happens when sorting fields by date which are
+ * unmapped in the provided index
+ *
+ * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
+ *
+ * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
+ * @param sortIds SortResults | undefined
+ * @returns SortResults
+ */
+export const getSafeSortIds = (sortIds: SortResults | undefined) => {
+  return sortIds?.map((sortId) => {
+    // haven't determined when we would receive a null value for a sort id
+    // but in case we do, default to sending the stringified Java max_int
+    if (sortId == null || sortId === '' || sortId >= Number.MAX_SAFE_INTEGER) {
+      return '9223372036854775807';
+    }
+    return sortId;
+  });
+};

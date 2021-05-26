@@ -55,13 +55,17 @@ export const WaterfallSidebarItem = ({
       data-test-subj={isHighlighted ? 'sideBarHighlightedItem' : 'sideBarDimmedItem'}
     >
       {!status || !isErrorStatusCode(status) ? (
-        <MiddleTruncatedText
-          text={text}
-          url={url}
-          ariaLabel={ariaLabel}
-          onClick={handleSidebarClick}
-          setButtonRef={setRef}
-        />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+            <MiddleTruncatedText
+              text={text}
+              url={url}
+              ariaLabel={ariaLabel}
+              onClick={handleSidebarClick}
+              setButtonRef={setRef}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false} style={{ minWidth: 0 }}>

@@ -20,6 +20,9 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
   return new EnhancedDataServerPlugin(initializerContext);
 }
 
-export { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
+export {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+} from '../../../../src/plugins/data/common';
 
 export { EnhancedDataServerPlugin as Plugin };

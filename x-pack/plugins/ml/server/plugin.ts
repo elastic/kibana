@@ -16,6 +16,7 @@ import {
   CapabilitiesStart,
   IClusterClient,
   SavedObjectsServiceStart,
+  SharedGlobalConfig,
 } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
@@ -41,7 +42,6 @@ import { jobRoutes } from './routes/anomaly_detectors';
 import { jobServiceRoutes } from './routes/job_service';
 import { savedObjectsRoutes } from './routes/saved_objects';
 import { jobValidationRoutes } from './routes/job_validation';
-import { notificationRoutes } from './routes/notification_settings';
 import { resultsServiceRoutes } from './routes/results_service';
 import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
@@ -59,6 +59,7 @@ import { RouteGuard } from './lib/route_guard';
 import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
 import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
+import { registerCollector } from './usage';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -74,11 +75,14 @@ export class MlServerPlugin
   private security: SecurityPluginSetup | undefined;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
+  private readonly kibanaIndexConfig: SharedGlobalConfig;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
+
+    this.kibanaIndexConfig = ctx.config.legacy.get();
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
@@ -176,7 +180,6 @@ export class MlServerPlugin
     jobAuditMessagesRoutes(routeInit);
     jobRoutes(routeInit);
     jobServiceRoutes(routeInit);
-    notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
@@ -210,6 +213,10 @@ export class MlServerPlugin
         logger: this.log,
         mlSharedServices: sharedServices,
       });
+    }
+
+    if (plugins.usageCollection) {
+      registerCollector(plugins.usageCollection, this.kibanaIndexConfig.kibana.index);
     }
 
     return { ...sharedServices };

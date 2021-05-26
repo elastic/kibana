@@ -9,7 +9,7 @@ import { Job, Datafeed } from '../../../../../../../common/types/anomaly_detecti
 import { filterRuntimeMappings } from './filter_runtime_mappings';
 
 function getJob(): Job {
-  // @ts-expect-error
+  // @ts-expect-error incomplete job type for test
   return {
     job_id: 'test',
     description: '',

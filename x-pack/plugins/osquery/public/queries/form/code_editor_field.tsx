@@ -31,15 +31,16 @@ const OsquerySchemaLink = React.memo(() => (
 OsquerySchemaLink.displayName = 'OsquerySchemaLink';
 
 const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ field }) => {
-  const { value, label, labelAppend, helpText, setValue } = field;
+  const { value, label, labelAppend, helpText, setValue, errors } = field;
+  const error = errors[0]?.message;
 
   return (
     <EuiFormRow
       label={label}
       labelAppend={!isEmpty(labelAppend) ? labelAppend : <OsquerySchemaLink />}
       helpText={helpText}
-      // isInvalid={typeof error === 'string'}
-      // error={error}
+      isInvalid={typeof error === 'string'}
+      error={error}
       fullWidth
     >
       <OsqueryEditor defaultValue={value} onChange={setValue} />

@@ -32,7 +32,7 @@ import { toastNotificationServiceProvider } from '../../../../services/toast_not
 import { ml } from '../../../../services/ml_api_service';
 import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { collapseLiteralStrings } from '../../../../../../shared_imports';
-import { DATAFEED_STATE } from '../../../../../../common/constants/states';
+import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
 
 export class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
@@ -176,11 +176,13 @@ export class EditJobFlyoutUI extends Component {
   extractJob(job, hasDatafeed) {
     this.extractInitialJobFormState(job, hasDatafeed);
     const datafeedRunning = hasDatafeed && job.datafeed_config.state !== DATAFEED_STATE.STOPPED;
+    const jobClosed = job.state === JOB_STATE.CLOSED;
 
     this.setState({
       job,
       hasDatafeed,
       datafeedRunning,
+      jobClosed,
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
       ...cloneDeep(this._initialJobFormState),
@@ -318,6 +320,7 @@ export class EditJobFlyoutUI extends Component {
         isValidJobDetails,
         isValidJobCustomUrls,
         datafeedRunning,
+        jobClosed,
       } = this.state;
 
       const tabs = [
@@ -328,6 +331,7 @@ export class EditJobFlyoutUI extends Component {
           }),
           content: (
             <JobDetails
+              jobClosed={jobClosed}
               datafeedRunning={datafeedRunning}
               jobDescription={jobDescription}
               jobGroups={jobGroups}

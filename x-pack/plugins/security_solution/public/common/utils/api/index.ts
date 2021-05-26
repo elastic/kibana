@@ -7,9 +7,7 @@
 
 import { has } from 'lodash/fp';
 
-export interface AppError {
-  name: string;
-  message: string;
+export interface AppError extends Error {
   body: {
     message: string;
   };
@@ -37,3 +35,7 @@ export const isSecurityAppError = (error: unknown): error is SecurityAppError =>
 
 export const isAppError = (error: unknown): error is AppError =>
   isKibanaError(error) || isSecurityAppError(error);
+
+export const isNotFoundError = (error: unknown) =>
+  (isKibanaError(error) && error.body.statusCode === 404) ||
+  (isSecurityAppError(error) && error.body.status_code === 404);

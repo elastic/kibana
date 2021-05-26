@@ -13,6 +13,7 @@ import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer'
 import '../../../../../common/mock/match_media';
 import { mockTimelineData } from '../../../../../common/mock';
 import { defaultHeaders } from '../column_headers/default_headers';
+import { defaultControlColumn } from '../control_columns';
 
 import { DataDrivenColumns } from '.';
 
@@ -23,7 +24,9 @@ describe('Columns', () => {
     const wrapper = shallow(
       <DataDrivenColumns
         ariaRowindex={2}
-        _id={mockTimelineData[0]._id}
+        id={mockTimelineData[0]._id}
+        actionsColumnWidth={50}
+        checked={false}
         columnHeaders={headersSansTimestamp}
         data={mockTimelineData[0].data}
         ecsData={mockTimelineData[0].ecs}
@@ -31,6 +34,21 @@ describe('Columns', () => {
         notesCount={0}
         renderCellValue={DefaultCellRenderer}
         timelineId="test"
+        columnValues={'abc def'}
+        showCheckboxes={false}
+        onPinEvent={jest.fn()}
+        selectedEventIds={{}}
+        loadingEventIds={[]}
+        onEventDetailsPanelOpened={jest.fn()}
+        onUnPinEvent={jest.fn()}
+        onRowSelected={jest.fn()}
+        showNotes={false}
+        isEventPinned={false}
+        toggleShowNotes={jest.fn()}
+        refetch={jest.fn()}
+        eventIdToNoteIds={{}}
+        leadingControlColumns={[defaultControlColumn]}
+        trailingControlColumns={[]}
       />
     );
 

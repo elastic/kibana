@@ -20,8 +20,6 @@ import {
 } from '../../../common/search_strategy';
 import { SourceConfiguration } from '../sources';
 
-export * from '../../utils/typed_resolvers';
-
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 
 export interface FrameworkAdapter {

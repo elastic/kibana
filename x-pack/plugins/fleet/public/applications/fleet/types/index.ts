@@ -13,7 +13,6 @@ export {
   AgentMetadata,
   AgentPolicy,
   NewAgentPolicy,
-  AgentEvent,
   SimplifiedAgentStatus,
   EnrollmentAPIKey,
   PackagePolicy,
@@ -64,8 +63,6 @@ export {
   PostBulkAgentUpgradeRequest,
   PostAgentUpgradeResponse,
   PostBulkAgentUpgradeResponse,
-  GetOneAgentEventsRequest,
-  GetOneAgentEventsResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
   PutAgentReassignRequest,
@@ -88,6 +85,7 @@ export {
   PutSettingsResponse,
   // API schemas - app
   CheckPermissionsResponse,
+  GenerateServiceTokenResponse,
   // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,

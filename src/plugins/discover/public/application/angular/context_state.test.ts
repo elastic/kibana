@@ -12,16 +12,17 @@ import { createBrowserHistory, History } from 'history';
 import { FilterManager, Filter } from '../../../../data/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+
 const setupMock = coreMock.createSetup();
 
 describe('Test Discover Context State', () => {
   let history: History;
-  let state: any;
+  let state: ReturnType<typeof getState>;
   const getCurrentUrl = () => history.createHref(history.location);
   beforeEach(async () => {
     history = createBrowserHistory();
     history.push('/');
-    state = await getState({
+    state = getState({
       defaultStepSize: '4',
       timeFieldName: 'time',
       history,

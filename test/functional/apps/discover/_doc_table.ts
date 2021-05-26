@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('discover');
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -182,6 +183,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
           expect(await docHeader.getVisibleText()).to.not.have.string(extraColumns[1]);
         });
+      });
+
+      it('should make the document table scrollable', async function () {
+        await PageObjects.discover.clearFieldSearchInput();
+        const dscTable = await find.byCssSelector('.dscTable');
+        const fieldNames = await PageObjects.discover.getAllFieldNames();
+        const clientHeight = await dscTable.getAttribute('clientHeight');
+        let fieldCounter = 0;
+        const checkScrollable = async () => {
+          const scrollWidth = await dscTable.getAttribute('scrollWidth');
+          const clientWidth = await dscTable.getAttribute('clientWidth');
+          log.debug(`scrollWidth: ${scrollWidth}, clientWidth: ${clientWidth}`);
+          return scrollWidth > clientWidth;
+        };
+        const addColumn = async () => {
+          await PageObjects.discover.clickFieldListItemAdd(fieldNames[fieldCounter++]);
+        };
+
+        await addColumn();
+        const isScrollable = await checkScrollable();
+        expect(isScrollable).to.be(false);
+
+        await retry.waitFor('container to be scrollable', async () => {
+          await addColumn();
+          return await checkScrollable();
+        });
+        // so now we need to check if the horizontal scrollbar is displayed
+        const newClientHeight = await dscTable.getAttribute('clientHeight');
+        expect(Number(clientHeight)).to.be.above(Number(newClientHeight));
       });
     });
   });

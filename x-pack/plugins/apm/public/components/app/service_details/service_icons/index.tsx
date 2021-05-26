@@ -30,13 +30,13 @@ const cloudIcons: Record<string, string> = {
   azure: 'logoAzure',
 };
 
-function getCloudIcon(provider?: string) {
+export function getCloudIcon(provider?: string) {
   if (provider) {
     return cloudIcons[provider];
   }
 }
 
-function getContainerIcon(container?: ContainerType) {
+export function getContainerIcon(container?: ContainerType) {
   if (!container) {
     return;
   }

@@ -13,7 +13,7 @@ import moment from 'moment';
 import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import { SearchSessionStatus } from '../../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../../src/plugins/data/common';
 import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../../';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { LocaleWrapper, mockUrls } from '../../__mocks__';
@@ -129,10 +129,10 @@ describe('Background Search Session Management Table', () => {
       expect(table.find('tbody td').map((node) => node.text())).toMatchInlineSnapshot(`
         Array [
           "App",
-          "Namevery background search",
-          "StatusIn progress",
+          "Namevery background search ",
+          "StatusExpired",
           "Created2 Dec, 2020, 00:19:32",
-          "Expiration7 Dec, 2020, 00:19:32",
+          "Expiration--",
           "",
           "",
         ]

@@ -7,9 +7,9 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from 'src/core/server';
-import { ReportingConfig, ReportingCore } from '../../';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { ReportingCore } from '../../';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
@@ -17,9 +17,10 @@ import {
 import { Report, ReportDocument } from './report';
 import { ReportingStore } from './store';
 
+const { createApiResponse } = elasticsearchServiceMock;
+
 describe('ReportingStore', () => {
   const mockLogger = createMockLevelLogger();
-  let mockConfig: ReportingConfig;
   let mockCore: ReportingCore;
   let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
 
@@ -28,9 +29,7 @@ describe('ReportingStore', () => {
       index: '.reporting-test',
       queue: { indexInterval: 'week' },
     };
-    const mockSchema = createMockConfigSchema(reportingConfig);
-    mockConfig = createMockConfig(mockSchema);
-    mockCore = await createMockReportingCore(mockConfig);
+    mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
     mockEsClient = (await mockCore.getEsClient()).asInternalUser as typeof mockEsClient;
 
     mockEsClient.indices.create.mockResolvedValue({} as any);
@@ -71,9 +70,7 @@ describe('ReportingStore', () => {
         index: '.reporting-test',
         queue: { indexInterval: 'centurially' },
       };
-      const mockSchema = createMockConfigSchema(reportingConfig);
-      mockConfig = createMockConfig(mockSchema);
-      mockCore = await createMockReportingCore(mockConfig);
+      mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
 
       const store = new ReportingStore(mockCore, mockLogger);
       const mockReport = new Report({
@@ -408,5 +405,41 @@ describe('ReportingStore', () => {
         },
       ]
     `);
+  });
+
+  describe('start', () => {
+    it('creates an ILM policy for managing reporting indices if there is not already one', async () => {
+      mockEsClient.ilm.getLifecycle.mockRejectedValueOnce(createApiResponse({ statusCode: 404 }));
+      mockEsClient.ilm.putLifecycle.mockResolvedValueOnce(createApiResponse());
+
+      const store = new ReportingStore(mockCore, mockLogger);
+      await store.start();
+
+      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ policy: 'kibana-reporting' });
+      expect(mockEsClient.ilm.putLifecycle.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "body": Object {
+            "policy": Object {
+              "phases": Object {
+                "hot": Object {
+                  "actions": Object {},
+                },
+              },
+            },
+          },
+          "policy": "kibana-reporting",
+        }
+      `);
+    });
+
+    it('does not create an ILM policy for managing reporting indices if one already exists', async () => {
+      mockEsClient.ilm.getLifecycle.mockResolvedValueOnce(createApiResponse());
+
+      const store = new ReportingStore(mockCore, mockLogger);
+      await store.start();
+
+      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ policy: 'kibana-reporting' });
+      expect(mockEsClient.ilm.putLifecycle).not.toHaveBeenCalled();
+    });
   });
 });

@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.error).to.eql('Bad Request');
       expect(body.message).to.eql(
-        '[request body.analysis_config.detectors]: expected value of type [array] but got [undefined]'
+        '[request body.analysis_config.bucket_span]: expected value of type [string] but got [undefined]'
       );
     });
 

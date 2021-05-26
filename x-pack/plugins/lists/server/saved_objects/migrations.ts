@@ -7,16 +7,19 @@
 
 import * as t from 'io-ts';
 import { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from 'kibana/server';
-
-import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
 import {
   EntriesArray,
-  ExceptionListSoSchema,
   NonEmptyNestedEntriesArray,
   OsTypeArray,
   entriesNested,
   entry,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
+
+import { ExceptionListSoSchema } from '../schemas/saved_objects';
 
 const entryType = t.union([entry, entriesNested]);
 type EntryType = t.TypeOf<typeof entryType>;
