@@ -17,10 +17,8 @@ const app = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.default,
   appRoute: `/app/some-id`,
-  meta: {
-    keywords: [],
-    searchDeepLinks: [],
-  },
+  keywords: [],
+  deepLinks: [],
   ...props,
 });
 

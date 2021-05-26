@@ -143,6 +143,7 @@ type TestSubject =
   | 'messageField.input'
   | 'mockCodeEditor'
   | 'tagField.input'
+  | 'typeSelectorField'
   | 'ignoreMissingSwitch.input'
   | 'ignoreFailureSwitch.input'
   | 'ifField.textarea'
@@ -153,4 +154,7 @@ type TestSubject =
   | 'separatorValueField.input'
   | 'quoteValueField.input'
   | 'emptyValueField.input'
+  | 'fieldsValueField.input'
+  | 'saltValueField.input'
+  | 'methodsValueField'
   | 'trimSwitch.input';
