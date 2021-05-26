@@ -5,7 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 export function registerDeleteTasksRoutes(server: Server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Request } from '@hapi/hapi';
 import { createHash } from 'crypto';
-import { Request } from 'hapi';
 import stringify from 'json-stable-stringify';
 
 import { ReindexSavedObject } from '../../../common/types';

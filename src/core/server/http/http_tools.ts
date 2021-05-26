@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from '@hapi/hapi';
 import Hoek from '@hapi/hoek';
 import { readFileSync } from 'fs';
-import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from 'hapi';
 import { ServerOptions as TLSOptions } from 'https';
 import { ValidationError } from 'joi';
 import { HttpConfig } from './http_config';

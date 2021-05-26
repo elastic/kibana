@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "6.8.16",
+  "version": "6.8.17",
   "branch": "6.8",
   "types": "./kibana.d.ts",
   "build": {
@@ -136,6 +136,7 @@
     "@hapi/boom": "^7.4.11",
     "@hapi/good-squeeze": "^6.0.0",
     "@hapi/h2o2": "^8.3.2",
+    "@hapi/hapi": "^17.9.0",
     "@hapi/hoek": "^6.2.4",
     "@hapi/inert": "^5.2.2",
     "@hapi/oppsy": "^2.1.2",
@@ -191,7 +192,6 @@
     "glob-all": "^3.1.0",
     "globby": "^8.0.1",
     "handlebars": "4.7.7",
-    "hapi": "^17.8.5",
     "hjson": "3.1.0",
     "http-proxy-agent": "^2.1.0",
     "https-proxy-agent": "^5.0.0",
@@ -280,7 +280,7 @@
     "webpack": "4.26.1",
     "webpack-merge": "4.1.4",
     "whatwg-fetch": "^3.0.0",
-    "x-pack": "6.8.16",
+    "x-pack": "6.8.17",
     "yauzl": "2.7.0"
   },
   "devDependencies": {
@@ -313,8 +313,8 @@
     "@types/glob": "^5.0.35",
     "@types/globby": "^8.0.0",
     "@types/graphql": "^0.13.1",
-    "@types/hapi": "^17.0.18",
     "@types/hapi__boom": "^7.4.1",
+    "@types/hapi__hapi": "npm:@types/hapi@17.8.9",
     "@types/hapi__hoek": "^6.2.0",
     "@types/hapi__podium": "^3.4.1",
     "@types/has-ansi": "^3.0.0",

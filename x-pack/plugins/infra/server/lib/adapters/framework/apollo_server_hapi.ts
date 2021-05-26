@@ -5,8 +5,8 @@
  */
 
 import Boom from '@hapi/boom';
+import { Plugin, Request, ResponseToolkit, RouteOptions, Server } from '@hapi/hapi';
 import * as GraphiQL from 'apollo-server-module-graphiql';
-import { Plugin, Request, ResponseToolkit, RouteOptions, Server } from 'hapi';
 
 import { GraphQLOptions, runHttpQuery } from 'apollo-server-core';
 

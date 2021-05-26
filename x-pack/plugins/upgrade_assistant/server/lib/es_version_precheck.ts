@@ -5,7 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { Request, RouteOptionsPreObject } from 'hapi';
+import { Request, RouteOptionsPreObject } from '@hapi/hapi';
 import { uniq } from 'lodash';
 import { SemVer } from 'semver';
 
