@@ -61,8 +61,7 @@ export class DrawFilterControl extends Component<Props, {}> {
       filter = createDistanceFilterWithMeta({
         alias: this.props.drawState.filterLabel ? this.props.drawState.filterLabel : '',
         distanceKm,
-        geoFieldName: this.props.drawState.geoFieldName,
-        indexPatternId: this.props.drawState.indexPatternId,
+        geoFieldNames: [this.props.drawState.geoFieldName],
         point: [
           _.round(circle.properties.center[0], precision),
           _.round(circle.properties.center[1], precision),
@@ -78,8 +77,7 @@ export class DrawFilterControl extends Component<Props, {}> {
           this.props.drawState.drawType === DRAW_TYPE.BOUNDS
             ? getBoundingBoxGeometry(geometry)
             : geometry,
-        indexPatternId: this.props.drawState.indexPatternId,
-        geoFieldName: this.props.drawState.geoFieldName,
+        geoFieldNames: [this.props.drawState.geoFieldName],
         geometryLabel: this.props.drawState.geometryLabel ? this.props.drawState.geometryLabel : '',
         relation: this.props.drawState.relation
           ? this.props.drawState.relation

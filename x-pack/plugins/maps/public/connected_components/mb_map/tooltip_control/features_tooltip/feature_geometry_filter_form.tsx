@@ -97,8 +97,7 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
       preIndexedShape,
       geometry: this.props.geometry as Polygon,
       geometryLabel,
-      indexPatternId,
-      geoFieldName,
+      geoFieldNames: [geoFieldName],
       relation,
     });
 
