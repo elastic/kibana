@@ -192,12 +192,17 @@ export class IndexPatternsService {
    * Get default index pattern
    */
   getDefault = async () => {
-    const defaultIndexPatternId = await this.config.get('defaultIndex');
+    const defaultIndexPatternId = await this.getDefaultId();
     if (defaultIndexPatternId) {
       return await this.get(defaultIndexPatternId);
     }
 
     return null;
+  };
+
+  getDefaultId = async (): Promise<string | null> => {
+    const defaultIndexPatternId = await this.config.get('defaultIndex');
+    return defaultIndexPatternId ?? null;
   };
 
   /**
