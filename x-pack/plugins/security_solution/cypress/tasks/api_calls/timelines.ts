@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { TimelineType } from '../../../common/types/timeline';
 import { CompleteTimeline } from '../../objects/timeline';
 
 export const createTimeline = (timeline: CompleteTimeline) =>
@@ -117,5 +117,28 @@ export const loadPrepackagedTimelineTemplates = () =>
   cy.request({
     method: 'POST',
     url: 'api/timeline/_prepackaged',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
+
+export const favoriteTimeline = ({
+  templateTimelineId,
+  templateTimelineVersion,
+  timelineId,
+  timelineType,
+}: {
+  templateTimelineId?: string;
+  templateTimelineVersion?: number;
+  timelineId: string;
+  timelineType: TimelineType;
+}) =>
+  cy.request({
+    method: 'PATCH',
+    url: 'api/timeline/_favorite',
+    body: {
+      templateTimelineId: null,
+      templateTimelineVersion: null,
+      timelineId,
+      timelineType: 'default',
+    },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });

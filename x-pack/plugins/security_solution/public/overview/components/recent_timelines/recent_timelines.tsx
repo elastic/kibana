@@ -45,7 +45,11 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
 
     const render = useCallback(
       (showHoverContent) => (
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexGroup
+          gutterSize="none"
+          justifyContent="spaceBetween"
+          data-test-subj="overview-recent-timelines"
+        >
           <EuiFlexItem grow={false}>
             <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={timeline} />
             <RecentTimelineCounts timeline={timeline} />

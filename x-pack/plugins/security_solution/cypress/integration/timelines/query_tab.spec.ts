@@ -18,6 +18,7 @@ import {
   addFilter,
   closeTimeline,
   openTimelineById,
+  persistNoteToFirstEvent,
   pinFirstEvent,
   refreshTimelinesUntilTimeLinePresent,
 } from '../../tasks/timeline';
@@ -45,6 +46,7 @@ describe('Timeline query tab', () => {
           )
           .then(() => openTimelineById(timelineId))
           .then(() => pinFirstEvent())
+          .then(() => persistNoteToFirstEvent('event note'))
           .then(() => addFilter(timeline.filter));
       });
   });
@@ -56,6 +58,10 @@ describe('Timeline query tab', () => {
 
     it('should contain the right query', () => {
       cy.get(TIMELINE_QUERY).should('have.text', `${timeline.query}`);
+    });
+
+    it('should be able to add event note', () => {
+      cy.get('[data-test-subj="notes"]').should('contain', 'event note');
     });
 
     it('should display timeline filter', () => {

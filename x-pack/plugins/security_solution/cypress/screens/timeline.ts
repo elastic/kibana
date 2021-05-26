@@ -58,6 +58,8 @@ export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-butto
 
 export const NOTES = '[data-test-subj="note-card-body"]';
 
+export const EVENT_NOTE = '[data-test-subj="timeline-notes-button-small"]';
+
 export const NOTE_BY_NOTE_ID = (noteId: string) =>
   `[data-test-subj="note-preview-${noteId}"] .euiMarkdownFormat`;
 
@@ -68,6 +70,12 @@ export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 export const NOTES_TAB_BUTTON = '[data-test-subj="timelineTabs-notes"]';
 
 export const NOTES_TEXT = '.euiMarkdownFormat';
+
+export const NOTES_CODE_BLOCK = '.euiCodeBlock__code';
+
+export const NOTES_AUTHOR = '.euiCommentEvent__headerUsername';
+
+export const NOTES_LINK = '[data-test-subj="markdown-link"]';
 
 export const NOTES_COUNT = '[data-test-subj="timeline-notes-count"]';
 
@@ -171,6 +179,14 @@ export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 
 export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-plus-in-circle"]';
+
+export const TIMELINE_SEARCH_OR_FILTER = '[data-test-subj="timeline-select-search-or-filter"]';
+
+export const TIMELINE_SEARCH_OR_FILTER_CONTENT = '.searchOrFilterPopover';
+
+export const TIMELINE_KQLMODE_SEARCH = '[data-test-subj="kqlModePopoverSearch"]';
+
+export const TIMELINE_KQLMODE_FILTER = '[data-test-subj="kqlModePopoverFilter"]';
 
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 

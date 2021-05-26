@@ -56,6 +56,7 @@ import {
   TIMELINE_DATA_PROVIDER_OPERATOR,
   TIMELINE_DATA_PROVIDER_VALUE,
   SAVE_DATA_PROVIDER_BTN,
+  EVENT_NOTE,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
@@ -112,7 +113,7 @@ export const goToQueryTab = () => {
     .should('have.class', 'euiTab-isSelected');
 };
 
-export const addNotesToTimeline = (notes: string) => {
+export const addNotesToTimeline = (notes: string, notesCount: number) => {
   goToNotesTab().then(() => {
     cy.get(NOTES_TEXT_AREA).type(notes);
     cy.root()
@@ -120,7 +121,7 @@ export const addNotesToTimeline = (notes: string) => {
         $el.find(ADD_NOTE_BUTTON).trigger('click');
         return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
       })
-      .should('have.text', '1');
+      .should('have.text', notesCount);
   });
 
   goToQueryTab();
@@ -247,6 +248,15 @@ export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<H
 
 export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
   return cy.get(PIN_EVENT).first().click({ force: true });
+};
+
+export const persistNoteToFirstEvent = (notes: string) => {
+  cy.get(EVENT_NOTE).first().click({ force: true });
+  cy.get(NOTES_TEXT_AREA).type(notes);
+  cy.root().pipe(($el) => {
+    $el.find(ADD_NOTE_BUTTON).trigger('click');
+    return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
+  });
 };
 
 export const populateTimeline = () => {
