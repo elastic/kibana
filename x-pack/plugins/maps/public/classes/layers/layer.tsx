@@ -47,120 +47,65 @@ import { IESSource } from '../sources/es_source';
 
 export interface ILayer {
   getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
-
   getDataRequest(id: string): DataRequest | undefined;
-
   getDisplayName(source?: ISource): Promise<string>;
-
   getId(): string;
-
   getSourceDataRequest(): DataRequest | undefined;
-
   getMetaFromTiles(): any;
-
   getSource(): ISource;
-
   getSourceForEditing(): ISource;
-
   syncData(syncContext: DataRequestContext): void;
-
   supportsElasticsearchFilters(): boolean;
-
   supportsFitToBounds(): Promise<boolean>;
-
   getAttributions(): Promise<Attribution[]>;
-
   getLabel(): string;
-
   hasLegendDetails(): Promise<boolean>;
-
   renderLegendDetails(): ReactElement<any> | null;
-
   showAtZoomLevel(zoom: number): boolean;
-
   getMinZoom(): number;
-
   getMaxZoom(): number;
-
   getMinSourceZoom(): number;
-
   getAlpha(): number;
-
   getQuery(): Query | null;
-
   getStyle(): IStyle;
-
   getStyleForEditing(): IStyle;
-
   getCurrentStyle(): IStyle;
-
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
-
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
-
   isLayerLoading(): boolean;
-
   isLoadingBounds(): boolean;
-
   isFilteredByGlobalTime(): Promise<boolean>;
-
   hasErrors(): boolean;
-
   getErrors(): string;
-
   getMbLayerIds(): string[];
-
   ownsMbLayerId(mbLayerId: string): boolean;
-
   ownsMbSourceId(mbSourceId: string): boolean;
-
   syncLayerWithMB(mbMap: MbMap): void;
-
   getLayerTypeIconName(): string;
-
   isInitialDataLoadComplete(): boolean;
-
   getIndexPatternIds(): string[];
-
   getQueryableIndexPatternIds(): string[];
-
   getType(): LAYER_TYPE | undefined;
-
   isVisible(): boolean;
-
   cloneDescriptor(): Promise<LayerDescriptor>;
-
   renderStyleEditor(
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
   ): ReactElement<any> | null;
-
   getInFlightRequestTokens(): symbol[];
-
   getPrevRequestToken(dataId: string): symbol | undefined;
-
   destroy: () => void;
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
-
   showJoinEditor(): boolean;
-
   getJoinsDisabledReason(): string | null;
-
   isFittable(): Promise<boolean>;
-
   isIncludeInFitToBounds(): boolean;
-
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
-
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
-
   queryForTileMeta(mbMap: MbMap): any;
-
   getDescriptor(): LayerDescriptor;
-
   getGeoFieldNames(): string[];
-
   getStyleMetaDescriptor(): Promise<StyleMetaDescriptor | null>;
 }
 

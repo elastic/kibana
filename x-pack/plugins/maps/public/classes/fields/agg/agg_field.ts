@@ -34,11 +34,6 @@ export class AggField extends CountAggField {
     return !!this._esDocField;
   }
 
-  // supportsFieldMeta(): boolean {
-  //   // count and sum aggregations are not within field bounds so they do not support field meta.
-  //   // return !isMetricCountable(this._getAggType());
-  // }
-
   canValueBeFormatted(): boolean {
     return this._getAggType() !== AGG_TYPE.UNIQUE_COUNT;
   }
