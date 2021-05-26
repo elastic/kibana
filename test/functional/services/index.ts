@@ -32,7 +32,7 @@ import { FlyoutService } from './flyout';
 import { GlobalNavService } from './global_nav';
 import { InspectorService } from './inspector';
 import { FieldEditorService } from './field_editor';
-import { ManagementMenuProvider } from './management';
+import { ManagementMenuService } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
@@ -83,7 +83,7 @@ export const services = {
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
   elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
-  managementMenu: ManagementMenuProvider,
+  managementMenu: ManagementMenuService,
   monacoEditor: MonacoEditorProvider,
   MenuToggle: MenuToggleProvider,
 };
