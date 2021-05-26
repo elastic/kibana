@@ -11,6 +11,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  EXCEPTION_LIST_URL,
+} from '@kbn/securitysolution-list-constants';
+import {
   PackageCustomExtensionComponentProps,
   pagePathGetters,
 } from '../../../../../../../../../fleet/public';
@@ -35,9 +39,9 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
 
   useEffect(() => {
     const fetchStats = async () => {
-      const summary = await http.get('/api/exception_lists/_summary', {
+      const summary = await http.get(`${EXCEPTION_LIST_URL}/_summary`, {
         query: {
-          list_id: 'endpoint_event_filters',
+          list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
           namespace_type: 'agnostic',
         },
       });
