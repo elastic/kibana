@@ -144,7 +144,7 @@ export const WaterfallChartLegendContainer = euiStyled.div`
 `; // NOTE: EuiShadowColor is a little too dark to work with the background-color
 
 export const WaterfallTooltipResponsiveMaxWidth = euiStyled.div`
-  margin-top: 15px;
+  margin-top: 16px;
   max-width: 90vw;
 `;
 
