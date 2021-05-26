@@ -37,7 +37,7 @@ import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
 import { ToastsProvider } from './toasts';
-import { DataGridProvider } from './data_grid';
+import { DataGridService } from './data_grid';
 import {
   PieChartProvider,
   ElasticChartProvider,
@@ -69,7 +69,7 @@ export const services = {
   dashboardPanelActions: DashboardPanelActionsProvider,
   flyout: FlyoutProvider,
   comboBox: ComboBoxProvider,
-  dataGrid: DataGridProvider,
+  dataGrid: DataGridService,
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
   browser: BrowserProvider,
