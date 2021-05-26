@@ -30,6 +30,8 @@ import { mvtVectorSourceWizardConfig } from '../sources/mvt_single_layer_vector_
 import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
 import { SecurityLayerWizardConfig } from './solution_layers/security';
 import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
+import { newVectorLayerWizardConfig } from './new_vector_layer_wizard';
+import { getMapAppConfig } from '../../kibana_services';
 
 let registered = false;
 export function registerLayerWizards() {
@@ -39,6 +41,9 @@ export function registerLayerWizards() {
 
   // Registration order determines display order
   registerLayerWizard(uploadLayerWizardConfig);
+  if (getMapAppConfig().enableDrawingFeature) {
+    registerLayerWizard(newVectorLayerWizardConfig);
+  }
   registerLayerWizard(esDocumentsLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(choroplethLayerWizardConfig);
