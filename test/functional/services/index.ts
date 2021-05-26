@@ -13,37 +13,37 @@ import {
   BrowserProvider,
   FailureDebuggingProvider,
   FindProvider,
-  ScreenshotsProvider,
-  SnapshotsProvider,
-  TestSubjectsProvider,
+  ScreenshotsService,
+  SnapshotsService,
+  TestSubjects,
 } from './common';
 import { ComboBoxProvider } from './combo_box';
 import {
-  DashboardAddPanelProvider,
-  DashboardReplacePanelProvider,
-  DashboardExpectProvider,
-  DashboardPanelActionsProvider,
-  DashboardVisualizationProvider,
+  DashboardAddPanelService,
+  DashboardReplacePanelService,
+  DashboardExpectService,
+  DashboardPanelActionsService,
+  DashboardVisualizationsService,
 } from './dashboard';
-import { DocTableProvider } from './doc_table';
+import { DocTableService } from './doc_table';
 import { EmbeddingProvider } from './embedding';
-import { FilterBarProvider } from './filter_bar';
+import { FilterBarService } from './filter_bar';
 import { FlyoutProvider } from './flyout';
-import { GlobalNavProvider } from './global_nav';
+import { GlobalNavService } from './global_nav';
 import { InspectorProvider } from './inspector';
-import { FieldEditorProvider } from './field_editor';
-import { ManagementMenuProvider } from './management';
+import { FieldEditorService } from './field_editor';
+import { ManagementMenuService } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
 import { ToastsProvider } from './toasts';
-import { DataGridProvider } from './data_grid';
+import { DataGridService } from './data_grid';
 import {
-  PieChartProvider,
-  ElasticChartProvider,
-  VegaDebugInspectorViewProvider,
+  PieChartService,
+  ElasticChartService,
+  VegaDebugInspectorViewService,
 } from './visualizations';
-import { ListingTableProvider } from './listing_table';
+import { ListingTableService } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
 import { MenuToggleProvider } from './menu_toggle';
@@ -53,37 +53,37 @@ export const services = {
   ...commonServiceProviders,
 
   __webdriver__: RemoteProvider,
-  filterBar: FilterBarProvider,
+  filterBar: FilterBarService,
   queryBar: QueryBarProvider,
   find: FindProvider,
-  testSubjects: TestSubjectsProvider,
-  docTable: DocTableProvider,
-  screenshots: ScreenshotsProvider,
-  snapshots: SnapshotsProvider,
-  dashboardVisualizations: DashboardVisualizationProvider,
-  dashboardExpect: DashboardExpectProvider,
+  testSubjects: TestSubjects,
+  docTable: DocTableService,
+  screenshots: ScreenshotsService,
+  snapshots: SnapshotsService,
   failureDebugging: FailureDebuggingProvider,
-  listingTable: ListingTableProvider,
-  dashboardAddPanel: DashboardAddPanelProvider,
-  dashboardReplacePanel: DashboardReplacePanelProvider,
-  dashboardPanelActions: DashboardPanelActionsProvider,
+  listingTable: ListingTableService,
+  dashboardVisualizations: DashboardVisualizationsService,
+  dashboardExpect: DashboardExpectService,
+  dashboardAddPanel: DashboardAddPanelService,
+  dashboardReplacePanel: DashboardReplacePanelService,
+  dashboardPanelActions: DashboardPanelActionsService,
   flyout: FlyoutProvider,
   comboBox: ComboBoxProvider,
-  dataGrid: DataGridProvider,
+  dataGrid: DataGridService,
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
   browser: BrowserProvider,
-  pieChart: PieChartProvider,
+  pieChart: PieChartService,
   inspector: InspectorProvider,
-  fieldEditor: FieldEditorProvider,
-  vegaDebugInspector: VegaDebugInspectorViewProvider,
+  fieldEditor: FieldEditorService,
+  vegaDebugInspector: VegaDebugInspectorViewService,
   appsMenu: AppsMenuProvider,
-  globalNav: GlobalNavProvider,
+  globalNav: GlobalNavService,
   toasts: ToastsProvider,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
-  elasticChart: ElasticChartProvider,
+  elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
-  managementMenu: ManagementMenuProvider,
+  managementMenu: ManagementMenuService,
   monacoEditor: MonacoEditorProvider,
   MenuToggle: MenuToggleProvider,
 };

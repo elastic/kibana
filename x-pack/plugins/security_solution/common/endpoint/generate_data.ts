@@ -1302,6 +1302,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    */
   public generateEpmPackage(): GetPackagesResponse['response'][0] {
     return {
+      id: this.seededUUIDv4(),
       name: 'endpoint',
       title: 'Elastic Endpoint',
       version: '0.5.0',
