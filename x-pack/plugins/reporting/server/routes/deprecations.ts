@@ -12,39 +12,44 @@ import { LevelLogger as Logger } from '../lib';
 export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
 
-  router.put({ path: API_MIGRATE_ILM_POLICY_URL, validate: false }, async (ctx, req, res) => {
-    const store = await reporting.getStore();
-    const { asInternalUser: client } = await reporting.getEsClient();
+  router.put(
+    { path: API_MIGRATE_ILM_POLICY_URL, validate: false },
+    async ({ core: { elasticsearch } }, req, res) => {
+      const store = await reporting.getStore();
+      const {
+        client: { asCurrentUser: client },
+      } = elasticsearch;
 
-    const indexPattern = store.getReportingIndexPattern();
-    const reportingIlmPolicy = store.getIlmPolicyName();
+      const indexPattern = store.getReportingIndexPattern();
+      const reportingIlmPolicy = store.getIlmPolicyName();
 
-    try {
-      await client.indices.putSettings({
-        index: indexPattern,
-        body: {
-          index: {
-            lifecycle: {
-              name: reportingIlmPolicy,
+      try {
+        await client.indices.putSettings({
+          index: indexPattern,
+          body: {
+            index: {
+              lifecycle: {
+                name: reportingIlmPolicy,
+              },
             },
           },
-        },
-      });
-      return res.ok();
-    } catch (err) {
-      logger.error(err);
-
-      if (err instanceof errors.ResponseError) {
-        return res.customError({
-          statusCode: 500,
-          body: {
-            message: err.message,
-            name: err.name,
-          },
         });
-      }
+        return res.ok();
+      } catch (err) {
+        logger.error(err);
 
-      throw err;
+        if (err instanceof errors.ResponseError) {
+          return res.customError({
+            statusCode: 500,
+            body: {
+              message: err.message,
+              name: err.name,
+            },
+          });
+        }
+
+        throw err;
+      }
     }
-  });
+  );
 };
