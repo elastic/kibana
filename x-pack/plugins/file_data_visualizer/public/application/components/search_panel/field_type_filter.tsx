@@ -8,25 +8,24 @@
 import React, { FC, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Option, MultiSelectPicker } from '../../../../components/multi_select_picker';
-import { FieldTypeIcon } from '../../../../components/field_type_icon';
-import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
-import type { MlJobFieldType } from '../../../../../../common/types/field_types';
+import { JOB_FIELD_TYPES, JobFieldType } from '../../../../common';
+import { FieldTypeIcon } from '../field_type_icon';
+import { MultiSelectPicker, Option } from '../multi_select_picker';
 
 const ML_JOB_FIELD_TYPES_OPTIONS = {
-  [ML_JOB_FIELD_TYPES.BOOLEAN]: { name: 'Boolean', icon: 'tokenBoolean' },
-  [ML_JOB_FIELD_TYPES.DATE]: { name: 'Date', icon: 'tokenDate' },
-  [ML_JOB_FIELD_TYPES.GEO_POINT]: { name: 'Geo point', icon: 'tokenGeo' },
-  [ML_JOB_FIELD_TYPES.GEO_SHAPE]: { name: 'Geo shape', icon: 'tokenGeo' },
-  [ML_JOB_FIELD_TYPES.IP]: { name: 'IP address', icon: 'tokenIP' },
-  [ML_JOB_FIELD_TYPES.KEYWORD]: { name: 'Keyword', icon: 'tokenKeyword' },
-  [ML_JOB_FIELD_TYPES.NUMBER]: { name: 'Number', icon: 'tokenNumber' },
-  [ML_JOB_FIELD_TYPES.TEXT]: { name: 'Text', icon: 'tokenString' },
-  [ML_JOB_FIELD_TYPES.UNKNOWN]: { name: 'Unknown' },
+  [JOB_FIELD_TYPES.BOOLEAN]: { name: 'Boolean', icon: 'tokenBoolean' },
+  [JOB_FIELD_TYPES.DATE]: { name: 'Date', icon: 'tokenDate' },
+  [JOB_FIELD_TYPES.GEO_POINT]: { name: 'Geo point', icon: 'tokenGeo' },
+  [JOB_FIELD_TYPES.GEO_SHAPE]: { name: 'Geo shape', icon: 'tokenGeo' },
+  [JOB_FIELD_TYPES.IP]: { name: 'IP address', icon: 'tokenIP' },
+  [JOB_FIELD_TYPES.KEYWORD]: { name: 'Keyword', icon: 'tokenKeyword' },
+  [JOB_FIELD_TYPES.NUMBER]: { name: 'Number', icon: 'tokenNumber' },
+  [JOB_FIELD_TYPES.TEXT]: { name: 'Text', icon: 'tokenString' },
+  [JOB_FIELD_TYPES.UNKNOWN]: { name: 'Unknown' },
 };
 
 export const DatavisualizerFieldTypeFilter: FC<{
-  indexedFieldTypes: MlJobFieldType[];
+  indexedFieldTypes: JobFieldType[];
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
 }> = ({ indexedFieldTypes, setVisibleFieldTypes, visibleFieldTypes }) => {

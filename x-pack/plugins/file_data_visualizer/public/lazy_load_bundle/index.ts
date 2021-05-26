@@ -6,13 +6,14 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { FileDataVisualizer } from '../application';
+import type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../application';
 import { getCoreStart } from '../kibana_services';
 
 let loadModulesPromise: Promise<LazyLoadedModules>;
 
 interface LazyLoadedModules {
-  FileDataVisualizer: typeof FileDataVisualizer;
+  FileDataVisualizer: FileDataVisualizerSpec;
+  IndexDataVisualizer: IndexDataVisualizerSpec;
   getHttp: () => HttpSetup;
 }
 

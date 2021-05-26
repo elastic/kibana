@@ -14,7 +14,8 @@
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../file_upload/tsconfig.json" },
+    { "path": "../lens/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
-    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
+    { "path": "../../../src/plugins/embeddable/tsconfig.json" }
   ]
 }

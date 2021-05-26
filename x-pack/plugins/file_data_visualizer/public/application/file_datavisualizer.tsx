@@ -12,6 +12,7 @@ import { getCoreStart, getPluginsStart } from '../kibana_services';
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_datavisualizer_view/index';
 
+export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 export const FileDataVisualizer: FC = () => {
   const coreStart = getCoreStart();
   const { data, maps, embeddable, share, security, fileUpload } = getPluginsStart();

@@ -5,24 +5,120 @@
  * 2.0.
  */
 import './_index.scss';
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { parse, stringify } from 'query-string';
+import { isEqual } from 'lodash';
+// @ts-ignore
+import { encode } from 'rison-node';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { getCoreStart, getPluginsStart } from '../kibana_services';
 import {
   IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
 } from './components/index_datavisualizer_view';
+import {
+  Accessor,
+  Provider as UrlStateContextProvider,
+  Dictionary,
+  parseUrlState,
+  SetUrlState,
+  getNestedProperty,
+  isRisonSerializationRequired,
+} from '../application/util/url_state';
 
-export const FileDataVisualizer: FC<Omit<IndexDataVisualizerViewProps, 'indexPatterns'>> = (
-  props
-) => {
+export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
+
+export interface DataVisualizerUrlStateContextProviderProps extends IndexDataVisualizerViewProps {
+  IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
+}
+export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateContextProviderProps> = ({
+  IndexDataVisualizerComponent,
+  ...restProps
+}) => {
+  const history = useHistory();
+  const { search: searchString } = useLocation();
+
+  const setUrlState: SetUrlState = useCallback(
+    (
+      accessor: Accessor,
+      attribute: string | Dictionary<any>,
+      value?: any,
+      replaceState?: boolean
+    ) => {
+      const prevSearchString = searchString;
+      const urlState = parseUrlState(prevSearchString);
+      const parsedQueryString = parse(prevSearchString, { sort: false });
+
+      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+        urlState[accessor] = {};
+      }
+
+      if (typeof attribute === 'string') {
+        if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
+          return prevSearchString;
+        }
+
+        urlState[accessor][attribute] = value;
+      } else {
+        const attributes = attribute;
+        Object.keys(attributes).forEach((a) => {
+          urlState[accessor][a] = attributes[a];
+        });
+      }
+
+      try {
+        const oldLocationSearchString = stringify(parsedQueryString, {
+          sort: false,
+          encode: false,
+        });
+
+        Object.keys(urlState).forEach((a) => {
+          if (isRisonSerializationRequired(a)) {
+            parsedQueryString[a] = encode(urlState[a]);
+          } else {
+            parsedQueryString[a] = urlState[a];
+          }
+        });
+        const newLocationSearchString = stringify(parsedQueryString, {
+          sort: false,
+          encode: false,
+        });
+
+        if (oldLocationSearchString !== newLocationSearchString) {
+          const newSearchString = stringify(parsedQueryString, { sort: false });
+          if (replaceState) {
+            history.replace({ search: newSearchString });
+          } else {
+            history.push({ search: newSearchString });
+          }
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Could not save url state', error);
+      }
+    },
+    [history, searchString]
+  );
+
+  return (
+    <UrlStateContextProvider value={{ searchString, setUrlState }}>
+      <IndexDataVisualizerComponent {...restProps} />
+    </UrlStateContextProvider>
+  );
+};
+
+export const IndexDataVisualizer: FC<IndexDataVisualizerViewProps> = (props) => {
   const coreStart = getCoreStart();
   const { data, maps, embeddable, share, security, fileUpload } = getPluginsStart();
   const services = { data, maps, embeddable, share, security, fileUpload, ...coreStart };
 
   return (
     <KibanaContextProvider services={{ ...services }}>
-      <IndexDataVisualizerView indexPatterns={data.indexPatterns} {...props} />
+      <DataVisualizerUrlStateContextProvider
+        IndexDataVisualizerComponent={IndexDataVisualizerView}
+        {...props}
+      />
     </KibanaContextProvider>
   );
 };

@@ -7,14 +7,18 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { lazyLoadModules } from '../lazy_load_bundle';
-import { FileDataVisualizer } from '../application';
-import { FieldHistogramRequestConfig, FieldRequestConfig } from '../../common/types';
-import { GetTimeFieldRangeResponse } from '../../common/types/time_field_request';
-import { IndicesOptions } from '../../common/types/indices';
+import type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../application';
+import type { FieldHistogramRequestConfig, FieldRequestConfig } from '../../common/types';
+import type { GetTimeFieldRangeResponse } from '../../common/types/time_field_request';
+import type { IndicesOptions } from '../../common/types/indices';
 
-export async function getFileDataVisualizerComponent(): Promise<typeof FileDataVisualizer> {
+export async function getFileDataVisualizerComponent(): Promise<FileDataVisualizerSpec> {
   const modules = await lazyLoadModules();
   return modules.FileDataVisualizer;
+}
+export async function getIndexDataVisualizerComponent(): Promise<IndexDataVisualizerSpec> {
+  const modules = await lazyLoadModules();
+  return modules.IndexDataVisualizer;
 }
 
 export function basePath() {

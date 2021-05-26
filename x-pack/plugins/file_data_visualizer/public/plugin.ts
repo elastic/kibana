@@ -16,7 +16,7 @@ import type { FileUploadPluginStart } from '../../file_upload/public';
 import type { MapsStartApi } from '../../maps/public';
 import type { SecurityPluginSetup } from '../../security/public';
 import type { LensPublicStart } from '../../lens/public';
-import { getFileDataVisualizerComponent } from './api';
+import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from './api';
 import { getMaxBytesFormatted } from './application/util/get_max_bytes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -46,6 +46,10 @@ export class FileDataVisualizerPlugin
 
   public start(core: CoreStart, plugins: FileDataVisualizerStartDependencies) {
     setStartServices(core, plugins);
-    return { getFileDataVisualizerComponent, getMaxBytesFormatted };
+    return {
+      getFileDataVisualizerComponent,
+      getIndexDataVisualizerComponent,
+      getMaxBytesFormatted,
+    };
   }
 }

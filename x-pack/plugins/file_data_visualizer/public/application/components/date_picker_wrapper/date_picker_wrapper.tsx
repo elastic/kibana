@@ -10,7 +10,11 @@ import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 
 import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
-import { TimeHistoryContract, TimeRange, UI_SETTINGS } from 'src/plugins/data/public';
+import {
+  TimeHistoryContract,
+  TimeRange,
+  UI_SETTINGS,
+} from '../../../../../../../src/plugins/data/public';
 
 import { useUrlState } from '../../util/url_state';
 import { useFileDataVisualizerKibana } from '../../kibana_context';
@@ -60,6 +64,7 @@ export const DatePickerWrapper: FC = () => {
   const refreshInterval: RefreshInterval =
     globalState?.refreshInterval ?? timefilter.getRefreshInterval();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const setRefreshInterval = useCallback(
     debounce((refreshIntervalUpdate: RefreshInterval) => {
       setGlobalState('refreshInterval', refreshIntervalUpdate, true);
@@ -122,7 +127,7 @@ export const DatePickerWrapper: FC = () => {
     return function cleanup() {
       subscriptions.unsubscribe();
     };
-  }, []);
+  }, [setRefreshInterval, timefilter]);
 
   function updateFilter({ start, end }: Duration) {
     const newTime = { from: start, to: end };
