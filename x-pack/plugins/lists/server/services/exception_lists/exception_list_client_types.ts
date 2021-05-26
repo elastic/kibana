@@ -56,6 +56,19 @@ export interface GetExceptionListOptions {
   namespaceType: NamespaceType;
 }
 
+export interface GetExceptionListSummaryOptions {
+  listId: ListIdOrUndefined;
+  id: IdOrUndefined;
+  namespaceType: NamespaceType;
+}
+
+export interface GetExceptionListSummaryResponse {
+  windows: number;
+  linux: number;
+  macos: number;
+  total: number;
+}
+
 export interface CreateExceptionListOptions {
   listId: ListId;
   namespaceType: NamespaceType;

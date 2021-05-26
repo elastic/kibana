@@ -6,54 +6,43 @@
  */
 
 import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React, { FC, memo, useEffect, useState } from 'react';
-import { CoreStart } from 'kibana/public';
+import React, { FC, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-import { TrustedAppsHttpService } from '../../../../../trusted_apps/service';
-import { GetTrustedAppsSummaryResponse } from '../../../../../../../../common/endpoint/types';
+import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
 
-const SUMMARY_KEYS: Readonly<Array<keyof GetTrustedAppsSummaryResponse>> = [
+const SUMMARY_KEYS: Readonly<Array<keyof GetExceptionSummaryResponse>> = [
   'windows',
   'macos',
   'linux',
   'total',
 ];
 
-const SUMMARY_LABELS: Readonly<{ [key in keyof GetTrustedAppsSummaryResponse]: string }> = {
+const SUMMARY_LABELS: Readonly<{ [key in keyof GetExceptionSummaryResponse]: string }> = {
   windows: i18n.translate(
-    'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppItemsSummary.windows',
+    'xpack.securitySolution.endpoint.fleetCustomExtension.exceptionItemsSummary.windows',
     { defaultMessage: 'Windows' }
   ),
   linux: i18n.translate(
-    'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppItemsSummary.linux',
+    'xpack.securitySolution.endpoint.fleetCustomExtension.exceptionItemsSummary.linux',
     { defaultMessage: 'Linux' }
   ),
   macos: i18n.translate(
-    'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppItemsSummary.macos',
+    'xpack.securitySolution.endpoint.fleetCustomExtension.exceptionItemsSummary.macos',
     { defaultMessage: 'Mac' }
   ),
   total: i18n.translate(
-    'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppItemsSummary.total',
+    'xpack.securitySolution.endpoint.fleetCustomExtension.exceptionItemsSummary.total',
     { defaultMessage: 'Total' }
   ),
 };
 
 const CSS_BOLD: Readonly<React.CSSProperties> = { fontWeight: 'bold' };
 
-export const TrustedAppItemsSummary = memo(() => {
-  const {
-    services: { http },
-  } = useKibana<CoreStart>();
-  const [stats, setStats] = useState<GetTrustedAppsSummaryResponse | undefined>();
-  const [trustedAppsApi] = useState(() => new TrustedAppsHttpService(http));
+interface ExceptionItemsSummaryProps {
+  stats: GetExceptionSummaryResponse | undefined;
+}
 
-  useEffect(() => {
-    trustedAppsApi.getTrustedAppsSummary().then((response) => {
-      setStats(response);
-    });
-  }, [trustedAppsApi]);
-
+export const ExceptionItemsSummary = memo<ExceptionItemsSummaryProps>(({ stats }) => {
   return (
     <EuiFlexGroup responsive={false}>
       {SUMMARY_KEYS.map((stat) => {
@@ -73,7 +62,7 @@ export const TrustedAppItemsSummary = memo(() => {
   );
 });
 
-TrustedAppItemsSummary.displayName = 'TrustedAppItemsSummary';
+ExceptionItemsSummary.displayName = 'ExceptionItemsSummary';
 
 const SummaryStat: FC<{ value: number; color?: EuiBadgeProps['color'] }> = memo(
   ({ children, value, color, ...commonProps }) => {

@@ -15,18 +15,14 @@ import {
   pagePathGetters,
 } from '../../../../../../../../../fleet/public';
 import { useKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-import { getTrustedAppsListPath } from '../../../../../../common/routing';
-import {
-  TrustedAppsListPageRouteState,
-  GetExceptionSummaryResponse,
-} from '../../../../../../../../common/endpoint/types';
+import { getEventFiltersListPath } from '../../../../../../common/routing';
+import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
 import { PLUGIN_ID as FLEET_PLUGIN_ID } from '../../../../../../../../../fleet/common';
 import { MANAGEMENT_APP_ID } from '../../../../../../common/constants';
 import { LinkWithIcon } from './link_with_icon';
 import { ExceptionItemsSummary } from './exception_items_summary';
-import { TrustedAppsHttpService } from '../../../../../trusted_apps/service';
 
-export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>(({ pkgkey }) => {
+export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(({ pkgkey }) => {
   const {
     services: {
       application: { getUrlForApp },
@@ -35,16 +31,22 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
   } = useKibana<CoreStart & { application: ApplicationStart }>();
 
   const [stats, setStats] = useState<GetExceptionSummaryResponse | undefined>();
-  const [trustedAppsApi] = useState(() => new TrustedAppsHttpService(http));
+  const eventFiltersListUrlPath = getEventFiltersListPath();
 
   useEffect(() => {
-    trustedAppsApi.getTrustedAppsSummary().then((response) => {
-      setStats(response);
-    });
-  }, [trustedAppsApi]);
-  const trustedAppsListUrlPath = getTrustedAppsListPath();
+    const fetchStats = async () => {
+      const summary = await http.get('/api/exception_lists/_summary', {
+        query: {
+          list_id: 'endpoint_event_filters',
+          namespace_type: 'agnostic',
+        },
+      });
+      setStats(summary);
+    };
+    fetchStats();
+  }, [http]);
 
-  const trustedAppRouteState = useMemo<TrustedAppsListPageRouteState>(() => {
+  const eventFiltersRouteState = useMemo(() => {
     const fleetPackageCustomUrlPath = `#${pagePathGetters.integration_details_custom({ pkgkey })}`;
     return {
       backButtonLabel: i18n.translate(
@@ -70,8 +72,8 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
           <EuiText>
             <h4>
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsLabel"
-                defaultMessage="Trusted Applications"
+                id="xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersLabel"
+                defaultMessage="Event Filters"
               />
             </h4>
           </EuiText>
@@ -83,14 +85,14 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
           <span>
             <LinkWithIcon
               appId={MANAGEMENT_APP_ID}
-              href={getUrlForApp(MANAGEMENT_APP_ID, { path: trustedAppsListUrlPath })}
-              appPath={trustedAppsListUrlPath}
-              appState={trustedAppRouteState}
-              data-test-subj="linkToTrustedApps"
+              href={getUrlForApp(MANAGEMENT_APP_ID, { path: eventFiltersListUrlPath })}
+              appPath={eventFiltersListUrlPath}
+              appState={eventFiltersRouteState}
+              data-test-subj="linkToEventFilters"
             >
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
-                defaultMessage="Manage trusted applications"
+                id="xpack.securitySolution.endpoint.fleetCustomExtension.manageEventFiltersLinkLabel"
+                defaultMessage="Manage event filters"
               />
             </LinkWithIcon>
           </span>
@@ -100,4 +102,4 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
   );
 });
 
-FleetTrustedAppsCard.displayName = 'FleetTrustedAppsCard';
+FleetEventFiltersCard.displayName = 'FleetEventFiltersCard';

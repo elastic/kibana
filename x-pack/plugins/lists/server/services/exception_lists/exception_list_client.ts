@@ -31,11 +31,14 @@ import {
   GetEndpointListItemOptions,
   GetExceptionListItemOptions,
   GetExceptionListOptions,
+  GetExceptionListSummaryOptions,
+  GetExceptionListSummaryResponse,
   UpdateEndpointListItemOptions,
   UpdateExceptionListItemOptions,
   UpdateExceptionListOptions,
 } from './exception_list_client_types';
 import { getExceptionList } from './get_exception_list';
+import { getExceptionListSummary } from './get_exception_list_summary';
 import { createExceptionList } from './create_exception_list';
 import { getExceptionListItem } from './get_exception_list_item';
 import { createExceptionListItem } from './create_exception_list_item';
@@ -70,6 +73,15 @@ export class ExceptionListClient {
   }: GetExceptionListOptions): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient } = this;
     return getExceptionList({ id, listId, namespaceType, savedObjectsClient });
+  };
+
+  public getExceptionListSummary = async ({
+    listId,
+    id,
+    namespaceType,
+  }: GetExceptionListSummaryOptions): Promise<GetExceptionListSummaryResponse | null> => {
+    const { savedObjectsClient } = this;
+    return getExceptionListSummary({ id, listId, namespaceType, savedObjectsClient });
   };
 
   public getExceptionListItem = async ({
