@@ -44,9 +44,10 @@ export function urlparam(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
+      var viewParam = [];
       const uri = parse(window.location.href, true);
       if (uri.hash != null) {
-        const viewParam = qs.parse(
+        viewParam = qs.parse(
           uri.hash.includes('?') ? uri.hash.substring(uri.hash.indexOf('?'), uri.hash.length) : ''
         );
       }
