@@ -9,12 +9,10 @@ import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
 import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
 import { DOC_TYPE } from '../../common';
-import { commonRenameOperationsForFormula } from '../migrations/attribute_migrations';
+import { commonRenameOperationsForFormula } from '../migrations/common_migrations';
 import { LensDocShapePre712 } from '../migrations/types';
 
-export const lensEmbeddableFactory = (
-  persistableStateService: EmbeddablePersistableStateService
-): EmbeddableRegistryDefinition => {
+export const lensEmbeddableFactory = (): EmbeddableRegistryDefinition => {
   return {
     id: DOC_TYPE,
     migrations: {

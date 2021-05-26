@@ -56,7 +56,7 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
         plugins.taskManager
       );
     }
-    plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory(plugins.embeddable));
+    plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
     return {};
   }
 

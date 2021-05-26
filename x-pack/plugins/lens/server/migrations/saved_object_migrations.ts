@@ -16,7 +16,7 @@ import {
 import { Query, Filter } from 'src/plugins/data/public';
 import { PersistableFilter } from '../../common';
 import { LensDocShapePost712, LensDocShapePre712 } from './types';
-import { commonRenameOperationsForFormula } from './attribute_migrations';
+import { commonRenameOperationsForFormula } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
   visualizationType: string | null;
