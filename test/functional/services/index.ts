@@ -27,7 +27,7 @@ import {
 } from './dashboard';
 import { DocTableProvider } from './doc_table';
 import { EmbeddingProvider } from './embedding';
-import { FilterBarProvider } from './filter_bar';
+import { FilterBarService } from './filter_bar';
 import { FlyoutProvider } from './flyout';
 import { GlobalNavProvider } from './global_nav';
 import { InspectorProvider } from './inspector';
@@ -53,7 +53,7 @@ export const services = {
   ...commonServiceProviders,
 
   __webdriver__: RemoteProvider,
-  filterBar: FilterBarProvider,
+  filterBar: FilterBarService,
   queryBar: QueryBarProvider,
   find: FindProvider,
   testSubjects: TestSubjectsProvider,
