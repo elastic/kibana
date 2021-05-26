@@ -79,6 +79,44 @@ describe('estimateCapacity', () => {
     });
   });
 
+  test('estimates the max capacity available when there are no active Kibana', async () => {
+    expect(
+      estimateCapacity(
+        mockStats(
+          { max_workers: 10, poll_interval: 3000 },
+          {
+            // 0 active tasks at this moment in time, so no owners identifiable
+            owner_ids: 0,
+            overdue_non_recurring: 0,
+            capacity_requirments: {
+              per_minute: 60,
+              per_hour: 0,
+              per_day: 0,
+            },
+          },
+          {
+            execution: {
+              duration: {},
+              // no non-recurring executions in the system in recent history
+              persistence: {
+                ephemeral: 0,
+                non_recurring: 0,
+                recurring: 100,
+              },
+              result_frequency_percent_as_number: {},
+            },
+          }
+        )
+      ).value
+    ).toMatchObject({
+      min_required_kibana: 1,
+      minutes_to_drain_overdue: 0,
+      max_throughput_per_minute: 200,
+      avg_required_throughput_per_minute: 60,
+      avg_recurring_required_throughput_per_minute: 60,
+    });
+  });
+
   test('estimates the max capacity available to handle the workload when there are multiple kibana', async () => {
     expect(
       estimateCapacity(

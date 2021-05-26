@@ -16,6 +16,7 @@ import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '.
 import { AggregationResultOf } from '../../../../../typings/elasticsearch';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskStore } from '../task_store';
+import { createRunningAveragedStat } from './task_run_calcultors';
 
 interface StatusStat extends JsonObject {
   [status: string]: number;
@@ -32,15 +33,27 @@ export interface WorkloadStat extends JsonObject {
   task_types: TaskTypeStat;
   schedule: Array<[string, number]>;
   non_recurring: number;
+  owner_ids: number[];
+  overdue: number;
+  overdue_non_recurring: number;
+  estimated_schedule_density: number[];
+  capacity_requirments: CapacityRequirments;
+}
+export interface SummarizedWorkloadStat extends JsonObject {
+  count: number;
+  task_types: TaskTypeStat;
+  schedule: Array<[string, number]>;
+  non_recurring: number;
   owner_ids: number;
   overdue: number;
   overdue_non_recurring: number;
   estimated_schedule_density: number[];
-  capacity_requirments: {
-    per_minute: number;
-    per_hour: number;
-    per_day: number;
-  };
+  capacity_requirments: CapacityRequirments;
+}
+export interface CapacityRequirments extends JsonObject {
+  per_minute: number;
+  per_hour: number;
+  per_day: number;
 }
 
 export interface WorkloadAggregation {
@@ -109,7 +122,6 @@ export function createWorkloadAggregator(
   elasticsearchAndSOAvailability$: Observable<boolean>,
   refreshInterval: number,
   pollInterval: number,
-  maxWorkers: number,
   logger: Logger
 ): AggregatedStatProvider<WorkloadStat> {
   // calculate scheduleDensity going two refreshIntervals or 1 minute into into the future
@@ -118,6 +130,8 @@ export function createWorkloadAggregator(
     Math.max(Math.round(60000 / pollInterval), Math.round((refreshInterval * 2) / pollInterval)),
     MAX_SHCEDULE_DENSITY_BUCKETS
   );
+
+  const ownerIdsQueue = createRunningAveragedStat<number>(scheduleDensityBuckets);
 
   return combineLatest([timer(0, refreshInterval), elasticsearchAndSOAvailability$]).pipe(
     filter(([, areElasticsearchAndSOAvailable]) => areElasticsearchAndSOAvailable),
@@ -260,7 +274,7 @@ export function createWorkloadAggregator(
           };
         }),
         non_recurring: nonRecurring,
-        owner_ids: ownerIds,
+        owner_ids: ownerIdsQueue(ownerIds),
         schedule: schedules
           .sort((scheduleLeft, scheduleRight) => scheduleLeft.asSeconds - scheduleRight.asSeconds)
           .map((schedule) => [schedule.interval, schedule.count]),
@@ -411,9 +425,14 @@ export function estimateRecurringTaskScheduling(
 
 export function summarizeWorkloadStat(
   workloadStats: WorkloadStat
-): { value: WorkloadStat; status: HealthStatus } {
+): { value: SummarizedWorkloadStat; status: HealthStatus } {
   return {
-    value: workloadStats,
+    value: {
+      ...workloadStats,
+      // assume the largest number we've seen of active owner IDs
+      // matches the number of active Task Managers in the cluster
+      owner_ids: Math.max(...workloadStats.owner_ids),
+    },
     status: HealthStatus.OK,
   };
 }

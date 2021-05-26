@@ -103,7 +103,6 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       10,
       3000,
-      10,
       loggingSystemMock.create().get()
     );
 
@@ -296,7 +295,6 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       10,
       3000,
-      10,
       loggingSystemMock.create().get()
     );
 
@@ -327,7 +325,6 @@ describe('Workload Statistics Aggregator', () => {
       availability$,
       10,
       3000,
-      10,
       loggingSystemMock.create().get()
     );
 
@@ -364,7 +361,6 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       10,
       3000,
-      10,
       loggingSystemMock.create().get()
     );
 
@@ -388,7 +384,6 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       10,
       3000,
-      10,
       loggingSystemMock.create().get()
     );
 
@@ -417,7 +412,6 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       60 * 1000,
       3000,
-      10,
       loggingSystemMock.create().get()
     );
 
@@ -456,7 +450,6 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       15 * 60 * 1000,
       3000,
-      10,
       loggingSystemMock.create().get()
     );
 
@@ -507,7 +500,7 @@ describe('Workload Statistics Aggregator', () => {
         )
       );
     const logger = loggingSystemMock.create().get();
-    const workloadAggregator = createWorkloadAggregator(taskStore, of(true), 10, 3000, 10, logger);
+    const workloadAggregator = createWorkloadAggregator(taskStore, of(true), 10, 3000, logger);
 
     return new Promise<void>((resolve, reject) => {
       workloadAggregator.pipe(take(2), bufferCount(2)).subscribe((results) => {
@@ -625,7 +618,6 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       10,
       pollingIntervalInSeconds * 1000,
-      maxWorkers,
       loggingSystemMock.create().get()
     );
 
@@ -655,7 +647,6 @@ describe('Workload Statistics Aggregator', () => {
       of(true),
       refreshInterval,
       3000,
-      10,
       logger
     );
 

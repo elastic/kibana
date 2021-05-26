@@ -15,6 +15,7 @@ import { TaskPollingLifecycle } from '../polling_lifecycle';
 import {
   createWorkloadAggregator,
   summarizeWorkloadStat,
+  SummarizedWorkloadStat,
   WorkloadStat,
 } from './workload_statistics';
 import {
@@ -59,7 +60,7 @@ export interface RawMonitoringStats {
   last_update: string;
   stats: {
     configuration?: RawMonitoredStat<ConfigStat>;
-    workload?: RawMonitoredStat<WorkloadStat>;
+    workload?: RawMonitoredStat<SummarizedWorkloadStat>;
     runtime?: RawMonitoredStat<SummarizedTaskRunStat>;
     capacity_estimation?: RawMonitoredStat<CapacityEstimationStat>;
   };
@@ -81,7 +82,6 @@ export function createAggregators(
       elasticsearchAndSOAvailability$,
       config.monitored_aggregated_stats_refresh_rate,
       config.poll_interval,
-      config.max_workers,
       logger
     )
   );

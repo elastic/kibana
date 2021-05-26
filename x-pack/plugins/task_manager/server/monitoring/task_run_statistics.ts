@@ -36,7 +36,7 @@ import { HealthStatus } from './monitoring_stats_stream';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
 
-enum TaskPersistence {
+export enum TaskPersistence {
   Recurring = 'recurring',
   NonRecurring = 'non_recurring',
   Ephemeral = 'ephemeral',

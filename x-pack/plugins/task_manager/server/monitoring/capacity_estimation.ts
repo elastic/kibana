@@ -30,10 +30,12 @@ function isCapacityEstimationParams(
 export function estimateCapacity(
   stats: CapacityEstimationParams
 ): RawMonitoredStat<CapacityEstimationStat> {
-  // stats.runtime.value.execution.persistence.
-  const uniqueOwnerIdsAtThisMoment = stats.workload.value.owner_ids;
+  const workload = stats.workload.value;
+  // if there are no active owners right now, assume there's at least 1
+  const assumedKibanaInstances = Math.max(workload.owner_ids, 1);
+
   const { recurring: recurringTasksAsPercentage } = stats.runtime.value.execution.persistence;
-  const { overdue, capacity_requirments: capacityRequirments } = stats.workload.value;
+  const { overdue, capacity_requirments: capacityRequirments } = workload;
   const { poll_interval: pollInterval, max_workers: maxWorkers } = stats.configuration.value;
   const capacityPerMinute = Math.round(((60 * 1000) / pollInterval) * maxWorkers);
   const averageCapacityAvailableForRecurringTasks =
@@ -44,8 +46,9 @@ export function estimateCapacity(
     Math.ceil(capacityRequirments.per_hour / 60) +
     Math.ceil(capacityRequirments.per_day / 24 / 60);
 
-  const practicalRequiredPerMinute =
-    averageRequiredPerMinute + (capacityPerMinute - averageCapacityAvailableForRecurringTasks);
+  const practicalRequiredPerMinute = Math.ceil(
+    averageRequiredPerMinute + (capacityPerMinute - averageCapacityAvailableForRecurringTasks)
+  );
 
   return {
     status:
@@ -58,7 +61,7 @@ export function estimateCapacity(
     value: {
       minutes_to_drain_overdue: Math.ceil(overdue / practicalRequiredPerMinute),
       min_required_kibana: Math.ceil(practicalRequiredPerMinute / capacityPerMinute),
-      max_throughput_per_minute: uniqueOwnerIdsAtThisMoment * capacityPerMinute,
+      max_throughput_per_minute: assumedKibanaInstances * capacityPerMinute,
       avg_recurring_required_throughput_per_minute: averageRequiredPerMinute,
       avg_required_throughput_per_minute: practicalRequiredPerMinute,
     },
