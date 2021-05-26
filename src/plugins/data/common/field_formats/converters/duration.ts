@@ -110,7 +110,7 @@ const outputFormats = [
       defaultMessage: 'Seconds',
     }),
     shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asSeconds.short', {
-      defaultMessage: 'sec',
+      defaultMessage: 's',
     }),
     method: 'asSeconds',
   },
@@ -128,7 +128,7 @@ const outputFormats = [
       defaultMessage: 'Hours',
     }),
     shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asHours.short', {
-      defaultMessage: 'hr',
+      defaultMessage: 'h',
     }),
     method: 'asHours',
   },
@@ -164,7 +164,7 @@ const outputFormats = [
       defaultMessage: 'Years',
     }),
     shortText: i18n.translate('data.fieldFormats.duration.outputFormats.asYears.short', {
-      defaultMessage: 'Yr',
+      defaultMessage: 'y',
     }),
     method: 'asYears',
   },
@@ -188,8 +188,8 @@ function formatInputDynamically(
   val: number,
   inputFormat: string,
   outputPrecision: number,
-  showSuffix: boolean,
-  useShortSuffix: boolean
+  useShortSuffix: boolean,
+  includeSpace: string
 ) {
   const ratio = ratioToSeconds[inputFormat] || 1;
   const kind = (inputFormat in ratioToSeconds
@@ -197,7 +197,14 @@ function formatInputDynamically(
     : inputFormat) as unitOfTime.DurationConstructor;
   const valueInDuration = moment.duration(val * ratio, kind);
 
-  return formatDuration(valueInDuration, outputPrecision, showSuffix, useShortSuffix);
+  return formatDuration(
+    val,
+    valueInDuration,
+    inputFormat,
+    outputPrecision,
+    useShortSuffix,
+    includeSpace
+  );
 }
 
 export class DurationFormat extends FieldFormat {
@@ -223,6 +230,7 @@ export class DurationFormat extends FieldFormat {
       inputFormat: DEFAULT_INPUT_FORMAT.kind,
       outputFormat: DEFAULT_OUTPUT_FORMAT.method,
       outputPrecision: DEFAULT_OUTPUT_PRECISION,
+      includeSpaceWithSuffix: true,
     };
   }
 
@@ -232,41 +240,46 @@ export class DurationFormat extends FieldFormat {
     const outputPrecision = this.param('outputPrecision');
     const showSuffix = Boolean(this.param('showSuffix'));
     const useShortSuffix = Boolean(this.param('useShortSuffix'));
+    const includeSpaceWithSuffix = this.param('includeSpaceWithSuffix');
+
+    // explicitly checking for false
+    const includeSpace = includeSpaceWithSuffix ? ' ' : '';
+
     const human = this.isHuman();
     const dyanmic = this.isDynamic();
+
     const prefix =
       val < 0 && human
         ? i18n.translate('data.fieldFormats.duration.negativeLabel', {
             defaultMessage: 'minus',
           }) + ' '
         : '';
+
     const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
     const formatted = dyanmic
-      ? formatInputDynamically(val, inputFormat, outputPrecision, showSuffix, useShortSuffix)
+      ? formatInputDynamically(val, inputFormat, outputPrecision, useShortSuffix, includeSpace)
       : duration[outputFormat]();
     const precise = human || dyanmic ? formatted : formatted.toFixed(outputPrecision);
     const type = outputFormats.find(({ method }) => method === outputFormat);
 
     const unitText = useShortSuffix ? type?.shortText : type?.text;
 
-    const suffix = showSuffix && unitText ? ` ${unitText}` : '';
+    const suffix = showSuffix && unitText ? `${includeSpace}${unitText}` : '';
 
     return dyanmic ? precise : prefix + precise + suffix;
   };
 }
 
 function formatDuration(
+  val: number,
   duration: moment.Duration,
+  inputFormat: string,
   outputPrecision: number,
-  showSuffix: boolean,
-  useShortSuffix: boolean
+  useShortSuffix: boolean,
+  includeSpace: string
 ) {
-  const parts = [];
-  // const duration = moment.duration(period);
-
   // return nothing when the duration is falsy or not correctly parsed (P0D)
   if (!duration || duration.toISOString() === 'P0D') return;
-
   const units = [
     { unit: duration.years(), nextUnitRate: 12, method: 'asYears' },
     { unit: duration.months(), nextUnitRate: 4, method: 'asMonths' },
@@ -278,27 +291,32 @@ function formatDuration(
     { unit: duration.milliseconds(), nextUnitRate: 1000, method: 'asMilliseconds' },
   ];
 
+  const getUnitText = (method: string) => {
+    const type = outputFormats.find(({ method: methodT }) => method === methodT);
+    return useShortSuffix ? type?.shortText : type?.text;
+  };
+
   for (let i = 0; i < units.length; i++) {
     const unitValue = units[i].unit;
     if (unitValue >= 1) {
-      const type = outputFormats.find(({ method }) => method === units[i].method);
-      const unitText = showSuffix ? (useShortSuffix ? type?.shortText : type?.text) : '';
+      const unitText = getUnitText(units[i].method);
 
       const value = Math.floor(unitValue);
       if (units?.[i + 1]) {
         const decimalPointValue = Math.floor(units[i + 1].unit);
-        parts.push(
+        return (
           (value + decimalPointValue / units[i].nextUnitRate).toFixed(outputPrecision) +
-            ' ' +
-            unitText
+          includeSpace +
+          unitText
         );
-        return parts.join(', ');
       } else {
-        parts.push(value + ' ' + unitText);
-        return parts.join(', ');
+        return unitValue.toFixed(outputPrecision) + includeSpace + unitText;
       }
     }
   }
 
-  return 0;
+  const unitValue = units[units.length - 1].unit;
+  const unitText = getUnitText(units[units.length - 1].method);
+
+  return unitValue.toFixed(outputPrecision) + includeSpace + unitText;
 }

@@ -11,6 +11,7 @@ import { shallow } from 'enzyme';
 
 import { DurationFormatEditor } from './duration';
 import { FieldFormat } from 'src/plugins/data/public';
+import { EuiSwitch } from '@elastic/eui';
 
 const fieldType = 'number';
 const format = {
@@ -22,9 +23,11 @@ const format = {
       inputFormat: 'seconds',
       outputFormat: 'humanize',
       outputPrecision: 10,
+      includeSpaceWithSuffix: true,
     };
   }),
   isHuman: () => true,
+  isDynamic: () => false,
   type: {
     inputFormats: [
       {
@@ -78,6 +81,7 @@ describe('DurationFormatEditor', () => {
           inputFormat: 'seconds',
           outputFormat: 'asMinutes',
           outputPrecision: 10,
+          includeSpaceWithSuffix: true,
         };
       }),
       isHuman: () => false,
@@ -91,6 +95,48 @@ describe('DurationFormatEditor', () => {
         onError={onError}
       />
     );
+    const labels = component.find(EuiSwitch);
+    expect(labels.length).toEqual(3);
+    expect(labels.get(0).props.label.props.defaultMessage).toEqual('Show suffix');
+    expect(labels.get(1).props.label.props.defaultMessage).toEqual('Use short suffix');
+    expect(labels.get(2).props.label.props.defaultMessage).toEqual(
+      'Include space between suffix and value'
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should not render show suffix on dynamic output', async () => {
+    const newFormat = {
+      ...format,
+      getParamDefaults: jest.fn().mockImplementation(() => {
+        return {
+          inputFormat: 'seconds',
+          outputFormat: 'dynamic',
+          outputPrecision: 2,
+          includeSpaceWithSuffix: true,
+        };
+      }),
+      isHuman: () => false,
+      isDynamic: () => true,
+    };
+    const component = shallow(
+      <DurationFormatEditor
+        fieldType={fieldType}
+        format={(newFormat as unknown) as FieldFormat}
+        formatParams={{ ...formatParams, outputFormat: 'dynamic' }}
+        onChange={onChange}
+        onError={onError}
+      />
+    );
+
+    const labels = component.find(EuiSwitch);
+    expect(labels.length).toEqual(2);
+    expect(labels.get(0).props.label.props.defaultMessage).toEqual('Use short suffix');
+    expect(labels.get(1).props.label.props.defaultMessage).toEqual(
+      'Include space between suffix and value'
+    );
+
     expect(component).toMatchSnapshot();
   });
 });
