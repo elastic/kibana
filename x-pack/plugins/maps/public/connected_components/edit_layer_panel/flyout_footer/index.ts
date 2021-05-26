@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { FlyoutFooter } from './view';
+import { FlyoutFooter } from './flyout_footer';
 
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { hasDirtyState } from '../../../selectors/map_selectors';
@@ -16,14 +18,15 @@ import {
   removeTrackedLayerStateForSelectedLayer,
   updateFlyout,
 } from '../../../actions';
+import { MapStoreState } from '../../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     hasStateChanged: hasDirtyState(state),
   };
 }
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
   return {
     cancelLayerPanel: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
