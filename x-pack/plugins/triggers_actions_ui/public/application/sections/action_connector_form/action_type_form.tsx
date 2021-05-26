@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -166,7 +166,7 @@ export const ActionTypeForm = ({
     isActionGroupDisabledForActionType
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
         ? i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.addNewActionConnectorActionGroup.display',
+            'xpack.triggersActionsUI.sections.actionTypeForm.addNewActionConnectorActionGroup.display',
             {
               defaultMessage: '{actionGroupName} (Not Currently Supported)',
               values: { actionGroupName },
@@ -202,9 +202,9 @@ export const ActionTypeForm = ({
   );
 
   const accordionContent = checkEnabledResult.isEnabled ? (
-    <Fragment>
+    <>
       {actionGroups && selectedActionGroup && setActionGroupIdByIndex && (
-        <Fragment>
+        <>
           <EuiFlexGroup component="div">
             <EuiFlexItem grow={true}>
               <EuiFormControlLayout
@@ -214,7 +214,7 @@ export const ActionTypeForm = ({
                     htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
                   >
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertForm.actionRunWhenInActionGroup"
+                      id="xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenInActionGroup"
                       defaultMessage="Run when"
                     />
                   </EuiFormLabel>
@@ -240,7 +240,7 @@ export const ActionTypeForm = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
-        </Fragment>
+        </>
       )}
       <EuiFlexGroup component="div">
         <EuiFlexItem>
@@ -248,7 +248,7 @@ export const ActionTypeForm = ({
             fullWidth
             label={
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertForm.actionIdLabel"
+                id="xpack.triggersActionsUI.sections.actionTypeForm.actionIdLabel"
                 defaultMessage="{connectorInstance} connector"
                 values={{
                   connectorInstance: actionTypesIndex
@@ -268,7 +268,7 @@ export const ActionTypeForm = ({
                 >
                   <FormattedMessage
                     defaultMessage="Add connector"
-                    id="xpack.triggersActionsUI.sections.alertForm.addNewConnectorEmptyButton"
+                    id="xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton"
                   />
                 </EuiButtonEmpty>
               ) : null
@@ -305,88 +305,86 @@ export const ActionTypeForm = ({
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
-    </Fragment>
+    </>
   ) : (
     checkEnabledResult.messageCard
   );
 
   return (
-    <Fragment key={index}>
-      <EuiAccordion
-        initialIsOpen={true}
-        id={index.toString()}
-        onToggle={setIsOpen}
-        paddingSize="l"
-        className="actAccordionActionForm"
-        buttonContentClassName="actAccordionActionForm__button"
-        data-test-subj={`alertActionAccordion-${index}`}
-        buttonContent={
-          <EuiFlexGroup gutterSize="l" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                <div>
-                  <EuiFlexGroup gutterSize="s">
+    <EuiAccordion
+      initialIsOpen={true}
+      key={index}
+      id={index.toString()}
+      onToggle={setIsOpen}
+      paddingSize="l"
+      className="actAccordionActionForm"
+      buttonContentClassName="actAccordionActionForm__button"
+      data-test-subj={`alertActionAccordion-${index}`}
+      buttonContent={
+        <EuiFlexGroup gutterSize="l" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <div>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      defaultMessage="{actionConnectorName}"
+                      id="xpack.triggersActionsUI.sections.actionTypeForm.existingAlertActionTypeEditTitle"
+                      values={{
+                        actionConnectorName: `${actionConnector.name} ${
+                          actionConnector.isPreconfigured ? preconfiguredMessage : ''
+                        }`,
+                      }}
+                    />
+                  </EuiFlexItem>
+                  {selectedActionGroup && !isOpen && (
                     <EuiFlexItem grow={false}>
-                      <FormattedMessage
-                        defaultMessage="{actionConnectorName}"
-                        id="xpack.triggersActionsUI.sections.alertForm.existingAlertActionTypeEditTitle"
-                        values={{
-                          actionConnectorName: `${actionConnector.name} ${
-                            actionConnector.isPreconfigured ? preconfiguredMessage : ''
-                          }`,
-                        }}
-                      />
+                      <EuiBadge>{selectedActionGroup.name}</EuiBadge>
                     </EuiFlexItem>
-                    {selectedActionGroup && !isOpen && (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge>{selectedActionGroup.name}</EuiBadge>
-                      </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    {checkEnabledResult.isEnabled === false && (
+                      <>
+                        <EuiIconTip
+                          type="alert"
+                          color="danger"
+                          content={i18n.translate(
+                            'xpack.triggersActionsUI.sections.actionTypeForm.actionDisabledTitle',
+                            {
+                              defaultMessage: 'This action is disabled',
+                            }
+                          )}
+                          position="right"
+                        />
+                      </>
                     )}
-                    <EuiFlexItem grow={false}>
-                      {checkEnabledResult.isEnabled === false && (
-                        <Fragment>
-                          <EuiIconTip
-                            type="alert"
-                            color="danger"
-                            content={i18n.translate(
-                              'xpack.triggersActionsUI.sections.alertForm.actionDisabledTitle',
-                              {
-                                defaultMessage: 'This action is disabled',
-                              }
-                            )}
-                            position="right"
-                          />
-                        </Fragment>
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </div>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        extraAction={
-          <EuiButtonIcon
-            iconType="minusInCircle"
-            color="danger"
-            className="actAccordionActionForm__extraAction"
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
-              {
-                defaultMessage: 'Delete',
-              }
-            )}
-            onClick={onDeleteAction}
-          />
-        }
-      >
-        {accordionContent}
-      </EuiAccordion>
-      <EuiSpacer size="m" />
-    </Fragment>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      extraAction={
+        <EuiButtonIcon
+          iconType="minusInCircle"
+          color="danger"
+          className="actAccordionActionForm__extraAction"
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
+            {
+              defaultMessage: 'Delete',
+            }
+          )}
+          onClick={onDeleteAction}
+        />
+      }
+    >
+      {accordionContent}
+    </EuiAccordion>
   );
 };
 
