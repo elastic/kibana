@@ -216,7 +216,7 @@
                 "height": 721,
                 "angle": 0
               },
-              "expression": "filters | demodata | markdown \"\" | render containerStyle={containerStyle backgroundColor=\"#ede9e7\"}"
+              "expression": "markdown \"\" | render containerStyle={containerStyle backgroundColor=\"#ede9e7\"}"
             },
             {
               "id": "element-71b63f54-0961-4ed2-a85d-45584b48a631",
