@@ -315,7 +315,6 @@ export function CustomizablePalette({
           }
         >
           <CustomStops
-            key={`${activePalette.name}-${rangeType}`}
             reverse={activePalette.params?.reverse}
             data-test-prefix="lnsDatatable"
             colorStops={colorStopsToShow}

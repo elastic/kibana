@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import type { FocusEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,12 +16,15 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiScreenReaderOnly,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import useMountedState from 'react-use/lib/useMountedState';
+import useUnmount from 'react-use/lib/useUnmount';
 import { DEFAULT_COLOR } from './constants';
 import { getDataMinMax, getStepValue, isValidColor } from './utils';
 import { TooltipWrapper, useDebouncedValue } from '../index';
 import { ColorStop } from './types';
+
+const idGenerator = htmlIdGenerator();
 
 export interface CustomStopsProps {
   colorStops: ColorStop[];
@@ -53,7 +56,7 @@ export const CustomStops = ({
     [onChange]
   );
   const memoizedValues = useMemo(
-    () => colorStops.map(({ color, stop }) => ({ color, stop: String(stop) })),
+    () => colorStops.map(({ color, stop }) => ({ color, stop: String(stop), id: idGenerator() })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [colorStops, reverse]
   );
@@ -68,29 +71,24 @@ export const CustomStops = ({
 
   // refresh on unmount:
   // the onChange logic here is a bit different than the one above as it has to actively sort if required
-  const isMounted = useMountedState();
-  useEffect(() => {
-    return () => {
-      if (!isMounted()) {
-        const areStopsValid = localColorStops.every(({ color, stop }, i) => {
-          const numberStop = Number(stop);
-          return isValidColor(color) && !Number.isNaN(numberStop);
-        });
-        const shouldSort = localColorStops.some(({ stop }, i) => {
-          const numberStop = Number(stop);
-          const prevNumberStop = Number(localColorStops[i - 1]?.stop ?? -Infinity);
-          return numberStop < prevNumberStop;
-        });
-        if (areStopsValid && shouldSort) {
-          onChange(
-            localColorStops
-              .map(({ color, stop }) => ({ color, stop: Number(stop) }))
-              .sort(({ stop: stopA }, { stop: stopB }) => Number(stopA) - Number(stopB))
-          );
-        }
-      }
-    };
-  }, [localColorStops, isMounted, onChange]);
+  useUnmount(() => {
+    const areStopsValid = localColorStops.every(({ color, stop }, i) => {
+      const numberStop = Number(stop);
+      return isValidColor(color) && !Number.isNaN(numberStop);
+    });
+    const shouldSort = localColorStops.some(({ stop }, i) => {
+      const numberStop = Number(stop);
+      const prevNumberStop = Number(localColorStops[i - 1]?.stop ?? -Infinity);
+      return numberStop < prevNumberStop;
+    });
+    if (areStopsValid && shouldSort) {
+      onChange(
+        localColorStops
+          .map(({ color, stop }) => ({ color, stop: Number(stop) }))
+          .sort(({ stop: stopA }, { stop: stopB }) => Number(stopA) - Number(stopB))
+      );
+    }
+  });
 
   return (
     <>
@@ -112,13 +110,13 @@ export const CustomStops = ({
         direction="column"
         gutterSize="s"
       >
-        {localColorStops.map(({ color, stop }, index) => {
+        {localColorStops.map(({ color, stop, id }, index) => {
           const prevStopValue = Number(localColorStops[index - 1]?.stop ?? -Infinity);
           const nextStopValue = Number(localColorStops[index + 1]?.stop ?? Infinity);
 
           return (
             <EuiFlexItem
-              key={index}
+              key={id}
               data-test-subj={`${dataTestPrefix}_dynamicColoring_stop_row_${index}`}
               onBlur={(e: FocusEvent<HTMLDivElement>) => {
                 // sort the stops when the focus leaves the row container
@@ -130,7 +128,7 @@ export const CustomStops = ({
                   // replace invalid color with previous valid one
                   const lastValidColor = hasInvalidColor ? colorStops[index].color : color;
                   const localColorStopsCopy = localColorStops.map((item, i) =>
-                    i === index ? { color: lastValidColor, stop } : item
+                    i === index ? { color: lastValidColor, stop, id } : item
                   );
                   setLocalColorStops(
                     localColorStopsCopy.sort(
@@ -154,6 +152,7 @@ export const CustomStops = ({
                       newColorStops[index] = {
                         color,
                         stop: newStopString,
+                        id,
                       };
                       setLocalColorStops(newColorStops);
                     }}
@@ -176,7 +175,7 @@ export const CustomStops = ({
                     // make sure that the popover is closed
                     if (color === '' && !popoverInFocus) {
                       const newColorStops = [...localColorStops];
-                      newColorStops[index] = { color: colorStops[index].color, stop };
+                      newColorStops[index] = { color: colorStops[index].color, stop, id };
                       setLocalColorStops(newColorStops);
                     }
                   }}
@@ -185,7 +184,7 @@ export const CustomStops = ({
                     key={stop}
                     onChange={(newColor) => {
                       const newColorStops = [...localColorStops];
-                      newColorStops[index] = { color: newColor, stop };
+                      newColorStops[index] = { color: newColor, stop, id };
                       setLocalColorStops(newColorStops);
                     }}
                     secondaryInputDisplay="top"
@@ -198,7 +197,7 @@ export const CustomStops = ({
                       setPopoverInFocus(false);
                       if (color === '') {
                         const newColorStops = [...localColorStops];
-                        newColorStops[index] = { color: colorStops[index].color, stop };
+                        newColorStops[index] = { color: colorStops[index].color, stop, id };
                         setLocalColorStops(newColorStops);
                       }
                     }}
@@ -272,6 +271,7 @@ export const CustomStops = ({
           newColorStops.push({
             color: prevColor,
             stop: String(newStop),
+            id: idGenerator(),
           });
           setLocalColorStops(newColorStops);
         }}
