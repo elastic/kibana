@@ -7,8 +7,10 @@
 
 import { PeerCertificate } from 'tls';
 import { TLSSettings } from '../../types';
+import { Logger } from '../../../../../../src/core/server';
 
 export function getNodeTLSOptions(
+  logger: Logger,
   verificationMode?: string
 ): {
   rejectUnauthorized?: boolean;
@@ -31,8 +33,10 @@ export function getNodeTLSOptions(
       case 'full':
         agentOptions.rejectUnauthorized = true;
         break;
-      default:
-        throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
+      default: {
+        logger.warn(`Unknown ssl verificationMode: ${verificationMode}`);
+        agentOptions.rejectUnauthorized = true;
+      }
     }
     // see: src/core/server/elasticsearch/legacy/elasticsearch_client_config.ts
     // This is where the global rejectUnauthorized is overridden by a custom host

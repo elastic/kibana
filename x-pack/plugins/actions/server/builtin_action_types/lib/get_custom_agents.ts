@@ -24,7 +24,7 @@ export function getCustomAgents(
   url: string
 ): GetCustomAgentsResponse {
   const generalTLSSettings = configurationUtilities.getTLSSettings();
-  const agentTLSOptions = getNodeTLSOptions(generalTLSSettings.verificationMode);
+  const agentTLSOptions = getNodeTLSOptions(logger, generalTLSSettings.verificationMode);
   // the default for rejectUnauthorized is the global setting, which can
   // be overridden (below) with a custom host setting
   const defaultAgents = {
@@ -59,7 +59,10 @@ export function getCustomAgents(
     );
     // see: src/core/server/elasticsearch/legacy/elasticsearch_client_config.ts
     // This is where the global rejectUnauthorized is overridden by a custom host
-    const customHostNodeTLSOptions = getNodeTLSOptions(tlsSettingsFromConfig.verificationMode);
+    const customHostNodeTLSOptions = getNodeTLSOptions(
+      logger,
+      tlsSettingsFromConfig.verificationMode
+    );
     if (customHostNodeTLSOptions.rejectUnauthorized !== undefined) {
       agentOptions.rejectUnauthorized = customHostNodeTLSOptions.rejectUnauthorized;
     }
@@ -104,7 +107,10 @@ export function getCustomAgents(
     return defaultAgents;
   }
 
-  const proxyNodeTLSOptions = getNodeTLSOptions(proxySettings.proxyTLSSettings.verificationMode);
+  const proxyNodeTLSOptions = getNodeTLSOptions(
+    logger,
+    proxySettings.proxyTLSSettings.verificationMode
+  );
   // At this point, we are going to use a proxy, so we need new agents.
   // We will though, copy over the calculated tls options from above, into
   // the https agent.

@@ -92,7 +92,10 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     customHostSettings = configurationUtilities.getCustomHostSettings(`smtp://${host}:${port}`);
 
     if (proxySettings && useProxy) {
-      transportConfig.tls = getNodeTLSOptions(proxySettings?.proxyTLSSettings.verificationMode);
+      transportConfig.tls = getNodeTLSOptions(
+        logger,
+        proxySettings?.proxyTLSSettings.verificationMode
+      );
       transportConfig.proxy = proxySettings.proxyUrl;
       transportConfig.headers = proxySettings.proxyHeaders;
     } else if (!transportConfig.secure && user == null && password == null) {
@@ -101,7 +104,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       // authenticate rarely have valid certs; eg cloud proxy, and npm maildev
       transportConfig.tls = { rejectUnauthorized: false };
     } else {
-      transportConfig.tls = getNodeTLSOptions(generalTLSSettings.verificationMode);
+      transportConfig.tls = getNodeTLSOptions(logger, generalTLSSettings.verificationMode);
     }
 
     // finally, allow customHostSettings to override some of the settings
@@ -119,7 +122,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
         tlsSettings?.verificationMode,
         tlsSettings?.rejectUnauthorized
       );
-      const nodeTLSOptions = getNodeTLSOptions(tlsSettingsFromConfig.verificationMode);
+      const nodeTLSOptions = getNodeTLSOptions(logger, tlsSettingsFromConfig.verificationMode);
       if (!transportConfig.tls) {
         transportConfig.tls = { ...tlsConfig, ...nodeTLSOptions };
       } else {
