@@ -7,10 +7,10 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { createEndpointListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
-import { ENDPOINT_LIST_URL } from '../../common/constants';
-import { createEndpointListSchema } from '../../common/schemas';
 
 import { buildSiemResponse } from './utils';
 import { getExceptionListClient } from './utils/get_exception_list_client';

@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useValuesList } from '../../../hooks/use_values_list';
 import { FieldValueSelection } from './field_value_selection';
 import { FieldValueSuggestionsProps } from './types';

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { TypeOf } from '@kbn/config-schema';
+import { HostIsolationRequestSchema } from '../schema/actions';
+
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
 export interface EndpointAction {
@@ -21,7 +24,8 @@ export interface EndpointAction {
   };
 }
 
+export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
+
 export interface HostIsolationResponse {
-  action?: string;
-  message?: string;
+  action: string;
 }
