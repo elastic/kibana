@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, Fragment, useReducer } from 'react';
+import React, { useCallback, useState, useReducer } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -29,8 +29,8 @@ import { ActionConnectorForm, getConnectorErrors } from './action_connector_form
 import {
   ActionType,
   ActionConnector,
-  ActionTypeRegistryContract,
   UserConfiguredActionConnector,
+  ConnectorAddFlyoutProps,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
@@ -38,15 +38,6 @@ import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { createConnectorReducer, InitialConnector, ConnectorReducer } from './connector_reducer';
 import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
-
-export interface ConnectorAddFlyoutProps {
-  onClose: () => void;
-  actionTypes?: ActionType[];
-  onTestConnector?: (connector: ActionConnector) => void;
-  reloadConnectors?: () => Promise<ActionConnector[] | void>;
-  consumer?: string;
-  actionTypeRegistry: ActionTypeRegistryContract;
-}
 
 const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   onClose,
@@ -199,7 +190,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
     };
 
     saveButton = (
-      <Fragment>
+      <>
         {onTestConnector && (
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -236,7 +227,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
             />
           </EuiButton>
         </EuiFlexItem>
-      </Fragment>
+      </>
     );
   }
 
@@ -251,7 +242,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
           ) : null}
           <EuiFlexItem>
             {actionTypeModel && actionType ? (
-              <Fragment>
+              <>
                 <EuiTitle size="s">
                   <h3 id="flyoutTitle">
                     <FormattedMessage
@@ -266,7 +257,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
                 <EuiText size="s" color="subdued">
                   {actionTypeModel.selectMessage}
                 </EuiText>
-              </Fragment>
+              </>
             ) : (
               <EuiTitle size="s">
                 <h3 id="selectConnectorFlyoutTitle">
@@ -285,7 +276,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
           !actionType && hasActionsUpgradeableByTrial ? (
             <UpgradeYourLicenseCallOut http={http} />
           ) : (
-            <Fragment />
+            <></>
           )
         }
       >
