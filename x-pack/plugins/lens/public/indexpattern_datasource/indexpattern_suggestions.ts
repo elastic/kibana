@@ -254,9 +254,11 @@ function getExistingLayerSuggestionsForField(
     }
   }
 
-  const metricSuggestion = createMetricSuggestion(indexPattern, layerId, state, field);
-  if (metricSuggestion) {
-    suggestions.push(metricSuggestion);
+  if (!fieldInUse) {
+    const metricSuggestion = createMetricSuggestion(indexPattern, layerId, state, field);
+    if (metricSuggestion) {
+      suggestions.push(metricSuggestion);
+    }
   }
 
   return suggestions;

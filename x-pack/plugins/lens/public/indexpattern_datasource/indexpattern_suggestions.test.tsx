@@ -867,10 +867,7 @@ describe('IndexPattern Data Source suggestions', () => {
           searchable: true,
         });
 
-        expect(suggestions).toHaveLength(1);
-        // Check that the suggestion is a single metric
-        expect(suggestions[0].table.columns).toHaveLength(1);
-        expect(suggestions[0].table.columns[0].operation.isBucketed).toBeFalsy();
+        expect(suggestions).toHaveLength(0);
       });
 
       it('appends a terms column with default size on string field', () => {
@@ -1023,6 +1020,24 @@ describe('IndexPattern Data Source suggestions', () => {
         });
 
         expect(suggestions).not.toContain(expect.objectContaining({ changeType: 'extended' }));
+      });
+
+      it('skips metric only suggestion when the field is already in use', () => {
+        const initialState = stateWithNonEmptyTables();
+        const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
+          name: 'bytes',
+          displayName: 'bytes',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        });
+
+        expect(
+          suggestions.some(
+            (suggestion) =>
+              suggestion.table.changeType === 'initial' && suggestion.table.columns.length === 1
+          )
+        ).toBeFalsy();
       });
 
       it('skips duplicates when the document-specific field is already in use', () => {
