@@ -76,8 +76,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           api: [],
           savedObject: {
-            all: [...caseSavedObjects],
-            read: ['config'],
+            all: [],
+            read: [],
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
@@ -93,7 +93,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           api: [],
           savedObject: {
             all: [],
-            read: ['config', ...caseSavedObjects],
+            read: [],
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
