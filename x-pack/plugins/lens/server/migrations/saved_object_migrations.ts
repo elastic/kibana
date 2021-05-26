@@ -405,4 +405,5 @@ export const migrations: SavedObjectMigrationMap = {
   '7.11.0': removeSuggestedPriority,
   '7.12.0': transformTableState,
   '7.13.0': renameOperationsForFormula,
+  '7.13.1': renameOperationsForFormula, // duplicate this migration in case a broken by value panel is added to the library
 };
