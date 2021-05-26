@@ -98,6 +98,7 @@ const prepareSeriesParam = (data: SeriesParam) => {
     mode: data.mode,
     show: data.show,
     showCircles: data.showCircles,
+    circlesRadius: data.circlesRadius,
     type: data.type,
     valueAxis: data.valueAxis,
   });
@@ -207,6 +208,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     fittingFunction: vis.params.fittingFunction,
     times: vis.params.times.map(prepareTimeMarker),
     palette: vis.params.palette.name,
+    fillOpacity: vis.params.fillOpacity,
     xDimension: dimensions.x ? prepareXYDimension(dimensions.x) : null,
     yDimension: dimensions.y.map(prepareXYDimension),
     zDimension: dimensions.z?.map(prepareXYDimension),
