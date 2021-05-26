@@ -41,7 +41,6 @@ describe('When on the Event Filters List Page', () => {
     waitForAction = mockedContext.middlewareSpy.waitForAction;
 
     act(() => {
-      mockedContext.setExperimentalFlag({ eventFilteringEnabled: true });
       history.push('/event_filters');
     });
   });

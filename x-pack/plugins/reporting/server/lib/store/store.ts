@@ -159,9 +159,7 @@ export class ReportingStore {
         this.logger.debug(`Found ILM policy ${this.ilmPolicyName}; skipping creation.`);
         return;
       }
-      this.logger.debug(
-        `Creating ILM policy for managing reporting indices: ${this.ilmPolicyName}`
-      );
+      this.logger.info(`Creating ILM policy for managing reporting indices: ${this.ilmPolicyName}`);
       await client.ilm.putLifecycle({
         policy: this.ilmPolicyName,
         body: reportingIlmPolicy,

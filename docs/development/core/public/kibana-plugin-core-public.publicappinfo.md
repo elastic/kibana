@@ -9,10 +9,11 @@ Public information about a registered [application](./kibana-plugin-core-public.
 <b>Signature:</b>
 
 ```typescript
-export declare type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'meta'> & {
+export declare type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'keywords' | 'deepLinks'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
-    meta: PublicAppMetaInfo;
+    keywords: string[];
+    deepLinks: PublicAppDeepLinkInfo[];
 };
 ```

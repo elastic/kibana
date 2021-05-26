@@ -7,7 +7,6 @@
 
 import { PutLifecycleRequest } from '@elastic/elasticsearch/api/types';
 
-// TODO: Review the default/starting policy
 export const reportingIlmPolicy: PutLifecycleRequest['body'] = {
   policy: {
     phases: {
