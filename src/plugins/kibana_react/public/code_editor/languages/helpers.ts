@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import { monaco } from '@kbn/monaco';
-import { mergeWith, isArray, isEmpty } from 'lodash';
 import { LangModuleType } from './';
 
 function registerLanguage(language: LangModuleType) {
@@ -15,12 +14,4 @@ function registerLanguage(language: LangModuleType) {
   monaco.languages.setLanguageConfiguration(language.ID, language.conf);
 }
 
-function mergeConfig<T>(firstConfig: T, secondConfig: T) {
-  return mergeWith(firstConfig, secondConfig, (src, dst) => {
-    if (isArray(src) && isArray(dst)) return [...src, ...dst];
-    if (isEmpty(src)) return dst;
-    if (isEmpty(dst)) return src;
-  });
-}
-
-export { registerLanguage, mergeConfig };
+export { registerLanguage };
