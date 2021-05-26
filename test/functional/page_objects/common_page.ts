@@ -39,7 +39,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
      * Logins to Kibana as default user and navigates to provided app
      * @param appUrl Kibana URL
      */
-    private async loginIfPrompted(appUrl: string, insertTimestamp: boolean) {
+    private async loginIfPrompted(
+      appUrl: string,
+      insertTimestamp: boolean,
+      username?: string,
+      password?: string
+    ) {
       // Disable the welcome screen. This is relevant for environments
       // which don't allow to use the yml setting, e.g. cloud production.
       // It is done here so it applies to logins but also to a login re-use.
@@ -53,7 +58,9 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
       if (loginPage && !wantedLoginPage) {
         log.debug('Found login page');
-        if (config.get('security.disableTestUser')) {
+        if (username && password) {
+          await PageObjects.login.login(username, password);
+        } else if (config.get('security.disableTestUser')) {
           await PageObjects.login.login(
             config.get('servers.kibana.username'),
             config.get('servers.kibana.password')
@@ -204,7 +211,14 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async navigateToApp(
       appName: string,
-      { basePath = '', shouldLoginIfPrompted = true, hash = '', insertTimestamp = true } = {}
+      {
+        basePath = '',
+        shouldLoginIfPrompted = true,
+        hash = '',
+        insertTimestamp = true,
+        username = '',
+        password = '',
+      } = {}
     ) {
       let appUrl: string;
       if (config.has(['apps', appName])) {
@@ -235,7 +249,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           log.debug('returned from get, calling refresh');
           await browser.refresh();
           let currentUrl = shouldLoginIfPrompted
-            ? await this.loginIfPrompted(appUrl, insertTimestamp)
+            ? await this.loginIfPrompted(appUrl, insertTimestamp, username, password)
             : await browser.getCurrentUrl();
 
           if (currentUrl.includes('app/kibana')) {

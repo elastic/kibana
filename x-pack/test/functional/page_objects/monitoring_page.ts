@@ -11,12 +11,14 @@ export function MonitoringPageProvider({ getPageObjects, getService }: FtrProvid
   const PageObjects = getPageObjects(['common', 'header', 'security', 'login']);
   const testSubjects = getService('testSubjects');
   const security = getService('security');
+  const username = 'basic_monitoring_user';
+  const password = 'monitoring_user_password';
 
   return new (class MonitoringPage {
     async navigateTo(useSuperUser = false) {
       // always create this because our tear down tries to delete it
-      await security.user.create('basic_monitoring_user', {
-        password: 'monitoring_user_password',
+      await security.user.create(username, {
+        password,
         roles: ['monitoring_user', 'kibana_admin'],
         full_name: 'basic monitoring',
       });
@@ -25,7 +27,10 @@ export function MonitoringPageProvider({ getPageObjects, getService }: FtrProvid
         await PageObjects.security.forceLogout();
         await PageObjects.login.login('basic_monitoring_user', 'monitoring_user_password');
       }
-      await PageObjects.common.navigateToApp('monitoring');
+      await PageObjects.common.navigateToApp('monitoring', {
+        username,
+        password,
+      });
     }
 
     async getAccessDeniedMessage() {
