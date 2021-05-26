@@ -25,8 +25,8 @@ describe('ExploratoryViewHeader', function () {
     const initSeries = {
       data: {
         'uptime-pings-histogram': {
-          dataType: 'synthetics',
-          reportType: 'upp',
+          dataType: 'synthetics' as const,
+          reportType: 'upp' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-15m', to: 'now' },
         },

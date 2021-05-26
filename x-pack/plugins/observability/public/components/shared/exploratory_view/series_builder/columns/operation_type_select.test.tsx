@@ -21,9 +21,9 @@ describe('OperationTypeSelect', function () {
     const initSeries = {
       data: {
         'performance-distribution': {
-          dataType: 'ux',
-          reportType: 'kpi',
-          operationType: 'median',
+          dataType: 'ux' as const,
+          reportType: 'kpi' as const,
+          operationType: 'median' as const,
           time: { from: 'now-15m', to: 'now' },
         },
       },
@@ -38,9 +38,9 @@ describe('OperationTypeSelect', function () {
     const initSeries = {
       data: {
         'series-id': {
-          dataType: 'ux',
-          reportType: 'kpi',
-          operationType: 'median',
+          dataType: 'ux' as const,
+          reportType: 'kpi' as const,
+          operationType: 'median' as const,
           time: { from: 'now-15m', to: 'now' },
         },
       },
