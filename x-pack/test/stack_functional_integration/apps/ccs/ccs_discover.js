@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import fs from 'fs';
 import expect from '@kbn/expect';
+import { Client as EsClient } from '@elastic/elasticsearch';
+import { KbnClient } from '@kbn/test';
+import { EsArchiver } from '@kbn/es-archiver';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 export default ({ getService, getPageObjects }) => {
   describe('Cross cluster search test in discover', async () => {
@@ -207,6 +212,30 @@ export default ({ getService, getPageObjects }) => {
     describe('Detection engine', async function () {
       const supertest = getService('supertest');
       const esSupertest = getService('esSupertest');
+      const config = getService('config');
+
+      const esClient = new EsClient({
+        ssl: {
+          ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
+        },
+        nodes: [process.env.TEST_ES_URLDATA],
+        requestTimeout: config.get('timeouts.esRequestTimeout'),
+      });
+
+      const kbnClient = new KbnClient({
+        log,
+        url: process.env.TEST_KIBANA_URLDATA,
+        certificateAuthorities: config.get('servers.kibana.certificateAuthorities'),
+        uiSettingDefaults: kibanaServer.uiSettings,
+        importExportDir: config.get('kbnArchiver.directory'),
+      });
+
+      const esArchiver = new EsArchiver({
+        log,
+        client: esClient,
+        kbnClient,
+        dataDir: config.get('esArchiver.directory'),
+      });
 
       let signalsId;
       let dataId;
@@ -233,6 +262,9 @@ export default ({ getService, getPageObjects }) => {
       });
 
       before('Prepare data:.monitoring-es-*', async function () {
+        log.info('Create index');
+        await esArchiver.load('metricbeat');
+
         log.info('Create index pattern');
         dataId = await supertest
           .post('/api/index_patterns/index_pattern')
@@ -291,6 +323,9 @@ export default ({ getService, getPageObjects }) => {
             .set('kbn-xsrf', 'true')
             .expect(200);
         }
+
+        log.info('Delete index');
+        await esArchiver.unload('metricbeat');
       });
 
       after('Clean up .siem-signal-*', async function () {
