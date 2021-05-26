@@ -34,18 +34,20 @@ export class FleetActionGenerator extends BaseDataGenerator {
   }
 
   generateResponse(overrides: DeepPartial<EndpointActionResponse> = {}): EndpointActionResponse {
+    const timeStamp = new Date();
+
     return merge(
       {
         action_data: {
           command: 'isolate',
-          comment: null,
+          comment: '',
         },
         action_id: this.randomUUID(),
         agent_id: this.randomUUID(),
         started_at: this.randomPastDate(),
-        completed_at: new Date().toISOString(),
+        completed_at: timeStamp.toISOString(),
         error: 'some error happen',
-        '@timestamp': new Date().toISOString(),
+        '@timestamp': timeStamp.toISOString(),
       },
       overrides
     );
