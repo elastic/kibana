@@ -134,7 +134,7 @@ export function FormulaEditor({
 
       let errors: ErrorWrapper[] = [];
 
-      const { root, error } = tryToParse(text);
+      const { root, error } = tryToParse(text, operationDefinitionMap);
       if (error) {
         errors = [error];
       } else if (root) {

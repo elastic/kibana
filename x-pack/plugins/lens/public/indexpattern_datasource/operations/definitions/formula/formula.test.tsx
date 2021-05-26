@@ -899,6 +899,100 @@ invalid: "
       ).toEqual(undefined);
     });
 
+    it('returns an error for a query not wrapped in single quotes', () => {
+      const formulas = [
+        `count(kql="category.keyword: *")`,
+        `count(kql='category.keyword: *")`,
+        `count(kql="category.keyword: *')`,
+        `count(kql='category.keyword: *)`,
+        `count(kql=category.keyword: *')`,
+        `count(kql=category.keyword: *)`,
+        `count(kql="category.keyword: "Men's Clothing" or category.keyword: "Men's Shoes"")`,
+        `count(lucene="category.keyword: *")`,
+        `count(lucene=category.keyword: *)`,
+        `count(lucene=category.keyword: *) + average(bytes)`,
+        `count(lucene='category.keyword: *') + count(kql=category.keyword: *)`,
+        `count(lucene='category.keyword: *") + count(kql='category.keyword: *")`,
+        `count(lucene='category.keyword: *') + count(kql=category.keyword: *, kql='category.keyword: *')`,
+        `count(lucene='category.keyword: *') + count(kql="category.keyword: *")`,
+        `moving_average(count(kql=category.keyword: *), window=7, kql=category.keywork: *)`,
+        `moving_average(
+          cumulative_sum(
+             7 * clamp(sum(bytes), 0, last_value(memory) + max(memory))
+          ), window=10, kql=category.keywork: *
+        )`,
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(expect.arrayContaining([expect.stringMatching(`Single quotes are required`)]));
+      }
+    });
+
+    it('it returns parse fail error rather than query message if the formula is only a query condition (false positive cases for query checks)', () => {
+      const formulas = [
+        `kql="category.keyword: *"`,
+        `kql=category.keyword: *`,
+        `kql='category.keyword: *'`,
+        `(kql="category.keyword: *")`,
+        `(kql=category.keyword: *)`,
+        `(lucene="category.keyword: *")`,
+        `(lucene=category.keyword: *)`,
+        `(lucene='category.keyword: *') + (kql=category.keyword: *)`,
+        `(lucene='category.keyword: *') + (kql=category.keyword: *, kql='category.keyword: *')`,
+        `(lucene='category.keyword: *') + (kql="category.keyword: *")`,
+        `((kql=category.keyword: *), window=7, kql=category.keywork: *)`,
+        `(, window=10, kql=category.keywork: *)`,
+        `(
+          , window=10, kql=category.keywork: *
+        )`,
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([`The Formula ${formula} cannot be parsed`]);
+      }
+    });
+
+    it('returns no error for a query wrapped in single quotes but with some whitespaces', () => {
+      const formulas = [
+        `count(kql ='category.keyword: *')`,
+        `count(kql = 'category.keyword: *')`,
+        `count(kql =    'category.keyword: *')`,
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(undefined);
+      }
+    });
+
+    it('returns an error for multiple queries submitted for the same function', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula(`count(kql='category.keyword: *', lucene='category.keyword: *')`),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual(['Use only one of kql= or lucene=, not both']);
+    });
+
     it('returns no error if a math operation is passed to fullReference operations', () => {
       const formulas = [
         'derivative(7+1)',

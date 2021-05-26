@@ -28,7 +28,7 @@ function parseAndExtract(
   indexPattern: IndexPattern,
   operationDefinitionMap: Record<string, GenericOperationDefinition>
 ) {
-  const { root, error } = tryToParse(text);
+  const { root, error } = tryToParse(text, operationDefinitionMap);
   if (error || !root) {
     return { extracted: [], isValid: false };
   }
