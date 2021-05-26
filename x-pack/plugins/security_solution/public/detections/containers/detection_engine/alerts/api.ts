@@ -14,7 +14,6 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../../common/constants';
-import { ISOLATE_HOST_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   BasicSignals,
@@ -25,6 +24,7 @@ import {
   UpdateAlertStatusProps,
   CasesFromAlertsResponse,
 } from './types';
+import { isolateHost } from '../../../../common/lib/host_isolation';
 
 /**
  * Fetch Alerts by providing a query
@@ -124,13 +124,10 @@ export const createHostIsolation = async ({
   comment?: string;
   caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
-  KibanaServices.get().http.fetch<HostIsolationResponse>(ISOLATE_HOST_ROUTE, {
-    method: 'POST',
-    body: JSON.stringify({
-      agent_ids: [agentId],
-      comment,
-      case_ids: caseIds,
-    }),
+  isolateHost({
+    agent_ids: [agentId],
+    comment,
+    case_ids: caseIds,
   });
 
 /**
