@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
 import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
 import { DOC_TYPE } from '../../common';
