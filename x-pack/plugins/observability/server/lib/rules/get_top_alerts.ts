@@ -6,7 +6,8 @@
  */
 import { ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils/target/technical_field_names';
 import { RuleDataClient } from '../../../../rule_registry/server';
-import { kqlQuery, rangeQuery } from '../../utils/queries';
+import type { AlertStatus } from '../../../common/typings';
+import { kqlQuery, rangeQuery, alertStatusQuery } from '../../utils/queries';
 
 export async function getTopAlerts({
   ruleDataClient,
@@ -14,18 +15,20 @@ export async function getTopAlerts({
   end,
   kuery,
   size,
+  status,
 }: {
   ruleDataClient: RuleDataClient;
   start: number;
   end: number;
   kuery?: string;
   size: number;
+  status: AlertStatus;
 }) {
   const response = await ruleDataClient.getReader().search({
     body: {
       query: {
         bool: {
-          filter: [...rangeQuery(start, end), ...kqlQuery(kuery)],
+          filter: [...rangeQuery(start, end), ...kqlQuery(kuery), ...alertStatusQuery(status)],
         },
       },
       fields: ['*'],

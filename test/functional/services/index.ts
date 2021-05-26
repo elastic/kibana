@@ -27,11 +27,11 @@ import {
 } from './dashboard';
 import { DocTableProvider } from './doc_table';
 import { EmbeddingProvider } from './embedding';
-import { FilterBarProvider } from './filter_bar';
+import { FilterBarService } from './filter_bar';
 import { FlyoutProvider } from './flyout';
 import { GlobalNavProvider } from './global_nav';
 import { InspectorProvider } from './inspector';
-import { FieldEditorProvider } from './field_editor';
+import { FieldEditorService } from './field_editor';
 import { ManagementMenuProvider } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
@@ -53,7 +53,7 @@ export const services = {
   ...commonServiceProviders,
 
   __webdriver__: RemoteProvider,
-  filterBar: FilterBarProvider,
+  filterBar: FilterBarService,
   queryBar: QueryBarProvider,
   find: FindProvider,
   testSubjects: TestSubjectsProvider,
@@ -75,7 +75,7 @@ export const services = {
   browser: BrowserProvider,
   pieChart: PieChartProvider,
   inspector: InspectorProvider,
-  fieldEditor: FieldEditorProvider,
+  fieldEditor: FieldEditorService,
   vegaDebugInspector: VegaDebugInspectorViewProvider,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
