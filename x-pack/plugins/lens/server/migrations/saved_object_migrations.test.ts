@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { migrations, LensDocShape } from './migrations';
+import { migrations, LensDocShape } from './saved_object_migrations';
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'src/core/server';
 
 describe('Lens migrations', () => {
