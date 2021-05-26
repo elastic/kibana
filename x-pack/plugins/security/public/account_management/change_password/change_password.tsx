@@ -17,7 +17,7 @@ import { canUserChangePassword } from '../../../common/model';
 import type { UserAPIClient } from '../../management/users';
 import { ChangePasswordForm } from '../../management/users/components/change_password_form';
 
-interface Props {
+export interface Props {
   user: AuthenticatedUser;
   userAPIClient: PublicMethodsOf<UserAPIClient>;
   notifications: NotificationsSetup;

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { ChangePassword } from './change_password';
-export { getChangePasswordComponent } from './change_password_async';
+export { SuspenseErrorBoundary } from './suspense_error_boundary';

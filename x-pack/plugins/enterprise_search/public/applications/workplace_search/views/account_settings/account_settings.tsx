@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
-import {
-  UserAPIClient,
-  ChangePassword,
-  PersonalInfo,
-  AuthenticatedUser,
-} from '../../../../../../security/public';
+import { AuthenticatedUser } from '../../../../../../security/public';
 import { HttpLogic } from '../../../shared/http/http_logic';
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
@@ -27,6 +22,12 @@ export const AccountSettings: React.FC = () => {
   useEffect(() => {
     security.authc.getCurrentUser().then(setCurrentUser);
   }, [security.authc]);
+
+  const { UserAPIClient } = security.uiApi;
+  const PersonalInfo = useMemo(() => security.uiApi.components.getPersonalInfo, [security.uiApi]);
+  const ChangePassword = useMemo(() => security.uiApi.components.getChangePassword, [
+    security.uiApi,
+  ]);
 
   if (!currentUser) {
     return null;

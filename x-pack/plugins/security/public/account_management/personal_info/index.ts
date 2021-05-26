@@ -6,3 +6,4 @@
  */
 
 export { PersonalInfo } from './personal_info';
+export { getPersonalInfoComponent } from './personal_info_async';

@@ -55,7 +55,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
       {},
     ],
     notifications: [props.notifications, {}],
-    security: [props.security, {}],
+    security: [props.security || {}, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],

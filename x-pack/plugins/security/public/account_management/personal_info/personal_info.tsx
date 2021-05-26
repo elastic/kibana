@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { AuthenticatedUser } from '../../../common/model';
 
-interface Props {
+export interface Props {
   user: AuthenticatedUser;
 }
 
