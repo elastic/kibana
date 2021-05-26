@@ -75,7 +75,10 @@ describe('#setup()', () => {
       const pluginId = Symbol('plugin');
       const updater$ = new BehaviorSubject<AppUpdater>((app) => ({}));
       setup.register(pluginId, createApp({ id: 'app1', updater$ }));
-      setup.register(pluginId, createApp({ id: 'app2' }));
+      setup.register(
+        pluginId,
+        createApp({ id: 'app2', deepLinks: [{ id: 'subapp1', title: 'Subapp', path: '/subapp' }] })
+      );
       const { applications$ } = await service.start(startDeps);
 
       let applications = await applications$.pipe(take(1)).toPromise();
@@ -92,6 +95,11 @@ describe('#setup()', () => {
           id: 'app2',
           navLinkStatus: AppNavLinkStatus.visible,
           status: AppStatus.accessible,
+          deepLinks: [
+            expect.objectContaining({
+              navLinkStatus: AppNavLinkStatus.hidden,
+            }),
+          ],
         })
       );
 
