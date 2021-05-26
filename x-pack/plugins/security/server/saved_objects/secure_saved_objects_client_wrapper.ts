@@ -41,7 +41,11 @@ import type {
   EnsureAuthorizedOptions,
   EnsureAuthorizedResult,
 } from './ensure_authorized';
-import { ensureAuthorized, getEnsureAuthorizedActionResult } from './ensure_authorized';
+import {
+  ensureAuthorized,
+  getEnsureAuthorizedActionResult,
+  isAuthorizedForObjectInAllSpaces,
+} from './ensure_authorized';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
@@ -1069,20 +1073,6 @@ function namespaceComparator(a: string, b: string) {
     return -1;
   }
   return A > B ? 1 : A < B ? -1 : 0;
-}
-
-function isAuthorizedForObjectInAllSpaces<T extends string>(
-  objectType: string,
-  action: T,
-  typeActionMap: EnsureAuthorizedResult<T>['typeActionMap'],
-  spacesToAuthorizeFor: string[]
-) {
-  const actionResult = getEnsureAuthorizedActionResult(objectType, action, typeActionMap);
-  const { authorizedSpaces, isGloballyAuthorized } = actionResult;
-  const authorizedSpacesSet = new Set(authorizedSpaces);
-  return (
-    isGloballyAuthorized || spacesToAuthorizeFor.every((space) => authorizedSpacesSet.has(space))
-  );
 }
 
 function getRedactedSpaces<T extends string>(

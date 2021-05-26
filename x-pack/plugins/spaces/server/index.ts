@@ -21,7 +21,12 @@ export { addSpaceIdToPath } from '../common';
 
 export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 export { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-export { ISpacesClient, SpacesClientRepositoryFactory, SpacesClientWrapper } from './spaces_client';
+export {
+  ISpacesClient,
+  LegacyUrlAliasTarget,
+  SpacesClientRepositoryFactory,
+  SpacesClientWrapper,
+} from './spaces_client';
 
 export { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
 

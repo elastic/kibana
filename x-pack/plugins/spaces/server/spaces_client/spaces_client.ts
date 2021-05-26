@@ -22,6 +22,7 @@ const SUPPORTED_GET_SPACE_PURPOSES: GetAllSpacesPurpose[] = [
   'shareSavedObjectsIntoSpace',
 ];
 const DEFAULT_PURPOSE = 'any';
+const LEGACY_URL_ALIAS_TYPE = 'legacy-url-alias';
 
 /**
  * Client interface for interacting with spaces.
@@ -57,6 +58,30 @@ export interface ISpacesClient {
    * @param id the id of the space to delete.
    */
   delete(id: string): Promise<void>;
+
+  /**
+   * Disables the specified legacy URL aliases.
+   * @param ids the ids of the legacy URL aliases to disable.
+   */
+  disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]): Promise<void>;
+}
+
+/**
+ * Client interface for interacting with legacy URL aliases.
+ */
+export interface LegacyUrlAliasTarget {
+  /**
+   * The namespace that the object existed in when it was converted.
+   */
+  targetSpace: string;
+  /**
+   * The type of the object when it was converted.
+   */
+  targetType: string;
+  /**
+   * The original ID of the object, before it was converted.
+   */
+  sourceId: string;
 }
 
 /**
@@ -133,6 +158,15 @@ export class SpacesClient implements ISpacesClient {
     await this.repository.deleteByNamespace(id);
 
     await this.repository.delete('space', id);
+  }
+
+  public async disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
+    const attributes = { disabled: true };
+    const objectsToUpdate = aliases.map(({ targetSpace, targetType, sourceId }) => {
+      const id = `${targetSpace}:${targetType}:${sourceId}`;
+      return { type: LEGACY_URL_ALIAS_TYPE, id, attributes };
+    });
+    await this.repository.bulkUpdate(objectsToUpdate);
   }
 
   private transformSavedObjectToSpace(savedObject: SavedObject<any>) {
