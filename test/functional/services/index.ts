@@ -8,7 +8,7 @@
 
 import { services as commonServiceProviders } from '../../common/services';
 
-import { AppsMenuProvider } from './apps_menu';
+import { AppsMenuService } from './apps_menu';
 import {
   BrowserProvider,
   FailureDebuggingProvider,
@@ -77,7 +77,7 @@ export const services = {
   inspector: InspectorService,
   fieldEditor: FieldEditorService,
   vegaDebugInspector: VegaDebugInspectorViewService,
-  appsMenu: AppsMenuProvider,
+  appsMenu: AppsMenuService,
   globalNav: GlobalNavService,
   toasts: ToastsService,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
