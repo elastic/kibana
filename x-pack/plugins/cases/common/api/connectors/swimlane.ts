@@ -9,10 +9,8 @@ import * as rt from 'io-ts';
 
 // New fields should also be added at: x-pack/plugins/cases/server/connectors/case/schema.ts
 export const SwimlaneFieldsRT = rt.type({
-  alertSource: rt.union([rt.string, rt.null]),
   caseId: rt.union([rt.string, rt.null]),
   caseName: rt.union([rt.string, rt.null]),
-  severity: rt.union([rt.string, rt.null]),
 });
 
 export type SwimlaneFieldsType = rt.TypeOf<typeof SwimlaneFieldsRT>;

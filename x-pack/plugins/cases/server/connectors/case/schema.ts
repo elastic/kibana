@@ -51,13 +51,6 @@ const JiraFieldsSchema = schema.object({
   parent: schema.nullable(schema.string()),
 });
 
-const SwimlaneFieldsSchema = schema.object({
-  alertSource: schema.nullable(schema.string()),
-  caseId: schema.nullable(schema.string()),
-  caseName: schema.nullable(schema.string()),
-  severity: schema.nullable(schema.string()),
-});
-
 const ResilientFieldsSchema = schema.object({
   incidentTypes: schema.nullable(schema.arrayOf(schema.string())),
   severityCode: schema.nullable(schema.string()),
@@ -79,6 +72,11 @@ const ServiceNowSIRFieldsSchema = schema.object({
   priority: schema.nullable(schema.string()),
   category: schema.nullable(schema.string()),
   subcategory: schema.nullable(schema.string()),
+});
+
+const SwimlaneFieldsSchema = schema.object({
+  caseId: schema.nullable(schema.string()),
+  caseName: schema.nullable(schema.string()),
 });
 
 const NoneFieldsSchema = schema.nullable(schema.object({}));
