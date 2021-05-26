@@ -947,7 +947,6 @@
     "data.fieldFormats.duration.outputFormats.asSeconds": "秒",
     "data.fieldFormats.duration.outputFormats.asWeeks": "週間",
     "data.fieldFormats.duration.outputFormats.asYears": "年",
-    "data.fieldFormats.duration.outputFormats.humanize": "人間に読解可能",
     "data.fieldFormats.duration.title": "期間",
     "data.fieldFormats.histogram.title": "ヒストグラム",
     "data.fieldFormats.ip.title": "IP アドレス",
