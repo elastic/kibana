@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
-import { CoreSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { store } from '../../../state';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { ClientPluginsSetup } from '../../../apps/plugin';
@@ -15,7 +15,7 @@ import { kibanaService } from '../../../state/kibana_service';
 import { AlertMonitorStatus } from '../../../components/overview/alerts/alerts_containers/alert_monitor_status';
 
 interface Props {
-  core: CoreSetup;
+  core: CoreStart;
   plugins: ClientPluginsSetup;
   params: any;
 }

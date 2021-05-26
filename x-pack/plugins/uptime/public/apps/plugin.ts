@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   CoreSetup,
   CoreStart,
@@ -100,17 +99,19 @@ export class UptimePlugin
 
     const { observabilityRuleTypeRegistry } = plugins.observability;
 
-    alertTypeInitializers.forEach((init) => {
-      const alertInitializer = init({
-        core,
-        plugins,
+    core.getStartServices().then(([coreStart]) => {
+      alertTypeInitializers.forEach((init) => {
+        const alertInitializer = init({
+          core: coreStart,
+          plugins,
+        });
+        if (
+          plugins.triggersActionsUi &&
+          !plugins.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
+        ) {
+          observabilityRuleTypeRegistry.register(alertInitializer);
+        }
       });
-      if (
-        plugins.triggersActionsUi &&
-        !plugins.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
-      ) {
-        observabilityRuleTypeRegistry.register(alertInitializer);
-      }
     });
 
     core.application.register({

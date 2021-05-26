@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
+import moment from 'moment';
+
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
-import { DurationAnomalyTranslations } from './translations';
+import { DurationAnomalyTranslations } from '../../../common/translations';
 import { AlertTypeInitializer } from '.';
 
-import { FormattableRuleType } from '../../../../observability/public';
-import type { UptimeRuleFieldMap } from '../../../common/rules/uptime_rule_field_map';
+import { format } from './common';
+
+import { FormattableAlertTypeModel } from '../../../../observability/public';
 
 const { defaultActionMessage, description } = DurationAnomalyTranslations;
 const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_anomaly'));
@@ -19,7 +22,7 @@ const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_an
 export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   core,
   plugins,
-}): FormattableRuleType<UptimeRuleFieldMap> => ({
+}): FormattableAlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
@@ -32,8 +35,19 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   validate: () => ({ errors: {} }),
   defaultActionMessage,
   requiresAppContext: true,
-  format: ({ alert }) => ({
-    reason: 'test',
-    link: 'http://elastic.co',
-  }),
+  format: ({ fields }) => {
+    return {
+      reason: fields.reason,
+      link: format({
+        pathname: `/app/uptime/monitor/${btoa(fields['monitor.id']!)}`,
+        query: {
+          dateRangeEnd:
+            fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end'],
+          dateRangeStart: moment(new Date(fields['anomaly.start']))
+            .subtract('5', 'm')
+            .toISOString(),
+        },
+      }),
+    };
+  },
 });

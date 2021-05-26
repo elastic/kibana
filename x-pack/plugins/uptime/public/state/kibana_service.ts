@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { apiService } from './api/utils';
 
 class KibanaService {
   private static instance: KibanaService;
-  private _core!: CoreSetup;
+  private _core!: CoreStart;
 
   public get core() {
     return this._core;
   }
 
-  public set core(coreSetup: CoreSetup) {
-    this._core = coreSetup;
+  public set core(coreStart: CoreStart) {
+    this._core = coreStart;
     apiService.http = this._core.http;
   }
 
