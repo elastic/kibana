@@ -1,0 +1,15 @@
+$euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
+
+.kbnPageTemplate__pageSideBar {
+  padding: $euiSizeL;
+  background:
+    linear-gradient(160deg, $euiSideNavEmphasizedBackgroundColor 0, $euiSideNavEmphasizedBackgroundColor $euiSizeXL, rgba(#FFF, 0) 0),
+    linear-gradient(175deg, $euiSideNavEmphasizedBackgroundColor 0, $euiSideNavEmphasizedBackgroundColor $euiSize, rgba(#FFF, 0) 0);
+}
+
+@include euiBreakpoint('xs','s') {
+  .kbnPageTemplate__pageSideBar {
+    width: auto;
+    padding: 0;
+  }
+}
