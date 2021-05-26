@@ -4247,7 +4247,7 @@
     "visDefaultEditor.controls.ranges.fromLabel": "自",
     "visDefaultEditor.controls.ranges.greaterThanOrEqualPrepend": "≥",
     "visDefaultEditor.controls.ranges.greaterThanOrEqualTooltip": "大于或等于",
-    "visDefaultEditor.controls.ranges.lessThanPrepend": "&lt;",
+    "visDefaultEditor.controls.ranges.lessThanPrepend": "<",
     "visDefaultEditor.controls.ranges.lessThanTooltip": "小于",
     "visDefaultEditor.controls.ranges.removeRangeButtonAriaLabel": "移除范围 {from} 至 {to}",
     "visDefaultEditor.controls.ranges.toLabel": "至",
