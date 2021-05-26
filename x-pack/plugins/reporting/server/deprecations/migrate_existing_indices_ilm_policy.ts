@@ -35,7 +35,11 @@ export const migrateExistingIndicesIlmPolicy = async (
       {
         level: 'warning',
         message: i18n.translate('xpack.reporting.deprecations.migrateIndexIlmPolicyActionMessage', {
-          defaultMessage: `All new reporting indices will be managed by a provisioned ILM policy: "${reportingIlmPolicy}". To manage the lifecycle of reports edit the ${reportingIlmPolicy} policy. Please note, this action will target all indices prefixed with "${indexPattern}".`,
+          defaultMessage: `All new reporting indices will be managed by a provisioned ILM policy: "{reportingIlmPolicy}". To manage the lifecycle of reports edit the {reportingIlmPolicy} policy. Please note, this action will target all indices prefixed with "{indexPattern}".`,
+          values: {
+            reportingIlmPolicy,
+            indexPattern,
+          },
         }),
         correctiveActions: {
           api: {
