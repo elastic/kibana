@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
+import moment from 'moment';
+
+import { FormattableAlertTypeModel } from '../../../../observability/public';
 import { ValidationResult } from '../../../../triggers_actions_ui/public';
-import { AlertTypeInitializer } from '.';
 
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MonitorStatusTranslations } from '../../../common/translations';
 
-import { FormattableRuleType } from '../../../../observability/public';
+import { format } from './common';
 
-import type { UptimeRuleFieldMap } from '../../../common/rules/uptime_rule_field_map';
+import { AlertTypeInitializer } from '.';
 
 const { defaultActionMessage, description } = MonitorStatusTranslations;
 
@@ -25,7 +27,7 @@ let validateFunc: (alertParams: any) => ValidationResult;
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   core,
   plugins,
-}): FormattableRuleType<UptimeRuleFieldMap> => ({
+}): FormattableAlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   description,
   iconClass: 'uptimeApp',
@@ -48,8 +50,18 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   },
   defaultActionMessage,
   requiresAppContext: false,
-  format: ({ alert }) => ({
-    reason: 'test',
-    link: 'http://elastic.co',
+  format: ({ fields }) => ({
+    reason: fields.reason,
+    link: format({
+      pathname: `/app/uptime/monitor/${btoa(fields['monitor.id']!)}`,
+      query: {
+        dateRangeEnd:
+          fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end'],
+        dateRangeStart: moment(new Date(fields['kibana.rac.alert.start']))
+          .subtract('5', 'm')
+          .toISOString(),
+        filters: JSON.stringify([['observer.geo.name', [fields['observer.geo.name'][0]]]]),
+      },
+    }),
   }),
 });
