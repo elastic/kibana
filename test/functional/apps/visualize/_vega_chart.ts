@@ -117,13 +117,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should contain "Statistics", "Request", "Response" tabs', async () => {
           await inspector.openInspectorRequestsView();
 
-          await retry.try(async () => {
-            const detailRequestBtn = await inspector.getOpenRequestDetailRequestButton();
-            const detailResponseBtn = await inspector.getOpenRequestDetailResponseButton();
-            const requestStatsBtn = await inspector.getOpenRequestStatisticButton();
-            for (const btn of [detailRequestBtn, detailResponseBtn, requestStatsBtn])
-              expect(await btn.isEnabled()).to.be(true);
-          });
+          for (const getFn of [
+            'getOpenRequestDetailRequestButton',
+            'getOpenRequestDetailResponseButton',
+            'getOpenRequestStatisticButton',
+          ] as const) {
+            await retry.try(async () => {
+              const requestStatisticTab = await inspector[getFn]();
+
+              expect(await requestStatisticTab.isEnabled()).to.be(true);
+            });
+          }
         });
 
         it('should set the default query name if not given in the schema', async () => {
@@ -155,12 +159,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await vegaDebugInspectorView.openVegaDebugInspectorView();
 
           for (const getFn of [
-            vegaDebugInspectorView.getOpenDataViewerButton,
-            vegaDebugInspectorView.getOpenSignalViewerButton,
-            vegaDebugInspectorView.getOpenSpecViewerButton,
-          ]) {
+            'getOpenDataViewerButton',
+            'getOpenSignalViewerButton',
+            'getOpenSpecViewerButton',
+          ] as const) {
             await retry.try(async () => {
-              const requestStatisticTab = await getFn();
+              const requestStatisticTab = await vegaDebugInspectorView[getFn]();
 
               expect(await requestStatisticTab.isEnabled()).to.be(true);
             });
