@@ -32,7 +32,6 @@ const mockDeps = {
     experimentalFeatures: {
       trustedAppsByPolicyEnabled: false,
       metricsEntitiesEnabled: false,
-      eventFilteringEnabled: false,
       hostIsolationEnabled: false,
       ruleRegistryEnabled: false,
     },

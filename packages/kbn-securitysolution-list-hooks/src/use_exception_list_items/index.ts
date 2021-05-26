@@ -15,7 +15,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { fetchExceptionListsItemsByListIds } from '@kbn/securitysolution-list-api';
 
-import { getIdsAndNamespaces } from '../utils';
+import { getIdsAndNamespaces } from '@kbn/securitysolution-list-utils';
 import { transformInput } from '../transforms';
 
 type Func = () => void;
