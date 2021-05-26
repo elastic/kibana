@@ -190,6 +190,24 @@ function FormulaHelp({
 
   const [searchText, setSearchText] = useState('');
 
+  const normalizedSearchText = searchText.trim().toLocaleLowerCase();
+
+  const filteredHelpGroups = helpGroups
+    .map((group) => {
+      const items = group.items.filter((helpItem) => {
+        return (
+          !normalizedSearchText || helpItem.label.toLocaleLowerCase().includes(normalizedSearchText)
+        );
+      });
+      return { ...group, items };
+    })
+    .filter((group) => {
+      if (group.items.length > 0 || !normalizedSearchText) {
+        return true;
+      }
+      return group.label.toLocaleLowerCase().includes(normalizedSearchText);
+    });
+
   return (
     <>
       <EuiPopoverTitle className="lnsFormula__docsHeader" paddingSize="s">
@@ -241,7 +259,7 @@ function FormulaHelp({
             </EuiFlexItem>
 
             <EuiFlexItem className="lnsFormula__docsNav">
-              {helpGroups.map((helpGroup, index) => {
+              {filteredHelpGroups.map((helpGroup, index) => {
                 return (
                   <nav className="lnsFormula__docsNavGroup" key={helpGroup.label}>
                     <EuiTitle size="xxs">
@@ -253,30 +271,26 @@ function FormulaHelp({
                             setSelectedFunction(helpGroup.label);
                           }}
                         >
-                          {helpGroup.label}
+                          <EuiHighlight search={searchText}>{helpGroup.label}</EuiHighlight>
                         </EuiLink>
                       </h6>
                     </EuiTitle>
 
                     <EuiListGroup gutterSize="none">
-                      {helpGroups[index].items
-                        .filter((helpItem) => {
-                          return !searchText || helpItem.label.includes(searchText);
-                        })
-                        .map((helpItem) => {
-                          return (
-                            <EuiListGroupItem
-                              key={helpItem.label}
-                              label={
-                                <EuiHighlight search={searchText}>{helpItem.label}</EuiHighlight>
-                              }
-                              size="s"
-                              onClick={() => {
-                                setSelectedFunction(helpItem.label);
-                              }}
-                            />
-                          );
-                        })}
+                      {helpGroup.items.map((helpItem) => {
+                        return (
+                          <EuiListGroupItem
+                            key={helpItem.label}
+                            label={
+                              <EuiHighlight search={searchText}>{helpItem.label}</EuiHighlight>
+                            }
+                            size="s"
+                            onClick={() => {
+                              setSelectedFunction(helpItem.label);
+                            }}
+                          />
+                        );
+                      })}
                     </EuiListGroup>
                   </nav>
                 );
