@@ -57,7 +57,7 @@ import { chartPluginMock } from '../../../../../../src/plugins/charts/public/moc
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import moment from 'moment';
 import { Observable } from 'rxjs';
-import { getResolvedDateRange } from '../../lib';
+import { getResolvedDateRange } from '../../utils';
 import { TimefilterContract } from 'src/plugins/data/public';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {

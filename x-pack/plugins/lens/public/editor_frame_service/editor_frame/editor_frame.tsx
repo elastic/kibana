@@ -10,7 +10,7 @@ import { CoreStart } from 'kibana/public';
 import _ from 'lodash';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { IndexPattern } from '../../../../../../src/plugins/data/public';
-import { getAllIndexPatterns } from '../../lib';
+import { getAllIndexPatterns } from '../../utils';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { Datasource, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';

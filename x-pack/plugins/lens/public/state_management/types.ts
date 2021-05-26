@@ -37,6 +37,6 @@ export type DispatchSetState = (
   type: string;
 };
 
-export interface State {
+export interface LensState {
   app: LensAppState;
 }

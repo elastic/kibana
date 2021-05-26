@@ -7,8 +7,7 @@
 
 import { delay, finalize, switchMap, tap } from 'rxjs/operators';
 import _, { debounce } from 'lodash';
-import { Dispatch, PayloadAction } from '@reduxjs/toolkit';
-import moment from 'moment';
+import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
 import {
@@ -17,15 +16,11 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { setState, LensGetState, LensDispatch } from '.';
 import { LensAppState } from './types';
-import { getResolvedDateRange } from '../lib';
+import { getResolvedDateRange } from '../utils';
 
-function containsDynamicMath(dateMathString: string) {
-  return dateMathString.includes('now');
-}
-const TIME_LAG_PERCENTAGE_LIMIT = 0.02;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const customMiddleware = (data: DataPublicPluginStart) => (store: any) => {
+export const externalContextMiddleware = (data: DataPublicPluginStart) => (
+  store: MiddlewareAPI
+) => {
   const unsubscribeFromExternalContext = subscribeToExternalContext(
     data,
     store.getState,
@@ -34,14 +29,6 @@ export const customMiddleware = (data: DataPublicPluginStart) => (store: any) =>
   return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
     if (action.type === 'app/navigateAway') {
       unsubscribeFromExternalContext();
-    }
-    // if document was modified or sessionId check if too much time passed to update searchSessionId
-    if (
-      action.type === 'app/setState' &&
-      action.payload?.lastKnownDoc &&
-      !_.isEqual(action.payload?.lastKnownDoc, store.getState().app.lastKnownDoc)
-    ) {
-      updateTimeRange(data, store.dispatch);
     }
     next(action);
   };
@@ -113,38 +100,4 @@ function subscribeToExternalContext(
     autoRefreshSubscription.unsubscribe();
     sessionSubscription.unsubscribe();
   };
-}
-
-function updateTimeRange(data: DataPublicPluginStart, dispatch: LensDispatch) {
-  const timefilter = data.query.timefilter.timefilter;
-  const unresolvedTimeRange = timefilter.getTime();
-  if (
-    !containsDynamicMath(unresolvedTimeRange.from) &&
-    !containsDynamicMath(unresolvedTimeRange.to)
-  ) {
-    return;
-  }
-
-  const { min, max } = timefilter.getBounds();
-
-  if (!min || !max) {
-    // bounds not fully specified, bailing out
-    return;
-  }
-
-  // calculate length of currently configured range in ms
-  const timeRangeLength = moment.duration(max.diff(min)).asMilliseconds();
-
-  // calculate lag of managed "now" for date math
-  const nowDiff = Date.now() - data.nowProvider.get().valueOf();
-
-  // if the lag is signifcant, start a new session to clear the cache
-  if (nowDiff > timeRangeLength * TIME_LAG_PERCENTAGE_LIMIT) {
-    dispatch(
-      setState({
-        searchSessionId: data.search.session.start(),
-        resolvedDateRange: getResolvedDateRange(timefilter),
-      })
-    );
-  }
 }

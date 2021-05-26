@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
+import { configureStore, DeepPartial, getDefaultMiddleware } from '@reduxjs/toolkit';
 import logger from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import { appSlice, initialState } from './app_slice';
-import { customMiddleware } from './custom_middleware';
+import { timeRangeMiddleware } from './time_range_middleware';
+import { externalContextMiddleware } from './external_context_middleware';
 
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { LensAppState } from './types';
+import { LensAppState, LensState } from './types';
 export * from './types';
 
 export const reducer = {
@@ -32,7 +33,7 @@ export const getPreloadedState = (initializedState: Partial<LensAppState>) => {
       ...initialState,
       ...initializedState,
     },
-  } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  } as DeepPartial<LensState>;
   return state;
 };
 
@@ -53,7 +54,8 @@ export const makeConfigureStore = (
         ],
       },
     }),
-    customMiddleware(data),
+    timeRangeMiddleware(data),
+    externalContextMiddleware(data),
   ];
   if (process.env.NODE_ENV === 'development') middleware.push(logger);
 

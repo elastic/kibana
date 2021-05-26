@@ -12,7 +12,7 @@
 //  * 2.0.
 //  */
 
-import { customMiddleware } from './custom_middleware';
+import { timeRangeMiddleware } from './time_range_middleware';
 
 import { Observable, Subject } from 'rxjs';
 import { DataPublicPluginStart, esFilters } from '../../../../../src/plugins/data/public';
@@ -130,7 +130,7 @@ function makeDefaultData(): jest.Mocked<DataPublicPluginStart> {
 }
 
 const createMiddleware = (data: DataPublicPluginStart) => {
-  const middleware = customMiddleware(data);
+  const middleware = timeRangeMiddleware(data);
   const store = {
     getState: jest.fn(() => ({ app: initialState })),
     dispatch: jest.fn(),
@@ -142,7 +142,7 @@ const createMiddleware = (data: DataPublicPluginStart) => {
   return { store, next, invoke };
 };
 
-describe('customMiddleware', () => {
+describe('timeRangeMiddleware', () => {
   describe('time update', () => {
     it('does update the searchSessionId when the state changes and too much time passed', () => {
       const data = makeDefaultData();

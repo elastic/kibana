@@ -52,7 +52,7 @@ import moment from 'moment';
 import { Provider } from 'react-redux';
 
 import { makeConfigureStore, getPreloadedState, setState } from '../state_management/index';
-import { getResolvedDateRange } from '../lib';
+import { getResolvedDateRange } from '../utils';
 
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');

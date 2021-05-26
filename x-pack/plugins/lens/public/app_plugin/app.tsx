@@ -22,7 +22,7 @@ import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects
 import { injectFilterReferences } from '../persistence';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { esFilters, syncQueryStateWithUrl } from '../../../../../src/plugins/data/public';
-import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
+import { getFullPath, APP_ID } from '../../common';
 import { LensAppProps, LensAppServices, RunSave } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { Document } from '../persistence';
