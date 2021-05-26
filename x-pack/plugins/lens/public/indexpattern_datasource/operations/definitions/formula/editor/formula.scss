@@ -108,9 +108,24 @@
   }
 }
 
+.lnsFormula__docsSidebar {
+  background: $euiColorLightestShade;
+}
+
+.lnsFormula__docsSidebarInner {
+  min-height: 0;
+
+  & > * + * {
+    border-top: $euiBorderThin;
+  }
+}
+
+.lnsFormula__docsSearch {
+  padding: $euiSizeS;
+}
+
 .lnsFormula__docsNav {
   @include euiYScroll;
-  background: $euiColorLightestShade;
 }
 
 .lnsFormula__docsNavGroup {
