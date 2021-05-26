@@ -149,7 +149,7 @@ async function get(
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigurationsResponse> {
   const {
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     caseConfigureService,
     logger,
     authorization,
@@ -264,7 +264,7 @@ async function update(
   const {
     caseConfigureService,
     logger,
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     user,
     authorization,
     auditLogger,
@@ -381,7 +381,7 @@ async function create(
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
   const {
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     caseConfigureService,
     logger,
     user,

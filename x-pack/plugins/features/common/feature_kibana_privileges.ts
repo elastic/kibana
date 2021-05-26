@@ -106,12 +106,12 @@ export interface FeatureKibanaPrivileges {
   };
 
   /**
-   * If your feature requires access to specific types of cases, then specify your access needs here. The values here should
-   * be a unique identifier for the type of case you want access to.
+   * If your feature requires access to specific owners of cases (aka plugins that have created cases), then specify your access needs here. The values here should
+   * be unique identifiers for the owners of cases you want access to.
    */
   cases?: {
     /**
-     * List of case types which users should have full read/write access to when granted this privilege.
+     * List of case owners which users should have full read/write access to when granted this privilege.
      * @example
      * ```ts
      *  {
@@ -121,7 +121,7 @@ export interface FeatureKibanaPrivileges {
      */
     all?: readonly string[];
     /**
-     * List of case types which users should have read-only access to when granted this privilege.
+     * List of case owners which users should have read-only access to when granted this privilege.
      * @example
      * ```ts
      *  {

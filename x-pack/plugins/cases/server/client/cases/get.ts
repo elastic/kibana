@@ -61,7 +61,13 @@ export const getCaseIDsByAlertID = async (
   { alertID, options }: CaseIDsByAlertIDParams,
   clientArgs: CasesClientArgs
 ): Promise<string[]> => {
-  const { savedObjectsClient, caseService, logger, authorization, auditLogger } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient: savedObjectsClient,
+    caseService,
+    logger,
+    authorization,
+    auditLogger,
+  } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -139,7 +145,13 @@ export const get = async (
   { id, includeComments, includeSubCaseComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
-  const { savedObjectsClient, caseService, logger, authorization: auth, auditLogger } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    caseService,
+    logger,
+    authorization: auth,
+    auditLogger,
+  } = clientArgs;
 
   try {
     if (!ENABLE_CASE_CONNECTOR && includeSubCaseComments) {
@@ -154,17 +166,17 @@ export const get = async (
     if (ENABLE_CASE_CONNECTOR) {
       const [caseInfo, subCasesForCaseId] = await Promise.all([
         caseService.getCase({
-          soClient: savedObjectsClient,
+          soClient: unsecuredSavedObjectsClient,
           id,
         }),
-        caseService.findSubCasesByCaseId({ soClient: savedObjectsClient, ids: [id] }),
+        caseService.findSubCasesByCaseId({ soClient: unsecuredSavedObjectsClient, ids: [id] }),
       ]);
 
       theCase = caseInfo;
       subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
     } else {
       theCase = await caseService.getCase({
-        soClient: savedObjectsClient,
+        soClient: unsecuredSavedObjectsClient,
         id,
       });
     }
@@ -187,7 +199,7 @@ export const get = async (
     }
 
     const theComments = await caseService.getAllCaseComments({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       id,
       options: {
         sortField: 'created_at',
@@ -219,7 +231,7 @@ export async function getTags(
   clientArgs: CasesClientArgs
 ): Promise<string[]> {
   const {
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     caseService,
     logger,
     authorization: auth,
@@ -281,7 +293,7 @@ export async function getReporters(
   clientArgs: CasesClientArgs
 ): Promise<User[]> {
   const {
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     caseService,
     logger,
     authorization: auth,

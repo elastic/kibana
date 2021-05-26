@@ -129,7 +129,7 @@ export const caseMigrations = {
       references: doc.references || [],
     };
   },
-  '7.13.0': (
+  '7.14.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
     return addOwnerToSO(doc);
@@ -156,7 +156,7 @@ export const configureMigrations = {
       references: doc.references || [],
     };
   },
-  '7.13.0': (
+  '7.14.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
     return addOwnerToSO(doc);
@@ -202,7 +202,7 @@ export const userActionsMigrations = {
       references: doc.references || [],
     };
   },
-  '7.13.0': (
+  '7.14.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
     return addOwnerToSO(doc);
@@ -257,7 +257,7 @@ export const commentsMigrations = {
       references: doc.references || [],
     };
   },
-  '7.13.0': (
+  '7.14.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
     return addOwnerToSO(doc);
@@ -265,7 +265,7 @@ export const commentsMigrations = {
 };
 
 export const connectorMappingsMigrations = {
-  '7.13.0': (
+  '7.14.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
     return addOwnerToSO(doc);
@@ -273,7 +273,7 @@ export const connectorMappingsMigrations = {
 };
 
 export const subCasesMigrations = {
-  '7.13.0': (
+  '7.14.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
     return addOwnerToSO(doc);

@@ -118,7 +118,7 @@ const addGeneratedAlerts = async (
   casesClientInternal: CasesClientInternal
 ): Promise<CaseResponse> => {
   const {
-    savedObjectsClient,
+    unsecuredSavedObjectsClient,
     attachmentService,
     caseService,
     userActionService,
@@ -152,7 +152,7 @@ const addGeneratedAlerts = async (
     });
 
     const caseInfo = await caseService.getCase({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       id: caseId,
     });
 
@@ -171,7 +171,7 @@ const addGeneratedAlerts = async (
 
     const subCase = await getSubCase({
       caseService,
-      savedObjectsClient,
+      savedObjectsClient: unsecuredSavedObjectsClient,
       caseId,
       createdAt: createdDate,
       userActionService,
@@ -182,7 +182,7 @@ const addGeneratedAlerts = async (
       logger,
       collection: caseInfo,
       subCase,
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       caseService,
       attachmentService,
     });
@@ -212,7 +212,7 @@ const addGeneratedAlerts = async (
     }
 
     await userActionService.bulkCreate({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       actions: [
         buildCommentUserActionItem({
           action: 'create',
@@ -329,7 +329,7 @@ export const addComment = async (
   );
 
   const {
-    savedObjectsClient,
+    unsecuredSavedObjectsClient,
     caseService,
     userActionService,
     attachmentService,
@@ -366,7 +366,7 @@ export const addComment = async (
     const combinedCase = await getCombinedCase({
       caseService,
       attachmentService,
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       id: caseId,
       logger,
     });
@@ -398,7 +398,7 @@ export const addComment = async (
     }
 
     await userActionService.bulkCreate({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       actions: [
         buildCommentUserActionItem({
           action: 'create',

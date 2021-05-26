@@ -29,7 +29,7 @@ export interface CasesClientArgs {
   readonly caseService: CaseService;
   readonly connectorMappingsService: ConnectorMappingsService;
   readonly user: User;
-  readonly savedObjectsClient: SavedObjectsClientContract;
+  readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   readonly userActionService: CaseUserActionService;
   readonly alertsService: AlertServiceContract;
   readonly attachmentService: AttachmentService;
@@ -37,4 +37,13 @@ export interface CasesClientArgs {
   readonly authorization: PublicMethodsOf<Authorization>;
   readonly auditLogger?: AuditLogger;
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
+}
+
+/**
+ * Describes an entity with the necessary fields to identify if the user is authorized to interact with the saved object
+ * returned from some find query.
+ */
+export interface OwnerEntity {
+  owner: string;
+  id: string;
 }

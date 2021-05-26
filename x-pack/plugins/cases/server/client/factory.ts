@@ -85,6 +85,7 @@ export class CasesClientFactory {
       getSpace: this.options.getSpace,
       features: this.options.featuresPluginStart,
       auditLogger: new AuthorizationAuditLogger(auditLogger),
+      logger: this.logger,
     });
 
     const caseService = new CaseService(this.logger, this.options?.securityPluginStart?.authc);
@@ -93,8 +94,11 @@ export class CasesClientFactory {
     return createCasesClient({
       alertsService: new AlertService(),
       scopedClusterClient,
-      savedObjectsClient: savedObjectsService.getScopedClient(request, {
+      unsecuredSavedObjectsClient: savedObjectsService.getScopedClient(request, {
         includedHiddenTypes: SAVED_OBJECT_TYPES,
+        // this tells the security plugin to not perform SO authorization and audit logging since we are handling
+        // that manually using our Authorization class and audit logger.
+        excludedWrappers: ['security'],
       }),
       // We only want these fields from the userInfo object
       user: { username: userInfo.username, email: userInfo.email, full_name: userInfo.full_name },

@@ -40,6 +40,7 @@ import {
 } from '../common';
 import { Authorization, DATABASE_CATEGORY, ECS_OUTCOMES, OperationDetails } from '../authorization';
 import { AuditLogger } from '../../../security/server';
+import { OwnerEntity } from './types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
@@ -560,15 +561,6 @@ export async function ensureAuthorized({
     logSavedObjects({ error });
     throw error;
   }
-}
-
-/**
- * Describes an entity with the necessary fields to identify if the user is authorized to interact with the saved object
- * returned from some find query.
- */
-interface OwnerEntity {
-  owner: string;
-  id: string;
 }
 
 /**

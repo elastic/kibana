@@ -271,10 +271,10 @@ export async function update({
   );
 
   try {
-    const { savedObjectsClient: soClient, user, caseService, userActionService } = clientArgs;
+    const { unsecuredSavedObjectsClient, user, caseService, userActionService } = clientArgs;
 
     const bulkSubCases = await caseService.getSubCases({
-      soClient,
+      soClient: unsecuredSavedObjectsClient,
       ids: query.subCases.map((q) => q.id),
     });
 
@@ -292,7 +292,7 @@ export async function update({
     }
 
     const subIDToParentCase = await getParentCases({
-      soClient,
+      soClient: unsecuredSavedObjectsClient,
       caseService,
       subCaseIDs: nonEmptySubCaseRequests.map((subCase) => subCase.id),
       subCasesMap,
@@ -300,7 +300,7 @@ export async function update({
 
     const updatedAt = new Date().toISOString();
     const updatedCases = await caseService.patchSubCases({
-      soClient,
+      soClient: unsecuredSavedObjectsClient,
       subCases: nonEmptySubCaseRequests.map((thisCase) => {
         const { id: subCaseId, version, ...updateSubCaseAttributes } = thisCase;
         let closedInfo: { closed_at: string | null; closed_by: User | null } = {
@@ -352,7 +352,7 @@ export async function update({
 
     await updateAlerts({
       caseService,
-      soClient,
+      soClient: unsecuredSavedObjectsClient,
       casesClientInternal,
       subCasesToSync: subCasesToSyncAlertsFor,
       logger: clientArgs.logger,
@@ -380,7 +380,7 @@ export async function update({
     );
 
     await userActionService.bulkCreate({
-      soClient,
+      soClient: unsecuredSavedObjectsClient,
       actions: buildSubCaseUserActions({
         originalSubCases: bulkSubCases.saved_objects,
         updatedSubCases: updatedCases.saved_objects,

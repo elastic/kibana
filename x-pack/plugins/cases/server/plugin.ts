@@ -154,10 +154,10 @@ export class CasePlugin {
     core: CoreSetup;
   }): IContextProvider<CasesRequestHandlerContext, 'cases'> => {
     return async (context, request, response) => {
-      const [{ savedObjects }] = await core.getStartServices();
-
       return {
         getCasesClient: async () => {
+          const [{ savedObjects }] = await core.getStartServices();
+
           return this.clientFactory.create({
             request,
             scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,

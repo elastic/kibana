@@ -93,7 +93,7 @@ export function createSubCasesClient(
 async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   try {
     const {
-      savedObjectsClient: soClient,
+      unsecuredSavedObjectsClient: soClient,
       user,
       userActionService,
       caseService,
@@ -161,7 +161,7 @@ async function find(
   clientArgs: CasesClientArgs
 ): Promise<SubCasesFindResponse> {
   try {
-    const { savedObjectsClient: soClient, caseService } = clientArgs;
+    const { unsecuredSavedObjectsClient: soClient, caseService } = clientArgs;
 
     const ids = [caseID];
     const { subCase: subCaseQueryOptions } = constructQueryOptions({
@@ -220,7 +220,7 @@ async function get(
   clientArgs: CasesClientArgs
 ): Promise<SubCaseResponse> {
   try {
-    const { savedObjectsClient: soClient, caseService } = clientArgs;
+    const { unsecuredSavedObjectsClient: soClient, caseService } = clientArgs;
 
     const subCase = await caseService.getSubCase({
       soClient,

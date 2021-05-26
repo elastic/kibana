@@ -81,7 +81,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.CreateCase]: {
     type: EVENT_TYPES.creation,
     name: WriteOperations.CreateCase,
-    action: 'create-case',
+    action: 'case_create',
     verbs: createVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
@@ -89,7 +89,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.DeleteCase]: {
     type: EVENT_TYPES.deletion,
     name: WriteOperations.DeleteCase,
-    action: 'delete-case',
+    action: 'case_delete',
     verbs: deleteVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
@@ -97,7 +97,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.UpdateCase]: {
     type: EVENT_TYPES.change,
     name: WriteOperations.UpdateCase,
-    action: 'update-case',
+    action: 'case_update',
     verbs: updateVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
@@ -105,7 +105,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.PushCase]: {
     type: EVENT_TYPES.change,
     name: WriteOperations.PushCase,
-    action: 'push-case',
+    action: 'case_push',
     verbs: updateVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
@@ -113,7 +113,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.CreateConfiguration]: {
     type: EVENT_TYPES.creation,
     name: WriteOperations.CreateConfiguration,
-    action: 'create-configuration',
+    action: 'configuration_create',
     verbs: createVerbs,
     docType: 'case configuration',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
@@ -121,7 +121,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.UpdateConfiguration]: {
     type: EVENT_TYPES.change,
     name: WriteOperations.UpdateConfiguration,
-    action: 'update-configuration',
+    action: 'configuration_update',
     verbs: updateVerbs,
     docType: 'case configuration',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
@@ -129,7 +129,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.FindConfigurations]: {
     type: EVENT_TYPES.access,
     name: ReadOperations.FindConfigurations,
-    action: 'find-configurations',
+    action: 'configuration_find',
     verbs: accessVerbs,
     docType: 'case configurations',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
@@ -137,7 +137,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.GetCase]: {
     type: EVENT_TYPES.access,
     name: ACCESS_CASE_OPERATION,
-    action: 'get-case',
+    action: 'case_get',
     verbs: accessVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
@@ -145,7 +145,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.FindCases]: {
     type: EVENT_TYPES.access,
     name: ACCESS_CASE_OPERATION,
-    action: 'find-cases',
+    action: 'case_find',
     verbs: accessVerbs,
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
@@ -153,7 +153,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.GetCaseIDsByAlertID]: {
     type: EVENT_TYPES.access,
     name: ACCESS_CASE_OPERATION,
-    action: 'get-case-ids-by-alert-id',
+    action: 'case_ids_by_alert_id_get',
     verbs: accessVerbs,
     docType: 'cases',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -161,7 +161,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.GetTags]: {
     type: EVENT_TYPES.access,
     name: ReadOperations.GetCase,
-    action: 'get-tags',
+    action: 'case_tags_get',
     verbs: accessVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
@@ -169,7 +169,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.GetReporters]: {
     type: EVENT_TYPES.access,
     name: ReadOperations.GetReporters,
-    action: 'get-reporters',
+    action: 'case_reporters_get',
     verbs: accessVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
@@ -178,7 +178,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.CreateComment]: {
     type: EVENT_TYPES.creation,
     name: WriteOperations.CreateComment,
-    action: 'create-comment',
+    action: 'comment_create',
     verbs: createVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -186,7 +186,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.DeleteAllComments]: {
     type: EVENT_TYPES.deletion,
     name: DELETE_COMMENT_OPERATION,
-    action: 'delete-all-comments',
+    action: 'comment_delete_all',
     verbs: deleteVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -194,7 +194,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.DeleteComment]: {
     type: EVENT_TYPES.deletion,
     name: DELETE_COMMENT_OPERATION,
-    action: 'delete-comment',
+    action: 'comment_delete',
     verbs: deleteVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -202,7 +202,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [WriteOperations.UpdateComment]: {
     type: EVENT_TYPES.change,
     name: WriteOperations.UpdateComment,
-    action: 'update-comments',
+    action: 'comment_update',
     verbs: updateVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -210,7 +210,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.GetComment]: {
     type: EVENT_TYPES.access,
     name: ACCESS_COMMENT_OPERATION,
-    action: 'get-comment',
+    action: 'comment_get',
     verbs: accessVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -218,7 +218,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.GetAllComments]: {
     type: EVENT_TYPES.access,
     name: ACCESS_COMMENT_OPERATION,
-    action: 'get-all-comment',
+    action: 'comment_get_all',
     verbs: accessVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -226,7 +226,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.FindComments]: {
     type: EVENT_TYPES.access,
     name: ACCESS_COMMENT_OPERATION,
-    action: 'find-comments',
+    action: 'comment_find',
     verbs: accessVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
@@ -235,7 +235,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.GetCaseStatuses]: {
     type: EVENT_TYPES.access,
     name: ACCESS_CASE_OPERATION,
-    action: 'find-case-statuses',
+    action: 'case_find_statuses',
     verbs: accessVerbs,
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
@@ -244,7 +244,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   [ReadOperations.GetUserActions]: {
     type: EVENT_TYPES.access,
     name: ReadOperations.GetUserActions,
-    action: 'get-user-actions',
+    action: 'user_actions_get',
     verbs: accessVerbs,
     docType: 'user actions',
     savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,

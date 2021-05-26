@@ -1050,7 +1050,7 @@ export class CaseService {
         filter: cloneDeep(filter),
       });
     } catch (error) {
-      this.log.error(`Error on GET cases: ${error}`);
+      this.log.error(`Error on GET tags: ${error}`);
       throw error;
     }
   }
@@ -1075,7 +1075,7 @@ export class CaseService {
         email: null,
       };
     } catch (error) {
-      this.log.error(`Error on GET cases: ${error}`);
+      this.log.error(`Error on GET user: ${error}`);
       throw error;
     }
   }
