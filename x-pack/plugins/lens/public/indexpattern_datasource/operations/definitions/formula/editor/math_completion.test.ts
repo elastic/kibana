@@ -39,6 +39,11 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     buildColumn: buildGenericColumn('sum'),
     getPossibleOperationForField: (field: IndexPatternField) =>
       field.type === 'number' ? numericOperation() : null,
+    documentation: {
+      section: 'elasticsearch',
+      signature: 'field: string',
+      description: 'description',
+    },
   } as unknown) as GenericOperationDefinition,
   count: ({
     type: 'count',
@@ -95,14 +100,16 @@ describe('math completion', () => {
 
     it('should return a signature for a field-based ES function', () => {
       expect(unwrapSignatures(getSignatureHelp('sum()', 4, operationDefinitionMap))).toEqual({
-        label: 'sum(field)',
+        label: 'sum(field: string)',
+        documentation: { value: 'description' },
         parameters: [{ label: 'field' }],
       });
     });
 
     it('should return a signature for count', () => {
       expect(unwrapSignatures(getSignatureHelp('count()', 6, operationDefinitionMap))).toEqual({
-        label: 'count()',
+        label: 'count(undefined)',
+        documentation: { value: '' },
         parameters: [],
       });
     });
@@ -113,7 +120,8 @@ describe('math completion', () => {
           getSignatureHelp('2 * moving_average(count(), window=)', 35, operationDefinitionMap)
         )
       ).toEqual({
-        label: 'moving_average(function, window=number)',
+        label: expect.stringContaining('moving_average('),
+        documentation: { value: '' },
         parameters: [
           { label: 'function' },
           {
@@ -129,16 +137,21 @@ describe('math completion', () => {
         unwrapSignatures(
           getSignatureHelp('2 * moving_average(count())', 25, operationDefinitionMap)
         )
-      ).toEqual({ label: 'count()', parameters: [] });
+      ).toEqual({
+        label: expect.stringContaining('count('),
+        parameters: [],
+        documentation: { value: '' },
+      });
     });
 
     it('should return a signature for a complex tinymath function', () => {
       expect(
         unwrapSignatures(getSignatureHelp('clamp(count(), 5)', 7, operationDefinitionMap))
       ).toEqual({
-        label: 'clamp(expression, min, max)',
+        label: expect.stringContaining('clamp('),
+        documentation: { value: '' },
         parameters: [
-          { label: 'expression', documentation: '' },
+          { label: 'value', documentation: '' },
           { label: 'min', documentation: '' },
           { label: 'max', documentation: '' },
         ],
@@ -153,31 +166,43 @@ describe('math completion', () => {
 
     it('should show signature for a field-based ES function', () => {
       expect(getHover('sum()', 2, operationDefinitionMap)).toEqual({
-        contents: [{ value: 'sum(field)' }],
+        contents: [{ value: 'sum(field: string)' }, { value: expect.stringContaining('Example') }],
       });
     });
 
     it('should show signature for count', () => {
       expect(getHover('count()', 2, operationDefinitionMap)).toEqual({
-        contents: [{ value: 'count()' }],
+        contents: [
+          { value: expect.stringContaining('count(') },
+          { value: expect.stringContaining('Example') },
+        ],
       });
     });
 
     it('should show signature for a function with named parameters', () => {
       expect(getHover('2 * moving_average(count())', 10, operationDefinitionMap)).toEqual({
-        contents: [{ value: 'moving_average(function, window=number)' }],
+        contents: [
+          { value: expect.stringContaining('moving_average(') },
+          { value: expect.stringContaining('Example') },
+        ],
       });
     });
 
     it('should show signature for an inner function', () => {
       expect(getHover('2 * moving_average(count())', 22, operationDefinitionMap)).toEqual({
-        contents: [{ value: 'count()' }],
+        contents: [
+          { value: expect.stringContaining('count(') },
+          { value: expect.stringContaining('Example') },
+        ],
       });
     });
 
     it('should show signature for a complex tinymath function', () => {
       expect(getHover('clamp(count(), 5)', 2, operationDefinitionMap)).toEqual({
-        contents: [{ value: 'clamp(expression, min, max)' }],
+        contents: [
+          { value: expect.stringContaining('clamp([value]: number') },
+          { value: expect.stringContaining('Example') },
+        ],
       });
     });
   });
