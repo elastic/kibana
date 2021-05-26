@@ -69,7 +69,7 @@ export class KbnClientImportExport {
     formData.append('file', objects.map((obj) => JSON.stringify(obj)).join('\n'), 'import.ndjson');
 
     if (options?.space) {
-      this.log.info('creating space', options.space);
+      this.log.info('creating space required for import', options.space);
 
       try {
         await this.spaces.create({
@@ -77,7 +77,10 @@ export class KbnClientImportExport {
           name: options.space,
         });
       } catch (e) {
-        this.log.warning('creating space failed:', e.message);
+        if (e.response?.status !== 409) {
+          this.log.error('failed to create space');
+          throw e;
+        }
       }
     }
 
