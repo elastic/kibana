@@ -5,16 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { monaco } from '@kbn/monaco';
-import { CssLang, HandlebarsLang, LangModuleType } from './languages';
-
-function registerLanguage(language: LangModuleType) {
-  monaco.languages.register({
-    id: language.ID,
-  });
-  monaco.languages.setMonarchTokensProvider(language.ID, language.language);
-  monaco.languages.setLanguageConfiguration(language.ID, language.conf);
-}
+import { CssLang, HandlebarsLang, MarkdownHandlebarsLang, registerLanguage } from './languages';
 
 registerLanguage(CssLang);
 registerLanguage(HandlebarsLang);
+registerLanguage(MarkdownHandlebarsLang);

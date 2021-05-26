@@ -15,7 +15,7 @@ import React, { Component } from 'react';
 import { createTickFormatter } from './lib/tick_formatter';
 import { convertSeriesToVars } from './lib/convert_series_to_vars';
 import _ from 'lodash';
-import { CodeEditor } from '../../../../kibana_react/public';
+import { CodeEditor, MarkdownHandlebarsLang } from '../../../../kibana_react/public';
 
 import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -102,7 +102,7 @@ export class MarkdownEditor extends Component {
         <div className="tvbMarkdownEditor__editor">
           <CodeEditor
             editorDidMount={this.handleOnLoad}
-            languageId="handlebars_url"
+            languageId={MarkdownHandlebarsLang.ID}
             options={{
               fontSize: '14px',
               wordWrap: 'on',

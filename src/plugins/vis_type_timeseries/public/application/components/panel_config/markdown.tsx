@@ -42,7 +42,7 @@ import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
-import { CodeEditor } from '../../../../../kibana_react/public';
+import { CodeEditor, CssLang } from '../../../../../kibana_react/public';
 
 const lessC = less(window, { env: 'production' });
 
@@ -283,7 +283,7 @@ export class MarkdownPanelConfig extends Component<
             <EuiSpacer size="s" />
             <CodeEditor
               height="500px"
-              languageId="css"
+              languageId={CssLang.ID}
               options={{ fontSize: 14 }}
               value={model.markdown_less ?? ''}
               onChange={this.handleCSSChange}
