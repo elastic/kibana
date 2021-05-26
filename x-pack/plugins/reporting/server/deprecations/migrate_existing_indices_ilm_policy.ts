@@ -37,7 +37,6 @@ export const migrateExistingIndicesIlmPolicy = async (
         message: i18n.translate('xpack.reporting.deprecations.migrateIndexIlmPolicyActionMessage', {
           defaultMessage: `All new reporting indices will be managed by a provisioned ILM policy: "${reportingIlmPolicy}". To manage the lifecycle of reports edit the ${reportingIlmPolicy} policy. Please note, this action will target all indices prefixed with "${indexPattern}".`,
         }),
-        documentationUrl: 'WIP', // TODO: Fix this!
         correctiveActions: {
           api: {
             method: 'PUT',
@@ -50,6 +49,19 @@ export const migrateExistingIndicesIlmPolicy = async (
               },
             },
           },
+          manualSteps: [
+            i18n.translate(
+              'xpack.reporting.deprecations.migrateIndexIlmPolicy.stepOneDescription',
+              {
+                defaultMessage:
+                  'Send a request to Elasticsearch that configures indices matching "{indexPattern}" to be managed by the "{reportingIlmPolicy}" Index Lifecycle Policy.',
+                values: {
+                  indexPattern,
+                  reportingIlmPolicy,
+                },
+              }
+            ),
+          ],
         },
       },
     ];
