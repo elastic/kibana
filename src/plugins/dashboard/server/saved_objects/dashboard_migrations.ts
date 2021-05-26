@@ -147,7 +147,10 @@ function createExtractPanelReferencesMigration(
   };
 }
 
-type ValueOrReferenceInput = SavedObjectEmbeddableInput & { attributes?: SerializableValue };
+type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
+  attributes?: SerializableValue;
+  savedVis?: SerializableValue;
+};
 
 // Runs the embeddable migrations on each panel
 const migrateByValuePanels = (
@@ -170,7 +173,9 @@ const migrateByValuePanels = (
   panels.forEach((panel) => {
     // Convert each panel into a state that can be passed to EmbeddablesSetup.migrate
     const originalPanelState = convertSavedDashboardPanelToPanelState<ValueOrReferenceInput>(panel);
-    if (originalPanelState.explicitInput.attributes) {
+
+    // saved vis is used to store by value input for Visualize. This should eventually be renamed to `attributes` to align with Lens and Maps
+    if (originalPanelState.explicitInput.attributes || originalPanelState.explicitInput.savedVis) {
       // If this panel is by value, migrate the state using embeddable migrations
       const migratedInput = deps.embeddable.migrate(
         {

@@ -8,11 +8,33 @@
 
 import { flow } from 'lodash';
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
+import { SerializableState } from '../../../kibana_utils/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
   commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
 } from '../migrations/visualization_common_migrations';
+
+const byValueAddSupportOfDualIndexSelectionModeInTSVB = (state: SerializableState) => {
+  return {
+    ...state,
+    savedVis: commonAddSupportOfDualIndexSelectionModeInTSVB(state.savedVis),
+  };
+};
+
+const byValueHideTSVBLastValueIndicator = (state: SerializableState) => {
+  return {
+    ...state,
+    savedVis: commonHideTSVBLastValueIndicator(state.savedVis),
+  };
+};
+
+const byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel = (state: SerializableState) => {
+  return {
+    ...state,
+    savedVis: commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel(state.savedVis),
+  };
+};
 
 export const visualizeEmbeddableFactory = (): EmbeddableRegistryDefinition => {
   return {
@@ -21,9 +43,9 @@ export const visualizeEmbeddableFactory = (): EmbeddableRegistryDefinition => {
       // These migrations are run in 7.13.1 for `by value` panels because the 7.13 release window was missed.
       '7.13.1': (state) =>
         flow(
-          commonAddSupportOfDualIndexSelectionModeInTSVB,
-          commonHideTSVBLastValueIndicator,
-          commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel
+          byValueAddSupportOfDualIndexSelectionModeInTSVB,
+          byValueHideTSVBLastValueIndicator,
+          byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel
         )(state),
     },
   };

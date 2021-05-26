@@ -796,7 +796,26 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
 };
 
 const addSupportOfDualIndexSelectionModeInTSVB: SavedObjectMigrationFn<any, any> = (doc) => {
-  return commonAddSupportOfDualIndexSelectionModeInTSVB(doc);
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+      return doc;
+    }
+    const newVisState = commonAddSupportOfDualIndexSelectionModeInTSVB(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
+  }
+  return doc;
 };
 
 // [Data table visualization] Enable toolbar by default
@@ -907,13 +926,44 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
  * [TSVB] Hide Last value indicator by default for all TSVB types except timeseries
  */
 const hideTSVBLastValueIndicator: SavedObjectMigrationFn<any, any> = (doc) => {
-  return commonHideTSVBLastValueIndicator(doc);
+  try {
+    const visState = JSON.parse(doc.attributes.visState);
+    const newVisState = commonHideTSVBLastValueIndicator(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+  }
+  return doc;
 };
 
 const removeDefaultIndexPatternAndTimeFieldFromTSVBModel: SavedObjectMigrationFn<any, any> = (
   doc
 ) => {
-  return commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel(doc);
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+      return doc;
+    }
+  }
+  const newVisState = commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel(visState);
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      visState: JSON.stringify(newVisState),
+    },
+  };
 };
 
 export const visualizationSavedObjectTypeMigrations = {
