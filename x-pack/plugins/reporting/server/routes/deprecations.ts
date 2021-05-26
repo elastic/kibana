@@ -40,7 +40,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
 
         if (err instanceof errors.ResponseError) {
           return res.customError({
-            statusCode: 500,
+            statusCode: err.statusCode ?? 500,
             body: {
               message: err.message,
               name: err.name,

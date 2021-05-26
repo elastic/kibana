@@ -6,6 +6,7 @@
  */
 
 import supertest from 'supertest';
+import { errors } from '@elastic/elasticsearch';
 import { UnwrapPromise } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { of } from 'rxjs';
@@ -96,6 +97,48 @@ describe(`PUT ${API_MIGRATE_ILM_POLICY_URL}`, () => {
       .expect(200)
       .then((response) => {
         expect(response.body).toMatchInlineSnapshot(`Object {}`); // empty body
+      });
+
+    expect(mockEsClient.indices.putSettings).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.indices.putSettings.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "index": Object {
+            "lifecycle": Object {
+              "name": "kibana-reporting",
+            },
+          },
+        },
+        "index": ".reporting-*",
+      }
+    `);
+  });
+
+  it('returns the ES error in case something goes wrong', async () => {
+    mockEsClient.indices.putSettings.mockRejectedValueOnce(
+      new errors.ResponseError({
+        body: { message: 'something is wrong' },
+        headers: {},
+        meta: {} as any,
+        statusCode: 503,
+        warnings: [],
+      })
+    );
+    registerDeprecationsRoutes(core, logger);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .put(API_MIGRATE_ILM_POLICY_URL)
+      .expect(503)
+      .then((response) => {
+        expect(response.body).toMatchInlineSnapshot(`
+          Object {
+            "error": "Service Unavailable",
+            "message": "Response Error",
+            "statusCode": 503,
+          }
+        `);
       });
 
     expect(mockEsClient.indices.putSettings).toHaveBeenCalledTimes(1);
