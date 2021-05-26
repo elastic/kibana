@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 import { monaco } from '@kbn/monaco';
-import { language, conf } from './css.d';
-import { LANG } from './constants';
 
-monaco.languages.register({
-  id: LANG,
-});
-monaco.languages.setMonarchTokensProvider(LANG, language);
-monaco.languages.setLanguageConfiguration(LANG, conf);
+export interface LangModule {
+  ID: string;
+  language: monaco.languages.IMonarchLanguage;
+  conf: monaco.languages.LanguageConfiguration;
+}

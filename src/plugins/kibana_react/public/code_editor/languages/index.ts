@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-import './css';
+import { Lang as CssLang } from './css';
+import { Lang as HandlebarsLang } from './handlebars';
+import { LangModule as LangModuleType } from './types';
+
+export { CssLang, HandlebarsLang, LangModuleType };
