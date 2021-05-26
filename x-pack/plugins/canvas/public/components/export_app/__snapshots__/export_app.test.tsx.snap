@@ -38,18 +38,13 @@ exports[`<ExportApp /> renders as expected 1`] = `
       <div
         className="canvasLayout__stageHeader"
       >
-        <Link
-          name="loadWorkpad"
-          params={
-            Object {
-              "id": "my-workpad-abcd",
-            }
-          }
+        <RoutingLink
+          to="/workpad/my-workpad-abcd"
         >
           <div>
             Link
           </div>
-        </Link>
+        </RoutingLink>
       </div>
       <div
         className="canvasExport__stageContent"
@@ -108,18 +103,13 @@ exports[`<ExportApp /> renders as expected 2`] = `
       <div
         className="canvasLayout__stageHeader"
       >
-        <Link
-          name="loadWorkpad"
-          params={
-            Object {
-              "id": "my-workpad-abcd",
-            }
-          }
+        <RoutingLink
+          to="/workpad/my-workpad-abcd"
         >
           <div>
             Link
           </div>
-        </Link>
+        </RoutingLink>
       </div>
       <div
         className="canvasExport__stageContent"

@@ -14,12 +14,12 @@ jest.mock('style-it', () => ({
   it: (css: string, Component: any) => Component,
 }));
 
-jest.mock('../../../components/workpad_page', () => ({
+jest.mock('../workpad_page', () => ({
   WorkpadPage: (props: any) => <div>Page</div>,
 }));
 
-jest.mock('../../../components/link', () => ({
-  Link: (props: any) => <div>Link</div>,
+jest.mock('../routing', () => ({
+  RoutingLink: (props: any) => <div>Link</div>,
 }));
 
 describe('<ExportApp />', () => {
