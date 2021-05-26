@@ -185,3 +185,10 @@ export const CREATE_TRUSTED_APP_ERROR: { [K in string]: string } = {
     { defaultMessage: 'An invalid Signature was entered. Please enter in a valid Signature.' }
   ),
 };
+
+export const SEARCH_TRUSTED_APP_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.trustedapps.list.search.placeholder',
+  {
+    defaultMessage: 'Search on the fields below: name, description, value',
+  }
+);

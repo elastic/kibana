@@ -131,6 +131,7 @@ export class DocLinksService {
           introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
           fieldFormattersNumber: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/numeral.html`,
           fieldFormattersString: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/field-formatters-string.html`,
+          runtimeFields: `${KIBANA_DOCS}managing-index-patterns.html#runtime-fields`,
         },
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
         kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
@@ -347,7 +348,7 @@ export class DocLinksService {
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
         },
         snapshotRestore: {
-          guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
+          guide: `${KIBANA_DOCS}snapshot-repositories.html`,
           changeIndexSettings: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html#change-index-settings-during-restore`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
           registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-filesystem-repository`,
@@ -512,6 +513,7 @@ export interface DocLinksStart {
       readonly introduction: string;
       readonly fieldFormattersNumber: string;
       readonly fieldFormattersString: string;
+      readonly runtimeFields: string;
     };
     readonly addData: string;
     readonly kibana: string;

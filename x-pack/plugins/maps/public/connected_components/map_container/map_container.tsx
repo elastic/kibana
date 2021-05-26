@@ -16,8 +16,7 @@ import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { ToolbarOverlay } from '../toolbar_overlay';
-// @ts-expect-error
-import { LayerPanel } from '../layer_panel';
+import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
@@ -30,7 +29,6 @@ import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { MapRefreshConfig } from '../../../common/descriptor_types';
-import 'mapbox-gl/dist/mapbox-gl.css';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -223,7 +221,7 @@ export class MapContainer extends Component<Props, State> {
     if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
       flyoutPanel = <AddLayerPanel />;
     } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
-      flyoutPanel = <LayerPanel />;
+      flyoutPanel = <EditLayerPanel />;
     } else if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
       flyoutPanel = <MapSettingsPanel />;
     }

@@ -12,11 +12,23 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPageTemplate,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  ALERT_START,
+  ALERT_STATUS,
+  RULE_ID,
+  RULE_NAME,
+} from '@kbn/rule-data-utils/target/technical_field_names';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { format, parse } from 'url';
+import {
+  ParsedTechnicalFields,
+  parseTechnicalFields,
+} from '../../../../rule_registry/common/parse_technical_fields';
+import type { AlertStatus } from '../../../common/typings';
 import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useFetcher } from '../../hooks/use_fetcher';
@@ -27,10 +39,12 @@ import type { ObservabilityAPIReturnType } from '../../services/call_observabili
 import { getAbsoluteDateRange } from '../../utils/date';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTable } from './alerts_table';
+import { StatusFilter } from './status_filter';
 
 export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
 
-export interface TopAlert extends TopAlertResponse {
+export interface TopAlert {
+  fields: ParsedTechnicalFields;
   start: number;
   reason: string;
   link?: string;
@@ -42,11 +56,11 @@ interface AlertsPageProps {
 }
 
 export function AlertsPage({ routeParams }: AlertsPageProps) {
-  const { core, observabilityRuleRegistry } = usePluginContext();
+  const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const { prepend } = core.http.basePath;
   const history = useHistory();
   const {
-    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '' },
+    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'open' },
   } = routeParams;
 
   // In a future milestone we'll have a page dedicated to rule management in
@@ -70,22 +84,24 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             start,
             end,
             kuery,
+            status,
           },
         },
       }).then((alerts) => {
         return alerts.map((alert) => {
-          const ruleType = observabilityRuleRegistry.getTypeByRuleId(alert['rule.id']);
+          const parsedFields = parseTechnicalFields(alert);
+          const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
           const formatted = {
             link: undefined,
-            reason: alert['rule.name'],
-            ...(ruleType?.format?.({ alert, formatters: { asDuration, asPercent } }) ?? {}),
+            reason: parsedFields[RULE_NAME]!,
+            ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
           };
 
           const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;
 
           return {
-            ...alert,
             ...formatted,
+            fields: parsedFields,
             link: parsedLink
               ? format({
                   ...parsedLink,
@@ -96,14 +112,23 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
                   },
                 })
               : undefined,
-            active: alert['event.action'] !== 'close',
-            start: new Date(alert['kibana.rac.alert.start']).getTime(),
+            active: parsedFields[ALERT_STATUS] !== 'closed',
+            start: new Date(parsedFields[ALERT_START]!).getTime(),
           };
         });
       });
     },
-    [kuery, observabilityRuleRegistry, rangeFrom, rangeTo]
+    [kuery, observabilityRuleTypeRegistry, rangeFrom, rangeTo, status]
   );
+
+  function setStatusFilter(value: AlertStatus) {
+    const nextSearchParams = new URLSearchParams(history.location.search);
+    nextSearchParams.set('status', value);
+    history.push({
+      ...history.location,
+      search: nextSearchParams.toString(),
+    });
+  }
 
   return (
     <EuiPageTemplate
@@ -167,9 +192,19 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             }}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <AlertsTable items={topAlerts ?? []} />
-        </EuiFlexItem>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <StatusFilter status={status} onChange={setStatusFilter} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AlertsTable items={topAlerts ?? []} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPageTemplate>
   );
