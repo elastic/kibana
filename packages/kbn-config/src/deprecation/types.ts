@@ -56,6 +56,16 @@ export type ConfigDeprecation = (
 ) => void | ConfigDeprecationCommand;
 
 /**
+ * List of config paths changed during deprecation.
+ *
+ * @public
+ */
+export interface ChangedDeprecatedPaths {
+  set: string[];
+  unset: string[];
+}
+
+/**
  * Outcome of deprecation operation. Allows mutating config values in a declarative way.
  *
  * @public
