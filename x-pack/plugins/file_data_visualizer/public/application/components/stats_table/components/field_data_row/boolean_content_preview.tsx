@@ -6,11 +6,11 @@
  */
 
 import React, { FC, useMemo } from 'react';
-// import { EuiDataGridColumn } from '@elastic/eui';
-import { OrdinalChartData } from './field_histograms';
-// import { ColumnChart } from '../../../../../../components/data_grid/column_chart'; // TODO copy component
-import { FieldDataRowProps } from '../../types';
+import type { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { getTFPercentage } from '../../utils';
+import { ColumnChart } from './column_chart';
+import type { OrdinalChartData } from './field_histograms';
+import type { FieldDataRowProps } from '../../types';
 
 export const BooleanContentPreview: FC<FieldDataRowProps> = ({ config }) => {
   const chartData = useMemo(() => {
@@ -25,19 +25,18 @@ export const BooleanContentPreview: FC<FieldDataRowProps> = ({ config }) => {
   }, [config]);
   if (!chartData || config.fieldName === undefined) return null;
 
-  // const columnType: EuiDataGridColumn = {
-  //   id: config.fieldName,
-  //   schema: undefined,
-  // };
-  // const dataTestSubj = `mlDataGridChart-${config.fieldName}`;
+  const columnType: EuiDataGridColumn = {
+    id: config.fieldName,
+    schema: undefined,
+  };
+  const dataTestSubj = `mlDataGridChart-${config.fieldName}`;
 
   return (
-    <></>
-    // <ColumnChart
-    //   dataTestSubj={dataTestSubj}
-    //   chartData={chartData}
-    //   columnType={columnType}
-    //   hideLabel={true}
-    // />
+    <ColumnChart
+      dataTestSubj={dataTestSubj}
+      chartData={chartData}
+      columnType={columnType}
+      hideLabel={true}
+    />
   );
 };

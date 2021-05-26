@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { GeoPointContent } from './geo_point_content';
+import { GeoPointContentWithMap } from './geo_point_content_with_map';
 import { JOB_FIELD_TYPES } from '../../../../common';
 import {
   BooleanContent,
@@ -15,6 +15,7 @@ import {
   KeywordContent,
   NumberContent,
   OtherContent,
+  TextContent,
 } from '../stats_table/components/field_data_expanded_row';
 import { NotInDocsContent } from '../not_in_docs_content';
 import { FieldVisConfig } from '../stats_table/types';
@@ -52,7 +53,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
       case JOB_FIELD_TYPES.GEO_POINT:
       case JOB_FIELD_TYPES.GEO_SHAPE:
         return (
-          <GeoPointContent
+          <GeoPointContentWithMap
             config={config}
             indexPattern={indexPattern}
             combinedQuery={combinedQuery}

@@ -13,7 +13,7 @@ import { useMlContext } from '../../contexts/ml';
 import { IndexDataVisualizerViewProps } from '../../../../../file_data_visualizer/public';
 export const IndexDataVisualizerPage: FC = () => {
   const mlContext = useMlContext();
-  const { combinedQuery, currentIndexPattern, kibanaConfig, currentSavedSearch } = mlContext;
+  const { currentIndexPattern, kibanaConfig, currentSavedSearch } = mlContext;
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
@@ -38,7 +38,7 @@ export const IndexDataVisualizerPage: FC = () => {
         // @ts-ignore FC IndexDataVisualizer does have props type
         React.Children.map(IndexDataVisualizer.props.children, (child) => {
           return React.cloneElement(child, {
-            combinedQuery,
+            // combinedQuery,
             currentIndexPattern,
             kibanaConfig,
             currentSavedSearch,
