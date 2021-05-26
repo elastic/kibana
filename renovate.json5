@@ -58,6 +58,14 @@
         enabled: true,
       },
       {
+        groupName: '@elastic/elasticsearch',
+        packageNames: ['@elastic/elasticsearch'],
+        reviewers: ['team:kibana-operations'],
+        matchBaseBranches: ['7.13'],
+        labels: ['release_note:skip', 'v7.13.0', 'Team:Operations', 'backport:skip'],
+        enabled: true,
+      },
+      {
         groupName: 'vega related modules',
         packageNames: ['vega', 'vega-lite', 'vega-schema-url-parser', 'vega-tooltip'],
         reviewers: ['team:kibana-app'],
