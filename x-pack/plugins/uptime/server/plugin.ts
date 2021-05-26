@@ -24,6 +24,7 @@ export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: ISavedObjectsRepository;
+  private initContext: PluginInitializerContext;
 
   constructor(_initializerContext: PluginInitializerContext) {
     this.initContext = _initializerContext;
