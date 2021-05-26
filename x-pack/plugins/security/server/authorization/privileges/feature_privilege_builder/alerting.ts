@@ -10,20 +10,35 @@ import { uniq } from 'lodash';
 import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
-const readOperations: string[] = ['get', 'getAlertState', 'getAlertInstanceSummary', 'find'];
-const writeOperations: string[] = [
-  'create',
-  'delete',
-  'update',
-  'updateApiKey',
-  'enable',
-  'disable',
-  'muteAll',
-  'unmuteAll',
-  'muteInstance',
-  'unmuteInstance',
-];
-const allOperations: string[] = [...readOperations, ...writeOperations];
+enum AlertingType {
+  RULE = 'rule',
+  ALERT = 'alert',
+}
+
+const readOperations: Record<AlertingType, string[]> = {
+  rule: ['get', 'getRuleState', 'getAlertSummary', 'find'],
+  alert: ['get', 'find'],
+};
+
+const writeOperations: Record<AlertingType, string[]> = {
+  rule: [
+    'create',
+    'delete',
+    'update',
+    'updateApiKey',
+    'enable',
+    'disable',
+    'muteAll',
+    'unmuteAll',
+    'muteAlert',
+    'unmuteAlert',
+  ],
+  alert: ['update'],
+};
+const allOperations: Record<AlertingType, string[]> = {
+  rule: [...readOperations.rule, ...writeOperations.rule],
+  alert: [...readOperations.alert, ...writeOperations.alert],
+};
 
 export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(
@@ -31,12 +46,16 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
     feature: KibanaFeature
   ): string[] {
     const getAlertingPrivilege = (
-      operations: string[],
+      operations: Record<AlertingType, string[]>,
       privilegedTypes: readonly string[],
       consumer: string
     ) =>
-      privilegedTypes.flatMap((type) =>
-        operations.map((operation) => this.actions.alerting.get(type, consumer, operation))
+      privilegedTypes.flatMap((privilegedType) =>
+        Object.values(AlertingType).flatMap((alertingType) =>
+          operations[alertingType].map((operation) =>
+            this.actions.alerting.get(privilegedType, consumer, alertingType, operation)
+          )
+        )
       );
 
     return uniq([
