@@ -32,10 +32,10 @@ export interface FiltersGlobalProps {
 }
 
 export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children, show = true }) => {
-  const { globalHeaderPortalNode } = useGlobalHeaderPortal();
+  const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
 
   return (
-    <InPortal node={globalHeaderPortalNode}>
+    <InPortal node={globalKQLHeaderPortalNode}>
       <FiltersGlobalContainer data-test-subj="filters-global-container" show={show}>
         <Wrapper className="siemFiltersGlobal">{children}</Wrapper>
       </FiltersGlobalContainer>
