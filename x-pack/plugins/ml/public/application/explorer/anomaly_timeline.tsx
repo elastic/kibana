@@ -238,7 +238,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 >
                   <FormattedMessage
                     id="xpack.ml.explorer.clearSelectionLabel"
-                    defaultMessage="Clear"
+                    defaultMessage="Clear selection"
                   />
                 </EuiButtonEmpty>
               </EuiFlexItem>

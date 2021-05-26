@@ -190,7 +190,9 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
     ...nextState,
     swimlaneBucketInterval,
     viewByLoadedForTimeFormatted: timeRange
-      ? formatHumanReadableDateTime(timeRange.earliestMs)
+      ? `${formatHumanReadableDateTime(timeRange.earliestMs)} - ${formatHumanReadableDateTime(
+          timeRange.latestMs
+        )}`
       : null,
     viewBySwimlaneFieldName,
     viewBySwimlaneOptions,
