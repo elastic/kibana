@@ -8,8 +8,8 @@
 
 import { Lang as CssLang } from './css';
 import { Lang as HandlebarsLang } from './handlebars';
-import { Lang as MarkdownHandlebarsLang } from './markdown_handlebars';
+import { Lang as MarkdownLang } from './markdown';
 import { LangModule as LangModuleType } from './types';
 import { registerLanguage } from './helpers';
 
-export { CssLang, HandlebarsLang, MarkdownHandlebarsLang, LangModuleType, registerLanguage };
+export { CssLang, HandlebarsLang, MarkdownLang, LangModuleType, registerLanguage };

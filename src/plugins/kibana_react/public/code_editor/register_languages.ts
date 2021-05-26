@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { CssLang, HandlebarsLang, MarkdownHandlebarsLang, registerLanguage } from './languages';
+import { CssLang, HandlebarsLang, MarkdownLang, registerLanguage } from './languages';
 
 registerLanguage(CssLang);
 registerLanguage(HandlebarsLang);
-registerLanguage(MarkdownHandlebarsLang);
+registerLanguage(MarkdownLang);
