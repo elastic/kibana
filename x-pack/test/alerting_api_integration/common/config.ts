@@ -150,7 +150,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          `--xpack.actions.verificationMode=${verificationMode}`,
+          `--xpack.actions.tls.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
           ...customHostSettings,
           '--xpack.eventLog.logEntries=true',
