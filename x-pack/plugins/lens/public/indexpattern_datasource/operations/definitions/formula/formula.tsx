@@ -76,6 +76,10 @@ export const formulaOperation: OperationDefinition<
         : params?.formula
       : '';
 
+    if (!params.formula || params.isFormulaBroken) {
+      return [];
+    }
+
     return [
       {
         type: 'function',

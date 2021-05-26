@@ -53,12 +53,13 @@
 
 .lnsFormula__editorPlaceholder {
   position: absolute;
-  top: 80px;
-  left: 0;
+  top: 0;
+  left: $euiSize;
   right: 0;
+  color: $euiTextSubduedColor;
   // Matches monaco editor
   font-family: Menlo, Monaco, 'Courier New', monospace;
-  text-align: center;
+  pointer-events: none;
 }
 
 .lnsIndexPatternDimensionEditor-isFullscreen .lnsFormula__editorContent {

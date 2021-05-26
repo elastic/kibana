@@ -306,7 +306,11 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   // Not a StateSetter because we have this unique use case of determining valid columns
   setState: (
     newState: Parameters<StateSetter<T>>[0],
-    publishToVisualization?: { shouldReplaceDimension?: boolean; shouldRemoveDimension?: boolean }
+    publishToVisualization?: {
+      shouldReplaceDimension?: boolean;
+      shouldRemoveDimension?: boolean;
+      shouldClose?: boolean;
+    }
   ) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;

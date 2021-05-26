@@ -935,6 +935,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lens-dimensionTabs-formula');
     },
 
+    async toggleFullscreen() {
+      await testSubjects.click('lnsFormula-fullscreen');
+    },
+
     async typeFormula(formula: string) {
       await find.byCssSelector('.monaco-editor');
       await find.clickByCssSelectorWhenNotDisabled('.monaco-editor');

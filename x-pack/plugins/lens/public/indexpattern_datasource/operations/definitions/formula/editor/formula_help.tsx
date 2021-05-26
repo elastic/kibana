@@ -17,7 +17,6 @@ import {
   EuiListGroup,
   EuiMarkdownFormat,
   EuiTitle,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../../types';
 import { tinymathFunctions } from '../util';
@@ -36,12 +35,10 @@ function FormulaHelp({
   indexPattern,
   operationDefinitionMap,
   isFullscreen,
-  closeHelp,
 }: {
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   isFullscreen: boolean;
-  closeHelp: () => void;
 }) {
   const [selectedFunction, setSelectedFunction] = useState<string | undefined>();
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
@@ -198,27 +195,9 @@ function FormulaHelp({
   return (
     <>
       <EuiPopoverTitle className="lnsFormula__docsHeader" paddingSize="s">
-        <EuiFlexGroup>
-          <EuiFlexItem grow={true}>
-            {i18n.translate('xpack.lens.formulaDocumentation.header', {
-              defaultMessage: 'Formula reference',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {!isFullscreen ? (
-              <EuiButtonIcon
-                iconType="cross"
-                color="text"
-                onClick={() => {
-                  closeHelp();
-                }}
-                aria-label={i18n.translate('xpack.lens.dimensionContainer.close', {
-                  defaultMessage: 'Close',
-                })}
-              />
-            ) : null}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {i18n.translate('xpack.lens.formulaDocumentation.header', {
+          defaultMessage: 'Formula reference',
+        })}
       </EuiPopoverTitle>
 
       <EuiFlexGroup className="lnsFormula__docsContent" gutterSize="none" responsive={false}>

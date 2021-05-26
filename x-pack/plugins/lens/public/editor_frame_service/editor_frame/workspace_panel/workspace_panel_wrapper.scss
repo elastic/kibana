@@ -31,6 +31,10 @@
       overflow: hidden;
     }
   }
+
+  &.lnsWorkspacePanelWrapper--fullscreen {
+    margin-bottom: 0;
+  }
 }
 
 .lnsWorkspacePanel__dragDrop {

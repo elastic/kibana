@@ -149,7 +149,10 @@ export { formulaOperation } from './formula/formula';
 export interface ParamEditorProps<C> {
   currentColumn: C;
   layer: IndexPatternLayer;
-  updateLayer: (newLayer: IndexPatternLayer) => void;
+  updateLayer: (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
+    shouldClose?: boolean
+  ) => void;
   toggleFullscreen: () => void;
   setIsCloseable: (isCloseable: boolean) => void;
   isFullscreen: boolean;

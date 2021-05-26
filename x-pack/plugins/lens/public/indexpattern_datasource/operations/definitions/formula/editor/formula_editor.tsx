@@ -17,8 +17,9 @@ import {
   EuiPopover,
   EuiText,
   EuiToolTip,
-  EuiMarkdownFormat,
+  EuiSpacer,
 } from '@elastic/eui';
+import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
 import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
@@ -63,9 +64,7 @@ export function FormulaEditor({
   const [text, setText] = useState(currentColumn.params.formula);
   const [warnings, setWarnings] = useState<Array<{ severity: monaco.MarkerSeverity }>>([]);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(isFullscreen);
-  const editorModel = React.useRef<monaco.editor.ITextModel>(
-    monaco.editor.createModel(text ?? '', LANGUAGE_ID)
-  );
+  const editorModel = React.useRef<monaco.editor.ITextModel>();
   const overflowDiv1 = React.useRef<HTMLElement>();
   const disposables = React.useRef<monaco.IDisposable[]>([]);
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
@@ -83,16 +82,32 @@ export function FormulaEditor({
 
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
-    const model = editorModel.current;
-    const allDisposables = disposables.current;
-    const editor1ref = editor1.current;
+    const model = editorModel;
+    const allDisposables = disposables;
+    const editor1ref = editor1;
     return () => {
-      model.dispose();
+      model.current?.dispose();
       overflowDiv1.current?.parentNode?.removeChild(overflowDiv1.current);
-      editor1ref?.dispose();
-      allDisposables?.forEach((d) => d.dispose());
+      editor1ref.current?.dispose();
+      allDisposables.current?.forEach((d) => d.dispose());
     };
   }, []);
+
+  useUnmount(() => {
+    // If the text is not synced, update the column.
+    if (text !== currentColumn.params.formula) {
+      updateLayer((prevLayer) => {
+        return regenerateLayerFromAst(
+          text || '',
+          prevLayer,
+          columnId,
+          currentColumn,
+          indexPattern,
+          operationDefinitionMap
+        ).newLayer;
+      }, true);
+    }
+  });
 
   useDebounceWithOptions(
     () => {
@@ -422,10 +437,6 @@ export function FormulaEditor({
     []
   );
 
-  const closePopover = useCallback(() => {
-    setIsHelpOpen(false);
-  }, []);
-
   const codeEditorOptions: CodeEditorProps = {
     languageId: LANGUAGE_ID,
     value: text ?? '',
@@ -514,12 +525,15 @@ export function FormulaEditor({
                   <EuiButtonEmpty
                     onClick={() => {
                       toggleFullscreen();
+                      // Help text opens when entering full screen, and closes when leaving full screen
+                      setIsHelpOpen(!isFullscreen);
                       trackUiEvent('toggle_formula_fullscreen');
                     }}
                     iconType={isFullscreen ? 'bolt' : 'fullScreen'}
                     size="xs"
                     color="text"
                     flush="right"
+                    data-test-subj="lnsFormula-fullscreen"
                   >
                     {isFullscreen
                       ? i18n.translate('xpack.lens.formula.fullScreenExitLabel', {
@@ -540,10 +554,13 @@ export function FormulaEditor({
                   ...codeEditorOptions.options,
                   // Shared model and overflow node
                   overflowWidgetsDomNode: overflowDiv1.current,
-                  model: editorModel.current,
                 }}
                 editorDidMount={(editor) => {
                   editor1.current = editor;
+                  const model = editor.getModel();
+                  if (model) {
+                    editorModel.current = model;
+                  }
                   disposables.current.push(
                     editor.onDidFocusEditorWidget(() => {
                       setTimeout(() => {
@@ -570,12 +587,12 @@ export function FormulaEditor({
 
               {!text ? (
                 <div className="lnsFormula__editorPlaceholder">
-                  <EuiMarkdownFormat>
+                  <EuiText color="subdued" size="s">
                     {i18n.translate('xpack.lens.formulaPlaceholderText', {
                       defaultMessage: 'Type a formula by combining functions with math, like:',
                     })}
-                  </EuiMarkdownFormat>
-
+                  </EuiText>
+                  <EuiSpacer size="s" />
                   <pre>count() + 1</pre>
                 </div>
               ) : null}
@@ -615,7 +632,6 @@ export function FormulaEditor({
                       content={i18n.translate('xpack.lens.formula.editorHelpOverlayToolTip', {
                         defaultMessage: 'Function reference',
                       })}
-                      delay="long"
                       position="top"
                     >
                       <EuiPopover
@@ -623,7 +639,8 @@ export function FormulaEditor({
                         panelPaddingSize="none"
                         anchorPosition="leftCenter"
                         isOpen={isHelpOpen}
-                        closePopover={() => {}}
+                        closePopover={() => setIsHelpOpen(false)}
+                        ownFocus={false}
                         button={
                           <EuiButtonEmpty
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
@@ -631,18 +648,13 @@ export function FormulaEditor({
                             iconType="help"
                             color="text"
                             size="s"
-                          >
-                            {i18n.translate('xpack.lens.formula.editorHelpOverlayLabel', {
-                              defaultMessage: 'Function reference',
-                            })}
-                          </EuiButtonEmpty>
+                          />
                         }
                       >
                         <MemoizedFormulaHelp
                           isFullscreen={isFullscreen}
                           indexPattern={indexPattern}
                           operationDefinitionMap={operationDefinitionMap}
-                          closeHelp={closePopover}
                         />
                       </EuiPopover>
                     </EuiToolTip>
@@ -651,24 +663,33 @@ export function FormulaEditor({
 
                 {errorCount || warningCount ? (
                   <EuiFlexItem className="lnsFormula__editorFooterGroup" grow={false}>
-                    {errorCount ? (
-                      <EuiText className="lnsFormula__editorError" color="danger" size="xs">
-                        <EuiIcon type="alert" />{' '}
-                        {i18n.translate('xpack.lens.formulaErrorCount', {
-                          defaultMessage: '{count} {count, plural, one {error} other {errors}}',
-                          values: { count: errorCount },
-                        })}
-                      </EuiText>
-                    ) : null}
-                    {warningCount ? (
-                      <EuiText className="lnsFormula__editorError" color="warning" size="xs">
-                        <EuiIcon type="alert" />{' '}
-                        {i18n.translate('xpack.lens.formulaWarningCount', {
-                          defaultMessage: '{count} {count, plural, one {warning} other {warnings}}',
-                          values: { count: warningCount },
-                        })}
-                      </EuiText>
-                    ) : null}
+                    <EuiLink
+                      color={errorCount ? 'danger' : 'warning'}
+                      className="lnsFormula__editorError"
+                      onClick={() => {
+                        editor1.current?.trigger('LENS', 'editor.action.marker.next', {});
+                      }}
+                    >
+                      {errorCount ? (
+                        <EuiText size="xs">
+                          <EuiIcon type="alert" />{' '}
+                          {i18n.translate('xpack.lens.formulaErrorCount', {
+                            defaultMessage: '{count} {count, plural, one {error} other {errors}}',
+                            values: { count: errorCount },
+                          })}
+                        </EuiText>
+                      ) : null}
+                      {warningCount ? (
+                        <EuiText size="xs">
+                          <EuiIcon type="alert" />{' '}
+                          {i18n.translate('xpack.lens.formulaWarningCount', {
+                            defaultMessage:
+                              '{count} {count, plural, one {warning} other {warnings}}',
+                            values: { count: warningCount },
+                          })}
+                        </EuiText>
+                      ) : null}
+                    </EuiLink>
                   </EuiFlexItem>
                 ) : null}
               </EuiFlexGroup>
@@ -681,7 +702,6 @@ export function FormulaEditor({
                 isFullscreen={isFullscreen}
                 indexPattern={indexPattern}
                 operationDefinitionMap={operationDefinitionMap}
-                closeHelp={closePopover}
               />
             </div>
           ) : null}

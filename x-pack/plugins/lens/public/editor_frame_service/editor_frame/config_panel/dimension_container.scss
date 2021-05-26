@@ -26,10 +26,18 @@
 
 .lnsDimensionContainer__footer {
   padding: $euiSizeS;
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    display: none;
+  }
 }
 
 .lnsDimensionContainer__header {
   padding: $euiSizeS $euiSizeXS;
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    display: none;
+  }
 }
 
 .lnsDimensionContainer__headerTitle {

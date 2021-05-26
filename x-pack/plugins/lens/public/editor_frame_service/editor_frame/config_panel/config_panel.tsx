@@ -77,18 +77,26 @@ export function LayerPanels(
         type: 'UPDATE_STATE',
         subType: 'UPDATE_ALL_STATES',
         updater: (prevState) => {
+          const updatedDatasourceState =
+            typeof newDatasourceState === 'function'
+              ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
+              : newDatasourceState;
+          const updatedVisualizationState =
+            typeof newVisualizationState === 'function'
+              ? newVisualizationState(prevState.visualization.state)
+              : newVisualizationState;
           return {
             ...prevState,
             datasourceStates: {
               ...prevState.datasourceStates,
               [datasourceId]: {
-                state: newDatasourceState,
+                state: updatedDatasourceState,
                 isLoading: false,
               },
             },
             visualization: {
               ...prevState.visualization,
-              state: newVisualizationState,
+              state: updatedVisualizationState,
             },
             stagedPreview: undefined,
           };
