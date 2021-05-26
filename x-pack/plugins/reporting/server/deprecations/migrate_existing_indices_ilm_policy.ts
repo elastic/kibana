@@ -41,13 +41,6 @@ export const migrateExistingIndicesIlmPolicy = async (
           api: {
             method: 'PUT',
             path: API_MIGRATE_ILM_POLICY_URL,
-            body: {
-              index: {
-                lifecycle: {
-                  name: reportingIlmPolicy,
-                },
-              },
-            },
           },
           manualSteps: [
             i18n.translate(
