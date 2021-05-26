@@ -36,7 +36,7 @@ import { ManagementMenuService } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
-import { ToastsProvider } from './toasts';
+import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
 import {
   PieChartService,
@@ -79,7 +79,7 @@ export const services = {
   vegaDebugInspector: VegaDebugInspectorViewService,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavService,
-  toasts: ToastsProvider,
+  toasts: ToastsService,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
   elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
