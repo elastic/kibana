@@ -17,6 +17,15 @@ export interface ContextQueryState {
   loadingStatus: LoadingStatusState;
   queryParameters: QueryParameters;
   rows: ContextRows;
+  hits: EsHitRecordList;
+  predecessors: EsHitRecordList;
+  successors: EsHitRecordList;
+  anchor: EsHitRecord;
+  anchorStatus: LoadingState;
+  predecessorsStatus: LoadingState;
+  successorsStatus: LoadingState;
+  predecessorCount: number;
+  successorCount: number;
   useNewFieldsApi: boolean;
 }
 
@@ -42,6 +51,8 @@ export interface LoadingStatusState {
   successors: LoadingStatusEntry | LoadingStatus;
 }
 
+export type LoadingState = LoadingStatusEntry | LoadingStatus;
+
 export interface QueryParameters {
   anchorId: string;
   columns: string[];
@@ -54,11 +65,11 @@ export interface QueryParameters {
   tieBreakerField: string;
 }
 
-interface ContextRows {
+export interface ContextRows {
   all: EsHitRecordList;
   anchor: EsHitRecord;
-  // predecessors: EsHitRecordList;
-  // successors: EsHitRecordList;
+  predecessors: EsHitRecordList;
+  successors: EsHitRecordList;
 }
 
 export function getContextQueryDefaults(
@@ -75,6 +86,14 @@ export function getContextQueryDefaults(
       defaultStepSize,
       tieBreakerField
     ),
+    hits: [],
+    predecessors: [],
+    successors: [],
+    anchor: {
+      fields: [],
+      sort: [],
+      _id: '',
+    },
     rows: {
       all: [],
       anchor: {
@@ -82,10 +101,15 @@ export function getContextQueryDefaults(
         sort: [],
         _id: '',
       },
-      // predecessors: [],
-      // successors: [],
+      predecessors: [],
+      successors: [],
     },
     loadingStatus: createInitialLoadingStatusState(),
+    anchorStatus: LoadingStatus.UNINITIALIZED,
+    predecessorsStatus: LoadingStatus.UNINITIALIZED,
+    successorsStatus: LoadingStatus.UNINITIALIZED,
+    predecessorCount: 5,
+    successorCount: 5,
     useNewFieldsApi,
   };
 }

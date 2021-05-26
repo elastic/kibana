@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, Fragment, useEffect, useRef } from 'react';
+import React, { useState, Fragment, useEffect, useRef, useCallback } from 'react';
 import classNames from 'classnames';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import './context_app_legacy.scss';
 import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep, isEqual } from 'lodash';
+import { FilterManager } from 'src/plugins/data/public';
+import { map } from 'rxjs/operators';
 import { DOC_HIDE_TIME_COLUMN_SETTING, DOC_TABLE_LEGACY } from '../../../../common';
 import { ContextErrorMessage } from '../context_error_message';
 import {
@@ -19,7 +21,7 @@ import {
   DocTableLegacyProps,
 } from '../../angular/doc_table/create_doc_table_react';
 import { IndexPattern } from '../../../../../data/common/index_patterns';
-import { LoadingStatus } from '../../angular/context_query_state';
+import { LoadingState, LoadingStatus } from '../../angular/context_query_state';
 import { ActionBar, ActionBarProps } from '../../angular/context/components/action_bar/action_bar';
 import { TopNavMenuProps } from '../../../../../navigation/public';
 import { DiscoverGrid, DiscoverGridProps } from '../discover_grid/discover_grid';
@@ -31,6 +33,7 @@ import { EsHitRecord, EsHitRecordList } from '../../angular/context/api/context'
 import { useContextAppState } from './use_context_app_state';
 import { useContextAppQuery } from './use_context_app_query';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../angular/context/query_parameters';
+// import { fetchAnchorRow } from './context_app_actions';
 
 export interface ContextAppProps {
   topNavMenu: React.ComponentType<TopNavMenuProps>;
@@ -62,7 +65,7 @@ const DataGridMemoized = React.memo(DiscoverGrid);
 const PREDECESSOR_TYPE = 'predecessors';
 const SUCCESSOR_TYPE = 'successors';
 
-function isLoading(status: string) {
+function isLoading(status: LoadingState) {
   return status !== LoadingStatus.LOADED && status !== LoadingStatus.FAILED;
 }
 
@@ -76,9 +79,9 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   const {
     indexPattern,
     indexPatternId,
-    anchorStatus,
-    predecessorStatus,
-    successorStatus,
+    // anchorStatus,
+    // predecessorStatus,
+    // successorStatus,
     // hits: rows,
     sorting,
     anchorId,
@@ -87,16 +90,16 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     useNewFieldsApi,
   } = renderProps;
   const [expandedDoc, setExpandedDoc] = useState<EsHitRecord | undefined>(undefined);
-  const isAnchorLoaded = anchorStatus === LoadingStatus.LOADED;
-  const isFailed = anchorStatus === LoadingStatus.FAILED;
-  const allRowsLoaded =
-    anchorStatus === LoadingStatus.LOADED &&
-    predecessorStatus === LoadingStatus.LOADED &&
-    successorStatus === LoadingStatus.LOADED;
+  // const isAnchorLoaded = anchor === LoadingStatus.LOADED;
+  // const isFailed = anchorStatus === LoadingStatus.FAILED;
+  // const allRowsLoaded =
+  //   anchorStatus === LoadingStatus.LOADED &&
+  //   predecessorStatus === LoadingStatus.LOADED &&
+  //   successorStatus === LoadingStatus.LOADED;
   const isLegacy = config.get(DOC_TABLE_LEGACY);
   // const anchorId = rows?.find(({ isAnchor }) => isAnchor)?._id;
 
-  const { state, stateContainer, setAppState } = useContextAppState({
+  const { state, setAppState } = useContextAppState({
     indexPattern,
     indexPatternId,
     anchorId,
@@ -104,16 +107,22 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   });
   const prevState = useRef<AppState>();
 
-  useEffect(() => {
-    stateContainer.startSync();
+  const isAnchorLoaded = state.anchorStatus === LoadingStatus.LOADED;
+  const isFailed = state.anchorStatus === LoadingStatus.FAILED;
+  const allRowsLoaded =
+    state.anchorStatus === LoadingStatus.LOADED &&
+    state.predecessorsStatus === LoadingStatus.LOADED &&
+    state.successorsStatus === LoadingStatus.LOADED;
 
-    return () => stateContainer.stopSync();
-  }, [stateContainer]);
+  // useEffect(() => {
+  //   stateContainer.startSync();
 
-  const { context$, fetchAnchorRow, fetchAllRows } = useContextAppQuery({
+  //   return () => stateContainer.stopSync();
+  // }, [stateContainer]);
+
+  const { context$, fetchContextRows, fetchAllRows } = useContextAppQuery({
     services,
     useNewFieldsApi: !!useNewFieldsApi,
-    state,
   });
 
   /**
@@ -121,30 +130,44 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
    */
   useEffect(() => {
     if (!prevState.current) {
-      fetchAllRows();
+      fetchAllRows(state.predecessorCount, state.successorCount, {
+        indexPatternId,
+        anchorId,
+        tieBreakerField: state.queryParameters.tieBreakerField,
+        sort: state.sort,
+      });
     } else if (
       prevState.current.predecessorCount !== state.predecessorCount ||
       prevState.current.successorCount !== state.successorCount ||
       !isEqual(prevState.current.filters, state.filters)
     ) {
-      fetchAllRows();
+      fetchContextRows(state.predecessorCount, state.successorCount, {
+        indexPatternId,
+        anchor: state.anchor,
+        tieBreakerField: state.queryParameters.tieBreakerField,
+        sort: state.sort,
+      });
     }
 
     prevState.current = cloneDeep(state);
-  }, [state, fetchAllRows, fetchAnchorRow, indexPatternId]);
+  }, [state, indexPatternId, anchorId, fetchContextRows, fetchAllRows]);
 
   /**
    * Sync app state with context$
    */
   useEffect(() => {
-    context$.subscribe((next) => {
-      setAppState(next);
+    context$.subscribe((value) => {
+      setAppState(value);
     });
 
     return () => context$.unsubscribe();
   }, [context$, setAppState]);
 
-  const rows = state.rows;
+  const rows = [
+    ...(state.predecessors || []),
+    ...(state.anchor ? [state.anchor] : []),
+    ...(state.successors || []),
+  ];
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDataGridColumns({
     capabilities,
     config,
@@ -171,7 +194,9 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       docCount: isPredecessorType ? predecessorCount : successorCount,
       docCountAvailable: isPredecessorType ? predecessorAvailable : successorAvailable,
       onChangeCount: isPredecessorType ? onChangePredecessorCount : onChangeSuccessorCount,
-      isLoading: isPredecessorType ? isLoading(predecessorStatus) : isLoading(successorStatus),
+      isLoading: isPredecessorType
+        ? isLoading(state.predecessorsStatus)
+        : isLoading(state.successorsStatus),
       type,
       isDisabled: !isAnchorLoaded,
     } as ActionBarProps;
@@ -181,7 +206,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     return {
       ariaLabelledBy: 'surDocumentsAriaLabel',
       columns,
-      rows: rows.all.length !== 0 && rows.all,
+      rows: rows.length !== 0 && rows,
       indexPattern,
       expandedDoc,
       isLoading: !allRowsLoaded,
@@ -230,7 +255,10 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   };
 
   const loadingFeedback = () => {
-    if (anchorStatus === LoadingStatus.UNINITIALIZED || anchorStatus === LoadingStatus.LOADING) {
+    if (
+      state.anchorStatus === LoadingStatus.UNINITIALIZED ||
+      state.anchorStatus === LoadingStatus.LOADING
+    ) {
       return (
         <EuiText textAlign="center" data-test-subj="contextApp_loadingIndicator">
           <FormattedMessage id="discover.context.loadingDescription" defaultMessage="Loading..." />
@@ -243,7 +271,10 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   return (
     <I18nProvider>
       {isFailed ? (
-        <ContextErrorMessage status={anchorStatus} reason={renderProps.anchorReason} />
+        <ContextErrorMessage
+          status={state.anchorStatus as string}
+          reason={renderProps.anchorReason}
+        />
       ) : (
         <Fragment>
           <TopNavMenu {...getNavBarProps()} />

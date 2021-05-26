@@ -16,16 +16,18 @@ import {
 } from '../../../../../../data/public';
 import { EsHitRecord } from './context';
 
+export type FetchAnchorCallback = (
+  indexPatternId: string,
+  anchorId: string,
+  sort: EsQuerySortValue[]
+) => Promise<EsHitRecord>;
+
 export function fetchAnchorProvider(
   indexPatterns: IndexPatternsContract,
   searchSource: ISearchSource,
   useNewFieldsApi: boolean = false
-) {
-  return async function fetchAnchor(
-    indexPatternId: string,
-    anchorId: string,
-    sort: EsQuerySortValue[]
-  ): Promise<EsHitRecord> {
+): FetchAnchorCallback {
+  return async function fetchAnchor(indexPatternId, anchorId, sort) {
     const indexPattern = await indexPatterns.get(indexPatternId);
     searchSource
       .setParent(undefined)

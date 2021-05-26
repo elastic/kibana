@@ -29,18 +29,18 @@ export interface AppState extends ContextQueryState {
    * Array of filters
    */
   filters?: Filter[];
-  /**
-   * Number of records to be fetched before anchor records (newer records)
-   */
-  predecessorCount?: number;
+  // /**
+  //  * Number of records to be fetched before anchor records (newer records)
+  //  */
+  // predecessorCount?: number;
   /**
    * Sorting of the records to be fetched, assumed to be a legacy parameter
    */
   sort: [[string, SortDirection]];
-  /**
-   * Number of records to be fetched after the anchor records (older records)
-   */
-  successorCount: number;
+  // /**
+  //  * Number of records to be fetched after the anchor records (older records)
+  //  */
+  // successorCount: number;
   query?: Query;
 }
 

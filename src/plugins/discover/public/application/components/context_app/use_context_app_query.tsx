@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { fromPairs } from 'lodash';
@@ -20,16 +20,44 @@ import {
   SurrDocType,
 } from '../../angular/context/api/context';
 import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
+import { Filter, SortDirection } from '../../../../../data/public';
+import {
+  ContextRows,
+  FailureReason,
+  LoadingState,
+  LoadingStatus,
+} from '../../angular/context_query_state';
 
 export type ContextAppMessage = Partial<AppState>;
+
+interface ContextDocsMessage {
+  successors?: EsHitRecordList;
+  predecessors?: EsHitRecordList;
+  anchor?: EsHitRecord;
+  all?: EsHitRecordList;
+  anchorStatus?: LoadingState;
+  predecessorsStatus?: LoadingState;
+  successorsStatus?: LoadingState;
+}
+
+interface FetchAllRowsParams {
+  anchorId: string;
+  indexPatternId: string;
+  tieBreakerField: string;
+  sort: [[string, SortDirection]];
+}
+interface FetchSurrDocsParams {
+  indexPatternId: string;
+  anchor: EsHitRecord;
+  tieBreakerField: string;
+  sort: [[string, SortDirection]];
+}
 
 export function useContextAppQuery({
   services,
   useNewFieldsApi,
-  state,
 }: {
   services: DiscoverServices;
-  state: AppState;
   useNewFieldsApi: boolean;
 }) {
   const { data, indexPatterns, toastNotifications, filterManager } = services;
@@ -47,68 +75,55 @@ export function useContextAppQuery({
     [indexPatterns, useNewFieldsApi]
   );
 
-  const context$ = useMemo(() => new Subject<ContextAppMessage>(), []);
+  const context$ = useMemo(() => new Subject<ContextDocsMessage>(), []);
 
-  const fetchAnchorRow = useCallback(() => {
-    const {
-      queryParameters: { indexPatternId, anchorId, tieBreakerField },
+  const fetchAnchorRow = useCallback(
+    ({
+      indexPatternId,
+      anchorId,
+      tieBreakerField,
       sort,
-    } = state;
+    }: {
+      indexPatternId: string;
+      anchorId: string;
+      tieBreakerField: string;
+      sort: [[string, SortDirection]];
+    }) => {
+      const [[, sortDir]] = sort;
 
-    if (!tieBreakerField) {
-      // reject
-    }
-
-    // set loading
-    const [[, sortDir]] = sort;
-
-    return fetchAnchor(indexPatternId, anchorId, [
-      fromPairs(sort),
-      { [tieBreakerField]: sortDir },
-    ]).then(
-      (anchorDocument: EsHitRecord) => {
-        // set loaded
-        context$.next({
-          rows: {
-            ...state.rows,
-            anchor: anchorDocument,
-          },
+      context$.next({ anchorStatus: LoadingStatus.LOADING });
+      return fetchAnchor(indexPatternId, anchorId, [
+        fromPairs(sort),
+        { [tieBreakerField]: sortDir },
+      ])
+        .then(
+          (anchor: EsHitRecord): EsHitRecord => {
+            context$.next({ anchor, anchorStatus: LoadingStatus.LOADED });
+            return anchor;
+          }
+        )
+        .catch((error) => {
+          context$.next({
+            anchorStatus: { reason: FailureReason.INVALID_TIEBREAKER },
+          });
+          toastNotifications.addDanger({
+            title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
+              defaultMessage: 'Unable to load the anchor document',
+            }),
+            text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
+          });
+          throw error;
         });
-      },
-      (error: Error) => {
-        // set errors
-        toastNotifications.addDanger({
-          title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
-            defaultMessage: 'Unable to load the anchor document',
-          }),
-          text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
-        });
-        throw error;
-      }
-    );
-  }, [fetchAnchor, state, toastNotifications, context$]);
+    },
+    [context$, fetchAnchor, toastNotifications]
+  );
 
   const fetchSurroundingRows = useCallback(
-    (type: SurrDocType) => {
-      const {
-        queryParameters: { indexPatternId, tieBreakerField },
-        rows: { anchor },
-        sort,
-      } = state;
+    (type, count, { indexPatternId, anchor, tieBreakerField, sort }: FetchSurrDocsParams) => {
       const filters = filterManager.getFilters();
-
-      const count =
-        type === 'successors'
-          ? state.queryParameters.successorCount
-          : state.queryParameters.predecessorCount;
-
-      if (!tieBreakerField) {
-        // reject request
-      }
-
-      // set loading
       const [[sortField, sortDir]] = sort;
 
+      context$.next({ [`${type}Status`]: LoadingStatus.LOADING });
       return fetchSurroundingDocs(
         type,
         indexPatternId,
@@ -119,12 +134,10 @@ export function useContextAppQuery({
         count,
         filters
       ).then(
-        (documents: EsHitRecordList) => {
-          // set loaded
-          return documents;
-        },
-        (error: Error) => {
-          // set error
+        (hits: EsHitRecordList) =>
+          context$.next({ [type]: hits, [`${type}Status`]: LoadingStatus.LOADED }),
+        (error) => {
+          context$.next({ [`${type}Status`]: { reason: LoadingStatus.FAILED } });
           toastNotifications.addDanger({
             title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
               defaultMessage: 'Unable to load documents',
@@ -135,27 +148,37 @@ export function useContextAppQuery({
         }
       );
     },
-    [toastNotifications, fetchSurroundingDocs, filterManager, state]
+    [context$, fetchSurroundingDocs, filterManager, toastNotifications]
   );
 
-  const fetchAllRows = useCallback(() => {
-    fetchAnchorRow()?.then(() => {
-      Promise.all([fetchSurroundingRows('predecessors'), fetchSurroundingRows('successors')]).then(
-        ([predecessors, successors]) => {
-          context$.next({
-            rows: {
-              ...state.rows,
-              all: [
-                ...(predecessors || []),
-                ...(state.rows.anchor ? [state.rows.anchor] : []),
-                ...(successors || []),
-              ],
-            },
-          });
-        }
-      );
-    });
-  }, [fetchAnchorRow, fetchSurroundingRows, state, context$]);
+  const fetchContextRows = useCallback(
+    (predecessorCount: number, successorCount: number, params: FetchSurrDocsParams) => {
+      return Promise.all([
+        fetchSurroundingRows('predecessors', predecessorCount, params),
+        fetchSurroundingRows('successors', successorCount, params),
+      ]);
+    },
+    [fetchSurroundingRows]
+  );
 
-  return { context$, fetchAnchorRow, fetchAllRows };
+  const fetchAllRows = useCallback(
+    (
+      predecessorCount: number,
+      successorCount: number,
+      { anchorId, ...restParams }: FetchAllRowsParams
+    ) => {
+      fetchAnchorRow({
+        anchorId,
+        ...restParams,
+      }).then((anchor: EsHitRecord) => {
+        return fetchContextRows(predecessorCount, successorCount, {
+          anchor,
+          ...restParams,
+        });
+      });
+    },
+    [fetchAnchorRow, fetchContextRows]
+  );
+
+  return { context$, fetchContextRows, fetchAllRows };
 }
