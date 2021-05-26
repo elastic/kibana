@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+import { SwimlaneFieldMappingConfig } from './types';
+
+const removeUnsafeFields = (fields: SwimlaneFieldMappingConfig[]): SwimlaneFieldMappingConfig[] =>
+  fields.filter(
+    (filter) =>
+      filter.id !== '__proto__' &&
+      filter.key !== '__proto__' &&
+      filter.name !== '__proto__' &&
+      filter.fieldType !== '__proto__'
+  );
 export async function getApplication({
   signal,
   url,
@@ -28,6 +38,7 @@ export async function getApplication({
   const applicationUrl = `${apiUrl}/app/{appId}`;
 
   const getApplicationUrl = (id: string) => applicationUrl.replace('{appId}', id);
+
   try {
     const response = await fetch(getApplicationUrl(appId), {
       method: 'GET',
@@ -35,13 +46,19 @@ export async function getApplication({
       signal,
     });
 
+    /**
+     * Fetch does not throws when there is an HTTP error (status >= 400).
+     * We need to do it manually.
+     */
+
     if (!response.ok) {
       throw new Error(
         `Received status: ${response.status} when attempting to get application with id: ${appId}`
       );
     }
 
-    return await response.json();
+    const data = await response.json();
+    return { ...data, fields: removeUnsafeFields(data?.fields ?? []) };
   } catch (error) {
     throw new Error(`Unable to get application with id ${appId}. Error: ${error.message}`);
   }
