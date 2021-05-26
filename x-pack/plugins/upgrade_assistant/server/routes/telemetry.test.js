@@ -12,7 +12,7 @@ jest.mock('../lib/telemetry/es_ui_reindex_apis', () => ({
   upsertUIReindexOption: jest.fn(),
 }));
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { upsertUIOpenOption } from '../lib/telemetry/es_ui_open_apis';
 import { upsertUIReindexOption } from '../lib/telemetry/es_ui_reindex_apis';
 import { registerTelemetryRoutes } from './telemetry';

@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Lifecycle, ResponseToolkit, RouteOptions } from '@hapi/hapi';
 import { GraphQLOptions } from 'apollo-server-core';
 import { GraphQLSchema } from 'graphql';
-import { Lifecycle, ResponseToolkit } from 'hapi';
-import { RouteOptions } from 'hapi';
 
 export interface UMFrameworkRequest {
   user: string;

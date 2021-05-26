@@ -5,7 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsClient } from 'src/server/saved_objects';

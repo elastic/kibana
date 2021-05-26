@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { Server } from '@hapi/hapi';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Server } from 'hapi';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import { sample } from 'lodash';
 import { DevConfig } from '../dev';

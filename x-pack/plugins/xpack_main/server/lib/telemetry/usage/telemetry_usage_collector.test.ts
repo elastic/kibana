@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from '@hapi/hapi';
 import { unlinkSync, writeFileSync } from 'fs';
-import { Server } from 'hapi';
 import { tmpdir } from 'os';
 import { resolve } from 'path';
 import {

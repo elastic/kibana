@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import { registerScrollForExportRoute } from './scroll';
 
 const createMockServer = () => {
