@@ -162,7 +162,7 @@ describe('ManageSpacePage', () => {
       id: 'existing-space',
       name: 'New Space Name',
       description: 'some description',
-      color: '#aabbcc',
+      color: '#AABBCC',
       initials: 'AB',
       imageUrl: '',
       disabledFeatures: ['feature-1'],
