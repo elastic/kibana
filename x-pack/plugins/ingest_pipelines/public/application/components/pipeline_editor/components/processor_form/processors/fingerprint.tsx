@@ -71,15 +71,6 @@ const fieldsConfig: FieldsConfig = {
         defaultMessage="Hash method used to compute the fingerprint."
       />
     ),
-    validations: [
-      {
-        validator: fieldValidators.emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.fingerprint.methodRequiredError', {
-            defaultMessage: 'A method value is required.',
-          })
-        ),
-      },
-    ],
   },
 };
 
