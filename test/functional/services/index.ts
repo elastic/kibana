@@ -25,7 +25,7 @@ import {
   DashboardPanelActionsProvider,
   DashboardVisualizationProvider,
 } from './dashboard';
-import { DocTableProvider } from './doc_table';
+import { DocTableService } from './doc_table';
 import { EmbeddingProvider } from './embedding';
 import { FilterBarService } from './filter_bar';
 import { FlyoutProvider } from './flyout';
@@ -57,7 +57,7 @@ export const services = {
   queryBar: QueryBarProvider,
   find: FindProvider,
   testSubjects: TestSubjectsProvider,
-  docTable: DocTableProvider,
+  docTable: DocTableService,
   screenshots: ScreenshotsProvider,
   snapshots: SnapshotsProvider,
   dashboardVisualizations: DashboardVisualizationProvider,
