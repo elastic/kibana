@@ -60,7 +60,7 @@ interface ValidationErrors {
   };
   tooManyQueries: {
     message: string;
-    type: { operation: string };
+    type: {};
   };
 }
 type ErrorTypes = keyof ValidationErrors;
@@ -98,12 +98,16 @@ export function hasInvalidOperations(
   };
 }
 
-export const getRawQueryValidationError = (text: string) => {
+export const getRawQueryValidationError = (text: string, operations: Record<string, unknown>) => {
   // try to extract the query context here
   const singleLine = text.split('\n').join('');
   const allArgs = singleLine.split(',').filter((args) => /(kql|lucene)/.test(args));
-  // no args, so no problem
-  if (allArgs.length === 0) {
+  // check for the presence of a valid ES operation
+  const containsOneValidOperation = Object.keys(operations).some((operation) =>
+    singleLine.includes(operation)
+  );
+  // no args or no valid operation, no more work to do here
+  if (allArgs.length === 0 || !containsOneValidOperation) {
     return;
   }
   // at this point each entry in allArgs may contain one or more
@@ -133,11 +137,10 @@ export const getRawQueryValidationError = (text: string) => {
 const validateQueryQuotes = (rawQuery: string, language: 'kql' | 'lucene') => {
   // check if the raw argument has the minimal requirements
   const [_, rawValue] = rawQuery.split('=');
-  // it must start with a single quote
-  if (rawValue.trim()[0] !== "'") {
+  // it must start with a single quote, and quotes must have a closure
+  if (rawValue.trim()[0] !== "'" || !/'\s*([^']+?)\s*'/.test(rawValue)) {
     return i18n.translate('xpack.lens.indexPattern.formulaOperationQueryError', {
-      defaultMessage:
-        'The {language} query for the operation must be wrapped in single quotes: {rawQuery}',
+      defaultMessage: `Single quotes are required for {language}='' at {rawQuery}`,
       values: { language, rawQuery },
     });
   }
@@ -259,8 +262,7 @@ function getMessageFromId<K extends ErrorTypes>({
       break;
     case 'tooManyQueries':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationDoubleQueryError', {
-        defaultMessage: 'The operation {operation} contains too many queries',
-        values: { operation: out.operation },
+        defaultMessage: 'Use only one of kql= or lucene=, not both',
       });
       break;
     // case 'mathRequiresFunction':
@@ -278,14 +280,18 @@ function getMessageFromId<K extends ErrorTypes>({
 }
 
 export function tryToParse(
-  formula: string
+  formula: string,
+  operations: Record<string, unknown>
 ): { root: TinymathAST; error: null } | { root: null; error: ErrorWrapper } {
   let root;
   try {
     root = parse(formula);
   } catch (e) {
-    // give it last try
-    const maybeQueryProblems = getRawQueryValidationError(formula);
+    // A tradeoff is required here, unless we want to reimplement a full parser
+    // Internally the function has the following logic:
+    // * if the formula contains no existing ES operation, assume it's a plain parse failure
+    // * if the formula contains at least one existing operation, check for query problems
+    const maybeQueryProblems = getRawQueryValidationError(formula, operations);
     if (maybeQueryProblems) {
       // need to emulate an error shape here
       return { root: null, error: { message: maybeQueryProblems[0], locations: [] } };
@@ -460,9 +466,7 @@ function validateNameArguments(
     errors.push(
       getMessageFromId({
         messageId: 'tooManyQueries',
-        values: {
-          operation: node.name,
-        },
+        values: {},
         locations: [node.location],
       })
     );

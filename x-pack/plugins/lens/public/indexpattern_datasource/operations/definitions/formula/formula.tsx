@@ -50,7 +50,7 @@ export const formulaOperation: OperationDefinition<
     if (!column.params.formula || !operationDefinitionMap) {
       return;
     }
-    const { root, error } = tryToParse(column.params.formula);
+    const { root, error } = tryToParse(column.params.formula, operationDefinitionMap);
     if (error || !root) {
       return [error!.message];
     }
