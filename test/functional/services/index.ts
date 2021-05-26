@@ -19,11 +19,11 @@ import {
 } from './common';
 import { ComboBoxProvider } from './combo_box';
 import {
-  DashboardAddPanelProvider,
-  DashboardReplacePanelProvider,
-  DashboardExpectProvider,
-  DashboardPanelActionsProvider,
-  DashboardVisualizationProvider,
+  DashboardAddPanelService,
+  DashboardReplacePanelService,
+  DashboardExpectService,
+  DashboardPanelActionsService,
+  DashboardVisualizationsService,
 } from './dashboard';
 import { DocTableService } from './doc_table';
 import { EmbeddingProvider } from './embedding';
@@ -32,16 +32,16 @@ import { FlyoutProvider } from './flyout';
 import { GlobalNavService } from './global_nav';
 import { InspectorProvider } from './inspector';
 import { FieldEditorService } from './field_editor';
-import { ManagementMenuProvider } from './management';
+import { ManagementMenuService } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
-import { ToastsProvider } from './toasts';
+import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
 import {
-  PieChartProvider,
-  ElasticChartProvider,
-  VegaDebugInspectorViewProvider,
+  PieChartService,
+  ElasticChartService,
+  VegaDebugInspectorViewService,
 } from './visualizations';
 import { ListingTableService } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
@@ -60,30 +60,30 @@ export const services = {
   docTable: DocTableService,
   screenshots: ScreenshotsService,
   snapshots: SnapshotsService,
-  dashboardVisualizations: DashboardVisualizationProvider,
-  dashboardExpect: DashboardExpectProvider,
   failureDebugging: FailureDebuggingProvider,
   listingTable: ListingTableService,
-  dashboardAddPanel: DashboardAddPanelProvider,
-  dashboardReplacePanel: DashboardReplacePanelProvider,
-  dashboardPanelActions: DashboardPanelActionsProvider,
+  dashboardVisualizations: DashboardVisualizationsService,
+  dashboardExpect: DashboardExpectService,
+  dashboardAddPanel: DashboardAddPanelService,
+  dashboardReplacePanel: DashboardReplacePanelService,
+  dashboardPanelActions: DashboardPanelActionsService,
   flyout: FlyoutProvider,
   comboBox: ComboBoxProvider,
   dataGrid: DataGridService,
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
   browser: BrowserProvider,
-  pieChart: PieChartProvider,
+  pieChart: PieChartService,
   inspector: InspectorProvider,
   fieldEditor: FieldEditorService,
-  vegaDebugInspector: VegaDebugInspectorViewProvider,
+  vegaDebugInspector: VegaDebugInspectorViewService,
   appsMenu: AppsMenuService,
   globalNav: GlobalNavService,
-  toasts: ToastsProvider,
+  toasts: ToastsService,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
-  elasticChart: ElasticChartProvider,
+  elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
-  managementMenu: ManagementMenuProvider,
+  managementMenu: ManagementMenuService,
   monacoEditor: MonacoEditorProvider,
   MenuToggle: MenuToggleProvider,
 };
