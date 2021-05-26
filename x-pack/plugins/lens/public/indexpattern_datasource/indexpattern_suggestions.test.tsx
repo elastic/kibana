@@ -16,6 +16,7 @@ import {
 } from './indexpattern_suggestions';
 import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';
+import { isEqual } from 'lodash';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -2359,7 +2360,7 @@ describe('IndexPattern Data Source suggestions', () => {
         );
       });
 
-      it('will skip a reduced suggestion when handling multiple references', () => {
+      it('will create reduced suggestions with all referenced children when handling references', () => {
         const initialState = testInitialState();
         const state: IndexPatternPrivateState = {
           ...initialState,
@@ -2367,7 +2368,17 @@ describe('IndexPattern Data Source suggestions', () => {
             ...initialState.layers,
             first: {
               ...initialState.layers.first,
-              columnOrder: ['date', 'metric', 'metric2', 'ref', 'ref2'],
+              columnOrder: [
+                'date',
+                'metric',
+                'metric2',
+                'ref',
+                'ref2',
+                'ref3',
+                'ref4',
+                'metric3',
+                'metric4',
+              ],
 
               columns: {
                 date: {
@@ -2399,6 +2410,20 @@ describe('IndexPattern Data Source suggestions', () => {
                   operationType: 'count',
                   sourceField: 'Records',
                 },
+                metric3: {
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'count',
+                  sourceField: 'Records',
+                },
+                metric4: {
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'count',
+                  sourceField: 'Records',
+                },
                 ref2: {
                   label: '',
                   dataType: 'number',
@@ -2406,20 +2431,69 @@ describe('IndexPattern Data Source suggestions', () => {
                   operationType: 'cumulative_sum',
                   references: ['metric2'],
                 },
+                ref3: {
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'math',
+                  references: ['ref4', 'metric3'],
+                  params: {
+                    tinymathAst: '',
+                  },
+                },
+                ref4: {
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'math',
+                  references: ['metric4'],
+                  params: {
+                    tinymathAst: '',
+                  },
+                },
               },
             },
           },
         };
 
-        const result = getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state));
+        const result = getDatasourceSuggestionsFromCurrentState(state);
 
-        expect(result).not.toContainEqual(
-          expect.objectContaining({
-            table: expect.objectContaining({
-              changeType: 'reduced',
-            }),
-          })
-        );
+        // only generate suggestions for top level metrics
+        expect(
+          result.filter((suggestion) => suggestion.table.changeType === 'reduced').length
+        ).toEqual(3);
+
+        // top level "ref" column
+        expect(
+          result.some(
+            (suggestion) =>
+              suggestion.table.changeType === 'reduced' &&
+              isEqual(suggestion.state.layers.first.columnOrder, ['ref', 'metric'])
+          )
+        ).toBeTruthy();
+
+        // top level "ref2" column
+        expect(
+          result.some(
+            (suggestion) =>
+              suggestion.table.changeType === 'reduced' &&
+              isEqual(suggestion.state.layers.first.columnOrder, ['ref2', 'metric2'])
+          )
+        ).toBeTruthy();
+
+        // top level "ref3" column
+        expect(
+          result.some(
+            (suggestion) =>
+              suggestion.table.changeType === 'reduced' &&
+              isEqual(suggestion.state.layers.first.columnOrder, [
+                'ref3',
+                'ref4',
+                'metric3',
+                'metric4',
+              ])
+          )
+        ).toBeTruthy();
       });
     });
   });

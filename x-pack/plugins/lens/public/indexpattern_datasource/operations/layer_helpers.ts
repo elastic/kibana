@@ -1166,6 +1166,20 @@ export function isReferenced(layer: IndexPatternLayer, columnId: string): boolea
   return allReferences.includes(columnId);
 }
 
+export function getReferencedColumnIds(layer: IndexPatternLayer, columnId: string): string[] {
+  const referencedIds: string[] = [];
+  function collect(id: string) {
+    const column = layer.columns[id];
+    if (column && 'references' in column) {
+      referencedIds.push(...column.references);
+      column.references.forEach(collect);
+    }
+  }
+  collect(columnId);
+
+  return referencedIds;
+}
+
 export function isOperationAllowedAsReference({
   operationType,
   validation,
