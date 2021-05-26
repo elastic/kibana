@@ -9,6 +9,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
+  ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -32,7 +33,6 @@ import {
   GetExceptionListItemOptions,
   GetExceptionListOptions,
   GetExceptionListSummaryOptions,
-  GetExceptionListSummaryResponse,
   UpdateEndpointListItemOptions,
   UpdateExceptionListItemOptions,
   UpdateExceptionListOptions,
@@ -79,7 +79,7 @@ export class ExceptionListClient {
     listId,
     id,
     namespaceType,
-  }: GetExceptionListSummaryOptions): Promise<GetExceptionListSummaryResponse | null> => {
+  }: GetExceptionListSummaryOptions): Promise<ExceptionListSummarySchema | null> => {
     const { savedObjectsClient } = this;
     return getExceptionListSummary({ id, listId, namespaceType, savedObjectsClient });
   };

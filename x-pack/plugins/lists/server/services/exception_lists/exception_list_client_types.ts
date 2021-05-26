@@ -62,13 +62,6 @@ export interface GetExceptionListSummaryOptions {
   namespaceType: NamespaceType;
 }
 
-export interface GetExceptionListSummaryResponse {
-  windows: number;
-  linux: number;
-  macos: number;
-  total: number;
-}
-
 export interface CreateExceptionListOptions {
   listId: ListId;
   namespaceType: NamespaceType;

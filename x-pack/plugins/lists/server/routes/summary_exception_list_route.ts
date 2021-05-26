@@ -7,8 +7,8 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ReadExceptionListSchemaDecoded,
-  readExceptionListSchema,
+  SummaryExceptionListSchemaDecoded,
+  summaryExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
@@ -29,9 +29,10 @@ export const summaryExceptionListRoute = (router: ListsPluginRouter): void => {
       },
       path: `${EXCEPTION_LIST_URL}/_summary`,
       validate: {
-        query: buildRouteValidation<typeof readExceptionListSchema, ReadExceptionListSchemaDecoded>(
-          readExceptionListSchema
-        ),
+        query: buildRouteValidation<
+          typeof summaryExceptionListSchema,
+          SummaryExceptionListSchemaDecoded
+        >(summaryExceptionListSchema),
       },
     },
     async (context, request, response) => {
