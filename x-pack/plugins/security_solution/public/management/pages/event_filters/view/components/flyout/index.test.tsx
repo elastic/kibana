@@ -14,14 +14,14 @@ import {
 } from '../../../../../../common/mock/endpoint';
 import { MiddlewareActionSpyHelper } from '../../../../../../common/store/test_utils';
 
-import {
+import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
-} from '../../../../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
 import { EventFiltersHttpService } from '../../../service';
 import { createdEventFilterEntryMock } from '../../../test_utils';
 import { getFormEntryState, isUninitialisedForm } from '../../../store/selector';
-import { EventFiltersListPageState } from '../../../state';
+import { EventFiltersListPageState } from '../../../types';
 
 jest.mock('../form');
 jest.mock('../../../service');

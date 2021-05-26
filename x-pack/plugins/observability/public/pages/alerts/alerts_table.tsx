@@ -16,6 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import {
+  ALERT_DURATION,
+  ALERT_SEVERITY_LEVEL,
+} from '@kbn/rule-data-utils/target/technical_field_names';
 import { asDuration } from '../../../common/utils/formatters';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -62,16 +66,16 @@ export function AlertsTable(props: AlertsTableProps) {
 
         return active ? (
           <EuiIconTip
-            content={i18n.translate('xpack.observability.alertsTable.statusActiveDescription', {
-              defaultMessage: 'Active',
+            content={i18n.translate('xpack.observability.alertsTable.statusOpenDescription', {
+              defaultMessage: 'Open',
             })}
             color="danger"
             type="alert"
           />
         ) : (
           <EuiIconTip
-            content={i18n.translate('xpack.observability.alertsTable.statusRecoveredDescription', {
-              defaultMessage: 'Recovered',
+            content={i18n.translate('xpack.observability.alertsTable.statusClosedDescription', {
+              defaultMessage: 'Closed',
             })}
             type="check"
           />
@@ -94,9 +98,7 @@ export function AlertsTable(props: AlertsTableProps) {
       }),
       render: (_, alert) => {
         const { active } = alert;
-        return active
-          ? null
-          : asDuration(alert['kibana.rac.alert.duration.us'], { extended: true });
+        return active ? null : asDuration(alert.fields[ALERT_DURATION], { extended: true });
       },
     },
     {
@@ -105,7 +107,7 @@ export function AlertsTable(props: AlertsTableProps) {
         defaultMessage: 'Severity',
       }),
       render: (_, alert) => {
-        return <SeverityBadge severityLevel={alert['kibana.rac.alert.severity.level']} />;
+        return <SeverityBadge severityLevel={alert.fields[ALERT_SEVERITY_LEVEL]} />;
       },
     },
     {

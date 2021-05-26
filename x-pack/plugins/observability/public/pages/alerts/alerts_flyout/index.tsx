@@ -22,6 +22,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import React from 'react';
+import {
+  ALERT_DURATION,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_SEVERITY_LEVEL,
+  RULE_CATEGORY,
+  RULE_NAME,
+} from '@kbn/rule-data-utils/target/technical_field_names';
 import { TopAlert } from '../';
 import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';
@@ -46,7 +54,7 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
       title: i18n.translate('xpack.observability.alertsFlyout.severityLabel', {
         defaultMessage: 'Severity',
       }),
-      description: <SeverityBadge severityLevel={alert['kibana.rac.alert.severity.level']} />,
+      description: <SeverityBadge severityLevel={alert.fields[ALERT_SEVERITY_LEVEL]} />,
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.triggeredLabel', {
@@ -60,25 +68,25 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
       title: i18n.translate('xpack.observability.alertsFlyout.durationLabel', {
         defaultMessage: 'Duration',
       }),
-      description: asDuration(alert['kibana.rac.alert.duration.us'], { extended: true }),
+      description: asDuration(alert.fields[ALERT_DURATION], { extended: true }),
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.expectedValueLabel', {
         defaultMessage: 'Expected value',
       }),
-      description: alert['kibana.observability.evaluation.threshold'] ?? '-',
+      description: alert.fields[ALERT_EVALUATION_THRESHOLD] ?? '-',
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.actualValueLabel', {
         defaultMessage: 'Actual value',
       }),
-      description: alert['kibana.observability.evaluation.value'] ?? '-',
+      description: alert.fields[ALERT_EVALUATION_VALUE] ?? '-',
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.ruleTypeLabel', {
         defaultMessage: 'Rule type',
       }),
-      description: alert['rule.category'] ?? '-',
+      description: alert.fields[RULE_CATEGORY] ?? '-',
     },
   ];
 
@@ -86,7 +94,7 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
     <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2>{alert['rule.name']}</h2>
+          <h2>{alert.fields[RULE_NAME]}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s">{alert.reason}</EuiText>
