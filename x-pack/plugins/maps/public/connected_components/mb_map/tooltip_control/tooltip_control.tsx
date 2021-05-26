@@ -164,7 +164,7 @@ export class TooltipControl extends Component<Props, {}> {
     const isPolygon =
       geometry &&
       (geometry.type === GEO_JSON_TYPE.POLYGON || geometry.type === GEO_JSON_TYPE.MULTI_POLYGON);
-    if (isPolygon && this.props.addFilters) {
+    if (isPolygon && this.props.geoFieldNames.length && this.props.addFilters) {
       actions.push({
         label: i18n.translate('xpack.maps.tooltip.action.filterByGeometryLabel', {
           defaultMessage: 'Filter by geometry',
