@@ -7,6 +7,7 @@
 
 import { Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
+import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import {
   DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
   NOTIFICATIONS_ID,
@@ -18,7 +19,6 @@ import { AlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { getSignals } from './get_signals';
 
 export const rulesNotificationAlertType = ({

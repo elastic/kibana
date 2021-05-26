@@ -27,6 +27,16 @@ import {
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
+import { getEndpointDetailsPath } from '../../../common/routing';
+import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
+import { hostIsolationHttpMocks } from '../../../../common/lib/host_isolation/mocks';
+import { fireEvent } from '@testing-library/dom';
+import {
+  isFailedResourceState,
+  isLoadedResourceState,
+  isUninitialisedResourceState,
+} from '../../../state';
+import { getCurrentIsolationRequestState } from '../store/selectors';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -47,8 +57,13 @@ jest.mock('../../policy/store/services/ingest', () => {
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   };
 });
+
+jest.mock('../../../../common/lib/kibana');
+
 describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
+  const act = reactTestingLibrary.act;
+
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let store: AppContextTestRender['store'];
@@ -71,6 +86,11 @@ describe('when on the endpoint list page', () => {
     reactTestingLibrary.act(() => {
       history.push('/endpoints');
     });
+
+    // Because `.../common/lib/kibana` was mocked, we need to alter these hooks (which are jest.MockFunctions)
+    // to use services that we have in our test `mockedContext`
+    (useToasts as jest.Mock).mockReturnValue(coreStart.notifications.toasts);
+    (useKibana as jest.Mock).mockReturnValue({ services: mockedContext.startServices });
   });
 
   it('should NOT display timeline', async () => {
@@ -608,6 +628,7 @@ describe('when on the endpoint list page', () => {
         return renderResult;
       };
     });
+
     afterEach(() => {
       jest.clearAllMocks();
     });
@@ -873,14 +894,152 @@ describe('when on the endpoint list page', () => {
         expect(renderResult.getByText('A New Unknown Action')).not.toBeNull();
       });
     });
+
+    describe('when showing the Host Isolate panel', () => {
+      const getKibanaServicesMock = KibanaServices.get as jest.Mock;
+      const confirmIsolateAndWaitForApiResponse = async (
+        typeOfResponse: 'success' | 'failure' = 'success'
+      ) => {
+        const isolateResponseAction = middlewareSpy.waitForAction(
+          'endpointIsolationRequestStateChange',
+          {
+            validate(action) {
+              if (typeOfResponse === 'failure') {
+                return isFailedResourceState(action.payload);
+              }
+
+              return isLoadedResourceState(action.payload);
+            },
+          }
+        );
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByTestId('hostIsolateConfirmButton'));
+          await isolateResponseAction;
+        });
+      };
+
+      let isolateApiMock: ReturnType<typeof hostIsolationHttpMocks>;
+      let renderResult: ReturnType<AppContextTestRender['render']>;
+
+      beforeEach(async () => {
+        getKibanaServicesMock.mockReturnValue(coreStart);
+        reactTestingLibrary.act(() => {
+          history.push('/endpoints?selected_endpoint=1&show=isolate');
+        });
+        renderResult = await renderAndWaitForData();
+        coreStart.http.post.mockReset();
+        isolateApiMock = hostIsolationHttpMocks(coreStart.http);
+      });
+
+      it('should show the isolate form', () => {
+        expect(renderResult.getByTestId('host_isolation_comment')).not.toBeNull();
+      });
+
+      it('should take you back to details when back link below the flyout header is clicked', async () => {
+        const backButtonLink = renderResult.getByTestId('flyoutSubHeaderBackButton');
+
+        expect(backButtonLink.getAttribute('href')).toEqual(
+          getEndpointDetailsPath({
+            name: 'endpointDetails',
+            page_index: '0',
+            page_size: '10',
+            selected_endpoint: '1',
+          })
+        );
+
+        const changeUrlAction = middlewareSpy.waitForAction('userChangedUrl');
+
+        act(() => {
+          fireEvent.click(backButtonLink);
+        });
+
+        expect((await changeUrlAction).payload).toMatchObject({
+          pathname: '/endpoints',
+          search: '?page_index=0&page_size=10&selected_endpoint=1',
+        });
+      });
+
+      it('take you back to details when Cancel button is clicked', async () => {
+        const changeUrlAction = middlewareSpy.waitForAction('userChangedUrl');
+
+        act(() => {
+          fireEvent.click(renderResult.getByTestId('hostIsolateCancelButton'));
+        });
+
+        expect((await changeUrlAction).payload).toMatchObject({
+          pathname: '/endpoints',
+          search: '?page_index=0&page_size=10&selected_endpoint=1',
+        });
+      });
+
+      it('should isolate endpoint host when confirm is clicked', async () => {
+        await confirmIsolateAndWaitForApiResponse();
+        expect(renderResult.getByTestId('hostIsolateSuccessMessage')).not.toBeNull();
+      });
+
+      it('should navigate to details when the Complete button on success message is clicked', async () => {
+        await confirmIsolateAndWaitForApiResponse();
+
+        const changeUrlAction = middlewareSpy.waitForAction('userChangedUrl');
+
+        act(() => {
+          fireEvent.click(renderResult.getByTestId('hostIsolateSuccessCompleteButton'));
+        });
+
+        expect((await changeUrlAction).payload).toMatchObject({
+          pathname: '/endpoints',
+          search: '?page_index=0&page_size=10&selected_endpoint=1',
+        });
+      });
+
+      it('should show error toast if isolate fails', async () => {
+        isolateApiMock.responseProvider.isolateHost.mockImplementation(() => {
+          throw new Error('oh oh. something went wrong');
+        });
+
+        // coreStart.http.post.mockReset();
+        // coreStart.http.post.mockRejectedValue(new Error('oh oh. something went wrong'));
+        await confirmIsolateAndWaitForApiResponse('failure');
+
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          'oh oh. something went wrong'
+        );
+      });
+
+      it('should reset isolation state and show form again', async () => {
+        // ensures that after the host isolation has been successful, if user navigates away from the panel
+        // (`show` is NOT `isolate`), then the state should be reset so that the form show up again the next
+        // time `isolate host` is clicked
+        await confirmIsolateAndWaitForApiResponse();
+        expect(renderResult.getByTestId('hostIsolateSuccessMessage')).not.toBeNull();
+
+        // Close flyout
+        const changeUrlAction = middlewareSpy.waitForAction('userChangedUrl');
+        act(() => {
+          fireEvent.click(renderResult.getByTestId('euiFlyoutCloseButton'));
+        });
+
+        expect((await changeUrlAction).payload).toMatchObject({
+          pathname: '/endpoints',
+          search: '?page_index=0&page_size=10',
+        });
+
+        expect(
+          isUninitialisedResourceState(
+            getCurrentIsolationRequestState(store.getState().management.endpoints)
+          )
+        ).toBe(true);
+      });
+    });
   });
 
   describe('when the more actions column is opened', () => {
+    const generator = new EndpointDocGenerator('seed');
     let hostInfo: HostInfo;
     let agentId: string;
     let agentPolicyId: string;
-    const generator = new EndpointDocGenerator('seed');
-    let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
+    let renderResult: ReturnType<AppContextTestRender['render']>;
 
     const mockEndpointListApi = () => {
       const { hosts, query_strategy_version: queryStrategyVersion } = mockEndpointResultList();
@@ -902,19 +1061,12 @@ describe('when on the endpoint list page', () => {
       });
     };
 
-    beforeEach(() => {
+    beforeEach(async () => {
       mockEndpointListApi();
 
       reactTestingLibrary.act(() => {
         history.push('/endpoints');
       });
-
-      renderAndWaitForData = async () => {
-        const renderResult = render();
-        await middlewareSpy.waitForAction('serverReturnedEndpointList');
-        await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
-        return renderResult;
-      };
 
       coreStart.application.getUrlForApp.mockImplementation((appName) => {
         switch (appName) {
@@ -925,42 +1077,43 @@ describe('when on the endpoint list page', () => {
         }
         return appName;
       });
+
+      renderResult = render();
+      await middlewareSpy.waitForAction('serverReturnedEndpointList');
+      await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
+
+      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
+
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
     });
 
     afterEach(() => {
       jest.clearAllMocks();
     });
 
-    it('navigates to the Security Solution Host Details page', async () => {
-      const renderResult = await renderAndWaitForData();
-      // open the endpoint actions menu
-      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
-      reactTestingLibrary.act(() => {
-        reactTestingLibrary.fireEvent.click(endpointActionsButton);
-      });
+    it('navigates to the Host Details Isolate flyout', async () => {
+      const isolateLink = await renderResult.findByTestId('isolateLink');
+      expect(isolateLink.getAttribute('href')).toEqual(
+        getEndpointDetailsPath({
+          name: 'endpointIsolate',
+          selected_endpoint: hostInfo.metadata.agent.id,
+        })
+      );
+    });
 
+    it('navigates to the Security Solution Host Details page', async () => {
       const hostLink = await renderResult.findByTestId('hostLink');
       expect(hostLink.getAttribute('href')).toEqual(
         `/app/security/hosts/${hostInfo.metadata.host.hostname}`
       );
     });
     it('navigates to the Ingest Agent Policy page', async () => {
-      const renderResult = await renderAndWaitForData();
-      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
-      reactTestingLibrary.act(() => {
-        reactTestingLibrary.fireEvent.click(endpointActionsButton);
-      });
-
       const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
       expect(agentPolicyLink.getAttribute('href')).toEqual(`/app/fleet#/policies/${agentPolicyId}`);
     });
     it('navigates to the Ingest Agent Details page', async () => {
-      const renderResult = await renderAndWaitForData();
-      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
-      reactTestingLibrary.act(() => {
-        reactTestingLibrary.fireEvent.click(endpointActionsButton);
-      });
-
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
       expect(agentDetailsLink.getAttribute('href')).toEqual(`/app/fleet#/fleet/agents/${agentId}`);
     });

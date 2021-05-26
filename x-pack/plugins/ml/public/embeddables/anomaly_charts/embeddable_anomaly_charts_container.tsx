@@ -183,6 +183,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               timeBuckets={timeBuckets}
               timefilter={timefilter}
               onSelectEntity={addEntityFieldFilter}
+              showSelectedInterval={false}
             />
           )}
         </div>
