@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { DeepPartial } from '../utils/utility_types';
+import { IndexNames } from '../elasticsearch';
 import { IEventLog, IEventLogger, IEventLoggerTemplate, IEventQueryBuilder } from './public_api';
 import { EventLogParams } from './internal_api';
 import { EventLoggerTemplate } from './event_logger_template';
@@ -24,6 +26,10 @@ export class EventLog<TEvent> implements IEventLog<TEvent> {
     });
   }
 
+  public getNames(): IndexNames {
+    return this.params.indexNames;
+  }
+
   public getLoggerTemplate(fields: DeepPartial<TEvent>): IEventLoggerTemplate<TEvent> {
     return this.initialTemplate.getLoggerTemplate(fields);
   }
@@ -32,7 +38,14 @@ export class EventLog<TEvent> implements IEventLog<TEvent> {
     return this.initialTemplate.getLogger(loggerName, fields);
   }
 
-  public getEvents(): IEventQueryBuilder<TEvent> {
+  public getQueryBuilder(): IEventQueryBuilder<TEvent> {
     return new EventQueryBuilder<TEvent>(this.params);
+  }
+
+  public async search<TDocument = TEvent>(
+    request: estypes.SearchRequest
+  ): Promise<estypes.SearchResponse<TDocument>> {
+    const response = await this.params.indexReader.search<TDocument>(request);
+    return response.body;
   }
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup, CoreStart, Logger } from 'src/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup, Logger } from 'src/core/server';
 import { SpacesPluginStart } from '../../spaces/server';
 
 import { RuleRegistryPluginConfig } from './config';
@@ -22,11 +22,10 @@ interface RuleRegistryPluginStartDependencies {
 
 export interface RuleRegistryPluginSetupContract {
   ruleDataService: RuleDataPluginService;
-}
-
-export interface RuleRegistryPluginStartContract {
   eventLogService: IEventLogService;
 }
+
+export type RuleRegistryPluginStartContract = void;
 
 export class RuleRegistryPlugin
   implements
@@ -36,13 +35,11 @@ export class RuleRegistryPlugin
       RuleRegistryPluginSetupDependencies,
       RuleRegistryPluginStartDependencies
     > {
-  private readonly initContext: PluginInitializerContext;
   private readonly config: RuleRegistryPluginConfig;
   private readonly logger: Logger;
   private eventLogService: EventLogService | null;
 
   constructor(initContext: PluginInitializerContext) {
-    this.initContext = initContext;
     this.config = initContext.config.get<RuleRegistryPluginConfig>();
     this.logger = initContext.logger.get();
     this.eventLogService = null;
@@ -51,18 +48,22 @@ export class RuleRegistryPlugin
   public setup(
     core: CoreSetup<RuleRegistryPluginStartDependencies, RuleRegistryPluginStartContract>
   ): RuleRegistryPluginSetupContract {
-    const config = this.initContext.config.get<RuleRegistryPluginConfig>();
+    const { config, logger } = this;
 
-    const logger = this.initContext.logger.get();
+    const startDependencies = core.getStartServices().then(([coreStart, pluginStart]) => {
+      return {
+        core: coreStart,
+        ...pluginStart,
+      };
+    });
 
     const ruleDataService = new RuleDataPluginService({
       logger,
       isWriteEnabled: config.write.enabled,
       index: config.index,
       getClusterClient: async () => {
-        const [coreStart] = await core.getStartServices();
-
-        return coreStart.elasticsearch.client.asInternalUser;
+        const deps = await startDependencies;
+        return deps.core.elasticsearch.client.asInternalUser;
       },
     });
 
@@ -73,37 +74,33 @@ export class RuleRegistryPlugin
       logger.error(error);
     });
 
-    return { ruleDataService };
-  }
-
-  public start(
-    core: CoreStart,
-    plugins: RuleRegistryPluginStartDependencies
-  ): RuleRegistryPluginStartContract {
-    this.eventLogService = new EventLogService({
+    const eventLogService = new EventLogService({
       config: {
         indexPrefix: this.config.index,
         isWriteEnabled: this.config.write.enabled,
       },
       dependencies: {
-        clusterClient: Promise.resolve(core.elasticsearch.client), // TODO: get rid of Promise
-        spaces: plugins.spaces.spacesService,
-        logger: this.logger.get('eventLog'),
+        clusterClient: startDependencies.then((deps) => deps.core.elasticsearch.client),
+        spacesService: startDependencies.then((deps) => deps.spaces.spacesService),
+        logger: logger.get('eventLog'),
       },
     });
 
     // TODO: remove before merge
-    testEventLogImplementation(this.eventLogService, this.logger);
+    testEventLogImplementation(eventLogService, logger);
 
-    return {
-      eventLogService: this.eventLogService,
-    };
+    this.eventLogService = eventLogService;
+    return { ruleDataService, eventLogService };
   }
 
+  public start(): RuleRegistryPluginStartContract {}
+
   public stop() {
-    if (this.eventLogService) {
-      this.eventLogService.stop().catch((e) => {
-        this.logger.error(e);
+    const { eventLogService, logger } = this;
+
+    if (eventLogService) {
+      eventLogService.stop().catch((e) => {
+        logger.error(e);
       });
     }
   }

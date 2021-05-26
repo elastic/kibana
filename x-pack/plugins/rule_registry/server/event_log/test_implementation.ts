@@ -50,27 +50,14 @@ const testImplementation = async (service: IEventLogService, logger: Logger) => 
   // ---------------------------------------------------------------------------
   // Bootstrap logs: for alerts-as-data and rule execution events.
 
-  const logResolver = service.getResolver();
-
-  const alertsLogProvider = logResolver.resolve(alertsLogDefinition, SPACE_ID);
-  const executionLogProvider = logResolver.resolve(executionLogDefinition, SPACE_ID);
-
-  debug(logger, 'Alerts log:', {
-    name: alertsLogProvider.getLogName(),
-    schema: alertsLogProvider.getEventSchema(),
-    indexSpec: alertsLogProvider.getIndexSpec(),
-  });
-
-  debug(logger, 'Rule execution log:', {
-    name: executionLogProvider.getLogName(),
-    schema: executionLogProvider.getEventSchema(),
-    indexSpec: executionLogProvider.getIndexSpec(),
-  });
-
   const bootstrapIndex = true;
+  const logResolver = service.getResolver(bootstrapIndex);
 
-  await alertsLogProvider.getLog(bootstrapIndex);
-  const executionLog = await executionLogProvider.getLog(bootstrapIndex);
+  const alertsLog = await logResolver.resolve(alertsLogDefinition, SPACE_ID);
+  const executionLog = await logResolver.resolve(executionLogDefinition, SPACE_ID);
+
+  debug(logger, 'Alerts log:', alertsLog.getNames());
+  debug(logger, 'Rule execution log:', executionLog.getNames());
 
   // ---------------------------------------------------------------------------
   // Log some rule execution events.
@@ -116,7 +103,7 @@ const testImplementation = async (service: IEventLogService, logger: Logger) => 
   // Fetch data from rule execution log.
 
   const allEvents1 = await executionLog
-    .getEvents()
+    .getQueryBuilder()
     .filterByLogger('rule-executor')
     .sortBy([{ '@timestamp': { order: 'desc' } }, { 'event.sequence': { order: 'desc' } }])
     .paginate({ page: 1, perPage: 30 })
@@ -125,62 +112,55 @@ const testImplementation = async (service: IEventLogService, logger: Logger) => 
 
   debug(logger, 'Data fetching: all events 1', { allEvents1 });
 
-  const allEvents2 = await executionLog
-    .getEvents()
-    .buildQuery()
-    .search({
-      body: {
-        from: 0,
-        size: 30,
-        query: {
-          bool: {
-            filter: [
-              { term: { 'kibana.rac.event_log.log_name': 'security.events' } },
-              { term: { 'kibana.rac.event_log.logger_name': 'rule-executor' } },
-            ],
-          },
+  const allEvents2 = await executionLog.search({
+    body: {
+      from: 0,
+      size: 30,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'kibana.rac.event_log.log_name': 'security.events' } },
+            { term: { 'kibana.rac.event_log.logger_name': 'rule-executor' } },
+          ],
         },
-        sort: [{ '@timestamp': { order: 'desc' } }, { 'event.sequence': { order: 'desc' } }],
       },
-    });
+      sort: [{ '@timestamp': { order: 'desc' } }, { 'event.sequence': { order: 'desc' } }],
+    },
+  });
 
   debug(logger, 'Data fetching: all events 2', { allEvents2 });
 
-  const monitoringAggregatedData = await executionLog
-    .getEvents()
-    .filterByFields({
-      'rule.uuid': ['1231234sdfgdf4565675sdv'],
-    })
-    .buildQuery()
-    .search({
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [{ term: { 'kibana.rac.producer': 'security' } }],
-          },
+  const monitoringAggregatedData = await executionLog.search({
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'kibana.rac.producer': 'security' } },
+            { terms: { 'rule.uuid': ['1231234sdfgdf4565675sdv'] } },
+          ],
         },
-        aggs: {
-          rules: {
-            terms: {
-              field: 'rule.uuid',
-              size: 1,
-            },
-            aggs: {
-              events_status_changed: {
-                filter: {
-                  term: { 'event.action': 'status-changed' },
-                },
-                aggs: {
-                  last_item: {
-                    top_hits: {
-                      size: 1,
-                      sort: [
-                        { '@timestamp': { order: 'desc' } },
-                        { 'event.sequence': { order: 'desc' } },
-                      ],
-                      _source: ['@timestamp', 'event', 'kibana'],
-                    },
+      },
+      aggs: {
+        rules: {
+          terms: {
+            field: 'rule.uuid',
+            size: 1,
+          },
+          aggs: {
+            events_status_changed: {
+              filter: {
+                term: { 'event.action': 'status-changed' },
+              },
+              aggs: {
+                last_item: {
+                  top_hits: {
+                    size: 1,
+                    sort: [
+                      { '@timestamp': { order: 'desc' } },
+                      { 'event.sequence': { order: 'desc' } },
+                    ],
+                    _source: ['@timestamp', 'event', 'kibana'],
                   },
                 },
               },
@@ -188,7 +168,8 @@ const testImplementation = async (service: IEventLogService, logger: Logger) => 
           },
         },
       },
-    });
+    },
+  });
 
   debug(logger, 'Data fetching: aggregated data', { monitoringAggregatedData });
 };

@@ -9,7 +9,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { IClusterClient, KibanaRequest, Logger } from 'kibana/server';
 import { SpacesServiceStart } from '../../../../spaces/server';
 
-import { IlmPolicy, IndexSpecification } from '../elasticsearch';
+import { IlmPolicy, IndexNames, IndexSpecification } from '../elasticsearch';
 import { FieldMap, Event, EventSchema } from '../event_schema';
 import { DeepPartial } from '../utils/utility_types';
 
@@ -44,35 +44,36 @@ export interface EventLogServiceConfig {
 
 export interface EventLogServiceDependencies {
   clusterClient: Promise<IClusterClient>;
-  spaces: SpacesServiceStart;
+  spacesService: Promise<SpacesServiceStart>;
   logger: Logger;
 }
 
 export interface IEventLogService {
-  getResolver(): IEventLogResolver;
-  getScopedResolver(request: KibanaRequest): IScopedEventLogResolver;
+  getResolver(bootstrapLog?: boolean): IEventLogResolver;
+  getScopedResolver(request: KibanaRequest, bootstrapLog?: boolean): IScopedEventLogResolver;
 }
 
 export interface IEventLogResolver {
   resolve<TMap extends FieldMap>(
     definition: IEventLogDefinition<TMap>,
     spaceId: string
-  ): IEventLogProvider<TMap>;
+  ): Promise<IEventLog<Event<TMap>>>;
 }
 
 export interface IScopedEventLogResolver {
-  resolve<TMap extends FieldMap>(definition: IEventLogDefinition<TMap>): IEventLogProvider<TMap>;
-}
-
-export interface IEventLogProvider<TMap extends FieldMap> {
-  getEventSchema(): EventSchema<TMap>;
-  getIndexSpec(): IndexSpecification;
-  getLogName(): string;
-  getLog(bootstrapIndex?: boolean): Promise<IEventLog<Event<TMap>>>;
+  resolve<TMap extends FieldMap>(
+    definition: IEventLogDefinition<TMap>
+  ): Promise<IEventLog<Event<TMap>>>;
 }
 
 export interface IEventLog<TEvent> extends IEventLoggerTemplate<TEvent> {
-  getEvents(): IEventQueryBuilder<TEvent>;
+  getNames(): IndexNames;
+
+  getQueryBuilder(): IEventQueryBuilder<TEvent>;
+
+  search<TDocument = TEvent>(
+    request: estypes.SearchRequest
+  ): Promise<estypes.SearchResponse<TDocument>>;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -109,8 +110,4 @@ export interface PaginationParams {
 
 export interface IEventQuery<TEvent> {
   execute(): Promise<TEvent[]>;
-
-  search<TDocument = TEvent>(
-    request: estypes.SearchRequest
-  ): Promise<estypes.SearchResponse<TDocument>>;
 }

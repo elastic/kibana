@@ -8,22 +8,29 @@
 import { Logger } from 'kibana/server';
 
 import { IIndexReader, IIndexWriter, IndexNames } from '../elasticsearch';
-import { FieldMap } from '../event_schema';
+import { Event, FieldMap } from '../event_schema';
 import { DeepPartial } from '../utils/utility_types';
-import { IEventLogDefinition, IEventLogProvider } from './public_api';
+import { IEventLogDefinition, IEventLog } from './public_api';
 
 export interface IEventLogRegistry {
   get<TMap extends FieldMap>(
     definition: IEventLogDefinition<TMap>,
     spaceId: string
-  ): IEventLogProvider<TMap> | null;
+  ): IEventLogProvider<Event<TMap>> | null;
 
   add<TMap extends FieldMap>(
     definition: IEventLogDefinition<TMap>,
     spaceId: string,
-    provider: IEventLogProvider<TMap>,
-    closeLog: () => Promise<void>
+    provider: IEventLogProvider<Event<TMap>>
   ): void;
+
+  shutdown(): Promise<void>;
+}
+
+export interface IEventLogProvider<TEvent> {
+  getLog(): IEventLog<TEvent>;
+  bootstrapLog(): Promise<void>;
+  shutdownLog(): Promise<void>;
 }
 
 export interface EventLogParams {

@@ -58,7 +58,7 @@ export class EventQueryBuilder<TEvent> implements IEventQueryBuilder<TEvent> {
   }
 
   public buildQuery(): IEventQuery<TEvent> {
-    const { indexReader, logger } = this.params;
+    const { indexReader } = this.params;
     const { page, perPage } = this.pagination;
 
     const request: estypes.SearchRequest = {
@@ -75,11 +75,7 @@ export class EventQueryBuilder<TEvent> implements IEventQueryBuilder<TEvent> {
       },
     };
 
-    return new EventQuery<TEvent>({
-      indexReader,
-      logger,
-      baseRequest: request,
-    });
+    return new EventQuery<TEvent>({ indexReader, request });
   }
 
   private buildFilter(): estypes.QueryContainer[] {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FieldMap } from '../event_schema';
-import { IEventLogDefinition, IEventLogProvider } from './public_api';
-import { IEventLogRegistry } from './internal_api';
+import { Event, FieldMap } from '../event_schema';
+import { IEventLogDefinition } from './public_api';
+import { IEventLogRegistry, IEventLogProvider } from './internal_api';
 
 const getRegistryKey = (definition: IEventLogDefinition<any>, spaceId: string) =>
   `${definition.eventLogName}-${spaceId}`;
@@ -16,7 +16,6 @@ interface RegistryEntry {
   definition: IEventLogDefinition<any>;
   spaceId: string;
   provider: IEventLogProvider<any>;
-  closeLog: () => Promise<void>;
 }
 
 export class EventLogRegistry implements IEventLogRegistry {
@@ -25,17 +24,16 @@ export class EventLogRegistry implements IEventLogRegistry {
   public get<TMap extends FieldMap>(
     definition: IEventLogDefinition<TMap>,
     spaceId: string
-  ): IEventLogProvider<TMap> | null {
+  ): IEventLogProvider<Event<TMap>> | null {
     const key = getRegistryKey(definition, spaceId);
     const entry = this.map.get(key);
-    return entry != null ? (entry.provider as IEventLogProvider<TMap>) : null;
+    return entry != null ? (entry.provider as IEventLogProvider<Event<TMap>>) : null;
   }
 
   public add<TMap extends FieldMap>(
     definition: IEventLogDefinition<TMap>,
     spaceId: string,
-    provider: IEventLogProvider<TMap>,
-    closeLog: () => Promise<void>
+    provider: IEventLogProvider<Event<TMap>>
   ): void {
     const key = getRegistryKey(definition, spaceId);
 
@@ -47,13 +45,12 @@ export class EventLogRegistry implements IEventLogRegistry {
       definition,
       spaceId,
       provider,
-      closeLog,
     });
   }
 
-  public async close(): Promise<void> {
+  public async shutdown(): Promise<void> {
     const entries = Array.from(this.map.values());
-    const promises = entries.map(({ closeLog }) => closeLog());
+    const promises = entries.map(({ provider }) => provider.shutdownLog());
     await Promise.all(promises);
   }
 }
