@@ -16,11 +16,12 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
   table,
   state,
   keptLayerIds,
-  mainPalette,
-  subVisualizationId,
 }) => {
-  if (state?.shape === CHART_SHAPES.HEATMAP) {
-    // don't provide suggestions when heatmap is the current chart
+  if (
+    state?.shape === CHART_SHAPES.HEATMAP &&
+    (state.xAccessor || state.yAccessor || state.valueAccessor) &&
+    table.changeType !== 'extended'
+  ) {
     return [];
   }
 

@@ -83,6 +83,25 @@ describe('heatmap suggestions', () => {
         })
       ).toEqual([]);
     });
+
+    test('when currently active with partial configuration and not extended change type', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [],
+            changeType: 'initial',
+          },
+          state: {
+            shape: 'heatmap',
+            layerId: 'first',
+            xAccessor: 'some-field',
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toHaveLength(0);
+    });
   });
 
   describe('hides suggestions', () => {
