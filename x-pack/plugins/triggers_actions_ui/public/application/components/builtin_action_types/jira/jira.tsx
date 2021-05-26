@@ -12,7 +12,6 @@ import {
   ActionTypeModel,
   ConnectorValidationResult,
 } from '../../../../types';
-import logo from './logo.svg';
 import { JiraActionConnector, JiraConfig, JiraSecrets, JiraActionParams } from './types';
 import { isValidUrl } from '../../../lib/value_validators';
 
@@ -78,7 +77,7 @@ export const JIRA_TITLE = i18n.translate(
 export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraActionParams> {
   return {
     id: '.jira',
-    iconClass: logo,
+    iconClass: lazy(() => import('./logo')),
     selectMessage: JIRA_DESC,
     actionTypeTitle: JIRA_TITLE,
     validateConnector,

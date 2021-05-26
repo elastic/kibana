@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
@@ -106,7 +106,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     errors.summary !== undefined && errors.summary.length > 0 && summary !== undefined;
 
   return (
-    <Fragment>
+    <>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -306,7 +306,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           </EuiFormRow>
         </>
       ) : null}
-    </Fragment>
+    </>
   );
 };
 

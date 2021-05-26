@@ -12,11 +12,12 @@ import { act } from 'react-dom/test-utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import AlertAdd, { AlertAddProps } from './alert_add';
+import AlertAdd from './alert_add';
 import { createAlert } from '../../lib/alert_api';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   Alert,
+  AlertAddProps,
   AlertFlyoutCloseReason,
   ConnectorValidationResult,
   GenericValidationResult,

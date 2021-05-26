@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 
-import { ActionsConnectorsList } from './actions_connectors_list';
+import ActionsConnectorsList from './actions_connectors_list';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -154,7 +154,7 @@ describe('actions_connectors_list component with items', () => {
 
     const mockedActionParamsFields = React.lazy(async () => ({
       default() {
-        return <React.Fragment />;
+        return <></>;
       },
     }));
 
@@ -260,7 +260,8 @@ describe('actions_connectors_list component with items', () => {
     await setup();
     await wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
 
-    expect(wrapper.find('ConnectorEditFlyout')).toHaveLength(1);
+    const edit = await wrapper.find('ConnectorEditFlyout');
+    expect(edit).toHaveLength(1);
   });
 });
 

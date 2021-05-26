@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { ConnectorAddModal } from './connector_add_modal';
+import ConnectorAddModal from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionType, ConnectorValidationResult, GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';

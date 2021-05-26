@@ -12,7 +12,6 @@ import {
   ActionTypeModel,
   ConnectorValidationResult,
 } from '../../../../types';
-import logo from './logo.svg';
 import {
   ServiceNowActionConnector,
   ServiceNowConfig,
@@ -97,7 +96,7 @@ export function getServiceNowITSMActionType(): ActionTypeModel<
 > {
   return {
     id: '.servicenow',
-    iconClass: logo,
+    iconClass: lazy(() => import('./logo')),
     selectMessage: SERVICENOW_ITSM_DESC,
     actionTypeTitle: SERVICENOW_ITSM_TITLE,
     validateConnector,
@@ -133,7 +132,7 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
 > {
   return {
     id: '.servicenow-sir',
-    iconClass: logo,
+    iconClass: lazy(() => import('./logo')),
     selectMessage: SERVICENOW_SIR_DESC,
     actionTypeTitle: SERVICENOW_SIR_TITLE,
     validateConnector,

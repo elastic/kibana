@@ -36,15 +36,16 @@ import {
 import { useKibana } from '../../../common/lib/kibana';
 import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 
-interface ConnectorAddModalProps {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type ConnectorAddModalProps = {
   actionType: ActionType;
   onClose: () => void;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
   consumer?: string;
   actionTypeRegistry: ActionTypeRegistryContract;
-}
+};
 
-export const ConnectorAddModal = ({
+const ConnectorAddModal = ({
   actionType,
   onClose,
   postSaveEventHandler,
@@ -233,3 +234,6 @@ export const ConnectorAddModal = ({
     </EuiModal>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ConnectorAddModal as default };

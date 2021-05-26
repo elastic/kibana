@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -23,7 +23,7 @@ const SlackActionFields: React.FunctionComponent<
     errors.webhookUrl !== undefined && errors.webhookUrl.length > 0 && webhookUrl !== undefined;
 
   return (
-    <Fragment>
+    <>
       <EuiFormRow
         id="webhookUrl"
         fullWidth
@@ -44,7 +44,7 @@ const SlackActionFields: React.FunctionComponent<
           }
         )}
       >
-        <Fragment>
+        <>
           {getEncryptedFieldNotifyLabel(
             !action.id,
             1,
@@ -70,9 +70,9 @@ const SlackActionFields: React.FunctionComponent<
               }
             }}
           />
-        </Fragment>
+        </>
       </EuiFormRow>
-    </Fragment>
+    </>
   );
 };
 

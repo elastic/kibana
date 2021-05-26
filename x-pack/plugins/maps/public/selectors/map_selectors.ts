@@ -401,6 +401,26 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
   }
 );
 
+export const getGeoFieldNames = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    const geoFieldNames: string[] = [];
+
+    if (waitingForMapReadyLayerList.length) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        const layer = createLayerInstance(layerDescriptor);
+        geoFieldNames.push(...layer.getGeoFieldNames());
+      });
+    } else {
+      layerList.forEach((layer) => {
+        geoFieldNames.push(...layer.getGeoFieldNames());
+      });
+    }
+    return _.uniq(geoFieldNames);
+  }
+);
+
 export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   return layerListRaw.some((layerDescriptor) => {
     if (layerDescriptor.__isPreviewLayer) {
