@@ -6,9 +6,9 @@
  */
 
 import type {
+  ExceptionListSummarySchema,
   IdOrUndefined,
   ListIdOrUndefined,
-  ListSummarySchema,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
@@ -41,7 +41,7 @@ export const getExceptionListSummary = async ({
   listId,
   savedObjectsClient,
   namespaceType,
-}: GetExceptionListSummaryOptions): Promise<ListSummarySchema | null> => {
+}: GetExceptionListSummaryOptions): Promise<ExceptionListSummarySchema | null> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   let finalListId: string = listId ?? '';
 
@@ -76,7 +76,7 @@ export const getExceptionListSummary = async ({
     type: savedObjectType,
   });
 
-  const summary: ListSummarySchema = (savedObject.aggregations as ByOsAggType).by_os.buckets.reduce(
+  const summary: ExceptionListSummarySchema = (savedObject.aggregations as ByOsAggType).by_os.buckets.reduce(
     (acc, item: ByOsAggBucketType) => ({
       ...acc,
       [item.key]: item.doc_count,
