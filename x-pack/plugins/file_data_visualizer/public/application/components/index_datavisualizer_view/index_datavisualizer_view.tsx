@@ -31,7 +31,6 @@ import {
   UI_SETTINGS,
   Query,
   IndexPattern,
-  IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/public';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { getQueryFromSavedSearch } from '../../util/index_utils';
@@ -118,15 +117,13 @@ export const getDefaultDataVisualizerListState = (): Required<DataVisualizerInde
 });
 
 export interface IndexDataVisualizerViewProps {
-  combinedQuery: Query;
+  query: Query;
   currentIndexPattern: IndexPattern; // TODO this should be IndexPattern or null
   currentSavedSearch: SavedSearchSavedObject | null;
-  indexPatterns: IndexPatternsContract;
 }
+const restorableDefaults = getDefaultDataVisualizerListState();
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
-  const restorableDefaults = getDefaultDataVisualizerListState();
-
   const {
     services: { lens: lensPlugin, docLinks, notifications, uiSettings },
   } = useFileDataVisualizerKibana();
@@ -140,7 +137,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
-  const { combinedQuery, currentIndexPattern } = dataVisualizerProps;
+  const { query, currentIndexPattern } = dataVisualizerProps;
 
   const getTimeBuckets = useCallback(() => {
     return new TimeBuckets({
@@ -210,6 +207,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
     const searchData = extractSearchData(currentSavedSearch);
+
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
       return {
         searchQuery: dataVisualizerListState.searchQuery,
@@ -223,6 +221,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         searchQueryLanguage: searchData.queryLanguage,
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSavedSearch, dataVisualizerListState]);
 
   const setSearchParams = (searchParams: {
@@ -299,27 +298,33 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   useEffect(() => {
     loadOverallStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, samplerShardSize, lastRefresh]);
 
   useEffect(() => {
     createMetricCards();
     createNonMetricCards();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overallStats, showEmptyFields]);
 
   useEffect(() => {
     loadMetricFieldStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metricConfigs]);
 
   useEffect(() => {
     loadNonMetricFieldStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonMetricConfigs]);
 
   useEffect(() => {
     createMetricCards();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metricsLoaded]);
 
   useEffect(() => {
     createNonMetricCards();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonMetricsLoaded]);
 
   /**
@@ -330,9 +335,9 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       return undefined;
     }
 
-    const { query } = getQueryFromSavedSearch(savedSearch);
-    const queryLanguage = query.language as SearchQueryLanguage;
-    const qryString = query.query;
+    const { query: extractedQuery } = getQueryFromSavedSearch(savedSearch);
+    const queryLanguage = extractedQuery.language as SearchQueryLanguage;
+    const qryString = extractedQuery.query;
     let qry;
     if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
       const ast = esKuery.fromKueryExpression(qryString);
@@ -781,7 +786,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       <EuiFlexItem grow={false}>
                         <FullTimeRangeSelector
                           indexPattern={currentIndexPattern}
-                          query={combinedQuery}
+                          query={query}
                           disabled={false}
                           timefilter={timefilter}
                         />

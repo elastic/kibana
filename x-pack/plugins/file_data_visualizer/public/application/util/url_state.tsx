@@ -125,7 +125,8 @@ export const usePageUrlState = <PageUrlState extends {}>(
       ...(defaultState ?? {}),
       ...(pageState ?? {}),
     };
-  }, [defaultState, pageState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageState]);
 
   const onStateUpdate = useCallback(
     (update: Partial<PageUrlState>, replaceState?: boolean) => {
