@@ -205,7 +205,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
 Returns the specified percentile of the values of a field. This is the value n percent of the values occuring in documents are smaller.
 
 Example: Get the number of bytes larger than 95 % of values:
-${'`percentile(bytes, percentile=95)`'}
+\`percentile(bytes, percentile=95)\`
       `,
     }),
   },

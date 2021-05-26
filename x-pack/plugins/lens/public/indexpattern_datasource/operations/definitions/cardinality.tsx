@@ -119,10 +119,10 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
 Calculates the number of unique values of a specified field. Works for number, string, date and boolean values.
 
 Example: Calculate the number of different products:
-${'`unique_count(product.name)`'}
+\`unique_count(product.name)\`
 
 Example: Calculate the number of different products from the "clothes" group:
-${"`unique_count(product.name, kql='product.group=clothes')`"}
+\`unique_count(product.name, kql='product.group=clothes')\`
       `,
     }),
   },

@@ -123,7 +123,7 @@ Calculates the cumulative sum of a metric over time, adding all previous values 
 This calculation will be done separately for separate series defined by filters or top values dimensions.
 
 Example: Visualize the received bytes accumulated over time:
-${'`cumulative_sum(sum(bytes))`'}
+\`cumulative_sum(sum(bytes))\`
       `,
     }),
   },

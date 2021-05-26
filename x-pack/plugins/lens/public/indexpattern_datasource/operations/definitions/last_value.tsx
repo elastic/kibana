@@ -277,7 +277,7 @@ Returns the value of a field from the last document, ordered by the default time
 This function is usefull the retrieve the latest state of an entity.
 
 Example: Get the current status of server A: 
-${'`last_value(server.status, kql=\'server.name="A"\')`'}
+\`last_value(server.status, kql=\'server.name="A"\')\`
       `,
     }),
   },

@@ -121,7 +121,7 @@ Differences requires the data to be sequential. If your data is empty when using
 This calculation will be done separately for separate series defined by filters or top values dimensions.
 
 Example: Visualize the change in bytes received over time:
-${'`differences(sum(bytes))`'}
+\`differences(sum(bytes))\`
       `,
     }),
   },

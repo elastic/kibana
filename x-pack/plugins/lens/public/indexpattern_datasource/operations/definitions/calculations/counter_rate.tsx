@@ -132,7 +132,7 @@ This calculation will be done separately for separate series defined by filters 
 It uses the current interval when used in Formula.
 
 Example: Visualize the rate of bytes received over time by a memcached server:
-${'`counter_rate(max(memcached.stats.read.bytes))`'}
+\`counter_rate(max(memcached.stats.read.bytes))\`
       `,
     }),
   },

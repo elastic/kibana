@@ -150,7 +150,7 @@ This calculation will be done separately for separate series defined by filters 
 Takes a named parameter \`window\` which specifies how many last values to include in the average calculation for the current value.
 
 Example: Smooth a line of measurements:
-${'`moving_average(sum(bytes), window=5)`'}
+\`moving_average(sum(bytes), window=5)\`
       `,
       values: {
         defaultValue: WINDOW_DEFAULT_VALUE,
