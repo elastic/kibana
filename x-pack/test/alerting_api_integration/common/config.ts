@@ -19,7 +19,7 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
   ssl?: boolean;
   enableActionsProxy: boolean;
-  rejectUnauthorized?: boolean;
+  verificationMode?: 'full' | 'none' | 'certificate';
   publicBaseUrl?: boolean;
   preconfiguredAlertHistoryEsIndex?: boolean;
   customizeLocalHostTls?: boolean;
@@ -49,7 +49,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     license = 'trial',
     disabledPlugins = [],
     ssl = false,
-    rejectUnauthorized = true,
+    verificationMode = 'full',
     preconfiguredAlertHistoryEsIndex = false,
     customizeLocalHostTls = false,
   } = options;
@@ -101,19 +101,19 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       {
         url: tlsWebhookServers.rejectUnauthorizedFalse,
         tls: {
-          rejectUnauthorized: false,
+          verificationMode: 'none',
         },
       },
       {
         url: tlsWebhookServers.rejectUnauthorizedTrue,
         tls: {
-          rejectUnauthorized: true,
+          verificationMode: 'full',
         },
       },
       {
         url: tlsWebhookServers.caFile,
         tls: {
-          rejectUnauthorized: true,
+          verificationMode: 'certificate',
           certificateAuthoritiesFiles: [CA_CERT_PATH],
         },
       },
@@ -150,7 +150,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
+          `--xpack.actions.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
           ...customHostSettings,
           '--xpack.eventLog.logEntries=true',
