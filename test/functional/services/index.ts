@@ -13,8 +13,8 @@ import {
   BrowserProvider,
   FailureDebuggingProvider,
   FindProvider,
-  ScreenshotsProvider,
-  SnapshotsProvider,
+  ScreenshotsService,
+  SnapshotsService,
   TestSubjects,
 } from './common';
 import { ComboBoxService } from './combo_box';
@@ -58,8 +58,8 @@ export const services = {
   find: FindProvider,
   testSubjects: TestSubjects,
   docTable: DocTableService,
-  screenshots: ScreenshotsProvider,
-  snapshots: SnapshotsProvider,
+  screenshots: ScreenshotsService,
+  snapshots: SnapshotsService,
   failureDebugging: FailureDebuggingProvider,
   listingTable: ListingTableService,
   dashboardVisualizations: DashboardVisualizationsService,
