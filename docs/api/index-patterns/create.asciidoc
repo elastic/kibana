@@ -4,7 +4,7 @@
 <titleabbrev>Create index pattern</titleabbrev>
 ++++
 
-experimental[] Create {kib} index pattern.
+experimental[] Create {kib} index patterns.
 
 [[index-patterns-api-create-request]]
 ==== Request
@@ -22,13 +22,13 @@ experimental[] Create {kib} index pattern.
 [[index-patterns-api-create-body-params]]
 ==== Request body
 
-`override`:: (Optional, boolean) If should override an existing index pattern if an
-index pattern with the provided title already exists. Defaults to false.
+`override`:: (Optional, boolean) Overrides an existing index pattern if an
+index pattern with the provided title already exists. The default is `false`.
 
-`refresh_fields`:: (Optional, boolean) If to reload index pattern fields after
-the index pattern is stored. Defaults to false.
+`refresh_fields`:: (Optional, boolean) Reloads index pattern fields after
+the index pattern is stored. The default is `false`.
 
-`index_pattern`:: (Required, object) Index pattern spec object. All fields are optional. See example request below.
+`index_pattern`:: (Required, object) The index pattern object. All fields are optional.
 
 [[index-patterns-api-create-request-codes]]
 ==== Response code
@@ -52,7 +52,7 @@ $ curl -X POST api/index_patterns/index_pattern
 --------------------------------------------------
 // KIBANA
 
-Customize creation behavior:
+Customize the creation behavior:
 
 [source,sh]
 --------------------------------------------------
@@ -67,7 +67,7 @@ $ curl -X POST api/index_patterns/index_pattern
 --------------------------------------------------
 // KIBANA
 
-At creation all index pattern fields are optional, and you can provide them:
+At creation, all index pattern fields are optional:
 
 [source,sh]
 --------------------------------------------------
@@ -91,7 +91,7 @@ $ curl -X POST api/index_patterns/index_pattern
 // KIBANA
 
 
-The API returns created index pattern object:
+The API returns the index pattern object:
 
 [source,sh]
 --------------------------------------------------

@@ -20,7 +20,7 @@ experimental[] Retrieve a single {kib} index pattern by ID.
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `id`::
-(Required, string) The ID of the index pattern to retrieve.
+(Required, string) The ID of the index pattern you want to retrieve.
 
 [[index-patterns-api-get-codes]]
 ==== Response code
@@ -29,7 +29,7 @@ experimental[] Retrieve a single {kib} index pattern by ID.
 Indicates a successful call.
 
 `404`::
-Index pattern with id `<id>` doesn't exist.
+The specified index pattern and ID doesn't exist.
 
 [[index-patterns-api-get-example]]
 ==== Example

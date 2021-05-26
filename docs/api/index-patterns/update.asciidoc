@@ -4,8 +4,8 @@
 <titleabbrev>Update index pattern</titleabbrev>
 ++++
 
-experimental[] Update part of an index pattern. Only provided fields will be updated on the
-index pattern, missing fields will stay as they are persisted.
+experimental[] Update part of an index pattern. Only the specified fields are updated in the
+index pattern. Unspecified fields stay as they are persisted.
 
 [[index-patterns-api-update-request]]
 ==== Request
@@ -21,19 +21,19 @@ index pattern, missing fields will stay as they are persisted.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `id`::
-  (Required, string) The ID of index pattern to update.
+  (Required, string) The ID of the index pattern you want to update.
 
 [[index-patterns-api-update-request-body]]
 ==== Request body
 
-`refresh_fields`:: (Optional, boolean) If to reload index pattern fields after
-the index pattern is updated. Defaults to false.
+`refresh_fields`:: (Optional, boolean) Reloads the index pattern fields after
+the index pattern is updated. The default is `false`.
 
 `index_pattern`::
-  (Required, object) the index patterns fields to update.
+  (Required, object) The index patterns fields you want to update.
 +
 
-These fields can be updated partially:
+You can partially update the following fields:
 
 * `title`
 * `timeFieldName`
@@ -52,7 +52,7 @@ These fields can be updated partially:
 [[index-patterns-api-update-example]]
 ==== Examples
 
-Update a title of a <my-pattern> index pattern:
+Update a title of the `<my-pattern>` index pattern:
 
 [source,sh]
 --------------------------------------------------
@@ -65,7 +65,8 @@ $ curl -X POST api/saved_objects/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA
 
-Customize update behavior:
+Customize the update behavior:
+
 [source,sh]
 --------------------------------------------------
 $ curl -X POST api/saved_objects/index-pattern/my-pattern
@@ -79,7 +80,8 @@ $ curl -X POST api/saved_objects/index-pattern/my-pattern
 // KIBANA
 
 
-All update fields are optional, you can specify the following fields:
+All update fields are optional, but you can specify the following fields:
+
 [source,sh]
 --------------------------------------------------
 $ curl -X POST api/saved_objects/index-pattern/my-pattern

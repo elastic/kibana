@@ -1,12 +1,12 @@
 [[index-patterns-api]]
 == Index patterns APIs
 
-experimental[] Manage {kib} index patterns using REST API.
+experimental[] Manage {kib} index patterns.
 
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly
 to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
 
-WARNING: Prefer using index patterns API for managing {kib} index patterns instead of lower-level <<saved-objects-api, saved objects API>>.
+WARNING: Use the index patterns API for managing {kib} index patterns instead of lower-level <<saved-objects-api, saved objects API>>.
 
 The following index patterns APIs are available: 
 
