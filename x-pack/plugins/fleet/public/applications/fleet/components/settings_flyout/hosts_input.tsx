@@ -6,7 +6,7 @@
  */
 import React, { useMemo, useCallback, useState } from 'react';
 import type { ReactNode, FunctionComponent, ChangeEvent } from 'react';
-import sytled from 'styled-components';
+import sytled, { useTheme } from 'styled-components';
 
 import {
   EuiFlexGroup,
@@ -26,6 +26,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   id: string;
@@ -66,6 +68,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
     }, [onDelete, index]);
 
     const isInvalid = (errors?.length ?? 0) > 0;
+    const theme = useTheme() as EuiTheme;
 
     return (
       <EuiDraggable
@@ -83,7 +86,11 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
             alignItems="center"
             gutterSize="none"
             responsive={false}
-            style={state.isDragging ? { background: '#fff' } : {}}
+            style={
+              state.isDragging
+                ? { background: theme.eui.euiPanelBackgroundColorModifiers.plain }
+                : {}
+            }
           >
             <EuiFlexItem grow={false}>
               <DraggableDiv
@@ -229,7 +236,6 @@ export const HostsInput: FunctionComponent<Props> = ({
             ))}
           </EuiDroppable>
         </EuiDragDropContext>
-        {globalErrors}
         {displayErrors(globalErrors)}
         <EuiSpacer size="m" />
         <EuiButtonEmpty size="xs" flush="left" iconType="plusInCircle" onClick={addRowHandler}>
