@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { visualizationSavedObjectTypeMigrations } from './visualization_migrations';
+import { visualizationSavedObjectTypeMigrations } from './visualization_saved_object_migrations';
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
