@@ -61,15 +61,15 @@ const normalizeServiceNowFields = (snFields: ServiceNowGetFieldsResponse): Conne
     []
   );
 export interface SwimlaneMappings {
-  title: string;
+  title?: string;
   description?: string;
   comments?: string;
 }
 export const mapSwimlaneFields = (
   slFields: SwimlanePublicConfigurationType['mappings']
 ): SwimlaneMappings => ({
-  title: slFields.alertNameConfig.id,
-  description: slFields.commentsConfig?.id,
+  title: slFields.caseNameConfig?.id,
+  description: slFields.descriptionConfig?.id,
   comments: slFields.commentsConfig?.id,
 });
 
@@ -111,9 +111,8 @@ const getPreferredFields = (theType: string, swimlaneMappings?: SwimlaneMappings
     description = 'description';
     comments = 'work_notes';
   } else if (theType === ConnectorTypes.swimlane) {
-    title = 'alertName';
-    // TODO: Where we should map the description?
-    description = 'comments';
+    title = 'caseName';
+    description = 'description';
     comments = 'comments';
   }
 
