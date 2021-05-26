@@ -23,6 +23,7 @@ interface CreateTestConfigOptions {
   publicBaseUrl?: boolean;
   preconfiguredAlertHistoryEsIndex?: boolean;
   customizeLocalHostTls?: boolean;
+  rejectUnauthorized?: boolean; // legacy
 }
 
 // test.not-enabled is specifically not enabled
@@ -52,6 +53,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     verificationMode = 'full',
     preconfiguredAlertHistoryEsIndex = false,
     customizeLocalHostTls = false,
+    rejectUnauthorized = true, // legacy
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -150,6 +152,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+          `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           `--xpack.actions.tls.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
           ...customHostSettings,
