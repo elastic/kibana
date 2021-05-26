@@ -46,7 +46,11 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
             data-test-subj="header-tooltip"
             content={<HeaderToolTipContent header={header} />}
           >
-            <>{header.label ?? header.id}</>
+            <>
+              {React.isValidElement(header.display)
+                ? header.display
+                : header.displayAsText ?? header.id}
+            </>
           </EuiToolTip>
         </TruncatableText>
 
@@ -63,7 +67,11 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
             data-test-subj="header-tooltip"
             content={<HeaderToolTipContent header={header} />}
           >
-            <>{header.label ?? header.id}</>
+            <>
+              {React.isValidElement(header.display)
+                ? header.display
+                : header.displayAsText ?? header.id}
+            </>
           </EuiToolTip>
         </TruncatableText>
       </EventsHeadingTitleSpan>

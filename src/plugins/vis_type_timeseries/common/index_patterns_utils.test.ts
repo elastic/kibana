@@ -11,7 +11,7 @@ import {
   isStringTypeIndexPattern,
   fetchIndexPattern,
 } from './index_patterns_utils';
-import { PanelSchema } from './types';
+import { Panel } from './types';
 import { IndexPattern, IndexPatternsService } from '../../data/common';
 
 describe('isStringTypeIndexPattern', () => {
@@ -24,7 +24,7 @@ describe('isStringTypeIndexPattern', () => {
 });
 
 describe('extractIndexPatterns', () => {
-  let panel: PanelSchema;
+  let panel: Panel;
 
   beforeEach(() => {
     panel = {
@@ -40,7 +40,7 @@ describe('extractIndexPatterns', () => {
         },
       ],
       annotations: [{ index_pattern: 'notes-*' }, { index_pattern: 'example-1-*' }],
-    } as PanelSchema;
+    } as Panel;
   });
 
   test('should return index patterns', () => {

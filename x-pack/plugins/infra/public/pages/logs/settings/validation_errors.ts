@@ -45,6 +45,11 @@ export interface RollupIndexPatternValidationError {
   indexPatternTitle: string;
 }
 
+export interface MissingIndexPatternValidationError {
+  type: 'missing_index_pattern';
+  indexPatternId: string;
+}
+
 export type FormValidationError =
   | GenericValidationError
   | ChildFormValidationError
@@ -53,7 +58,8 @@ export type FormValidationError =
   | MissingTimestampFieldValidationError
   | MissingMessageFieldValidationError
   | InvalidMessageFieldTypeValidationError
-  | RollupIndexPatternValidationError;
+  | RollupIndexPatternValidationError
+  | MissingIndexPatternValidationError;
 
 export const validateStringNotEmpty = (fieldName: string, value: string): FormValidationError[] =>
   value === '' ? [{ type: 'empty_field', fieldName }] : [];

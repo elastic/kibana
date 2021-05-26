@@ -481,10 +481,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   return (
     <>
       {isEnrollmentFlyoutOpen ? (
-        <AgentEnrollmentFlyout
-          agentPolicies={agentPolicies}
-          onClose={() => setIsEnrollmentFlyoutOpen(false)}
-        />
+        <EuiPortal>
+          <AgentEnrollmentFlyout
+            agentPolicies={agentPolicies}
+            onClose={() => setIsEnrollmentFlyoutOpen(false)}
+          />
+        </EuiPortal>
       ) : null}
       {agentToReassign && (
         <EuiPortal>

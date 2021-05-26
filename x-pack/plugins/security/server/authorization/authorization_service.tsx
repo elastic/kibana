@@ -10,7 +10,6 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Observable, Subscription } from 'rxjs';
 
-import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import type {
   CapabilitiesSetup,
   HttpServiceSetup,
@@ -52,7 +51,6 @@ import { validateReservedPrivileges } from './validate_reserved_privileges';
 
 export { Actions } from './actions';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
-export { featurePrivilegeIterator } from './privileges';
 
 interface AuthorizationServiceSetupParams {
   packageVersion: string;
@@ -163,25 +161,14 @@ export class AuthorizationService {
 
     http.registerOnPreResponse((request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
-        const basePath = http.basePath.get(request);
-        const next = `${basePath}${request.url.pathname}${request.url.search}`;
-        const regularBundlePath = `${basePath}/${buildNumber}/bundles`;
-
-        const logoutUrl = http.basePath.prepend(
-          `/api/security/logout?${querystring.stringify({ next })}`
-        );
-        const styleSheetPaths = [
-          `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
-          `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
-          `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
-          `${basePath}/ui/legacy_light_theme.css`,
-        ];
-
+        const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
         const body = renderToStaticMarkup(
           <ResetSessionPage
-            logoutUrl={logoutUrl}
-            styleSheetPaths={styleSheetPaths}
-            basePath={basePath}
+            buildNumber={buildNumber}
+            basePath={http.basePath}
+            logoutUrl={http.basePath.prepend(
+              `/api/security/logout?${querystring.stringify({ next })}`
+            )}
           />
         );
 

@@ -12,7 +12,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('kibana_exclusive_mb', () => {
+  describe('kibana_exclusive mb', () => {
     const archive = 'monitoring/setup/collection/kibana_exclusive_mb';
     const timeRange = {
       min: '2019-04-09T00:00:00.741Z',

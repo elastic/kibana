@@ -11,10 +11,9 @@ import { formatMetric } from '../../../lib/format_number';
 import {
   EuiText,
   EuiPopover,
-  EuiIcon,
+  EuiButtonIcon,
   EuiDescriptionList,
   EuiSpacer,
-  EuiKeyboardAccessible,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -40,7 +39,7 @@ const getDirection = (slope) => {
 
 const getIcon = (slope) => {
   if (slope || slope === 0) {
-    return slope > 0 ? 'arrowUp' : 'arrowDown';
+    return slope > 0 ? 'sortUp' : 'sortDown';
   }
   return null;
 };
@@ -83,17 +82,22 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
       },
     ];
 
+    const iconLabel = i18n.translate(
+      'xpack.monitoring.elasticsearch.node.cells.tooltip.iconLabel',
+      {
+        defaultMessage: 'More information about this metric',
+      }
+    );
+
     const button = (
-      <EuiKeyboardAccessible>
-        <EuiIcon
-          onClick={onButtonClick}
-          type={getIcon(slope)}
-          data-test-subj={`monitoringCellIcon-${props['data-test-subj']}`}
-          title={i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.iconLabel', {
-            defaultMessage: 'More information about this metric',
-          })}
-        />
-      </EuiKeyboardAccessible>
+      <EuiButtonIcon
+        color="text"
+        onClick={onButtonClick}
+        iconType={getIcon(slope)}
+        data-test-subj={`monitoringCellIcon-${props['data-test-subj']}`}
+        title={iconLabel}
+        aria-label={iconLabel}
+      />
     );
 
     return (

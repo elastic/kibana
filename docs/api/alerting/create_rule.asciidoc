@@ -6,6 +6,8 @@
 
 Create {kib} rules.
 
+WARNING: This API supports <<token-api-authentication>> only.
+
 [[create-rule-api-request]]
 ==== Request
 

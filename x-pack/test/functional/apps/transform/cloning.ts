@@ -11,6 +11,7 @@ import {
   isPivotTransform,
   TransformPivotConfig,
 } from '../../../../plugins/transform/common/types/transform';
+import { getLatestTransformConfig } from './index';
 
 interface TestData {
   type: 'pivot' | 'latest';
@@ -32,7 +33,7 @@ function getTransformConfig(): TransformPivotConfig {
       aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
     },
     description:
-      'ecommerce batch transform with avg(products.base_price) grouped by terms(category.keyword)',
+      'ecommerce batch transform with avg(products.base_price) grouped by terms(category)',
     frequency: '3s',
     settings: {
       max_page_search_size: 250,
@@ -85,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
     const transformConfigWithRuntimeMapping = getTransformConfigWithRuntimeMappings();
-    // const transformConfigWithLatest = getLatestTransformConfig();
+    const transformConfigWithLatest = getLatestTransformConfig('cloning');
 
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
@@ -99,10 +100,10 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithRuntimeMapping
       );
 
-      // await transform.api.createAndRunTransform(
-      //   transformConfigWithLatest.id,
-      //   transformConfigWithLatest
-      // );
+      await transform.api.createAndRunTransform(
+        transformConfigWithLatest.id,
+        transformConfigWithLatest
+      );
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
@@ -114,10 +115,10 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithRuntimeMapping.dest.index
       );
 
-      // await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
       await transform.api.deleteIndices(transformConfigWithRuntimeMapping.dest.index);
-      // await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
+      await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
     });
 
@@ -186,33 +187,30 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       },
-      // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
-      // {
-      //   type: 'latest' as const,
-      //   suiteTitle: 'clone transform with latest function',
-      //   originalConfig: transformConfigWithLatest,
-      //   transformId: `clone_${transformConfigWithLatest.id}`,
-      //   transformDescription: `a cloned transform`,
-      //   get destinationIndex(): string {
-      //     return `user-${this.transformId}`;
-      //   },
-      //   expected: {
-      //     indexPreview: {
-      //       columns: 10,
-      //       rows: 5,
-      //     },
-      //     transformPreview: {
-      //       column: 0,
-      //       values: [
-      //         'July 12th 2019, 22:16:19',
-      //         'July 12th 2019, 22:50:53',
-      //         'July 12th 2019, 23:06:43',
-      //         'July 12th 2019, 23:15:22',
-      //         'July 12th 2019, 23:31:12',
-      //       ],
-      //     },
-      //   },
-      // },
+      {
+        type: 'latest' as const,
+        suiteTitle: 'clone transform with latest function',
+        originalConfig: transformConfigWithLatest,
+        transformId: `clone_${transformConfigWithLatest.id}`,
+        transformDescription: `a cloned transform`,
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          transformPreview: {
+            column: 0,
+            values: [
+              'July 12th 2019, 23:06:43',
+              'July 12th 2019, 23:31:12',
+              'July 12th 2019, 23:45:36',
+            ],
+          },
+        },
+      },
     ];
 
     for (const testData of testDataList) {

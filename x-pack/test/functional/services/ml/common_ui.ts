@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test/types/ftr';
+import { ProvidedType } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -121,6 +121,25 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
       await label.click();
       await this.assertRadioGroupValue(testSubject, value);
+    },
+
+    async assertSelectSelectedOptionVisibleText(testSubject: string, visibleText: string) {
+      // Need to validate the selected option text, as the option value may be different to the visible text.
+      const selectControl = await testSubjects.find(testSubject);
+      const selectedValue = await selectControl.getAttribute('value');
+      const selectedOption = await selectControl.findByCssSelector(`[value="${selectedValue}"]`);
+      const selectedOptionText = await selectedOption.getVisibleText();
+      expect(selectedOptionText).to.eql(
+        visibleText,
+        `Expected selected option visible text to be '${visibleText}' (got '${selectedOptionText}')`
+      );
+    },
+
+    async selectSelectValueByVisibleText(testSubject: string, visibleText: string) {
+      // Cannot use await testSubjects.selectValue as the option value may be different to the text.
+      const selectControl = await testSubjects.find(testSubject);
+      await selectControl.type(visibleText);
+      await this.assertSelectSelectedOptionVisibleText(testSubject, visibleText);
     },
 
     async setMultiSelectFilter(testDataSubj: string, fieldTypes: string[]) {
@@ -244,6 +263,29 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
           )}' (got '${JSON.stringify(actualColorStatsWithTolerance)}')`
         );
       });
+    },
+
+    async assertRowsNumberPerPage(testSubj: string, rowsNumber: 10 | 25 | 100) {
+      const textContent = await testSubjects.getVisibleText(
+        `${testSubj} > tablePaginationPopoverButton`
+      );
+      expect(textContent).to.be(`Rows per page: ${rowsNumber}`);
+    },
+
+    async ensurePagePopupOpen(testSubj: string) {
+      await retry.tryForTime(5000, async () => {
+        const isOpen = await testSubjects.exists('tablePagination-10-rows');
+        if (!isOpen) {
+          await testSubjects.click(`${testSubj} > tablePaginationPopoverButton`);
+          await testSubjects.existOrFail('tablePagination-10-rows');
+        }
+      });
+    },
+
+    async setRowsNumberPerPage(testSubj: string, rowsNumber: 10 | 25 | 100) {
+      await this.ensurePagePopupOpen(testSubj);
+      await testSubjects.click(`tablePagination-${rowsNumber}-rows`);
+      await this.assertRowsNumberPerPage(testSubj, rowsNumber);
     },
   };
 }

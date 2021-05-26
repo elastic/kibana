@@ -9,126 +9,69 @@ import React from 'react';
 import { EuiText, EuiCommentProps, EuiAvatar } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import moment from 'moment';
-import uuid from 'uuid';
 
-import * as i18n from './translations';
 import {
-  AlertData,
-  BuilderEntry,
-  CreateExceptionListItemBuilderSchema,
-  ExceptionsBuilderExceptionItem,
-  Flattened,
-} from './types';
-import { EXCEPTION_OPERATORS, isOperator } from '../autocomplete/operators';
-import { OperatorOption } from '../autocomplete/types';
-import {
+  comment,
+  osType,
   CommentsArray,
   Comment,
   CreateComment,
   Entry,
-  ExceptionListItemSchema,
   NamespaceType,
-  OperatorTypeEnum,
-  CreateExceptionListItemSchema,
-  comment,
-  entry,
-  entriesNested,
-  nestedEntryItem,
-  createExceptionListItemSchema,
-  exceptionListItemSchema,
-  UpdateExceptionListItemSchema,
   EntryNested,
   OsTypeArray,
-  EntriesArray,
-  osType,
   ExceptionListType,
-} from '../../../shared_imports';
+  ListOperatorTypeEnum as OperatorTypeEnum,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import {
+  getOperatorType,
+  getNewExceptionItem,
+  addIdToEntries,
+  ExceptionsBuilderExceptionItem,
+} from '@kbn/securitysolution-list-utils';
+import * as i18n from './translations';
+import { AlertData, Flattened } from './types';
+
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { validate } from '../../../../common/validate';
 import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
-import { addIdToItem, removeIdFromItem } from '../../../../common';
-import exceptionableFields from './exceptionable_fields.json';
+import exceptionableLinuxFields from './exceptionable_linux_fields.json';
+import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
+import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
+import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
 
 export const filterIndexPatterns = (
   patterns: IIndexPattern,
-  type: ExceptionListType
+  type: ExceptionListType,
+  osTypes?: OsTypeArray
 ): IIndexPattern => {
-  return type === 'endpoint'
-    ? {
+  switch (type) {
+    case 'endpoint':
+      const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
+        ? (name: string) =>
+            exceptionableLinuxFields.includes(name) || exceptionableEndpointFields.includes(name)
+        : (name: string) =>
+            exceptionableWindowsMacFields.includes(name) ||
+            exceptionableEndpointFields.includes(name);
+
+      return {
         ...patterns,
-        fields: patterns.fields.filter(({ name }) => exceptionableFields.includes(name)),
-      }
-    : patterns;
-};
-
-export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
-  return entries.map((singleEntry) => {
-    if (singleEntry.type === 'nested') {
-      return addIdToItem({
-        ...singleEntry,
-        entries: singleEntry.entries.map((nestedEntry) => addIdToItem(nestedEntry)),
-      });
-    } else {
-      return addIdToItem(singleEntry);
-    }
-  });
-};
-
-/**
- * Returns the operator type, may not need this if using io-ts types
- *
- * @param item a single ExceptionItem entry
- */
-export const getOperatorType = (item: BuilderEntry): OperatorTypeEnum => {
-  switch (item.type) {
-    case 'match':
-      return OperatorTypeEnum.MATCH;
-    case 'match_any':
-      return OperatorTypeEnum.MATCH_ANY;
-    case 'list':
-      return OperatorTypeEnum.LIST;
+        fields: patterns.fields.filter(({ name }) => osFilterForEndpoint(name)),
+      };
+    case 'endpoint_events':
+      return {
+        ...patterns,
+        fields: patterns.fields.filter(({ name }) =>
+          exceptionableEndpointEventFields.includes(name)
+        ),
+      };
     default:
-      return OperatorTypeEnum.EXISTS;
-  }
-};
-
-/**
- * Determines operator selection (is/is not/is one of, etc.)
- * Default operator is "is"
- *
- * @param item a single ExceptionItem entry
- */
-export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption => {
-  if (item.type === 'nested') {
-    return isOperator;
-  } else {
-    const operatorType = getOperatorType(item);
-    const foundOperator = EXCEPTION_OPERATORS.find((operatorOption) => {
-      return item.operator === operatorOption.operator && operatorType === operatorOption.type;
-    });
-
-    return foundOperator ?? isOperator;
-  }
-};
-
-/**
- * Returns the fields corresponding value for an entry
- *
- * @param item a single ExceptionItem entry
- */
-export const getEntryValue = (item: BuilderEntry): string | string[] | undefined => {
-  switch (item.type) {
-    case OperatorTypeEnum.MATCH:
-    case OperatorTypeEnum.MATCH_ANY:
-      return item.value;
-    case OperatorTypeEnum.EXISTS:
-      return undefined;
-    case OperatorTypeEnum.LIST:
-      return item.list.id;
-    default:
-      return undefined;
+      return patterns;
   }
 };
 
@@ -167,91 +110,6 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
       />
     ),
   }));
-
-export const getNewExceptionItem = ({
-  listId,
-  namespaceType,
-  ruleName,
-}: {
-  listId: string;
-  namespaceType: NamespaceType;
-  ruleName: string;
-}): CreateExceptionListItemBuilderSchema => {
-  return {
-    comments: [],
-    description: `${ruleName} - exception list item`,
-    entries: addIdToEntries([
-      {
-        field: '',
-        operator: 'included',
-        type: 'match',
-        value: '',
-      },
-    ]),
-    item_id: undefined,
-    list_id: listId,
-    meta: {
-      temporaryUuid: uuid.v4(),
-    },
-    name: `${ruleName} - exception list item`,
-    namespace_type: namespaceType,
-    tags: [],
-    type: 'simple',
-  };
-};
-
-export const filterExceptionItems = (
-  exceptions: ExceptionsBuilderExceptionItem[]
-): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
-    (acc, exception) => {
-      const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
-        const strippedSingleEntry = removeIdFromItem(singleEntry);
-
-        if (entriesNested.is(strippedSingleEntry)) {
-          const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
-            const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
-            const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
-            return validatedNestedEntry != null;
-          });
-          const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
-            removeIdFromItem(singleNestedEntry)
-          );
-
-          const [validatedNestedEntry] = validate(
-            { ...strippedSingleEntry, entries: noIdNestedEntries },
-            entriesNested
-          );
-
-          if (validatedNestedEntry != null) {
-            return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
-          }
-          return nestedAcc;
-        } else {
-          const [validatedEntry] = validate(strippedSingleEntry, entry);
-
-          if (validatedEntry != null) {
-            return [...nestedAcc, singleEntry];
-          }
-          return nestedAcc;
-        }
-      }, []);
-
-      const item = { ...exception, entries };
-
-      if (exceptionListItemSchema.is(item)) {
-        return [...acc, item];
-      } else if (createExceptionListItemSchema.is(item)) {
-        const { meta, ...rest } = item;
-        const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
-        return [...acc, itemSansMetaId];
-      } else {
-        return acc;
-      }
-    },
-    []
-  );
-};
 
 export const formatExceptionItemForUpdate = (
   exceptionItem: ExceptionListItemSchema
@@ -500,9 +358,11 @@ export const getPrepopulatedEndpointException = ({
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
-  const { file } = alertEcsData;
+  const { file, host } = alertEcsData;
   const filePath = file?.path ?? '';
   const sha256Hash = file?.hash?.sha256 ?? '';
+  const filePathDefault = host?.os?.family === 'linux' ? 'file.path' : 'file.path.caseless';
+
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
     entries: addIdToEntries([
@@ -525,7 +385,7 @@ export const getPrepopulatedEndpointException = ({
         ],
       },
       {
-        field: 'file.path.caseless',
+        field: filePathDefault,
         operator: 'included',
         type: 'match',
         value: filePath ?? '',

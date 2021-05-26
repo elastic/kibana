@@ -8,6 +8,7 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiCode,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
@@ -18,7 +19,7 @@ import {
 
 import { Repository, S3Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
-import { textService } from '../../../services/text';
+import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 
 interface Props {
   repository: S3Repository;
@@ -64,6 +65,11 @@ export const S3Settings: React.FunctionComponent<Props> = ({
     text: option,
   }));
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
+  const updateSettings = (name: string, value: string) => {
+    updateRepositorySettings({
+      [name]: value,
+    });
+  };
 
   const storageClassOptions = ['standard', 'reduced_redundancy', 'standard_ia'].map((option) => ({
     value: option,
@@ -249,49 +255,12 @@ export const S3Settings: React.FunctionComponent<Props> = ({
       </EuiDescribedFormGroup>
 
       {/* Chunk size field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeS3.chunkSizeTitle"
-                defaultMessage="Chunk size"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeS3.chunkSizeDescription"
-            defaultMessage="Breaks files into smaller units when taking snapshots."
-          />
-        }
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.chunkSizeLabel"
-              defaultMessage="Chunk size"
-            />
-          }
-          fullWidth
-          isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
-          error={settingErrors.chunkSize}
-          helpText={textService.getSizeNotationHelpText()}
-        >
-          <EuiFieldText
-            defaultValue={chunkSize || ''}
-            fullWidth
-            onChange={(e) => {
-              updateRepositorySettings({
-                chunkSize: e.target.value,
-              });
-            }}
-            data-test-subj="chunkSizeInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <ChunkSizeField
+        isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
+        error={settingErrors.chunkSize}
+        defaultValue={chunkSize || ''}
+        updateSettings={updateSettings}
+      />
 
       {/* Server side encryption field */}
       <EuiDescribedFormGroup
@@ -368,7 +337,20 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.bufferSize)}
           error={settingErrors.bufferSize}
-          helpText={textService.getSizeNotationHelpText()}
+          helpText={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeS3.bufferSizeHelpText"
+              defaultMessage="Accepts byte size units, such as {example1}, {example2}, {example3}, or {example4}. Defaults to {defaultSize} or {defaultPercentage} of JVM heap, whichever is smaller."
+              values={{
+                example1: <EuiCode>1g</EuiCode>,
+                example2: <EuiCode>10mb</EuiCode>,
+                example3: <EuiCode>5k</EuiCode>,
+                example4: <EuiCode>1024B</EuiCode>,
+                defaultSize: <EuiCode>100mb</EuiCode>,
+                defaultPercentage: <EuiCode>5%</EuiCode>,
+              }}
+            />
+          }
         >
           <EuiFieldText
             defaultValue={bufferSize || ''}
@@ -474,94 +456,20 @@ export const S3Settings: React.FunctionComponent<Props> = ({
       </EuiDescribedFormGroup>
 
       {/* Max snapshot bytes field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeS3.maxSnapshotBytesTitle"
-                defaultMessage="Max snapshot bytes per second"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeS3.maxSnapshotBytesDescription"
-            defaultMessage="The rate for creating snapshots for each node."
-          />
-        }
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.maxSnapshotBytesLabel"
-              defaultMessage="Max snapshot bytes per second"
-            />
-          }
-          fullWidth
-          isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
-          error={settingErrors.maxSnapshotBytesPerSec}
-          helpText={textService.getSizeNotationHelpText()}
-        >
-          <EuiFieldText
-            defaultValue={maxSnapshotBytesPerSec || ''}
-            fullWidth
-            onChange={(e) => {
-              updateRepositorySettings({
-                maxSnapshotBytesPerSec: e.target.value,
-              });
-            }}
-            data-test-subj="maxSnapshotBytesInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <MaxSnapshotsField
+        isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
+        error={settingErrors.maxSnapshotBytesPerSec}
+        defaultValue={maxSnapshotBytesPerSec || ''}
+        updateSettings={updateSettings}
+      />
 
       {/* Max restore bytes field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeS3.maxRestoreBytesTitle"
-                defaultMessage="Max restore bytes per second"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeS3.maxRestoreBytesDescription"
-            defaultMessage="The snapshot restore rate for each node."
-          />
-        }
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.maxRestoreBytesLabel"
-              defaultMessage="Max restore bytes per second"
-            />
-          }
-          fullWidth
-          isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
-          error={settingErrors.maxRestoreBytesPerSec}
-          helpText={textService.getSizeNotationHelpText()}
-        >
-          <EuiFieldText
-            defaultValue={maxRestoreBytesPerSec || ''}
-            fullWidth
-            onChange={(e) => {
-              updateRepositorySettings({
-                maxRestoreBytesPerSec: e.target.value,
-              });
-            }}
-            data-test-subj="maxRestoreBytesInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <MaxRestoreField
+        isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
+        error={settingErrors.maxRestoreBytesPerSec}
+        defaultValue={maxRestoreBytesPerSec || ''}
+        updateSettings={updateSettings}
+      />
 
       {/* Readonly field */}
       <EuiDescribedFormGroup

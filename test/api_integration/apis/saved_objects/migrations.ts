@@ -574,6 +574,7 @@ export default ({ getService }: FtrProviderContext) => {
             id: 'legacy-url-alias:spacex:foo:1',
             type: 'legacy-url-alias',
             'legacy-url-alias': {
+              sourceId: '1',
               targetId: newFooId,
               targetNamespace: 'spacex',
               targetType: 'foo',
@@ -606,6 +607,7 @@ export default ({ getService }: FtrProviderContext) => {
             id: 'legacy-url-alias:spacex:bar:1',
             type: 'legacy-url-alias',
             'legacy-url-alias': {
+              sourceId: '1',
               targetId: newBarId,
               targetNamespace: 'spacex',
               targetType: 'bar',
@@ -735,6 +737,7 @@ async function migrateIndex({
     mappingProperties,
     batchSize: 10,
     log: getLogMock(),
+    setStatus: () => {},
     pollInterval: 50,
     scrollDuration: '5m',
     serializer: new SavedObjectsSerializer(typeRegistry),

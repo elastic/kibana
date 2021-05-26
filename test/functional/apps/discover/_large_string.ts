@@ -29,25 +29,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('verify the large string book present', async function () {
-      const ExpectedDoc =
-        'mybookProject Gutenberg EBook of Hamlet, by William Shakespeare' +
+      const expectedText =
+        'Project Gutenberg EBook of Hamlet, by William Shakespeare' +
         ' This eBook is for the use of anyone anywhere in the United States' +
         ' and most other parts of the world at no cost and with almost no restrictions whatsoever.' +
         ' You may copy it, give it away or re-use it under the terms of the' +
         ' Project Gutenberg License included with this eBook or online at www.gutenberg.org.' +
         ' If you are not located in the United States,' +
         ' you’ll have to check the laws of the country where you are' +
-        ' located before using this ebook.' +
-        ' Title: Hamlet Author: William Shakespeare Release Date: November 1998 [EBook #1524]' +
-        ' Last Updated: December 30, 2017 Language: English Character set encoding:' +
-        ' _id:1 _type: - _index:testlargestring _score:0';
+        ' located before using this ebook.';
 
-      let rowData;
       await PageObjects.common.navigateToApp('discover');
       await retry.try(async function tryingForTime() {
-        rowData = await PageObjects.discover.getDocTableIndex(1);
-        log.debug('rowData.length=' + rowData.length);
-        expect(rowData.substring(0, 200)).to.be(ExpectedDoc.substring(0, 200));
+        const rowData = await PageObjects.discover.getDocTableIndex(1);
+        expect(rowData).to.contain(expectedText);
       });
     });
 

@@ -62,25 +62,18 @@ export const LogsToolbar = () => {
             iconType="search"
             indexPatterns={[derivedIndexPattern]}
             isInvalid={!isFilterQueryDraftValid}
-            onChange={(expression: Query) => {
-              if (typeof expression.query === 'string') {
-                setSurroundingLogsId(null);
-                setLogFilterQueryDraft(expression.query);
-              }
+            onChange={(query: Query) => {
+              setSurroundingLogsId(null);
+              setLogFilterQueryDraft(query);
             }}
-            onSubmit={(expression: Query) => {
-              if (typeof expression.query === 'string') {
-                setSurroundingLogsId(null);
-                applyLogFilterQuery(expression.query);
-              }
+            onSubmit={(query: Query) => {
+              setSurroundingLogsId(null);
+              applyLogFilterQuery(query);
             }}
             placeholder={i18n.translate('xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder', {
               defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
             })}
-            query={{
-              query: filterQueryDraft?.expression ?? '',
-              language: filterQueryDraft?.kind ?? 'kuery',
-            }}
+            query={filterQueryDraft}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

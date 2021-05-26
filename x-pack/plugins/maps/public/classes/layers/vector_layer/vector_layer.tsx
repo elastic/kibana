@@ -89,6 +89,8 @@ export interface IVectorLayer extends ILayer {
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
+  canShowTooltip(): boolean;
+  getLeftJoinFields(): Promise<IField[]>;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -782,7 +784,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const filterExpr = getPointFilterExpression(this.hasJoins());
-    if (filterExpr !== mbMap.getFilter(pointLayerId)) {
+    if (!_.isEqual(filterExpr, mbMap.getFilter(pointLayerId))) {
       mbMap.setFilter(pointLayerId, filterExpr);
       mbMap.setFilter(textLayerId, filterExpr);
     }
@@ -818,7 +820,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const filterExpr = getPointFilterExpression(this.hasJoins());
-    if (filterExpr !== mbMap.getFilter(symbolLayerId)) {
+    if (!_.isEqual(filterExpr, mbMap.getFilter(symbolLayerId))) {
       mbMap.setFilter(symbolLayerId, filterExpr);
     }
 
@@ -900,14 +902,14 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     this.syncVisibilityWithMb(mbMap, fillLayerId);
     mbMap.setLayerZoomRange(fillLayerId, this.getMinZoom(), this.getMaxZoom());
     const fillFilterExpr = getFillFilterExpression(hasJoins);
-    if (fillFilterExpr !== mbMap.getFilter(fillLayerId)) {
+    if (!_.isEqual(fillFilterExpr, mbMap.getFilter(fillLayerId))) {
       mbMap.setFilter(fillLayerId, fillFilterExpr);
     }
 
     this.syncVisibilityWithMb(mbMap, lineLayerId);
     mbMap.setLayerZoomRange(lineLayerId, this.getMinZoom(), this.getMaxZoom());
     const lineFilterExpr = getLineFilterExpression(hasJoins);
-    if (lineFilterExpr !== mbMap.getFilter(lineLayerId)) {
+    if (!_.isEqual(lineFilterExpr, mbMap.getFilter(lineLayerId))) {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
 
@@ -931,7 +933,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const filterExpr = getCentroidFilterExpression(this.hasJoins());
-    if (filterExpr !== mbMap.getFilter(centroidLayerId)) {
+    if (!_.isEqual(filterExpr, mbMap.getFilter(centroidLayerId))) {
       mbMap.setFilter(centroidLayerId, filterExpr);
     }
 
@@ -1034,10 +1036,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   canShowTooltip() {
-    return (
-      this.isVisible() &&
-      (this.getSource().canFormatFeatureProperties() || this.getJoins().length > 0)
-    );
+    return this.getSource().hasTooltipProperties() || this.getJoins().length > 0;
   }
 
   getFeatureById(id: string | number) {

@@ -133,17 +133,18 @@ export function ServiceOverviewInstancesTable({
         <EuiTitle size="xs">
           <h2>
             {i18n.translate('xpack.apm.serviceOverview.instancesTableTitle', {
-              defaultMessage: 'All instances',
+              defaultMessage: 'Instances',
             })}
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem data-test-subj="serviceInstancesTableContainer">
         <TableFetchWrapper status={status}>
           <ServiceOverviewTableContainer
             isEmptyAndLoading={mainStatsItemCount === 0 && isLoading}
           >
             <EuiBasicTable
+              data-test-subj="instancesTable"
               loading={isLoading}
               items={mainStatsItems}
               columns={columns}

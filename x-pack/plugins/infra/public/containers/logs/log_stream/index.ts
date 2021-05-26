@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
 import createContainer from 'constate';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
-import { esKuery, esQuery, Query } from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
 import { useSubscription } from '../../../utils/use_observable';
 import { LogSourceConfigurationProperties } from '../log_source';
@@ -23,7 +23,7 @@ interface LogStreamProps {
   sourceId: string;
   startTimestamp: number;
   endTimestamp: number;
-  query?: string | Query | BuiltEsQuery;
+  query?: BuiltEsQuery;
   center?: LogEntryCursor;
   columns?: LogSourceConfigurationProperties['logColumns'];
 }
@@ -77,27 +77,15 @@ export function useLogStream({
     }
   }, [prevEndTimestamp, endTimestamp, setState]);
 
-  const parsedQuery = useMemo(() => {
-    if (!query) {
-      return undefined;
-    } else if (typeof query === 'string') {
-      return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query));
-    } else if ('language' in query) {
-      return getEsQueryFromQueryObject(query);
-    } else {
-      return query;
-    }
-  }, [query]);
-
   const commonFetchArguments = useMemo(
     () => ({
       sourceId,
       startTimestamp,
       endTimestamp,
-      query: parsedQuery,
+      query,
       columnOverrides: columns,
     }),
-    [columns, endTimestamp, parsedQuery, sourceId, startTimestamp]
+    [columns, endTimestamp, query, sourceId, startTimestamp]
   );
 
   const {
@@ -266,15 +254,6 @@ export function useLogStream({
     isLoadingMore,
     isReloading,
   };
-}
-
-function getEsQueryFromQueryObject(query: Query) {
-  switch (query.language) {
-    case 'kuery':
-      return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string));
-    case 'lucene':
-      return esQuery.luceneStringToDsl(query.query as string);
-  }
 }
 
 export const [LogStreamProvider, useLogStreamContext] = createContainer(useLogStream);

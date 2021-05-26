@@ -18,6 +18,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { Loading } from '../../../shared/loading';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 
+import { EmptyState } from './components';
 import { RelevanceTuning } from './relevance_tuning';
 import { RelevanceTuningForm } from './relevance_tuning_form';
 
@@ -51,7 +52,7 @@ describe('RelevanceTuning', () => {
     const wrapper = subject();
     expect(wrapper.find(RelevanceTuningForm).exists()).toBe(true);
     expect(wrapper.find(Loading).exists()).toBe(false);
-    expect(wrapper.find('EmptyCallout').exists()).toBe(false);
+    expect(wrapper.find(EmptyState).exists()).toBe(false);
   });
 
   it('initializes relevance tuning data', () => {
@@ -65,7 +66,7 @@ describe('RelevanceTuning', () => {
       engineHasSchemaFields: false,
     });
     const wrapper = subject();
-    expect(wrapper.find('EmptyCallout').dive().find(EuiEmptyPrompt).exists()).toBe(true);
+    expect(wrapper.find(EmptyState).dive().find(EuiEmptyPrompt).exists()).toBe(true);
     expect(wrapper.find(Loading).exists()).toBe(false);
     expect(wrapper.find(RelevanceTuningForm).exists()).toBe(false);
   });
@@ -77,7 +78,7 @@ describe('RelevanceTuning', () => {
     });
     const wrapper = subject();
     expect(wrapper.find(Loading).exists()).toBe(true);
-    expect(wrapper.find('EmptyCallout').exists()).toBe(false);
+    expect(wrapper.find(EmptyState).exists()).toBe(false);
     expect(wrapper.find(RelevanceTuningForm).exists()).toBe(false);
   });
 

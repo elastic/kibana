@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious PrintSpooler Service Executable File Creation",
-  "query": "event.category:file and not event.type:deletion and process.name:spoolsv.exe and file.extension:(exe or dll) and not file.path:(C\\:\\\\Windows\\\\System32\\\\spool\\\\* or C\\:\\\\Windows\\\\Temp\\\\* or C\\:\\\\Users\\\\*)",
+  "query": "file where event.type != \"deletion\" and process.name : \"spoolsv.exe\" and\n  file.extension : (\"exe\", \"dll\") and\n  not file.path : (\"?:\\\\Windows\\\\System32\\\\spool\\\\*\", \"?:\\\\Windows\\\\Temp\\\\*\", \"?:\\\\Users\\\\*\")\n",
   "references": [
     "https://voidsec.com/cve-2020-1337-printdemon-is-dead-long-live-printdemon/",
     "https://www.thezdi.com/blog/2020/7/8/cve-2020-1300-remote-code-execution-through-microsoft-windows-cab-files"
@@ -45,6 +45,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 3
+  "type": "eql",
+  "version": 4
 }

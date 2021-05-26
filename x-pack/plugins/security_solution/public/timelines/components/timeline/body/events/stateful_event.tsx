@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { CellValueElementProps } from '../../cell_rendering';
+import { ControlColumnProps } from '../control_columns';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   TimelineExpandedDetailType,
@@ -61,6 +62,8 @@ interface Props {
   showCheckboxes: boolean;
   tabType?: TimelineTabs;
   timelineId: string;
+  leadingControlColumns: ControlColumnProps[];
+  trailingControlColumns: ControlColumnProps[];
 }
 
 const emptyNotes: string[] = [];
@@ -93,6 +96,8 @@ const StatefulEventComponent: React.FC<Props> = ({
   showCheckboxes,
   tabType,
   timelineId,
+  leadingControlColumns,
+  trailingControlColumns,
 }) => {
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
@@ -280,6 +285,8 @@ const StatefulEventComponent: React.FC<Props> = ({
           tabType={tabType}
           timelineId={timelineId}
           toggleShowNotes={onToggleShowNotes}
+          leadingControlColumns={leadingControlColumns}
+          trailingControlColumns={trailingControlColumns}
         />
 
         <EventsTrSupplementContainerWrapper>

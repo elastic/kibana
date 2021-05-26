@@ -6,19 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 import { IndexPattern } from '../../index_patterns';
 import { GetConfigFn } from '../../types';
-import { fetchSoon } from './legacy';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
-import { AggConfigs, AggTypesRegistryStart } from '../../';
+import { AggConfigs, AggTypesRegistryStart, ES_SEARCH_STRATEGY } from '../../';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestResponder } from 'src/plugins/inspector/common';
 import { switchMap } from 'rxjs/operators';
-
-jest.mock('./legacy', () => ({
-  fetchSoon: jest.fn().mockResolvedValue({}),
-}));
 
 const getComputedFields = () => ({
   storedFields: [],
@@ -32,7 +27,7 @@ const mockSource2 = { excludes: ['bar-*'] };
 
 const indexPattern = ({
   title: 'foo',
-  fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }],
+  fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }, { name: '_id' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
 } as unknown) as IndexPattern;
@@ -73,7 +68,7 @@ describe('SearchSource', () => {
   beforeEach(() => {
     const getConfigMock = jest
       .fn()
-      .mockImplementation((param) => param === 'metaFields' && ['_type', '_source'])
+      .mockImplementation((param) => param === 'metaFields' && ['_type', '_source', '_id'])
       .mockName('getConfig');
 
     mockSearchMethod = jest
@@ -89,10 +84,6 @@ describe('SearchSource', () => {
       getConfig: getConfigMock,
       search: mockSearchMethod,
       onResponse: (req, res) => res,
-      legacy: {
-        callMsearch: jest.fn(),
-        loadingCount$: new BehaviorSubject(0),
-      },
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);
@@ -361,6 +352,13 @@ describe('SearchSource', () => {
         const request = searchSource.getSearchRequestBody();
         expect(request.stored_fields).toEqual(['*']);
       });
+
+      test('_source is not set when using the fields API', async () => {
+        searchSource.setField('fields', ['*']);
+        const request = searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual(['*']);
+        expect(request._source).toEqual(false);
+      });
     });
 
     describe('source filters handling', () => {
@@ -457,6 +455,28 @@ describe('SearchSource', () => {
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
 
         const request = searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+      });
+
+      test('excludes metafields from the request', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+
+        const request = searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+
+        searchSource.setField('fields', ['foo-bar', 'foo--bar', 'field1', 'field2']);
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+
+        searchSource.removeField('fields');
+        searchSource.setField('fieldsFromSource', ['foo-bar', 'foo--bar', 'field1', 'field2']);
         expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
       });
 
@@ -614,6 +634,7 @@ describe('SearchSource', () => {
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
+        expect(request.hasOwnProperty('docvalue_fields')).toBe(false);
         expect(request.fields).toEqual([
           { field: 'foo-bar' },
           { field: 'field1' },
@@ -869,7 +890,7 @@ describe('SearchSource', () => {
   });
 
   describe('fetch$', () => {
-    describe('#legacy fetch()', () => {
+    describe('#legacy COURIER_BATCH_SEARCHES', () => {
       beforeEach(() => {
         searchSourceDependencies = {
           ...searchSourceDependencies,
@@ -879,11 +900,22 @@ describe('SearchSource', () => {
         };
       });
 
-      test('should call msearch', async () => {
+      test('should override to use sync search if not set', async () => {
         searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
         const options = {};
         await searchSource.fetch$(options).toPromise();
-        expect(fetchSoon).toBeCalledTimes(1);
+
+        const [, callOptions] = mockSearchMethod.mock.calls[0];
+        expect(callOptions.strategy).toBe(ES_SEARCH_STRATEGY);
+      });
+
+      test('should not override strategy if set ', async () => {
+        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+        const options = { strategy: 'banana' };
+        await searchSource.fetch$(options).toPromise();
+
+        const [, callOptions] = mockSearchMethod.mock.calls[0];
+        expect(callOptions.strategy).toBe('banana');
       });
     });
 
@@ -901,18 +933,26 @@ describe('SearchSource', () => {
         expect(next).toBeCalledTimes(2);
         expect(complete).toBeCalledTimes(1);
         expect(next.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Object {
+        Array [
+          Object {
+            "isPartial": true,
+            "isRunning": true,
+            "rawResponse": Object {
               "test": 1,
             },
-          ]
+          },
+        ]
         `);
         expect(next.mock.calls[1]).toMatchInlineSnapshot(`
-          Array [
-            Object {
+        Array [
+          Object {
+            "isPartial": false,
+            "isRunning": false,
+            "rawResponse": Object {
               "test": 2,
             },
-          ]
+          },
+        ]
         `);
       });
 
@@ -956,13 +996,9 @@ describe('SearchSource', () => {
         expect(next).toBeCalledTimes(1);
         expect(error).toBeCalledTimes(1);
         expect(complete).toBeCalledTimes(0);
-        expect(next.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "test": 1,
-            },
-          ]
-        `);
+        expect(next.mock.calls[0][0].rawResponse).toStrictEqual({
+          test: 1,
+        });
         expect(error.mock.calls[0][0]).toBe(undefined);
       });
     });
@@ -1172,7 +1208,7 @@ describe('SearchSource', () => {
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
-        expect(resp).toStrictEqual({ other: 5 });
+        expect(resp.rawResponse).toStrictEqual({ other: 5 });
         expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(3);
       });
 

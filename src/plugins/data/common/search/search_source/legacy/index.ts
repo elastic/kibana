@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { fetchSoon } from './fetch_soon';
 export * from './types';

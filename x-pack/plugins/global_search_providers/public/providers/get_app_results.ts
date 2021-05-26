@@ -6,10 +6,10 @@
  */
 
 import levenshtein from 'js-levenshtein';
-import { PublicAppInfo, PublicAppSearchDeepLinkInfo } from 'src/core/public';
+import { PublicAppInfo, PublicAppDeepLinkInfo } from 'src/core/public';
 import { GlobalSearchProviderResult } from '../../../global_search/public';
 
-/** Type used internally to represent an application unrolled into its separate searchDeepLinks */
+/** Type used internally to represent an application unrolled into its separate deepLinks */
 export interface AppLink {
   id: string;
   app: PublicAppInfo;
@@ -27,7 +27,7 @@ export const getAppResults = (
 ): GlobalSearchProviderResult[] => {
   return (
     apps
-      // Unroll all searchDeepLinks, only if there is a search term
+      // Unroll all deepLinks, only if there is a search term
       .flatMap((app) =>
         term.length > 0
           ? flattenDeepLinks(app)
@@ -37,7 +37,7 @@ export const getAppResults = (
                 app,
                 path: app.appRoute,
                 subLinkTitles: [],
-                keywords: app.meta?.keywords ?? [],
+                keywords: app.keywords ?? [],
               },
             ]
       )
@@ -56,7 +56,7 @@ export const scoreApp = (term: string, appLink: AppLink): number => {
   const appScoreByTerms = scoreAppByTerms(term, title);
 
   const keywords = [
-    ...appLink.app.meta.keywords.map((keyword) => keyword.toLowerCase()),
+    ...appLink.app.keywords.map((keyword) => keyword.toLowerCase()),
     ...appLink.keywords.map((keyword) => keyword.toLowerCase()),
   ];
   const appScoreByKeywords = scoreAppByKeywords(term, keywords);
@@ -115,10 +115,7 @@ export const appToResult = (appLink: AppLink, score: number): GlobalSearchProvid
   };
 };
 
-const flattenDeepLinks = (
-  app: PublicAppInfo,
-  deepLink?: PublicAppSearchDeepLinkInfo
-): AppLink[] => {
+const flattenDeepLinks = (app: PublicAppInfo, deepLink?: PublicAppDeepLinkInfo): AppLink[] => {
   if (!deepLink) {
     return [
       {
@@ -126,9 +123,9 @@ const flattenDeepLinks = (
         app,
         path: app.appRoute,
         subLinkTitles: [],
-        keywords: app.meta?.keywords ?? [],
+        keywords: app?.keywords ?? [],
       },
-      ...app.meta.searchDeepLinks.flatMap((appDeepLink) => flattenDeepLinks(app, appDeepLink)),
+      ...app.deepLinks.flatMap((appDeepLink) => flattenDeepLinks(app, appDeepLink)),
     ];
   }
   return [
@@ -143,7 +140,7 @@ const flattenDeepLinks = (
           },
         ]
       : []),
-    ...deepLink.searchDeepLinks
+    ...deepLink.deepLinks
       .flatMap((deepDeepLink) => flattenDeepLinks(app, deepDeepLink))
       .map((deepAppLink) => ({
         ...deepAppLink,

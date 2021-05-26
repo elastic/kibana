@@ -17,7 +17,7 @@ import {
 } from '../__fixtures__';
 import { initPatchCasesApi } from './patch_cases';
 import { mockCaseConfigure, mockCaseNoConnectorId } from '../__fixtures__/mock_saved_objects';
-import { CaseStatuses } from '../../../../common/api';
+import { CaseStatuses } from '../../../../common';
 
 describe('PATCH cases', () => {
   let routeHandler: RequestHandler<any, any, any>;

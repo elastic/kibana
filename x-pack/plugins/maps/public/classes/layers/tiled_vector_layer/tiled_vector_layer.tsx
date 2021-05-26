@@ -13,6 +13,7 @@ import {
 } from 'mapbox-gl';
 import { Feature } from 'geojson';
 import uuid from 'uuid/v4';
+import { parse as parseUrl } from 'url';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
   KBN_TOO_MANY_FEATURES_PROPERTY,
@@ -22,7 +23,7 @@ import {
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { VectorLayer, VectorLayerArguments } from '../vector_layer';
-import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
+import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
 import { DataRequestContext } from '../../../actions';
 import {
   VectorLayerDescriptor,
@@ -152,10 +153,20 @@ export class TiledVectorLayer extends VectorLayer {
           : prevData.urlToken;
 
       const newUrlTemplateAndMeta = await this._source.getUrlTemplateWithMeta(searchFilters);
+
+      let urlTemplate;
+      if (newUrlTemplateAndMeta.refreshTokenParamName) {
+        const parsedUrl = parseUrl(newUrlTemplateAndMeta.urlTemplate, true);
+        const separator = !parsedUrl.query || Object.keys(parsedUrl.query).length === 0 ? '?' : '&';
+        urlTemplate = `${newUrlTemplateAndMeta.urlTemplate}${separator}${newUrlTemplateAndMeta.refreshTokenParamName}=${urlToken}`;
+      } else {
+        urlTemplate = newUrlTemplateAndMeta.urlTemplate;
+      }
+
       const urlTemplateAndMetaWithToken = {
         ...newUrlTemplateAndMeta,
         urlToken,
-        urlTemplate: newUrlTemplateAndMeta.urlTemplate + `&token=${urlToken}`,
+        urlTemplate,
       };
       stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, urlTemplateAndMetaWithToken, {});
     } catch (error) {

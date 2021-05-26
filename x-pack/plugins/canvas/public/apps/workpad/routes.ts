@@ -70,8 +70,8 @@ export const routes = [
               const fetchedWorkpad = await workpadService.get(params.id);
 
               const { assets, ...workpad } = fetchedWorkpad;
-              dispatch(setWorkpad(workpad));
               dispatch(setAssets(assets));
+              dispatch(setWorkpad(workpad));
 
               // reset transient properties when changing workpads
               dispatch(setZoomScale(1));

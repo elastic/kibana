@@ -15,17 +15,23 @@ interface Props {
 }
 
 export const ProcessorInformation: FunctionComponent<Props> = memo(({ processor }) => {
-  const label = getProcessorDescriptor(processor.type)?.label ?? processor.type;
+  const processorDescriptor = getProcessorDescriptor(processor.type);
+  const label = processorDescriptor?.label ?? processor.type;
+  const description =
+    processor.options.description ?? processorDescriptor?.getDefaultDescription(processor.options);
+
   return (
     <EuiPanel>
       <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
-          <b>{label}</b>
+          <EuiText>
+            <strong>{label}</strong>
+          </EuiText>
         </EuiFlexItem>
-        {processor.options.description ? (
+        {description ? (
           <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size="m">
-              {processor.options.description}
+            <EuiText color="subdued" size="s">
+              {description}
             </EuiText>
           </EuiFlexItem>
         ) : undefined}

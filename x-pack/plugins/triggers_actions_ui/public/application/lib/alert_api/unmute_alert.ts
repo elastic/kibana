@@ -16,5 +16,9 @@ export async function unmuteAlertInstance({
   instanceId: string;
   http: HttpSetup;
 }): Promise<void> {
-  await http.post(`${BASE_ALERTING_API_PATH}/rule/${id}/alert/${instanceId}/_unmute`);
+  await http.post(
+    `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/alert/${encodeURIComponent(
+      instanceId
+    )}/_unmute`
+  );
 }

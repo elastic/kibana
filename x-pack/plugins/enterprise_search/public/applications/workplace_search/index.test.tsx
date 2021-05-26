@@ -18,7 +18,7 @@ import { Layout } from '../shared/layout';
 import { WorkplaceSearchHeaderActions } from './components/layout';
 import { SourceAdded } from './views/content_sources/components/source_added';
 import { ErrorState } from './views/error_state';
-import { Overview as OverviewMVP } from './views/overview_mvp';
+import { Overview } from './views/overview';
 import { SetupGuide } from './views/setup_guide';
 
 import { WorkplaceSearch, WorkplaceSearchUnconfigured, WorkplaceSearchConfigured } from './';
@@ -61,7 +61,7 @@ describe('WorkplaceSearchConfigured', () => {
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
     expect(wrapper.find(Layout).first().prop('readOnlyMode')).toBeFalsy();
-    expect(wrapper.find(OverviewMVP)).toHaveLength(1);
+    expect(wrapper.find(Overview)).toHaveLength(1);
 
     expect(mockKibanaValues.setChromeIsVisible).toHaveBeenCalledWith(true);
     expect(mockKibanaValues.renderHeaderActions).toHaveBeenCalledWith(WorkplaceSearchHeaderActions);

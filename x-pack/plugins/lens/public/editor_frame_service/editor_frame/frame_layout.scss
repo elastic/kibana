@@ -9,12 +9,49 @@
   bottom: 0;
   overflow: hidden;
   flex-direction: column;
+  @include euiBreakpoint('xs', 's', 'm') {
+    position: static;
+  }
 }
 
 .lnsFrameLayout__pageContent {
   overflow: hidden;
   flex-grow: 1;
   flex-direction: row;
+  @include euiBreakpoint('xs', 's', 'm') {
+    flex-wrap: wrap;
+    overflow: auto;
+    > * {
+      flex-basis: 100%;
+    }
+    > .lnsFrameLayout__sidebar {
+      min-height: $euiSizeL * 15;
+    }
+  }
+}
+
+.visEditor {
+  @include flexParent();
+
+  height: 100%;
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    .visualization {
+      // While we are on a small screen the visualization is below the
+      // editor. In this cases it needs a minimum height, since it would otherwise
+      // maybe end up with 0 height since it just gets the flexbox rest of the screen.
+      min-height: $euiSizeL * 15;
+    }
+  }
+
+  /* 1. Without setting this to 0 you will run into a bug where the filter bar modal is hidden under
+a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
+  > .visualize {
+    height: 100%;
+    flex: 1 1 auto;
+    display: flex;
+    z-index: 0; /* 1 */
+  }
 }
 
 .lnsFrameLayout__pageBody {
@@ -51,6 +88,10 @@
   max-width: $euiFormMaxWidth + $euiSizeXXL;
   max-height: 100%;
 
+  @include euiBreakpoint('xs', 's', 'm') {
+    max-width: 100%;
+  }
+
   .lnsConfigPanel {
     @include euiScrollBar;
     padding: $euiSize $euiSizeXS $euiSize $euiSize;
@@ -58,5 +99,10 @@
     overflow-y: scroll;
     padding-left: $euiFormMaxWidth + $euiSize;
     margin-left: -$euiFormMaxWidth;
+
+    @include euiBreakpoint('xs', 's', 'm') {
+      padding-left: $euiSize;
+      margin-left: 0;
+    }
   }
 }

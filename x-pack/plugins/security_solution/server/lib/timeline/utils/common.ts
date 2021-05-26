@@ -11,17 +11,17 @@ import fs from 'fs';
 import { Readable } from 'stream';
 import { createListStream } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
-import { isObject } from 'lodash/fp';
 
 import { KibanaRequest } from 'src/core/server';
-import { SetupPlugins } from '../../../plugin';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { SetupPlugins, StartPlugins } from '../../../plugin';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { FrameworkRequest } from '../../framework';
 
 export const buildFrameworkRequest = async (
   context: SecuritySolutionRequestHandlerContext,
-  security: SetupPlugins['security'],
+  security: StartPlugins['security'] | SetupPlugins['security'] | undefined,
   request: KibanaRequest
 ): Promise<FrameworkRequest> => {
   const savedObjectsClient = context.core.savedObjects.client;
@@ -39,29 +39,6 @@ export const buildFrameworkRequest = async (
 };
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
-
-export const formatErrors = (errors: rt.Errors): string[] => {
-  const err = errors.map((error) => {
-    if (error.message != null) {
-      return error.message;
-    } else {
-      const keyContext = error.context
-        .filter(
-          (entry) => entry.key != null && !Number.isInteger(+entry.key) && entry.key.trim() !== ''
-        )
-        .map((entry) => entry.key)
-        .join(',');
-
-      const nameContext = error.context.find((entry) => entry.type?.name?.length > 0);
-      const suppliedValue =
-        keyContext !== '' ? keyContext : nameContext != null ? nameContext.type.name : '';
-      const value = isObject(error.value) ? JSON.stringify(error.value) : error.value;
-      return `Invalid value "${value}" supplied to "${suppliedValue}"`;
-    }
-  });
-
-  return [...new Set(err)];
-};
 
 type ErrorFactory = (message: string) => Error;
 

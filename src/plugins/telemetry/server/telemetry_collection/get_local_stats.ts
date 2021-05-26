@@ -26,10 +26,10 @@ import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get
  * @param {Object} clusterStats Cluster stats (GET /_cluster/stats)
  * @param {Object} kibana The Kibana Usage stats
  */
-export function handleLocalStats(
+export function handleLocalStats<ClusterStats extends estypes.ClusterStatsResponse>(
   // eslint-disable-next-line @typescript-eslint/naming-convention
   { cluster_name, cluster_uuid, version }: estypes.RootNodeInfoResponse,
-  { _nodes, cluster_name: clusterName, ...clusterStats }: any,
+  { _nodes, cluster_name: clusterName, ...clusterStats }: ClusterStats,
   kibana: KibanaUsageStats | undefined,
   dataTelemetry: DataTelemetryPayload | undefined,
   context: StatsCollectionContext
@@ -48,13 +48,17 @@ export function handleLocalStats(
   };
 }
 
+/**
+ * The payload structure as composed by the OSS telemetry collection mechanism.
+ */
 export type TelemetryLocalStats = ReturnType<typeof handleLocalStats>;
 
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
- * @param {Array} cluster uuids array of cluster uuid's
- * @param {Object} config contains the usageCollection, callCluster (deprecated), the esClient and Saved Objects client scoped to the request or the internal repository, and the kibana request
- * @param {Object} StatsCollectionContext contains logger and version (string)
+ * @internal only used externally by the X-Pack Telemetry extension
+ * @param clustersDetails uuids array of cluster uuid's
+ * @param config contains the usageCollection, callCluster (deprecated), the esClient and Saved Objects client scoped to the request or the internal repository, and the kibana request
+ * @param context contains logger and version (string)
  */
 export const getLocalStats: StatsGetter<TelemetryLocalStats> = async (
   clustersDetails,

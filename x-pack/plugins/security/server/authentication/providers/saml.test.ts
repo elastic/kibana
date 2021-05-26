@@ -10,6 +10,10 @@ import Boom from '@hapi/boom';
 
 import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 
+import {
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+} from '../../../common/constants';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
@@ -848,16 +852,61 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('redirects non-AJAX request that can not be authenticated to the "capture URL" page.', async () => {
+      mockOptions.getRequestOriginalURL.mockReturnValue(
+        '/mock-server-basepath/s/foo/some-path?auth_provider_hint=saml'
+      );
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
-
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path&providerType=saml&providerName=saml',
+          '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path%3Fauth_provider_hint%3Dsaml',
           { state: null }
         )
       );
 
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledTimes(1);
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledWith(request, [
+        [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER, 'saml'],
+      ]);
+
       expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('initiates SAML handshake for non-AJAX request that can not be authenticated, but includes URL hash fragment.', async () => {
+      mockOptions.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/s/foo/some-path');
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
+        securityMock.createApiResponse({
+          body: {
+            id: 'some-request-id',
+            redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+          },
+        })
+      );
+
+      const request = httpServerMock.createKibanaRequest({
+        path: '/s/foo/some-path',
+        query: { [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: '#some-fragment' },
+      });
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.redirectTo(
+          'https://idp-host/path/login?SAMLRequest=some%20request%20',
+          {
+            state: {
+              requestId: 'some-request-id',
+              redirectURL: '/mock-server-basepath/s/foo/some-path#some-fragment',
+              realm: 'test-realm',
+            },
+          }
+        )
+      );
+
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledTimes(1);
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledWith(request);
+
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/saml/prepare',
+        body: { realm: 'test-realm' },
+      });
     });
 
     it('succeeds if state contains a valid token.', async () => {
@@ -1024,6 +1073,9 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('re-capture URL for non-AJAX requests if refresh token is expired.', async () => {
+      mockOptions.getRequestOriginalURL.mockReturnValue(
+        '/mock-server-basepath/s/foo/some-path?auth_provider_hint=saml'
+      );
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path', headers: {} });
       const state = {
         accessToken: 'expired-token',
@@ -1040,10 +1092,15 @@ describe('SAMLAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path&providerType=saml&providerName=saml',
+          '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path%3Fauth_provider_hint%3Dsaml',
           { state: null }
         )
       );
+
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledTimes(1);
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledWith(request, [
+        [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER, 'saml'],
+      ]);
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(state.refreshToken);

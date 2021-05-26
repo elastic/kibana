@@ -1,6 +1,7 @@
 .header__topBanner {
   position: fixed;
   top: 0;
+  left: 0;
   height: $kbnHeaderBannerHeight;
   width: 100%;
   z-index: $euiZHeader;
