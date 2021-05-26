@@ -11,25 +11,28 @@ import { EuiFieldSearch, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { TimelineEntry } from './components/timeline_entry';
 import * as i18 from '../translations';
 import { Immutable, EndpointAction } from '../../../../../../common/endpoint/types';
+import { AsyncResourceState } from '../../../../state';
 
 export const EndpointActivityLog = memo(
-  ({ endpointActions }: { endpointActions: Immutable<EndpointAction[]> }) => {
+  ({ endpointActions }: { endpointActions: AsyncResourceState<Immutable<EndpointAction[]>> }) => {
     return (
       <>
         <EuiSpacer size="l" />
-        <EuiFieldSearch compressed fullWidth placeholder={i18.SEARCH_ACTIVITY_LOG} />
-        <EuiSpacer size="l" />
-        {!endpointActions.length ? (
+        {endpointActions.type !== 'LoadedResourceState' || !endpointActions.data.length ? (
           <EuiEmptyPrompt
-            iconType="alert"
+            iconType="editorUnorderedList"
             titleSize="s"
-            title={<h2>{'No activity logged for the endpoint'}</h2>}
-            body={<p>{'Perform some actions on the endpoint to see actions log here.'}</p>}
+            title={<h2>{'No logged actions'}</h2>}
+            body={<p>{'No actions have been logged for this endpoint.'}</p>}
           />
         ) : (
-          endpointActions.map((endpointAction) => (
-            <TimelineEntry key={endpointAction.action_id} endpointAction={endpointAction} />
-          ))
+          <>
+            <EuiFieldSearch compressed fullWidth placeholder={i18.SEARCH_ACTIVITY_LOG} />
+            <EuiSpacer size="l" />
+            {endpointActions.data.map((endpointAction) => (
+              <TimelineEntry key={endpointAction.action_id} endpointAction={endpointAction} />
+            ))}
+          </>
         )}
       </>
     );

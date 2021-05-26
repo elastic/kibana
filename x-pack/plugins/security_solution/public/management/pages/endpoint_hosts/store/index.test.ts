@@ -43,9 +43,7 @@ describe('EndpointList store concerns', () => {
         error: undefined,
         endpointDetails: {
           activityLog: {
-            log: undefined,
-            logLoading: false,
-            logError: undefined,
+            type: 'UninitialisedResourceState',
           },
           hostDetails: {
             details: undefined,

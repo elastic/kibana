@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EndpointDetailsActivityLogChanged } from './action';
 import {
   isOnEndpointPage,
   hasSelectedEndpoint,
@@ -12,61 +13,33 @@ import {
   getCurrentIsolationRequestState,
 } from './selectors';
 import { EndpointState } from '../types';
+import { initialEndpointPageState } from './builders';
 import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
-import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 import { createUninitialisedResourceState, isUninitialisedResourceState } from '../../../state';
 
-export const initialEndpointListState: Immutable<EndpointState> = {
-  hosts: [],
-  pageSize: 10,
-  pageIndex: 0,
-  total: 0,
-  loading: false,
-  error: undefined,
-  endpointDetails: {
-    activityLog: {
-      log: undefined,
-      logLoading: false,
-      logError: undefined,
+type StateReducer = ImmutableReducer<EndpointState, AppAction>;
+type CaseReducer<T extends AppAction> = (
+  state: Immutable<EndpointState>,
+  action: Immutable<T>
+) => Immutable<EndpointState>;
+
+const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivityLogChanged> = (
+  state,
+  action
+) => {
+  return {
+    ...state!,
+    endpointDetails: {
+      ...state.endpointDetails!,
+      activityLog: action.payload,
     },
-    hostDetails: {
-      details: undefined,
-      detailsLoading: false,
-      detailsError: undefined,
-    },
-  },
-  policyResponse: undefined,
-  policyResponseLoading: false,
-  policyResponseError: undefined,
-  location: undefined,
-  policyItems: [],
-  selectedPolicyId: undefined,
-  policyItemsLoading: false,
-  endpointPackageInfo: undefined,
-  nonExistingPolicies: {},
-  agentPolicies: {},
-  endpointsExist: true,
-  patterns: [],
-  patternsError: undefined,
-  isAutoRefreshEnabled: true,
-  autoRefreshInterval: DEFAULT_POLL_INTERVAL,
-  agentsWithEndpointsTotal: 0,
-  agentsWithEndpointsTotalError: undefined,
-  endpointsTotal: 0,
-  endpointsTotalError: undefined,
-  queryStrategyVersion: undefined,
-  policyVersionInfo: undefined,
-  hostStatus: undefined,
-  isolationRequestState: createUninitialisedResourceState(),
+  };
 };
 
 /* eslint-disable-next-line complexity */
-export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
-  state = initialEndpointListState,
-  action
-) => {
+export const endpointListReducer: StateReducer = (state = initialEndpointPageState(), action) => {
   if (action.type === 'serverReturnedEndpointList') {
     const {
       hosts,
@@ -148,31 +121,8 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
         },
       },
     };
-  } else if (action.type === 'serverReturnedEndpointDetailsActivityLog') {
-    return {
-      ...state,
-      endpointDetails: {
-        ...state.endpointDetails,
-        activityLog: {
-          ...state.endpointDetails.activityLog,
-          log: action.payload,
-          logError: undefined,
-          logLoading: false,
-        },
-      },
-    };
-  } else if (action.type === 'serverFailedToReturnEndpointDetailsActivityLog') {
-    return {
-      ...state,
-      endpointDetails: {
-        ...state.endpointDetails,
-        activityLog: {
-          ...state.endpointDetails.activityLog,
-          logError: action.payload,
-          logLoading: false,
-        },
-      },
-    };
+  } else if (action.type === 'endpointDetailsActivityLogChanged') {
+    return handleEndpointDetailsActivityLogChanged(state, action);
   } else if (action.type === 'serverReturnedPoliciesForOnboarding') {
     return {
       ...state,

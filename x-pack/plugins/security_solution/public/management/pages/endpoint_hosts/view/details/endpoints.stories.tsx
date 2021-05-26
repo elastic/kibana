@@ -8,67 +8,73 @@
 import React, { ComponentType } from 'react';
 import moment from 'moment';
 
-import { EndpointAction } from '../../../../../../common/endpoint/types';
+import { EndpointAction, Immutable } from '../../../../../../common/endpoint/types';
 import { EndpointDetailsFlyoutTabs } from './components/endpoint_details_tabs';
 import { EndpointActivityLog } from './endpoint_activity_log';
 import { EndpointDetailsFlyout } from '.';
 import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { AsyncResourceState } from '../../../../state';
 
-export const dummyEndpointActivityLog = (selectedEndpoint: string = ''): EndpointAction[] => [
-  {
-    action_id: '1',
-    '@timestamp': moment().subtract(1, 'hours').fromNow().toString(),
-    expiration: moment().add(3, 'day').fromNow().toString(),
-    type: 'INPUT_ACTION',
-    input_type: 'endpoint',
-    agents: [`${selectedEndpoint}`],
-    user_id: 'sys',
-    data: {
-      command: 'isolate',
+export const dummyEndpointActivityLog = (
+  selectedEndpoint: string = ''
+): AsyncResourceState<Immutable<EndpointAction[]>> => ({
+  type: 'LoadedResourceState',
+  data: [
+    {
+      action_id: '1',
+      '@timestamp': moment().subtract(1, 'hours').fromNow().toString(),
+      expiration: moment().add(3, 'day').fromNow().toString(),
+      type: 'INPUT_ACTION',
+      input_type: 'endpoint',
+      agents: [`${selectedEndpoint}`],
+      user_id: 'sys',
+      data: {
+        command: 'isolate',
+      },
     },
-  },
-  {
-    action_id: '2',
-    '@timestamp': moment().subtract(2, 'hours').fromNow().toString(),
-    expiration: moment().add(1, 'day').fromNow().toString(),
-    type: 'INPUT_ACTION',
-    input_type: 'endpoint',
-    agents: [`${selectedEndpoint}`],
-    user_id: 'ash',
-    data: {
-      command: 'isolate',
-      comment: 'Sem et tortor consequat id porta nibh venenatis cras sed.',
+    {
+      action_id: '2',
+      '@timestamp': moment().subtract(2, 'hours').fromNow().toString(),
+      expiration: moment().add(1, 'day').fromNow().toString(),
+      type: 'INPUT_ACTION',
+      input_type: 'endpoint',
+      agents: [`${selectedEndpoint}`],
+      user_id: 'ash',
+      data: {
+        command: 'isolate',
+        comment: 'Sem et tortor consequat id porta nibh venenatis cras sed.',
+      },
     },
-  },
-  {
-    action_id: '3',
-    '@timestamp': moment().subtract(4, 'hours').fromNow().toString(),
-    expiration: moment().add(1, 'day').fromNow().toString(),
-    type: 'INPUT_ACTION',
-    input_type: 'endpoint',
-    agents: [`${selectedEndpoint}`],
-    user_id: 'someone',
-    data: {
-      command: 'unisolate',
-      comment: 'Turpis egestas pretium aenean pharetra.',
+    {
+      action_id: '3',
+      '@timestamp': moment().subtract(4, 'hours').fromNow().toString(),
+      expiration: moment().add(1, 'day').fromNow().toString(),
+      type: 'INPUT_ACTION',
+      input_type: 'endpoint',
+      agents: [`${selectedEndpoint}`],
+      user_id: 'someone',
+      data: {
+        command: 'unisolate',
+        comment: 'Turpis egestas pretium aenean pharetra.',
+      },
     },
-  },
-  {
-    action_id: '4',
-    '@timestamp': moment().subtract(1, 'day').fromNow().toString(),
-    expiration: moment().add(3, 'day').fromNow().toString(),
-    type: 'INPUT_ACTION',
-    input_type: 'endpoint',
-    agents: [`${selectedEndpoint}`],
-    user_id: 'ash',
-    data: {
-      command: 'isolate',
-      comment:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
+    {
+      action_id: '4',
+      '@timestamp': moment().subtract(1, 'day').fromNow().toString(),
+      expiration: moment().add(3, 'day').fromNow().toString(),
+      type: 'INPUT_ACTION',
+      input_type: 'endpoint',
+      agents: [`${selectedEndpoint}`],
+      user_id: 'ash',
+      data: {
+        command: 'isolate',
+        comment:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
         sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      },
     },
-  },
-];
+  ],
+});
 
 export default {
   title: 'Endpoints/Endpoint Details',

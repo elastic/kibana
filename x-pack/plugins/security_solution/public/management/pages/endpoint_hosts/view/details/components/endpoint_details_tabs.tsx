@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { EndpointIndexUIQueryParams } from '../../../types';
@@ -44,38 +44,34 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   }
 `;
 
-export const EndpointDetailsFlyoutTabs = ({
-  show,
-  tabs,
-}: {
-  show: EndpointIndexUIQueryParams['show'];
-  tabs: EndpointDetailsTabs[];
-}) => {
-  const [selectedTabId, setSelectedTabId] = useState<EndpointDetailsTabsId>(() => {
-    return show === 'details'
-      ? EndpointDetailsTabsTypes.overview
-      : EndpointDetailsTabsTypes.activityLog;
-  });
+export const EndpointDetailsFlyoutTabs = memo(
+  ({ show, tabs }: { show: EndpointIndexUIQueryParams['show']; tabs: EndpointDetailsTabs[] }) => {
+    const [selectedTabId, setSelectedTabId] = useState<EndpointDetailsTabsId>(() => {
+      return show === 'details'
+        ? EndpointDetailsTabsTypes.overview
+        : EndpointDetailsTabsTypes.activityLog;
+    });
 
-  const handleTabClick = useCallback(
-    (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EndpointDetailsTabsId),
-    [setSelectedTabId]
-  );
+    const handleTabClick = useCallback(
+      (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EndpointDetailsTabsId),
+      [setSelectedTabId]
+    );
 
-  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === selectedTabId), [
-    tabs,
-    selectedTabId,
-  ]);
+    const selectedTab = useMemo(() => tabs.find((tab) => tab.id === selectedTabId), [
+      tabs,
+      selectedTabId,
+    ]);
 
-  return (
-    <StyledEuiTabbedContent
-      data-test-subj="endpointDetailsTabs"
-      tabs={tabs}
-      selectedTab={selectedTab}
-      onTabClick={handleTabClick}
-      key="endpoint-details-tabs"
-    />
-  );
-};
+    return (
+      <StyledEuiTabbedContent
+        data-test-subj="endpointDetailsTabs"
+        tabs={tabs}
+        selectedTab={selectedTab}
+        onTabClick={handleTabClick}
+        key="endpoint-details-tabs"
+      />
+    );
+  }
+);
 
 EndpointDetailsFlyoutTabs.displayName = 'EndpointDetailsFlyoutTabs';

@@ -29,6 +29,7 @@ import {
   isTransformEnabled,
   getIsIsolationRequestPending,
   getCurrentIsolationRequestState,
+  getActivityLogData,
 } from './selectors';
 import { EndpointState, PolicyIds } from '../types';
 import {
@@ -339,17 +340,23 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
       // call the activity log api
       try {
+        dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          // ts error to be fixed when AsyncResourceState is refactored (#830)
+          // @ts-expect-error
+          payload: createLoadingResourceState<EndpointAction[]>(getActivityLogData(getState())),
+        });
         const activityLog = await coreStart.http.get<EndpointAction[]>(
           resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, { agent_id: selectedAgent(getState()) })
         );
         dispatch({
-          type: 'serverReturnedEndpointDetailsActivityLog',
-          payload: activityLog,
+          type: 'endpointDetailsActivityLogChanged',
+          payload: createLoadedResourceState<EndpointAction[]>(activityLog),
         });
       } catch (error) {
         dispatch({
-          type: 'serverFailedToReturnEndpointDetailsActivityLog',
-          payload: error,
+          type: 'endpointDetailsActivityLogChanged',
+          payload: createFailedResourceState<EndpointAction[]>(error.body ?? error),
         });
       }
 

@@ -32,9 +32,9 @@ import {
   detailsData,
   detailsError,
   detailsLoading,
-  activityLogData,
-  activityLogError,
-  activityLogLoading,
+  getActivityLogData,
+  getActivityLogError,
+  getActivityLogRequestLoading,
   showView,
   listData,
   policyResponseConfigurations,
@@ -93,9 +93,9 @@ export const EndpointDetailsFlyout = memo(() => {
     ...queryParamsWithoutSelectedEndpoint
   } = queryParams;
 
-  const activityLog = useEndpointSelector(activityLogData);
-  const activityLoading = useEndpointSelector(activityLogLoading);
-  const activityError = useEndpointSelector(activityLogError);
+  const activityLog = useEndpointSelector(getActivityLogData);
+  const activityLoading = useEndpointSelector(getActivityLogRequestLoading);
+  const activityError = useEndpointSelector(getActivityLogError);
   const hostDetails = useEndpointSelector(detailsData);
   const hostDetailsLoading = useEndpointSelector(detailsLoading);
   const hostDetailsError = useEndpointSelector(detailsError);
@@ -118,14 +118,14 @@ export const EndpointDetailsFlyout = memo(() => {
     {
       id: EndpointDetailsTabsTypes.activityLog,
       name: i18.ACTIVITY_LOG,
-      content:
-        activityLog === undefined ? (
-          contentLoadingMarkup
-        ) : (
-          <EndpointActivityLog endpointActions={activityLog} />
-        ),
+      content: activityLoading ? (
+        contentLoadingMarkup
+      ) : (
+        <EndpointActivityLog endpointActions={activityLog} />
+      ),
     },
   ];
+
   const hostList = useEndpointSelector(listData);
   const pageCount = hostList.length;
 

@@ -51,17 +51,10 @@ export const detailsData = (state: Immutable<EndpointState>) =>
 export const detailsLoading = (state: Immutable<EndpointState>): boolean =>
   state.endpointDetails.hostDetails.detailsLoading;
 
-export const detailsError = (state: Immutable<EndpointState>) =>
+export const detailsError = (
+  state: Immutable<EndpointState>
+): EndpointState['endpointDetails']['hostDetails']['detailsError'] =>
   state.endpointDetails.hostDetails.detailsError;
-
-export const activityLogData = (state: Immutable<EndpointState>) =>
-  state.endpointDetails.activityLog.log;
-
-export const activityLogLoading = (state: Immutable<EndpointState>): boolean =>
-  state.endpointDetails.activityLog.logLoading;
-
-export const activityLogError = (state: Immutable<EndpointState>) =>
-  state.endpointDetails.activityLog.logError;
 
 export const policyItems = (state: Immutable<EndpointState>) => state.policyItems;
 
@@ -359,5 +352,29 @@ export const getIsolationRequestError: (
 ) => ServerApiError | undefined = createSelector(getCurrentIsolationRequestState, (isolateHost) => {
   if (isFailedResourceState(isolateHost)) {
     return isolateHost.error;
+  }
+});
+
+export const getActivityLogData = (
+  state: Immutable<EndpointState>
+): Immutable<EndpointState['endpointDetails']['activityLog']> => state.endpointDetails.activityLog;
+
+export const getActivityLogRequestLoading: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getActivityLogData, (activityLog) =>
+  isLoadingResourceState(activityLog)
+);
+
+export const getActivityLogRequestLoaded: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getActivityLogData, (activityLog) =>
+  isLoadedResourceState(activityLog)
+);
+
+export const getActivityLogError: (
+  state: Immutable<EndpointState>
+) => ServerApiError | undefined = createSelector(getActivityLogData, (activityLog) => {
+  if (isFailedResourceState(activityLog)) {
+    return activityLog.error;
   }
 });

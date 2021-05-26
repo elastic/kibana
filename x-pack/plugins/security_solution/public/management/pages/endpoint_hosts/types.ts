@@ -36,14 +36,7 @@ export interface EndpointState {
   /** api error from retrieving host list */
   error?: ServerApiError;
   endpointDetails: {
-    activityLog: {
-      /** activity detail of a specific endpoint */
-      log?: Immutable<EndpointAction[]>;
-      /** details/activity log page is retrieving data */
-      logLoading: boolean;
-      /** api error from retrieving endpoint activity details */
-      logError?: ServerApiError;
-    };
+    activityLog: AsyncResourceState<EndpointAction[]>;
     hostDetails: {
       /** details data for a specific host */
       details?: Immutable<HostMetadata>;
