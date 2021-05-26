@@ -19,9 +19,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiHorizontalRule,
-  EuiIcon,
   EuiIconTip,
   EuiPage,
   EuiPageBody,
@@ -29,7 +27,6 @@ import {
   EuiPageHeaderSection,
   EuiSpacer,
   EuiTitle,
-  EuiToolTip,
   EuiLoadingContent,
   EuiPanel,
   EuiAccordion,
@@ -374,7 +371,9 @@ export class ExplorerUI extends React.Component {
               explorerState={this.props.explorerState}
               setSelectedCells={this.props.setSelectedCells}
             />
+
             <EuiSpacer size="m" />
+
             {annotationsError !== undefined && (
               <>
                 <EuiTitle
@@ -476,47 +475,16 @@ export class ExplorerUI extends React.Component {
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
-                <EuiFlexGroup
-                  direction="row"
-                  gutterSize="l"
-                  responsive={true}
-                  className="ml-anomalies-controls"
-                >
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
-                        defaultMessage: 'Severity threshold',
-                      })}
-                    >
-                      <SelectSeverity />
-                    </EuiFormRow>
+                <EuiFlexGroup direction="row" gutterSize="l" responsive={true} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <SelectSeverity c />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={
-                        <EuiToolTip
-                          content={i18n.translate('xpack.ml.explorer.intervalTooltip', {
-                            defaultMessage:
-                              'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
-                          })}
-                        >
-                          <span>
-                            {i18n.translate('xpack.ml.explorer.intervalLabel', {
-                              defaultMessage: 'Interval',
-                            })}
-                            <EuiIcon type="questionInCircle" color="subdued" />
-                          </span>
-                        </EuiToolTip>
-                      }
-                    >
-                      <SelectInterval />
-                    </EuiFormRow>
+                  <EuiFlexItem grow={false}>
+                    <SelectInterval />
                   </EuiFlexItem>
                   {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
-                    <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-                      <EuiFormRow label="&#8203;">
-                        <CheckboxShowCharts />
-                      </EuiFormRow>
+                    <EuiFlexItem grow={false}>
+                      <CheckboxShowCharts />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>

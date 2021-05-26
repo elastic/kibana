@@ -141,13 +141,17 @@ export const SelectSeverityUI: FC<
 
   return (
     <EuiSuperSelect
+      prepend={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
+        defaultMessage: 'Severity threshold',
+      })}
+      id="severityThreshold"
       data-test-subj={'mlAnomalySeverityThresholdControls'}
       className={classNames}
       hasDividers
       options={options}
       valueOfSelected={severity.display}
       onChange={handleOnChange}
-      compressed={compressed ?? false}
+      compressed
     />
   );
 };
