@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const LANG = 'markdown_handlebars';
+export const LANG = 'markdown';
