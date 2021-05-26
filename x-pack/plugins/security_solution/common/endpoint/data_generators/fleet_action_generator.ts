@@ -8,7 +8,9 @@
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import { BaseDataGenerator } from './base_data_generator';
-import { EndpointAction, EndpointActionResponse } from '../types';
+import { EndpointAction, EndpointActionResponse, ISOLATION_ACTIONS } from '../types';
+
+const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
 export class FleetActionGenerator extends BaseDataGenerator {
   /** Generate an Action */
@@ -25,7 +27,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
         agents: [this.randomUUID()],
         user_id: 'elastic',
         data: {
-          command: 'isolate',
+          command: this.randomIsolateCommand(),
           comment: this.randomString(15),
         },
       },
@@ -33,13 +35,14 @@ export class FleetActionGenerator extends BaseDataGenerator {
     );
   }
 
+  /** Generates an action response */
   generateResponse(overrides: DeepPartial<EndpointActionResponse> = {}): EndpointActionResponse {
     const timeStamp = new Date();
 
     return merge(
       {
         action_data: {
-          command: 'isolate',
+          command: this.randomIsolateCommand(),
           comment: '',
         },
         action_id: this.randomUUID(),
@@ -51,5 +54,9 @@ export class FleetActionGenerator extends BaseDataGenerator {
       },
       overrides
     );
+  }
+
+  protected randomIsolateCommand() {
+    return this.randomChoice(ISOLATION_COMMANDS);
   }
 }

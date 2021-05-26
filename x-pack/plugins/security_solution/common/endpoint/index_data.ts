@@ -430,7 +430,10 @@ const indexFleetActionsForHost = async (
     const unIsolateAction = fleetActionGenerator.generateResponse({
       action_id: isolateAction.action_id,
       agent_id: agentId,
-      action_data: { comment: 'data generator: bad host isolated' },
+      action_data: {
+        command: isolateAction.data.command,
+        comment: 'data generator: bad host isolated',
+      },
     });
 
     await esClient.index(
