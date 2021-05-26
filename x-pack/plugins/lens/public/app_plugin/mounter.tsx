@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
 import { Provider } from 'react-redux';
+import _ from 'lodash';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
@@ -24,7 +25,7 @@ import { App } from './app';
 import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID, getFullPath } from '../../common';
 import {
   LensEmbeddableInput,
   LensByReferenceInput,
@@ -34,6 +35,7 @@ import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actio
 import { LensAttributeService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+
 import {
   makeConfigureStore,
   navigateAway,
@@ -41,7 +43,8 @@ import {
   LensRootStore,
   setState,
 } from '../state_management';
-import { getResolvedDateRange } from '../lib';
+import { getAllIndexPatterns, getResolvedDateRange } from '../lib';
+import { injectFilterReferences } from '../persistence';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
@@ -183,7 +186,85 @@ export async function mountApp(
   });
 
   const lensStore: LensRootStore = makeConfigureStore(preloadedState, { data });
-  // const featureFlagConfig = await getByValueFeatureFlag();
+
+  const loadDocument = (
+    redirectCallback: (savedObjectId?: string) => void,
+    initialInput?: LensEmbeddableInput
+  ) => {
+    const { attributeService: attributeServiceInstance, chrome, notifications } = lensServices;
+    const { persistedDoc } = lensStore.getState().app;
+    if (
+      !initialInput ||
+      (attributeServiceInstance.inputIsRefType(initialInput) &&
+        initialInput.savedObjectId === persistedDoc?.savedObjectId)
+    ) {
+      return;
+    }
+    lensStore.dispatch(setState({ isAppLoading: true }));
+
+    attributeServiceInstance
+      .unwrapAttributes(initialInput)
+      .then((attributes) => {
+        if (!initialInput) {
+          return;
+        }
+        const doc = {
+          ...initialInput,
+          ...attributes,
+          type: LENS_EMBEDDABLE_TYPE,
+        };
+
+        if (attributeServiceInstance.inputIsRefType(initialInput)) {
+          chrome.recentlyAccessed.add(
+            getFullPath(initialInput.savedObjectId),
+            attributes.title,
+            initialInput.savedObjectId
+          );
+        }
+        const indexPatternIds = _.uniq(
+          doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
+        );
+        getAllIndexPatterns(indexPatternIds, data.indexPatterns)
+          .then(({ indexPatterns }) => {
+            // Don't overwrite any pinned filters
+            data.query.filterManager.setAppFilters(
+              injectFilterReferences(doc.state.filters, doc.references)
+            );
+            lensStore.dispatch(
+              setState({
+                query: doc.state.query,
+                isAppLoading: false,
+                indexPatternsForTopNav: indexPatterns,
+                lastKnownDoc: doc,
+                ...(!_.isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
+              })
+            );
+          })
+          .catch((e) => {
+            lensStore.dispatch(
+              setState({
+                isAppLoading: false,
+              })
+            );
+            redirectCallback();
+          });
+      })
+      .catch((e) => {
+        lensStore.dispatch(
+          setState({
+            isAppLoading: false,
+          })
+        );
+        notifications.toasts.addDanger(
+          i18n.translate('xpack.lens.app.docLoadingError', {
+            defaultMessage: 'Error loading saved document',
+          })
+        );
+
+        redirectCallback();
+      });
+  };
+
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
       const redirectCallback = useCallback(
@@ -194,9 +275,7 @@ export async function mountApp(
       );
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
-
-      lensStore.dispatch(setState({ isAppLoading: Boolean(initialInput) }));
-
+      loadDocument(redirectCallback, initialInput);
       return (
         <Provider store={lensStore}>
           <App

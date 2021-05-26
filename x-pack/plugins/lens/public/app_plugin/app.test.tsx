@@ -29,6 +29,7 @@ import {
   IFieldType,
   IIndexPattern,
   IndexPattern,
+  Query,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
@@ -295,6 +296,9 @@ describe('Lens App', () => {
       }
     );
 
+    const origDispatch = lensStore.dispatch;
+    lensStore.dispatch = jest.fn(origDispatch);
+
     const wrappingComponent: React.FC<{
       children: React.ReactNode;
     }> = ({ children }) => {
@@ -405,7 +409,7 @@ describe('Lens App', () => {
     } as unknown) as Document;
 
     it('sets breadcrumbs when the document title changes', async () => {
-      const { component, services } = mountWith({});
+      const { component, services, lensStore } = mountWith({});
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
@@ -416,9 +420,13 @@ describe('Lens App', () => {
         { text: 'Create' },
       ]);
 
-      services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue(breadcrumbDoc);
       await act(async () => {
         component.setProps({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+        lensStore.dispatch(
+          setState({
+            persistedDoc: breadcrumbDoc,
+          })
+        );
       });
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
@@ -437,7 +445,7 @@ describe('Lens App', () => {
       props.incomingState = { originatingApp: 'coolContainer' };
       services.getOriginatingAppName = jest.fn(() => 'The Coolest Container Ever Made');
 
-      const { component } = mountWith({
+      const { component, lensStore } = mountWith({
         props,
         services,
         storeProps: {
@@ -455,9 +463,14 @@ describe('Lens App', () => {
         { text: 'Create' },
       ]);
 
-      services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue(breadcrumbDoc);
       await act(async () => {
         component.setProps({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+
+        lensStore.dispatch(
+          setState({
+            persistedDoc: breadcrumbDoc,
+          })
+        );
       });
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
@@ -473,98 +486,35 @@ describe('Lens App', () => {
   });
 
   describe('persistence', () => {
-    it('does not load a document if there is no initial input', () => {
-      const { services } = mountWith({});
-      expect(services.attributeService.unwrapAttributes).not.toHaveBeenCalled();
-    });
-
     it('loads a document and uses query and filters if initial input is provided', async () => {
-      const { component, services, lensStore } = mountWith({});
-      services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
+      const { component, lensStore } = mountWith({});
+      const document = ({
         savedObjectId: defaultSavedObjectId,
         state: {
           query: 'fake query',
           filters: [{ query: { match_phrase: { src: 'test' } } }],
         },
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-      });
+      } as unknown) as Document;
 
-      await act(async () => {
-        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
+      act(() => {
+        lensStore.dispatch(
+          setState({
+            query: ('fake query' as unknown) as Query,
+            indexPatternsForTopNav: ([{ id: '1' }] as unknown) as IndexPattern[],
+            lastKnownDoc: document,
+            persistedDoc: document,
+          })
+        );
       });
+      component.update();
 
-      expect(services.attributeService.unwrapAttributes).toHaveBeenCalledWith({
-        savedObjectId: defaultSavedObjectId,
-      });
-      expect(services.data.indexPatterns.get).toHaveBeenCalledWith('1');
-      expect(services.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([
-        { query: { match_phrase: { src: 'test' } } },
-      ]);
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',
           indexPatterns: [{ id: '1' }],
         }),
         {}
-      );
-
-      expect(lensStore.getState()).toEqual({
-        app: expect.objectContaining({
-          persistedDoc: expect.objectContaining({
-            savedObjectId: defaultSavedObjectId,
-            state: expect.objectContaining({
-              query: 'fake query',
-              filters: [{ query: { match_phrase: { src: 'test' } } }],
-            }),
-          }),
-        }),
-      });
-    });
-
-    it('does not load documents on sequential renders unless the id changes', async () => {
-      const { services, component } = mountWith({});
-
-      await act(async () => {
-        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
-      });
-      await act(async () => {
-        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
-      });
-      expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
-
-      await act(async () => {
-        component.setProps({ initialInput: { savedObjectId: '5678' } });
-      });
-
-      expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(2);
-    });
-
-    it('handles document load errors', async () => {
-      const services = makeDefaultServices();
-      services.attributeService.unwrapAttributes = jest.fn().mockRejectedValue('failed to load');
-      const { component, props } = mountWith({ services });
-
-      await act(async () => {
-        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
-      });
-
-      expect(services.attributeService.unwrapAttributes).toHaveBeenCalledWith({
-        savedObjectId: defaultSavedObjectId,
-      });
-      expect(services.notifications.toasts.addDanger).toHaveBeenCalled();
-      expect(props.redirectTo).toHaveBeenCalled();
-    });
-
-    it('adds to the recently accessed list on load', async () => {
-      const { component, services } = mountWith({});
-
-      await act(async () => {
-        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
-      });
-      expect(services.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
-        '/app/lens#/edit/1234',
-        'An extremely cool default document!',
-        '1234'
       );
     });
 
@@ -629,12 +579,6 @@ describe('Lens App', () => {
 
         const { frame, component, lensStore } = mountWith({ services, props });
 
-        if (initialSavedObjectId) {
-          expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
-        } else {
-          expect(services.attributeService.unwrapAttributes).not.toHaveBeenCalled();
-        }
-
         act(() => {
           lensStore.dispatch(
             setState({
@@ -649,7 +593,7 @@ describe('Lens App', () => {
         await act(async () => {
           testSave(component, { ...saveProps });
         });
-        return { props, services, component, frame };
+        return { props, services, component, frame, lensStore };
       }
 
       it('shows a disabled save button when the user does not have permissions', async () => {
@@ -826,7 +770,7 @@ describe('Lens App', () => {
       });
 
       it('saves existing docs', async () => {
-        const { props, services, component } = await save({
+        const { props, services, component, lensStore } = await save({
           initialSavedObjectId: defaultSavedObjectId,
           newCopyOnSave: false,
           newTitle: 'hello there',
@@ -843,7 +787,22 @@ describe('Lens App', () => {
         await act(async () => {
           component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
         });
-        expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
+
+        expect(lensStore.dispatch).toHaveBeenCalledWith({
+          payload: {
+            lastKnownDoc: expect.objectContaining({
+              savedObjectId: defaultSavedObjectId,
+              title: 'hello there',
+            }),
+            persistedDoc: expect.objectContaining({
+              savedObjectId: defaultSavedObjectId,
+              title: 'hello there',
+            }),
+            isLinkedToOriginatingApp: false,
+          },
+          type: 'app/setState',
+        });
+
         expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
           "Saved 'hello there'"
         );
@@ -1520,7 +1479,7 @@ describe('Lens App', () => {
     });
 
     it('should confirm when leaving with an unsaved doc', () => {
-      const { component, lensStore, props } = mountWith({});
+      const { lensStore, props } = mountWith({});
       act(() => {
         lensStore.dispatch(
           setState({
@@ -1529,7 +1488,6 @@ describe('Lens App', () => {
           })
         );
       });
-      component.update();
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
@@ -1537,13 +1495,11 @@ describe('Lens App', () => {
     });
 
     it('should confirm when leaving with unsaved changes to an existing doc', async () => {
-      const { component, lensStore, props } = mountWith({});
-      await act(async () => {
-        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
-      });
+      const { lensStore, props } = mountWith({});
       act(() => {
         lensStore.dispatch(
           setState({
+            persistedDoc: defaultDoc,
             lastKnownDoc: ({
               savedObjectId: defaultSavedObjectId,
               references: [],
@@ -1552,7 +1508,6 @@ describe('Lens App', () => {
           })
         );
       });
-      component.update();
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
@@ -1560,19 +1515,16 @@ describe('Lens App', () => {
     });
 
     it('should not confirm when changes are saved', async () => {
-      const { component, lensStore, props } = mountWith({});
-      await act(async () => {
-        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
-      });
+      const { lensStore, props } = mountWith({});
       act(() => {
         lensStore.dispatch(
           setState({
             lastKnownDoc: defaultDoc,
+            persistedDoc: defaultDoc,
             isSaveable: true,
           })
         );
       });
-      component.update();
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(defaultLeave).toHaveBeenCalled();
@@ -1580,13 +1532,11 @@ describe('Lens App', () => {
     });
 
     it('should confirm when the latest doc is invalid', async () => {
-      const { component, lensStore, props } = mountWith({});
-      await act(async () => {
-        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
-      });
+      const { lensStore, props } = mountWith({});
       act(() => {
         lensStore.dispatch(
           setState({
+            persistedDoc: defaultDoc,
             lastKnownDoc: ({
               savedObjectId: defaultSavedObjectId,
               references: [],
@@ -1595,7 +1545,6 @@ describe('Lens App', () => {
           })
         );
       });
-      component.update();
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();

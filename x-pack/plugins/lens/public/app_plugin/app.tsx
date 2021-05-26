@@ -40,8 +40,6 @@ import {
   DispatchSetState,
 } from '../state_management';
 
-import { getAllIndexPatterns } from '../lib';
-
 export function App({
   history,
   onAppLeave,
@@ -210,83 +208,6 @@ export function App({
     initialInput,
     appState.isLinkedToOriginatingApp,
     appState.persistedDoc,
-  ]);
-
-  useEffect(() => {
-    if (
-      !initialInput ||
-      (attributeService.inputIsRefType(initialInput) &&
-        initialInput.savedObjectId === appState.persistedDoc?.savedObjectId)
-    ) {
-      return;
-    }
-
-    dispatchSetState({ isAppLoading: true });
-    attributeService
-      .unwrapAttributes(initialInput)
-      .then((attributes) => {
-        if (!initialInput) {
-          return;
-        }
-        const doc = {
-          ...initialInput,
-          ...attributes,
-          type: LENS_EMBEDDABLE_TYPE,
-        };
-
-        if (attributeService.inputIsRefType(initialInput)) {
-          chrome.recentlyAccessed.add(
-            getFullPath(initialInput.savedObjectId),
-            attributes.title,
-            initialInput.savedObjectId
-          );
-        }
-        const indexPatternIds = _.uniq(
-          doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
-        );
-        getAllIndexPatterns(indexPatternIds, data.indexPatterns)
-          .then(({ indexPatterns }) => {
-            // Don't overwrite any pinned filters
-            data.query.filterManager.setAppFilters(
-              injectFilterReferences(doc.state.filters, doc.references)
-            );
-            dispatchSetState({
-              query: doc.state.query,
-              isAppLoading: false,
-              indexPatternsForTopNav: indexPatterns,
-              lastKnownDoc: doc,
-              ...(!_.isEqual(appState.persistedDoc, doc) ? { persistedDoc: doc } : null),
-            });
-          })
-          .catch((e) => {
-            dispatchSetState({
-              isAppLoading: false,
-            });
-            redirectTo();
-          });
-      })
-      .catch((e) => {
-        dispatchSetState({
-          isAppLoading: false,
-        });
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.lens.app.docLoadingError', {
-            defaultMessage: 'Error loading saved document',
-          })
-        );
-
-        redirectTo();
-      });
-  }, [
-    notifications,
-    data.indexPatterns,
-    data.query.filterManager,
-    initialInput,
-    attributeService,
-    redirectTo,
-    chrome.recentlyAccessed,
-    appState.persistedDoc,
-    dispatchSetState,
   ]);
 
   const tagsIds =
