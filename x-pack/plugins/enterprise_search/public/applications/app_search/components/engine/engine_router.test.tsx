@@ -7,10 +7,10 @@
 
 import '../../../__mocks__/react_router_history.mock';
 import { mockFlashMessageHelpers, setMockValues, setMockActions } from '../../../__mocks__';
-import '../../../__mocks__/shallow_useeffect.mock';
+import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockEngineValues } from '../../__mocks__';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Switch, Redirect, useParams } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
@@ -21,7 +21,6 @@ import { ApiLogs } from '../api_logs';
 import { CurationsRouter } from '../curations';
 import { Documents, DocumentDetail } from '../documents';
 import { EngineOverview } from '../engine_overview';
-import { KibanaHeaderActions } from '../layout/kibana_header_actions';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
 import { SchemaRouter } from '../schema';
@@ -31,17 +30,12 @@ import { Synonyms } from '../synonyms';
 
 import { EngineRouter } from './engine_router';
 
-const getUnmountHandlerFromNthUseEffectCall = (index: number) => {
-  return (useEffect as jest.Mock).mock.results[index].value;
-};
-
 describe('EngineRouter', () => {
   const values = {
     ...mockEngineValues,
     dataLoading: false,
     engineNotFound: false,
     myRole: {},
-    renderHeaderActions: jest.fn(),
   };
   const actions = { setEngineName: jest.fn(), initializeEngine: jest.fn(), clearEngine: jest.fn() };
 
@@ -53,7 +47,6 @@ describe('EngineRouter', () => {
 
   describe('useEffect', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
       shallow(<EngineRouter />);
     });
 
@@ -65,21 +58,9 @@ describe('EngineRouter', () => {
       expect(actions.initializeEngine).toHaveBeenCalled();
     });
 
-    it('will render header actions', () => {
-      expect(values.renderHeaderActions).toHaveBeenCalledWith(KibanaHeaderActions);
-    });
-
     it('clears engine on unmount and on update', () => {
-      const unmountHandler = getUnmountHandlerFromNthUseEffectCall(0);
       unmountHandler();
       expect(actions.clearEngine).toHaveBeenCalled();
-    });
-
-    it('re-renders header actions with null on unmount and on update ', () => {
-      const unmountHandler = getUnmountHandlerFromNthUseEffectCall(1);
-      unmountHandler();
-      const [headerActionsToRender] = (values.renderHeaderActions as jest.Mock).mock.calls[1];
-      expect(headerActionsToRender()).toBeNull();
     });
   });
 

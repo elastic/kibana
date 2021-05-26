@@ -13,7 +13,6 @@ import { useValues, useActions } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { setQueuedErrorMessage } from '../../../shared/flash_messages';
-import { KibanaLogic } from '../../../shared/kibana';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
 import { AppLogic } from '../../app_logic';
@@ -38,7 +37,6 @@ import { ApiLogs } from '../api_logs';
 import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
 import { EngineOverview } from '../engine_overview';
-import { KibanaHeaderActions } from '../layout/kibana_header_actions';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
 import { SchemaRouter } from '../schema';
@@ -64,7 +62,6 @@ export const EngineRouter: React.FC = () => {
       canViewEngineApiLogs,
     },
   } = useValues(AppLogic);
-  const { renderHeaderActions } = useValues(KibanaLogic);
 
   const { engineName: engineNameFromUrl } = useParams() as { engineName: string };
   const { engineName, dataLoading, engineNotFound } = useValues(EngineLogic);
@@ -75,13 +72,6 @@ export const EngineRouter: React.FC = () => {
     initializeEngine();
     return clearEngine;
   }, [engineNameFromUrl]);
-
-  useEffect(() => {
-    renderHeaderActions(KibanaHeaderActions);
-    return () => {
-      renderHeaderActions(() => null);
-    };
-  }, []);
 
   if (engineNotFound) {
     setQueuedErrorMessage(

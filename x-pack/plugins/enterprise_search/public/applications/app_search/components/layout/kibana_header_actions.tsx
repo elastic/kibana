@@ -7,20 +7,28 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { EngineLogic } from '../engine';
+
 export const KibanaHeaderActions: React.FC = () => {
+  const { engineName } = useValues(EngineLogic);
+
   return (
     <EuiHeaderLinks>
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiButtonEmpty iconType="beaker" size="s">
-            {i18n.translate('xpack.enterpriseSearch.appSearch.engine.queryTesterButtonLabel', {
-              defaultMessage: 'Query tester',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {engineName && (
+          <EuiFlexItem>
+            <EuiButtonEmpty iconType="beaker" size="s">
+              {i18n.translate('xpack.enterpriseSearch.appSearch.engine.queryTesterButtonLabel', {
+                defaultMessage: 'Query tester',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiHeaderLinks>
   );
