@@ -117,17 +117,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should contain "Statistics", "Request", "Response" tabs', async () => {
           await inspector.openInspectorRequestsView();
 
-          for (const getFn of [
-            inspector.getOpenRequestDetailRequestButton,
-            inspector.getOpenRequestDetailResponseButton,
-            inspector.getOpenRequestStatisticButton,
-          ]) {
-            await retry.try(async () => {
-              const requestStatisticTab = await getFn();
-
-              expect(await requestStatisticTab.isEnabled()).to.be(true);
-            });
-          }
+          await retry.try(async () => {
+            const detailRequestBtn = await inspector.getOpenRequestDetailRequestButton();
+            const detailResponseBtn = await inspector.getOpenRequestDetailResponseButton();
+            const requestStatsBtn = await inspector.getOpenRequestStatisticButton();
+            for (const btn of [detailRequestBtn, detailResponseBtn, requestStatsBtn])
+              expect(await btn.isEnabled()).to.be(true);
+          });
         });
 
         it('should set the default query name if not given in the schema', async () => {
