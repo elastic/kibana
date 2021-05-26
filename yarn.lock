@@ -940,6 +940,16 @@
     "@hapi/hoek" "9.x.x"
     fast-safe-stringify "2.x.x"
 
+"@hapi/h2o2@^8.3.2":
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/@hapi/h2o2/-/h2o2-8.3.2.tgz#008a8f9ec3d9bba29077691aa9ec0ace93d4de80"
+  integrity sha512-2WkZq+QAkvYHWGqnUuG0stcVeGyv9T7bopBYnCJSUEuvBZlUf2BTX2JCVSKxsnTLOxCYwoC/aI4Rr0ZSRd2oVg==
+  dependencies:
+    "@hapi/boom" "7.x.x"
+    "@hapi/hoek" "8.x.x"
+    "@hapi/joi" "16.x.x"
+    "@hapi/wreck" "15.x.x"
+
 "@hapi/hapi@^17.9.0":
   version "17.9.0"
   resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-17.9.0.tgz#c01836a3c38fdddd372d5453b7483e9761e5d46b"
@@ -4551,11 +4561,6 @@ bounce@1.x.x:
   dependencies:
     boom "7.x.x"
     hoek "6.x.x"
-
-bourne@1.x.x:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/bourne/-/bourne-1.1.2.tgz#e290b5bd7166635632eaf8ef12b006b2d4a75b83"
-  integrity sha512-b2dgVkTZhkQirNMohgC00rWfpVqEi9y5tKM1k3JvoNx05ODtfQoPPd4js9CYFQoY0IM8LAmnJulEuWv74zjUOg==
 
 boxen@^1.2.1, boxen@^1.2.2:
   version "1.3.0"
@@ -10710,16 +10715,6 @@ gulplog@^1.0.0:
   integrity sha1-4oxNRdBey77YGDY86PnFkmIp/+U=
   dependencies:
     glogg "^1.0.0"
-
-h2o2@^8.2.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/h2o2/-/h2o2-8.2.0.tgz#ead6a855f40cf8fbe67986751b5e2ff8a87aa643"
-  integrity sha512-TwWWSk1tMg03VkSKQTrTSXWKogmpYts5Uj5W6GN9CedFJY5EtL5vz2nndd9s5qxxSMP6Wj8jyGrj/6qV9d4KDg==
-  dependencies:
-    boom "7.x.x"
-    hoek "5.x.x"
-    joi "13.x.x"
-    wreck "14.x.x"
 
 handle-thing@^2.0.0:
   version "2.0.1"
@@ -22985,15 +22980,6 @@ wrappy@1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
-
-wreck@14.x.x:
-  version "14.2.0"
-  resolved "https://registry.yarnpkg.com/wreck/-/wreck-14.2.0.tgz#0064a5b930fc675f57830c1fd28342da1a70b0fc"
-  integrity sha512-NFFft3SMgqrJbXEVfYifh+QDWFxni+98/I7ut7rLbz3F0XOypluHsdo3mdEYssGSirMobM3fGlqhyikbWKDn2Q==
-  dependencies:
-    boom "7.x.x"
-    bourne "1.x.x"
-    hoek "6.x.x"
 
 write-file-atomic@^1.1.2:
   version "1.3.4"
