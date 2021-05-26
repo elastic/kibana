@@ -146,7 +146,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
           id={`mlAnomalyExplorerEmbeddableWrapper-${id}`}
           style={{
             width: '100%',
-            overflowY: 'auto',
+            overflowY: 'hidden',
             overflowX: 'hidden',
             padding: '8px',
           }}
