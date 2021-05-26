@@ -28,15 +28,15 @@ import {
 import { DocTableService } from './doc_table';
 import { EmbeddingService } from './embedding';
 import { FilterBarService } from './filter_bar';
-import { FlyoutProvider } from './flyout';
+import { FlyoutService } from './flyout';
 import { GlobalNavService } from './global_nav';
-import { InspectorProvider } from './inspector';
+import { InspectorService } from './inspector';
 import { FieldEditorService } from './field_editor';
 import { ManagementMenuService } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableService } from './renderable';
-import { ToastsProvider } from './toasts';
+import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
 import {
   PieChartService,
@@ -67,19 +67,19 @@ export const services = {
   dashboardAddPanel: DashboardAddPanelService,
   dashboardReplacePanel: DashboardReplacePanelService,
   dashboardPanelActions: DashboardPanelActionsService,
-  flyout: FlyoutProvider,
+  flyout: FlyoutService,
   comboBox: ComboBoxProvider,
   dataGrid: DataGridService,
   embedding: EmbeddingService,
   renderable: RenderableService,
   browser: BrowserProvider,
   pieChart: PieChartService,
-  inspector: InspectorProvider,
+  inspector: InspectorService,
   fieldEditor: FieldEditorService,
   vegaDebugInspector: VegaDebugInspectorViewService,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavService,
-  toasts: ToastsProvider,
+  toasts: ToastsService,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
   elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
