@@ -18,6 +18,7 @@ const ratioToSeconds: Record<string, number> = {
   microseconds: 0.000001,
 };
 const HUMAN_FRIENDLY = 'humanize';
+const HUMAN_FRIENDLY_PRECISE = 'humanizePrecise';
 const DEFAULT_OUTPUT_PRECISION = 2;
 const DEFAULT_INPUT_FORMAT = {
   text: i18n.translate('data.fieldFormats.duration.inputFormats.seconds', {
@@ -89,13 +90,19 @@ const inputFormats = [
   },
 ];
 const DEFAULT_OUTPUT_FORMAT = {
-  text: i18n.translate('data.fieldFormats.duration.outputFormats.humanize', {
-    defaultMessage: 'Human Readable',
+  text: i18n.translate('data.fieldFormats.duration.outputFormats.humanize.precise', {
+    defaultMessage: 'Human Readable precise',
   }),
-  method: 'humanize',
+  method: 'humanizePrecise',
 };
 const outputFormats = [
   { ...DEFAULT_OUTPUT_FORMAT },
+  {
+    text: i18n.translate('data.fieldFormats.duration.outputFormats.humanize.approximate', {
+      defaultMessage: 'Human Readable approximate',
+    }),
+    method: 'humanize',
+  },
   {
     text: i18n.translate('data.fieldFormats.duration.outputFormats.asMilliseconds', {
       defaultMessage: 'Milliseconds',
@@ -168,12 +175,6 @@ const outputFormats = [
     }),
     method: 'asYears',
   },
-  {
-    text: i18n.translate('data.fieldFormats.duration.outputFormats.dynamic', {
-      defaultMessage: 'Dynamic',
-    }),
-    method: 'dynamic',
-  },
 ];
 
 function parseInputAsDuration(val: number, inputFormat: string) {
@@ -184,7 +185,7 @@ function parseInputAsDuration(val: number, inputFormat: string) {
   return moment.duration(val * ratio, kind);
 }
 
-function formatInputDynamically(
+function formatInputHumanPrecise(
   val: number,
   inputFormat: string,
   outputPrecision: number,
@@ -221,8 +222,8 @@ export class DurationFormat extends FieldFormat {
     return this.param('outputFormat') === HUMAN_FRIENDLY;
   }
 
-  isDynamic() {
-    return this.param('outputFormat') === 'dynamic';
+  isHumanPrecise() {
+    return this.param('outputFormat') === HUMAN_FRIENDLY_PRECISE;
   }
 
   getParamDefaults() {
@@ -242,11 +243,10 @@ export class DurationFormat extends FieldFormat {
     const useShortSuffix = Boolean(this.param('useShortSuffix'));
     const includeSpaceWithSuffix = this.param('includeSpaceWithSuffix');
 
-    // explicitly checking for false
     const includeSpace = includeSpaceWithSuffix ? ' ' : '';
 
     const human = this.isHuman();
-    const dyanmic = this.isDynamic();
+    const humanPrecise = this.isHumanPrecise();
 
     const prefix =
       val < 0 && human
@@ -256,17 +256,18 @@ export class DurationFormat extends FieldFormat {
         : '';
 
     const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
-    const formatted = dyanmic
-      ? formatInputDynamically(val, inputFormat, outputPrecision, useShortSuffix, includeSpace)
+    const formatted = humanPrecise
+      ? formatInputHumanPrecise(val, inputFormat, outputPrecision, useShortSuffix, includeSpace)
       : duration[outputFormat]();
-    const precise = human || dyanmic ? formatted : formatted.toFixed(outputPrecision);
+
+    const precise = human || humanPrecise ? formatted : formatted.toFixed(outputPrecision);
     const type = outputFormats.find(({ method }) => method === outputFormat);
 
     const unitText = useShortSuffix ? type?.shortText : type?.text;
 
-    const suffix = showSuffix && unitText ? `${includeSpace}${unitText}` : '';
+    const suffix = showSuffix && unitText && !human ? `${includeSpace}${unitText}` : '';
 
-    return dyanmic ? precise : prefix + precise + suffix;
+    return humanPrecise ? precise : prefix + precise + suffix;
   };
 }
 

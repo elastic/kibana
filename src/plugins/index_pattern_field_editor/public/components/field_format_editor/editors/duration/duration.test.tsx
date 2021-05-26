@@ -27,7 +27,7 @@ const format = {
     };
   }),
   isHuman: () => true,
-  isDynamic: () => false,
+  isHumanPrecise: () => false,
   type: {
     inputFormats: [
       {
@@ -118,7 +118,7 @@ describe('DurationFormatEditor', () => {
         };
       }),
       isHuman: () => false,
-      isDynamic: () => true,
+      isHumanPrecise: () => true,
     };
     const component = shallow(
       <DurationFormatEditor

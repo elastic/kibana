@@ -141,7 +141,7 @@ describe('Duration Format', () => {
 
   testCase({
     inputFormat: 'nanoseconds',
-    outputFormat: 'dynamic',
+    outputFormat: 'humanizePrecise',
     outputPrecision: 2,
     showSuffix: true,
     fixtures: [
@@ -162,7 +162,7 @@ describe('Duration Format', () => {
 
   testCase({
     inputFormat: 'microseconds',
-    outputFormat: 'dynamic',
+    outputFormat: 'humanizePrecise',
     outputPrecision: 2,
     showSuffix: true,
     fixtures: [
@@ -183,7 +183,7 @@ describe('Duration Format', () => {
 
   testCase({
     inputFormat: 'microseconds',
-    outputFormat: 'dynamic',
+    outputFormat: 'humanizePrecise',
     outputPrecision: 1,
     showSuffix: true,
     fixtures: [
@@ -204,7 +204,7 @@ describe('Duration Format', () => {
 
   testCase({
     inputFormat: 'seconds',
-    outputFormat: 'dynamic',
+    outputFormat: 'humanizePrecise',
     outputPrecision: 0,
     showSuffix: true,
     fixtures: [
@@ -225,7 +225,7 @@ describe('Duration Format', () => {
 
   testCase({
     inputFormat: 'milliseconds',
-    outputFormat: 'dynamic',
+    outputFormat: 'humanizePrecise',
     outputPrecision: 0,
     showSuffix: true,
     useShortSuffix: true,
@@ -275,7 +275,7 @@ describe('Duration Format', () => {
 
   testCase({
     inputFormat: 'milliseconds',
-    outputFormat: 'dynamic',
+    outputFormat: 'humanizePrecise',
     outputPrecision: 0,
     showSuffix: true,
     useShortSuffix: true,

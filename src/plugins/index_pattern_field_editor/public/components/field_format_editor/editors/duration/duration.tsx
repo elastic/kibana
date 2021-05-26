@@ -166,7 +166,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
                 isInvalid={!!error}
               />
             </EuiFormRow>
-            {!(format as DurationFormat).isDynamic() && (
+            {!(format as DurationFormat).isHumanPrecise() && (
               <EuiFormRow>
                 <EuiSwitch
                   label={
