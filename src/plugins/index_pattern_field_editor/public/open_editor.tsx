@@ -19,11 +19,9 @@ import {
   UsageCollectionStart,
 } from './shared_imports';
 
-import { InternalFieldType, CloseEditor } from './types';
+import type { PluginStart, InternalFieldType, CloseEditor } from './types';
 import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
-
-import { PluginStart } from './types';
-
+import { ApiService } from './lib/api';
 export interface OpenFieldEditorOptions {
   ctx: {
     indexPattern: IndexPattern;
@@ -37,6 +35,7 @@ interface Dependencies {
   /** The search service from the data plugin */
   search: DataPublicPluginStart['search'];
   indexPatternService: DataPublicPluginStart['indexPatterns'];
+  apiService: ApiService;
   fieldFormats: DataPublicPluginStart['fieldFormats'];
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
   usageCollection: UsageCollectionStart;
@@ -49,6 +48,7 @@ export const getFieldEditorOpener = ({
   fieldFormatEditors,
   search,
   usageCollection,
+  apiService,
 }: Dependencies) => (options: OpenFieldEditorOptions): CloseEditor => {
   const { uiSettings, overlays, docLinks, notifications } = core;
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
@@ -106,6 +106,7 @@ export const getFieldEditorOpener = ({
             fieldFormats={fieldFormats}
             uiSettings={uiSettings}
             usageCollection={usageCollection}
+            apiService={apiService}
           />
         </KibanaReactContextProvider>
       )

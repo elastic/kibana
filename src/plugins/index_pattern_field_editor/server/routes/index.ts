@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { deserializeField } from './serialization';
+import { RouteDependencies } from '../types';
+import { registerFieldPreviewRoute } from './field_preview';
 
-export { getLinks } from './documentation';
-
-export {
-  getRuntimeFieldValidator,
-  RuntimeFieldPainlessError,
-  parseEsError,
-} from './runtime_field_validation';
-
-export { initApi, ApiService } from './api';
+export class ApiRoutes {
+  setup(dependencies: RouteDependencies) {
+    registerFieldPreviewRoute(dependencies);
+  }
+}

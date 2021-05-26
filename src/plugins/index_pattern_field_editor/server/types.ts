@@ -5,15 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { IRouter } from 'src/core/server';
 
-export { deserializeField } from './serialization';
-
-export { getLinks } from './documentation';
-
-export {
-  getRuntimeFieldValidator,
-  RuntimeFieldPainlessError,
-  parseEsError,
-} from './runtime_field_validation';
-
-export { initApi, ApiService } from './api';
+export interface RouteDependencies {
+  router: IRouter;
+}

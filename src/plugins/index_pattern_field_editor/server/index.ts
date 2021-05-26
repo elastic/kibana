@@ -5,15 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { PluginInitializerContext } from '../../../../src/core/server';
+import { IndexPatternPlugin } from './plugin';
 
-export { deserializeField } from './serialization';
-
-export { getLinks } from './documentation';
-
-export {
-  getRuntimeFieldValidator,
-  RuntimeFieldPainlessError,
-  parseEsError,
-} from './runtime_field_validation';
-
-export { initApi, ApiService } from './api';
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new IndexPatternPlugin(initializerContext);
+}

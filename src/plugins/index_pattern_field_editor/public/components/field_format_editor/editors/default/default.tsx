@@ -10,8 +10,8 @@ import React, { PureComponent, ReactText } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FieldFormat, FieldFormatsContentType } from 'src/plugins/data/public';
-import { Sample, SampleInput } from '../../types';
-import { FormatSelectEditorProps } from '../../field_format_editor';
+import type { Sample, SampleInput } from '../../types';
+import type { FormatSelectEditorProps } from '../../field_format_editor';
 
 export const convertSampleInput = (
   converter: (input: SampleInput) => string,

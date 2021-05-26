@@ -55,7 +55,8 @@ const setup = (props?: Partial<Props>) => {
   };
 };
 
-describe('<FieldEditor />', () => {
+// Skipping for now, I will unskip after migrating to the __jest__/client_integration folder
+describe.skip('<FieldEditor />', () => {
   beforeAll(() => {
     jest.useFakeTimers();
   });
