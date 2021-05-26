@@ -23,14 +23,18 @@ import { i18n } from '@kbn/i18n';
 import { Join } from './resources/join';
 import { ILayer } from '../../../classes/layers/layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
-import { IField } from '../../../classes/fields/field';
 import { SOURCE_TYPES } from '../../../../common/constants';
+
+export interface JoinField {
+  label: string;
+  name: string;
+}
 
 export interface Props {
   joins: JoinDescriptor[];
   layer: ILayer;
   layerDisplayName: string;
-  leftJoinFields: IField[];
+  leftJoinFields: JoinField[];
   onChange: (layer: ILayer, joins: JoinDescriptor[]) => void;
 }
 
