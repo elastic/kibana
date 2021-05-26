@@ -12,7 +12,7 @@ import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 const defaultFingerprintParameters = {
   if: undefined,
   tag: undefined,
-  method: undefined,
+  method: 'SHA-1',
   salt: undefined,
   description: undefined,
   ignore_missing: undefined,
@@ -75,7 +75,7 @@ describe('Processor: Fingerprint', () => {
       component,
     } = testBed;
 
-    // Add "type" value (required)
+    // Add "fields" value (required)
     await act(async () => {
       find('fieldsValueField.input').simulate('change', [{ label: 'user' }]);
     });
@@ -98,7 +98,7 @@ describe('Processor: Fingerprint', () => {
       component,
     } = testBed;
 
-    // Add "field" value (required)
+    // Add "fields" value (required)
     await act(async () => {
       find('fieldsValueField.input').simulate('change', [{ label: 'user' }]);
     });
@@ -108,6 +108,8 @@ describe('Processor: Fingerprint', () => {
     form.setInputValue('targetField.input', 'target_field');
     form.setSelectValue('methodsValueField', 'SHA-256');
     form.setInputValue('saltValueField.input', 'salt');
+    form.toggleEuiSwitch('ignoreMissingSwitch.input');
+    form.toggleEuiSwitch('ignoreFailureSwitch.input');
 
     // Save the field with new changes
     await saveNewProcessor();
@@ -119,6 +121,8 @@ describe('Processor: Fingerprint', () => {
       target_field: 'target_field',
       method: 'SHA-256',
       salt: 'salt',
+      ignore_missing: true,
+      ignore_failure: true,
     });
   });
 });

@@ -60,17 +60,26 @@ const fieldsConfig: FieldsConfig = {
   },
   method: {
     type: FIELD_TYPES.TEXT,
+    defaultValue: 'SHA-1',
     serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.fingerprint.methodFieldLabel', {
-      defaultMessage: 'Method (optional)',
+      defaultMessage: 'Method',
     }),
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.fingerprint.methodHelpText"
-        defaultMessage="Hash method used to compute the fingerprint. Defaults to {value}."
-        values={{ value: <EuiCode>{'SHA-1'}</EuiCode> }}
+        defaultMessage="Hash method used to compute the fingerprint."
       />
     ),
+    validations: [
+      {
+        validator: fieldValidators.emptyField(
+          i18n.translate('xpack.ingestPipelines.pipelineEditor.fingerprint.methodRequiredError', {
+            defaultMessage: 'A method value is required.',
+          })
+        ),
+      },
+    ],
   },
 };
 
@@ -103,37 +112,23 @@ export const Fingerprint: FunctionComponent = () => {
             options: [
               {
                 value: 'MD5',
-                text: i18n.translate('xpack.ingestPipelines.pipelineEditor.fingerprint.md5Option', {
-                  defaultMessage: 'MD5',
-                }),
+                text: 'MD5',
               },
               {
                 value: 'SHA-1',
-                text: i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.fingerprint.sha1Option',
-                  { defaultMessage: 'SHA-1' }
-                ),
+                text: 'SHA-1',
               },
               {
                 value: 'SHA-256',
-                text: i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.fingerprint.sha256Option',
-                  { defaultMessage: 'SHA-256' }
-                ),
+                text: 'SHA-256',
               },
               {
                 value: 'SHA-512',
-                text: i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.fingerprint.sha512Option',
-                  { defaultMessage: 'SHA-512' }
-                ),
+                text: 'SHA-512',
               },
               {
                 value: 'MurmurHash3',
-                text: i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.fingerprint.murmurhash3Option',
-                  { defaultMessage: 'MurmurHash3' }
-                ),
+                text: 'MurmurHash3',
               },
             ],
           },
