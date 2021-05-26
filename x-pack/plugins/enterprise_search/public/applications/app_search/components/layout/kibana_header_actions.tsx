@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiButtonEmpty, EuiText, EuiFlexGroup, EuiFlexItem, EuiHeaderLinks } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const KibanaHeaderActions: React.FC = () => {
@@ -15,12 +15,10 @@ export const KibanaHeaderActions: React.FC = () => {
     <EuiHeaderLinks>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="beaker">
-            <EuiText size="s">
-              {i18n.translate('xpack.enterpriseSearch.appSearch.engine.queryTesterButtonLabel', {
-                defaultMessage: 'Query tester',
-              })}
-            </EuiText>
+          <EuiButtonEmpty iconType="beaker" size="s">
+            {i18n.translate('xpack.enterpriseSearch.appSearch.engine.queryTesterButtonLabel', {
+              defaultMessage: 'Query tester',
+            })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
