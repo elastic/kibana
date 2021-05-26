@@ -28,7 +28,6 @@ import { HostIsolationPanel } from '../../../../detections/components/host_isola
 import { TakeActionDropdown } from '../../../../detections/components/host_isolation/take_action_dropdown';
 import { ISOLATE_HOST } from '../../../../detections/components/host_isolation/translations';
 import { ALERT_DETAILS } from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -70,7 +69,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     skip: !expandedEvent.eventId,
   });
 
-  const isHostIsolationEnabled = useIsExperimentalFeatureEnabled('hostIsolationEnabled');
+  const isHostIsolationEnabled = true;
 
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
