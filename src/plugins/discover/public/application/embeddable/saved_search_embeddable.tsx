@@ -349,10 +349,10 @@ export class SavedSearchEmbeddable
       if (this.node) {
         await this.rerenderComponent(this.node);
       }
-    } /* else if (this.searchProps) {
-      // trigger a digest cycle to make sure non-fetch relevant changes are propagated
-      //this.searchScope.$applyAsync();??
-    }*/
+    } else if (this.searchProps && this.node) {
+      this.searchProps = searchProps;
+      ReactDOM.render(<SavedSearchEmbeddableComponent {...this.searchProps} />, this.node);
+    }
   }
 
   /**
