@@ -31,14 +31,14 @@ import {
   UpdateExceptionListProps,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { toError, toPromise } from '../fp_utils';
 import {
   ENDPOINT_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_NAMESPACE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
   EXCEPTION_LIST_URL,
-} from '../constants';
+} from '@kbn/securitysolution-list-constants';
+import { toError, toPromise } from '../fp_utils';
 
 /**
  * Add new ExceptionList
