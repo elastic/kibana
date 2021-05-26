@@ -1728,7 +1728,110 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOrderedByEventId.length).equal(2);
       });
     });
+
+    describe('Signals generated from events with name override field', async () => {
+      beforeEach(async () => {
+        await deleteSignalsIndex(supertest);
+        await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
+      });
+
+      afterEach(async () => {
+        await deleteSignalsIndex(supertest);
+        await deleteAllAlerts(supertest);
+        await esArchiver.load('auditbeat/hosts');
+      });
+
+      it('should generate signals with name_override field', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          rule_name_override: 'event.action',
+        };
+
+        const { id } = await createRule(supertest, rule);
+
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 1, [id]);
+        const signalsResponse = await getSignalsByIds(supertest, [id], 1);
+        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+        const fullSignal = signalsOrderedByEventId[0];
+
+        expect(fullSignal).eql({
+          '@timestamp': fullSignal['@timestamp'],
+          agent: {
+            ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
+            hostname: 'zeek-sensor-amsterdam',
+            id: 'e52588e6-7aa3-4c89-a2c4-d6bc5c286db1',
+            type: 'auditbeat',
+            version: '8.0.0',
+          },
+          cloud: { instance: { id: '133551048' }, provider: 'digitalocean', region: 'ams3' },
+          ecs: { version: '1.0.0-beta2' },
+          event: {
+            action: 'boot',
+            dataset: 'login',
+            kind: 'signal',
+            module: 'system',
+            origin: '/var/log/wtmp',
+          },
+          host: {
+            architecture: 'x86_64',
+            containerized: false,
+            hostname: 'zeek-sensor-amsterdam',
+            id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9',
+            name: 'zeek-sensor-amsterdam',
+            os: {
+              codename: 'bionic',
+              family: 'debian',
+              kernel: '4.15.0-45-generic',
+              name: 'Ubuntu',
+              platform: 'ubuntu',
+              version: '18.04.2 LTS (Bionic Beaver)',
+            },
+          },
+          message: 'System boot',
+          service: { type: 'system' },
+          signal: {
+            _meta: {
+              version: SIGNALS_TEMPLATE_VERSION,
+            },
+            parents: [
+              {
+                depth: 0,
+                id: 'UBXOBmkBR346wHgnLP8T',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+            ],
+            ancestors: [
+              {
+                depth: 0,
+                id: 'UBXOBmkBR346wHgnLP8T',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+            ],
+            status: 'open',
+            rule: fullSignal.signal.rule,
+            original_time: fullSignal.signal.original_time,
+            depth: 1,
+            parent: {
+              id: 'UBXOBmkBR346wHgnLP8T',
+              type: 'event',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              depth: 0,
+            },
+            original_event: {
+              action: 'boot',
+              dataset: 'login',
+              kind: 'event',
+              module: 'system',
+              origin: '/var/log/wtmp',
+            },
+          },
+        });
+      });
+    });
   });
 };
-
-// TODO: name override tests
