@@ -33,17 +33,17 @@ export const uptimeRuleFieldMap = {
     type: 'keyword',
   },
   // tls alert fields
-  'cert.count': {
-    type: 'number',
+  'cert_status.count': {
+    type: 'integer',
   },
   'cert_status.aging_count': {
-    type: 'number',
+    type: 'integer',
   },
   'cert_status.aging_common_name_and_date': {
     type: 'text',
   },
   'cert_status.expiring_count': {
-    type: 'number',
+    type: 'integer',
   },
   'cert_status.expiring_common_name_and_date': {
     type: 'text',
@@ -59,16 +59,16 @@ export const uptimeRuleFieldMap = {
     type: 'keyword',
   },
   'anomaly.severity_score': {
-    type: 'number',
+    type: 'double',
   },
   'anomaly.start': {
     type: 'date',
   },
   'anomaly.slowest_response': {
-    type: 'number',
+    type: 'double',
   },
   'anomaly.expected_response': {
-    type: 'number',
+    type: 'double',
   },
   'anomaly.observer_location': {
     type: 'keyword',

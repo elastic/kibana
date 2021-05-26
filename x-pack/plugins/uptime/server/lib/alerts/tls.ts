@@ -138,7 +138,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
       const alert = alertWithLifecycle({
         id: TLS.id,
         fields: {
-          'cert.count': summary.count,
+          'cert_status.count': summary.count,
           'cert_status.aging_count': summary.agingCount,
           'cert_status.aging_common_name_and_date': summary.agingCommonNameAndDate,
           'cert_status.expiring_count': summary.expiringCount,

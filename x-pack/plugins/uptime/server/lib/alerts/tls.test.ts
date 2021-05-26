@@ -101,7 +101,7 @@ describe('tls alert', () => {
       expect(alertWithLifecycle).toHaveBeenCalledTimes(1);
       expect(alertWithLifecycle).toBeCalledWith({
         fields: {
-          'cert.count': 4,
+          'cert_status.count': 4,
           'cert_status.aging_common_name_and_date': '',
           'cert_status.aging_count': 0,
           'cert_status.expiring_common_name_and_date':
@@ -171,7 +171,7 @@ Expiring Certificates: Common-One, expired on 2020-07-16T03:15:39.000Z 301 days 
       expect(alertWithLifecycle).toHaveBeenCalledTimes(1);
       expect(alertWithLifecycle).toBeCalledWith({
         fields: {
-          'cert.count': 4,
+          'cert_status.count': 4,
           'cert_status.aging_common_name_and_date':
             'Common-Two, valid since 2019-07-20T03:15:39.000Z, 663 days ago.; Common-Three, valid since 2019-07-22T03:15:39.000Z, 661 days ago.; Common-One, valid since 2019-07-24T03:15:39.000Z, 659 days ago.',
           'cert_status.aging_count': 4,
