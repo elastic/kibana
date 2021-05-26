@@ -28,9 +28,9 @@ import {
 import { DocTableService } from './doc_table';
 import { EmbeddingProvider } from './embedding';
 import { FilterBarService } from './filter_bar';
-import { FlyoutProvider } from './flyout';
+import { FlyoutService } from './flyout';
 import { GlobalNavService } from './global_nav';
-import { InspectorProvider } from './inspector';
+import { InspectorService } from './inspector';
 import { FieldEditorService } from './field_editor';
 import { ManagementMenuService } from './management';
 import { QueryBarProvider } from './query_bar';
@@ -67,14 +67,14 @@ export const services = {
   dashboardAddPanel: DashboardAddPanelService,
   dashboardReplacePanel: DashboardReplacePanelService,
   dashboardPanelActions: DashboardPanelActionsService,
-  flyout: FlyoutProvider,
+  flyout: FlyoutService,
   comboBox: ComboBoxProvider,
   dataGrid: DataGridService,
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
   browser: BrowserProvider,
   pieChart: PieChartService,
-  inspector: InspectorProvider,
+  inspector: InspectorService,
   fieldEditor: FieldEditorService,
   vegaDebugInspector: VegaDebugInspectorViewService,
   appsMenu: AppsMenuProvider,
