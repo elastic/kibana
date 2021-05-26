@@ -407,6 +407,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
     });
 
+    it('should create a heatmap chart and transition to barchart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsHeatmap_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsHeatmap_yDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'geo.dest',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsHeatmap_cellPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      expect(await PageObjects.lens.hasChartSwitchWarning('bar')).to.eql(false);
+      await PageObjects.lens.switchToVisualization('bar');
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+        '@timestamp'
+      );
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        'Average of bytes'
+      );
+    });
+
     it('should create a valid XY chart with references', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
