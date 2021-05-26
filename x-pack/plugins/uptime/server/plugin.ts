@@ -34,7 +34,7 @@ export class Plugin implements PluginType {
     const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
 
     const ready = once(async () => {
-      const componentTemplateName = plugins.ruleRegistry.getFullAssetName('uptime-mappings');
+      const componentTemplateName = plugins.ruleRegistry.getFullAssetName('synthetics-mappings');
 
       if (!plugins.ruleRegistry.isWriteEnabled()) {
         return;
@@ -53,7 +53,7 @@ export class Plugin implements PluginType {
       });
 
       await plugins.ruleRegistry.createOrUpdateIndexTemplate({
-        name: plugins.ruleRegistry.getFullAssetName('uptime-index-template'),
+        name: plugins.ruleRegistry.getFullAssetName('synthetics-index-template'),
         body: {
           index_patterns: [plugins.ruleRegistry.getFullAssetName('observability-synthetics*')],
           composed_of: [
