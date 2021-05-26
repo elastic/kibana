@@ -23,6 +23,7 @@ export const ConfigMapping = {
   caseNameConfig: schema.nullable(ConfigMapSchema),
   commentsConfig: schema.nullable(ConfigMapSchema),
   severityConfig: schema.nullable(ConfigMapSchema),
+  descriptionConfig: schema.nullable(ConfigMapSchema),
 };
 
 export const ConfigMappingSchema = schema.object(ConfigMapping);
@@ -48,6 +49,7 @@ const SwimlaneFields = {
   caseName: schema.nullable(schema.string()),
   comments: schema.nullable(schema.string()),
   severity: schema.nullable(schema.string()),
+  description: schema.nullable(schema.string()),
 };
 
 export const ExecutorSubActionCreateRecordParamsSchema = schema.object(SwimlaneFields);

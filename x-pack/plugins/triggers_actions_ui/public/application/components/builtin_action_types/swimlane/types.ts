@@ -27,6 +27,7 @@ export interface SwimlaneMappingConfig {
   caseIdConfig: SwimlaneFieldMappingConfig;
   alertNameConfig: SwimlaneFieldMappingConfig;
   commentsConfig: SwimlaneFieldMappingConfig;
+  descriptionConfig: SwimlaneFieldMappingConfig;
 }
 
 export interface SwimlaneFieldMappingConfig {

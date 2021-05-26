@@ -48,6 +48,7 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
       caseIdConfig: findOption(options, mappings?.caseIdConfig?.id),
       caseNameConfig: findOption(options, mappings?.caseNameConfig?.id),
       commentsConfig: findOption(options, mappings?.commentsConfig?.id),
+      descriptionConfig: findOption(options, mappings?.descriptionConfig?.id),
     }),
     [options, mappings]
   );
@@ -134,6 +135,16 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
           singleSelection={SINGLE_SELECTION}
           data-test-subj="swimlaneCommentsConfig"
           onChange={(e) => editMappings('commentsConfig', e)}
+        />
+      </EuiFormRow>
+      <EuiFormRow id="descriptionConfig" fullWidth label={i18n.SW_DESCRIPTION_FIELD_LABEL}>
+        <EuiComboBox
+          fullWidth
+          selectedOptions={[state.descriptionConfig]}
+          options={options}
+          singleSelection={SINGLE_SELECTION}
+          data-test-subj="swimlaneDescriptionConfig"
+          onChange={(e) => editMappings('descriptionConfig', e)}
         />
       </EuiFormRow>
       <EuiButton color="warning" onClick={resetConnection}>

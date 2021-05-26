@@ -156,6 +156,13 @@ export const SW_COMMENTS_FIELD_LABEL = i18n.translate(
   }
 );
 
+export const SW_DESCRIPTION_FIELD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.descriptionFieldLabel',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
 export const SW_REMEMBER_VALUE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.rememberValueLabel',
   { defaultMessage: 'Remember this value. You must reenter it each time you edit the connector.' }
