@@ -8,7 +8,6 @@
 * <<configuring-kibana-shield>>
 * <<csp-strict-mode>>
 * <<enabling-ssl>>
-* <<load-balancing-es>>
 * <<load-balancing-kibana>>
 * <<accessing-load-balanced-kibana>>
 * <<high-availability>>
@@ -22,9 +21,8 @@ Kibana instances that are all connected to the same Elasticsearch instance.
 
 While Kibana isn't terribly resource intensive, we still recommend running Kibana
 separate from  your Elasticsearch data or master nodes. To distribute Kibana
-traffic across the nodes in your Elasticsearch cluster, you can run Kibana
-and an Elasticsearch client node on the same machine. For more information, see
-<<load-balancing-es, Load balancing across multiple Elasticsearch nodes>>.
+traffic across the nodes in your Elasticsearch cluster, you can configure Kibana
+to use a list of Elasticsearch hosts.
 
 [float]
 [[configuring-kibana-shield]]
