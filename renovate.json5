@@ -44,7 +44,7 @@
       {
         groupName: '@elastic/elasticsearch',
         packageNames: ['@elastic/elasticsearch'],
-        reviewers: ['team:kibana-operations', 'team:kibana-core'],
+        reviewers: ['team:kibana-operations', 'team:@elastic/kibana-core'],
         matchBaseBranches: ['master'],
         labels: ['release_note:skip', 'v8.0.0', 'Team:Operations', 'Team:Core', 'backport:skip'],
         enabled: true,
@@ -52,7 +52,7 @@
       {
         groupName: '@elastic/elasticsearch',
         packageNames: ['@elastic/elasticsearch'],
-        reviewers: ['team:kibana-operations', 'team:kibana-core'],
+        reviewers: ['team:kibana-operations', 'team:@elastic/kibana-core'],
         matchBaseBranches: ['7.x'],
         labels: ['release_note:skip', 'v7.14.0', 'Team:Operations', 'Team:Core', 'backport:skip'],
         enabled: true,
