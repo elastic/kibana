@@ -489,12 +489,19 @@ export function MachineLearningJobTableProvider(
     public async closeEditJobFlyout() {
       if (await testSubjects.exists('mlEditJobFlyoutCloseButton')) {
         await testSubjects.click('mlEditJobFlyoutCloseButton');
+        await testSubjects.missingOrFail('mlJobEditFlyout');
       }
     }
 
-    public async clickOpenCustomEditor() {
+    public async saveEditJobFlyoutChanges() {
+      await testSubjects.click('mlEditJobFlyoutSaveButton');
+      await testSubjects.missingOrFail('mlJobEditFlyout', { timeout: 5000 });
+    }
+
+    public async clickOpenCustomUrlEditor() {
       await this.ensureEditCustomUrlTabOpen();
       await testSubjects.click('mlJobOpenCustomUrlFormButton');
+      await testSubjects.existOrFail('mlJobCustomUrlForm');
     }
 
     public async addDiscoverCustomUrl(
@@ -512,7 +519,7 @@ export function MachineLearningJobTableProvider(
       const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
 
       // Fill-in the form
-      await testSubjects.click('mlJobOpenCustomUrlFormButton');
+      await this.clickOpenCustomUrlEditor();
       await customUrls.setCustomUrlLabel(customUrl.label);
       await mlCommonUI.selectRadioGroupValue(
         `mlJobCustomUrlLinkToTypeInput`,
@@ -537,7 +544,7 @@ export function MachineLearningJobTableProvider(
       await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
 
       // Save the job
-      await testSubjects.click('mlEditJobFlyoutSaveButton');
+      await this.saveEditJobFlyoutChanges();
     }
 
     public async addDashboardCustomUrl(
@@ -555,7 +562,7 @@ export function MachineLearningJobTableProvider(
       const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
 
       // Fill-in the form
-      await testSubjects.click('mlJobOpenCustomUrlFormButton');
+      await this.clickOpenCustomUrlEditor();
       await customUrls.setCustomUrlLabel(customUrl.label);
       await mlCommonUI.selectRadioGroupValue(
         `mlJobCustomUrlLinkToTypeInput`,
@@ -580,7 +587,7 @@ export function MachineLearningJobTableProvider(
       await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
 
       // Save the job
-      await testSubjects.click('mlEditJobFlyoutSaveButton');
+      await this.saveEditJobFlyoutChanges();
     }
 
     public async addOtherTypeCustomUrl(jobId: string, customUrl: { label: string; url: string }) {
@@ -589,7 +596,7 @@ export function MachineLearningJobTableProvider(
       const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
 
       // Fill-in the form
-      await testSubjects.click('mlJobOpenCustomUrlFormButton');
+      await this.clickOpenCustomUrlEditor();
       await customUrls.setCustomUrlLabel(customUrl.label);
       await mlCommonUI.selectRadioGroupValue(`mlJobCustomUrlLinkToTypeInput`, URL_TYPE.OTHER);
       await customUrls.setCustomUrlOtherTypeUrl(customUrl.url);
@@ -600,7 +607,7 @@ export function MachineLearningJobTableProvider(
       await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
 
       // Save the job
-      await testSubjects.click('mlEditJobFlyoutSaveButton');
+      await this.saveEditJobFlyoutChanges();
     }
 
     public async editCustomUrl(
@@ -612,8 +619,8 @@ export function MachineLearningJobTableProvider(
       await customUrls.editCustomUrlLabel(indexInList, customUrl.label);
       await customUrls.editCustomUrlUrlValue(indexInList, customUrl.url);
 
-      // Save the edit and test edit has been applied.
-      await testSubjects.click('mlEditJobFlyoutSaveButton');
+      // Save the edit
+      await this.saveEditJobFlyoutChanges();
     }
 
     public async deleteCustomUrl(jobId: string, indexInList: number) {

@@ -18,6 +18,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
   />
   <EuiForm
     className="ml-edit-url-form"
+    data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
       className="url-label"
@@ -219,6 +220,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
   />
   <EuiForm
     className="ml-edit-url-form"
+    data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
       className="url-label"
@@ -458,6 +460,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
   />
   <EuiForm
     className="ml-edit-url-form"
+    data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
       className="url-label"
@@ -693,6 +696,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
   />
   <EuiForm
     className="ml-edit-url-form"
+    data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
       className="url-label"
@@ -898,6 +902,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
   />
   <EuiForm
     className="ml-edit-url-form"
+    data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
       className="url-label"
@@ -1014,6 +1019,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
   />
   <EuiForm
     className="ml-edit-url-form"
+    data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
       className="url-label"

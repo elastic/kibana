@@ -209,7 +209,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
         </h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiForm className="ml-edit-url-form">
+      <EuiForm className="ml-edit-url-form" data-test-subj="mlJobCustomUrlForm">
         <EuiFormRow
           label={
             <FormattedMessage id="xpack.ml.customUrlsEditor.labelLabel" defaultMessage="Label" />
