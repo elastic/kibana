@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
+import {
+  EuiHeaderSectionItemButton,
+  EuiCallOut,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { Dispatch, useCallback, useReducer, useState } from 'react';
@@ -115,14 +121,16 @@ export const MlPopover = React.memo(() => {
         anchorPosition="downRight"
         id="integrations-popover"
         button={
-          <EuiButtonEmpty
+          <EuiHeaderSectionItemButton
+            aria-expanded={isPopoverOpen}
+            aria-haspopup="true"
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >
             {i18n.ML_JOB_SETTINGS}
-          </EuiButtonEmpty>
+          </EuiHeaderSectionItemButton>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -138,7 +146,10 @@ export const MlPopover = React.memo(() => {
         anchorPosition="downRight"
         id="integrations-popover"
         button={
-          <EuiButtonEmpty
+          <EuiHeaderSectionItemButton
+            aria-expanded={isPopoverOpen}
+            aria-haspopup="true"
+            aria-label={i18n.ML_JOB_SETTINGS}
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
@@ -148,7 +159,7 @@ export const MlPopover = React.memo(() => {
             }}
           >
             {i18n.ML_JOB_SETTINGS}
-          </EuiButtonEmpty>
+          </EuiHeaderSectionItemButton>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}

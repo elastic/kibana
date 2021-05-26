@@ -24,13 +24,14 @@ import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
 import { useThrottledResizeObserver } from '../../common/components/utils';
-import { AppLeaveHandler } from '../../../../../../src/core/public';
+import { AppLeaveHandler, AppMountParameters } from '../../../../../../src/core/public';
 import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
 import { MainNavigation } from './main_navigation';
 import { HeaderGlobal } from './header_global';
 import { IS_DRAGGING_CLASS_NAME } from '../../common/components/drag_and_drop/helpers';
 import { getTimelineShowStatusByIdSelector } from '../../timelines/components/flyout/selectors';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { KQLHeaderGlobal } from './kql_global';
 
 const StyledEuiPanel = styled(EuiPanel).attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   style: {
@@ -62,9 +63,14 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
 interface HomePageProps {
   children: React.ReactNode;
   onAppLeave: (handler: AppLeaveHandler) => void;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const HomePageComponent: React.FC<HomePageProps> = ({ children, onAppLeave }) => {
+const HomePageComponent: React.FC<HomePageProps> = ({
+  children,
+  onAppLeave,
+  setHeaderActionMenu,
+}) => {
   const { application, overlays } = useKibana().services;
   const subPluginId = useRef<string>('');
   const { ref, height = 0 } = useThrottledResizeObserver(300);
@@ -105,6 +111,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, onAppLeave }) =>
   const shouldShowTimelineBottomBar = indicesExist && showTimeline;
   return (
     <SecuritySolutionAppWrapper className="kbnAppWrapper">
+      <HeaderGlobal setHeaderActionMenu={setHeaderActionMenu} />
       <main className="kbnAppWrapper" data-test-subj="pageContainer">
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
@@ -131,7 +138,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, onAppLeave }) =>
             }
           >
             <EuiPanel color="subdued" paddingSize="none">
-              <HeaderGlobal ref={ref} isFixed={headerFixed} />
+              <KQLHeaderGlobal ref={ref} isFixed={headerFixed} />
             </EuiPanel>
             <StyledEuiPanel paddingTop={mainPaddingTop} paddingSize="l" color="transparent">
               {children}
