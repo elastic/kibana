@@ -39,9 +39,9 @@ import { RenderableProvider } from './renderable';
 import { ToastsProvider } from './toasts';
 import { DataGridService } from './data_grid';
 import {
-  PieChartProvider,
-  ElasticChartProvider,
-  VegaDebugInspectorViewProvider,
+  PieChartService,
+  ElasticChartService,
+  VegaDebugInspectorViewService,
 } from './visualizations';
 import { ListingTableService } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
@@ -73,15 +73,15 @@ export const services = {
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
   browser: BrowserProvider,
-  pieChart: PieChartProvider,
+  pieChart: PieChartService,
   inspector: InspectorProvider,
   fieldEditor: FieldEditorService,
-  vegaDebugInspector: VegaDebugInspectorViewProvider,
+  vegaDebugInspector: VegaDebugInspectorViewService,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavService,
   toasts: ToastsProvider,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
-  elasticChart: ElasticChartProvider,
+  elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
   managementMenu: ManagementMenuProvider,
   monacoEditor: MonacoEditorProvider,
