@@ -54,7 +54,7 @@ export class Plugin implements PluginType {
       await plugins.ruleRegistry.createOrUpdateIndexTemplate({
         name: plugins.ruleRegistry.getFullAssetName('uptime-index-template'),
         body: {
-          index_patterns: [plugins.ruleRegistry.getFullAssetName('observability-uptime*')],
+          index_patterns: [plugins.ruleRegistry.getFullAssetName('observability-synthetics*')],
           composed_of: [
             plugins.ruleRegistry.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
             componentTemplateName,
@@ -64,7 +64,7 @@ export class Plugin implements PluginType {
     });
 
     const ruleDataClient = new RuleDataClient({
-      alias: plugins.ruleRegistry.getFullAssetName('observability-uptime'),
+      alias: plugins.ruleRegistry.getFullAssetName('observability-synthetics'),
       getClusterClient: async () => {
         const coreStart = await getCoreStart();
         return coreStart.elasticsearch.client.asInternalUser;
