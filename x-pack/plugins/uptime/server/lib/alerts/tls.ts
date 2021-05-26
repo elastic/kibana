@@ -8,14 +8,15 @@
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { UptimeAlertTypeFactory } from './types';
-import { updateState } from './common';
+import { updateState, generateAlertMessage } from './common';
 import { TLS } from '../../../common/constants/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
+import { TlsTranslations } from '../../../common/translations';
 
-const DEFAULT_SIZE = 20;
+export const DEFAULT_SIZE = 20;
 
 interface TlsAlertState {
   count: number;
@@ -137,15 +138,21 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
       const alert = alertWithLifecycle({
         id: TLS.id,
         fields: {
-          ...updateState(state, foundCerts),
-          ...summary,
+          'cert.count': summary.count,
+          'cert_status.aging_count': summary.agingCount,
+          'cert_status.aging_common_name_and_date': summary.agingCommonNameAndDate,
+          'cert_status.expiring_count': summary.expiringCount,
+          'cert_status.expiring_common_name_and_date': summary.expiringCommonNameAndDate,
+          'cert_status.has_aging': summary.hasAging,
+          'cert_status.has_expired': summary.hasExpired,
+          reason: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
         },
       });
 
-      alert.state = {
+      alert.replaceState({
         ...updateState(state, foundCerts),
         ...summary,
-      };
+      });
       alert.scheduleActions(TLS.id);
     }
 
