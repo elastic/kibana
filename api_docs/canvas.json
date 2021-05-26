@@ -5,22 +5,25 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "canvas",
         "id": "def-public.WithKibanaProps",
         "type": "Interface",
+        "tags": [],
         "label": "WithKibanaProps",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/canvas/public/index.ts",
+          "lineNumber": 15
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "canvas",
             "id": "def-public.WithKibanaProps.kibana",
             "type": "Object",
+            "tags": [],
             "label": "kibana",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/canvas/public/index.ts",
-              "lineNumber": 16
-            },
             "signature": [
               "{ services: ",
               {
@@ -31,29 +34,18 @@
                 "text": "CoreStart"
               },
               " & ",
-              {
-                "pluginId": "canvas",
-                "scope": "public",
-                "docId": "kibCanvasPluginApi",
-                "section": "def-public.CanvasStartDeps",
-                "text": "CanvasStartDeps"
-              },
+              "CanvasStartDeps",
               " & { canvas: ",
-              {
-                "pluginId": "canvas",
-                "scope": "public",
-                "docId": "kibCanvasPluginApi",
-                "section": "def-public.CanvasServices",
-                "text": "CanvasServices"
-              },
+              "CanvasServices",
               "; }; }"
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/canvas/public/index.ts",
+              "lineNumber": 16
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/canvas/public/index.ts",
-          "lineNumber": 15
-        },
         "initialIsOpen": false
       }
     ],
@@ -61,38 +53,40 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "canvas",
       "id": "def-public.CanvasSetup",
       "type": "Type",
+      "tags": [],
       "label": "CanvasSetup",
-      "tags": [
-        "public"
-      ],
       "description": [
         "\nThese are the interfaces with your public contracts. You should export these\nfor other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces."
       ],
-      "source": {
-        "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 63
-      },
       "signature": [
         "CanvasApi"
       ],
+      "source": {
+        "path": "x-pack/plugins/canvas/public/plugin.tsx",
+        "lineNumber": 68
+      },
+      "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "canvas",
       "id": "def-public.CanvasStart",
       "type": "Type",
-      "label": "CanvasStart",
       "tags": [],
+      "label": "CanvasStart",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 64
-      },
       "signature": [
         "void"
       ],
+      "source": {
+        "path": "x-pack/plugins/canvas/public/plugin.tsx",
+        "lineNumber": 69
+      },
+      "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -111,6 +105,36 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "canvas",
+        "id": "def-common.UI_SETTINGS",
+        "type": "Object",
+        "tags": [],
+        "label": "UI_SETTINGS",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/canvas/common/index.ts",
+          "lineNumber": 8
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "canvas",
+            "id": "def-common.UI_SETTINGS.ENABLE_LABS_UI",
+            "type": "string",
+            "tags": [],
+            "label": "ENABLE_LABS_UI",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/canvas/common/index.ts",
+              "lineNumber": 9
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

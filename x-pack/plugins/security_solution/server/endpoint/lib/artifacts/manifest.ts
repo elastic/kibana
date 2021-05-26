@@ -7,7 +7,7 @@
 
 import { flatMap, isEqual } from 'lodash';
 import semver from 'semver';
-import { validate } from '../../../../common';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   InternalArtifactSchema,
   InternalManifestSchema,
@@ -56,10 +56,7 @@ export class Manifest {
   private readonly policySpecificEntries: Map<string, Map<string, ManifestEntry>>;
   private version: ManifestVersion;
 
-  constructor(
-    version?: Partial<ManifestVersion>,
-    private readonly isFleetServerEnabled: boolean = false
-  ) {
+  constructor(version?: Partial<ManifestVersion>) {
     this.allEntries = new Map();
     this.defaultEntries = new Map();
     this.policySpecificEntries = new Map();
@@ -78,8 +75,8 @@ export class Manifest {
     this.version = validated;
   }
 
-  public static getDefault(schemaVersion?: ManifestSchemaVersion, isFleetServerEnabled?: boolean) {
-    return new Manifest({ schemaVersion, semanticVersion: '1.0.0' }, isFleetServerEnabled);
+  public static getDefault(schemaVersion?: ManifestSchemaVersion) {
+    return new Manifest({ schemaVersion, semanticVersion: '1.0.0' });
   }
 
   public bumpSemanticVersion() {
@@ -107,7 +104,7 @@ export class Manifest {
     const descriptor = {
       isDefaultEntry: existingDescriptor?.isDefaultEntry || policyId === undefined,
       specificTargetPolicies: addValueToSet(existingDescriptor?.specificTargetPolicies, policyId),
-      entry: existingDescriptor?.entry || new ManifestEntry(artifact, this.isFleetServerEnabled),
+      entry: existingDescriptor?.entry || new ManifestEntry(artifact),
     };
 
     this.allEntries.set(descriptor.entry.getDocId(), descriptor);

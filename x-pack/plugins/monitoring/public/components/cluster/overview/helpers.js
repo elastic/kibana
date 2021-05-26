@@ -27,16 +27,32 @@ export function HealthLabel(props) {
     });
   }
 
-  if (props.status === 'yellow') {
-    return i18n.translate('xpack.monitoring.cluster.health.replicaShards', {
-      defaultMessage: 'Missing replica shards',
-    });
+  const { product, status } = props;
+  if (product === 'es') {
+    if (props.status === 'yellow') {
+      return i18n.translate('xpack.monitoring.cluster.health.replicaShards', {
+        defaultMessage: 'Missing replica shards',
+      });
+    }
+
+    if (props.status === 'red') {
+      return i18n.translate('xpack.monitoring.cluster.health.primaryShards', {
+        defaultMessage: 'Missing primary shards',
+      });
+    }
   }
 
-  if (props.status === 'red') {
-    return i18n.translate('xpack.monitoring.cluster.health.primaryShards', {
-      defaultMessage: 'Missing primary shards',
-    });
+  if (product === 'kb' && status === 'red') {
+    return (
+      <EuiText>
+        {i18n.translate('xpack.monitoring.cluster.health.pluginIssues', {
+          defaultMessage: 'Some plugins are experiencing issues. Check ',
+        })}
+        <EuiLink href="/status" target="_blank" external={true}>
+          status
+        </EuiLink>
+      </EuiText>
+    );
   }
 
   return 'N/A';
@@ -55,7 +71,7 @@ export function HealthStatusIndicator(props) {
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiHealth color={statusColor} data-test-subj="statusIcon">
-          <HealthLabel status={props.status} />
+          <HealthLabel {...props} />
         </EuiHealth>
       </EuiFlexItem>
     </EuiFlexGroup>

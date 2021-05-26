@@ -8,7 +8,7 @@
 
 import { map } from 'rxjs/operators';
 import { ISearchStrategy, PluginStart } from '../../../src/plugins/data/server';
-import { IMyStrategyResponse, IMyStrategyRequest } from '../common';
+import { IMyStrategyRequest, IMyStrategyResponse } from '../common/types';
 
 export const mySearchStrategyProvider = (
   data: PluginStart
@@ -20,6 +20,7 @@ export const mySearchStrategyProvider = (
         map((esSearchRes) => ({
           ...esSearchRes,
           cool: request.get_cool ? 'YES' : 'NOPE',
+          executed_at: new Date().getTime(),
         }))
       ),
     cancel: async (id, options, deps) => {

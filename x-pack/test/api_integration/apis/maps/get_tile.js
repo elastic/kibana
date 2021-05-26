@@ -17,11 +17,8 @@ export default function ({ getService }) {
     it('should return vector tile containing document', async () => {
       const resp = await supertest
         .get(
-          `/api/maps/mvt/getTile\
-?x=1\
-&y=1\
-&z=2\
-&geometryFieldName=geo.coordinates\
+          `/api/maps/mvt/getTile/2/1/1.pbf\
+?geometryFieldName=geo.coordinates\
 &index=logstash-*\
 &requestBody=(_source:!f,docvalue_fields:!(bytes,geo.coordinates,machine.os.raw),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10000,stored_fields:!(bytes,geo.coordinates,machine.os.raw))\
 &geoFieldType=geo_point`
@@ -51,11 +48,8 @@ export default function ({ getService }) {
       const resp = await supertest
         // requestBody sets size=1 to force count exceeded
         .get(
-          `/api/maps/mvt/getTile\
-?x=1\
-&y=1\
-&z=2\
-&geometryFieldName=geo.coordinates\
+          `/api/maps/mvt/getTile/2/1/1.pbf\
+?geometryFieldName=geo.coordinates\
 &index=logstash-*\
 &requestBody=(_source:!f,docvalue_fields:!(bytes,geo.coordinates,machine.os.raw),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:1,stored_fields:!(bytes,geo.coordinates,machine.os.raw))\
 &geoFieldType=geo_point`

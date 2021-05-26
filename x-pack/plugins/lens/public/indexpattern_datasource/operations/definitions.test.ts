@@ -11,7 +11,10 @@ import {
   countOperation,
   counterRateOperation,
   movingAverageOperation,
+  cumulativeSumOperation,
   derivativeOperation,
+  AvgIndexPatternColumn,
+  DerivativeIndexPatternColumn,
 } from './definitions';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { documentField } from '../document_field';
@@ -35,7 +38,7 @@ const indexPatternFields = [
   },
   {
     name: 'bytes',
-    displayName: 'bytes',
+    displayName: 'bytesLabel',
     type: 'number',
     aggregatable: true,
     searchable: true,
@@ -98,6 +101,73 @@ const baseColumnArgs: {
   field: indexPattern.fields[2],
 };
 
+const layer: IndexPatternLayer = {
+  indexPatternId: '1',
+  columnOrder: ['date', 'metric', 'ref'],
+  columns: {
+    date: {
+      label: '',
+      customLabel: true,
+      dataType: 'date',
+      isBucketed: true,
+      operationType: 'date_histogram',
+      sourceField: 'timestamp',
+      params: { interval: 'auto' },
+    },
+    metric: {
+      label: 'metricLabel',
+      customLabel: true,
+      dataType: 'number',
+      isBucketed: false,
+      operationType: 'average',
+      sourceField: 'bytes',
+      params: {},
+    } as AvgIndexPatternColumn,
+    ref: {
+      label: '',
+      customLabel: true,
+      dataType: 'number',
+      isBucketed: false,
+      operationType: 'differences',
+      references: ['metric'],
+    } as DerivativeIndexPatternColumn,
+  },
+};
+
+describe('labels', () => {
+  const calcColumnArgs = {
+    ...baseColumnArgs,
+    referenceIds: ['metric'],
+    layer,
+    previousColumn: layer.columns.metric,
+  };
+  it('should use label of referenced operation to create label for derivative and moving average', () => {
+    expect(derivativeOperation.buildColumn(calcColumnArgs)).toEqual(
+      expect.objectContaining({
+        label: 'Differences of metricLabel',
+      })
+    );
+    expect(movingAverageOperation.buildColumn(calcColumnArgs)).toEqual(
+      expect.objectContaining({
+        label: 'Moving average of metricLabel',
+      })
+    );
+  });
+
+  it('should use displayName of a field for a label for counter rate and cumulative sum', () => {
+    expect(counterRateOperation.buildColumn(calcColumnArgs)).toEqual(
+      expect.objectContaining({
+        label: 'Counter rate of bytesLabel per second',
+      })
+    );
+    expect(cumulativeSumOperation.buildColumn(calcColumnArgs)).toEqual(
+      expect.objectContaining({
+        label: 'Cumulative sum of bytesLabel',
+      })
+    );
+  });
+});
+
 describe('time scale transition', () => {
   it('should carry over time scale and adjust label on operation from count to sum', () => {
     expect(
@@ -107,7 +177,7 @@ describe('time scale transition', () => {
     ).toEqual(
       expect.objectContaining({
         timeScale: 'h',
-        label: 'Sum of bytes per hour',
+        label: 'Sum of bytesLabel per hour',
       })
     );
   });
@@ -122,27 +192,6 @@ describe('time scale transition', () => {
         expect(result.timeScale).toEqual('h');
         expect(result.label).toContain('per hour');
       }
-    );
-  });
-
-  it('should carry over time scale and adjust label on operation from sum to count', () => {
-    expect(
-      countOperation.buildColumn({
-        ...baseColumnArgs,
-        previousColumn: {
-          label: 'Sum of bytes per hour',
-          timeScale: 'h',
-          dataType: 'number',
-          isBucketed: false,
-          operationType: 'sum',
-          sourceField: 'bytes',
-        },
-      })
-    ).toEqual(
-      expect.objectContaining({
-        timeScale: 'h',
-        label: 'Count of records per hour',
-      })
     );
   });
 
@@ -188,7 +237,7 @@ describe('time scale transition', () => {
     expect(
       sumOperation.onFieldChange(
         {
-          label: 'Sum of bytes per hour',
+          label: 'Sum of bytesLabel per hour',
           timeScale: 'h',
           dataType: 'number',
           isBucketed: false,

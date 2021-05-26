@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
@@ -45,7 +45,6 @@ import {
 import { LensAttributeService } from '../lens_attribute_service';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { EmbeddableStateTransfer } from '../../../../../src/plugins/embeddable/public';
-import { NativeRenderer } from '../native_renderer';
 import moment from 'moment';
 
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
@@ -72,10 +71,11 @@ const { TopNavMenu } = navigationStartMock.ui;
 
 function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   return {
-    mount: jest.fn(async (el, props) => {}),
-    unmount: jest.fn(() => {}),
+    EditorFrameContainer: jest.fn((props: EditorFrameProps) => <div />),
   };
 }
+
+const sessionIdSubject = new Subject<string>();
 
 function createMockSearchService() {
   let sessionIdCounter = 1;
@@ -84,6 +84,7 @@ function createMockSearchService() {
       start: jest.fn(() => `sessionId-${sessionIdCounter++}`),
       clear: jest.fn(),
       getSessionId: jest.fn(() => `sessionId-${sessionIdCounter}`),
+      getSession$: jest.fn(() => sessionIdSubject.asObservable()),
     },
   };
 }
@@ -305,13 +306,9 @@ describe('Lens App', () => {
 
   it('renders the editor frame', () => {
     const { frame } = mountWith({});
-
-    expect(frame.mount.mock.calls).toMatchInlineSnapshot(`
+    expect(frame.EditorFrameContainer.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          <div
-            class="lnsApp__frame"
-          />,
           Object {
             "dateRange": Object {
               "fromDate": "2021-01-10T04:00:00.000Z",
@@ -330,6 +327,7 @@ describe('Lens App', () => {
             "searchSessionId": "sessionId-1",
             "showNoDataPopover": [Function],
           },
+          Object {},
         ],
       ]
     `);
@@ -354,21 +352,20 @@ describe('Lens App', () => {
     const { component, frame } = mountWith({ services });
 
     component.update();
-
-    expect(frame.mount).toHaveBeenCalledWith(
-      expect.any(Element),
+    expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
       expect.objectContaining({
         dateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
         query: { query: '', language: 'kuery' },
         filters: [pinnedFilter],
-      })
+      }),
+      {}
     );
     expect(services.data.query.filterManager.getFilters).not.toHaveBeenCalled();
   });
 
   it('displays errors from the frame in a toast', () => {
     const { component, frame, services } = mountWith({});
-    const onError = frame.mount.mock.calls[0][1].onError;
+    const onError = frame.EditorFrameContainer.mock.calls[0][0].onError;
     onError({ message: 'error' });
     component.update();
     expect(services.notifications.toasts.addDanger).toHaveBeenCalled();
@@ -482,8 +479,7 @@ describe('Lens App', () => {
         }),
         {}
       );
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           doc: expect.objectContaining({
             savedObjectId: defaultSavedObjectId,
@@ -492,7 +488,8 @@ describe('Lens App', () => {
               filters: [{ query: { match_phrase: { src: 'test' } } }],
             }),
           }),
-        })
+        }),
+        {}
       );
     });
 
@@ -616,7 +613,7 @@ describe('Lens App', () => {
           expect(services.attributeService.unwrapAttributes).not.toHaveBeenCalled();
         }
 
-        const onChange = frame.mount.mock.calls[0][1].onChange;
+        const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
 
         act(() =>
           onChange({
@@ -644,7 +641,7 @@ describe('Lens App', () => {
         };
         const { component, frame } = mountWith({ services });
         expect(getButton(component).disableButton).toEqual(true);
-        const onChange = frame.mount.mock.calls[0][1].onChange;
+        const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
         act(() =>
           onChange({
             filterableIndexPatterns: [],
@@ -659,7 +656,7 @@ describe('Lens App', () => {
       it('shows a save button that is enabled when the frame has provided its state and does not show save and return or save as', async () => {
         const { component, frame } = mountWith({});
         expect(getButton(component).disableButton).toEqual(true);
-        const onChange = frame.mount.mock.calls[0][1].onChange;
+        const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
         act(() =>
           onChange({
             filterableIndexPatterns: [],
@@ -825,7 +822,7 @@ describe('Lens App', () => {
           .fn()
           .mockRejectedValue({ message: 'failed' });
         const { component, props, frame } = mountWith({ services });
-        const onChange = frame.mount.mock.calls[0][1].onChange;
+        const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
         act(() =>
           onChange({
             filterableIndexPatterns: [],
@@ -903,7 +900,7 @@ describe('Lens App', () => {
           .fn()
           .mockReturnValue(Promise.resolve({ savedObjectId: '123' }));
         const { component, frame } = mountWith({ services });
-        const onChange = frame.mount.mock.calls[0][1].onChange;
+        const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
         await act(async () =>
           onChange({
             filterableIndexPatterns: [],
@@ -937,7 +934,7 @@ describe('Lens App', () => {
 
       it('does not show the copy button on first save', async () => {
         const { component, frame } = mountWith({});
-        const onChange = frame.mount.mock.calls[0][1].onChange;
+        const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
         await act(async () =>
           onChange({
             filterableIndexPatterns: [],
@@ -964,7 +961,7 @@ describe('Lens App', () => {
 
     it('should be disabled when no data is available', async () => {
       const { component, frame } = mountWith({});
-      const onChange = frame.mount.mock.calls[0][1].onChange;
+      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
       await act(async () =>
         onChange({
           filterableIndexPatterns: [],
@@ -978,7 +975,7 @@ describe('Lens App', () => {
 
     it('should disable download when not saveable', async () => {
       const { component, frame } = mountWith({});
-      const onChange = frame.mount.mock.calls[0][1].onChange;
+      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
 
       await act(async () =>
         onChange({
@@ -1004,7 +1001,7 @@ describe('Lens App', () => {
       };
 
       const { component, frame } = mountWith({ services });
-      const onChange = frame.mount.mock.calls[0][1].onChange;
+      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
       await act(async () =>
         onChange({
           filterableIndexPatterns: [],
@@ -1029,12 +1026,12 @@ describe('Lens App', () => {
         }),
         {}
       );
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           dateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
           query: { query: '', language: 'kuery' },
-        })
+        }),
+        {}
       );
     });
 
@@ -1046,7 +1043,7 @@ describe('Lens App', () => {
         }),
         {}
       );
-      const onChange = frame.mount.mock.calls[0][1].onChange;
+      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
       await act(async () => {
         onChange({
           filterableIndexPatterns: ['1'],
@@ -1103,12 +1100,12 @@ describe('Lens App', () => {
         from: 'now-14d',
         to: 'now-7d',
       });
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           dateRange: { fromDate: '2021-01-09T04:00:00.000Z', toDate: '2021-01-09T08:00:00.000Z' },
           query: { query: 'new', language: 'lucene' },
-        })
+        }),
+        {}
       );
     });
 
@@ -1122,11 +1119,11 @@ describe('Lens App', () => {
         ])
       );
       component.update();
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: [esFilters.buildExistsFilter(field, indexPattern)],
-        })
+        }),
+        {}
       );
     });
 
@@ -1139,11 +1136,11 @@ describe('Lens App', () => {
         })
       );
       component.update();
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           searchSessionId: `sessionId-1`,
-        })
+        }),
+        {}
       );
 
       // trigger again, this time changing just the query
@@ -1154,11 +1151,11 @@ describe('Lens App', () => {
         })
       );
       component.update();
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           searchSessionId: `sessionId-2`,
-        })
+        }),
+        {}
       );
 
       const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
@@ -1169,11 +1166,11 @@ describe('Lens App', () => {
         ])
       );
       component.update();
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           searchSessionId: `sessionId-3`,
-        })
+        }),
+        {}
       );
     });
   });
@@ -1269,6 +1266,26 @@ describe('Lens App', () => {
       );
     });
 
+    it('updates the query if saved query is selected', () => {
+      const { component } = mountWith({});
+      act(() => {
+        component.find(TopNavMenu).prop('onSavedQueryUpdated')!({
+          id: '2',
+          attributes: {
+            title: 'new title',
+            description: '',
+            query: { query: 'abc:def', language: 'lucene' },
+          },
+        });
+      });
+      expect(TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { query: 'abc:def', language: 'lucene' },
+        }),
+        {}
+      );
+    });
+
     it('clears all existing unpinned filters when the active saved query is cleared', () => {
       const { component, frame, services } = mountWith({});
       act(() =>
@@ -1287,11 +1304,11 @@ describe('Lens App', () => {
       component.update();
       act(() => component.find(TopNavMenu).prop('onClearSavedQuery')!());
       component.update();
-      expect(frame.mount).toHaveBeenLastCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).toHaveBeenLastCalledWith(
         expect.objectContaining({
           filters: [pinned],
-        })
+        }),
+        {}
       );
     });
   });
@@ -1320,11 +1337,29 @@ describe('Lens App', () => {
         });
       });
       component.update();
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           searchSessionId: `sessionId-2`,
-        })
+        }),
+        {}
+      );
+    });
+
+    it('re-renders the frame if session id changes from the outside', async () => {
+      const services = makeDefaultServices();
+      const { frame } = mountWith({ props: undefined, services });
+
+      act(() => {
+        sessionIdSubject.next('new-session-id');
+      });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          searchSessionId: `new-session-id`,
+        }),
+        {}
       );
     });
 
@@ -1346,11 +1381,11 @@ describe('Lens App', () => {
       component.update();
       act(() => component.find(TopNavMenu).prop('onClearSavedQuery')!());
       component.update();
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           searchSessionId: `sessionId-2`,
-        })
+        }),
+        {}
       );
     });
 
@@ -1375,16 +1410,14 @@ describe('Lens App', () => {
     it('does not update the searchSessionId when the state changes', () => {
       const { component, frame } = mountWith({});
       act(() => {
-        (component.find(NativeRenderer).prop('nativeProps') as EditorFrameProps).onChange(
-          mockUpdate
-        );
+        component.find(frame.EditorFrameContainer).prop('onChange')(mockUpdate);
       });
       component.update();
-      expect(frame.mount).not.toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).not.toHaveBeenCalledWith(
         expect.objectContaining({
           searchSessionId: `sessionId-2`,
-        })
+        }),
+        {}
       );
     });
 
@@ -1403,16 +1436,14 @@ describe('Lens App', () => {
       });
 
       act(() => {
-        (component.find(NativeRenderer).prop('nativeProps') as EditorFrameProps).onChange(
-          mockUpdate
-        );
+        component.find(frame.EditorFrameContainer).prop('onChange')(mockUpdate);
       });
       component.update();
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).toHaveBeenCalledWith(
         expect.objectContaining({
           searchSessionId: `sessionId-2`,
-        })
+        }),
+        {}
       );
     });
 
@@ -1431,16 +1462,14 @@ describe('Lens App', () => {
       });
 
       act(() => {
-        (component.find(NativeRenderer).prop('nativeProps') as EditorFrameProps).onChange(
-          mockUpdate
-        );
+        component.find(frame.EditorFrameContainer).prop('onChange')(mockUpdate);
       });
       component.update();
-      expect(frame.mount).not.toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(frame.EditorFrameContainer).not.toHaveBeenCalledWith(
         expect.objectContaining({
           searchSessionId: `sessionId-2`,
-        })
+        }),
+        {}
       );
     });
   });
@@ -1472,7 +1501,7 @@ describe('Lens App', () => {
         },
       };
       const { component, frame, props } = mountWith({ services });
-      const onChange = frame.mount.mock.calls[0][1].onChange;
+      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
       act(() =>
         onChange({
           filterableIndexPatterns: [],
@@ -1492,7 +1521,7 @@ describe('Lens App', () => {
 
     it('should confirm when leaving with an unsaved doc', () => {
       const { component, frame, props } = mountWith({});
-      const onChange = frame.mount.mock.calls[0][1].onChange;
+      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
       act(() =>
         onChange({
           filterableIndexPatterns: [],
@@ -1512,7 +1541,7 @@ describe('Lens App', () => {
       await act(async () => {
         component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
       });
-      const onChange = frame.mount.mock.calls[0][1].onChange;
+      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
       act(() =>
         onChange({
           filterableIndexPatterns: [],
@@ -1535,7 +1564,7 @@ describe('Lens App', () => {
       await act(async () => {
         component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
       });
-      const onChange = frame.mount.mock.calls[0][1].onChange;
+      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
       act(() =>
         onChange({
           filterableIndexPatterns: [],
@@ -1555,7 +1584,7 @@ describe('Lens App', () => {
       await act(async () => {
         component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
       });
-      const onChange = frame.mount.mock.calls[0][1].onChange;
+      const onChange = frame.EditorFrameContainer.mock.calls[0][0].onChange;
       act(() =>
         onChange({
           filterableIndexPatterns: [],

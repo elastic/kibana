@@ -70,7 +70,7 @@ class FieldsService {
   }
 
   // create field object from the results from _field_caps
-  private async createFields(): Promise<Field[]> {
+  private async createFields(includeNested: boolean = false): Promise<Field[]> {
     const fieldCaps = await this.loadFieldCaps();
     const fields: Field[] = [];
     if (fieldCaps && fieldCaps.fields) {
@@ -80,7 +80,10 @@ class FieldsService {
         if (firstKey !== undefined) {
           const field = fc[firstKey];
           // add to the list of fields if the field type can be used by ML
-          if (supportedTypes.includes(field.type) === true && field.metadata_field !== true) {
+          if (
+            (supportedTypes.includes(field.type) === true && field.metadata_field !== true) ||
+            (includeNested && field.type === ES_FIELD_TYPES.NESTED)
+          ) {
             fields.push({
               id: k,
               name: k,
@@ -101,7 +104,7 @@ class FieldsService {
   // based on what is available in the rollup job
   // the _indexPattern will be replaced with a comma separated list
   // of index patterns from all of the rollup jobs
-  public async getData(): Promise<NewJobCaps> {
+  public async getData(includeNested: boolean = false): Promise<NewJobCaps> {
     let rollupFields: RollupFields = {};
 
     if (this._isRollup) {
@@ -128,7 +131,7 @@ class FieldsService {
     }
 
     const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
-    const fields: Field[] = await this.createFields();
+    const fields: Field[] = await this.createFields(includeNested);
 
     return combineFieldsAndAggs(fields, aggs, rollupFields);
   }

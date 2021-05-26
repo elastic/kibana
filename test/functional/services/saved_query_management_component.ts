@@ -50,15 +50,14 @@ export function SavedQueryManagementComponentProvider({
       // an error.
       await testSubjects.click('savedQueryFormSaveButton');
 
-      const saveQueryFormSaveButtonStatus = await testSubjects.isEnabled(
-        'savedQueryFormSaveButton'
-      );
+      await retry.waitForWithTimeout('save button to be disabled', 1000, async () => {
+        const saveQueryFormSaveButtonStatus = await testSubjects.isEnabled(
+          'savedQueryFormSaveButton'
+        );
+        return saveQueryFormSaveButtonStatus === false;
+      });
 
-      try {
-        expect(saveQueryFormSaveButtonStatus).to.not.eql(true);
-      } finally {
-        await testSubjects.click('savedQueryFormCancelButton');
-      }
+      await testSubjects.click('savedQueryFormCancelButton');
     }
 
     public async saveCurrentlyLoadedAsNewQuery(

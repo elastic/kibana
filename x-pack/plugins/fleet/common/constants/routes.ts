@@ -76,6 +76,7 @@ export const SETTINGS_API_ROUTES = {
 // App API routes
 export const APP_API_ROUTES = {
   CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
+  GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service-tokens`,
 };
 
 // Agent API routes
@@ -84,7 +85,6 @@ export const AGENT_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/agents/{agentId}`,
   UPDATE_PATTERN: `${API_ROOT}/agents/{agentId}`,
   DELETE_PATTERN: `${API_ROOT}/agents/{agentId}`,
-  EVENTS_PATTERN: `${API_ROOT}/agents/{agentId}/events`,
   CHECKIN_PATTERN: `${API_ROOT}/agents/{agentId}/checkin`,
   ACKS_PATTERN: `${API_ROOT}/agents/{agentId}/acks`,
   ACTIONS_PATTERN: `${API_ROOT}/agents/{agentId}/actions`,
@@ -96,11 +96,6 @@ export const AGENT_API_ROUTES = {
   STATUS_PATTERN: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
-};
-export const AGENT_API_ROUTES_7_9 = {
-  CHECKIN_PATTERN: `${FLEET_API_ROOT_7_9}/agents/{agentId}/checkin`,
-  ACKS_PATTERN: `${FLEET_API_ROOT_7_9}/agents/{agentId}/acks`,
-  ENROLL_PATTERN: `${FLEET_API_ROOT_7_9}/agents/enroll`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

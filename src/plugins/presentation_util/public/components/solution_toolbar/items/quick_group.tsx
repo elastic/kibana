@@ -17,23 +17,27 @@ import './quick_group.scss';
 export interface QuickButtonProps extends Pick<EuiButtonGroupOptionProps, 'iconType'> {
   createType: string;
   onClick: () => void;
+  isDarkModeEnabled?: boolean;
 }
 
 export interface Props {
   buttons: QuickButtonProps[];
 }
 
-type Option = EuiButtonGroupOptionProps & Omit<QuickButtonProps, 'createType'>;
+type Option = EuiButtonGroupOptionProps &
+  Omit<QuickButtonProps, 'createType' | 'isDarkModeEnabled'>;
 
 export const QuickButtonGroup = ({ buttons }: Props) => {
   const buttonGroupOptions: Option[] = buttons.map((button: QuickButtonProps, index) => {
-    const { createType: label, ...rest } = button;
+    const { createType: label, isDarkModeEnabled, ...rest } = button;
     const title = strings.getAriaButtonLabel(label);
 
     return {
       ...rest,
       'aria-label': title,
-      className: 'quickButtonGroup__button',
+      className: `quickButtonGroup__button ${
+        isDarkModeEnabled ? 'quickButtonGroup__button--dark' : 'quickButtonGroup__button--light'
+      }`,
       id: `${htmlIdGenerator()()}${index}`,
       label,
       title,
@@ -46,7 +50,7 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
 
   return (
     <EuiButtonGroup
-      buttonSize="s"
+      buttonSize="m"
       className="quickButtonGroup"
       legend={strings.getLegend()}
       options={buttonGroupOptions}

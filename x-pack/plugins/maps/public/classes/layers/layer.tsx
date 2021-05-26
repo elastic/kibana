@@ -10,7 +10,7 @@
 import { Map as MbMap } from 'mapbox-gl';
 import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
 import { FeatureCollection } from 'geojson';
@@ -18,6 +18,7 @@ import { DataRequest } from '../util/data_request';
 import {
   AGG_TYPE,
   FIELD_ORIGIN,
+  LAYER_TYPE,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
@@ -29,13 +30,14 @@ import {
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   AggDescriptor,
+  Attribution,
   ESTermSourceDescriptor,
   JoinDescriptor,
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
 } from '../../../common/descriptor_types';
-import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
+import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { getJoinAggKey } from '../../../common/get_agg_key';
@@ -54,6 +56,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
+  hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
   getMinZoom(): number;
@@ -74,13 +77,12 @@ export interface ILayer {
   getMbLayerIds(): string[];
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
-  canShowTooltip(): boolean;
   syncLayerWithMB(mbMap: MbMap): void;
   getLayerTypeIconName(): string;
   isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getType(): string | undefined;
+  getType(): LAYER_TYPE | undefined;
   isVisible(): boolean;
   cloneDescriptor(): Promise<LayerDescriptor>;
   renderStyleEditor(
@@ -95,12 +97,14 @@ export interface ILayer {
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
   isFittable(): Promise<boolean>;
+  isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
+  getDescriptor(): LayerDescriptor;
 }
 
 export type CustomIconAndTooltipContent = {
-  icon: ReactElement<any> | null;
+  icon: ReactNode;
   tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
 };
@@ -127,6 +131,8 @@ export class AbstractLayer implements ILayer {
       alpha: _.get(options, 'alpha', 0.75),
       visible: _.get(options, 'visible', true),
       style: _.get(options, 'style', null),
+      includeInFitToBounds:
+        typeof options.includeInFitToBounds === 'boolean' ? options.includeInFitToBounds : true,
     };
   }
 
@@ -152,6 +158,10 @@ export class AbstractLayer implements ILayer {
     // @ts-expect-error
     const mbStyle = mbMap.getStyle();
     return mbStyle.sources[sourceId].data;
+  }
+
+  getDescriptor(): LayerDescriptor {
+    return this._descriptor;
   }
 
   async cloneDescriptor(): Promise<LayerDescriptor> {
@@ -238,7 +248,11 @@ export class AbstractLayer implements ILayer {
   }
 
   async isFittable(): Promise<boolean> {
-    return (await this.supportsFitToBounds()) && this.isVisible();
+    return (await this.supportsFitToBounds()) && this.isVisible() && this.isIncludeInFitToBounds();
+  }
+
+  isIncludeInFitToBounds(): boolean {
+    return !!this._descriptor.includeInFitToBounds;
   }
 
   async isFilteredByGlobalTime(): Promise<boolean> {
@@ -257,10 +271,16 @@ export class AbstractLayer implements ILayer {
   }
 
   async getAttributions(): Promise<Attribution[]> {
-    if (!this.hasErrors()) {
-      return await this.getSource().getAttributions();
+    if (this.hasErrors() || !this.isVisible()) {
+      return [];
     }
-    return [];
+
+    const attributionProvider = this.getSource().getAttributionProvider();
+    if (attributionProvider) {
+      return attributionProvider();
+    }
+
+    return this._descriptor.attribution !== undefined ? [this._descriptor.attribution] : [];
   }
 
   getStyleForEditing(): IStyle {
@@ -438,10 +458,6 @@ export class AbstractLayer implements ILayer {
     throw new Error('Should implement AbstractLayer#ownsMbSourceId');
   }
 
-  canShowTooltip() {
-    return false;
-  }
-
   syncLayerWithMB(mbMap: MbMap) {
     throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
@@ -482,8 +498,8 @@ export class AbstractLayer implements ILayer {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
-  getType(): string | undefined {
-    return this._descriptor.type;
+  getType(): LAYER_TYPE | undefined {
+    return this._descriptor.type as LAYER_TYPE;
   }
 
   areLabelsOnTop(): boolean {

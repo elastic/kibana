@@ -26,11 +26,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/89477
-  describe.skip('saved queries saved objects', function describeIndexTests() {
+  describe('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('discover');
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -132,10 +132,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         }
         await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
-      });
-
-      it('does not allow saving a query with leading or trailing whitespace in the name', async () => {
-        await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse ');
       });
 
       it('resets any changes to a loaded query on reloading the same saved query', async () => {

@@ -35,5 +35,8 @@ export {
 
 export { DynamicActionsState } from './services/ui_actions_service_enhancements';
 
-export { DrilldownDefinition as UiActionsEnhancedDrilldownDefinition } from './drilldowns';
+export {
+  DrilldownDefinition as UiActionsEnhancedDrilldownDefinition,
+  DrilldownTemplate as UiActionsEnhancedDrilldownTemplate,
+} from './drilldowns';
 export * from './drilldowns/url_drilldown';

@@ -32,6 +32,7 @@ import {
   AlertNotifyWhenType,
   WithoutReservedActionGroups,
   ActionVariable,
+  SanitizedRuleConfig,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
@@ -46,6 +47,7 @@ export interface AlertingApiRequestHandlerContext {
   getAlertsClient: () => AlertsClient;
   listTypes: AlertTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
+  areApiKeysEnabled: () => Promise<boolean>;
 }
 
 /**
@@ -88,6 +90,7 @@ export interface AlertExecutorOptions<
   services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
   params: Params;
   state: State;
+  rule: SanitizedRuleConfig;
   spaceId: string;
   namespace?: string;
   name: string;

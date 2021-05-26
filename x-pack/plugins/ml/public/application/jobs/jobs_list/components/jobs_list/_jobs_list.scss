@@ -87,16 +87,6 @@
     }
   }
 
-  .actions-border {
-    // SASSTODO: Proper calc
-    height: 20px;
-    border-right: $euiBorderThin;
-    width: 1px;
-    display: inline-block;
-    vertical-align: middle;
-    margin: 0 $euiSizeXS;
-  }
-
   .job-description {
     display: inline-block;
   }

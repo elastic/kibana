@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { SchemaTypes } from '../../../shared/types';
+import { SchemaType } from '../../../shared/schema/types';
 
 import {
   areFieldsAtDefaultSettings,
-  areFieldsEmpty,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
   clearAllFields,
   resetAllFields,
   splitResultFields,
+  areFieldsEmpty,
 } from './utils';
 
 describe('clearAllFields', () => {
@@ -56,7 +56,7 @@ describe('convertServerResultFieldsToResultFields', () => {
           },
         },
         {
-          foo: 'text' as SchemaTypes,
+          foo: SchemaType.Text,
         }
       )
     ).toEqual({
@@ -132,8 +132,8 @@ describe('splitResultFields', () => {
           },
         },
         {
-          foo: 'text' as SchemaTypes,
-          bar: 'number' as SchemaTypes,
+          foo: SchemaType.Text,
+          bar: SchemaType.Number,
         }
       )
     ).toEqual({
@@ -146,14 +146,16 @@ describe('splitResultFields', () => {
 });
 
 describe('areFieldsEmpty', () => {
-  it('should return true if all fields are empty objects', () => {
+  it('should return true if all fields are empty or have all properties disabled', () => {
     expect(
       areFieldsEmpty({
         foo: {},
-        bar: {},
+        bar: { raw: false, snippet: false },
+        baz: { raw: false },
       })
     ).toBe(true);
   });
+
   it('should return false otherwise', () => {
     expect(
       areFieldsEmpty({

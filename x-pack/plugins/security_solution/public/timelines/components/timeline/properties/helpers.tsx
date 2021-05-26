@@ -15,7 +15,6 @@ import { timelineActions, timelineSelectors } from '../../../../timelines/store/
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
 import * as i18n from './translations';
-import { TimelineInput } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 
@@ -24,8 +23,6 @@ const NotesCountBadge = (styled(EuiBadge)`
 ` as unknown) as typeof EuiBadge;
 
 NotesCountBadge.displayName = 'NotesCountBadge';
-
-export type SaveTimeline = (args: TimelineInput) => void;
 
 interface AddToFavoritesButtonProps {
   timelineId: string;

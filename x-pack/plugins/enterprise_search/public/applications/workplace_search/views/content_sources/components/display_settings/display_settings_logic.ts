@@ -16,7 +16,13 @@ import {
   flashAPIErrors,
 } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
+import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
+import {
+  DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
+  DISPLAY_SETTINGS_SEARCH_RESULT_PATH,
+  getContentSourcePath,
+} from '../../../../routes';
 import { DetailField, SearchResultConfig, OptionValue, Result } from '../../../../types';
 import { SourceLogic } from '../../source_logic';
 
@@ -33,6 +39,8 @@ export interface DisplaySettingsInitialData extends DisplaySettingsResponseProps
   sourceId: string;
   serverRoute: string;
 }
+
+export type TabId = 'search_results' | 'result_detail';
 
 interface DisplaySettingsActions {
   initializeDisplaySettings(): void;
@@ -51,6 +59,8 @@ interface DisplaySettingsActions {
   setDetailFields(result: DropResult): { result: DropResult };
   openEditDetailField(editFieldIndex: number | null): number | null;
   removeDetailField(index: number): number;
+  setNavigatingBetweenTabs(navigatingBetweenTabs: boolean): boolean;
+  handleSelectedTabChanged(tabId: TabId): TabId;
   addDetailField(newField: DetailField): DetailField;
   updateDetailField(
     updatedField: DetailField,
@@ -73,6 +83,7 @@ interface DisplaySettingsValues {
   serverRoute: string;
   editFieldIndex: number | null;
   dataLoading: boolean;
+  navigatingBetweenTabs: boolean;
   addFieldModalVisible: boolean;
   titleFieldHover: boolean;
   urlFieldHover: boolean;
@@ -109,6 +120,8 @@ export const DisplaySettingsLogic = kea<
     setDetailFields: (result: DropResult) => ({ result }),
     openEditDetailField: (editFieldIndex: number | null) => editFieldIndex,
     removeDetailField: (index: number) => index,
+    setNavigatingBetweenTabs: (navigatingBetweenTabs: boolean) => navigatingBetweenTabs,
+    handleSelectedTabChanged: (tabId: TabId) => tabId,
     addDetailField: (newField: DetailField) => newField,
     updateDetailField: (updatedField: DetailField, index: number) => ({ updatedField, index }),
     toggleFieldEditorModal: () => true,
@@ -224,6 +237,12 @@ export const DisplaySettingsLogic = kea<
         onInitializeDisplaySettings: () => false,
       },
     ],
+    navigatingBetweenTabs: [
+      false,
+      {
+        setNavigatingBetweenTabs: (_, navigatingBetweenTabs) => navigatingBetweenTabs,
+      },
+    ],
     addFieldModalVisible: [
       false,
       {
@@ -329,6 +348,26 @@ export const DisplaySettingsLogic = kea<
     },
     toggleFieldEditorModal: () => {
       clearFlashMessages();
+    },
+
+    handleSelectedTabChanged: async (tabId, breakpoint) => {
+      const { isOrganization } = AppLogic.values;
+      const { sourceId } = values;
+      const path =
+        tabId === 'result_detail'
+          ? getContentSourcePath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, sourceId, isOrganization)
+          : getContentSourcePath(DISPLAY_SETTINGS_SEARCH_RESULT_PATH, sourceId, isOrganization);
+
+      // This method is needed because the shared `UnsavedChangesPrompt` component is triggered
+      // when navigating between tabs. We set a boolean flag that tells the prompt there are no
+      // unsaved changes when navigating between the tabs and reset it one the transition is complete
+      // in order to restore the intended functionality when navigating away with unsaved changes.
+      actions.setNavigatingBetweenTabs(true);
+
+      await breakpoint();
+
+      KibanaLogic.values.navigateToUrl(path);
+      actions.setNavigatingBetweenTabs(false);
     },
   }),
 });

@@ -22,7 +22,6 @@ import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../timelines/components/timeline/body/constants';
-import { ToStringArray } from '../../../graphql/types';
 
 import * as i18n from './translations';
 
@@ -50,7 +49,7 @@ export interface Item {
   field: JSX.Element;
   fieldId: string;
   type: string;
-  values: ToStringArray;
+  values: string[];
 }
 
 export interface AlertSummaryRow {
@@ -99,7 +98,7 @@ export const getColumnHeaderFromBrowserField = ({
   id: browserField.name || '',
   type: browserField.type,
   aggregatable: browserField.aggregatable,
-  width,
+  initialWidth: width,
 });
 
 /**
@@ -225,7 +224,7 @@ export const getSummaryColumns = (
       field: 'title',
       truncateText: false,
       render: getTitle,
-      width: '120px',
+      width: '160px',
       name: '',
     },
     {

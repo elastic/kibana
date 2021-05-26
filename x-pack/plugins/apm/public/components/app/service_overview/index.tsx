@@ -119,7 +119,7 @@ export function ServiceOverview({
             {!isRumAgent && (
               <EuiFlexItem>
                 <EuiFlexGroup
-                  direction={rowDirection}
+                  direction="column"
                   gutterSize="s"
                   responsive={false}
                 >

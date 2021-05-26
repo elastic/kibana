@@ -15,6 +15,7 @@ import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { render } from '../../../../utils/test_helper';
 import { UXSection } from './';
 import { response } from './mock_data/ux.mock';
+import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -39,6 +40,7 @@ describe('UXSection', () => {
         http: { basePath: { prepend: jest.fn() } },
       } as unknown) as CoreStart,
       appMountParameters: {} as AppMountParameters,
+      config: { unsafe: { alertingExperience: { enabled: true } } },
       plugins: ({
         data: {
           query: {
@@ -53,6 +55,7 @@ describe('UXSection', () => {
           },
         },
       } as unknown) as ObservabilityPublicPluginsStart,
+      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
     }));
   });
   it('renders with core web vitals', () => {

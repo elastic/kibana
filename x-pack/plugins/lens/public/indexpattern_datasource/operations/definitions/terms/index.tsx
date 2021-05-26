@@ -57,7 +57,9 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'terms';
   params: {
     size: number;
-    orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
+    // if order is alphabetical, the `fallback` flag indicates whether it became alphabetical because there wasn't
+    // another option or whether the user explicitly chose to make it alphabetical.
+    orderBy: { type: 'alphabetical'; fallback?: boolean } | { type: 'column'; columnId: string };
     orderDirection: 'asc' | 'desc';
     otherBucket?: boolean;
     missingBucket?: boolean;
@@ -123,7 +125,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               type: 'column',
               columnId: existingMetricColumn,
             }
-          : { type: 'alphabetical' },
+          : { type: 'alphabetical', fallback: true },
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
         otherBucket: !indexPattern.hasRestrictions,
         missingBucket: false,
@@ -168,16 +170,29 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   onOtherColumnChanged: (layer, thisColumnId, changedColumnId) => {
     const columns = layer.columns;
     const currentColumn = columns[thisColumnId] as TermsIndexPatternColumn;
-    if (currentColumn.params.orderBy.type === 'column') {
+    if (currentColumn.params.orderBy.type === 'column' || currentColumn.params.orderBy.fallback) {
       // check whether the column is still there and still a metric
-      const columnSortedBy = columns[currentColumn.params.orderBy.columnId];
-      if (!columnSortedBy || !isSortableByColumn(layer, changedColumnId)) {
+      const columnSortedBy =
+        currentColumn.params.orderBy.type === 'column'
+          ? columns[currentColumn.params.orderBy.columnId]
+          : undefined;
+      if (
+        !columnSortedBy ||
+        (currentColumn.params.orderBy.type === 'column' &&
+          !isSortableByColumn(layer, currentColumn.params.orderBy.columnId))
+      ) {
+        // check whether we can find another metric column to sort by
+        const existingMetricColumn = Object.entries(layer.columns)
+          .filter(([columnId]) => isSortableByColumn(layer, columnId))
+          .map(([id]) => id)[0];
         return {
           ...currentColumn,
           params: {
             ...currentColumn.params,
-            orderBy: { type: 'alphabetical' },
-            orderDirection: 'asc',
+            orderBy: existingMetricColumn
+              ? { type: 'column', columnId: existingMetricColumn }
+              : { type: 'alphabetical', fallback: true },
+            orderDirection: existingMetricColumn ? 'desc' : 'asc',
           },
         };
       }
@@ -197,7 +212,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
 
     function fromValue(value: string): TermsIndexPatternColumn['params']['orderBy'] {
       if (value === 'alphabetical') {
-        return { type: 'alphabetical' };
+        return { type: 'alphabetical', fallback: false };
       }
       const parts = value.split(SEPARATOR);
       return {
@@ -271,16 +286,23 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             data-test-subj="indexPattern-terms-orderBy"
             options={orderOptions}
             value={toValue(currentColumn.params.orderBy)}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              const newOrderByValue = fromValue(e.target.value);
+              const updatedLayer = updateColumnParam({
+                layer,
+                columnId,
+                paramName: 'orderBy',
+                value: newOrderByValue,
+              });
               updateLayer(
                 updateColumnParam({
-                  layer,
+                  layer: updatedLayer,
                   columnId,
-                  paramName: 'orderBy',
-                  value: fromValue(e.target.value),
+                  paramName: 'orderDirection',
+                  value: newOrderByValue.type === 'alphabetical' ? 'asc' : 'desc',
                 })
-              )
-            }
+              );
+            }}
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
               defaultMessage: 'Rank by',
             })}

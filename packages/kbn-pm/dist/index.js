@@ -29754,15 +29754,14 @@ var gitHosts = __webpack_require__(284)
 var GitHost = module.exports = __webpack_require__(285)
 
 var protocolToRepresentationMap = {
-  'git+ssh': 'sshurl',
-  'git+https': 'https',
-  'ssh': 'sshurl',
-  'git': 'git'
+  'git+ssh:': 'sshurl',
+  'git+https:': 'https',
+  'ssh:': 'sshurl',
+  'git:': 'git'
 }
 
 function protocolToRepresentation (protocol) {
-  if (protocol.substr(-1) === ':') protocol = protocol.slice(0, -1)
-  return protocolToRepresentationMap[protocol] || protocol
+  return protocolToRepresentationMap[protocol] || protocol.slice(0, -1)
 }
 
 var authProtocols = {
@@ -29776,6 +29775,7 @@ var authProtocols = {
 var cache = {}
 
 module.exports.fromUrl = function (giturl, opts) {
+  if (typeof giturl !== 'string') return
   var key = giturl + JSON.stringify(opts || {})
 
   if (!(key in cache)) {
@@ -29791,13 +29791,13 @@ function fromUrl (giturl, opts) {
     isGitHubShorthand(giturl) ? 'github:' + giturl : giturl
   )
   var parsed = parseGitUrl(url)
-  var shortcutMatch = url.match(new RegExp('^([^:]+):(?:(?:[^@:]+(?:[^@]+)?@)?([^/]*))[/](.+?)(?:[.]git)?($|#)'))
+  var shortcutMatch = url.match(/^([^:]+):(?:[^@]+@)?(?:([^/]*)\/)?([^#]+)/)
   var matches = Object.keys(gitHosts).map(function (gitHostName) {
     try {
       var gitHostInfo = gitHosts[gitHostName]
       var auth = null
       if (parsed.auth && authProtocols[parsed.protocol]) {
-        auth = decodeURIComponent(parsed.auth)
+        auth = parsed.auth
       }
       var committish = parsed.hash ? decodeURIComponent(parsed.hash.substr(1)) : null
       var user = null
@@ -29805,22 +29805,27 @@ function fromUrl (giturl, opts) {
       var defaultRepresentation = null
       if (shortcutMatch && shortcutMatch[1] === gitHostName) {
         user = shortcutMatch[2] && decodeURIComponent(shortcutMatch[2])
-        project = decodeURIComponent(shortcutMatch[3])
+        project = decodeURIComponent(shortcutMatch[3].replace(/\.git$/, ''))
         defaultRepresentation = 'shortcut'
       } else {
-        if (parsed.host !== gitHostInfo.domain) return
+        if (parsed.host && parsed.host !== gitHostInfo.domain && parsed.host.replace(/^www[.]/, '') !== gitHostInfo.domain) return
         if (!gitHostInfo.protocols_re.test(parsed.protocol)) return
         if (!parsed.path) return
         var pathmatch = gitHostInfo.pathmatch
         var matched = parsed.path.match(pathmatch)
         if (!matched) return
-        if (matched[1] != null) user = decodeURIComponent(matched[1].replace(/^:/, ''))
-        if (matched[2] != null) project = decodeURIComponent(matched[2])
+        /* istanbul ignore else */
+        if (matched[1] !== null && matched[1] !== undefined) {
+          user = decodeURIComponent(matched[1].replace(/^:/, ''))
+        }
+        project = decodeURIComponent(matched[2])
         defaultRepresentation = protocolToRepresentation(parsed.protocol)
       }
       return new GitHost(gitHostName, user, auth, project, committish, defaultRepresentation, opts)
     } catch (ex) {
-      if (!(ex instanceof URIError)) throw ex
+      /* istanbul ignore else */
+      if (ex instanceof URIError) {
+      } else throw ex
     }
   }).filter(function (gitHostInfo) { return gitHostInfo })
   if (matches.length !== 1) return
@@ -29850,9 +29855,31 @@ function fixupUnqualifiedGist (giturl) {
 }
 
 function parseGitUrl (giturl) {
-  if (typeof giturl !== 'string') giturl = '' + giturl
   var matched = giturl.match(/^([^@]+)@([^:/]+):[/]?((?:[^/]+[/])?[^/]+?)(?:[.]git)?(#.*)?$/)
-  if (!matched) return url.parse(giturl)
+  if (!matched) {
+    var legacy = url.parse(giturl)
+    // If we don't have url.URL, then sorry, this is just not fixable.
+    // This affects Node <= 6.12.
+    if (legacy.auth && typeof url.URL === 'function') {
+      // git urls can be in the form of scp-style/ssh-connect strings, like
+      // git+ssh://user@host.com:some/path, which the legacy url parser
+      // supports, but WhatWG url.URL class does not.  However, the legacy
+      // parser de-urlencodes the username and password, so something like
+      // https://user%3An%40me:p%40ss%3Aword@x.com/ becomes
+      // https://user:n@me:p@ss:word@x.com/ which is all kinds of wrong.
+      // Pull off just the auth and host, so we dont' get the confusing
+      // scp-style URL, then pass that to the WhatWG parser to get the
+      // auth properly escaped.
+      var authmatch = giturl.match(/[^@]+@[^:/]+/)
+      /* istanbul ignore else - this should be impossible */
+      if (authmatch) {
+        var whatwg = new url.URL(authmatch[0])
+        legacy.auth = whatwg.username || ''
+        if (whatwg.password) legacy.auth += ':' + whatwg.password
+      }
+    }
+    return legacy
+  }
   return {
     protocol: 'git+ssh:',
     slashes: true,
@@ -29894,7 +29921,7 @@ var gitHosts = module.exports = {
     'filetemplate': 'https://{auth@}raw.githubusercontent.com/{user}/{project}/{committish}/{path}',
     'bugstemplate': 'https://{domain}/{user}/{project}/issues',
     'gittemplate': 'git://{auth@}{domain}/{user}/{project}.git{#committish}',
-    'tarballtemplate': 'https://{domain}/{user}/{project}/archive/{committish}.tar.gz'
+    'tarballtemplate': 'https://codeload.{domain}/{user}/{project}/tar.gz/{committish}'
   },
   bitbucket: {
     'protocols': [ 'git+ssh', 'git+https', 'ssh', 'https' ],
@@ -29906,25 +29933,30 @@ var gitHosts = module.exports = {
     'protocols': [ 'git+ssh', 'git+https', 'ssh', 'https' ],
     'domain': 'gitlab.com',
     'treepath': 'tree',
-    'docstemplate': 'https://{domain}/{user}/{project}{/tree/committish}#README',
     'bugstemplate': 'https://{domain}/{user}/{project}/issues',
-    'tarballtemplate': 'https://{domain}/{user}/{project}/repository/archive.tar.gz?ref={committish}'
+    'httpstemplate': 'git+https://{auth@}{domain}/{user}/{projectPath}.git{#committish}',
+    'tarballtemplate': 'https://{domain}/{user}/{project}/repository/archive.tar.gz?ref={committish}',
+    'pathmatch': /^[/]([^/]+)[/]((?!.*(\/-\/|\/repository\/archive\.tar\.gz\?=.*|\/repository\/[^/]+\/archive.tar.gz$)).*?)(?:[.]git|[/])?$/
   },
   gist: {
     'protocols': [ 'git', 'git+ssh', 'git+https', 'ssh', 'https' ],
     'domain': 'gist.github.com',
-    'pathmatch': /^[/](?:([^/]+)[/])?([a-z0-9]+)(?:[.]git)?$/,
+    'pathmatch': /^[/](?:([^/]+)[/])?([a-z0-9]{32,})(?:[.]git)?$/,
     'filetemplate': 'https://gist.githubusercontent.com/{user}/{project}/raw{/committish}/{path}',
     'bugstemplate': 'https://{domain}/{project}',
     'gittemplate': 'git://{domain}/{project}.git{#committish}',
     'sshtemplate': 'git@{domain}:/{project}.git{#committish}',
     'sshurltemplate': 'git+ssh://git@{domain}/{project}.git{#committish}',
     'browsetemplate': 'https://{domain}/{project}{/committish}',
+    'browsefiletemplate': 'https://{domain}/{project}{/committish}{#path}',
     'docstemplate': 'https://{domain}/{project}{/committish}',
     'httpstemplate': 'git+https://{domain}/{project}.git{#committish}',
     'shortcuttemplate': '{type}:{project}{#committish}',
     'pathtemplate': '{project}{#committish}',
-    'tarballtemplate': 'https://{domain}/{user}/{project}/archive/{committish}.tar.gz'
+    'tarballtemplate': 'https://codeload.github.com/gist/{project}/tar.gz/{committish}',
+    'hashformat': function (fragment) {
+      return 'file-' + formatHashFragment(fragment)
+    }
   }
 }
 
@@ -29932,12 +29964,14 @@ var gitHostDefaults = {
   'sshtemplate': 'git@{domain}:{user}/{project}.git{#committish}',
   'sshurltemplate': 'git+ssh://git@{domain}/{user}/{project}.git{#committish}',
   'browsetemplate': 'https://{domain}/{user}/{project}{/tree/committish}',
+  'browsefiletemplate': 'https://{domain}/{user}/{project}/{treepath}/{committish}/{path}{#fragment}',
   'docstemplate': 'https://{domain}/{user}/{project}{/tree/committish}#readme',
   'httpstemplate': 'git+https://{auth@}{domain}/{user}/{project}.git{#committish}',
   'filetemplate': 'https://{domain}/{user}/{project}/raw/{committish}/{path}',
   'shortcuttemplate': '{type}:{user}/{project}{#committish}',
   'pathtemplate': '{user}/{project}{#committish}',
-  'pathmatch': /^[/]([^/]+)[/]([^/]+?)(?:[.]git|[/])?$/
+  'pathmatch': /^[/]([^/]+)[/]([^/]+?)(?:[.]git|[/])?$/,
+  'hashformat': formatHashFragment
 }
 
 Object.keys(gitHosts).forEach(function (name) {
@@ -29951,6 +29985,10 @@ Object.keys(gitHosts).forEach(function (name) {
     }).join('|') + '):$')
 })
 
+function formatHashFragment (fragment) {
+  return fragment.toLowerCase().replace(/^\W+|\/|\W+$/g, '').replace(/\W+/g, '-')
+}
+
 
 /***/ }),
 /* 285 */
@@ -29959,9 +29997,25 @@ Object.keys(gitHosts).forEach(function (name) {
 "use strict";
 
 var gitHosts = __webpack_require__(284)
-var extend = Object.assign || __webpack_require__(112)._extend
+/* eslint-disable node/no-deprecated-api */
 
-var GitHost = module.exports = function (type, user, auth, project, committish, defaultRepresentation, opts) {
+// copy-pasta util._extend from node's source, to avoid pulling
+// the whole util module into peoples' webpack bundles.
+/* istanbul ignore next */
+var extend = Object.assign || function _extend (target, source) {
+  // Don't do anything if source isn't an object
+  if (source === null || typeof source !== 'object') return target
+
+  var keys = Object.keys(source)
+  var i = keys.length
+  while (i--) {
+    target[keys[i]] = source[keys[i]]
+  }
+  return target
+}
+
+module.exports = GitHost
+function GitHost (type, user, auth, project, committish, defaultRepresentation, opts) {
   var gitHostInfo = this
   gitHostInfo.type = type
   Object.keys(gitHosts[type]).forEach(function (key) {
@@ -29974,7 +30028,6 @@ var GitHost = module.exports = function (type, user, auth, project, committish, 
   gitHostInfo.default = defaultRepresentation
   gitHostInfo.opts = opts || {}
 }
-GitHost.prototype = {}
 
 GitHost.prototype.hash = function () {
   return this.committish ? '#' + this.committish : ''
@@ -29983,27 +30036,43 @@ GitHost.prototype.hash = function () {
 GitHost.prototype._fill = function (template, opts) {
   if (!template) return
   var vars = extend({}, opts)
+  vars.path = vars.path ? vars.path.replace(/^[/]+/g, '') : ''
   opts = extend(extend({}, this.opts), opts)
   var self = this
   Object.keys(this).forEach(function (key) {
     if (self[key] != null && vars[key] == null) vars[key] = self[key]
   })
   var rawAuth = vars.auth
-  var rawComittish = vars.committish
+  var rawcommittish = vars.committish
+  var rawFragment = vars.fragment
+  var rawPath = vars.path
+  var rawProject = vars.project
   Object.keys(vars).forEach(function (key) {
-    vars[key] = encodeURIComponent(vars[key])
+    var value = vars[key]
+    if ((key === 'path' || key === 'project') && typeof value === 'string') {
+      vars[key] = value.split('/').map(function (pathComponent) {
+        return encodeURIComponent(pathComponent)
+      }).join('/')
+    } else {
+      vars[key] = encodeURIComponent(value)
+    }
   })
   vars['auth@'] = rawAuth ? rawAuth + '@' : ''
+  vars['#fragment'] = rawFragment ? '#' + this.hashformat(rawFragment) : ''
+  vars.fragment = vars.fragment ? vars.fragment : ''
+  vars['#path'] = rawPath ? '#' + this.hashformat(rawPath) : ''
+  vars['/path'] = vars.path ? '/' + vars.path : ''
+  vars.projectPath = rawProject.split('/').map(encodeURIComponent).join('/')
   if (opts.noCommittish) {
     vars['#committish'] = ''
     vars['/tree/committish'] = ''
-    vars['/comittish'] = ''
-    vars.comittish = ''
+    vars['/committish'] = ''
+    vars.committish = ''
   } else {
-    vars['#committish'] = rawComittish ? '#' + rawComittish : ''
+    vars['#committish'] = rawcommittish ? '#' + rawcommittish : ''
     vars['/tree/committish'] = vars.committish
-                            ? '/' + vars.treepath + '/' + vars.committish
-                            : ''
+      ? '/' + vars.treepath + '/' + vars.committish
+      : ''
     vars['/committish'] = vars.committish ? '/' + vars.committish : ''
     vars.committish = vars.committish || 'master'
   }
@@ -30026,8 +30095,19 @@ GitHost.prototype.sshurl = function (opts) {
   return this._fill(this.sshurltemplate, opts)
 }
 
-GitHost.prototype.browse = function (opts) {
-  return this._fill(this.browsetemplate, opts)
+GitHost.prototype.browse = function (P, F, opts) {
+  if (typeof P === 'string') {
+    if (typeof F !== 'string') {
+      opts = F
+      F = null
+    }
+    return this._fill(this.browsefiletemplate, extend({
+      fragment: F,
+      path: P
+    }, opts))
+  } else {
+    return this._fill(this.browsetemplate, P)
+  }
 }
 
 GitHost.prototype.docs = function (opts) {
@@ -30054,14 +30134,13 @@ GitHost.prototype.path = function (opts) {
   return this._fill(this.pathtemplate, opts)
 }
 
-GitHost.prototype.tarball = function (opts) {
+GitHost.prototype.tarball = function (opts_) {
+  var opts = extend({}, opts_, { noCommittish: false })
   return this._fill(this.tarballtemplate, opts)
 }
 
 GitHost.prototype.file = function (P, opts) {
-  return this._fill(this.filetemplate, extend({
-    path: P.replace(/^[/]+/g, '')
-  }, opts))
+  return this._fill(this.filetemplate, extend({ path: P }, opts))
 }
 
 GitHost.prototype.getDefaultRepresentation = function () {
@@ -30069,7 +30148,8 @@ GitHost.prototype.getDefaultRepresentation = function () {
 }
 
 GitHost.prototype.toString = function (opts) {
-  return (this[this.default] || this.sshurl).call(this, opts)
+  if (this.default && typeof this[this.default] === 'function') return this[this.default](opts)
+  return this.sshurl(opts)
 }
 
 
@@ -48432,7 +48512,13 @@ async function runBazel(bazelArgs, offline = false, runOpts = {}) {
   await runBazelCommandWithRunner('bazel', bazelArgs, offline, runOpts);
 }
 async function runIBazel(bazelArgs, offline = false, runOpts = {}) {
-  await runBazelCommandWithRunner('ibazel', bazelArgs, offline, runOpts);
+  const extendedEnv = _objectSpread({
+    IBAZEL_USE_LEGACY_WATCHER: '0'
+  }, runOpts === null || runOpts === void 0 ? void 0 : runOpts.env);
+
+  await runBazelCommandWithRunner('ibazel', bazelArgs, offline, _objectSpread(_objectSpread({}, runOpts), {}, {
+    env: extendedEnv
+  }));
 }
 
 /***/ }),
@@ -59663,7 +59749,7 @@ const WatchBazelCommand = {
     // Note: --run_output=false arg will disable the iBazel notifications about gazelle and buildozer when running it
     // Can also be solved by adding a root `.bazel_fix_commands.json` but its not needed at the moment
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_0__["runIBazel"])(['--run_output=false', 'build', '//packages:build'], runOffline);
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_0__["runIBazel"])(['--run_output=false', 'build', '//packages:build', '--show_result=1'], runOffline);
   }
 
 };

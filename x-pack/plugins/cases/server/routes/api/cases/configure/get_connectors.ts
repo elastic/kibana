@@ -12,10 +12,7 @@ import { ActionType } from '../../../../../../actions/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../../../actions/server/types';
 
-import {
-  CASE_CONFIGURE_CONNECTORS_URL,
-  SUPPORTED_CONNECTORS,
-} from '../../../../../common/constants';
+import { CASE_CONFIGURE_CONNECTORS_URL, SUPPORTED_CONNECTORS } from '../../../../../common';
 
 const isConnectorSupported = (
   action: FindActionResult,

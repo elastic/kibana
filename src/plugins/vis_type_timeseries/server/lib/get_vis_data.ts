@@ -9,8 +9,8 @@
 import _ from 'lodash';
 
 import { Framework } from '../plugin';
-import { TimeseriesVisData } from '../../common/types';
-import { PANEL_TYPES } from '../../common/panel_types';
+import type { TimeseriesVisData } from '../../common/types';
+import { PANEL_TYPES } from '../../common/enums';
 import type {
   VisTypeTimeseriesVisDataRequest,
   VisTypeTimeseriesRequestHandlerContext,

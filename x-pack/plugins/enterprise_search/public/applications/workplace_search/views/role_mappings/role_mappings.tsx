@@ -12,6 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
 import { AddRoleMappingButton, RoleMappingsTable } from '../../../shared/role_mapping';
 import {
@@ -61,6 +62,7 @@ export const RoleMappings: React.FC = () => {
 
   return (
     <>
+      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
       <ViewContentHeader title={ROLE_MAPPINGS_TITLE} description={ROLE_MAPPINGS_DESCRIPTION} />
       <div>
         <FlashMessages />

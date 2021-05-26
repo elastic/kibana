@@ -7,7 +7,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { clearFlashMessages, flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  clearFlashMessages,
+  flashAPIErrors,
+  setSuccessMessage,
+} from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
@@ -15,11 +19,17 @@ import { AttributeName } from '../../../shared/types';
 import { ROLE_MAPPINGS_PATH } from '../../routes';
 import { RoleGroup, WSRoleMapping, Role } from '../../types';
 
-import { DELETE_ROLE_MAPPING_MESSAGE, DEFAULT_GROUP_NAME } from './constants';
+import {
+  DELETE_ROLE_MAPPING_MESSAGE,
+  ROLE_MAPPING_DELETED_MESSAGE,
+  ROLE_MAPPING_CREATED_MESSAGE,
+  ROLE_MAPPING_UPDATED_MESSAGE,
+  DEFAULT_GROUP_NAME,
+} from './constants';
 
 interface RoleMappingsServerDetails {
-  multipleAuthProvidersConfig: boolean;
   roleMappings: WSRoleMapping[];
+  multipleAuthProvidersConfig: boolean;
 }
 
 interface RoleMappingServerDetails {
@@ -31,68 +41,69 @@ interface RoleMappingServerDetails {
   roleMapping?: WSRoleMapping;
 }
 
-interface RoleMappingsActions {
-  setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
-  setRoleMappingData(data: RoleMappingServerDetails): RoleMappingServerDetails;
-  handleRoleChange(roleType: Role): { roleType: Role };
-  handleAllGroupsSelectionChange(selected: boolean): { selected: boolean };
-  handleAttributeSelectorChange(
-    value: AttributeName,
-    firstElasticsearchRole: string
-  ): { value: AttributeName; firstElasticsearchRole: string };
-  handleAttributeValueChange(value: string): { value: string };
-  handleGroupSelectionChange(
-    groupId: string,
-    selected: boolean
-  ): { groupId: string; selected: boolean };
-  handleAuthProviderChange(value: string[]): { value: string[] };
-  resetState(): void;
-  initializeRoleMapping(roleId?: string): { roleId?: string };
-  handleSaveMapping(): void;
-  handleDeleteMapping(): void;
-  initializeRoleMappings(): void;
-}
-
-interface RoleMappingsValues {
-  attributes: string[];
-  availableAuthProviders: string[];
-  elasticsearchRoles: string[];
-  roleMapping: WSRoleMapping | null;
-  roleMappings: WSRoleMapping[];
-  roleType: Role;
-  attributeValue: string;
-  attributeName: AttributeName;
-  dataLoading: boolean;
-  multipleAuthProvidersConfig: boolean;
-  availableGroups: RoleGroup[];
-  selectedGroups: Set<string>;
-  includeInAllGroups: boolean;
-  selectedAuthProviders: string[];
-}
-
 const getFirstAttributeName = (roleMapping: WSRoleMapping): AttributeName =>
   Object.entries(roleMapping.rules)[0][0] as AttributeName;
 const getFirstAttributeValue = (roleMapping: WSRoleMapping): string =>
   Object.entries(roleMapping.rules)[0][1] as string;
 
+interface RoleMappingsActions {
+  handleAllGroupsSelectionChange(selected: boolean): { selected: boolean };
+  handleAuthProviderChange(value: string[]): { value: string[] };
+  handleAttributeSelectorChange(
+    value: AttributeName,
+    firstElasticsearchRole: string
+  ): { value: AttributeName; firstElasticsearchRole: string };
+  handleAttributeValueChange(value: string): { value: string };
+  handleDeleteMapping(): void;
+  handleGroupSelectionChange(
+    groupId: string,
+    selected: boolean
+  ): { groupId: string; selected: boolean };
+  handleRoleChange(roleType: Role): { roleType: Role };
+  handleSaveMapping(): void;
+  initializeRoleMapping(roleId?: string): { roleId?: string };
+  initializeRoleMappings(): void;
+  resetState(): void;
+  setRoleMappingData(data: RoleMappingServerDetails): RoleMappingServerDetails;
+  setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
+}
+
+interface RoleMappingsValues {
+  includeInAllGroups: boolean;
+  attributeName: AttributeName;
+  attributeValue: string;
+  attributes: string[];
+  availableAuthProviders: string[];
+  availableGroups: RoleGroup[];
+  dataLoading: boolean;
+  elasticsearchRoles: string[];
+  multipleAuthProvidersConfig: boolean;
+  roleMapping: WSRoleMapping | null;
+  roleMappings: WSRoleMapping[];
+  roleType: Role;
+  selectedAuthProviders: string[];
+  selectedGroups: Set<string>;
+}
+
 export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappingsActions>>({
+  path: ['enterprise_search', 'workplace_search', 'role_mappings'],
   actions: {
     setRoleMappingsData: (data: RoleMappingsServerDetails) => data,
     setRoleMappingData: (data: RoleMappingServerDetails) => data,
+    handleAuthProviderChange: (value: string[]) => ({ value }),
     handleRoleChange: (roleType: Role) => ({ roleType }),
     handleGroupSelectionChange: (groupId: string, selected: boolean) => ({ groupId, selected }),
-    handleAllGroupsSelectionChange: (selected: boolean) => ({ selected }),
     handleAttributeSelectorChange: (value: string, firstElasticsearchRole: string) => ({
       value,
       firstElasticsearchRole,
     }),
     handleAttributeValueChange: (value: string) => ({ value }),
-    handleAuthProviderChange: (value: string[]) => ({ value }),
-    resetState: () => true,
+    handleAllGroupsSelectionChange: (selected: boolean) => ({ selected }),
+    resetState: true,
+    initializeRoleMappings: true,
     initializeRoleMapping: (roleId?: string) => ({ roleId }),
-    handleSaveMapping: () => true,
-    handleDeleteMapping: () => true,
-    initializeRoleMappings: () => true,
+    handleDeleteMapping: true,
+    handleSaveMapping: true,
   },
   reducers: {
     dataLoading: [
@@ -110,16 +121,72 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         resetState: () => [],
       },
     ],
-    attributes: [
-      [],
+    multipleAuthProvidersConfig: [
+      false,
       {
-        setRoleMappingData: (_, { attributes }) => attributes,
+        setRoleMappingsData: (_, { multipleAuthProvidersConfig }) => multipleAuthProvidersConfig,
+        setRoleMappingData: (_, { multipleAuthProvidersConfig }) => multipleAuthProvidersConfig,
+        resetState: () => false,
       },
     ],
     availableGroups: [
       [],
       {
         setRoleMappingData: (_, { availableGroups }) => availableGroups,
+      },
+    ],
+    attributes: [
+      [],
+      {
+        setRoleMappingData: (_, { attributes }) => attributes,
+      },
+    ],
+    elasticsearchRoles: [
+      [],
+      {
+        setRoleMappingData: (_, { elasticsearchRoles }) => elasticsearchRoles,
+      },
+    ],
+    roleMapping: [
+      null,
+      {
+        setRoleMappingData: (_, { roleMapping }) => roleMapping || null,
+        resetState: () => null,
+      },
+    ],
+    roleType: [
+      'admin',
+      {
+        setRoleMappingData: (_, { roleMapping }) =>
+          roleMapping ? (roleMapping.roleType as Role) : 'admin',
+        handleRoleChange: (_, { roleType }) => roleType,
+      },
+    ],
+    includeInAllGroups: [
+      false,
+      {
+        setRoleMappingData: (_, { roleMapping }) => (roleMapping ? roleMapping.allGroups : false),
+        handleAllGroupsSelectionChange: (_, { selected }) => selected,
+      },
+    ],
+    attributeValue: [
+      '',
+      {
+        setRoleMappingData: (_, { roleMapping }) =>
+          roleMapping ? getFirstAttributeValue(roleMapping) : '',
+        handleAttributeSelectorChange: (_, { value, firstElasticsearchRole }) =>
+          value === 'role' ? firstElasticsearchRole : '',
+        handleAttributeValueChange: (_, { value }) => value,
+        resetState: () => '',
+      },
+    ],
+    attributeName: [
+      'username',
+      {
+        setRoleMappingData: (_, { roleMapping }) =>
+          roleMapping ? getFirstAttributeName(roleMapping) : 'username',
+        handleAttributeSelectorChange: (_, { value }) => value,
+        resetState: () => 'username',
       },
     ],
     selectedGroups: [
@@ -144,66 +211,10 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         },
       },
     ],
-    includeInAllGroups: [
-      false,
-      {
-        setRoleMappingData: (_, { roleMapping }) => (roleMapping ? roleMapping.allGroups : false),
-        handleAllGroupsSelectionChange: (_, { selected }) => selected,
-      },
-    ],
-    elasticsearchRoles: [
-      [],
-      {
-        setRoleMappingData: (_, { elasticsearchRoles }) => elasticsearchRoles,
-      },
-    ],
-    roleMapping: [
-      null,
-      {
-        setRoleMappingData: (_, { roleMapping }) => roleMapping || null,
-        resetState: () => null,
-      },
-    ],
-    roleType: [
-      'admin',
-      {
-        setRoleMappingData: (_, { roleMapping }) =>
-          roleMapping ? (roleMapping.roleType as Role) : 'admin',
-        handleRoleChange: (_, { roleType }) => roleType,
-      },
-    ],
-    attributeValue: [
-      '',
-      {
-        setRoleMappingData: (_, { roleMapping }) =>
-          roleMapping ? getFirstAttributeValue(roleMapping) : '',
-        handleAttributeSelectorChange: (_, { value, firstElasticsearchRole }) =>
-          value === 'role' ? firstElasticsearchRole : '',
-        handleAttributeValueChange: (_, { value }) => value,
-        resetState: () => '',
-      },
-    ],
-    attributeName: [
-      'username',
-      {
-        setRoleMappingData: (_, { roleMapping }) =>
-          roleMapping ? getFirstAttributeName(roleMapping) : 'username',
-        handleAttributeSelectorChange: (_, { value }) => value,
-        resetState: () => 'username',
-      },
-    ],
     availableAuthProviders: [
       [],
       {
         setRoleMappingData: (_, { authProviders }) => authProviders,
-      },
-    ],
-    multipleAuthProvidersConfig: [
-      false,
-      {
-        setRoleMappingsData: (_, { multipleAuthProvidersConfig }) => multipleAuthProvidersConfig,
-        setRoleMappingData: (_, { multipleAuthProvidersConfig }) => multipleAuthProvidersConfig,
-        resetState: () => false,
       },
     ],
     selectedAuthProviders: [
@@ -254,17 +265,18 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       }
     },
     handleDeleteMapping: async () => {
+      const { roleMapping } = values;
+      if (!roleMapping) return;
+
       const { http } = HttpLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
-      const { roleMapping } = values;
-      if (!roleMapping) {
-        return;
-      }
       const route = `/api/workplace_search/org/role_mappings/${roleMapping.id}`;
+
       if (window.confirm(DELETE_ROLE_MAPPING_MESSAGE)) {
         try {
           await http.delete(route);
           navigateToUrl(ROLE_MAPPINGS_PATH);
+          setSuccessMessage(ROLE_MAPPING_DELETED_MESSAGE);
         } catch (e) {
           flashAPIErrors(e);
         }
@@ -284,22 +296,27 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       } = values;
 
       const body = JSON.stringify({
+        roleType,
+        allGroups: includeInAllGroups,
+        authProvider: selectedAuthProviders,
         rules: {
           [attributeName]: attributeValue,
         },
-        roleType,
         groups: includeInAllGroups ? [] : Array.from(selectedGroups),
-        allGroups: includeInAllGroups,
-        authProvider: selectedAuthProviders,
       });
 
       const request = !roleMapping
         ? http.post('/api/workplace_search/org/role_mappings', { body })
         : http.put(`/api/workplace_search/org/role_mappings/${roleMapping.id}`, { body });
 
+      const SUCCESS_MESSAGE = !roleMapping
+        ? ROLE_MAPPING_CREATED_MESSAGE
+        : ROLE_MAPPING_UPDATED_MESSAGE;
+
       try {
         await request;
         navigateToUrl(ROLE_MAPPINGS_PATH);
+        setSuccessMessage(SUCCESS_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }

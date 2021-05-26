@@ -37,7 +37,7 @@ export function EmptyList() {
 export const ListItem = (
   props: Pick<
     Props['project'],
-    'description' | 'isActive' | 'name' | 'solutions' | 'environments'
+    'description' | 'isActive' | 'name' | 'solutions' | 'environments' | 'isDisplayed'
   > &
     Omit<ProjectStatus, 'defaultValue'>
 ) => {

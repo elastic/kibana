@@ -9,11 +9,11 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious PrintSpooler SPL File Created",
-  "note": "Refer to CVEs, CVE-2020-1048 and CVE-2020-1337 for further information on the vulnerability and exploit. Verify that the relevant system is patched.",
-  "query": "event.category:file and not event.type:deletion and file.extension:(spl or SPL) and file.path:C\\:\\\\Windows\\\\System32\\\\spool\\\\PRINTERS\\\\* and not process.name:(spoolsv.exe or printfilterpipelinesvc.exe or PrintIsolationHost.exe or splwow64.exe or msiexec.exe or poqexec.exe)",
+  "note": "## Threat intel\n\nRefer to CVEs, CVE-2020-1048 and CVE-2020-1337 for further information on the vulnerability and exploit. Verify that the relevant system is patched.",
+  "query": "file where event.type != \"deletion\" and\n  file.extension : \"spl\" and\n  file.path : \"?:\\\\Windows\\\\System32\\\\spool\\\\PRINTERS\\\\*\" and\n  not process.name : (\"spoolsv.exe\",\n                      \"printfilterpipelinesvc.exe\",\n                      \"PrintIsolationHost.exe\",\n                      \"splwow64.exe\",\n                      \"msiexec.exe\",\n                      \"poqexec.exe\")\n",
   "references": [
     "https://safebreach.com/Post/How-we-bypassed-CVE-2020-1048-Patch-and-got-CVE-2020-1337"
   ],
@@ -45,6 +45,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 3
+  "type": "eql",
+  "version": 4
 }

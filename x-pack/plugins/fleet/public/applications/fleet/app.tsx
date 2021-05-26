@@ -28,6 +28,7 @@ import {
   sendSetup,
   useBreadcrumbs,
   useConfig,
+  useStartServices,
 } from './hooks';
 import { Error, Loading } from './components';
 import { IntraAppStateProvider } from './hooks/use_intra_app_state';
@@ -59,6 +60,7 @@ const Panel = styled(EuiPanel)`
 
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('base');
+  const { notifications } = useStartServices();
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();
@@ -81,6 +83,13 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
             if (setupResponse.error) {
               setInitializationError(setupResponse.error);
             }
+            if (setupResponse.data?.nonFatalErrors?.length) {
+              notifications.toasts.addError(setupResponse.data.nonFatalErrors[0], {
+                title: i18n.translate('xpack.fleet.setup.uiPreconfigurationErrorTitle', {
+                  defaultMessage: 'Configuration error',
+                }),
+              });
+            }
           } catch (err) {
             setInitializationError(err);
           }
@@ -92,7 +101,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         setPermissionsError('REQUEST_ERROR');
       }
     })();
-  }, []);
+  }, [notifications.toasts]);
 
   if (isPermissionsLoading || permissionsError) {
     return (

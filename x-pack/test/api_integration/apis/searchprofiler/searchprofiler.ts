@@ -10,10 +10,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const API_BASE_PATH = '/api/searchprofiler';
 
+// Flaky https://github.com/elastic/kibana/issues/97954
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Profile', () => {
+  describe.skip('Profile', () => {
     it('should return profile results for a valid index', async () => {
       const payload = {
         index: '_all',

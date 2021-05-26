@@ -8,6 +8,7 @@
 
 import { Server } from '@hapi/hapi';
 import { EMPTY } from 'rxjs';
+import moment from 'moment';
 import supertest from 'supertest';
 import {
   getServerOptions,
@@ -35,6 +36,7 @@ describe('BasePathProxyServer', () => {
     config = {
       host: '127.0.0.1',
       port: 10012,
+      shutdownTimeout: moment.duration(30, 'seconds'),
       keepaliveTimeout: 1000,
       socketTimeout: 1000,
       cors: {

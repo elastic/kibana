@@ -9,6 +9,8 @@ import moment from 'moment-timezone';
 
 import { PolicyFromES } from '../../../common/types';
 
+import { defaultRolloverAction } from '../../../public/application/constants';
+
 export const POLICY_NAME = 'my_policy';
 export const SNAPSHOT_POLICY_NAME = 'my_snapshot_policy';
 export const NEW_SNAPSHOT_POLICY_NAME = 'my_new_snapshot_policy';
@@ -22,10 +24,7 @@ export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
       hot: {
         min_age: '0ms',
         actions: {
-          rollover: {
-            max_age: '30d',
-            max_size: '50gb',
-          },
+          rollover: defaultRolloverAction,
         },
       },
       warm: {
@@ -117,7 +116,7 @@ export const getDefaultHotPhasePolicy = (policyName: string): PolicyFromES => ({
         actions: {
           rollover: {
             max_age: '30d',
-            max_size: '50gb',
+            max_primary_shard_size: '50gb',
           },
         },
       },

@@ -39,12 +39,14 @@ export function registerRoutes({
   plugins,
   logger,
   config,
+  ruleDataClient,
 }: {
   core: APMRouteHandlerResources['core'];
   plugins: APMRouteHandlerResources['plugins'];
   logger: APMRouteHandlerResources['logger'];
   repository: ServerRouteRepository<APMRouteHandlerResources>;
   config: APMRouteHandlerResources['config'];
+  ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
 }) {
   const routes = repository.getRoutes();
 
@@ -97,6 +99,7 @@ export function registerRoutes({
               },
               validatedParams
             ),
+            ruleDataClient,
           })) as any;
 
           if (Array.isArray(data)) {

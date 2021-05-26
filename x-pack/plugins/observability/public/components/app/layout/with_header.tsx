@@ -16,7 +16,9 @@ const Page = styled(EuiPage)<EuiPageProps>`
 
 const Container = styled.div<{ color?: string }>`
   overflow-y: hidden;
-  min-height: calc(100vh - ${(props) => props.theme.eui.euiHeaderChildSize});
+  min-height: calc(
+    100vh - ${(props) => props.theme.eui.euiHeaderHeight + props.theme.eui.euiHeaderHeight}
+  );
   background: ${(props) => props.color};
 `;
 

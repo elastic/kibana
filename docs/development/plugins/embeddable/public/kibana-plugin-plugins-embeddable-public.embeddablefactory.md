@@ -16,6 +16,7 @@ export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = Em
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [grouping](./kibana-plugin-plugins-embeddable-public.embeddablefactory.grouping.md) | <code>UiActionsPresentableGrouping</code> | Indicates the grouping this factory should appear in a sub-menu. Example, this is used for grouping options in the editors menu in Dashboard for creating new embeddables |
 |  [isContainerType](./kibana-plugin-plugins-embeddable-public.embeddablefactory.iscontainertype.md) | <code>boolean</code> | True if is this factory create embeddables that are Containers. Used in the add panel to conditionally show whether these can be added to another container. It's just not supported right now, but once nested containers are officially supported we can probably get rid of this interface. |
 |  [isEditable](./kibana-plugin-plugins-embeddable-public.embeddablefactory.iseditable.md) | <code>() =&gt; Promise&lt;boolean&gt;</code> | Returns whether the current user should be allowed to edit this type of embeddable. Most of the time this should be based off the capabilities service, hence it's async. |
 |  [savedObjectMetaData](./kibana-plugin-plugins-embeddable-public.embeddablefactory.savedobjectmetadata.md) | <code>SavedObjectMetaData&lt;TSavedObjectAttributes&gt;</code> |  |
@@ -29,6 +30,8 @@ export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = Em
 |  [create(initialInput, parent)](./kibana-plugin-plugins-embeddable-public.embeddablefactory.create.md) | Resolves to undefined if a new Embeddable cannot be directly created and the user will instead be redirected elsewhere.<!-- -->This will likely change in future iterations when we improve in place editing capabilities. |
 |  [createFromSavedObject(savedObjectId, input, parent)](./kibana-plugin-plugins-embeddable-public.embeddablefactory.createfromsavedobject.md) | Creates a new embeddable instance based off the saved object id. |
 |  [getDefaultInput(partial)](./kibana-plugin-plugins-embeddable-public.embeddablefactory.getdefaultinput.md) | Can be used to get any default input, to be passed in to during the creation process. Default input will not be stored in a parent container, so any inherited input from a container will trump default input parameters. |
+|  [getDescription()](./kibana-plugin-plugins-embeddable-public.embeddablefactory.getdescription.md) | Returns a description about the embeddable. |
 |  [getDisplayName()](./kibana-plugin-plugins-embeddable-public.embeddablefactory.getdisplayname.md) | Returns a display name for this type of embeddable. Used in "Create new... " options in the add panel for containers. |
 |  [getExplicitInput()](./kibana-plugin-plugins-embeddable-public.embeddablefactory.getexplicitinput.md) | Can be used to request explicit input from the user, to be passed in to <code>EmbeddableFactory:create</code>. Explicit input is stored on the parent container for this embeddable. It overrides any inherited input passed down from the parent container. |
+|  [getIconType()](./kibana-plugin-plugins-embeddable-public.embeddablefactory.geticontype.md) | Returns an EUI Icon type to be displayed in a menu. |
 

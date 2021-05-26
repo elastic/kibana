@@ -43,17 +43,19 @@ describe('LineClamp', () => {
   describe('overflow', () => {
     const clientHeight = 400;
     const scrollHeight = clientHeight + 100; // scrollHeight is > clientHeight
+    let spyClientHeight: jest.SpyInstance<number, []>;
+    let spyScrollHeight: jest.SpyInstance<number, []>;
 
     beforeAll(() => {
-      Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
-        configurable: true,
-        value: clientHeight,
-      });
+      spyClientHeight = jest.spyOn(window.HTMLElement.prototype, 'clientHeight', 'get');
+      spyClientHeight.mockReturnValue(clientHeight);
+      spyScrollHeight = jest.spyOn(window.HTMLElement.prototype, 'scrollHeight', 'get');
+      spyScrollHeight.mockReturnValue(scrollHeight);
+    });
 
-      Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
-        configurable: true,
-        value: scrollHeight,
-      });
+    afterAll(() => {
+      spyClientHeight.mockRestore();
+      spyScrollHeight.mockRestore();
     });
 
     test('it does NOT render the expanded line clamp by default when isOverflow is true', () => {

@@ -168,6 +168,9 @@ export class AddLayerPanel extends Component<Props, State> {
           previewLayers={this._previewLayers}
           showBackButton={!this.state.isStepLoading}
           currentStepId={this.state.currentStep ? this.state.currentStep.id : null}
+          isOnFinalStep={
+            this.state.currentStep ? this.state.currentStep.id === ADD_LAYER_STEP_ID : false
+          }
           enableNextBtn={this._enableNextBtn}
           disableNextBtn={this._disableNextBtn}
           startStepLoading={this._startStepLoading}

@@ -19,14 +19,12 @@ export function selectedFiltersReducer(
   action: Action<any>
 ): SelectedFilters | null {
   switch (action.type) {
-    case String(getSelectedFilters):
-      return state;
     case String(setSelectedFilters):
-      if (state === null) return { ...action.payload };
+      if (action.payload === null) return null;
       return {
-        ...(state || {}),
         ...action.payload,
       };
+    case String(getSelectedFilters):
     default:
       return state;
   }

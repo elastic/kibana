@@ -279,16 +279,32 @@ This content has moved. Refer to <<dashboard, **Dashboard**>>.
 [role="exclude",id="ingest-node-pipelines"]
 == Ingest Node Pipelines
 
-This content has moved. See {ref}/ingest.html[Ingest pipelines].
+This content has moved. Refer to {ref}/ingest.html[Ingest pipelines].
 
 
 [role="exclude",id="create-panels-with-timelion"]
 == Timelion
 
-This content has moved. refer to <<timelion>>.
+This content has moved. Refer to <<timelion>>.
 
 
 [role="exclude",id="space-rbac-tutorial"]
 == Tutorial: Use role-based access control to customize Kibana spaces
 
-This content has moved. refer to <<tutorial-secure-access-to-kibana>>.
+This content has moved. Refer to <<tutorial-secure-access-to-kibana>>.
+
+[role="exclude",id="search"]
+== Search your data
+
+This content has moved. Refer to <<kuery-query>>.
+
+[role="exclude",id="discover-document-context"]
+== View surrounding documents
+
+This content has moved. Refer to <<discover-view-surrounding-documents>>.
+
+[role="exclude",id="field-formatters-string"]
+== String field formatters
+
+This content has moved. Refer to <<string-field-formatters>>.
+

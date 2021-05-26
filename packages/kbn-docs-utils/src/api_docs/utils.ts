@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import path from 'path';
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import {
   AnchorLink,
@@ -28,14 +28,14 @@ export const snakeToCamel = (str: string): string =>
 
 /**
  * Returns the plugin that the file belongs to.
- * @param path An absolute file path that can point to a file nested inside a plugin
+ * @param filePath An absolute file path that can point to a file nested inside a plugin
  * @param plugins A list of plugins to search through.
  */
 export function getPluginForPath(
-  path: string,
+  filePath: string,
   plugins: KibanaPlatformPlugin[]
 ): KibanaPlatformPlugin | undefined {
-  return plugins.find((plugin) => path.startsWith(plugin.directory));
+  return plugins.find((plugin) => filePath.startsWith(plugin.directory + path.sep));
 }
 
 /**
@@ -68,13 +68,13 @@ function escapeRegExp(regexp: string) {
  * name of the first nested folder in the plugin. For example a path of
  * 'src/plugins/data/public/search_services/file.ts' would return 'search_service' while
  * 'src/plugin/data/server/file.ts' would return undefined.
- * @param path
+ * @param filePath
  */
-export function getServiceForPath(path: string, pluginDirectory: string): string | undefined {
+export function getServiceForPath(filePath: string, pluginDirectory: string): string | undefined {
   const dir = escapeRegExp(pluginDirectory);
-  const publicMatchGroups = path.match(`${dir}\/public\/([^\/]*)\/`);
-  const serverMatchGroups = path.match(`${dir}\/server\/([^\/]*)\/`);
-  const commonMatchGroups = path.match(`${dir}\/common\/([^\/]*)\/`);
+  const publicMatchGroups = filePath.match(`${dir}\/public\/([^\/]*)\/`);
+  const serverMatchGroups = filePath.match(`${dir}\/server\/([^\/]*)\/`);
+  const commonMatchGroups = filePath.match(`${dir}\/common\/([^\/]*)\/`);
 
   if (publicMatchGroups && publicMatchGroups.length > 1) {
     return publicMatchGroups[1];
@@ -87,7 +87,6 @@ export function getServiceForPath(path: string, pluginDirectory: string): string
 
 export function getPluginApiDocId(
   id: string,
-  log: ToolingLog,
   serviceInfo?: {
     serviceFolders: readonly string[];
     apiPath: string;
@@ -109,7 +108,9 @@ export function getPluginApiDocId(
 }
 
 export function getApiSectionId(link: AnchorLink) {
-  const id = `def-${link.scope}.${link.apiName}`.replace(' ', '-');
+  // Clean up the name. Things like destructured function parameters can have really long names with brackets and commas.
+  const cleanName = link.apiName.replace(/[^A-Za-z_.$0-9]+/g, '');
+  const id = `def-${link.scope}.${cleanName}`;
   return id;
 }
 
@@ -169,29 +170,70 @@ export function addApiDeclarationToScope(declaration: ApiDeclaration, scope: Sco
   }
 }
 
+/**
+ * Loops through the signatures of every API declarations for the given pluginApi. If any are external references that
+ * don't actually exist inside `pluginApiMap`, it will remove the link and replace the signature with just the text. This way we avoid
+ * broken links in the docs system.
+ * @param pluginApi - The plugin API that will have all missing reference links removed.
+ * @param missingApiItems - Collects all the missing API items encountered so this information can be displayed as stats.
+ * @param pluginApiMap - Used to look up the referenced API items from other plugins.
+ * @param log
+ */
 export function removeBrokenLinks(
   pluginApi: PluginApi,
-  missingApiItems: { [key: string]: string[] },
-  pluginApiMap: { [key: string]: PluginApi }
+  missingApiItems: { [key: string]: { [key: string]: string[] } },
+  pluginApiMap: { [key: string]: PluginApi },
+  log: ToolingLog
 ) {
+  let missingCnt = 0;
   (['client', 'common', 'server'] as Array<'client' | 'server' | 'common'>).forEach((scope) => {
     pluginApi[scope].forEach((api) => {
-      if (api.signature) {
-        api.signature = api.signature.map((sig) => {
-          if (typeof sig !== 'string') {
-            if (apiItemExists(sig.text, sig.scope, pluginApiMap[sig.pluginId]) === false) {
-              if (missingApiItems[sig.pluginId] === undefined) {
-                missingApiItems[sig.pluginId] = [];
-              }
-              missingApiItems[sig.pluginId].push(`${sig.scope}.${sig.text}`);
-              return sig.text;
-            }
-          }
-          return sig;
-        });
-      }
+      missingCnt += removeBrokenLinksFromApi(pluginApi.id, api, missingApiItems, pluginApiMap);
     });
   });
+
+  if (missingCnt > 0) {
+    log.info(
+      `${pluginApi.id} had ${missingCnt} API item references removed to avoid broken links use the flag '--stats exports' to get a list of every missing export `
+    );
+  }
+}
+
+function removeBrokenLinksFromApi(
+  pluginId: string,
+  api: ApiDeclaration,
+  missingApiItems: { [key: string]: { [key: string]: string[] } },
+  pluginApiMap: { [key: string]: PluginApi }
+): number {
+  let missingCnt = 0;
+  if (api.signature) {
+    api.signature = api.signature.map((sig) => {
+      if (typeof sig !== 'string') {
+        if (!apiItemExists(sig.text, sig.scope, pluginApiMap[sig.pluginId])) {
+          if (missingApiItems[sig.pluginId] === undefined) {
+            missingApiItems[sig.pluginId] = {};
+          }
+          const sourceId = `${sig.pluginId}-${sig.scope}-${sig.text}`;
+          if (missingApiItems[sig.pluginId][sourceId] === undefined) {
+            missingApiItems[sig.pluginId][sourceId] = [];
+          }
+
+          missingApiItems[sig.pluginId][sourceId].push(`${pluginId}-${api.id}`);
+
+          missingCnt++;
+          return sig.text;
+        }
+        return sig;
+      }
+      return sig;
+    });
+  }
+  if (api.children) {
+    api.children.forEach((child) => {
+      missingCnt += removeBrokenLinksFromApi(pluginId, child, missingApiItems, pluginApiMap);
+    });
+  }
+  return missingCnt;
 }
 
 function apiItemExists(name: string, scope: ApiScope, pluginApi: PluginApi): boolean {

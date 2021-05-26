@@ -25,6 +25,15 @@ export const MANAGE_CURATION_TITLE = i18n.translate(
   { defaultMessage: 'Manage curation' }
 );
 
+export const QUERY_INPUTS_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curations.addQueryButtonLabel',
+  { defaultMessage: 'Add query' }
+);
+export const QUERY_INPUTS_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curations.queryPlaceholder',
+  { defaultMessage: 'Enter a query' }
+);
+
 export const DELETE_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.deleteConfirmation',
   { defaultMessage: 'Are you sure you want to remove this curation?' }

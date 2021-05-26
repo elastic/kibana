@@ -8,7 +8,7 @@
 
 import { postSnapshot } from '@percy/agent/dist/utils/sdk-utils';
 import testSubjSelector from '@kbn/test-subj-selector';
-import { Test } from '@kbn/test/types/ftr';
+import { Test } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

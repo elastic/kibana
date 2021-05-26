@@ -70,6 +70,7 @@ export const EngineNav: React.FC = () => {
     dataLoading,
     isSampleEngine,
     isMetaEngine,
+    hasSchemaErrors,
     hasSchemaConflicts,
     hasUnconfirmedSchemaFields,
     engine,
@@ -124,13 +125,23 @@ export const EngineNav: React.FC = () => {
       )}
       {canViewEngineSchema && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_SCHEMA_PATH))}
+          to={generateEnginePath(ENGINE_SCHEMA_PATH)}
+          shouldShowActiveForSubroutes
           data-test-subj="EngineSchemaLink"
         >
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
             <EuiFlexItem>{SCHEMA_TITLE}</EuiFlexItem>
             <EuiFlexItem className="appSearchNavIcons">
+              {hasSchemaErrors && (
+                <EuiIcon
+                  type="alert"
+                  color="danger"
+                  title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.errors', {
+                    defaultMessage: 'Schema change errors',
+                  })}
+                  data-test-subj="EngineNavSchemaErrors"
+                />
+              )}
               {hasUnconfirmedSchemaFields && (
                 <EuiIcon
                   type="iInCircle"
@@ -168,8 +179,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canViewMetaEngineSourceEngines && isMetaEngine && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(META_ENGINE_SOURCE_ENGINES_PATH))}
+          to={generateEnginePath(META_ENGINE_SOURCE_ENGINES_PATH)}
           data-test-subj="MetaEngineEnginesLink"
         >
           {ENGINES_TITLE}
@@ -180,7 +190,7 @@ export const EngineNav: React.FC = () => {
           to={generateEnginePath(ENGINE_RELEVANCE_TUNING_PATH)}
           data-test-subj="EngineRelevanceTuningLink"
         >
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
             <EuiFlexItem>{RELEVANCE_TUNING_TITLE}</EuiFlexItem>
             <EuiFlexItem className="appSearchNavIcons">
               {invalidBoosts && (
@@ -211,8 +221,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canManageEngineSynonyms && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_SYNONYMS_PATH))}
+          to={generateEnginePath(ENGINE_SYNONYMS_PATH)}
           data-test-subj="EngineSynonymsLink"
         >
           {SYNONYMS_TITLE}
@@ -237,8 +246,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canManageEngineSearchUi && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_SEARCH_UI_PATH))}
+          to={generateEnginePath(ENGINE_SEARCH_UI_PATH)}
           data-test-subj="EngineSearchUILink"
         >
           {SEARCH_UI_TITLE}

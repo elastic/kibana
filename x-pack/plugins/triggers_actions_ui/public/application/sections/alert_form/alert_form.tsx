@@ -135,14 +135,10 @@ export function getAlertErrors(
     ...alertBaseErrors,
   } as IErrorObject;
 
-  const alertActionsErrors = alert.actions.reduce((prev, alertAction: AlertAction) => {
-    return {
-      ...prev,
-      [alertAction.id]: actionTypeRegistry
-        .get(alertAction.actionTypeId)
-        ?.validateParams(alertAction.params).errors,
-    };
-  }, {}) as Record<string, IErrorObject>;
+  const alertActionsErrors = alert.actions.map((alertAction: AlertAction) => {
+    return actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
+      .errors;
+  });
   return {
     alertParamsErrors,
     alertBaseErrors,
@@ -160,13 +156,11 @@ export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>
 export function isValidAlert(
   alertObject: InitialAlert | Alert,
   validationResult: IErrorObject,
-  actionsErrors: Record<string, IErrorObject>
+  actionsErrors: IErrorObject[]
 ): alertObject is Alert {
   return (
     !hasObjectErrors(validationResult) &&
-    Object.keys(actionsErrors).find((actionErrorsKey) =>
-      hasObjectErrors(actionsErrors[actionErrorsKey])
-    ) === undefined
+    actionsErrors.every((error: IErrorObject) => !hasObjectErrors(error))
   );
 }
 
@@ -476,35 +470,34 @@ export const AlertForm = ({
                 </span>
               );
               return (
-                <Fragment key={index}>
-                  <EuiListGroupItem
-                    data-test-subj={`${item.id}-SelectOption`}
-                    color="primary"
-                    label={
-                      item.checkEnabledResult.isEnabled ? (
-                        alertTypeListItemHtml
-                      ) : (
-                        <EuiToolTip
-                          position="top"
-                          data-test-subj={`${item.id}-disabledTooltip`}
-                          content={item.checkEnabledResult.message}
-                        >
-                          {alertTypeListItemHtml}
-                        </EuiToolTip>
-                      )
+                <EuiListGroupItem
+                  key={index}
+                  data-test-subj={`${item.id}-SelectOption`}
+                  color="primary"
+                  label={
+                    item.checkEnabledResult.isEnabled ? (
+                      alertTypeListItemHtml
+                    ) : (
+                      <EuiToolTip
+                        position="top"
+                        data-test-subj={`${item.id}-disabledTooltip`}
+                        content={item.checkEnabledResult.message}
+                      >
+                        {alertTypeListItemHtml}
+                      </EuiToolTip>
+                    )
+                  }
+                  isDisabled={!item.checkEnabledResult.isEnabled}
+                  onClick={() => {
+                    setAlertProperty('alertTypeId', item.id);
+                    setActions([]);
+                    setAlertTypeModel(item.alertTypeItem);
+                    setAlertProperty('params', {});
+                    if (alertTypesIndex && alertTypesIndex.has(item.id)) {
+                      setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
                     }
-                    isDisabled={!item.checkEnabledResult.isEnabled}
-                    onClick={() => {
-                      setAlertProperty('alertTypeId', item.id);
-                      setActions([]);
-                      setAlertTypeModel(item.alertTypeItem);
-                      setAlertProperty('params', {});
-                      if (alertTypesIndex && alertTypesIndex.has(item.id)) {
-                        setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
-                      }
-                    }}
-                  />
-                </Fragment>
+                  }}
+                />
               );
             })}
         </EuiListGroup>
@@ -513,7 +506,7 @@ export const AlertForm = ({
     ));
 
   const alertTypeDetails = (
-    <Fragment>
+    <>
       <EuiHorizontalRule />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
@@ -611,11 +604,11 @@ export const AlertForm = ({
       selectedAlertType ? (
         <>
           {errors.actionConnectors.length >= 1 ? (
-            <Fragment>
+            <>
               <EuiSpacer />
               <EuiCallOut color="danger" size="s" title={errors.actionConnectors} />
               <EuiSpacer />
-            </Fragment>
+            </>
           ) : null}
           <ActionForm
             actions={alert.actions}
@@ -646,7 +639,7 @@ export const AlertForm = ({
           />
         </>
       ) : null}
-    </Fragment>
+    </>
   );
 
   const labelForAlertChecked = (
@@ -799,9 +792,9 @@ export const AlertForm = ({
       </EuiFlexGrid>
       <EuiSpacer size="m" />
       {alertTypeModel ? (
-        <Fragment>{alertTypeDetails}</Fragment>
+        <>{alertTypeDetails}</>
       ) : availableAlertTypes.length ? (
-        <Fragment>
+        <>
           <EuiHorizontalRule />
           <EuiFormRow
             fullWidth
@@ -863,14 +856,14 @@ export const AlertForm = ({
           </EuiFormRow>
           <EuiSpacer />
           {errors.alertTypeId.length >= 1 && alert.alertTypeId !== undefined ? (
-            <Fragment>
+            <>
               <EuiSpacer />
               <EuiCallOut color="danger" size="s" title={errors.alertTypeId} />
               <EuiSpacer />
-            </Fragment>
+            </>
           ) : null}
           {alertTypeNodes}
-        </Fragment>
+        </>
       ) : alertTypesIndex ? (
         <NoAuthorizedAlertTypes operation={operation} />
       ) : (

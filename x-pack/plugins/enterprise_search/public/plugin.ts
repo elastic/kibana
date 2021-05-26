@@ -116,7 +116,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         // The Workplace Search Personal dashboard needs the chrome hidden. We hide it globally
         // here first to prevent a flash of chrome on the Personal dashboard and unhide it for admin routes.
-        chrome.setIsVisible(false);
+        if (this.config.host) chrome.setIsVisible(false);
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 

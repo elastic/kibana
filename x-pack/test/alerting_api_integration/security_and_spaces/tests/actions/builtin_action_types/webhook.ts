@@ -119,6 +119,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'A generic Webhook action',
         connector_type_id: '.webhook',
+        is_missing_secrets: false,
         config: {
           ...defaultValues,
           url: webhookSimulatorURL,
@@ -136,6 +137,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'A generic Webhook action',
         connector_type_id: '.webhook',
+        is_missing_secrets: false,
         config: {
           ...defaultValues,
           url: webhookSimulatorURL,
@@ -168,6 +170,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'A generic Webhook action',
         connector_type_id: '.webhook',
+        is_missing_secrets: false,
         config: {
           ...defaultValues,
           url: webhookSimulatorURL,
@@ -204,6 +207,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'A generic Webhook action',
         connector_type_id: '.webhook',
+        is_missing_secrets: false,
         config: {
           ...defaultValues,
           url: webhookSimulatorURL,
