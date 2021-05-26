@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiFormRow,
   EuiComboBox,
@@ -165,7 +165,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   }, [actionParams]);
 
   return (
-    <Fragment>
+    <>
       <EuiTitle size="s">
         <h3>Incident</h3>
       </EuiTitle>
@@ -251,7 +251,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           { defaultMessage: 'Additional comments' }
         )}
       />
-    </Fragment>
+    </>
   );
 };
 
