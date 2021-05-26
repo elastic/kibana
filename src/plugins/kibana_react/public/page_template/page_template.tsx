@@ -89,7 +89,10 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
       template={template}
       restrictWidth={restrictWidth}
       paddingSize={template === 'centeredBody' ? 'none' : 'l'}
-      pageHeader={pageHeader}
+      pageHeader={{
+        'data-test-subj': 'kibana-page-template-header',
+        ...pageHeader,
+      }}
       pageSideBar={pageSideBar}
       pageSideBarProps={{
         ...rest.pageSideBarProps,

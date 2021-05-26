@@ -8,7 +8,7 @@
 
 import React, { ComponentType } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
 
 interface ManagementLandingPageProps {
