@@ -12,6 +12,8 @@ import type { ElasticsearchClient } from 'src/core/server';
 import type { SearchServiceParams } from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
 
+const fieldCandidatesFilter = ['parent.id', 'trace.id', 'transaction.id'];
+
 export const getRandomDocsRequest = (params: SearchServiceParams): estypes.SearchRequest => ({
   index: params.index,
   body: {
@@ -24,14 +26,16 @@ export const getRandomDocsRequest = (params: SearchServiceParams): estypes.Searc
         random_score: {},
       },
     },
-    size: 10000,
+    // Required value for later correlation queries
+    track_total_hits: true,
+    size: 500,
   },
 });
 
 export const fetchTransactionDurationFieldCandidates = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams
-): Promise<string[]> => {
+): Promise<{ fieldCandidates: string[]; totalHits: number }> => {
   const { index } = params;
   // Get all fields with keyword mapping
   const respMapping = await esClient.fieldCaps({ index, fields: '*' });
@@ -47,11 +51,9 @@ export const fetchTransactionDurationFieldCandidates = async (
   // Get all field names for each returned doc and flatten it
   // to a list of unique field names used across all docs
   // and filter by fields of type keyword and some APM specific unique fields.
-  const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
-    .filter(
-      (d) => keywordFields.includes(d) && !['parent.id', 'trace.id', 'transaction.id'].includes(d)
-    )
+  const fieldCandidates = [...new Set(docs.map(Object.keys).flat(1))]
+    .filter((d) => keywordFields.includes(d) && !fieldCandidatesFilter.includes(d))
     .sort();
 
-  return populatedFields;
+  return { fieldCandidates, totalHits: (resp.body.hits.total as estypes.TotalHits).value };
 };

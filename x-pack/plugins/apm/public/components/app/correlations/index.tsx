@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { LatencyCorrelations } from './latency_correlations';
 import { MlCorrelations } from './ml_correlations';
+import { MlScatter } from './ml_scatter';
 import { ErrorCorrelations } from './error_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { createHref } from '../../shared/Links/url_helpers';
@@ -52,14 +53,21 @@ const errorRateTab = {
   }),
   component: ErrorCorrelations,
 };
-const mlTab = {
-  key: 'ml',
-  label: i18n.translate('xpack.apm.correlations.tabs.mlLabel', {
-    defaultMessage: 'ML',
+const demo1Tab = {
+  key: 'demo1',
+  label: i18n.translate('xpack.apm.correlations.tabs.demo1Label', {
+    defaultMessage: 'Demo 1',
   }),
   component: MlCorrelations,
 };
-const tabs = [latencyTab, errorRateTab, mlTab];
+const demo2Tab = {
+  key: 'demo2',
+  label: i18n.translate('xpack.apm.correlations.tabs.demo2Label', {
+    defaultMessage: 'Demo 2',
+  }),
+  component: MlScatter,
+};
+const tabs = [latencyTab, errorRateTab, demo1Tab, demo2Tab];
 
 export function Correlations() {
   const license = useLicenseContext();

@@ -13,6 +13,8 @@ import { fetchTransactionDurationFieldCandidates } from './query_field_candidate
 import { fetchTransactionDurationFieldValuePairs } from './query_field_value_pairs';
 import { fetchTransactionDurationHistogram, HistogramItem } from './query_histogram';
 import { fetchTransactionDurationHistogramInterval } from './query_histogram_interval';
+import { fetchTransactionDurationPecentiles } from './query_percentiles';
+import { fetchTransactionDurationCorrelation } from './query_correlation';
 
 export interface SearchServiceParams {
   index: string;
@@ -29,7 +31,7 @@ export interface SearchServiceValue {
   histogram: HistogramItem[];
   value: string;
   field: string;
-  diff: number;
+  correlation: number;
 }
 
 export interface AsyncSearchProviderProgress {
@@ -66,6 +68,7 @@ export const asyncSearchServiceProvider = (
   };
 
   let values: SearchServiceValue[] = [];
+  let scatter: Array<{ correlation: number; docCount: number }> = [];
 
   const cancel = () => {
     isCancelled = true;
@@ -93,13 +96,25 @@ export const asyncSearchServiceProvider = (
         return;
       }
 
-      const fieldCandidates = await fetchTransactionDurationFieldCandidates(esClient, params);
+      const { fieldCandidates, totalHits } = await fetchTransactionDurationFieldCandidates(
+        esClient,
+        params
+      );
       progress.loadedFieldCanditates = 1;
+
+      const percentiles = await fetchTransactionDurationPecentiles(esClient, params);
 
       if (isCancelled) {
         isRunning = false;
         return;
       }
+
+      const { ranges: overallRanges } = await fetchTransactionDurationCorrelation(
+        esClient,
+        params,
+        percentiles,
+        totalHits
+      );
 
       const fieldValuePairs = await fetchTransactionDurationFieldValuePairs(
         esClient,
@@ -128,17 +143,24 @@ export const asyncSearchServiceProvider = (
             item.value
           );
 
+          const { ranges, correlation } = await fetchTransactionDurationCorrelation(
+            esClient,
+            params,
+            percentiles,
+            totalHits,
+            item.field,
+            item.value
+          );
+
           if (isCancelled) {
             isRunning = false;
             return;
           }
 
-          let diff = 0;
           const fullHistogram = overallHistogram.map((h) => {
             const histogramItem = histogram.find((di) => di.key === h.key);
             const docCount =
               item !== undefined && histogramItem !== undefined ? histogramItem.doc_count : 0;
-            diff = diff + (h.doc_count - docCount);
             return {
               key: h.key,
               doc_count_full: h.doc_count,
@@ -146,9 +168,15 @@ export const asyncSearchServiceProvider = (
             };
           });
 
+          const docCount = fullHistogram.reduce((p, c) => {
+            return p + c.doc_count;
+          }, 0);
+
+          scatter.push({ correlation, docCount });
+
           yield {
             ...item,
-            diff,
+            correlation,
             histogram: fullHistogram,
           };
         }
@@ -157,7 +185,7 @@ export const asyncSearchServiceProvider = (
       let loadedHistograms = 0;
       for await (const item of fetchTransactionDurationHistograms()) {
         values.push(item);
-        values = values.sort((a, b) => a.diff - b.diff).slice(0, 10);
+        values = values.sort((a, b) => b.correlation - a.correlation).slice(0, 9);
         loadedHistograms++;
         progress.loadedHistograms = loadedHistograms / fieldValuePairs.length;
       }
@@ -170,13 +198,18 @@ export const asyncSearchServiceProvider = (
 
   fetchCorrelations();
 
-  return () => ({
-    error,
-    isRunning,
-    loaded: Math.floor(progress.getOverallProgress() * 100),
-    started: progress.started,
-    total: 100,
-    values,
-    cancel,
-  });
+  return () => {
+    const scatterDelta = [...scatter];
+    scatter = [];
+    return {
+      error,
+      isRunning,
+      loaded: Math.floor(progress.getOverallProgress() * 100),
+      started: progress.started,
+      total: 100,
+      values,
+      scatter: scatterDelta,
+      cancel,
+    };
+  };
 };

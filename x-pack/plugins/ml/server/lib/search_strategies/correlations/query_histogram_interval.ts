@@ -14,7 +14,7 @@ import { TRANSACTION_DURATION_US } from './constants';
 import type { SearchServiceParams } from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
 
-const HISTOGRAM_INTERVALS = 100;
+const HISTOGRAM_INTERVALS = 1000;
 
 export const getHistogramIntervalRequest = (
   params: SearchServiceParams

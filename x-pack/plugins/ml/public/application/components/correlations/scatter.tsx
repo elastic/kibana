@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect, FC } from 'react';
+import React, { useEffect, useState, FC } from 'react';
 
-import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { useMlKibana } from '../../contexts/kibana';
 
-import { CorrelationChart } from './correlation_chart';
+// Separate imports for lazy loadable VegaChart and related code
+import { VegaChart } from '../vega_chart';
+
 import { useCorrelations } from './use_correlations';
 
 const isErrorMessage = (arg: unknown): arg is Error => {
@@ -30,14 +32,16 @@ interface CorrelationsProps {
   end?: string;
 }
 
-export const Correlations: FC<CorrelationsProps> = (fetchOptions) => {
+export const Scatter: FC<CorrelationsProps> = (fetchOptions) => {
   const {
     services: { notifications },
   } = useMlKibana();
 
+  const [allScatter, setAllScatter] = useState([]);
+
   const {
     error,
-    histograms,
+    scatter,
     isComplete,
     isRunning,
     progress,
@@ -50,6 +54,21 @@ export const Correlations: FC<CorrelationsProps> = (fetchOptions) => {
 
   // cancel any running async partial request when unmounting the component
   useEffect(() => cancelFetch, []);
+
+  useEffect(() => {
+    const newAllScatter = allScatter
+      .map((d) => {
+        d.status = 'old';
+        return d;
+      })
+      .concat(
+        scatter.map((d) => {
+          d.status = 'new';
+          return d;
+        })
+      );
+    setAllScatter(newAllScatter);
+  }, [JSON.stringify(scatter)]);
 
   useEffect(() => {
     if (isComplete) {
@@ -67,6 +86,20 @@ export const Correlations: FC<CorrelationsProps> = (fetchOptions) => {
       });
     }
   }, [error]);
+
+  const vegaSpec = {
+    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    description: 'A scatterplot with delta updates',
+    width: 400,
+    height: 400,
+    data: { values: allScatter },
+    mark: 'point',
+    encoding: {
+      x: { field: 'correlation', type: 'quantitative' },
+      y: { field: 'docCount', type: 'quantitative', scale: { type: 'log' } },
+      color: { field: 'status' },
+    },
+  };
 
   return (
     <>
@@ -90,13 +123,7 @@ export const Correlations: FC<CorrelationsProps> = (fetchOptions) => {
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGrid columns={3} gutterSize="none">
-        {histograms.map((histogram) => (
-          <EuiFlexItem>
-            <CorrelationChart {...histogram} key={`${histogram.field}:${histogram.value}`} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
+      <VegaChart vegaSpec={vegaSpec} />
     </>
   );
 };

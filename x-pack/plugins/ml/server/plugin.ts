@@ -221,7 +221,7 @@ export class MlServerPlugin
     }
 
     // search strategies for async partial search results
-    coreSetup.getStartServices().then(([coreStart, depsStart]) => {
+    coreSetup.getStartServices().then(() => {
       plugins.data.search.registerSearchStrategy(
         'mlCorrelationsSearchStrategy',
         mlCorrelationsSearchStrategyProvider()

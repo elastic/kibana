@@ -13,7 +13,7 @@ import {
   Axis,
   ScaleType,
   Position,
-  BarSeries,
+  AreaSeries,
   RecursivePartial,
   AxisStyle,
   PartialTheme,
@@ -32,11 +32,13 @@ const axes: RecursivePartial<AxisStyle> = {
     stroke: axisColor,
   },
   tickLabel: {
-    fontSize: 12,
+    fontSize: 8,
     fill: axisColor,
+    padding: 10,
   },
   tickLine: {
     stroke: axisColor,
+    size: 0,
   },
   gridLine: {
     horizontal: {
@@ -67,21 +69,27 @@ interface CorrelationChartProps {
 
 export const CorrelationChart: FC<CorrelationChartProps> = ({ field, value, histogram }) => {
   return (
-    <div>
-      {`${field}:${value}`}
+    <div style={{ width: '210px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      <small
+        style={{
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+        }}
+      >{`${field}:${value}`}</small>
       <Chart
         size={{
-          width: '100%',
-          height: '120px',
+          width: '200px',
+          height: '180px',
         }}
       >
         <Settings rotation={0} theme={theme} showLegend={false} />
 
         <Axis id="x-axis" title="" position={Position.Bottom} />
         <Axis id="y-axis" title="" position={Position.Left} />
-        <BarSeries
+        <AreaSeries
           id="magnitude"
-          xScaleType={ScaleType.Ordinal}
+          xScaleType={ScaleType.Log}
           yScaleType={ScaleType.Log}
           data={histogram}
           {...barSeriesSpec}
