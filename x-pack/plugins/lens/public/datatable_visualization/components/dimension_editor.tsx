@@ -254,7 +254,12 @@ export function TableDimensionEditor(
                 defaultMessage: 'Color',
               })}
             >
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+                responsive={false}
+                className="lnsDynamicColoringClickable"
+              >
                 <EuiFlexItem>
                   <EuiColorPaletteDisplay
                     data-test-subj="lnsDatatable_dynamicColoring_palette"
