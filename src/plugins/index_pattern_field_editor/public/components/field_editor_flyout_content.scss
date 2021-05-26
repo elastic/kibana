@@ -9,30 +9,30 @@
     width: 100%;
     height: 100%;
     overflow-y: auto;
-    padding-top: 24px;
-    padding-right: 24px;
-    padding-left: 24px;
+    padding-top: $euiSizeL;
+    padding-right: $euiSizeL;
+    padding-left: $euiSizeL;
   }
 
   &__body {
-    min-height: calc(100% - 72px);
+    min-height: calc(100% - #{$euiSizeL * 3});
   }
 
   &__footer {
     position: sticky;
     bottom: 0;
-    width: calc(100% + 48px);
-    margin-left: -24px;
+    width: calc(100% + #{$euiSizeL * 2});
+    margin-left: $euiSizeL * -1;
   }
 }
 
 .fieldEditorFlyoutContent__right {
   width: 40%;
-  background-color: #F6F6F6;
+  background-color: $euiColorLightestShade;
   position: absolute;
-  height: calc(100% + 16px);
+  height: calc(100% + #{$euiSize});
   overflow-y: auto;
-  padding: 48px 32px 16px 16px;
-  top: -16px;
+  padding: $euiSizeL * 2 $euiSize * 2 $euiSize $euiSize;
+  top: $euiSize * -1;
   left: 60%;
 }
