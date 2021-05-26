@@ -164,11 +164,6 @@ export class MbMap extends Component<Props, State> {
     };
   })();
 
-  // _queryForMeta = _.debounce((layerId, layer) => {
-  //   const mbFeatures = layer.queryForTileMeta(this.state.mbMap);
-  //   this.props.updateCounts(layerId, mbFeatures);
-  // }, 1000);
-
   _debouncedSync = _.debounce(() => {
     if (this._isMounted && this.props.isMapReady && this.state.mbMap) {
       if (!this.state.hasSyncedLayerList) {
@@ -234,7 +229,7 @@ export class MbMap extends Component<Props, State> {
         options.bounds = [-170, -60, 170, 75];
       }
       const mbMap = new mapboxgl.Map(options);
-      // mbMap.dragRotate.disable();
+      mbMap.dragRotate.disable();
       mbMap.touchZoomRotate.disableRotation();
 
       this._tileStatusTracker = new TileStatusTracker({

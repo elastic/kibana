@@ -9,10 +9,10 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from 'mapbox-gl';
 import { FeatureCollection } from 'geojson';
+import { Feature } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultStaticProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
 import {
-  COUNT_PROP_NAME,
   DEFAULT_ICON,
   FIELD_ORIGIN,
   GEO_JSON_TYPE,
@@ -489,7 +489,7 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
-  async pluckStyleMetaFromTileMeta(foobar: any): Promise<StyleMetaDescriptor> {
+  async pluckStyleMetaFromTileMeta(features: Feature[]): Promise<StyleMetaDescriptor> {
     const styleMeta = {
       geometryTypes: {
         isPointsOnly: false,
@@ -500,7 +500,7 @@ export class VectorStyle implements IVectorStyle {
     } as StyleMetaDescriptor;
 
     const dynamicProperties = this.getDynamicPropertiesArray();
-    if (dynamicProperties.length === 0 || !foobar) {
+    if (dynamicProperties.length === 0 || !features) {
       // no additional meta data to pull from source data request.
       return styleMeta;
     }
@@ -515,9 +515,9 @@ export class VectorStyle implements IVectorStyle {
 
       let min = Infinity;
       let max = -Infinity;
-      for (let i = 0; i < foobar.length; i++) {
-        if (foobar[i].properties && foobar[i].properties[name]) {
-          const metaFromTiles = JSON.parse(foobar[i].properties[name]);
+      for (let i = 0; i < features.length; i++) {
+        if (features[i].properties && features[i].properties[name]) {
+          const metaFromTiles = JSON.parse(features[i].properties[name]);
           min = Math.min(metaFromTiles.min, min);
           max = Math.max(metaFromTiles.max, max);
         }
