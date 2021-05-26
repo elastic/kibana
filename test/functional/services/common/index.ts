@@ -11,4 +11,4 @@ export { FailureDebuggingProvider } from './failure_debugging';
 export { FindProvider } from './find';
 export { ScreenshotsProvider } from './screenshots';
 export { SnapshotsProvider } from './snapshots';
-export { TestSubjectsProvider, TestSubjects } from './test_subjects';
+export { TestSubjects } from './test_subjects';
