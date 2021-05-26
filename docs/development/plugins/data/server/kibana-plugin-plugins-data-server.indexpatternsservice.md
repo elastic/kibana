@@ -27,6 +27,7 @@ export declare class IndexPatternsService
 |  [get](./kibana-plugin-plugins-data-server.indexpatternsservice.get.md) |  | <code>(id: string) =&gt; Promise&lt;IndexPattern&gt;</code> | Get an index pattern by id. Cache optimized |
 |  [getCache](./kibana-plugin-plugins-data-server.indexpatternsservice.getcache.md) |  | <code>() =&gt; Promise&lt;SavedObject&lt;IndexPatternSavedObjectAttrs&gt;[] &#124; null &#124; undefined&gt;</code> |  |
 |  [getDefault](./kibana-plugin-plugins-data-server.indexpatternsservice.getdefault.md) |  | <code>() =&gt; Promise&lt;IndexPattern &#124; null&gt;</code> | Get default index pattern |
+|  [getDefaultId](./kibana-plugin-plugins-data-server.indexpatternsservice.getdefaultid.md) |  | <code>() =&gt; Promise&lt;string &#124; null&gt;</code> |  |
 |  [getFieldsForIndexPattern](./kibana-plugin-plugins-data-server.indexpatternsservice.getfieldsforindexpattern.md) |  | <code>(indexPattern: IndexPattern &#124; IndexPatternSpec, options?: GetFieldsOptions &#124; undefined) =&gt; Promise&lt;any&gt;</code> | Get field list by providing an index patttern (or spec) |
 |  [getFieldsForWildcard](./kibana-plugin-plugins-data-server.indexpatternsservice.getfieldsforwildcard.md) |  | <code>(options: GetFieldsOptions) =&gt; Promise&lt;any&gt;</code> | Get field list by providing { pattern } |
 |  [getIds](./kibana-plugin-plugins-data-server.indexpatternsservice.getids.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;string[]&gt;</code> | Get list of index pattern ids |
