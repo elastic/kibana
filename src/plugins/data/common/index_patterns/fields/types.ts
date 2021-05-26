@@ -8,6 +8,10 @@
 
 import { FieldSpec, IFieldSubType, IndexPattern } from '../..';
 
+/**
+ * @deprecated
+ * Use IndexPatternField or FieldSpec instead
+ */
 export interface IFieldType {
   name: string;
   type: string;

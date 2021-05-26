@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useReducer, useState, Fragment } from 'react';
+import React, { useCallback, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -30,7 +30,8 @@ import { ActionConnectorForm, getConnectorErrors } from './action_connector_form
 import { TestConnectorForm } from './test_connector_form';
 import {
   ActionConnector,
-  ActionTypeRegistryContract,
+  ConnectorEditFlyoutProps,
+  EditConectorTabs,
   UserConfiguredActionConnector,
 } from '../../../types';
 import { ConnectorReducer, createConnectorReducer } from './connector_reducer';
@@ -44,21 +45,7 @@ import './connector_edit_flyout.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 
-export interface ConnectorEditFlyoutProps {
-  initialConnector: ActionConnector;
-  onClose: () => void;
-  tab?: EditConectorTabs;
-  reloadConnectors?: () => Promise<ActionConnector[] | void>;
-  consumer?: string;
-  actionTypeRegistry: ActionTypeRegistryContract;
-}
-
-export enum EditConectorTabs {
-  Configuration = 'configuration',
-  Test = 'test',
-}
-
-export const ConnectorEditFlyout = ({
+const ConnectorEditFlyout = ({
   initialConnector,
   onClose,
   tab = EditConectorTabs.Configuration,
@@ -173,7 +160,7 @@ export const ConnectorEditFlyout = ({
       });
 
   const flyoutTitle = connector.isPreconfigured ? (
-    <Fragment>
+    <>
       <EuiTitle size="s">
         <h3 id="flyoutTitle">
           <FormattedMessage
@@ -201,7 +188,7 @@ export const ConnectorEditFlyout = ({
           values={{ actionDescription: actionTypeModel.selectMessage }}
         />
       </EuiText>
-    </Fragment>
+    </>
   ) : (
     <EuiTitle size="s">
       <h3 id="flyoutTitle">
@@ -313,7 +300,7 @@ export const ConnectorEditFlyout = ({
               consumer={consumer}
             />
           ) : (
-            <Fragment>
+            <>
               <EuiText>
                 {i18n.translate(
                   'xpack.triggersActionsUI.sections.editConnectorForm.descriptionText',
@@ -328,7 +315,7 @@ export const ConnectorEditFlyout = ({
                   defaultMessage="Learn more about preconfigured connectors."
                 />
               </EuiLink>
-            </Fragment>
+            </>
           )
         ) : (
           <TestConnectorForm
@@ -358,7 +345,7 @@ export const ConnectorEditFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween">
               {canSave && actionTypeModel && !connector.isPreconfigured ? (
-                <Fragment>
+                <>
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       color="secondary"
@@ -391,7 +378,7 @@ export const ConnectorEditFlyout = ({
                       />
                     </EuiButton>
                   </EuiFlexItem>
-                </Fragment>
+                </>
               ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>

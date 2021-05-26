@@ -198,6 +198,31 @@ describe('migrations v2 model', () => {
   });
 
   describe('model transitions from', () => {
+    it('transition returns new state', () => {
+      const initState: State = {
+        ...baseState,
+        controlState: 'INIT',
+        currentAlias: '.kibana',
+        versionAlias: '.kibana_7.11.0',
+        versionIndex: '.kibana_7.11.0_001',
+      };
+
+      const res: ResponseType<'INIT'> = Either.right({
+        '.kibana_7.11.0_001': {
+          aliases: {
+            '.kibana': {},
+            '.kibana_7.11.0': {},
+          },
+          mappings: {
+            properties: {},
+          },
+          settings: {},
+        },
+      });
+      const newState = model(initState, res);
+      expect(newState).not.toBe(initState);
+    });
+
     describe('INIT', () => {
       const initState: State = {
         ...baseState,
@@ -1133,14 +1158,7 @@ describe('migrations v2 model', () => {
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL if no outdated documents to transform and we have failed document migrations', () => {
         const corruptDocumentIdsCarriedOver = ['a:somethingelse'];
         const originalTransformError = new Error('something went wrong');
-        const transFormErr = new TransformSavedObjectDocumentError(
-          '123',
-          'vis',
-          undefined,
-          'randomvis: 7.12.0',
-          'failedDoc',
-          originalTransformError
-        );
+        const transFormErr = new TransformSavedObjectDocumentError(originalTransformError);
         const transformationErrors = [
           { rawId: 'bob:tail', err: transFormErr },
         ] as TransformErrorObjects[];
@@ -1159,7 +1177,7 @@ describe('migrations v2 model', () => {
         expect(newState.reason.includes('Migrations failed. Reason:')).toBe(true);
         expect(newState.reason.includes('Corrupt saved object documents: ')).toBe(true);
         expect(newState.reason.includes('Transformation errors: ')).toBe(true);
-        expect(newState.reason.includes('randomvis: 7.12.0')).toBe(true);
+        expect(newState.reason.includes('bob:tail')).toBe(true);
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
     });
@@ -1204,14 +1222,7 @@ describe('migrations v2 model', () => {
       const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
       const corruptDocumentIds = ['a:somethingelse'];
       const originalTransformError = new Error('Dang diggity!');
-      const transFormErr = new TransformSavedObjectDocumentError(
-        'id',
-        'type',
-        'namespace',
-        'failedTransform',
-        'failedDoc',
-        originalTransformError
-      );
+      const transFormErr = new TransformSavedObjectDocumentError(originalTransformError);
       const transformationErrors = [
         { rawId: 'bob:tail', err: transFormErr },
       ] as TransformErrorObjects[];

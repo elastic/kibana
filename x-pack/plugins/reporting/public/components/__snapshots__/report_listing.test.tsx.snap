@@ -52,6 +52,7 @@ Array [
         "onSelectionChange": [Function],
       }
     }
+    tableCaption="Reports generated in Kibana applications"
     tableLayout="fixed"
   >
     <div

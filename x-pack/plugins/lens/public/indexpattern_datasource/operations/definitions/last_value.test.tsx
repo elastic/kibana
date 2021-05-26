@@ -29,6 +29,7 @@ const defaultProps = {
     ...createMockedIndexPattern(),
     hasRestrictions: false,
   } as IndexPattern,
+  operationDefinitionMap: {},
 };
 
 describe('last_value', () => {
