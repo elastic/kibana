@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -102,9 +102,9 @@ export const TestConnectorForm = ({
         defaultMessage: 'Run the test',
       }),
       children: (
-        <Fragment>
+        <>
           {executeEnabled ? null : (
-            <Fragment>
+            <>
               <EuiCallOut iconType="alert" color="warning">
                 <p>
                   <FormattedMessage
@@ -114,7 +114,7 @@ export const TestConnectorForm = ({
                 </p>
               </EuiCallOut>
               <EuiSpacer size="s" />
-            </Fragment>
+            </>
           )}
           <EuiText>
             <EuiButton
@@ -130,7 +130,7 @@ export const TestConnectorForm = ({
               />
             </EuiButton>
           </EuiText>
-        </Fragment>
+        </>
       ),
     },
     {
