@@ -19,7 +19,7 @@ import {
   createJavaAgentInstructions,
   createDotNetAgentInstructions,
   createPhpAgentInstructions,
-} from '../../../../../../src/plugins/apm_oss/server';
+} from '../instructions/apm_agent_instructions';
 import { CloudSetup } from '../../../../cloud/server';
 
 export function createElasticCloudInstructions(cloudSetup?: CloudSetup) {
