@@ -270,6 +270,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           alerting: {
             all: [SIGNALS_ID, NOTIFICATIONS_ID],
           },
+          cases: {
+            all: [APP_ID],
+          },
           management: {
             insightsAndAlerting: ['triggersActions'],
           },
@@ -285,6 +288,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           },
           alerting: {
             read: [SIGNALS_ID, NOTIFICATIONS_ID],
+          },
+          cases: {
+            read: [APP_ID],
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
