@@ -99,7 +99,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       if (Math.abs(chartWidth - e.width) > 20) {
-        setChartWidth(e.width);
+        requestAnimationFrame(() => setChartWidth(e.width));
       }
     }, RESIZE_THROTTLE_TIME_MS),
     [chartWidth]
@@ -148,7 +148,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
           id={`mlAnomalyExplorerEmbeddableWrapper-${id}`}
           style={{
             width: '100%',
-            overflowY: 'hidden',
+            overflowY: 'auto',
             overflowX: 'hidden',
             padding: '8px',
           }}
