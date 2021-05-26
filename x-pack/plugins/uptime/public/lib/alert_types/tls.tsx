@@ -6,19 +6,17 @@
  */
 
 import React from 'react';
+import { FormattableAlertTypeModel } from '../../../../observability/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
-import { TlsTranslations } from './translations';
+import { TlsTranslations } from '../../../common/translations';
 import { AlertTypeInitializer } from '.';
-
-import { FormattableRuleType } from '../../../../observability/public';
-import type { UptimeRuleFieldMap } from '../../../common/rules/uptime_rule_field_map';
 
 const { defaultActionMessage, description } = TlsTranslations;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
 export const initTlsAlertType: AlertTypeInitializer = ({
   core,
   plugins,
-}): FormattableRuleType<UptimeRuleFieldMap> => ({
+}): FormattableAlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
@@ -31,8 +29,8 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   validate: () => ({ errors: {} }),
   defaultActionMessage,
   requiresAppContext: false,
-  format: ({ alert }) => ({
-    reason: 'test',
-    link: 'http://elastic.co',
+  format: ({ fields }) => ({
+    reason: fields.reason,
+    link: '/app/uptime/certificates',
   }),
 });
