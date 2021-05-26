@@ -21,6 +21,13 @@
               "type": "long"
             }
           }
+        },
+        "embeddable": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            }
+          }
         }
       }
     },
