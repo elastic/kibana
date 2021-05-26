@@ -63,7 +63,7 @@ export const AppWithoutRouter = ({
       render={(props) => (
         <IndexManagementHome
           section={props.match.params.section}
-          historyPush={props.history.push}
+          history={props.history}
           managementPageLayout={managementPageLayout}
         />
       )}

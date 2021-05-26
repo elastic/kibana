@@ -6,6 +6,8 @@
  */
 
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+
+import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
@@ -19,7 +21,7 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), testBedConfig);
+const setupTestbed = registerTestBed(WithAppDependencies(IndexManagementHome), testBedConfig);
 
 export interface HomeTestBed extends TestBed<TestSubjects> {
   actions: {
@@ -28,7 +30,9 @@ export interface HomeTestBed extends TestBed<TestSubjects> {
 }
 
 export const setup = async (): Promise<HomeTestBed> => {
-  const testBed = await initTestBed();
+  const testBed = await setupTestbed({
+    managementPageLayout: KibanaPageTemplate,
+  });
 
   /**
    * User Actions

@@ -10,6 +10,8 @@ import { ReactWrapper } from 'enzyme';
 
 import { EuiDescriptionListDescription } from '@elastic/eui';
 import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
+
+import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
 import { DataStream } from '../../../common';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
@@ -51,11 +53,13 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     doMountAsync: true,
   };
 
-  const initTestBed = registerTestBed(
+  const setupTestbed = registerTestBed(
     WithAppDependencies(IndexManagementHome, overridingDependencies),
     testBedConfig
   );
-  const testBed = await initTestBed();
+  const testBed = await setupTestbed({
+    managementPageLayout: KibanaPageTemplate,
+  });
 
   /**
    * User Actions

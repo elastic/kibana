@@ -7,6 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
+import { History } from 'history';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
@@ -33,13 +34,13 @@ export const homeSections = [
 
 interface MatchParams {
   section: Section;
-  historyPush: (newRoute: string) => void;
+  history: History;
   managementPageLayout: ManagementAppMountParams['managementPageLayout'];
 }
 
 export const IndexManagementHome = ({
   section,
-  historyPush,
+  history,
   managementPageLayout: ManagementPageLayout,
 }: MatchParams) => {
   const tabs = [
@@ -77,7 +78,7 @@ export const IndexManagementHome = ({
   ];
 
   const onSectionChange = (newSection: Section) => {
-    historyPush(`/${newSection}`);
+    history.push(`/${newSection}`);
   };
 
   useEffect(() => {

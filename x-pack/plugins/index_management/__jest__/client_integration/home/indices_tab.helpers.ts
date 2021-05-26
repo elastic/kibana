@@ -9,6 +9,8 @@ import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
 import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
+
+import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
@@ -34,11 +36,13 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
 }
 
 export const setup = async (overridingDependencies: any = {}): Promise<IndicesTestBed> => {
-  const initTestBed = registerTestBed(
+  const setupTestbed = registerTestBed(
     WithAppDependencies(IndexManagementHome, overridingDependencies),
     testBedConfig
   );
-  const testBed = await initTestBed();
+  const testBed = await setupTestbed({
+    managementPageLayout: KibanaPageTemplate,
+  });
 
   /**
    * User Actions

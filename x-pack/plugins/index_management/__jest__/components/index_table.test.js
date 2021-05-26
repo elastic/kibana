@@ -18,6 +18,7 @@ import { MemoryRouter } from 'react-router-dom';
  */
 import { mountWithIntl, stubWebWorker } from '@kbn/test/jest'; // eslint-disable-line no-unused-vars
 
+import { KibanaPageTemplate } from '../../../../../src/plugins/kibana_react/public';
 import { AppWithoutRouter } from '../../public/application/app';
 import { AppContextProvider } from '../../public/application/app_context';
 import { Provider } from 'react-redux';
@@ -137,7 +138,7 @@ describe('index table', () => {
       <Provider store={store}>
         <MemoryRouter initialEntries={[`${BASE_PATH}indices`]}>
           <AppContextProvider value={appDependencies}>
-            <AppWithoutRouter />
+            <AppWithoutRouter managementPageLayout={KibanaPageTemplate} />
           </AppContextProvider>
         </MemoryRouter>
       </Provider>

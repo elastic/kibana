@@ -8,6 +8,8 @@
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
+
+import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
 import { TemplateList } from '../../../public/application/sections/home/template_list';
 import { TemplateDeserialized } from '../../../common';
 import { WithAppDependencies, TestSubjects } from '../helpers';
@@ -20,7 +22,10 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed<TestSubjects>(WithAppDependencies(TemplateList), testBedConfig);
+const setupTestbed = registerTestBed<TestSubjects>(
+  WithAppDependencies(TemplateList),
+  testBedConfig
+);
 
 const createActions = (testBed: TestBed<TestSubjects>) => {
   /**
@@ -128,7 +133,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 };
 
 export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
-  const testBed = await initTestBed();
+  const testBed = await setupTestbed({
+    managementPageLayout: KibanaPageTemplate,
+  });
 
   return {
     ...testBed,
