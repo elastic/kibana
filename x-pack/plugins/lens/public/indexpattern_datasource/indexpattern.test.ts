@@ -1315,7 +1315,7 @@ describe('IndexPattern Data Source', () => {
         layers: {
           first: {
             indexPatternId: '1',
-            columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5'],
+            columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
             columns: {
               col1: {
                 operationType: 'date_histogram',
@@ -1353,6 +1353,14 @@ describe('IndexPattern Data Source', () => {
               col5: {
                 operationType: 'count',
                 timeShift: '1w',
+                label: '',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'records',
+              },
+              col6: {
+                operationType: 'count',
+                timeShift: 'previous',
                 label: '',
                 dataType: 'number',
                 isBucketed: false,

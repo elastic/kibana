@@ -333,7 +333,11 @@ export function getTimeShiftWarningMessages(
       if (column.isBucketed) return;
       let duration: number = 0;
       if (column.timeShift) {
-        duration = (parseTimeShift(column.timeShift) as moment.Duration).asMilliseconds();
+        const parsedTimeShift = parseTimeShift(column.timeShift);
+        if (parsedTimeShift === 'previous' || parsedTimeShift === 'invalid') {
+          return;
+        }
+        duration = parsedTimeShift.asMilliseconds();
       }
       timeShifts.push(duration);
       if (!timeShiftMap[duration]) {
