@@ -34,6 +34,11 @@ export function registerDashboardUsageCollector(
           type: 'long',
         },
       },
+      embeddable: {
+        DYNAMIC_KEY: {
+          type: 'long',
+        },
+      },
     },
   });
 
