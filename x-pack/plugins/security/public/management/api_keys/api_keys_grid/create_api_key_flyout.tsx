@@ -45,7 +45,9 @@ export interface ApiKeyFormValues {
   expiration: string;
   customExpiration: boolean;
   customPrivileges: boolean;
+  includeMetadata: boolean;
   role_descriptors: string;
+  metadata: string;
 }
 
 export interface CreateApiKeyFlyoutProps {
@@ -59,6 +61,7 @@ const defaultDefaultValues: ApiKeyFormValues = {
   expiration: '',
   customExpiration: false,
   customPrivileges: false,
+  includeMetadata: false,
   role_descriptors: JSON.stringify(
     {
       'role-a': {
@@ -78,6 +81,18 @@ const defaultDefaultValues: ApiKeyFormValues = {
             privileges: ['all'],
           },
         ],
+      },
+    },
+    null,
+    2
+  ),
+  metadata: JSON.stringify(
+    {
+      application: 'my-application',
+      environment: {
+        level: 1,
+        trusted: true,
+        tags: ['dev', 'staging'],
       },
     },
     null,
@@ -312,6 +327,49 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
             )}
           </EuiFormFieldset>
 
+          <EuiSpacer />
+          <EuiFormFieldset>
+            <EuiSwitch
+              id="apiKeyCustom"
+              label={i18n.translate(
+                'xpack.security.accountManagement.createApiKey.includeMetadataLabel',
+                {
+                  defaultMessage: 'Include metadata',
+                }
+              )}
+              checked={!!form.values.includeMetadata}
+              onChange={(e) => form.setValue('includeMetadata', e.target.checked)}
+            />
+            {form.values.includeMetadata && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  helpText={
+                    <DocLink
+                      app="elasticsearch"
+                      doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
+                    >
+                      <FormattedMessage
+                        id="xpack.security.accountManagement.createApiKey.metadataHelpText"
+                        defaultMessage="Learn how to structure metadata."
+                      />
+                    </DocLink>
+                  }
+                  error={form.errors.metadata}
+                  isInvalid={form.touched.metadata && !!form.errors.metadata}
+                >
+                  <CodeEditorField
+                    value={form.values.metadata!}
+                    onChange={(value) => form.setValue('metadata', value)}
+                    languageId="xjson"
+                    height={200}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="s" />
+              </>
+            )}
+          </EuiFormFieldset>
+
           {/* Hidden submit button is required for enter key to trigger form submission */}
           <input type="submit" hidden />
         </EuiForm>
@@ -374,5 +432,6 @@ export function mapValues(values: ApiKeyFormValues): CreateApiKeyRequest {
       values.customPrivileges && values.role_descriptors
         ? JSON.parse(values.role_descriptors)
         : undefined,
+    metadata: values.includeMetadata && values.metadata ? JSON.parse(values.metadata) : undefined,
   };
 }
