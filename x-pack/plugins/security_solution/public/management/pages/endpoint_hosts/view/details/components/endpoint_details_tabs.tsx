@@ -26,6 +26,7 @@ interface EndpointDetailsTabs {
 
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   overflow: hidden;
+  padding-bottom: 48px;
 
   > [role='tabpanel'] {
     height: 100%;

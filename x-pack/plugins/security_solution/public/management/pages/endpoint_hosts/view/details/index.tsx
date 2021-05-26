@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, memo, useState } from 'react';
+import React, { useCallback, useEffect, memo } from 'react';
 import styled from 'styled-components';
 import {
   EuiFlyout,
@@ -19,8 +19,6 @@ import {
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutFooter,
-  EuiPagination,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -36,7 +34,6 @@ import {
   getActivityLogError,
   getActivityLogRequestLoading,
   showView,
-  listData,
   policyResponseConfigurations,
   policyResponseActions,
   policyResponseFailedOrWarningActionCount,
@@ -126,18 +123,6 @@ export const EndpointDetailsFlyout = memo(() => {
     },
   ];
 
-  const hostList = useEndpointSelector(listData);
-  const pageCount = hostList.length;
-
-  const [activePage, setActivePage] = useState<number>(() =>
-    // @ts-expect-error
-    // TODO paginate endpoints when details flyout is open
-    hostList.indexOf(hostList.find((host) => host.metadata.agent.id === selectedEndpoint))
-  );
-  const onPageClick = useCallback((pageNumber) => {
-    setActivePage(pageNumber);
-  }, []);
-
   const handleFlyoutClose = useCallback(() => {
     const { show: _show, ...urlSearchParams } = queryParamsWithoutSelectedEndpoint;
     history.push(
@@ -216,15 +201,6 @@ export const EndpointDetailsFlyout = memo(() => {
           {show === 'isolate' && <EndpointIsolateFlyoutPanel hostMeta={hostDetails} />}
         </>
       )}
-
-      <EuiFlyoutFooter>
-        <EuiPagination
-          pageCount={pageCount}
-          activePage={activePage}
-          onPageClick={onPageClick}
-          compressed
-        />
-      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 });
