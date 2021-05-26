@@ -68,45 +68,53 @@ function createDefaultChangeSpacesHandler(
   spacesManager: SpacesManager,
   toastNotifications: ToastsStart
 ) {
-  return async (spacesToAdd: string[], spacesToRemove: string[]) => {
-    const { type, id, title } = object;
-    const objects = [{ type, id }];
+  return async (
+    objects: Array<{ type: string; id: string }>,
+    spacesToAdd: string[],
+    spacesToRemove: string[]
+  ) => {
+    const { title } = object;
+    const objectsToUpdate = objects.map(({ type, id }) => ({ type, id })); // only use 'type' and 'id' fields
+    const relativesCount = objects.length - 1;
     const toastTitle = i18n.translate('xpack.spaces.shareToSpace.shareSuccessTitle', {
       values: { objectNoun: object.noun },
       defaultMessage: 'Updated {objectNoun}',
       description: `Object noun can be plural or singular, examples: "Updated objects", "Updated job"`,
     });
-    await spacesManager.updateSavedObjectsSpaces(objects, spacesToAdd, spacesToRemove);
+    await spacesManager.updateSavedObjectsSpaces(objectsToUpdate, spacesToAdd, spacesToRemove);
 
     const isSharedToAllSpaces = spacesToAdd.includes(ALL_SPACES_ID);
     let toastText: string;
     if (spacesToAdd.length > 0 && spacesToRemove.length > 0 && !isSharedToAllSpaces) {
       toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessAddRemoveText', {
-        defaultMessage: `'{object}' was added to {spacesTargetAdd} and removed from {spacesTargetRemove}.`, // TODO: update to include # of references and/or # of tags
+        defaultMessage: `'{object}' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} added to {spacesTargetAdd} and removed from {spacesTargetRemove}.`,
         values: {
           object: title,
+          relativesCount,
           spacesTargetAdd: getSpacesTargetString(spacesToAdd),
           spacesTargetRemove: getSpacesTargetString(spacesToRemove),
         },
-        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget...' inputs. Example strings: "'Finance dashboard' was added to 1 space and removed from 2 spaces.", "'Finance dashboard' was added to 3 spaces and removed from all spaces."`,
+        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget...' inputs. Example strings: "'Finance dashboard' was added to 1 space and removed from 2 spaces.", "'Finance dashboard' and 2 related objects were added to 3 spaces and removed from all spaces."`,
       });
     } else if (spacesToAdd.length > 0) {
       toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessAddText', {
-        defaultMessage: `'{object}' was added to {spacesTarget}.`, // TODO: update to include # of references and/or # of tags
+        defaultMessage: `'{object}' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} added to {spacesTarget}.`,
         values: {
           object: title,
+          relativesCount,
           spacesTarget: getSpacesTargetString(spacesToAdd),
         },
-        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget' input. Example strings: "'Finance dashboard' was added to 1 space.", "'Finance dashboard' was added to all spaces."`,
+        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget' input. Example strings: "'Finance dashboard' was added to 1 space.", "'Finance dashboard' and 2 related objects were added to all spaces."`,
       });
     } else {
       toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessRemoveText', {
-        defaultMessage: `'{object}' was removed from {spacesTarget}.`, // TODO: update to include # of references and/or # of tags
+        defaultMessage: `'{object}' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} removed from {spacesTarget}.`,
         values: {
           object: title,
+          relativesCount,
           spacesTarget: getSpacesTargetString(spacesToRemove),
         },
-        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget' input. Example strings: "'Finance dashboard' was removed from 1 space.", "'Finance dashboard' was removed from all spaces."`,
+        description: `Uses output of xpack.spaces.shareToSpace.spacesTarget or xpack.spaces.shareToSpace.allSpacesTarget as 'spacesTarget' input. Example strings: "'Finance dashboard' was removed from 1 space.", "'Finance dashboard' and 2 related objects were removed from all spaces."`,
       });
     }
     toastNotifications.addSuccess({ title: toastTitle, text: toastText });
@@ -248,7 +256,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   async function startShare() {
     setShareInProgress(true);
     try {
-      await changeSpacesHandler(spacesToAdd, spacesToRemove);
+      await changeSpacesHandler(referenceGraph, spacesToAdd, spacesToRemove);
       onUpdate();
       onClose();
     } catch (e) {

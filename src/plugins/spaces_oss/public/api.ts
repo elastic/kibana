@@ -168,11 +168,15 @@ export interface ShareToSpaceFlyoutProps {
    */
   behaviorContext?: 'within-space' | 'outside-space';
   /**
-   * Optional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object. If
-   * this is not defined, a default handler will be used that calls `/api/spaces/_update_objects_spaces` and displays a toast indicating
-   * what occurred.
+   * Optional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object and
+   * its relatives. If this is not defined, a default handler will be used that calls `/api/spaces/_update_objects_spaces` and displays a
+   * toast indicating what occurred.
    */
-  changeSpacesHandler?: (spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>;
+  changeSpacesHandler?: (
+    objects: Array<{ type: string; id: string }>,
+    spacesToAdd: string[],
+    spacesToRemove: string[]
+  ) => Promise<void>;
   /**
    * Optional callback when the target object is updated.
    */
