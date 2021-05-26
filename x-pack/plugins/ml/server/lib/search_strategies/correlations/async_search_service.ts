@@ -68,7 +68,6 @@ export const asyncSearchServiceProvider = (
   };
 
   let values: SearchServiceValue[] = [];
-  let scatter: Array<{ correlation: number; docCount: number }> = [];
 
   const cancel = () => {
     isCancelled = true;
@@ -172,8 +171,6 @@ export const asyncSearchServiceProvider = (
             return p + c.doc_count;
           }, 0);
 
-          scatter.push({ correlation, docCount });
-
           yield {
             ...item,
             correlation,
@@ -199,8 +196,6 @@ export const asyncSearchServiceProvider = (
   fetchCorrelations();
 
   return () => {
-    const scatterDelta = [...scatter];
-    scatter = [];
     return {
       error,
       isRunning,
@@ -208,7 +203,6 @@ export const asyncSearchServiceProvider = (
       started: progress.started,
       total: 100,
       values,
-      scatter: scatterDelta,
       cancel,
     };
   };

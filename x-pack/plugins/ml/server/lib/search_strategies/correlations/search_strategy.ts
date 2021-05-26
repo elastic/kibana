@@ -41,15 +41,7 @@ export const mlCorrelationsSearchStrategyProvider = (): ISearchStrategy<
         asyncSearchServiceMap.get(id) ??
         asyncSearchServiceProvider(deps.esClient.asCurrentUser, request.params);
 
-      const {
-        error,
-        isRunning,
-        loaded,
-        started,
-        total,
-        values,
-        scatter,
-      } = getAsyncSearchServiceState();
+      const { error, isRunning, loaded, started, total, values } = getAsyncSearchServiceState();
 
       if (error instanceof Error) {
         asyncSearchServiceMap.delete(id);
@@ -68,7 +60,7 @@ export const mlCorrelationsSearchStrategyProvider = (): ISearchStrategy<
         total,
         isRunning,
         isPartial: isRunning,
-        rawResponse: { took, values, scatter },
+        rawResponse: { took, values },
       });
     },
     cancel: async (id, options, deps) => {

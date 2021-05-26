@@ -6,4 +6,3 @@
  */
 
 export { Correlations } from './correlations';
-export { Scatter } from './scatter';

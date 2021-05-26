@@ -95,7 +95,6 @@ export const useCorrelations = (params: CorrelationsOptions) => {
   return {
     error,
     histograms: rawResponse?.values ?? [],
-    scatter: rawResponse?.scatter ?? [],
     isComplete,
     isRunning,
     progress: loaded / total,
