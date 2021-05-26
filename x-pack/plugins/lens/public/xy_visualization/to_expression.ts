@@ -149,6 +149,7 @@ export const buildExpression = (
           ],
           fittingFunction: [state.fittingFunction || 'None'],
           curveType: [state.curveType || 'LINEAR'],
+          fillOpacity: [state.fillOpacity || 0.3],
           yLeftExtent: [
             {
               type: 'expression',

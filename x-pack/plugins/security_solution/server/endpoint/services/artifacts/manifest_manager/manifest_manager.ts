@@ -361,10 +361,7 @@ export class ManifestManager {
     const results = await Promise.all([
       this.buildExceptionListArtifacts(),
       this.buildTrustedAppsArtifacts(),
-      // If Endpoint Event Filtering feature is ON, then add in the exceptions for them
-      ...(this.experimentalFeatures.eventFilteringEnabled
-        ? [this.buildEventFiltersArtifacts()]
-        : []),
+      this.buildEventFiltersArtifacts(),
     ]);
 
     const manifest = new Manifest({
