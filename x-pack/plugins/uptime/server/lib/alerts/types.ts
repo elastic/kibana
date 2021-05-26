@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Type } from '@kbn/config-schema';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { UMServerLibs, UptimeESClient } from '../lib';
 import { DynamicSettings } from '../../../common/runtime_types';
-import { AlertTypeWithExecutor } from '../../../../rule_registry/server';
+import { AlertTypeWithExecutor, LifecycleAlertService } from '../../../../rule_registry/server';
 import { AlertInstanceContext } from '../../../../alerting/common';
 
 /**
@@ -21,7 +20,11 @@ export type DefaultUptimeAlertInstance = Omit<
   AlertTypeWithExecutor<
     Record<string, any>,
     AlertInstanceContext,
-    { alertWithLifecycle: any; dynamicSettings: DynamicSettings; uptimeEsClient: UptimeESClient }
+    {
+      alertWithLifecycle: LifecycleAlertService<AlertInstanceContext>;
+      dynamicSettings: DynamicSettings;
+      uptimeEsClient: UptimeESClient;
+    }
   >,
   'producer'
 >;

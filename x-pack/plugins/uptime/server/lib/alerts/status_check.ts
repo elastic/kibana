@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import Mustache from 'mustache';
 import { UptimeAlertTypeFactory } from './types';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/common';
@@ -17,7 +16,7 @@ import {
   GetMonitorAvailabilityParams,
 } from '../../../common/runtime_types';
 import { MONITOR_STATUS } from '../../../common/constants/alerts';
-import { updateState } from './common';
+import { updateState, generateAlertMessage } from './common';
 import { commonMonitorStateI18, commonStateTranslations, DOWN_LABEL } from './translations';
 import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/lib';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
@@ -101,8 +100,8 @@ export const formatFilterString = async (
     search
   );
 
-export const getMonitorSummary = (monitorInfo: Ping) => {
-  return {
+export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
+  const summary = {
     monitorUrl: monitorInfo.url?.full,
     monitorId: monitorInfo.monitor?.id,
     monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
@@ -111,16 +110,26 @@ export const getMonitorSummary = (monitorInfo: Ping) => {
     observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
     observerHostname: monitorInfo.agent?.name,
   };
+  const reason = generateAlertMessage(MonitorStatusTranslations.defaultActionMessage, {
+    ...summary,
+    statusMessage,
+  });
+  return {
+    ...summary,
+    reason,
+  };
 };
 
-const generateMessageForOlderVersions = (fields: Record<string, any>) => {
-  const messageTemplate = MonitorStatusTranslations.defaultActionMessage;
-
-  // Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from
-  // {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}
-
-  return Mustache.render(messageTemplate, { state: { ...fields } });
-};
+export const getMonitorAlertDocument = (monitorSummary: Record<string, string | undefined>) => ({
+  'monitor.id': monitorSummary.monitorId,
+  'monitor.type': monitorSummary.monitorType,
+  'monitor.name': monitorSummary.monitorName,
+  'url.full': monitorSummary.monitorUrl,
+  'observer.geo.name': monitorSummary.observerLocation,
+  'error.message': monitorSummary.latestErrorMessage,
+  'agent.name': monitorSummary.observerHostname,
+  reason: monitorSummary.reason,
+});
 
 export const getStatusMessage = (
   downMonInfo?: Ping,
@@ -161,7 +170,7 @@ export const getStatusMessage = (
   return statusMessage + availabilityMessage;
 };
 
-const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
+export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
   const normalizeText = (txt: string) => {
     // replace url and name special characters with -
     return txt.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
@@ -292,19 +301,20 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       for (const monitorLoc of downMonitorsByLocation) {
         const monitorInfo = monitorLoc.monitorInfo;
 
-        const monitorSummary = getMonitorSummary(monitorInfo);
         const statusMessage = getStatusMessage(monitorInfo);
+        const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
 
         const alert = alertWithLifecycle({
           id: getInstanceId(monitorInfo, monitorLoc.location),
+          fields: getMonitorAlertDocument(monitorSummary),
         });
 
-        alert.state = {
+        alert.replaceState({
           ...state,
           ...monitorSummary,
           statusMessage,
           ...updateState(state, true),
-        };
+        });
 
         alert.scheduleActions(MONITOR_STATUS.id);
       }
@@ -333,19 +343,19 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
 
       const monitorInfo = downMonInfo || availMonInfo?.monitorInfo!;
 
-      const monitorSummary = getMonitorSummary(monitorInfo);
       const statusMessage = getStatusMessage(downMonInfo!, availMonInfo!, availability);
+      const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
 
       const alert = alertWithLifecycle({
         id: getInstanceId(monitorInfo, monIdByLoc),
+        fields: getMonitorAlertDocument(monitorSummary),
       });
 
-      alert.state = {
+      alert.replaceState({
         ...updateState(state, true),
         ...monitorSummary,
         statusMessage,
-        message: generateMessageForOlderVersions({ ...monitorSummary, statusMessage }),
-      };
+      });
 
       alert.scheduleActions(MONITOR_STATUS.id);
     });
