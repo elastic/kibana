@@ -421,6 +421,28 @@ export function validate(values: ApiKeyFormValues) {
     }
   }
 
+  if (values.includeMetadata) {
+    if (!values.metadata) {
+      errors.metadata = i18n.translate(
+        'xpack.security.management.apiKeys.createApiKey.metadataRequired',
+        {
+          defaultMessage: 'Enter metadata or disable this option.',
+        }
+      );
+    } else {
+      try {
+        JSON.parse(values.metadata);
+      } catch (e) {
+        errors.metadata = i18n.translate(
+          'xpack.security.management.apiKeys.createApiKey.invalidJsonError',
+          {
+            defaultMessage: 'Enter valid JSON.',
+          }
+        );
+      }
+    }
+  }
+
   return errors;
 }
 
