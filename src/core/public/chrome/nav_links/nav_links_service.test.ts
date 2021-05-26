@@ -73,13 +73,10 @@ describe('NavLinksService', () => {
       const navLinkIds$ = start.getNavLinks$().pipe(map((links) => links.map((l) => l.id)));
       const emittedLinks: string[][] = [];
       navLinkIds$.subscribe((r) => emittedLinks.push(r));
-      start.update('app1', { href: '/foo' });
+      start.showOnly('app1');
 
       service.stop();
-      expect(emittedLinks).toEqual([
-        ['app2', 'app1'],
-        ['app2', 'app1'],
-      ]);
+      expect(emittedLinks).toEqual([['app2', 'app1'], ['app1']]);
     });
 
     it('completes when service is stopped', async () => {
@@ -167,45 +164,6 @@ describe('NavLinksService', () => {
           )
           .toPromise()
       ).toEqual(['app2']);
-    });
-  });
-
-  describe('#update()', () => {
-    it('updates the navlinks and returns the updated link', async () => {
-      expect(start.update('app2', { hidden: true })).toEqual(
-        expect.objectContaining({
-          hidden: true,
-          id: 'app2',
-          order: -10,
-          title: 'App 2',
-          euiIconType: 'canvasApp',
-        })
-      );
-      const hiddenLinkIds = await start
-        .getNavLinks$()
-        .pipe(
-          take(1),
-          map((links) => links.filter((l) => l.hidden).map((l) => l.id))
-        )
-        .toPromise();
-      expect(hiddenLinkIds).toEqual(['app2']);
-    });
-
-    it('returns undefined if link does not exist', () => {
-      expect(start.update('fake', { hidden: true })).toBeUndefined();
-    });
-
-    it('keeps the updated link when availableApps are re-emitted', async () => {
-      start.update('app2', { hidden: true });
-      mockAppService.applications$.next(mockAppService.applications$.value);
-      const hiddenLinkIds = await start
-        .getNavLinks$()
-        .pipe(
-          take(1),
-          map((links) => links.filter((l) => l.hidden).map((l) => l.id))
-        )
-        .toPromise();
-      expect(hiddenLinkIds).toEqual(['app2']);
     });
   });
 
