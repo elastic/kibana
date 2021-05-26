@@ -31,8 +31,9 @@ import {
   UI_SETTINGS,
   Query,
   IndexPattern,
+  IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/public';
-import { FullTimeRangeSelector } from '../full_time_range_selector';
+import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { getQueryFromSavedSearch } from '../../util/index_utils';
 import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
@@ -61,6 +62,7 @@ import { DatePickerWrapper } from '../date_picker_wrapper';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { HelpMenu } from '../help_menu';
 import { TimeBuckets } from '../../services/time_buckets';
+
 export interface Refresh {
   lastRefresh: number;
   timeRange?: { start: string; end: string };
@@ -117,8 +119,9 @@ export const getDefaultDataVisualizerListState = (): Required<DataVisualizerInde
 
 export interface IndexDataVisualizerViewProps {
   combinedQuery: Query;
-  currentIndexPattern: IndexPattern;
+  currentIndexPattern: IndexPattern; // TODO this should be IndexPattern or null
   currentSavedSearch: SavedSearchSavedObject | null;
+  indexPatterns: IndexPatternsContract;
 }
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
@@ -190,36 +193,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     }
   }, [currentIndexPattern, toasts]);
 
-  /**
-   * Extract query data from the saved search object.
-   */
-  const extractSearchData = useCallback(
-    (savedSearch: SavedSearchSavedObject | null) => {
-      if (!savedSearch) {
-        return undefined;
-      }
-
-      const { query } = getQueryFromSavedSearch(savedSearch);
-      const queryLanguage = query.language as SearchQueryLanguage;
-      const qryString = query.query;
-      let qry;
-      if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-        const ast = esKuery.fromKueryExpression(qryString);
-        qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
-      } else {
-        qry = esQuery.luceneStringToDsl(qryString);
-        esQuery.decorateQuery(qry, uiSettings.get(UI_SETTINGS.QUERY_STRING_OPTIONS));
-      }
-
-      return {
-        searchQuery: qry,
-        searchString: qryString,
-        queryLanguage,
-      };
-    },
-    [currentIndexPattern, uiSettings]
-  );
-
   // Obtain the list of non metric field types which appear in the index pattern.
   let indexedFieldTypes: JobFieldType[] = [];
   const indexPatternFields: IndexPatternField[] = currentIndexPattern.fields;
@@ -250,7 +223,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         searchQueryLanguage: searchData.queryLanguage,
       };
     }
-  }, [currentSavedSearch, dataVisualizerListState, extractSearchData]);
+  }, [currentSavedSearch, dataVisualizerListState]);
 
   const setSearchParams = (searchParams: {
     searchQuery: Query['query'];
@@ -307,6 +280,251 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
+
+  useEffect(() => {
+    const timeUpdateSubscription = merge(
+      timefilter.getTimeUpdate$(),
+      mlTimefilterRefresh$
+    ).subscribe(() => {
+      setGlobalState({
+        time: timefilter.getTime(),
+        refreshInterval: timefilter.getRefreshInterval(),
+      });
+      setLastRefresh(Date.now());
+    });
+    return () => {
+      timeUpdateSubscription.unsubscribe();
+    };
+  });
+
+  useEffect(() => {
+    loadOverallStats();
+  }, [searchQuery, samplerShardSize, lastRefresh]);
+
+  useEffect(() => {
+    createMetricCards();
+    createNonMetricCards();
+  }, [overallStats, showEmptyFields]);
+
+  useEffect(() => {
+    loadMetricFieldStats();
+  }, [metricConfigs]);
+
+  useEffect(() => {
+    loadNonMetricFieldStats();
+  }, [nonMetricConfigs]);
+
+  useEffect(() => {
+    createMetricCards();
+  }, [metricsLoaded]);
+
+  useEffect(() => {
+    createNonMetricCards();
+  }, [nonMetricsLoaded]);
+
+  /**
+   * Extract query data from the saved search object.
+   */
+  function extractSearchData(savedSearch: SavedSearchSavedObject | null) {
+    if (!savedSearch) {
+      return undefined;
+    }
+
+    const { query } = getQueryFromSavedSearch(savedSearch);
+    const queryLanguage = query.language as SearchQueryLanguage;
+    const qryString = query.query;
+    let qry;
+    if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
+      const ast = esKuery.fromKueryExpression(qryString);
+      qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
+    } else {
+      qry = esQuery.luceneStringToDsl(qryString);
+      esQuery.decorateQuery(qry, uiSettings.get(UI_SETTINGS.QUERY_STRING_OPTIONS));
+    }
+
+    return {
+      searchQuery: qry,
+      searchString: qryString,
+      queryLanguage,
+    };
+  }
+
+  async function loadOverallStats() {
+    const tf = timefilter as any;
+    let earliest;
+    let latest;
+
+    const activeBounds = tf.getActiveBounds();
+
+    if (currentIndexPattern.timeFieldName !== undefined && activeBounds === undefined) {
+      return;
+    }
+
+    if (currentIndexPattern.timeFieldName !== undefined) {
+      earliest = activeBounds.min.valueOf();
+      latest = activeBounds.max.valueOf();
+    }
+
+    try {
+      const allStats = await dataLoader.loadOverallData(
+        searchQuery,
+        samplerShardSize,
+        earliest,
+        latest
+      );
+      setOverallStats(allStats);
+    } catch (err) {
+      dataLoader.displayError(err);
+    }
+  }
+
+  async function loadMetricFieldStats() {
+    // Only request data for fields that exist in documents.
+    if (metricConfigs.length === 0) {
+      return;
+    }
+
+    const configsToLoad = metricConfigs.filter(
+      (config) => config.existsInDocs === true && config.loading === true
+    );
+    if (configsToLoad.length === 0) {
+      return;
+    }
+
+    // Pass the field name, type and cardinality in the request.
+    // Top values will be obtained on a sample if cardinality > 100000.
+    const existMetricFields: FieldRequestConfig[] = configsToLoad.map((config) => {
+      const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
+      if (config.stats !== undefined && config.stats.cardinality !== undefined) {
+        props.cardinality = config.stats.cardinality;
+      }
+      return props;
+    });
+
+    // Obtain the interval to use for date histogram aggregations
+    // (such as the document count chart). Aim for 75 bars.
+    const buckets = getTimeBuckets();
+
+    const tf = timefilter as any;
+    let earliest: number | undefined;
+    let latest: number | undefined;
+    if (currentIndexPattern.timeFieldName !== undefined) {
+      earliest = tf.getActiveBounds().min.valueOf();
+      latest = tf.getActiveBounds().max.valueOf();
+    }
+
+    const bounds = tf.getActiveBounds();
+    const BAR_TARGET = 75;
+    buckets.setInterval('auto');
+    buckets.setBounds(bounds);
+    buckets.setBarTarget(BAR_TARGET);
+    const aggInterval = buckets.getInterval();
+
+    try {
+      const metricFieldStats = await dataLoader.loadFieldStats(
+        searchQuery,
+        samplerShardSize,
+        earliest,
+        latest,
+        existMetricFields,
+        aggInterval.asMilliseconds()
+      );
+
+      // Add the metric stats to the existing stats in the corresponding config.
+      const configs: FieldVisConfig[] = [];
+      metricConfigs.forEach((config) => {
+        const configWithStats = { ...config };
+        if (config.fieldName !== undefined) {
+          configWithStats.stats = {
+            ...configWithStats.stats,
+            ...metricFieldStats.find(
+              (fieldStats: any) => fieldStats.fieldName === config.fieldName
+            ),
+          };
+          configWithStats.loading = false;
+          configs.push(configWithStats);
+        } else {
+          // Document count card.
+          configWithStats.stats = metricFieldStats.find(
+            (fieldStats: any) => fieldStats.fieldName === undefined
+          );
+
+          if (configWithStats.stats !== undefined) {
+            // Add earliest / latest of timefilter for setting x axis domain.
+            configWithStats.stats.timeRangeEarliest = earliest;
+            configWithStats.stats.timeRangeLatest = latest;
+          }
+          setDocumentCountStats(configWithStats);
+        }
+      });
+
+      setMetricConfigs(configs);
+    } catch (err) {
+      dataLoader.displayError(err);
+    }
+  }
+
+  async function loadNonMetricFieldStats() {
+    // Only request data for fields that exist in documents.
+    if (nonMetricConfigs.length === 0) {
+      return;
+    }
+
+    const configsToLoad = nonMetricConfigs.filter(
+      (config) => config.existsInDocs === true && config.loading === true
+    );
+    if (configsToLoad.length === 0) {
+      return;
+    }
+
+    // Pass the field name, type and cardinality in the request.
+    // Top values will be obtained on a sample if cardinality > 100000.
+    const existNonMetricFields: FieldRequestConfig[] = configsToLoad.map((config) => {
+      const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
+      if (config.stats !== undefined && config.stats.cardinality !== undefined) {
+        props.cardinality = config.stats.cardinality;
+      }
+      return props;
+    });
+
+    const tf = timefilter as any;
+    let earliest;
+    let latest;
+    if (currentIndexPattern.timeFieldName !== undefined) {
+      earliest = tf.getActiveBounds().min.valueOf();
+      latest = tf.getActiveBounds().max.valueOf();
+    }
+
+    try {
+      const nonMetricFieldStats = await dataLoader.loadFieldStats(
+        searchQuery,
+        samplerShardSize,
+        earliest,
+        latest,
+        existNonMetricFields
+      );
+
+      // Add the field stats to the existing stats in the corresponding config.
+      const configs: FieldVisConfig[] = [];
+      nonMetricConfigs.forEach((config) => {
+        const configWithStats = { ...config };
+        if (config.fieldName !== undefined) {
+          configWithStats.stats = {
+            ...configWithStats.stats,
+            ...nonMetricFieldStats.find(
+              (fieldStats: any) => fieldStats.fieldName === config.fieldName
+            ),
+          };
+        }
+        configWithStats.loading = false;
+        configs.push(configWithStats);
+      });
+
+      setNonMetricConfigs(configs);
+    } catch (err) {
+      dataLoader.displayError(err);
+    }
+  }
 
   const createMetricCards = useCallback(() => {
     const configs: FieldVisConfig[] = [];
@@ -465,227 +683,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     overallStats,
     showEmptyFields,
   ]);
-
-  useEffect(() => {
-    const timeUpdateSubscription = merge(
-      timefilter.getTimeUpdate$(),
-      mlTimefilterRefresh$
-    ).subscribe(() => {
-      setGlobalState({
-        time: timefilter.getTime(),
-        refreshInterval: timefilter.getRefreshInterval(),
-      });
-      setLastRefresh(Date.now());
-    });
-    return () => {
-      timeUpdateSubscription.unsubscribe();
-    };
-  });
-
-  useEffect(() => {
-    loadOverallStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, samplerShardSize, lastRefresh]);
-
-  useEffect(() => {
-    createMetricCards();
-    createNonMetricCards();
-  }, [createMetricCards, createNonMetricCards, overallStats, showEmptyFields]);
-
-  useEffect(() => {
-    loadMetricFieldStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metricConfigs]);
-
-  useEffect(() => {
-    loadNonMetricFieldStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nonMetricConfigs]);
-
-  useEffect(() => {
-    createMetricCards();
-  }, [createMetricCards, metricsLoaded]);
-
-  useEffect(() => {
-    createNonMetricCards();
-  }, [createNonMetricCards, nonMetricsLoaded]);
-
-  const loadOverallStats = useCallback(async () => {
-    const tf = timefilter as any;
-    let earliest;
-    let latest;
-
-    const activeBounds = tf.getActiveBounds();
-
-    if (currentIndexPattern.timeFieldName !== undefined && activeBounds === undefined) {
-      return;
-    }
-
-    if (currentIndexPattern.timeFieldName !== undefined) {
-      earliest = activeBounds.min.valueOf();
-      latest = activeBounds.max.valueOf();
-    }
-
-    try {
-      const allStats = await dataLoader.loadOverallData(
-        searchQuery,
-        samplerShardSize,
-        earliest,
-        latest
-      );
-      setOverallStats(allStats);
-    } catch (err) {
-      dataLoader.displayError(err);
-    }
-  }, [currentIndexPattern, dataLoader, samplerShardSize, searchQuery, timefilter]);
-
-  async function loadMetricFieldStats() {
-    // Only request data for fields that exist in documents.
-    if (metricConfigs.length === 0) {
-      return;
-    }
-
-    const configsToLoad = metricConfigs.filter(
-      (config) => config.existsInDocs === true && config.loading === true
-    );
-    if (configsToLoad.length === 0) {
-      return;
-    }
-
-    // Pass the field name, type and cardinality in the request.
-    // Top values will be obtained on a sample if cardinality > 100000.
-    const existMetricFields: FieldRequestConfig[] = configsToLoad.map((config) => {
-      const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
-      if (config.stats !== undefined && config.stats.cardinality !== undefined) {
-        props.cardinality = config.stats.cardinality;
-      }
-      return props;
-    });
-
-    // Obtain the interval to use for date histogram aggregations
-    // (such as the document count chart). Aim for 75 bars.
-    const buckets = getTimeBuckets();
-
-    const tf = timefilter as any;
-    let earliest: number | undefined;
-    let latest: number | undefined;
-    if (currentIndexPattern.timeFieldName !== undefined) {
-      earliest = tf.getActiveBounds().min.valueOf();
-      latest = tf.getActiveBounds().max.valueOf();
-    }
-
-    const bounds = tf.getActiveBounds();
-    const BAR_TARGET = 75;
-    buckets.setInterval('auto');
-    buckets.setBounds(bounds);
-    buckets.setBarTarget(BAR_TARGET);
-    const aggInterval = buckets.getInterval();
-
-    try {
-      const metricFieldStats = await dataLoader.loadFieldStats(
-        searchQuery,
-        samplerShardSize,
-        earliest,
-        latest,
-        existMetricFields,
-        aggInterval.asMilliseconds()
-      );
-
-      // Add the metric stats to the existing stats in the corresponding config.
-      const configs: FieldVisConfig[] = [];
-      metricConfigs.forEach((config) => {
-        const configWithStats = { ...config };
-        if (config.fieldName !== undefined) {
-          configWithStats.stats = {
-            ...configWithStats.stats,
-            ...metricFieldStats.find(
-              (fieldStats: any) => fieldStats.fieldName === config.fieldName
-            ),
-          };
-          configWithStats.loading = false;
-          configs.push(configWithStats);
-        } else {
-          // Document count card.
-          configWithStats.stats = metricFieldStats.find(
-            (fieldStats: any) => fieldStats.fieldName === undefined
-          );
-
-          if (configWithStats.stats !== undefined) {
-            // Add earliest / latest of timefilter for setting x axis domain.
-            configWithStats.stats.timeRangeEarliest = earliest;
-            configWithStats.stats.timeRangeLatest = latest;
-          }
-          setDocumentCountStats(configWithStats);
-        }
-      });
-
-      setMetricConfigs(configs);
-    } catch (err) {
-      dataLoader.displayError(err);
-    }
-  }
-
-  async function loadNonMetricFieldStats() {
-    // Only request data for fields that exist in documents.
-    if (nonMetricConfigs.length === 0) {
-      return;
-    }
-
-    const configsToLoad = nonMetricConfigs.filter(
-      (config) => config.existsInDocs === true && config.loading === true
-    );
-    if (configsToLoad.length === 0) {
-      return;
-    }
-
-    // Pass the field name, type and cardinality in the request.
-    // Top values will be obtained on a sample if cardinality > 100000.
-    const existNonMetricFields: FieldRequestConfig[] = configsToLoad.map((config) => {
-      const props = { fieldName: config.fieldName, type: config.type, cardinality: 0 };
-      if (config.stats !== undefined && config.stats.cardinality !== undefined) {
-        props.cardinality = config.stats.cardinality;
-      }
-      return props;
-    });
-
-    const tf = timefilter as any;
-    let earliest;
-    let latest;
-    if (currentIndexPattern.timeFieldName !== undefined) {
-      earliest = tf.getActiveBounds().min.valueOf();
-      latest = tf.getActiveBounds().max.valueOf();
-    }
-
-    try {
-      const nonMetricFieldStats = await dataLoader.loadFieldStats(
-        searchQuery,
-        samplerShardSize,
-        earliest,
-        latest,
-        existNonMetricFields
-      );
-
-      // Add the field stats to the existing stats in the corresponding config.
-      const configs: FieldVisConfig[] = [];
-      nonMetricConfigs.forEach((config) => {
-        const configWithStats = { ...config };
-        if (config.fieldName !== undefined) {
-          configWithStats.stats = {
-            ...configWithStats.stats,
-            ...nonMetricFieldStats.find(
-              (fieldStats: any) => fieldStats.fieldName === config.fieldName
-            ),
-          };
-        }
-        configWithStats.loading = false;
-        configs.push(configWithStats);
-      });
-
-      setNonMetricConfigs(configs);
-    } catch (err) {
-      dataLoader.displayError(err);
-    }
-  }
 
   const wizardPanelWidth = '280px';
 
