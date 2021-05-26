@@ -43,7 +43,7 @@ import {
   ElasticChartProvider,
   VegaDebugInspectorViewProvider,
 } from './visualizations';
-import { ListingTableProvider } from './listing_table';
+import { ListingTableService } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
 import { MenuToggleProvider } from './menu_toggle';
@@ -63,7 +63,7 @@ export const services = {
   dashboardVisualizations: DashboardVisualizationProvider,
   dashboardExpect: DashboardExpectProvider,
   failureDebugging: FailureDebuggingProvider,
-  listingTable: ListingTableProvider,
+  listingTable: ListingTableService,
   dashboardAddPanel: DashboardAddPanelProvider,
   dashboardReplacePanel: DashboardReplacePanelProvider,
   dashboardPanelActions: DashboardPanelActionsProvider,
