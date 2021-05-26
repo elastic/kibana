@@ -1,0 +1,38 @@
+.fieldEditorFlyoutContent__left {
+  position: absolute;
+  height: 100%;
+  width: 60%;
+  left: 0;
+
+  &__wrapper {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding-top: 24px;
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+
+  &__body {
+    min-height: calc(100% - 72px);
+  }
+
+  &__footer {
+    position: sticky;
+    bottom: 0;
+    width: calc(100% + 48px);
+    margin-left: -24px;
+  }
+}
+
+.fieldEditorFlyoutContent__right {
+  width: 40%;
+  background-color: #F6F6F6;
+  position: absolute;
+  height: calc(100% + 16px);
+  overflow-y: auto;
+  padding: 48px 32px 16px 16px;
+  top: -16px;
+  left: 60%;
+}

@@ -115,7 +115,8 @@ export const getFieldEditorOpener = ({
             uiSettings={uiSettings}
           />
         </KibanaReactContextProvider>
-      )
+      ),
+      { maxWidth: '960px', size: 'l' }
     );
 
     return closeEditor;
