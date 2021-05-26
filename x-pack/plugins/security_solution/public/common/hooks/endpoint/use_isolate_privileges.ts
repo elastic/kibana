@@ -28,10 +28,12 @@ export const useIsolationPrivileges = (): IsolationPriviledgesStatus => {
   useEffect(() => {
     setIsLoading(true);
     const user = services.security.authc.getCurrentUser();
-    user.then((authenticatedUser) => {
-      setCanIsolate(userCanIsolate(authenticatedUser.roles));
-      setIsLoading(false);
-    });
+    if (user) {
+      user.then((authenticatedUser) => {
+        setCanIsolate(userCanIsolate(authenticatedUser.roles));
+        setIsLoading(false);
+      });
+    }
   }, [services.security.authc]);
 
   return { isLoading, isAllowed: canIsolate && isPlatinumPlus ? true : false };

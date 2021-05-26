@@ -32,12 +32,11 @@ export const useHostIsolationStatus = ({
   useEffect(() => {
     // isMounted tracks if a component is mounted before changing state
     let isMounted = true;
-    setLoading(true);
     const fetchData = async () => {
       try {
         const metadataResponse = await getHostMetadata({ agentId });
         if (isMounted) {
-          setIsIsolated(Boolean(metadataResponse.metadata.Endpoint.configuration.isolation));
+          setIsIsolated(Boolean(metadataResponse.metadata.Endpoint.state.isolation));
         }
       } catch (error) {
         addError(error.message, { title: ISOLATION_STATUS_FAILURE });
@@ -47,13 +46,19 @@ export const useHostIsolationStatus = ({
       }
     };
 
-    if (!isEmpty(agentId)) {
-      fetchData();
-    }
+    setLoading((prevState) => {
+      if (prevState) {
+        return prevState;
+      }
+      if (!isEmpty(agentId)) {
+        fetchData();
+      }
+      return true;
+    });
     return () => {
       // updates to show component is unmounted
       isMounted = false;
     };
-  }, [addError, agentId, loading]);
+  }, [addError, agentId]);
   return { loading, isIsolated };
 };
