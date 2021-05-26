@@ -13,7 +13,10 @@ export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract }
 export { RuleDataClient } from './rule_data_client';
 export { IRuleDataClient } from './rule_data_client/types';
 export { getRuleExecutorData, RuleExecutorData } from './utils/get_rule_executor_data';
-export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
+export {
+  createLifecycleRuleTypeFactory,
+  LifecycleAlertService,
+} from './utils/create_lifecycle_rule_type_factory';
 export { AlertTypeWithExecutor } from './types';
 
 export const config = {
