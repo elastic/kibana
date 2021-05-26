@@ -14,8 +14,8 @@ import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
 import { ManagementAppDependencies } from './management_app';
 import { ManagementSection } from '../../utils';
-import { ManagementSidebarNav } from '../management_sidebar_nav';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '../../../../kibana_react/public';
+import { managementSidebarNav } from '../management_sidebar_nav';
 
 interface ManagementRouterProps {
   history: AppMountParameters['history'];
@@ -36,12 +36,17 @@ export const ManagementRouter = ({
     window.scrollTo(0, 0);
   }, []);
 
-  const solution: KibanaPageTemplateProps['solution'] = {
+  const solution: KibanaPageTemplateProps['solutionNav'] = {
     name: i18n.translate('management.nav.label', {
       defaultMessage: 'Management',
     }),
     icon: 'managementApp',
-    id: 'stack-management-nav-header',
+    'data-test-subj': 'mgtSideBarNav',
+    items: managementSidebarNav({
+      selectedId,
+      sections,
+      history,
+    }),
   };
 
   return (
@@ -58,18 +63,7 @@ export const ManagementRouter = ({
                   onAppMounted={onAppMounted}
                   history={history}
                   managementPageLayout={({ children, ...rest }) => (
-                    <KibanaPageTemplate
-                      {...rest}
-                      solution={solution}
-                      pageSideBar={
-                        <ManagementSidebarNav
-                          navId={solution.id}
-                          selectedId={selectedId}
-                          sections={sections}
-                          history={history}
-                        />
-                      }
-                    >
+                    <KibanaPageTemplate {...rest} solutionNav={solution}>
                       {children}
                     </KibanaPageTemplate>
                   )}
@@ -85,18 +79,7 @@ export const ManagementRouter = ({
               version={dependencies.kibanaVersion}
               setBreadcrumbs={setBreadcrumbs}
               managementPageLayout={({ children, ...rest }) => (
-                <KibanaPageTemplate
-                  {...rest}
-                  solution={solution}
-                  pageSideBar={
-                    <ManagementSidebarNav
-                      navId={solution.id}
-                      selectedId={selectedId}
-                      sections={sections}
-                      history={history}
-                    />
-                  }
-                >
+                <KibanaPageTemplate {...rest} solutionNav={solution}>
                   {children}
                 </KibanaPageTemplate>
               )}

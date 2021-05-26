@@ -6,18 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { sortBy } from 'lodash';
 
-import {
-  EuiIcon,
-  EuiSideNav,
-  EuiSideNavItemType,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiIcon, EuiSideNavItemType, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { AppMountParameters } from 'kibana/public';
 import { ManagementApp, ManagementSection } from '../../utils';
 
@@ -28,23 +20,14 @@ interface ManagementSidebarNavProps {
   sections: ManagementSection[];
   history: AppMountParameters['history'];
   selectedId: string;
-  navId?: string;
 }
 
-const navMenuLabel = i18n.translate('management.nav.menu', {
-  defaultMessage: 'Management menu',
-});
-
 /** @internal **/
-export const ManagementSidebarNav = ({
-  navId,
+export const managementSidebarNav = ({
   selectedId,
   sections,
   history,
 }: ManagementSidebarNavProps) => {
-  const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
-  const toggleOpenOnMobile = () => setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
-
   const sectionsToNavItems = (managementSections: ManagementSection[]) => {
     const sortedManagementSections = sortBy(managementSections, 'order');
 
@@ -103,16 +86,5 @@ export const ManagementSidebarNav = ({
     };
   };
 
-  return (
-    <>
-      <EuiSideNav
-        aria-labelledby={navId}
-        mobileTitle={navMenuLabel}
-        toggleOpenOnMobile={toggleOpenOnMobile}
-        isOpenOnMobile={isSideNavOpenOnMobile}
-        items={sectionsToNavItems(sections)}
-        data-test-subj="mgtSideBarNav"
-      />
-    </>
-  );
+  return sectionsToNavItems(sections);
 };
