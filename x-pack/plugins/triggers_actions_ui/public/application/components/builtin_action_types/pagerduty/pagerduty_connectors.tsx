@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -21,7 +21,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
   const { apiUrl } = action.config;
   const { routingKey } = action.secrets;
   return (
-    <Fragment>
+    <>
       <EuiFormRow
         id="apiUrl"
         fullWidth
@@ -68,7 +68,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
           }
         )}
       >
-        <Fragment>
+        <>
           {getEncryptedFieldNotifyLabel(
             !action.id,
             1,
@@ -94,9 +94,9 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
               }
             }}
           />
-        </Fragment>
+        </>
       </EuiFormRow>
-    </Fragment>
+    </>
   );
 };
 
