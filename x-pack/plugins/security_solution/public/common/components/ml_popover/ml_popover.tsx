@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiHeaderSectionItemButton,
   EuiCallOut,
   EuiPopover,
@@ -124,10 +125,13 @@ export const MlPopover = React.memo(() => {
           <EuiHeaderSectionItemButton
             aria-expanded={isPopoverOpen}
             aria-haspopup="true"
+            aria-label={i18n.ML_JOB_SETTINGS}
+            color="primary"
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            textProps={{ style: { fontSize: '1rem' } }}
           >
             {i18n.ML_JOB_SETTINGS}
           </EuiHeaderSectionItemButton>
@@ -150,6 +154,7 @@ export const MlPopover = React.memo(() => {
             aria-expanded={isPopoverOpen}
             aria-haspopup="true"
             aria-label={i18n.ML_JOB_SETTINGS}
+            color="primary"
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
@@ -157,6 +162,7 @@ export const MlPopover = React.memo(() => {
               setIsPopoverOpen(!isPopoverOpen);
               dispatch({ type: 'refresh' });
             }}
+            textProps={{ style: { fontSize: '1rem' } }}
           >
             {i18n.ML_JOB_SETTINGS}
           </EuiHeaderSectionItemButton>
