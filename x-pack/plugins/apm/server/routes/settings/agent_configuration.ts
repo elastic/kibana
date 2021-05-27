@@ -108,7 +108,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
         setup,
       });
       logger.info(
-        `Saved latest agent settings to Fleet integration policy for APM.`
+        `Updated Fleet integration policy for APM to remove the deleted agent configuration.`
       );
     }
 

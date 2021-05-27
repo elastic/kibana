@@ -29,6 +29,8 @@ export async function registerFleetPolicyCallbacks({
   }
   const fleetPluginStart = await plugins.fleet.start();
 
+  // Registers a callback invoked when a policy is created to populate the APM
+  // integration policy with pre-existing agent configurations
   registerAgentConfigExternalCallback({
     fleetPluginStart,
     callbackName: 'packagePolicyCreate',
@@ -37,6 +39,9 @@ export async function registerFleetPolicyCallbacks({
     config,
     logger,
   });
+
+  // Registers a callback invoked when a policy is updated to populate the APM
+  // integration policy with existing agent configurations
   registerAgentConfigExternalCallback({
     fleetPluginStart,
     callbackName: 'packagePolicyUpdate',
@@ -95,6 +100,7 @@ function registerAgentConfigExternalCallback({
   fleetPluginStart.registerExternalCallback(callbackName, callbackFn);
 }
 
+// Immutable function applies the given package policy with a set of agent configurations
 export function getPackagePolicyWithAgentConfigurations(
   packagePolicy: PackagePolicy,
   agentConfigurations: AgentConfiguration[]
