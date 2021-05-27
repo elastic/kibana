@@ -10,7 +10,7 @@ import { AlertActionParams } from '../types';
 
 export interface InjectActionParamsOpts {
   ruleId: string;
-  spaceId: string;
+  spaceId: string | undefined;
   actionTypeId: string;
   actionParams: AlertActionParams;
 }
