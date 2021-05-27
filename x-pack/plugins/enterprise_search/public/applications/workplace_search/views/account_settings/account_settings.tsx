@@ -9,7 +9,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
-import { AuthenticatedUser } from '../../../../../../security/public';
+import type { AuthenticatedUser } from '../../../../../../security/public';
 import { HttpLogic } from '../../../shared/http/http_logic';
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
