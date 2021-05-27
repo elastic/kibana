@@ -26,13 +26,12 @@ describe('waterfall filter', () => {
     offsetIndex,
   };
 
-  it('renders sidbar item', () => {
+  it('renders sidebar item', () => {
     const { getByText } = render(<WaterfallSidebarItem item={item} highestIndex={10} />);
 
-    const chunks = getChunks(url.replace('http://', ''));
+    const chunks = getChunks(url.replace('http://www.', ''));
 
     expect(getByText(`${offsetIndex}. ${chunks.first}`));
-    expect(getByText(`${chunks.last}`));
   });
 
   it('render screen reader text when renderFilterScreenReaderText is true', () => {

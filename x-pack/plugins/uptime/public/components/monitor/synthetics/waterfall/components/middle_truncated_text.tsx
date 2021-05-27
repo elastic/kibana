@@ -45,14 +45,11 @@ const InnerContainer = euiStyled.span`
 `;
 
 const IndexNumber = euiStyled(EuiText)`
-  margin-right: 3px;
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+  margin-right: ${(props) => props.theme.eui.euiSizeXS};
   line-height: ${FIXED_AXIS_HEIGHT}px;
   text-align: right;
   background-color: ${(props) => props.theme.eui.euiColorLightestShade};
-
-  &&& > div {
-    margin-right: 2px;
-  }
 `;
 
 const FirstChunk = euiStyled.span`
@@ -81,7 +78,7 @@ const StyledButton = euiStyled(EuiButtonEmpty)`
 `;
 
 const SecureIcon = euiStyled(EuiIcon)`
-  margin-right: 3px;
+  margin-right: ${(props) => props.theme.eui.euiSizeXS};
 `;
 
 export const getChunks = (text: string = '') => {
