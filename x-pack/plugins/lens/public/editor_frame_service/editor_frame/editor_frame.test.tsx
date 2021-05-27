@@ -7,14 +7,7 @@
 
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
-import {
-  makeConfigureStore,
-  getPreloadedState,
-  setState,
-  LensAppState,
-  LensRootStore,
-} from '../../state_management/index';
-import { Provider } from 'react-redux';
+import { setState, LensRootStore } from '../../state_management/index';
 
 // Tests are executed in a jsdom environment who does not have sizing methods,
 // thus the AutoSizer will always compute a 0x0 size space
@@ -36,7 +29,6 @@ jest.mock('react-virtualized-auto-sizer', () => {
 });
 
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
-import { mountWithIntl as mount } from '@kbn/test/jest';
 import { EditorFrame, EditorFrameProps } from './editor_frame';
 import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
 import { act } from 'react-dom/test-utils';
@@ -52,13 +44,9 @@ import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
 import { FrameLayout } from './frame_layout';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
-import moment from 'moment';
-import { Observable } from 'rxjs';
-import { getResolvedDateRange } from '../../utils';
-import { TimefilterContract } from 'src/plugins/data/public';
+import { mockDataPlugin, mountWithProvider } from '../../mocks';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -70,36 +58,6 @@ function generateSuggestion(state = {}): DatasourceSuggestion {
       changeType: 'unchanged',
     },
     keptLayerIds: ['first'],
-  };
-}
-
-function createMockTimefilter() {
-  const unsubscribe = jest.fn();
-
-  let timeFilter = { from: 'now-7d', to: 'now' };
-  let subscriber: () => void;
-  return {
-    getTime: jest.fn(() => timeFilter),
-    setTime: jest.fn((newTimeFilter) => {
-      timeFilter = newTimeFilter;
-      if (subscriber) {
-        subscriber();
-      }
-    }),
-    getTimeUpdate$: () => ({
-      subscribe: ({ next }: { next: () => void }) => {
-        subscriber = next;
-        return unsubscribe;
-      },
-    }),
-    calculateBounds: jest.fn(() => ({
-      min: moment('2021-01-10T04:00:00.000Z'),
-      max: moment('2021-01-10T08:00:00.000Z'),
-    })),
-    getBounds: jest.fn(() => timeFilter),
-    getRefreshInterval: () => {},
-    getRefreshIntervalDefaults: () => {},
-    getAutoRefreshFetch$: () => new Observable(),
   };
 }
 
@@ -117,34 +75,13 @@ function getDefaultProps() {
     core: coreMock.createStart(),
     plugins: {
       uiActions: uiActionsPluginMock.createStartContract(),
-      data: dataPluginMock.createStartContract(),
+      data: mockDataPlugin(),
       expressions: expressionsPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
     },
     palettes: chartPluginMock.createPaletteRegistry(),
     showNoDataPopover: jest.fn(),
   };
-
-  defaultProps.plugins.data.query.timefilter.timefilter = (createMockTimefilter() as unknown) as TimefilterContract;
-
-  defaultProps.plugins.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
-    return [];
-  });
-  defaultProps.plugins.data.query.filterManager.getGlobalFilters = jest
-    .fn()
-    .mockImplementation(() => {
-      return [];
-    });
-
-  defaultProps.plugins.data.query.queryString.getQuery = jest.fn().mockImplementation(() => {
-    return {
-      language: 'lucene',
-      query: '',
-    };
-  });
-
-  defaultProps.plugins.data.search.session.start = jest.fn().mockImplementation(() => 'sessionId');
-
   return defaultProps;
 }
 
@@ -192,41 +129,6 @@ describe('editor_frame', () => {
     expressionRendererMock = createExpressionRendererMock();
   });
 
-  const mountWithProvider = async (
-    props: EditorFrameProps,
-    storePreloadedState?: Partial<LensAppState>
-  ) => {
-    const lensStore = makeConfigureStore(
-      getPreloadedState({
-        query: props.plugins.data.query.queryString.getQuery(),
-        filters: props.plugins.data.query.filterManager.getGlobalFilters(),
-        searchSessionId: props.plugins.data.search.session.start(),
-        isLinkedToOriginatingApp: false,
-        resolvedDateRange: getResolvedDateRange(props.plugins.data.query.timefilter.timefilter),
-        ...storePreloadedState,
-      }),
-      {
-        data: props.plugins.data,
-      }
-    );
-
-    const origDispatch = lensStore.dispatch;
-    lensStore.dispatch = jest.fn(origDispatch);
-
-    const wrappingComponent: React.FC<{
-      children: React.ReactNode;
-    }> = ({ children }) => <Provider store={lensStore}>{children}</Provider>;
-
-    let instance: ReactWrapper = {} as ReactWrapper;
-
-    await act(async () => {
-      instance = mount(<EditorFrame {...props} />, ({
-        wrappingComponent,
-      } as unknown) as ReactWrapper);
-    });
-    return { instance, lensStore };
-  };
-
   describe('initialization', () => {
     it('should initialize initial datasource', async () => {
       mockVisualization.getLayerIds.mockReturnValue([]);
@@ -242,7 +144,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
 
-      await mountWithProvider(props);
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
       expect(mockDatasource.initialize).toHaveBeenCalled();
     });
 
@@ -264,7 +166,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
 
-      await mountWithProvider(props, {
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data, {
         persistedDoc: {
           visualizationType: 'testVis',
           title: '',
@@ -304,7 +206,7 @@ describe('editor_frame', () => {
       };
 
       await act(async () => {
-        mountWithProvider(props);
+        mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
         expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
       });
       expect(mockDatasource.renderDataPanel).toHaveBeenCalled();
@@ -324,7 +226,7 @@ describe('editor_frame', () => {
       };
 
       await act(async () => {
-        mountWithProvider(props);
+        mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
         expect(mockVisualization.initialize).not.toHaveBeenCalled();
       });
 
@@ -344,7 +246,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
       await act(async () => {
-        mountWithProvider(props);
+        mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
         expect(mockVisualization.initialize).not.toHaveBeenCalled();
       });
 
@@ -356,7 +258,7 @@ describe('editor_frame', () => {
         filters: [],
         dateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
         availablePalettes: props.palettes,
-        searchSessionId: 'sessionId',
+        searchSessionId: 'sessionId-1',
       });
     });
 
@@ -376,7 +278,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(props, {
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data, {
         persistedDoc: {
           visualizationType: 'testVis',
           title: '',
@@ -418,7 +320,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
 
-      await mountWithProvider(props, {
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data, {
         persistedDoc: {
           visualizationType: 'testVis',
           title: '',
@@ -464,7 +366,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
 
-      await mountWithProvider(props);
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
 
       await act(async () => {
         databaseInitialized!(initialState);
@@ -494,7 +396,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
 
-      await mountWithProvider(props);
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
 
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({ state: initialState })
@@ -520,7 +422,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(props)).instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />, props.plugins.data)).instance;
 
       instance.update();
 
@@ -552,7 +454,7 @@ describe('editor_frame', () => {
       };
 
       instance = (
-        await mountWithProvider(props, {
+        await mountWithProvider(<EditorFrame {...props} />, props.plugins.data, {
           persistedDoc: {
             visualizationType: 'testVis',
             title: '',
@@ -660,7 +562,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(props);
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
       const updatedState = {};
       const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
         .setState;
@@ -692,7 +594,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(props);
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
 
       const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
         .setState;
@@ -728,7 +630,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(props);
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
 
       const updatedPublicAPI: DatasourcePublicAPI = {
         datasourceId: 'testDatasource',
@@ -775,7 +677,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(props, {
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data, {
         persistedDoc: {
           visualizationType: 'testVis',
           title: '',
@@ -824,7 +726,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(props, {
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data, {
         persistedDoc: {
           visualizationType: 'testVis',
           title: '',
@@ -877,7 +779,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(props);
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
 
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith({
         state: datasourceState,
@@ -932,7 +834,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(props)).instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />, props.plugins.data)).instance;
 
       // necessary to flush elements to dom synchronously
       instance.update();
@@ -1045,7 +947,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(props);
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
 
       expect(mockDatasource.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalled();
     });
@@ -1063,7 +965,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(props);
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
 
       expect(mockDatasource.getDatasourceSuggestionsFromCurrentState).toHaveBeenCalled();
       expect(mockDatasource2.getDatasourceSuggestionsFromCurrentState).not.toHaveBeenCalled();
@@ -1096,7 +998,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(props);
+      await mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
 
       expect(mockVisualization.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
@@ -1164,7 +1066,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(props)).instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />, props.plugins.data)).instance;
 
       // TODO why is this necessary?
       instance.update();
@@ -1212,7 +1114,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(props)).instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />, props.plugins.data)).instance;
 
       // TODO why is this necessary?
       instance.update();
@@ -1273,7 +1175,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(props)).instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />, props.plugins.data)).instance;
 
       // TODO why is this necessary?
       instance.update();
@@ -1344,7 +1246,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       } as EditorFrameProps;
-      instance = (await mountWithProvider(props)).instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />, props.plugins.data)).instance;
       // TODO why is this necessary?
       instance.update();
 
@@ -1446,7 +1348,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       } as EditorFrameProps;
 
-      instance = (await mountWithProvider(props)).instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />, props.plugins.data)).instance;
 
       // TODO why is this necessary?
       instance.update();
@@ -1507,7 +1409,7 @@ describe('editor_frame', () => {
 
       let lensStore: LensRootStore = {} as LensRootStore;
       await act(async () => {
-        const mounted = await mountWithProvider(props);
+        const mounted = await mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
         lensStore = mounted.lensStore;
         expect(lensStore.dispatch).toHaveBeenCalledTimes(0);
         resolver({});
@@ -1516,7 +1418,7 @@ describe('editor_frame', () => {
       expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
       expect(lensStore.dispatch).toHaveBeenNthCalledWith(1, {
         payload: {
-          indexPatternsForTopNav: [{}],
+          indexPatternsForTopNav: [{ id: '1' }],
           lastKnownDoc: {
             savedObjectId: undefined,
             description: undefined,
@@ -1542,7 +1444,7 @@ describe('editor_frame', () => {
       });
       expect(lensStore.dispatch).toHaveBeenLastCalledWith({
         payload: {
-          indexPatternsForTopNav: [{}],
+          indexPatternsForTopNav: [{ id: '1' }],
           lastKnownDoc: {
             references: [
               {
@@ -1590,7 +1492,10 @@ describe('editor_frame', () => {
         onChange,
       };
 
-      const { instance: el, lensStore } = await mountWithProvider(props);
+      const { instance: el, lensStore } = await mountWithProvider(
+        <EditorFrame {...props} />,
+        props.plugins.data
+      );
       instance = el;
 
       expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
@@ -1657,7 +1562,7 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
         onChange,
       };
-      const mounted = await mountWithProvider(props);
+      const mounted = await mountWithProvider(<EditorFrame {...props} />, props.plugins.data);
       instance = mounted.instance;
       const { lensStore } = mounted;
 
