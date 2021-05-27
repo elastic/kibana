@@ -44,7 +44,7 @@ export function urlparam(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const viewParam: {[index: string]:any} = {}
+      let viewParam: { [index: string] : any} = {};
       const uri = parse(window.location.href, true);
       if (uri.hash != null) {
         viewParam = qs.parse(
