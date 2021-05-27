@@ -121,19 +121,20 @@ export class APMPlugin
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
+    const { ruleDataService } = plugins.ruleRegistry;
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
 
     const ready = once(async () => {
-      const componentTemplateName = plugins.ruleRegistry.getFullAssetName(
+      const componentTemplateName = ruleDataService.getFullAssetName(
         'apm-mappings'
       );
 
-      if (!plugins.ruleRegistry.isWriteEnabled()) {
+      if (!ruleDataService.isWriteEnabled()) {
         return;
       }
 
-      await plugins.ruleRegistry.createOrUpdateComponentTemplate({
+      await ruleDataService.createOrUpdateComponentTemplate({
         name: componentTemplateName,
         body: {
           template: {
@@ -158,16 +159,14 @@ export class APMPlugin
         },
       });
 
-      await plugins.ruleRegistry.createOrUpdateIndexTemplate({
-        name: plugins.ruleRegistry.getFullAssetName('apm-index-template'),
+      await ruleDataService.createOrUpdateIndexTemplate({
+        name: ruleDataService.getFullAssetName('apm-index-template'),
         body: {
           index_patterns: [
-            plugins.ruleRegistry.getFullAssetName('observability-apm*'),
+            ruleDataService.getFullAssetName('observability-apm*'),
           ],
           composed_of: [
-            plugins.ruleRegistry.getFullAssetName(
-              TECHNICAL_COMPONENT_TEMPLATE_NAME
-            ),
+            ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
             componentTemplateName,
           ],
         },
@@ -179,7 +178,7 @@ export class APMPlugin
     });
 
     const ruleDataClient = new RuleDataClient({
-      alias: plugins.ruleRegistry.getFullAssetName('observability-apm'),
+      alias: ruleDataService.getFullAssetName('observability-apm'),
       getClusterClient: async () => {
         const coreStart = await getCoreStart();
         return coreStart.elasticsearch.client.asInternalUser;
