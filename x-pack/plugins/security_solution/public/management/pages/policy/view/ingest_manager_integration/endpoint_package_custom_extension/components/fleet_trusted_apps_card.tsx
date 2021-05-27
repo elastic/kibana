@@ -35,7 +35,7 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
   } = useKibana<CoreStart & { application: ApplicationStart }>();
 
   const [stats, setStats] = useState<GetExceptionSummaryResponse | undefined>();
-  const [trustedAppsApi] = useState(() => new TrustedAppsHttpService(http));
+  const trustedAppsApi = useMemo(() => new TrustedAppsHttpService(http), [http]);
 
   useEffect(() => {
     trustedAppsApi.getTrustedAppsSummary().then((response) => {
