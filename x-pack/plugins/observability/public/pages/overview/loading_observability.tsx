@@ -15,7 +15,7 @@ export function LoadingObservability() {
   const { ObservabilityPageTemplate } = usePluginContext();
 
   return (
-    <ObservabilityPageTemplate template="centeredBody">
+    <ObservabilityPageTemplate template="centeredContent">
       <ObservabilityHeaderMenu />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
