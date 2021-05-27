@@ -22,7 +22,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-export const AccessDeniedPage = () => (
+export const InsufficientLicensePage = () => (
   <Fragment>
     <EuiPage data-test-subj="mlPageAccessDenied">
       <EuiPageBody>
@@ -31,7 +31,7 @@ export const AccessDeniedPage = () => (
             <EuiTitle>
               <h1>
                 <FormattedMessage
-                  id="xpack.ml.management.jobsList.accessDeniedTitle"
+                  id="xpack.ml.management.jobsList.insufficientLicenseTitle"
                   defaultMessage="Machine Learning"
                 />
               </h1>
@@ -41,8 +41,9 @@ export const AccessDeniedPage = () => (
         <EuiPageContentBody>
           <EuiSpacer size="m" />
           <EuiCallOut
-            title={i18n.translate('xpack.ml.management.jobsList.noPermissionToAccessLabel', {
-              defaultMessage: 'Access denied',
+            title={i18n.translate('xpack.ml.management.jobsList.insufficientLicenseLabel', {
+              defaultMessage:
+                'Machine leaning is only availale on a trial, platinum or enterprise license',
             })}
             color="danger"
             iconType="cross"
@@ -50,8 +51,8 @@ export const AccessDeniedPage = () => (
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.ml.management.jobsList.noGrantedPrivilegesDescription"
-                  defaultMessage="You don’t have permission to manage ML jobs"
+                  id="xpack.ml.management.jobsList.insufficientLicenseDescription"
+                  defaultMessage="Please upgrade your license to use Machine Learning features"
                 />
               </p>
             </EuiText>
