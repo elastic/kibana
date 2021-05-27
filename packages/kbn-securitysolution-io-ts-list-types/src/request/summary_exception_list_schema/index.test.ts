@@ -7,7 +7,6 @@
  */
 
 import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getSummaryExceptionListSchemaMock } from './index.mock';
@@ -18,7 +17,7 @@ describe('summary_exception_list_schema', () => {
     const payload = getSummaryExceptionListSchemaMock();
     const decoded = summaryExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
@@ -29,7 +28,7 @@ describe('summary_exception_list_schema', () => {
     delete payload.id;
     const decoded = summaryExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
@@ -40,7 +39,7 @@ describe('summary_exception_list_schema', () => {
     delete payload.list_id;
     const decoded = summaryExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
@@ -51,7 +50,7 @@ describe('summary_exception_list_schema', () => {
     delete payload.namespace_type;
     const decoded = summaryExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(getSummaryExceptionListSchemaMock());
@@ -67,7 +66,7 @@ describe('summary_exception_list_schema', () => {
     delete output.list_id;
     const decoded = summaryExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(output);
@@ -79,7 +78,7 @@ describe('summary_exception_list_schema', () => {
     delete payload.list_id;
     const decoded = summaryExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
@@ -93,7 +92,7 @@ describe('summary_exception_list_schema', () => {
     delete output.id;
     const decoded = summaryExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(output);
@@ -107,7 +106,7 @@ describe('summary_exception_list_schema', () => {
     delete output.list_id;
     const decoded = summaryExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(output);
@@ -120,7 +119,7 @@ describe('summary_exception_list_schema', () => {
     payload.extraKey = 'some new value';
     const decoded = summaryExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "extraKey"']);
     expect(message.schema).toEqual({});
   });

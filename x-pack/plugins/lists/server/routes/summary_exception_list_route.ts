@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   SummaryExceptionListSchemaDecoded,
+  exceptionListSummarySchema,
   summaryExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
@@ -27,7 +29,7 @@ export const summaryExceptionListRoute = (router: ListsPluginRouter): void => {
       options: {
         tags: ['access:lists-summary'],
       },
-      path: `${EXCEPTION_LIST_URL}/_summary`,
+      path: `${EXCEPTION_LIST_URL}/summary`,
       validate: {
         query: buildRouteValidation<
           typeof summaryExceptionListSchema,
@@ -52,7 +54,12 @@ export const summaryExceptionListRoute = (router: ListsPluginRouter): void => {
               statusCode: 404,
             });
           } else {
-            return response.ok({ body: exceptionListSummary ?? {} });
+            const [validated, errors] = validate(exceptionListSummary, exceptionListSummarySchema);
+            if (errors != null) {
+              return response.ok({ body: exceptionListSummary });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
           }
         } else {
           return siemResponse.error({ body: 'id or list_id required', statusCode: 400 });

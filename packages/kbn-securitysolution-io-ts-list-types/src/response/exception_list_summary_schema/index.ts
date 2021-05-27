@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
-import { _versionOrUndefined } from '../../common/underscore_version';
 
 export const exceptionListSummarySchema = t.exact(
   t.type({
-    windows: t.number,
-    linux: t.number,
-    macos: t.number,
-    total: t.number,
+    windows: PositiveInteger,
+    linux: PositiveInteger,
+    macos: PositiveInteger,
+    total: PositiveInteger,
   })
 );
 

@@ -59,7 +59,7 @@ export const getExceptionListSummary = async ({
     }
   }
 
-  const savedObject = await savedObjectsClient.find<ExceptionListSoSchema>({
+  const savedObject = await savedObjectsClient.find<ExceptionListSoSchema, ByOsAggType>({
     aggs: {
       by_os: {
         terms: {
@@ -76,7 +76,11 @@ export const getExceptionListSummary = async ({
     type: savedObjectType,
   });
 
-  const summary: ExceptionListSummarySchema = (savedObject.aggregations as ByOsAggType).by_os.buckets.reduce(
+  if (!savedObject.aggregations) {
+    return null;
+  }
+
+  const summary: ExceptionListSummarySchema = savedObject.aggregations.by_os.buckets.reduce(
     (acc, item: ByOsAggBucketType) => ({
       ...acc,
       [item.key]: item.doc_count,
