@@ -185,6 +185,7 @@ describe('agent policy', () => {
 
     it('should return a policy with monitoring if monitoring is enabled for logs', async () => {
       const soClient = getSavedObjectMock({
+        namespace: 'default',
         revision: 1,
         monitoring_enabled: ['logs'],
       });
@@ -207,6 +208,7 @@ describe('agent policy', () => {
         },
         agent: {
           monitoring: {
+            namespace: 'default',
             use_output: 'default',
             enabled: true,
             logs: true,
@@ -218,6 +220,7 @@ describe('agent policy', () => {
 
     it('should return a policy with monitoring if monitoring is enabled for metrics', async () => {
       const soClient = getSavedObjectMock({
+        namespace: 'default',
         revision: 1,
         monitoring_enabled: ['metrics'],
       });
@@ -240,6 +243,7 @@ describe('agent policy', () => {
         },
         agent: {
           monitoring: {
+            namespace: 'default',
             use_output: 'default',
             enabled: true,
             logs: false,
