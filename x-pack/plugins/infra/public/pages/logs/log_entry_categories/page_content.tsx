@@ -23,8 +23,22 @@ import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
+
+const logCategoriesTabTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle', {
+  defaultMessage: 'Categories',
+});
 
 export const LogEntryCategoriesPageContent = () => {
+  const {
+    services: {
+      observability: {
+        navigation: { PageTemplate },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
   const {
     hasLogAnalysisCapabilites,
     hasLogAnalysisReadCapabilities,
@@ -45,36 +59,71 @@ export const LogEntryCategoriesPageContent = () => {
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
   if (!hasLogAnalysisCapabilites) {
-    return <SubscriptionSplashContent />;
+    return (
+      <CategoriesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+        <SubscriptionSplashContent />
+      </CategoriesPageTemplate>
+    );
   } else if (!hasLogAnalysisReadCapabilities) {
-    return <MissingResultsPrivilegesPrompt />;
+    return (
+      <CategoriesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+        <MissingResultsPrivilegesPrompt />
+      </CategoriesPageTemplate>
+    );
   } else if (setupStatus.type === 'initializing') {
     return (
-      <LoadingPage
-        message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
-          defaultMessage: 'Checking status of categorization jobs...',
-        })}
-      />
+      <CategoriesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+        <LoadingPage
+          message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
+            defaultMessage: 'Checking status of categorization jobs...',
+          })}
+        />
+      </CategoriesPageTemplate>
     );
   } else if (setupStatus.type === 'unknown') {
-    return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
+    return (
+      <CategoriesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+        <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />
+      </CategoriesPageTemplate>
+    );
   } else if (isJobStatusWithResults(jobStatus['log-entry-categories-count'])) {
     return (
-      <>
+      <CategoriesPageTemplate PageTemplate={PageTemplate}>
         <LogEntryCategoriesResultsContent onOpenSetup={showCategoriesModuleSetup} />
         <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
-      </>
+      </CategoriesPageTemplate>
     );
   } else if (!hasLogAnalysisSetupCapabilities) {
-    return <MissingSetupPrivilegesPrompt />;
+    return (
+      <CategoriesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
+        <MissingSetupPrivilegesPrompt />
+      </CategoriesPageTemplate>
+    );
   } else {
     return (
-      <>
+      <CategoriesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
         <LogEntryCategoriesSetupContent onOpenSetup={showCategoriesModuleSetup} />
         <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
-      </>
+      </CategoriesPageTemplate>
     );
   }
 };
 
 const allowedSetupModules = ['logs_ui_categories' as const];
+
+const CategoriesPageTemplate: React.FC<{
+  PageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
+  isEmptyState?: boolean;
+}> = ({ PageTemplate, isEmptyState = false, children }) => {
+  return (
+    <PageTemplate
+      data-test-subj="logsLogEntryCategoriesPage"
+      isEmptyState={isEmptyState}
+      pageHeader={{
+        pageTitle: logCategoriesTabTitle,
+      }}
+    >
+      {children}
+    </PageTemplate>
+  );
+};

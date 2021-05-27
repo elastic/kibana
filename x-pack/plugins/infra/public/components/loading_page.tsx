@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageBody,
-  EuiPageContent,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-
-import { FlexPage } from './page';
+import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 interface LoadingPageProps {
   message?: ReactNode;
@@ -24,9 +17,25 @@ interface LoadingPageProps {
 export const LoadingPage = ({
   message,
   'data-test-subj': dataTestSubj = 'loadingPage',
-}: LoadingPageProps) => (
-  <EuiFlexGroup alignItems="center" style={{ flexWrap: 'nowrap' }}>
-    <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
-    <EuiFlexItem data-test-subj="loadingMessage">{message}</EuiFlexItem>
-  </EuiFlexGroup>
-);
+}: LoadingPageProps) => {
+  const {
+    services: {
+      observability: {
+        navigation: { PageTemplate },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
+  return (
+    <PageTemplate isEmptyState={true}>
+      <EuiEmptyPrompt
+        body={
+          <>
+            <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
+            {message}
+          </>
+        }
+      />
+    </PageTemplate>
+  );
+};

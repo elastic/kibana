@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiPageTemplate,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/common';
@@ -22,6 +15,7 @@ import {
   ResolveLogSourceConfigurationError,
 } from '../../../common/log_sources';
 import { useLinkProps } from '../../hooks/use_link_props';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const LogSourceErrorPage: React.FC<{
   errors: Error[];
@@ -29,8 +23,16 @@ export const LogSourceErrorPage: React.FC<{
 }> = ({ errors, onRetry }) => {
   const settingsLinkProps = useLinkProps({ app: 'logs', pathname: '/settings' });
 
+  const {
+    services: {
+      observability: {
+        navigation: { PageTemplate },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
   return (
-    <EuiPageTemplate template="centeredBody" pageContentProps={{ paddingSize: 'none' }}>
+    <PageTemplate isEmptyState={true}>
       <EuiEmptyPrompt
         iconType="alert"
         iconColor="danger"
@@ -73,7 +75,7 @@ export const LogSourceErrorPage: React.FC<{
           </EuiButtonEmpty>,
         ]}
       />
-    </EuiPageTemplate>
+    </PageTemplate>
   );
 };
 

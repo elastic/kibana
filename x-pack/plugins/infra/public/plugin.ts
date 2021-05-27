@@ -59,7 +59,7 @@ export class Plugin implements InfraClientPluginClass {
           entries: [
             { label: 'Stream', app: 'logs', path: '/stream' },
             { label: 'Anomalies', app: 'logs', path: '/anomalies' },
-            { label: 'Categories', app: 'logs', path: '/categories' },
+            { label: 'Categories', app: 'logs', path: '/log-categories' },
           ],
         },
         {

@@ -7,8 +7,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 interface NoIndicesProps {
   message: string;
@@ -17,15 +16,23 @@ interface NoIndicesProps {
   'data-test-subj'?: string;
 }
 
-export const NoIndices: React.FC<NoIndicesProps> = ({ actions, message, title, ...rest }) => (
-  <CenteredEmptyPrompt
-    title={<h2>{title}</h2>}
-    body={<p>{message}</p>}
-    actions={actions}
-    {...rest}
-  />
-);
+export const NoIndices: React.FC<NoIndicesProps> = ({ actions, message, title, ...rest }) => {
+  const {
+    services: {
+      observability: {
+        navigation: { PageTemplate },
+      },
+    },
+  } = useKibanaContextForPlugin();
 
-const CenteredEmptyPrompt = euiStyled(EuiEmptyPrompt)`
-  align-self: center;
-`;
+  return (
+    <PageTemplate isEmptyState={true}>
+      <EuiEmptyPrompt
+        title={<h2>{title}</h2>}
+        body={<p>{message}</p>}
+        actions={actions}
+        {...rest}
+      />
+    </PageTemplate>
+  );
+};

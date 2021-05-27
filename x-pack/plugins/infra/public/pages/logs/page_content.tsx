@@ -24,16 +24,8 @@ import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const LogsPageContent: React.FunctionComponent = () => {
-  const {
-    services: {
-      observability: {
-        navigation: { PageTemplate },
-      },
-    },
-  } = useKibanaContextForPlugin();
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu } = useContext(HeaderActionMenuContext);
 

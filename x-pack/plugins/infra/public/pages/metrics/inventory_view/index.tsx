@@ -26,8 +26,17 @@ import { useLinkProps } from '../../../hooks/use_link_props';
 import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
 import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
 import { useWaffleOptionsContext } from './hooks/use_waffle_options';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const SnapshotPage = () => {
+  const {
+    services: {
+      observability: {
+        navigation: { PageTemplate },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
   const uiCapabilities = useKibana().services.application?.capabilities;
   const {
     hasFailedLoadingSource,
@@ -48,75 +57,70 @@ export const SnapshotPage = () => {
 
   return (
     <EuiErrorBoundary>
-      <ColumnarPage>
-        <DocumentTitle
-          title={(previousTitle: string) =>
-            i18n.translate('xpack.infra.infrastructureSnapshotPage.documentTitle', {
-              defaultMessage: '{previousTitle} | Inventory',
-              values: {
-                previousTitle,
-              },
-            })
-          }
-        />
-        {isLoading && !source ? (
-          <SourceLoadingPage />
-        ) : metricIndicesExist ? (
-          <>
-            <FilterBar />
-            <SavedViewProvider
-              shouldLoadDefault={optionsSource === 'default'}
-              viewType={'inventory-view'}
-              defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
-            >
-              <LayoutView />
-            </SavedViewProvider>
-          </>
-        ) : hasFailedLoadingSource ? (
-          <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
-        ) : (
-          <NoIndices
-            title={i18n.translate('xpack.infra.homePage.noMetricsIndicesTitle', {
-              defaultMessage: "Looks like you don't have any metrics indices.",
-            })}
-            message={i18n.translate('xpack.infra.homePage.noMetricsIndicesDescription', {
-              defaultMessage: "Let's add some!",
-            })}
-            actions={
-              <EuiFlexGroup>
+      <DocumentTitle
+        title={(previousTitle: string) =>
+          i18n.translate('xpack.infra.infrastructureSnapshotPage.documentTitle', {
+            defaultMessage: '{previousTitle} | Inventory',
+            values: {
+              previousTitle,
+            },
+          })
+        }
+      />
+      {true || (isLoading && !source) ? (
+        <SourceLoadingPage />
+      ) : metricIndicesExist ? (
+        <>
+          <FilterBar />
+          <SavedViewProvider
+            shouldLoadDefault={optionsSource === 'default'}
+            viewType={'inventory-view'}
+            defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
+          >
+            <LayoutView />
+          </SavedViewProvider>
+        </>
+      ) : hasFailedLoadingSource ? (
+        <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
+      ) : (
+        <NoIndices
+          title={i18n.translate('xpack.infra.homePage.noMetricsIndicesTitle', {
+            defaultMessage: "Looks like you don't have any metrics indices.",
+          })}
+          message={i18n.translate('xpack.infra.homePage.noMetricsIndicesDescription', {
+            defaultMessage: "Let's add some!",
+          })}
+          actions={
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiButton
+                  {...tutorialLinkProps}
+                  color="primary"
+                  fill
+                  data-test-subj="infrastructureViewSetupInstructionsButton"
+                >
+                  {i18n.translate('xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel', {
+                    defaultMessage: 'View setup instructions',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              {uiCapabilities?.infrastructure?.configureSource ? (
                 <EuiFlexItem>
-                  <EuiButton
-                    {...tutorialLinkProps}
-                    color="primary"
-                    fill
-                    data-test-subj="infrastructureViewSetupInstructionsButton"
+                  <ViewSourceConfigurationButton
+                    app="metrics"
+                    data-test-subj="configureSourceButton"
                   >
-                    {i18n.translate(
-                      'xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel',
-                      {
-                        defaultMessage: 'View setup instructions',
-                      }
-                    )}
-                  </EuiButton>
+                    {i18n.translate('xpack.infra.configureSourceActionLabel', {
+                      defaultMessage: 'Change source configuration',
+                    })}
+                  </ViewSourceConfigurationButton>
                 </EuiFlexItem>
-                {uiCapabilities?.infrastructure?.configureSource ? (
-                  <EuiFlexItem>
-                    <ViewSourceConfigurationButton
-                      app="metrics"
-                      data-test-subj="configureSourceButton"
-                    >
-                      {i18n.translate('xpack.infra.configureSourceActionLabel', {
-                        defaultMessage: 'Change source configuration',
-                      })}
-                    </ViewSourceConfigurationButton>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            }
-            data-test-subj="noMetricsIndicesPrompt"
-          />
-        )}
-      </ColumnarPage>
+              ) : null}
+            </EuiFlexGroup>
+          }
+          data-test-subj="noMetricsIndicesPrompt"
+        />
+      )}
     </EuiErrorBoundary>
   );
 };

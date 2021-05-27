@@ -7,7 +7,6 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { LogEntryRatePageContent } from './page_content';
 import { LogEntryRatePageProviders } from './page_providers';
 
