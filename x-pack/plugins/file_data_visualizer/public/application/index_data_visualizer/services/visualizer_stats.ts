@@ -12,7 +12,7 @@ import { OverallStats } from '../types/overall_stats';
 
 export function basePath() {
   // @todo: change to internal/data_visualizer
-  return '/api/ml';
+  return '/internal/data_visualizer';
 }
 
 export async function getVisualizerOverallStats({
@@ -50,7 +50,7 @@ export async function getVisualizerOverallStats({
   const fileUploadModules = await lazyLoadModules();
   // @todo: update
   return await fileUploadModules.getHttp().fetch<OverallStats>({
-    path: `${basePath()}/data_visualizer/get_overall_stats/${indexPatternTitle}`,
+    path: `${basePath()}/get_overall_stats/${indexPatternTitle}`,
     method: 'POST',
     body,
   });
@@ -94,7 +94,7 @@ export async function getVisualizerFieldStats({
   const fileUploadModules = await lazyLoadModules();
   // @todo: update
   return await fileUploadModules.getHttp().fetch<[DocumentCounts, FieldVisStats]>({
-    path: `${basePath()}/data_visualizer/get_field_stats/${indexPatternTitle}`,
+    path: `${basePath()}/get_field_stats/${indexPatternTitle}`,
     method: 'POST',
     body,
   });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { DataVisualizerPlugin } from './plugin';
+import { SecurityPluginStart } from '../../../security/server';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new DataVisualizerPlugin(initializerContext);
+export interface StartDeps {
+  security?: SecurityPluginStart;
+}

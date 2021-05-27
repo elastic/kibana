@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-// @remove
 // Default sampler shard size used for field histograms
 export const DEFAULT_SAMPLER_SHARD_SIZE = 5000;

@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { DataVisualizerPlugin } from './plugin';
-
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new DataVisualizerPlugin(initializerContext);
+export { StartDeps } from './deps';
