@@ -68,6 +68,10 @@ declare global {
 const RESIZE_THROTTLE_TIME_MS = 500;
 const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
+/**
+ * Minimum container height to make sure "No data" message is displayed without overflow.
+ */
+const MIN_CONTAINER_HEIGHT = 40;
 
 const Y_AXIS_HEIGHT = 24;
 
@@ -245,7 +249,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     return isLoading
       ? containerHeightRef.current
       : // TODO update when elastic charts X label will be fixed
-        rowsCount * CELL_HEIGHT + (showLegend ? LEGEND_HEIGHT : 0) + (true ? Y_AXIS_HEIGHT : 0);
+        Math.max(
+          rowsCount * CELL_HEIGHT + (showLegend ? LEGEND_HEIGHT : 0) + (true ? Y_AXIS_HEIGHT : 0),
+          MIN_CONTAINER_HEIGHT
+        );
   }, [isLoading, rowsCount, showTimeline]);
 
   useEffect(() => {

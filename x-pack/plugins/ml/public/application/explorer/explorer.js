@@ -75,6 +75,7 @@ import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
 import { AnomalyContextMenu } from './anomaly_context_menu';
+import { isDefined } from '../../../common/types/guards';
 
 const ExplorerPage = ({
   children,
@@ -260,6 +261,7 @@ export class ExplorerUI extends React.Component {
       selectedCells,
       selectedJobs,
       tableData,
+      swimLaneSeverity,
     } = this.props.explorerState;
     const { annotationsData, aggregations, error: annotationsError } = annotations;
 
@@ -273,6 +275,8 @@ export class ExplorerUI extends React.Component {
       (hasResults && overallSwimlaneData.points.some((v) => v.value > 0)) ||
       tableData.anomalies?.length > 0;
 
+    const hasActiveFilter = isDefined(swimLaneSeverity);
+
     if (noJobsFound && !loading) {
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
@@ -281,7 +285,7 @@ export class ExplorerUI extends React.Component {
       );
     }
 
-    if (hasResultsWithAnomalies === false && !loading) {
+    if (!hasResultsWithAnomalies && !loading && !hasActiveFilter) {
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
           <ExplorerNoResultsFound
