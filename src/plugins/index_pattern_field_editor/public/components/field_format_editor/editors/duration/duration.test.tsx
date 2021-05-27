@@ -132,9 +132,15 @@ describe('DurationFormatEditor', () => {
 
     const labels = component.find(EuiSwitch);
     expect(labels.length).toEqual(2);
-    expect(labels.get(0).props.label.props.defaultMessage).toEqual('Use short suffix');
-    expect(labels.get(0).props.disabled).toEqual(false);
-    expect(labels.get(1).props.label.props.defaultMessage).toEqual(
+    const useShortSuffixSwitch = labels.get(0);
+
+    expect(useShortSuffixSwitch.props.label.props.defaultMessage).toEqual('Use short suffix');
+    expect(useShortSuffixSwitch.props.disabled).toEqual(false);
+
+    const includeSpaceSwitch = labels.get(1);
+
+    expect(includeSpaceSwitch.props.disabled).toEqual(false);
+    expect(includeSpaceSwitch.props.label.props.defaultMessage).toEqual(
       'Include space between suffix and value'
     );
 

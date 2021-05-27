@@ -122,7 +122,7 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
   >
     <EuiSwitch
       checked={true}
-      disabled={true}
+      disabled={false}
       label={
         <FormattedMessage
           defaultMessage="Include space between suffix and value"

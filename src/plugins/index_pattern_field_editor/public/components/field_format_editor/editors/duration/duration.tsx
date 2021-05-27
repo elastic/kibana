@@ -179,7 +179,6 @@ export class DurationFormatEditor extends DefaultFormatEditor<
                   onChange={(e) => {
                     this.onChange({
                       showSuffix: !formatParams.showSuffix,
-                      includeSpaceWithSuffix: !formatParams.showSuffix,
                     });
                   }}
                 />
@@ -204,7 +203,9 @@ export class DurationFormatEditor extends DefaultFormatEditor<
             </EuiFormRow>
             <EuiFormRow>
               <EuiSwitch
-                disabled={!Boolean(formatParams.showSuffix)}
+                disabled={
+                  !Boolean(formatParams.showSuffix) && !(format as DurationFormat).isHumanPrecise()
+                }
                 label={
                   <FormattedMessage
                     id="indexPatternFieldEditor.duration.includeSpace"
