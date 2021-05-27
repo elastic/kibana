@@ -1214,13 +1214,6 @@
                 }
               },
               {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 194
-                }
-              },
-              {
                 "plugin": "apm",
                 "link": {
                   "path": "x-pack/plugins/apm/server/routes/index_pattern.ts",
@@ -1246,6 +1239,13 @@
                 "link": {
                   "path": "x-pack/plugins/infra/server/plugin.ts",
                   "lineNumber": 153
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                  "lineNumber": 194
                 }
               },
               {
@@ -2048,13 +2048,6 @@
               }
             },
             {
-              "plugin": "securitySolution",
-              "link": {
-                "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 194
-              }
-            },
-            {
               "plugin": "apm",
               "link": {
                 "path": "x-pack/plugins/apm/server/routes/index_pattern.ts",
@@ -2087,6 +2080,13 @@
               "link": {
                 "path": "x-pack/plugins/infra/server/plugin.ts",
                 "lineNumber": 153
+              }
+            },
+            {
+              "plugin": "securitySolution",
+              "link": {
+                "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                "lineNumber": 194
               }
             }
           ]
