@@ -20,8 +20,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { ResultsLinks } from '../results_links';
-import { FilebeatConfigFlyout } from '../filebeat_config_flyout';
+import { ResultsLinks } from '../../../components/results_links';
+import { FilebeatConfigFlyout } from '../../../components/filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
 import { ImportErrors } from '../import_errors';
 import { ImportSummary } from '../import_summary';
@@ -30,8 +30,8 @@ import {
   addCombinedFieldsToPipeline,
   addCombinedFieldsToMappings,
   getDefaultCombinedFields,
-} from '../combined_fields';
-import { ExperimentalBadge } from '../experimental_badge';
+} from '../../../components/combined_fields';
+import { ExperimentalBadge } from '../../../components/experimental_badge';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };

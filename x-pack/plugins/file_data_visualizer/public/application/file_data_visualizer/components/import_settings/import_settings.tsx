@@ -12,8 +12,8 @@ import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
 
 import { SimpleSettings } from './simple';
 import { AdvancedSettings } from './advanced';
-import { CombinedField } from '../combined_fields';
-import { FindFileStructureResponse } from '../../../../../file_upload/common';
+import { CombinedField } from '../../../components/combined_fields';
+import { FindFileStructureResponse } from '../../../../../../file_upload/common';
 
 interface Props {
   index: string;

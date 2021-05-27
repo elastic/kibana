@@ -6,4 +6,3 @@
  */
 
 export { FileDataVisualizer, FileDataVisualizerSpec } from './file_data_visualizer';
-export { IndexDataVisualizer, IndexDataVisualizerSpec } from './index_data_visualizer';

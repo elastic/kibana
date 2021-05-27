@@ -31,7 +31,7 @@ import {
   // getCharsetOptions,
 } from './options';
 import { isTimestampFormatValid } from './overrides_validation';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import { TIMESTAMP_OPTIONS, CUSTOM_DROPDOWN_OPTION } from './options/option_lists';
 

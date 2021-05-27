@@ -18,9 +18,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { CombinedField, CombinedFieldsForm } from '../combined_fields';
+import { CombinedField, CombinedFieldsForm } from '../../../components/combined_fields';
 import { JsonEditor, EDITOR_MODE } from '../json_editor';
-import { FindFileStructureResponse } from '../../../../../file_upload/common';
+import { FindFileStructureResponse } from '../../../../../../file_upload/common';
 const EDITOR_HEIGHT = '300px';
 
 interface Props {

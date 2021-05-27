@@ -10,9 +10,6 @@ import React, { FC, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-
-// @remove
-
 export const LoadingIndicator: FC = () => (
   <Fragment>
     <EuiSpacer size="xxl" />
