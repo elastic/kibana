@@ -132,19 +132,21 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async clearMarkdown() {
       await retry.waitForWithTimeout('text area is cleared', 20000, async () => {
         const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-        const value = await input.getVisibleText();
-        if (value.length > 0) {
-          log.debug('Clearing text area input');
-          this.waitForMarkdownTextAreaCleaned();
-        }
+        await input.clickMouseButton();
+        await input.clearValueWithKeyboard();
 
-        return value.length === 0;
+        const linesContainer = await find.byCssSelector('.tvbMarkdownEditor__editor .view-lines');
+        // lines of code in monaco-editor
+        // text is not present in textarea
+        const lines = await linesContainer.findAllByClassName('mtk1');
+        return lines.length === 0;
       });
     }
 
     public async waitForMarkdownTextAreaCleaned() {
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await input.clearValueWithKeyboard();
+
       const text = await this.getMarkdownText();
       return text.length === 0;
     }
