@@ -31,7 +31,7 @@ export const AccessDeniedPage = () => (
             <EuiTitle>
               <h1>
                 <FormattedMessage
-                  id="xpack.ml.management.jobsList.accessDeniedTitle"
+                  id="xpack.ml.management.jobsList.insufficientLicenseTitle"
                   defaultMessage="Machine Learning"
                 />
               </h1>
