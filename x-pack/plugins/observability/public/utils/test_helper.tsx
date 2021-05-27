@@ -31,7 +31,7 @@ export const core = ({
   },
 } as unknown) as CoreStart;
 
-const config = { unsafe: { alertingExperience: { enabled: true } } };
+const config = { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } };
 
 const plugins = ({
   data: { query: { timefilter: { timefilter: { setTime: jest.fn() } } } },
