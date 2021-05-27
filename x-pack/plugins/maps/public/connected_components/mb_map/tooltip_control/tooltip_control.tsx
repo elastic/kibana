@@ -14,7 +14,7 @@ import {
   MapboxGeoJSONFeature,
   MapMouseEvent,
   Point as MbPoint,
-} from 'mapbox-gl';
+} from '@kbn/mapbox-gl';
 import uuid from 'uuid/v4';
 import { Geometry } from 'geojson';
 import { Filter } from 'src/plugins/data/public';
