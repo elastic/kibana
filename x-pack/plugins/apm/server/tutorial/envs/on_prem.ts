@@ -110,19 +110,19 @@ export function onPremInstructions({
             }
           ),
           btnLabel: i18n.translate(
-            'apmOss.tutorial.apmServer.statusCheck.btnLabel',
+            'xpack.apm.tutorial.apmServer.statusCheck.btnLabel',
             {
               defaultMessage: 'Check APM Server status',
             }
           ),
           success: i18n.translate(
-            'apmOss.tutorial.apmServer.statusCheck.successMessage',
+            'xpack.apm.tutorial.apmServer.statusCheck.successMessage',
             {
               defaultMessage: 'You have correctly setup APM Server',
             }
           ),
           error: i18n.translate(
-            'apmOss.tutorial.apmServer.statusCheck.errorMessage',
+            'xpack.apm.tutorial.apmServer.statusCheck.errorMessage',
             {
               defaultMessage:
                 'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
@@ -202,20 +202,20 @@ export function onPremInstructions({
             }
           ),
           btnLabel: i18n.translate(
-            'apmOss.tutorial.apmAgents.statusCheck.btnLabel',
+            'xpack.apm.tutorial.apmAgents.statusCheck.btnLabel',
             {
               defaultMessage: 'Check agent status',
             }
           ),
           success: i18n.translate(
-            'apmOss.tutorial.apmAgents.statusCheck.successMessage',
+            'xpack.apm.tutorial.apmAgents.statusCheck.successMessage',
             {
               defaultMessage:
                 'Data successfully received from one or more agents',
             }
           ),
           error: i18n.translate(
-            'apmOss.tutorial.apmAgents.statusCheck.errorMessage',
+            'xpack.apm.tutorial.apmAgents.statusCheck.errorMessage',
             {
               defaultMessage: 'No data has been received from agents yet',
             }

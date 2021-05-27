@@ -32,7 +32,7 @@ APM services are created programmatically based on the `serviceName`. \
 This agent supports a variety of frameworks but can also be used with your custom stack.',
     }),
     commands: `// ${i18n.translate(
-      'apmOss.tutorial.nodeClient.configure.commands.addThisToTheFileTopComment',
+      'xpack.apm.tutorial.nodeClient.configure.commands.addThisToTheFileTopComment',
       {
         defaultMessage:
           'Add this to the VERY top of the first file loaded in your app',
@@ -41,13 +41,13 @@ This agent supports a variety of frameworks but can also be used with your custo
 var apm = require('elastic-apm-node').start({curlyOpen}
 
   // ${i18n.translate(
-    'apmOss.tutorial.nodeClient.configure.commands.setRequiredServiceNameComment',
+    'xpack.apm.tutorial.nodeClient.configure.commands.setRequiredServiceNameComment',
     {
       defaultMessage: 'Override the service name from package.json',
     }
   )}
   // ${i18n.translate(
-    'apmOss.tutorial.nodeClient.configure.commands.allowedCharactersComment',
+    'xpack.apm.tutorial.nodeClient.configure.commands.allowedCharactersComment',
     {
       defaultMessage: 'Allowed characters: a-z, A-Z, 0-9, -, _, and space',
     }
@@ -55,7 +55,7 @@ var apm = require('elastic-apm-node').start({curlyOpen}
   serviceName: '',
 
   // ${i18n.translate(
-    'apmOss.tutorial.nodeClient.configure.commands.useIfApmRequiresTokenComment',
+    'xpack.apm.tutorial.nodeClient.configure.commands.useIfApmRequiresTokenComment',
     {
       defaultMessage: 'Use if APM Server requires a secret token',
     }
@@ -63,7 +63,7 @@ var apm = require('elastic-apm-node').start({curlyOpen}
   secretToken: '${secretToken}',
 
   // ${i18n.translate(
-    'apmOss.tutorial.nodeClient.configure.commands.setCustomApmServerUrlComment',
+    'xpack.apm.tutorial.nodeClient.configure.commands.setCustomApmServerUrlComment',
     {
       defaultMessage:
         'Set the custom APM Server URL (default: {defaultApmServerUrl})',
@@ -73,7 +73,7 @@ var apm = require('elastic-apm-node').start({curlyOpen}
   serverUrl: '${apmServerUrl}',
 
   // ${i18n.translate(
-    'apmOss.tutorial.nodeClient.configure.commands.setCustomServiceEnvironmentComment',
+    'xpack.apm.tutorial.nodeClient.configure.commands.setCustomServiceEnvironmentComment',
     {
       defaultMessage: 'Set the service environment',
     }
@@ -123,7 +123,7 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
       }
     ),
     commands: `# ${i18n.translate(
-      'apmOss.tutorial.djangoClient.configure.commands.addAgentComment',
+      'xpack.apm.tutorial.djangoClient.configure.commands.addAgentComment',
       {
         defaultMessage: 'Add the agent to the installed apps',
       }
@@ -135,13 +135,13 @@ INSTALLED_APPS = (
 
 ELASTIC_APM = {curlyOpen}
   # ${i18n.translate(
-    'apmOss.tutorial.djangoClient.configure.commands.setRequiredServiceNameComment',
+    'xpack.apm.tutorial.djangoClient.configure.commands.setRequiredServiceNameComment',
     {
       defaultMessage: 'Set the required service name. Allowed characters:',
     }
   )}
   # ${i18n.translate(
-    'apmOss.tutorial.djangoClient.configure.commands.allowedCharactersComment',
+    'xpack.apm.tutorial.djangoClient.configure.commands.allowedCharactersComment',
     {
       defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
     }
@@ -149,7 +149,7 @@ ELASTIC_APM = {curlyOpen}
   'SERVICE_NAME': '',
 
   # ${i18n.translate(
-    'apmOss.tutorial.djangoClient.configure.commands.useIfApmServerRequiresTokenComment',
+    'xpack.apm.tutorial.djangoClient.configure.commands.useIfApmServerRequiresTokenComment',
     {
       defaultMessage: 'Use if APM Server requires a secret token',
     }
@@ -157,7 +157,7 @@ ELASTIC_APM = {curlyOpen}
   'SECRET_TOKEN': '${secretToken}',
 
   # ${i18n.translate(
-    'apmOss.tutorial.djangoClient.configure.commands.setCustomApmServerUrlComment',
+    'xpack.apm.tutorial.djangoClient.configure.commands.setCustomApmServerUrlComment',
     {
       defaultMessage:
         'Set the custom APM Server URL (default: {defaultApmServerUrl})',
@@ -167,7 +167,7 @@ ELASTIC_APM = {curlyOpen}
   'SERVER_URL': '${apmServerUrl}',
 
   # ${i18n.translate(
-    'apmOss.tutorial.djangoClient.configure.commands.setServiceEnvironmentComment',
+    'xpack.apm.tutorial.djangoClient.configure.commands.setServiceEnvironmentComment',
     {
       defaultMessage: 'Set the service environment',
     }
@@ -176,7 +176,7 @@ ELASTIC_APM = {curlyOpen}
 {curlyClose}
 
 # ${i18n.translate(
-      'apmOss.tutorial.djangoClient.configure.commands.addTracingMiddlewareComment',
+      'xpack.apm.tutorial.djangoClient.configure.commands.addTracingMiddlewareComment',
       {
         defaultMessage:
           'To send performance metrics, add our tracing middleware:',
@@ -187,7 +187,7 @@ MIDDLEWARE = (
   #...
 )`.split('\n'),
     textPost: i18n.translate(
-      'apmOss.tutorial.djangoClient.configure.textPost',
+      'xpack.apm.tutorial.djangoClient.configure.textPost',
       {
         defaultMessage:
           'See the [documentation]({documentationLink}) for advanced usage.',
@@ -226,7 +226,7 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
       }
     ),
     commands: `# ${i18n.translate(
-      'apmOss.tutorial.flaskClient.configure.commands.initializeUsingEnvironmentVariablesComment',
+      'xpack.apm.tutorial.flaskClient.configure.commands.initializeUsingEnvironmentVariablesComment',
       {
         defaultMessage: 'initialize using environment variables',
       }
@@ -236,7 +236,7 @@ app = Flask(__name__)
 apm = ElasticAPM(app)
 
 # ${i18n.translate(
-      'apmOss.tutorial.flaskClient.configure.commands.configureElasticApmComment',
+      'xpack.apm.tutorial.flaskClient.configure.commands.configureElasticApmComment',
       {
         defaultMessage:
           "or configure to use ELASTIC_APM in your application's settings",
@@ -245,13 +245,13 @@ apm = ElasticAPM(app)
 from elasticapm.contrib.flask import ElasticAPM
 app.config['ELASTIC_APM'] = {curlyOpen}
   # ${i18n.translate(
-    'apmOss.tutorial.flaskClient.configure.commands.setRequiredServiceNameComment',
+    'xpack.apm.tutorial.flaskClient.configure.commands.setRequiredServiceNameComment',
     {
       defaultMessage: 'Set the required service name. Allowed characters:',
     }
   )}
   # ${i18n.translate(
-    'apmOss.tutorial.flaskClient.configure.commands.allowedCharactersComment',
+    'xpack.apm.tutorial.flaskClient.configure.commands.allowedCharactersComment',
     {
       defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
     }
@@ -259,7 +259,7 @@ app.config['ELASTIC_APM'] = {curlyOpen}
   'SERVICE_NAME': '',
 
   # ${i18n.translate(
-    'apmOss.tutorial.flaskClient.configure.commands.useIfApmServerRequiresTokenComment',
+    'xpack.apm.tutorial.flaskClient.configure.commands.useIfApmServerRequiresTokenComment',
     {
       defaultMessage: 'Use if APM Server requires a secret token',
     }
@@ -267,7 +267,7 @@ app.config['ELASTIC_APM'] = {curlyOpen}
   'SECRET_TOKEN': '${secretToken}',
 
   # ${i18n.translate(
-    'apmOss.tutorial.flaskClient.configure.commands.setCustomApmServerUrlComment',
+    'xpack.apm.tutorial.flaskClient.configure.commands.setCustomApmServerUrlComment',
     {
       defaultMessage:
         'Set the custom APM Server URL (default: {defaultApmServerUrl})',
@@ -277,7 +277,7 @@ app.config['ELASTIC_APM'] = {curlyOpen}
   'SERVER_URL': '${apmServerUrl}',
 
   # ${i18n.translate(
-    'apmOss.tutorial.flaskClient.configure.commands.setServiceEnvironmentComment',
+    'xpack.apm.tutorial.flaskClient.configure.commands.setServiceEnvironmentComment',
     {
       defaultMessage: 'Set the service environment',
     }
@@ -385,13 +385,13 @@ export const createRackAgentInstructions = (
 
   ElasticAPM.start(
     app: MySinatraApp, # ${i18n.translate(
-      'apmOss.tutorial.rackClient.configure.commands.requiredComment',
+      'xpack.apm.tutorial.rackClient.configure.commands.requiredComment',
       {
         defaultMessage: 'required',
       }
     )}
     config_file: '' # ${i18n.translate(
-      'apmOss.tutorial.rackClient.configure.commands.optionalComment',
+      'xpack.apm.tutorial.rackClient.configure.commands.optionalComment',
       {
         defaultMessage: 'optional, defaults to config/elastic_apm.yml',
       }
@@ -416,14 +416,14 @@ export const createRackAgentInstructions = (
     commands: `# config/elastic_apm.yml:
 
 # ${i18n.translate(
-      'apmOss.tutorial.rackClient.createConfig.commands.setServiceNameComment',
+      'xpack.apm.tutorial.rackClient.createConfig.commands.setServiceNameComment',
       {
         defaultMessage:
           'Set the service name - allowed characters: a-z, A-Z, 0-9, -, _ and space',
       }
     )}
 # ${i18n.translate(
-      'apmOss.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
+      'xpack.apm.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
       {
         defaultMessage: "Defaults to the name of your Rack app's class.",
       }
@@ -431,7 +431,7 @@ export const createRackAgentInstructions = (
 service_name: 'my-service'
 
 # ${i18n.translate(
-      'apmOss.tutorial.rackClient.createConfig.commands.useIfApmServerRequiresTokenComment',
+      'xpack.apm.tutorial.rackClient.createConfig.commands.useIfApmServerRequiresTokenComment',
       {
         defaultMessage: 'Use if APM Server requires a token',
       }
@@ -439,7 +439,7 @@ service_name: 'my-service'
 secret_token: '${secretToken}'
 
 # ${i18n.translate(
-      'apmOss.tutorial.rackClient.createConfig.commands.setCustomApmServerComment',
+      'xpack.apm.tutorial.rackClient.createConfig.commands.setCustomApmServerComment',
       {
         defaultMessage:
           'Set custom APM Server URL (default: {defaultServerUrl})',
@@ -449,14 +449,14 @@ secret_token: '${secretToken}'
 server_url: '${apmServerUrl || 'http://localhost:8200'}',
 
 # ${i18n.translate(
-      'apmOss.tutorial.rackClient.createConfig.commands.setServiceEnvironment',
+      'xpack.apm.tutorial.rackClient.createConfig.commands.setServiceEnvironment',
       {
         defaultMessage: 'Set the service environment',
       }
     )}
 environment: 'production'`.split('\n'),
     textPost: i18n.translate(
-      'apmOss.tutorial.rackClient.createConfig.textPost',
+      'xpack.apm.tutorial.rackClient.createConfig.textPost',
       {
         defaultMessage:
           'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
@@ -472,13 +472,13 @@ environment: 'production'`.split('\n'),
 export const createJsAgentInstructions = (apmServerUrl = '') => [
   {
     title: i18n.translate(
-      'apmOss.tutorial.jsClient.enableRealUserMonitoring.title',
+      'xpack.apm.tutorial.jsClient.enableRealUserMonitoring.title',
       {
         defaultMessage: 'Enable Real User Monitoring support in APM Server',
       }
     ),
     textPre: i18n.translate(
-      'apmOss.tutorial.jsClient.enableRealUserMonitoring.textPre',
+      'xpack.apm.tutorial.jsClient.enableRealUserMonitoring.textPre',
       {
         defaultMessage:
           'APM Server disables RUM support by default. See the [documentation]({documentationLink}) \
@@ -498,7 +498,7 @@ for details on how to enable RUM support.',
       }
     ),
     textPre: i18n.translate(
-      'apmOss.tutorial.jsClient.installDependency.textPre',
+      'xpack.apm.tutorial.jsClient.installDependency.textPre',
       {
         defaultMessage:
           'You can install the Agent as a dependency to your application with \
@@ -510,7 +510,7 @@ The Agent can then be initialized and configured in your application like this:'
 var apm = initApm({curlyOpen}
 
   // ${i18n.translate(
-    'apmOss.tutorial.jsClient.installDependency.commands.setRequiredServiceNameComment',
+    'xpack.apm.tutorial.jsClient.installDependency.commands.setRequiredServiceNameComment',
     {
       defaultMessage:
         'Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)',
@@ -519,7 +519,7 @@ var apm = initApm({curlyOpen}
   serviceName: 'your-app-name',
 
   // ${i18n.translate(
-    'apmOss.tutorial.jsClient.installDependency.commands.setCustomApmServerUrlComment',
+    'xpack.apm.tutorial.jsClient.installDependency.commands.setCustomApmServerUrlComment',
     {
       defaultMessage:
         'Set custom APM Server URL (default: {defaultApmServerUrl})',
@@ -529,7 +529,7 @@ var apm = initApm({curlyOpen}
   serverUrl: '${apmServerUrl}',
 
   // ${i18n.translate(
-    'apmOss.tutorial.jsClient.installDependency.commands.setServiceVersionComment',
+    'xpack.apm.tutorial.jsClient.installDependency.commands.setServiceVersionComment',
     {
       defaultMessage:
         'Set the service version (required for source map feature)',
@@ -538,7 +538,7 @@ var apm = initApm({curlyOpen}
   serviceVersion: '',
 
   // ${i18n.translate(
-    'apmOss.tutorial.jsClient.installDependency.commands.setServiceEnvironmentComment',
+    'xpack.apm.tutorial.jsClient.installDependency.commands.setServiceEnvironmentComment',
     {
       defaultMessage: 'Set the service environment',
     }
@@ -546,7 +546,7 @@ var apm = initApm({curlyOpen}
   environment: 'production'
 {curlyClose})`.split('\n'),
     textPost: i18n.translate(
-      'apmOss.tutorial.jsClient.installDependency.textPost',
+      'xpack.apm.tutorial.jsClient.installDependency.textPost',
       {
         defaultMessage:
           'Framework integrations, like React or Angular, have custom dependencies. \
@@ -611,21 +611,21 @@ APM services are created programmatically based on the executable \
 file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
     }),
     commands: `# ${i18n.translate(
-      'apmOss.tutorial.goClient.configure.commands.initializeUsingEnvironmentVariablesComment',
+      'xpack.apm.tutorial.goClient.configure.commands.initializeUsingEnvironmentVariablesComment',
       {
         defaultMessage: 'Initialize using environment variables:',
       }
     )}
 
 # ${i18n.translate(
-      'apmOss.tutorial.goClient.configure.commands.setServiceNameComment',
+      'xpack.apm.tutorial.goClient.configure.commands.setServiceNameComment',
       {
         defaultMessage:
           'Set the service name. Allowed characters: # a-z, A-Z, 0-9, -, _, and space.',
       }
     )}
 # ${i18n.translate(
-      'apmOss.tutorial.goClient.configure.commands.usedExecutableNameComment',
+      'xpack.apm.tutorial.goClient.configure.commands.usedExecutableNameComment',
       {
         defaultMessage:
           'If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.',
@@ -634,7 +634,7 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
 export ELASTIC_APM_SERVICE_NAME=
 
 # ${i18n.translate(
-      'apmOss.tutorial.goClient.configure.commands.setCustomApmServerUrlComment',
+      'xpack.apm.tutorial.goClient.configure.commands.setCustomApmServerUrlComment',
       {
         defaultMessage:
           'Set custom APM Server URL (default: {defaultApmServerUrl})',
@@ -644,7 +644,7 @@ export ELASTIC_APM_SERVICE_NAME=
 export ELASTIC_APM_SERVER_URL=${apmServerUrl}
 
 # ${i18n.translate(
-      'apmOss.tutorial.goClient.configure.commands.useIfApmRequiresTokenComment',
+      'xpack.apm.tutorial.goClient.configure.commands.useIfApmRequiresTokenComment',
       {
         defaultMessage: 'Use if APM Server requires a secret token',
       }
@@ -652,7 +652,7 @@ export ELASTIC_APM_SERVER_URL=${apmServerUrl}
 export ELASTIC_APM_SECRET_TOKEN=${secretToken}
 
 # ${i18n.translate(
-      'apmOss.tutorial.goClient.configure.commands.setServiceEnvironment',
+      'xpack.apm.tutorial.goClient.configure.commands.setServiceEnvironment',
       {
         defaultMessage: 'Set the service environment',
       }
@@ -731,7 +731,7 @@ Do **not** add the agent as a dependency to your application.',
       }
     ),
     textPre: i18n.translate(
-      'apmOss.tutorial.javaClient.startApplication.textPre',
+      'xpack.apm.tutorial.javaClient.startApplication.textPre',
       {
         defaultMessage:
           'Add the `-javaagent` flag and configure the agent with system properties.\n\n \
@@ -751,7 +751,7 @@ Do **not** add the agent as a dependency to your application.',
      -Delastic.apm.application_packages=org.example \\
      -jar my-application.jar`.split('\n'),
     textPost: i18n.translate(
-      'apmOss.tutorial.javaClient.startApplication.textPost',
+      'xpack.apm.tutorial.javaClient.startApplication.textPost',
       {
         defaultMessage:
           'See the [documentation]({documentationLink}) for configuration options and advanced \
@@ -799,13 +799,13 @@ export const createDotNetAgentInstructions = (
   },
   {
     title: i18n.translate(
-      'apmOss.tutorial.dotNetClient.configureApplication.title',
+      'xpack.apm.tutorial.dotNetClient.configureApplication.title',
       {
         defaultMessage: 'Add the agent to the application',
       }
     ),
     textPre: i18n.translate(
-      'apmOss.tutorial.dotNetClient.configureApplication.textPre',
+      'xpack.apm.tutorial.dotNetClient.configureApplication.textPre',
       {
         defaultMessage:
           'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `UseAllElasticApm` \
@@ -822,7 +822,7 @@ export const createDotNetAgentInstructions = (
   //…rest of the class
 {curlyClose}`.split('\n'),
     textPost: i18n.translate(
-      'apmOss.tutorial.dotNetClient.configureApplication.textPost',
+      'xpack.apm.tutorial.dotNetClient.configureApplication.textPost',
       {
         defaultMessage:
           'Passing an `IConfiguration` instance is optional and by doing so, the agent will read config settings through this \
@@ -848,7 +848,7 @@ export const createDotNetAgentInstructions = (
   {curlyClose}
 {curlyClose}`.split('\n'),
     textPost: i18n.translate(
-      'apmOss.tutorial.dotNetClient.configureAgent.textPost',
+      'xpack.apm.tutorial.dotNetClient.configureAgent.textPost',
       {
         defaultMessage:
           'In case you don’t pass an `IConfiguration` instance to the agent (e.g. in case of non ASP.NET Core applications) \
@@ -884,14 +884,14 @@ export const createPhpAgentInstructions = (
       defaultMessage: 'Install the downloaded package',
     }),
     textPre: i18n.translate(
-      'apmOss.tutorial.phpClient.installPackage.textPre',
+      'xpack.apm.tutorial.phpClient.installPackage.textPre',
       {
         defaultMessage: 'For example on Alpine Linux using APK package:',
       }
     ),
     commands: ['apk add --allow-untrusted <package-file>.apk'],
     textPost: i18n.translate(
-      'apmOss.tutorial.phpClient.installPackage.textPost',
+      'xpack.apm.tutorial.phpClient.installPackage.textPost',
       {
         defaultMessage:
           'See the [documentation]({documentationLink}) for installation commands on other supported platforms and advanced installation.',
@@ -907,7 +907,7 @@ export const createPhpAgentInstructions = (
       defaultMessage: 'Configure the agent',
     }),
     textPre: i18n.translate(
-      'apmOss.tutorial.phpClient.configureAgent.textPre',
+      'xpack.apm.tutorial.phpClient.configureAgent.textPre',
       {
         defaultMessage:
           'APM is automatically started when your app boots. Configure the agent either via `php.ini` file:',

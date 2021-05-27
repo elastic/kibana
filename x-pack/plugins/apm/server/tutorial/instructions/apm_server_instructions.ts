@@ -105,7 +105,7 @@ export function createWindowsServerInstructions() {
     {
       title: createDownloadServerTitle(),
       textPre: i18n.translate(
-        'apmOss.tutorial.windowsServerInstructions.textPre',
+        'xpack.apm.tutorial.windowsServerInstructions.textPre',
         {
           defaultMessage:
             '1. Download the APM Server Windows zip file from the \
@@ -127,7 +127,7 @@ PowerShell.\n5. From the PowerShell prompt, run the following commands to instal
         `.\\install-service-apm-server.ps1`,
       ],
       textPost: i18n.translate(
-        'apmOss.tutorial.windowsServerInstructions.textPost',
+        'xpack.apm.tutorial.windowsServerInstructions.textPost',
         {
           defaultMessage:
             'Note: If script execution is disabled on your system, \
