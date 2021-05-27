@@ -7,7 +7,7 @@
 
 import { UserConfiguredActionConnector } from '../../../../types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorSubActionCreateRecordParams } from '../../../../../../actions/server/builtin_action_types/swimlane/types';
+import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/swimlane/types';
 
 export type SwimlaneActionConnector = UserConfiguredActionConnector<
   SwimlaneConfig,
@@ -43,7 +43,7 @@ export interface SwimlaneSecrets {
 
 export interface SwimlaneActionParams {
   subAction: string;
-  subActionParams: ExecutorSubActionCreateRecordParams;
+  subActionParams: ExecutorSubActionPushParams;
 }
 
 export interface SwimlaneFieldMap {

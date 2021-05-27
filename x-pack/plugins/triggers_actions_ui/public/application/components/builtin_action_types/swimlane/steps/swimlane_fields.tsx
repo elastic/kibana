@@ -8,12 +8,10 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiButton, EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import * as i18n from '../translations';
-import { UserConfiguredActionConnector } from '../../../../../types';
 import {
+  SwimlaneActionConnector,
   SwimlaneFieldMappingConfig,
   SwimlaneMappingConfig,
-  SwimlaneConfig,
-  SwimlaneSecrets,
 } from '../types';
 
 const SINGLE_SELECTION = { asPlainText: true };
@@ -28,7 +26,7 @@ const createSelectedOption = (field: SwimlaneFieldMappingConfig | null | undefin
   field != null ? [formatOption(field)] : EMPTY_COMBO_BOX_ARRAY;
 
 interface Props {
-  action: UserConfiguredActionConnector<SwimlaneConfig, SwimlaneSecrets>;
+  action: SwimlaneActionConnector;
   editActionConfig: (property: string, value: any) => void;
   updateCurrentStep: (step: number) => void;
   fields: SwimlaneFieldMappingConfig[];

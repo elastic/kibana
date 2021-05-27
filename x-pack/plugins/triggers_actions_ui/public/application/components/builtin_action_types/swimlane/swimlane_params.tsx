@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 import * as i18n from './translations';
 import { ActionParamsProps } from '../../../../types';
-import { SwimlaneActionParams } from './types';
+import { SwimlaneActionConnector, SwimlaneActionParams } from './types';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 
@@ -19,74 +19,144 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
   index,
   messageVariables,
   errors,
+  actionConnector,
 }) => {
-  const isInit = useRef(true);
-  const {
-    subActionParams = {
-      alertName: '',
-      severity: '',
-      alertSource: '',
-      caseName: '',
-      caseId: '',
-      comments: '',
-    },
-  } = actionParams;
+  const { incident, comments } = useMemo(
+    () =>
+      actionParams.subActionParams ??
+      (({
+        incident: {},
+        comments: [],
+      } as unknown) as SwimlaneActionParams['subActionParams']),
+    [actionParams.subActionParams]
+  );
+
+  const actionConnectorRef = useRef(actionConnector?.id ?? '');
+
+  const { mappings } = ((actionConnector as unknown) as SwimlaneActionConnector).config;
+  const { hasAlertName, hasAlertSource, hasComments, hasSeverity } = useMemo(
+    () => ({
+      hasAlertName: mappings.alertNameConfig != null,
+      hasAlertSource: mappings.alertSourceConfig != null,
+      hasComments: mappings.commentsConfig != null,
+      hasSeverity: mappings.severityConfig != null,
+    }),
+    [
+      mappings.alertNameConfig,
+      mappings.alertSourceConfig,
+      mappings.commentsConfig,
+      mappings.severityConfig,
+    ]
+  );
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
-      const newProps = { ...subActionParams, [key]: value };
-      editAction('subActionParams', newProps, index);
+      if (key === 'comments') {
+        return editAction('subActionParams', { incident, comments: value }, index);
+      }
+
+      return editAction(
+        'subActionParams',
+        {
+          incident: { ...incident, [key]: value },
+          comments,
+        },
+        index
+      );
     },
-    [subActionParams, editAction, index]
+    [editAction, incident, comments, index]
+  );
+
+  const editComment = useCallback(
+    (key, value) => {
+      if (value.length > 0) {
+        editSubActionProperty(key, [{ commentId: '1', comment: value }]);
+      }
+    },
+    [editSubActionProperty]
   );
 
   useEffect(() => {
-    if (isInit.current) {
-      isInit.current = false;
-      editAction('subAction', 'createRecord', index);
+    if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
+      actionConnectorRef.current = actionConnector.id;
+      editAction(
+        'subActionParams',
+        {
+          incident: {},
+          comments: [],
+        },
+        index
+      );
     }
-  }, [index, editAction]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionConnector]);
+
+  useEffect(() => {
+    if (!actionParams.subAction) {
+      editAction('subAction', 'pushToService', index);
+    }
+
+    if (!actionParams.subActionParams) {
+      editAction(
+        'subActionParams',
+        {
+          incident: {},
+          comments: [],
+        },
+        index
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionParams]);
 
   return (
     <>
-      <EuiFormRow
-        id="swimlaneAlertName"
-        fullWidth
-        error={errors.alertName}
-        isInvalid={errors.alertName.length > 0 && subActionParams?.alertName !== undefined}
-        label={i18n.SW_ALERT_NAME_FIELD_LABEL}
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          data-test-subj="alertName"
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'alertName'}
-          inputTargetValue={subActionParams.alertName || ''}
-          errors={errors.alertName as string[]}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        id="swimlaneAlertSource"
-        fullWidth
-        error={errors.alertSource}
-        isInvalid={errors.alertSource.length > 0 && subActionParams?.alertSource !== undefined}
-        label={i18n.SW_ALERT_SOURCE_FIELD_LABEL}
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          data-test-subj="alertSource"
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'alertSource'}
-          inputTargetValue={subActionParams.alertSource || ''}
-          errors={errors.alertSource as string[]}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      {hasAlertName && (
+        <>
+          <EuiFormRow
+            id="swimlaneAlertName"
+            fullWidth
+            error={errors.alertName}
+            isInvalid={errors.alertName.length > 0 && incident.alertName !== undefined}
+            label={i18n.SW_ALERT_NAME_FIELD_LABEL}
+          >
+            <TextFieldWithMessageVariables
+              index={index}
+              data-test-subj="alertName"
+              editAction={editSubActionProperty}
+              messageVariables={messageVariables}
+              paramsProperty={'alertName'}
+              inputTargetValue={incident.alertName || ''}
+              errors={errors.alertName as string[]}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {hasAlertSource && (
+        <>
+          <EuiFormRow
+            id="swimlaneAlertSource"
+            fullWidth
+            error={errors.alertSource}
+            isInvalid={errors.alertSource.length > 0 && incident.alertSource !== undefined}
+            label={i18n.SW_ALERT_SOURCE_FIELD_LABEL}
+          >
+            <TextFieldWithMessageVariables
+              index={index}
+              data-test-subj="alertSource"
+              editAction={editSubActionProperty}
+              messageVariables={messageVariables}
+              paramsProperty={'alertSource'}
+              inputTargetValue={incident.alertSource || ''}
+              errors={errors.alertSource as string[]}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {hasSeverity && (
+        <>
           <EuiFormRow fullWidth label={i18n.SW_SEVERITY_FIELD_LABEL}>
             <TextFieldWithMessageVariables
               index={index}
@@ -94,59 +164,24 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
               editAction={editSubActionProperty}
               messageVariables={messageVariables}
               paramsProperty={'severity'}
-              inputTargetValue={subActionParams.severity || ''}
+              inputTargetValue={incident.severity || ''}
               errors={errors.severity as string[]}
             />
           </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        id="swimlaneCaseId"
-        fullWidth
-        error={errors.caseId}
-        isInvalid={errors.caseId.length > 0 && subActionParams?.caseId !== undefined}
-        label={i18n.SW_CASE_ID_FIELD_LABEL}
-      >
-        <TextFieldWithMessageVariables
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {hasComments && (
+        <TextAreaWithMessageVariables
+          data-test-subj="comments"
           index={index}
-          data-test-subj="caseId"
-          editAction={editSubActionProperty}
+          editAction={editComment}
           messageVariables={messageVariables}
-          paramsProperty={'caseId'}
-          inputTargetValue={subActionParams.caseId || ''}
-          errors={errors.caseId as string[]}
+          paramsProperty={'comments'}
+          inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+          label={i18n.SW_COMMENTS_FIELD_LABEL}
         />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        id="swimlaneCaseName"
-        fullWidth
-        error={errors.caseName}
-        isInvalid={errors.caseName.length > 0 && subActionParams?.caseName !== undefined}
-        label={i18n.SW_CASE_NAME_FIELD_LABEL}
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          data-test-subj="caseName"
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'caseName'}
-          inputTargetValue={subActionParams.caseName || ''}
-          errors={errors.caseName as string[]}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <TextAreaWithMessageVariables
-        index={index}
-        data-test-subj="comments"
-        editAction={editSubActionProperty}
-        messageVariables={messageVariables}
-        paramsProperty={'comments'}
-        inputTargetValue={subActionParams.comments || ''}
-        errors={errors.comments as string[]}
-        label={i18n.SW_COMMENTS_FIELD_LABEL}
-      />
+      )}
     </>
   );
 };

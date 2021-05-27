@@ -11,7 +11,6 @@ import { Logger } from '@kbn/logging';
 import {
   ConfigMappingSchema,
   ExecutorParamsSchema,
-  ExecutorSubActionCreateRecordParamsSchema,
   ExecutorSubActionPushParamsSchema,
   SwimlaneSecretsConfigurationSchema,
   SwimlaneServiceConfigurationSchema,
@@ -26,10 +25,6 @@ export type MappingConfigType = TypeOf<typeof ConfigMappingSchema> &
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
-
-export type ExecutorSubActionCreateRecordParams = TypeOf<
-  typeof ExecutorSubActionCreateRecordParamsSchema
->;
 
 export interface ExternalServiceCredentials {
   config: SwimlanePublicConfigurationType;
@@ -83,17 +78,10 @@ export interface ExternalService {
   updateRecord: (params: UpdateRecordParams) => Promise<ExternalServiceIncidentResponse>;
 }
 
-export type Incident = ExecutorSubActionPushParams['incident'];
-export type CreateRecordApiParams = ExecutorSubActionCreateRecordParams;
+export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;
-}
-
-export interface CreateRecordApiHandlerArgs extends ExternalServiceApiHandlerArgs {
-  params: CreateRecordApiParams;
-  externalService: ExternalService;
-  logger: Logger;
 }
 
 export interface GetApplicationHandlerArgs {
@@ -101,7 +89,6 @@ export interface GetApplicationHandlerArgs {
 }
 
 export interface ExternalServiceApi {
-  createRecord: (args: CreateRecordApiHandlerArgs) => Promise<ExternalServiceIncidentResponse>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<ExternalServiceIncidentResponse>;
 }
 

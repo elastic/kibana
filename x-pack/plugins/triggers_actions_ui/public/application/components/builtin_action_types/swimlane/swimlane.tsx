@@ -77,7 +77,10 @@ export function getActionType(): ActionTypeModel<
         comments: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (!actionParams.subActionParams || !actionParams.subActionParams.alertName?.length) {
+      if (
+        !actionParams.subActionParams ||
+        !actionParams.subActionParams.incident.alertName?.length
+      ) {
         errors.alertName.push(i18n.SW_REQUIRED_ALERT_NAME);
       }
       return validationResult;

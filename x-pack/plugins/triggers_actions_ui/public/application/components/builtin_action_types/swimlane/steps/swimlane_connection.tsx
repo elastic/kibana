@@ -18,11 +18,11 @@ import { FormattedMessage } from 'react-intl';
 import * as i18n from '../translations';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGetApplication } from '../use_get_application';
-import { SwimlaneConfig, SwimlaneFieldMappingConfig, SwimlaneSecrets } from '../types';
-import { IErrorObject, UserConfiguredActionConnector } from '../../../../../types';
+import { SwimlaneActionConnector, SwimlaneFieldMappingConfig } from '../types';
+import { IErrorObject } from '../../../../../types';
 
 interface Props {
-  action: UserConfiguredActionConnector<SwimlaneConfig, SwimlaneSecrets>;
+  action: SwimlaneActionConnector;
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
   errors: IErrorObject;

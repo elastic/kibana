@@ -51,8 +51,6 @@ const SwimlaneFields = {
   description: schema.nullable(schema.string()),
 };
 
-export const ExecutorSubActionCreateRecordParamsSchema = schema.object(SwimlaneFields);
-
 export const ExecutorSubActionPushParamsSchema = schema.object({
   incident: schema.object({
     ...SwimlaneFields,
@@ -69,10 +67,6 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
 });
 
 export const ExecutorParamsSchema = schema.oneOf([
-  schema.object({
-    subAction: schema.literal('createRecord'),
-    subActionParams: ExecutorSubActionCreateRecordParamsSchema,
-  }),
   schema.object({
     subAction: schema.literal('pushToService'),
     subActionParams: ExecutorSubActionPushParamsSchema,

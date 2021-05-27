@@ -6,19 +6,11 @@
  */
 
 import {
-  CreateRecordApiHandlerArgs,
   ExternalServiceIncidentResponse,
   ExternalServiceApi,
   Incident,
   PushToServiceApiHandlerArgs,
 } from './types';
-
-const createRecordHandler = async ({
-  externalService,
-  params,
-}: CreateRecordApiHandlerArgs): Promise<ExternalServiceIncidentResponse> => {
-  return await externalService.createRecord({ incident: { ...params, externalId: null } });
-};
 
 const pushToServiceHandler = async ({
   externalService,
@@ -26,10 +18,12 @@ const pushToServiceHandler = async ({
 }: PushToServiceApiHandlerArgs): Promise<ExternalServiceIncidentResponse> => {
   const { comments } = params;
   let res: ExternalServiceIncidentResponse;
-  const incident: Incident = params.incident;
-  if (incident.externalId != null) {
+  const { externalId, ...rest } = params.incident;
+  const incident: Incident = rest;
+
+  if (externalId != null) {
     res = await externalService.updateRecord({
-      incidentId: incident.externalId,
+      incidentId: externalId,
       incident,
     });
   } else {
@@ -52,6 +46,5 @@ const pushToServiceHandler = async ({
 };
 
 export const api: ExternalServiceApi = {
-  createRecord: createRecordHandler,
   pushToService: pushToServiceHandler,
 };
