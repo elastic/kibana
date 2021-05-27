@@ -8837,7 +8837,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-          "lineNumber": 113
+          "lineNumber": 114
         },
         "deprecated": false,
         "children": [
@@ -8855,7 +8855,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-              "lineNumber": 117
+              "lineNumber": 118
             },
             "deprecated": false
           },
@@ -8870,7 +8870,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-              "lineNumber": 121
+              "lineNumber": 122
             },
             "deprecated": false
           },
@@ -8885,7 +8885,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-              "lineNumber": 125
+              "lineNumber": 126
             },
             "deprecated": false
           },
@@ -8900,7 +8900,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-              "lineNumber": 129
+              "lineNumber": 130
             },
             "deprecated": false
           },
@@ -8918,7 +8918,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-              "lineNumber": 133
+              "lineNumber": 134
             },
             "deprecated": false
           },
@@ -8933,7 +8933,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-              "lineNumber": 139
+              "lineNumber": 140
             },
             "deprecated": false
           }
@@ -9085,7 +9085,7 @@
             "label": "agent",
             "description": [],
             "signature": [
-              "{ monitoring: { use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; } | undefined"
+              "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; } | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
@@ -9326,7 +9326,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-          "lineNumber": 102
+          "lineNumber": 103
         },
         "deprecated": false,
         "children": [
@@ -9342,7 +9342,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-              "lineNumber": 103
+              "lineNumber": 104
             },
             "deprecated": false
           },
@@ -9355,7 +9355,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-              "lineNumber": 104
+              "lineNumber": 105
             },
             "deprecated": false
           },
@@ -9371,7 +9371,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-              "lineNumber": 105
+              "lineNumber": 106
             },
             "deprecated": false
           }

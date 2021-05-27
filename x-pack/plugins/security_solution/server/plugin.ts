@@ -283,7 +283,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             read: ['config'],
           },
           alerting: {
-            all: ruleTypes,
+            rule: {
+              all: ruleTypes,
+            },
+            alert: {
+              all: ruleTypes,
+            },
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
@@ -305,7 +310,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
           },
           alerting: {
-            read: ruleTypes,
+            rule: {
+              read: ruleTypes,
+            },
+            alert: {
+              read: ruleTypes,
+            },
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
