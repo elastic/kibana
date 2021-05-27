@@ -8,13 +8,11 @@
 import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test/jest';
 
-export const createFormToggleAction = (testBed: TestBed, dataTestSubject: string) => async (
-  checked: boolean
-) => {
+export const createFormToggleAction = (testBed: TestBed, dataTestSubject: string) => async () => {
   const { form, component } = testBed;
 
   await act(async () => {
-    form.toggleEuiSwitch(dataTestSubject, checked);
+    form.toggleEuiSwitch(dataTestSubject);
   });
 
   component.update();

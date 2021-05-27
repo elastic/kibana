@@ -13,7 +13,7 @@ import { getGeneratedPolicies } from '../constants';
 
 describe('<EditPolicy /> policy name validation', () => {
   let testBed: EditPolicyTestBed;
-  let runTimers: () => void;
+  let actions: EditPolicyTestBed['actions'];
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -34,28 +34,24 @@ describe('<EditPolicy /> policy name validation', () => {
 
     const { component } = testBed;
     component.update();
-
-    ({ runTimers } = testBed);
+    ({ actions } = testBed);
   });
 
   test(`doesn't allow empty policy name`, async () => {
-    const { actions } = testBed;
     await actions.savePolicy();
-    actions.expectErrorMessages([i18nTexts.editPolicy.errors.policyNameRequiredMessage]);
+    actions.errors.expectMessages([i18nTexts.editPolicy.errors.policyNameRequiredMessage]);
   });
 
   test(`doesn't allow policy name with space`, async () => {
-    const { actions } = testBed;
     await actions.setPolicyName('my policy');
-    runTimers();
-    actions.expectErrorMessages([i18nTexts.editPolicy.errors.policyNameContainsInvalidChars]);
+    actions.errors.waitForValidation();
+    actions.errors.expectMessages([i18nTexts.editPolicy.errors.policyNameContainsInvalidChars]);
   });
 
   test(`doesn't allow policy name that is already used`, async () => {
-    const { actions } = testBed;
     await actions.setPolicyName('testy0');
-    runTimers();
-    actions.expectErrorMessages([i18nTexts.editPolicy.errors.policyNameAlreadyUsedErrorMessage]);
+    actions.errors.waitForValidation();
+    actions.errors.expectMessages([i18nTexts.editPolicy.errors.policyNameAlreadyUsedErrorMessage]);
   });
 
   test(`doesn't allow to save as new policy but using the same name`, async () => {
@@ -69,31 +65,28 @@ describe('<EditPolicy /> policy name validation', () => {
         },
       });
     });
-    const { component, actions } = testBed;
+    const { component } = testBed;
     component.update();
+    ({ actions } = testBed);
 
-    ({ runTimers } = testBed);
-
-    await actions.saveAsNewPolicy(true);
-    runTimers();
+    await actions.toggleSaveAsNewPolicy();
+    actions.errors.waitForValidation();
     await actions.savePolicy();
-    actions.expectErrorMessages([
+    actions.errors.expectMessages([
       i18nTexts.editPolicy.errors.policyNameMustBeDifferentErrorMessage,
     ]);
   });
 
   test(`doesn't allow policy name with comma`, async () => {
-    const { actions } = testBed;
     await actions.setPolicyName('my,policy');
-    runTimers();
-    actions.expectErrorMessages([i18nTexts.editPolicy.errors.policyNameContainsInvalidChars]);
+    actions.errors.waitForValidation();
+    actions.errors.expectMessages([i18nTexts.editPolicy.errors.policyNameContainsInvalidChars]);
   });
 
   test(`doesn't allow policy name starting with underscore`, async () => {
-    const { actions } = testBed;
     await actions.setPolicyName('_mypolicy');
-    runTimers();
-    actions.expectErrorMessages([
+    actions.errors.waitForValidation();
+    actions.errors.expectMessages([
       i18nTexts.editPolicy.errors.policyNameStartsWithUnderscoreErrorMessage,
     ]);
   });

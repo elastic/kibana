@@ -56,7 +56,7 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
     const { actions, component } = testBed;
 
     component.update();
-    await actions.enable(true);
+    await actions.toggleColdPhase();
 
     expect(actions.isAllocationLoading()).toBeFalsy();
     expect(actions.hasWillUseFallbackTierNotice()).toBeFalsy();
@@ -67,7 +67,7 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
       server.respondImmediately = false;
 
       const { actions } = testBed;
-      await actions.enable(true);
+      await actions.toggleColdPhase();
 
       expect(actions.isAllocationLoading()).toBeTruthy();
       expect(actions.hasDataTierAllocationControls()).toBeTruthy();
@@ -83,7 +83,7 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
     describe('and some are defined', () => {
       test('shows the node attributes input', async () => {
         const { actions } = testBed;
-        await actions.enable(true);
+        await actions.toggleColdPhase();
 
         expect(actions.isAllocationLoading()).toBeFalsy();
         await actions.setDataAllocation('node_attrs');
@@ -95,7 +95,7 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
       test('shows view node attributes link when an attribute is selected and shows flyout when clicked', async () => {
         const { actions } = testBed;
 
-        await actions.enable(true);
+        await actions.toggleColdPhase();
 
         expect(actions.isAllocationLoading()).toBeFalsy();
         await actions.setDataAllocation('node_attrs');
@@ -116,7 +116,7 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
         await setup();
         const { actions, component } = testBed;
         component.update();
-        await actions.enable(true);
+        await actions.toggleColdPhase();
 
         expect(actions.isAllocationLoading()).toBeFalsy();
         await actions.setDataAllocation('node_attrs');
@@ -186,7 +186,7 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
       const { actions, component } = testBed;
 
       component.update();
-      await actions.enable(true);
+      await actions.toggleColdPhase();
 
       expect(actions.isAllocationLoading()).toBeFalsy();
       expect(actions.hasNoTiersAvailableNotice()).toBeTruthy();
@@ -213,7 +213,7 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
         const { actions, component } = testBed;
 
         component.update();
-        await actions.enable(true);
+        await actions.toggleColdPhase();
 
         expect(actions.isAllocationLoading()).toBeFalsy();
         expect(actions.hasWillUseFallbackTierNotice()).toBeTruthy();
