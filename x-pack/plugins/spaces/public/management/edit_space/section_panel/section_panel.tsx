@@ -13,7 +13,6 @@ import React, { Component, Fragment } from 'react';
 interface Props {
   iconType?: IconType;
   title: string | ReactNode;
-  description: string;
 }
 
 export class SectionPanel extends Component<Props, {}> {

@@ -182,7 +182,7 @@ export class CustomizeSpaceAvatar extends Component<Props> {
                     helpText={i18n.translate(
                       'xpack.spaces.management.customizeSpaceAvatar.initialsHelpText',
                       {
-                        defaultMessage: 'Enter a maximum of two characters.',
+                        defaultMessage: 'Enter up to two characters.',
                       }
                     )}
                     {...this.props.validator.validateAvatarInitials(space)}

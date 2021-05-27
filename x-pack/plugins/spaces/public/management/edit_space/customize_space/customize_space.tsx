@@ -51,7 +51,7 @@ export class CustomizeSpace extends Component<Props, State> {
     });
 
     return (
-      <SectionPanel title={panelTitle} description={panelTitle}>
+      <SectionPanel title={panelTitle}>
         <EuiDescribedFormGroup
           title={
             <EuiTitle size="xs">
@@ -66,7 +66,7 @@ export class CustomizeSpace extends Component<Props, State> {
           description={i18n.translate(
             'xpack.spaces.management.manageSpacePage.describeSpaceDescription',
             {
-              defaultMessage: 'Give your space a name and description for easy identification.',
+              defaultMessage: "Give your space a name that's memorable.",
             }
           )}
           fullWidth
@@ -127,7 +127,7 @@ export class CustomizeSpace extends Component<Props, State> {
               helpText={
                 <FormattedMessage
                   id="xpack.spaces.management.spaceIdentifier.kibanaURLForSpaceIdentifierDescription"
-                  defaultMessage="The URL identifier can't be changed once created."
+                  defaultMessage="You can't change the URL identifier once created."
                 />
               }
               {...this.props.validator.validateURLIdentifier(this.props.space)}
@@ -150,13 +150,13 @@ export class CustomizeSpace extends Component<Props, State> {
               <h3>
                 <FormattedMessage
                   id="xpack.spaces.management.manageSpacePage.avatarTitle"
-                  defaultMessage="Customize avatar for this space"
+                  defaultMessage="Create an avatar"
                 />
               </h3>
             </EuiTitle>
           }
           description={i18n.translate('xpack.spaces.management.manageSpacePage.avatarDescription', {
-            defaultMessage: 'Choose how you wish your space’s avatar to appear across Kibana.',
+            defaultMessage: 'Choose how your space avatar appears across Kibana.',
           })}
           fullWidth
         >

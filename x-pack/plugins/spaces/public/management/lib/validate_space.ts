@@ -40,7 +40,7 @@ export class SpaceValidator {
     if (!space.name || !space.name.trim()) {
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.requiredNameErrorMessage', {
-          defaultMessage: 'Name is required.',
+          defaultMessage: 'Enter a name.',
         })
       );
     }
@@ -84,7 +84,7 @@ export class SpaceValidator {
     if (!space.id) {
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.urlIdentifierRequiredErrorMessage', {
-          defaultMessage: 'URL identifier is required.',
+          defaultMessage: 'Enter a URL identifier.',
         })
       );
     }

@@ -17,17 +17,12 @@ import {
   hexToHsv,
   hsvToHex,
 } from '@elastic/eui';
-import _ from 'lodash';
-import React, { Component, Fragment } from 'react';
+import { difference } from 'lodash';
+import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type {
-  ApplicationStart,
-  Capabilities,
-  NotificationsStart,
-  ScopedHistory,
-} from 'src/core/public';
+import type { Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
 import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
@@ -58,7 +53,6 @@ interface Props {
   onLoadSpace?: (space: Space) => void;
   capabilities: Capabilities;
   history: ScopedHistory;
-  getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
 interface State {
@@ -123,11 +117,7 @@ export class ManageSpacePage extends Component<Props, State> {
   public render() {
     const content = this.state.isLoading ? this.getLoadingIndicator() : this.getForm();
 
-    return (
-      <Fragment>
-        <EuiPageContentBody>{content}</EuiPageContentBody>
-      </Fragment>
-    );
+    return <EuiPageContentBody>{content}</EuiPageContentBody>;
   }
 
   public getLoadingIndicator = () => (
@@ -165,7 +155,6 @@ export class ManageSpacePage extends Component<Props, State> {
           space={this.state.space}
           features={this.state.features}
           onChange={this.onSpaceChange}
-          getUrlForApp={this.props.getUrlForApp}
         />
 
         <EuiSpacer />
@@ -306,7 +295,7 @@ export class ManageSpacePage extends Component<Props, State> {
 
         const haveDisabledFeaturesChanged =
           space.disabledFeatures.length !== originalSpace.disabledFeatures.length ||
-          _.difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
+          difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
 
         if (editingActiveSpace && haveDisabledFeaturesChanged) {
           this.setState({

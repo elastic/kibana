@@ -32,8 +32,6 @@ const features: KibanaFeatureConfig[] = [
 ];
 
 describe('EnabledFeatures', () => {
-  const getUrlForApp = (appId: string) => appId;
-
   it(`renders as expected`, () => {
     expect(
       shallowWithIntl(
@@ -45,7 +43,6 @@ describe('EnabledFeatures', () => {
             disabledFeatures: ['feature-1', 'feature-2'],
           }}
           onChange={jest.fn()}
-          getUrlForApp={getUrlForApp}
         />
       )
     ).toMatchSnapshot();
@@ -63,7 +60,6 @@ describe('EnabledFeatures', () => {
           disabledFeatures: ['feature-1', 'feature-2'],
         }}
         onChange={changeHandler}
-        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -97,7 +93,6 @@ describe('EnabledFeatures', () => {
           disabledFeatures: [],
         }}
         onChange={changeHandler}
-        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -134,7 +129,6 @@ describe('EnabledFeatures', () => {
           disabledFeatures: [],
         }}
         onChange={changeHandler}
-        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -164,7 +158,6 @@ describe('EnabledFeatures', () => {
           disabledFeatures: ['feature-1', 'feature-2'],
         }}
         onChange={changeHandler}
-        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -192,7 +185,6 @@ describe('EnabledFeatures', () => {
           disabledFeatures: ['feature-1'],
         }}
         onChange={jest.fn()}
-        getUrlForApp={getUrlForApp}
       />
     );
     expect(findTestSubject(wrapper, 'hideAllFeaturesLink')).toHaveLength(1);
@@ -211,7 +203,6 @@ describe('EnabledFeatures', () => {
             disabledFeatures: [],
           }}
           onChange={changeHandler}
-          getUrlForApp={getUrlForApp}
         />
       );
 
@@ -239,7 +230,6 @@ describe('EnabledFeatures', () => {
             disabledFeatures: [],
           }}
           onChange={changeHandler}
-          getUrlForApp={getUrlForApp}
         />
       );
 
