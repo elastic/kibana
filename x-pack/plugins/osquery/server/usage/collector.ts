@@ -21,10 +21,12 @@ export const registerCollector: RegisterCollector = ({ usageCollection }) => {
   if (!usageCollection) {
     return;
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const collector = usageCollection.makeUsageCollector<any>({
     type: 'osquery',
     schema: usageSchema,
     isReady: () => true,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetch: async ({ esClient }: CollectorFetchContext): Promise<any> => {
       return {
         beat_metrics: {

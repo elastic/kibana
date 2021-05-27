@@ -6,11 +6,11 @@
  */
 
 import {
-    SingleBucketAggregate,
-    TopHitsAggregate,
-    ValueAggregate,
+  SingleBucketAggregate,
+  TopHitsAggregate,
+  ValueAggregate,
 } from '@elastic/elasticsearch/api/types';
-import {getUsageRecorder} from '../routes/usage'
+import { getUsageRecorder } from '../routes/usage';
 import { ElasticsearchClient } from '../../../../../src/core/server';
 import { METRICS_INDICES } from './constants';
 
@@ -27,8 +27,8 @@ export interface BeatMetricAggregation {
 
 // TODO: pipe this through ES
 export function getLiveQueryUsage() {
-    const usageRecorder = getUsageRecorder()
-    return usageRecorder.getRouteMetric('live_query')
+  const usageRecorder = getUsageRecorder();
+  return usageRecorder.getRouteMetric('live_query');
 }
 
 export async function getBeatUsage(esClient: ElasticsearchClient) {
@@ -96,23 +96,24 @@ export async function getBeatUsage(esClient: ElasticsearchClient) {
 
   // XXX: discrimating the union types gets hairy when attempting to genericize, figure out a fix!
   if ('max_rss' in lastDayAggs) {
-      result.rss.max = (lastDayAggs.max_rss as ValueAggregate).value
+    result.rss.max = (lastDayAggs.max_rss as ValueAggregate).value;
   }
 
   if ('avg_rss' in lastDayAggs) {
-      result.rss.avg = (lastDayAggs.max_rss as ValueAggregate).value
+    result.rss.avg = (lastDayAggs.max_rss as ValueAggregate).value;
   }
 
   if ('max_cpu' in lastDayAggs) {
-      result.cpuMs.max = (lastDayAggs.max_cpu as ValueAggregate).value
+    result.cpuMs.max = (lastDayAggs.max_cpu as ValueAggregate).value;
   }
 
   if ('avg_cpu' in lastDayAggs) {
-      result.cpuMs.avg = (lastDayAggs.max_cpu as ValueAggregate).value
+    result.cpuMs.avg = (lastDayAggs.max_cpu as ValueAggregate).value;
   }
 
   if ('latest' in lastDayAggs) {
-    const latest = (lastDayAggs.latest as TopHitsAggregate).hits.hits[0]?._source?.monitoring.metrics.beat;
+    const latest = (lastDayAggs.latest as TopHitsAggregate).hits.hits[0]?._source?.monitoring
+      .metrics.beat;
     result.cpuMs.latest = latest.cpu.total.time.ms;
     result.rss.latest = latest.memstats.rss;
   }
