@@ -26,6 +26,8 @@ verify_no_git_changes() {
   fi
 }
 
+# docker_run can be used in place of `docker run`
+# it automatically passes along all of Buildkite's tracked environment variables, and mounts the buildkite-agent in the running container
 docker_run() {
   args=()
 
