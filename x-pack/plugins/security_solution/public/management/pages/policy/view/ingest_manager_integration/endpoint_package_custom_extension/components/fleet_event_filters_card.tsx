@@ -92,7 +92,7 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
           <ExceptionItemsSummary stats={stats} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <span>
+          <>
             <LinkWithIcon
               appId={MANAGEMENT_APP_ID}
               href={getUrlForApp(MANAGEMENT_APP_ID, { path: eventFiltersListUrlPath })}
@@ -105,7 +105,7 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
                 defaultMessage="Manage event filters"
               />
             </LinkWithIcon>
-          </span>
+          </>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

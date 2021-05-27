@@ -95,7 +95,7 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
           <ExceptionItemsSummary stats={stats} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <span>
+          <>
             <LinkWithIcon
               appId={MANAGEMENT_APP_ID}
               href={getUrlForApp(MANAGEMENT_APP_ID, { path: trustedAppsListUrlPath })}
@@ -108,7 +108,7 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
                 defaultMessage="Manage trusted applications"
               />
             </LinkWithIcon>
-          </span>
+          </>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
