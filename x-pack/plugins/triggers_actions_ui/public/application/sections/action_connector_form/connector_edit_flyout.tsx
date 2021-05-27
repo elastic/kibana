@@ -31,7 +31,6 @@ import { TestConnectorForm } from './test_connector_form';
 import {
   ActionConnector,
   ConnectorEditFlyoutProps,
-  ActionTypeRegistryContract,
   IErrorObject,
   EditConectorTabs,
   UserConfiguredActionConnector,

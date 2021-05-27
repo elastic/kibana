@@ -23,13 +23,7 @@ import {
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeRegistryContract,
-  Alert,
-  AlertFlyoutCloseReason,
-  AlertTypeRegistryContract,
-  IErrorObject,
-} from '../../../types';
+import { Alert, AlertFlyoutCloseReason, AlertEditProps, IErrorObject } from '../../../types';
 import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
