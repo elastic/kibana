@@ -22,7 +22,6 @@ import type {
   ReportingStartDeps,
 } from './types';
 import { registerReportingUsageCollector } from './usage';
-import { registerDeprecations } from './deprecations';
 
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
@@ -66,7 +65,6 @@ export class ReportingPlugin
     });
 
     registerUiSettings(core);
-    registerDeprecations(reportingCore, core);
     registerReportingUsageCollector(reportingCore, plugins);
     registerRoutes(reportingCore, this.logger);
     registerDeprecations({

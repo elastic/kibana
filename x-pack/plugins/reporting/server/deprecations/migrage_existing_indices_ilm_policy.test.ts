@@ -11,7 +11,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/serve
 import { ReportingCore } from '../core';
 import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
 
-import { migrateExistingIndicesIlmPolicy } from './migrate_existing_indices_ilm_policy';
+import { getDeprecationsInfo } from './migrate_existing_indices_ilm_policy';
 
 type ScopedClusterClientMock = ReturnType<
   typeof elasticsearchServiceMock.createScopedClusterClient
@@ -19,7 +19,7 @@ type ScopedClusterClientMock = ReturnType<
 
 const { createApiResponse } = elasticsearchServiceMock;
 
-describe("Migrate existing indices' ILM policy", () => {
+describe("Migrate existing indices' ILM policy deprecations", () => {
   let esClient: ScopedClusterClientMock;
   let deprecationsCtx: GetDeprecationsContext;
   let reportingCore: ReportingCore;
@@ -52,8 +52,7 @@ describe("Migrate existing indices' ILM policy", () => {
       })
     );
 
-    expect(await migrateExistingIndicesIlmPolicy(deprecationsCtx, { reportingCore }))
-      .toMatchInlineSnapshot(`
+    expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(`
       Array [
         Object {
           "correctiveActions": Object {
@@ -82,9 +81,9 @@ describe("Migrate existing indices' ILM policy", () => {
       })
     );
 
-    expect(
-      await migrateExistingIndicesIlmPolicy(deprecationsCtx, { reportingCore })
-    ).toMatchInlineSnapshot(`Array []`);
+    expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(
+      `Array []`
+    );
 
     esClient.asInternalUser.indices.getSettings.mockResolvedValueOnce(
       createApiResponse({
@@ -92,8 +91,8 @@ describe("Migrate existing indices' ILM policy", () => {
       })
     );
 
-    expect(
-      await migrateExistingIndicesIlmPolicy(deprecationsCtx, { reportingCore })
-    ).toMatchInlineSnapshot(`Array []`);
+    expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(
+      `Array []`
+    );
   });
 });

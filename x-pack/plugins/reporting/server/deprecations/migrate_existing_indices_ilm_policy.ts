@@ -14,7 +14,7 @@ interface ExtraDependencies {
   reportingCore: ReportingCore;
 }
 
-export const migrateExistingIndicesIlmPolicy = async (
+export const getDeprecationsInfo = async (
   { esClient }: GetDeprecationsContext,
   { reportingCore }: ExtraDependencies
 ): Promise<DeprecationsDetails[]> => {
@@ -46,19 +46,6 @@ export const migrateExistingIndicesIlmPolicy = async (
             method: 'PUT',
             path: API_MIGRATE_ILM_POLICY_URL,
           },
-          manualSteps: [
-            i18n.translate(
-              'xpack.reporting.deprecations.migrateIndexIlmPolicy.stepOneDescription',
-              {
-                defaultMessage:
-                  'Send a request to Elasticsearch that configures indices matching "{indexPattern}" to be managed by the "{reportingIlmPolicy}" Index Lifecycle Policy.',
-                values: {
-                  indexPattern,
-                  reportingIlmPolicy,
-                },
-              }
-            ),
-          ],
         },
       },
     ];

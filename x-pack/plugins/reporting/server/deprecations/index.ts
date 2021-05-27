@@ -7,7 +7,8 @@
 import { CoreSetup } from 'src/core/server';
 import { ReportingCore } from '../core';
 
-import { migrateExistingIndicesIlmPolicy } from './migrate_existing_indices_ilm_policy';
+import { getDeprecationsInfo as getIlmPolicyDeprecationsInfo } from './migrate_existing_indices_ilm_policy';
+import { getDeprecationsInfo as getReportingRoleDeprecationsInfo } from './reporting_role';
 
 export const registerDeprecations = ({
   core,
@@ -17,10 +18,11 @@ export const registerDeprecations = ({
   reportingCore: ReportingCore;
 }) => {
   core.deprecations.registerDeprecations({
-    getDeprecations(ctx) {
-      return migrateExistingIndicesIlmPolicy(ctx, {
-        reportingCore,
-      });
+    getDeprecations: async (ctx) => {
+      return [
+        ...(await getIlmPolicyDeprecationsInfo(ctx, { reportingCore })),
+        ...(await getReportingRoleDeprecationsInfo(ctx, { reportingCore })),
+      ];
     },
   });
 };
