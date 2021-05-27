@@ -66,6 +66,8 @@ export function createIndexDocRecordsStream(
 
     async write(record, enc, callback) {
       try {
+        stats.log.info('index doc records stream write()', record);
+
         await indexDocs([record.value]);
         progress.addToComplete(1);
         callback(null);

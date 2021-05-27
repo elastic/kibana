@@ -35,21 +35,32 @@ export async function deleteIndex(options: {
       }
     );
 
+    stats.log.info('attempt to get aliases for', indices, resp);
+
     return resp.statusCode === 404 ? indices : Object.keys(resp.body);
   };
 
   try {
     const indicesToDelete = await getIndicesToDelete();
-    await client.indices.delete(
+
+    stats.log.info('indices to delete', indicesToDelete);
+
+    const resp = await client.indices.delete(
       { index: indicesToDelete },
       {
         headers: ES_CLIENT_HEADERS,
       }
     );
+    stats.log.info('deleted indices with response', resp.body);
     for (const index of indices) {
       stats.deletedIndex(index);
     }
   } catch (error) {
+    stats.log.info('error while deleting indices', {
+      message: error.message,
+      meta: error.meta,
+    });
+
     if (retryIfSnapshottingCount > 0 && isDeleteWhileSnapshotInProgressError(error)) {
       for (const index of indices) {
         stats.waitingForInProgressSnapshot(index);

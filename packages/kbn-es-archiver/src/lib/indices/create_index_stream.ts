@@ -62,6 +62,13 @@ export function createCreateIndexStream({
           kibanaIndexAlreadyDeleted = true;
         }
 
+        await new Promise((resolve) => setTimeout(resolve, 6000));
+
+        stats.log.info('calling client.indices.create', {
+          index,
+          body: { settings, mappings, aliases },
+        });
+
         await client.indices.create(
           {
             index,
@@ -95,6 +102,10 @@ export function createCreateIndexStream({
           err?.meta?.body?.error?.type !== 'resource_already_exists_exception' ||
           attemptNumber >= 3
         ) {
+          stats.log.info('throwing error', {
+            message: err.message,
+            meta: err.meta,
+          });
           throw err;
         }
 
@@ -104,6 +115,10 @@ export function createCreateIndexStream({
           return;
         }
 
+        stats.log.info('trying to delete existing index', {
+          message: err.message,
+          meta: err.meta,
+        });
         await deleteIndex({ client, stats, index, log });
         await attemptToCreate(attemptNumber + 1);
         return;
