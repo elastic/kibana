@@ -11,18 +11,18 @@ import { useGlobalHeaderPortal } from '../../../common/hooks/use_global_header_p
 
 const Wrapper = styled.header<{ $isFixed: boolean }>`
   ${({ theme, $isFixed }) => `
-    background: ${theme.eui.euiColorEmptyShade};
+    background: ${theme.eui.euiPageBackgroundColor};
     border-bottom: ${theme.eui.euiBorderThin};
     z-index: ${theme.eui.euiZNavigation};
     position: relative;
     ${
       $isFixed
         ? `
-    left: 240px;
-    position: fixed;
-    right: 0;
-    width: calc(100% - 240px);
-    `
+          left: 240px;
+          position: fixed;
+          right: 0;
+          width: calc(100% - 240px);
+        `
         : ''
     }
   `}

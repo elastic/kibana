@@ -32,8 +32,20 @@ import { IS_DRAGGING_CLASS_NAME } from '../../common/components/drag_and_drop/he
 import { getTimelineShowStatusByIdSelector } from '../../timelines/components/flyout/selectors';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { KQLHeaderGlobal } from './kql_global';
+import { useMainNavigationVisibility } from './temp_collapse_sidenav_context';
 
 const StyledEuiPanel = styled(EuiPanel).attrs<{ paddingTop: number }>(({ paddingTop }) => ({
+  style: {
+    paddingTop: `${paddingTop}px`,
+  },
+}))<{ paddingTop: number }>`
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+`;
+
+const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   style: {
     paddingTop: `${paddingTop}px`,
   },
@@ -50,6 +62,7 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   .timeline-bottom-bar {
     background: #ffffff;
     color: inherit;
+    left: 240px !important;
     transform: ${({ $isShowingTimelineOverlay }) =>
       $isShowingTimelineOverlay ? 'none' : 'translateY(calc(100% - 50px))'};
     z-index: ${({ theme }) => theme.eui.euiZLevel8};
@@ -79,6 +92,9 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   const mainPaddingTop = headerFixed ? height : 0;
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
   const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, TimelineId.active));
+
+  // TODO: Remove when collapsible side nav is introduced
+  const { isCollapsed } = useMainNavigationVisibility();
 
   useEffect(() => {
     const subscription = banners$.subscribe((banners) => setHeaderFixed(!banners.length));
@@ -112,40 +128,41 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   return (
     <SecuritySolutionAppWrapper className="kbnAppWrapper">
       <HeaderGlobal setHeaderActionMenu={setHeaderActionMenu} />
-      <main className="kbnAppWrapper" data-test-subj="pageContainer">
-        <DragDropContextWrapper browserFields={browserFields}>
-          <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-          <StyledKibanaPageTemplate
-            paddingSize="none"
-            pageSideBar={<MainNavigation />}
-            restrictWidth={false}
-            template="default"
-            $isShowingTimelineOverlay={show}
-            bottomBarProps={{
-              // Using a classname to target the bottom bar for the show/hide functionality
-              className: 'timeline-bottom-bar',
-              left: 240,
-              position: 'fixed',
-              usePortal: false,
-            }}
-            bottomBar={
-              shouldShowTimelineBottomBar && (
-                <>
-                  <AutoSaveWarningMsg />
-                  <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
-                </>
-              )
-            }
+      <DragDropContextWrapper browserFields={browserFields}>
+        <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
+        <StyledKibanaPageTemplate
+          paddingSize="none"
+          pageSideBar={isCollapsed ? undefined : <MainNavigation />}
+          restrictWidth={false}
+          template="default"
+          $isShowingTimelineOverlay={show}
+          bottomBarProps={{
+            // Using a classname to target the bottom bar for the show/hide functionality
+            className: 'timeline-bottom-bar',
+            position: 'fixed',
+            usePortal: false,
+          }}
+          bottomBar={
+            shouldShowTimelineBottomBar && (
+              <>
+                <AutoSaveWarningMsg />
+                <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
+              </>
+            )
+          }
+        >
+          <EuiPanel color="subdued" paddingSize="none">
+            <KQLHeaderGlobal ref={ref} isFixed={headerFixed} />
+          </EuiPanel>
+          <Main
+            className="kbnAppWrapper"
+            data-test-subj="pageContainer"
+            paddingTop={mainPaddingTop}
           >
-            <EuiPanel color="subdued" paddingSize="none">
-              <KQLHeaderGlobal ref={ref} isFixed={headerFixed} />
-            </EuiPanel>
-            <StyledEuiPanel paddingTop={mainPaddingTop} paddingSize="l" color="transparent">
-              {children}
-            </StyledEuiPanel>
-          </StyledKibanaPageTemplate>
-        </DragDropContextWrapper>
-      </main>
+            {children}
+          </Main>
+        </StyledKibanaPageTemplate>
+      </DragDropContextWrapper>
       <HelpMenu />
     </SecuritySolutionAppWrapper>
   );
