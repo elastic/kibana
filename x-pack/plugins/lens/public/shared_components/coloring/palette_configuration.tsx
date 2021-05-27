@@ -67,7 +67,6 @@ export function CustomizablePalette({
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds: { min: number; max: number };
 }) {
-  const rangeType = activePalette.params?.rangeType ?? defaultPaletteParams.rangeType;
   const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
   const colorStopsToShow = roundStopValues(
@@ -315,11 +314,9 @@ export function CustomizablePalette({
           }
         >
           <CustomStops
-            reverse={activePalette.params?.reverse}
-            palette={activePalette.params?.name}
+            paletteConfiguration={activePalette?.params}
             data-test-prefix="lnsDatatable"
             colorStops={colorStopsToShow}
-            rangeType={rangeType}
             dataBounds={dataBounds}
             onChange={(colorStops) => {
               const newParams = getSwitchToCustomParams(

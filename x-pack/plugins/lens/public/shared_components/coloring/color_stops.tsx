@@ -22,7 +22,7 @@ import useUnmount from 'react-use/lib/useUnmount';
 import { DEFAULT_COLOR } from './constants';
 import { getDataMinMax, getStepValue, isValidColor } from './utils';
 import { TooltipWrapper, useDebouncedValue } from '../index';
-import { ColorStop } from './types';
+import { ColorStop, CustomPaletteParams } from './types';
 
 const idGeneratorFn = htmlIdGenerator();
 
@@ -43,19 +43,15 @@ function shouldSortStops(colorStops: Array<{ color: string; stop: string | numbe
 export interface CustomStopsProps {
   colorStops: ColorStop[];
   onChange: (colorStops: ColorStop[]) => void;
-  rangeType: 'number' | 'percent';
   dataBounds: { min: number; max: number };
-  reverse?: boolean;
-  palette?: string;
+  paletteConfiguration: CustomPaletteParams | undefined;
   'data-test-prefix': string;
 }
 export const CustomStops = ({
   colorStops,
   onChange,
-  rangeType,
+  paletteConfiguration,
   dataBounds,
-  reverse,
-  palette,
   ['data-test-prefix']: dataTestPrefix,
 }: CustomStopsProps) => {
   const onChangeWithValidation = useCallback(
@@ -76,7 +72,7 @@ export const CustomStops = ({
       id: idGeneratorFn(),
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [palette, reverse]);
+  }, [paletteConfiguration?.name, paletteConfiguration?.reverse, paletteConfiguration?.rangeType]);
 
   const { inputValue: localColorStops, handleInputChange: setLocalColorStops } = useDebouncedValue({
     onChange: onChangeWithValidation,
@@ -100,6 +96,8 @@ export const CustomStops = ({
       );
     }
   });
+
+  const rangeType = paletteConfiguration?.rangeType || 'percent';
 
   return (
     <>
