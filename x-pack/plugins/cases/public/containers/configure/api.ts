@@ -54,12 +54,10 @@ export const getCaseConfigure = async ({
     const decodedConfigs = decodeCaseConfigurationsResponse(response);
     if (Array.isArray(decodedConfigs) && decodedConfigs.length > 0) {
       return convertToCamelCase<CasesConfigureResponse, CaseConfigure>(decodedConfigs[0]);
-    } else {
-      return null;
     }
-  } else {
-    return null;
   }
+
+  return null;
 };
 
 export const getConnectorMappings = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
