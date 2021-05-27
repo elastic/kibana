@@ -130,13 +130,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async clearMarkdown() {
-      // Since we use ACE editor and that isn't really storing its value inside
-      // a textarea we must really select all text and remove it, and cannot use
-      // clearValue().
       await retry.waitForWithTimeout('text area is cleared', 20000, async () => {
-        const editor = await testSubjects.find('codeEditorContainer');
-        const $ = await editor.parseDomContent();
-        const value = $('.ace_line').text();
+        const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
+        const value = await input.getVisibleText();
         if (value.length > 0) {
           log.debug('Clearing text area input');
           this.waitForMarkdownTextAreaCleaned();
