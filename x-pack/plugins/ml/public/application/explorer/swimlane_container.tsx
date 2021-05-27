@@ -67,6 +67,7 @@ declare global {
  */
 const RESIZE_THROTTLE_TIME_MS = 500;
 const CELL_HEIGHT = 30;
+const LEGEND_HEIGHT = 34;
 
 const Y_AXIS_HEIGHT = 24;
 
@@ -244,7 +245,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     return isLoading
       ? containerHeightRef.current
       : // TODO update when elastic charts X label will be fixed
-        rowsCount * CELL_HEIGHT + (true ? Y_AXIS_HEIGHT : 0);
+        rowsCount * CELL_HEIGHT + (showLegend ? LEGEND_HEIGHT : 0) + (true ? Y_AXIS_HEIGHT : 0);
   }, [isLoading, rowsCount, showTimeline]);
 
   useEffect(() => {
@@ -330,6 +331,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       brushArea: {
         stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
       },
+      ...(showLegend ? { maxLegendHeight: LEGEND_HEIGHT } : {}),
       timeZone: 'UTC',
     };
   }, [
