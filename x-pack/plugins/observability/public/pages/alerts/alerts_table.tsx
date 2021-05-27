@@ -66,16 +66,16 @@ export function AlertsTable(props: AlertsTableProps) {
 
         return active ? (
           <EuiIconTip
-            content={i18n.translate('xpack.observability.alertsTable.statusActiveDescription', {
-              defaultMessage: 'Active',
+            content={i18n.translate('xpack.observability.alertsTable.statusOpenDescription', {
+              defaultMessage: 'Open',
             })}
             color="danger"
             type="alert"
           />
         ) : (
           <EuiIconTip
-            content={i18n.translate('xpack.observability.alertsTable.statusRecoveredDescription', {
-              defaultMessage: 'Recovered',
+            content={i18n.translate('xpack.observability.alertsTable.statusClosedDescription', {
+              defaultMessage: 'Closed',
             })}
             type="check"
           />
