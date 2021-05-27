@@ -6,11 +6,19 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import mustache from 'mustache';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode } from '@elastic/eui';
 
-import { FIELD_TYPES, ToggleField, UseField, Field } from '../../../../../../shared_imports';
+import {
+  FIELD_TYPES,
+  useFormData,
+  SelectField,
+  ToggleField,
+  UseField,
+  Field,
+} from '../../../../../../shared_imports';
 
 import { FieldsConfig, to, from } from './shared';
 
@@ -32,6 +40,20 @@ const fieldsConfig: FieldsConfig = {
         values={{
           emptyString: <EuiCode>{'""'}</EuiCode>,
         }}
+      />
+    ),
+  },
+  mediaType: {
+    type: FIELD_TYPES.TEXT,
+    defaultValue: 'application/json',
+    serializer: from.emptyStringToUndefined,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.mediaTypeFieldLabel', {
+      defaultMessage: 'Media Type',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.setForm.mediaTypeHelpText"
+        defaultMessage="Media type for encoding value."
       />
     ),
   },
@@ -79,10 +101,17 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
+// https://stackoverflow.com/questions/15502629/regex-for-mustache-style-double-braces
+const isValidMustache = (str: string) => {
+  return str?.match(/{{{\s*[\w\.]+\s*}}}/g);
+};
+
 /**
  * Disambiguate name from the Set data structure
  */
 export const SetProcessor: FunctionComponent = () => {
+  const [{ fields }] = useFormData();
+
   return (
     <>
       <FieldNameField
@@ -101,6 +130,33 @@ export const SetProcessor: FunctionComponent = () => {
         }}
         path="fields.value"
       />
+
+      {isValidMustache(fields?.value) && (
+        <UseField
+          componentProps={{
+            euiFieldProps: {
+              'data-test-subj': 'mediaTypeField',
+              options: [
+                {
+                  value: 'application/json',
+                  text: 'application/json',
+                },
+                {
+                  value: 'text/plain',
+                  text: 'text/plain',
+                },
+                {
+                  value: 'application/x-www-form-urlencoded',
+                  text: 'application/x-www-form-urlencoded',
+                },
+              ],
+            },
+          }}
+          config={fieldsConfig.mediaType}
+          component={SelectField}
+          path="fields.media_type"
+        />
+      )}
 
       <UseField config={fieldsConfig.override} component={ToggleField} path="fields.override" />
 
