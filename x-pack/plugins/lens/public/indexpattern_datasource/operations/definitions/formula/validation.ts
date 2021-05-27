@@ -136,9 +136,15 @@ export const getRawQueryValidationError = (text: string, operations: Record<stri
 
 const validateQueryQuotes = (rawQuery: string, language: 'kql' | 'lucene') => {
   // check if the raw argument has the minimal requirements
-  const [, rawValue] = rawQuery.split('=');
+  const [, rawValue = ''] = rawQuery.split('=');
+  const cleanedRawValue = rawValue.trim();
   // it must start with a single quote, and quotes must have a closure
-  if (rawValue.trim()[0] !== "'" || !/'\s*([^']+?)\s*'/.test(rawValue)) {
+  if (
+    cleanedRawValue.length &&
+    (cleanedRawValue[0] !== "'" || !/'\s*([^']+?)\s*'/.test(rawValue)) &&
+    // there's a special case when it's valid as two single quote strings
+    cleanedRawValue !== "''"
+  ) {
     return i18n.translate('xpack.lens.indexPattern.formulaOperationQueryError', {
       defaultMessage: `Single quotes are required for {language}='' at {rawQuery}`,
       values: { language, rawQuery },

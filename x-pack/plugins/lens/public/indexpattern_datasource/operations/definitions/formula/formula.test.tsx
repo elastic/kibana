@@ -927,8 +927,29 @@ invalid: "
       ).toEqual(undefined);
     });
 
+    it('returns no error for a query edge case', () => {
+      const formulas = [
+        `count(kql='')`,
+        `count(lucene='')`,
+        `moving_average(count(kql=''), window=7)`,
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(undefined);
+      }
+    });
+
     it('returns an error for a query not wrapped in single quotes', () => {
       const formulas = [
+        `count(kql="")`,
+        `count(kql='")`,
+        `count(kql="')`,
         `count(kql="category.keyword: *")`,
         `count(kql='category.keyword: *")`,
         `count(kql="category.keyword: *')`,
