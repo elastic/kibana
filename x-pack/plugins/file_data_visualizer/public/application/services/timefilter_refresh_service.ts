@@ -7,6 +7,6 @@
 
 import { Subject } from 'rxjs';
 import { Required } from 'utility-types';
-import { Refresh } from '../components/index_datavisualizer_view/index_datavisualizer_view';
+import { Refresh } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 
 export const mlTimefilterRefresh$ = new Subject<Required<Refresh>>();

@@ -38,7 +38,7 @@ import {
 import {
   FieldHistogramRequestConfig,
   FieldRequestConfig,
-} from '../../datavisualizer/index_based/common';
+} from '../../datavisualizer/index_based/common/request';
 import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
 import type { RuntimeMappings } from '../../../../common/types/fields';

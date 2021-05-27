@@ -7,7 +7,7 @@
 
 import { FileDataVisualizerPlugin } from './plugin';
 
-export type { IndexDataVisualizerViewProps } from './application/components/index_datavisualizer_view';
+export type { IndexDataVisualizerViewProps } from './application/components/index_data_visualizer_view';
 
 export function plugin() {
   return new FileDataVisualizerPlugin();

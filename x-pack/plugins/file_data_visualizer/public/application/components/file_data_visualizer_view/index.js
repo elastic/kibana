@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { FileDataVisualizerView } from './file_datavisualizer_view';
+export { FileDataVisualizerView } from './file_data_visualizer_view';

@@ -16,7 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { MODE as DATAVISUALIZER_MODE } from '../file_datavisualizer_view/constants';
+import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
 
 interface BottomBarProps {
   mode: DATAVISUALIZER_MODE;

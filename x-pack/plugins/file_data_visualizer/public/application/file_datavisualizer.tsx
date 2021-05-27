@@ -10,7 +10,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import { getCoreStart, getPluginsStart } from '../kibana_services';
 
 // @ts-ignore
-import { FileDataVisualizerView } from './components/file_datavisualizer_view/index';
+import { FileDataVisualizerView } from './components/file_data_visualizer_view/index';
 
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 export const FileDataVisualizer: FC = () => {

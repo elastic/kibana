@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { IndexDataVisualizerViewProps, IndexDataVisualizerView } from './index_datavisualizer_view';
+export {
+  IndexDataVisualizerViewProps,
+  IndexDataVisualizerView,
+} from './index_data_visualizer_view';
