@@ -464,6 +464,7 @@ export interface XYArgs {
   tickLabelsVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
   gridlinesVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
   curveType?: XYCurveType;
+  fillOpacity?: number;
   hideEndzones?: boolean;
 }
 
@@ -485,6 +486,7 @@ export interface XYState {
   tickLabelsVisibilitySettings?: AxesSettingsConfig;
   gridlinesVisibilitySettings?: AxesSettingsConfig;
   curveType?: XYCurveType;
+  fillOpacity?: number;
   hideEndzones?: boolean;
 }
 

@@ -74,7 +74,9 @@ export function Detail() {
   const { getHref, getPath } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const history = useHistory();
-  const location = useLocation();
+  const { pathname, search, hash } = useLocation();
+  const queryParams = useMemo(() => new URLSearchParams(search), [search]);
+  const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -120,6 +122,16 @@ export function Detail() {
     }
   }, [packageInfoData, setPackageInstallStatus, setPackageInfo]);
 
+  const integrationInfo = useMemo(
+    () =>
+      integration
+        ? packageInfo?.policy_templates?.find(
+            (policyTemplate) => policyTemplate.name === integration
+          )
+        : undefined,
+    [integration, packageInfo]
+  );
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -147,8 +159,9 @@ export function Detail() {
               ) : (
                 <IconPanel
                   packageName={packageInfo.name}
+                  integrationName={integrationInfo?.name}
                   version={packageInfo.version}
-                  icons={packageInfo.icons}
+                  icons={integrationInfo?.icons || packageInfo.icons}
                 />
               )}
             </EuiFlexItem>
@@ -157,7 +170,7 @@ export function Detail() {
                 <FlexItemWithMinWidth grow={false}>
                   <EuiText>
                     {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                    <h1>{packageInfo?.title || '\u00A0'}</h1>
+                    <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
                   </EuiText>
                 </FlexItemWithMinWidth>
                 {packageInfo?.release && packageInfo.release !== 'ga' ? (
@@ -174,7 +187,7 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [getHref, isLoading, packageInfo]
+    [getHref, integrationInfo, isLoading, packageInfo]
   );
 
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
@@ -184,9 +197,9 @@ export function Detail() {
       // The object below, given to `createHref` is explicitly accessing keys of `location` in order
       // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
       const currentPath = history.createHref({
-        pathname: location.pathname,
-        search: location.search,
-        hash: location.hash,
+        pathname,
+        search,
+        hash,
       });
       const redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
         CreatePackagePolicyRouteState['onCancelNavigateTo'] = [
@@ -204,11 +217,12 @@ export function Detail() {
       history.push({
         pathname: getPath('add_integration_to_policy', {
           pkgkey,
+          ...(integration ? { integration } : {}),
         }),
         state: redirectBackRouteState,
       });
     },
-    [getPath, history, location.hash, location.pathname, location.search, pkgkey]
+    [getPath, history, hash, pathname, search, pkgkey, integration]
   );
 
   const headerRightContent = useMemo(
@@ -255,6 +269,7 @@ export function Detail() {
                     iconType="plusInCircle"
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
+                      ...(integration ? { integration } : {}),
                     })}
                     onClick={handleAddIntegrationPolicyClick}
                     data-test-subj="addIntegrationPolicyButton"
@@ -263,7 +278,7 @@ export function Detail() {
                       id="xpack.fleet.epm.addPackagePolicyButtonText"
                       defaultMessage="Add {packageName}"
                       values={{
-                        packageName: packageInfo.title,
+                        packageName: integrationInfo?.title || packageInfo.title,
                       }}
                     />
                   </EuiButton>
@@ -290,6 +305,8 @@ export function Detail() {
       getHref,
       handleAddIntegrationPolicyClick,
       hasWriteCapabilites,
+      integration,
+      integrationInfo,
       packageInfo,
       packageInstallStatus,
       pkgkey,
@@ -316,6 +333,7 @@ export function Detail() {
         'data-test-subj': `tab-overview`,
         href: getHref('integration_details_overview', {
           pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
         }),
       },
     ];
@@ -333,6 +351,7 @@ export function Detail() {
         'data-test-subj': `tab-policies`,
         href: getHref('integration_details_policies', {
           pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
         }),
       });
     }
@@ -349,6 +368,7 @@ export function Detail() {
       'data-test-subj': `tab-settings`,
       href: getHref('integration_details_settings', {
         pkgkey: packageInfoKey,
+        ...(integration ? { integration } : {}),
       }),
     });
 
@@ -365,12 +385,13 @@ export function Detail() {
         'data-test-subj': `tab-custom`,
         href: getHref('integration_details_custom', {
           pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
         }),
       });
     }
 
     return tabs;
-  }, [getHref, packageInfo, panel, showCustomTab, packageInstallStatus]);
+  }, [packageInfo, panel, getHref, integration, packageInstallStatus, showCustomTab]);
 
   return (
     <WithHeaderLayout
@@ -380,7 +401,7 @@ export function Detail() {
       tabs={headerTabs}
       tabsClassName="fleet__epm__shiftNavTabs"
     >
-      {packageInfo ? <Breadcrumbs packageTitle={packageInfo.title} /> : null}
+      {integrationInfo ? <Breadcrumbs packageTitle={integrationInfo.title} /> : null}
       {packageInfoError ? (
         <Error
           title={
@@ -396,7 +417,7 @@ export function Detail() {
       ) : (
         <Switch>
           <Route path={PAGE_ROUTING_PATHS.integration_details_overview}>
-            <OverviewPage packageInfo={packageInfo} />
+            <OverviewPage packageInfo={packageInfo} integrationInfo={integrationInfo} />
           </Route>
           <Route path={PAGE_ROUTING_PATHS.integration_details_settings}>
             <SettingsPage packageInfo={packageInfo} />
