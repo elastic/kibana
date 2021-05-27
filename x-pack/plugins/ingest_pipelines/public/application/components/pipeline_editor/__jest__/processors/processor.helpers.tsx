@@ -154,4 +154,7 @@ type TestSubject =
   | 'separatorValueField.input'
   | 'quoteValueField.input'
   | 'emptyValueField.input'
+  | 'extractDeviceTypeSwitch.input'
+  | 'propertiesValueField'
+  | 'regexFileField.input'
   | 'trimSwitch.input';
