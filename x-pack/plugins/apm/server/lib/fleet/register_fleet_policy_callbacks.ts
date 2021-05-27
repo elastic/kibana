@@ -10,6 +10,8 @@ import { listConfigurations } from '../settings/agent_configuration/list_configu
 import { setupRequest } from '../helpers/setup_request';
 import { APMPluginStartDependencies } from '../../types';
 import { ExternalCallback } from '../../../../fleet/server';
+import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
+import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
 
 export async function registerFleetPolicyCallbacks({
   plugins,
@@ -83,18 +85,38 @@ function registerAgentConfigExternalCallback({
       logger,
       ruleDataClient,
     });
-    const configurations = await listConfigurations({ setup });
-    const agentConfigValue = configurations.map((configuration) => ({
-      service: configuration.service,
-      settings: configuration.settings,
-    }));
-    packagePolicy.inputs[0].config = {
-      agent_config: {
-        value: agentConfigValue,
-      },
-    };
-    return packagePolicy;
+    const agentConfigurations = await listConfigurations({ setup });
+    return getPackagePolicyWithAgentConfigurations(
+      packagePolicy,
+      agentConfigurations
+    );
   };
 
   fleetPluginStart.registerExternalCallback(callbackName, callbackFn);
+}
+
+export function getPackagePolicyWithAgentConfigurations(
+  packagePolicy: PackagePolicy,
+  agentConfigurations: AgentConfiguration[]
+) {
+  const [firstInput, ...restInputs] = packagePolicy.inputs;
+  return {
+    ...packagePolicy,
+    inputs: [
+      {
+        ...firstInput,
+        config: {
+          agent_config: {
+            value: agentConfigurations.map((configuration) => ({
+              service: configuration.service,
+              config: configuration.settings,
+              etag: configuration.etag,
+              [AGENT_NAME]: configuration.agent_name,
+            })),
+          },
+        },
+      },
+      ...restInputs,
+    ],
+  };
 }
