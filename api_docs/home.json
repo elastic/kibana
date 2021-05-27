@@ -954,13 +954,6 @@
           "deprecated": true,
           "references": [
             {
-              "plugin": "cloud",
-              "link": {
-                "path": "x-pack/plugins/cloud/public/plugin.ts",
-                "lineNumber": 66
-              }
-            },
-            {
               "plugin": "ml",
               "link": {
                 "path": "x-pack/plugins/ml/public/register_feature.ts",
@@ -972,6 +965,13 @@
               "link": {
                 "path": "x-pack/plugins/apm/public/plugin.ts",
                 "lineNumber": 82
+              }
+            },
+            {
+              "plugin": "cloud",
+              "link": {
+                "path": "x-pack/plugins/cloud/public/plugin.ts",
+                "lineNumber": 66
               }
             }
           ]
