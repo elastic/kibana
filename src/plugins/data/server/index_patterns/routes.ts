@@ -20,6 +20,7 @@ import { registerGetScriptedFieldRoute } from './routes/scripted_fields/get_scri
 import { registerDeleteScriptedFieldRoute } from './routes/scripted_fields/delete_scripted_field';
 import { registerUpdateScriptedFieldRoute } from './routes/scripted_fields/update_scripted_field';
 import type { DataPluginStart, DataPluginStartDependencies } from '../plugin';
+import { registerManageDefaultIndexPatternRoutes } from './routes/default_index_pattern';
 
 export function registerRoutes(
   http: HttpServiceSetup,
@@ -42,6 +43,7 @@ export function registerRoutes(
   registerGetIndexPatternRoute(router, getStartServices);
   registerDeleteIndexPatternRoute(router, getStartServices);
   registerUpdateIndexPatternRoute(router, getStartServices);
+  registerManageDefaultIndexPatternRoutes(router, getStartServices);
 
   // Fields API
   registerUpdateFieldsRoute(router, getStartServices);
