@@ -41,7 +41,7 @@ export const getRenderCellValueFn = (
   useEffect(() => {
     if ((row as EsHitRecord).isAnchor) {
       setCellProps({
-        className: 'dscDiscoverGrid__cell--highlight',
+        className: 'dscDocsGrid__cell--highlight',
       });
     } else if (ctx.expanded && row && ctx.expanded._id === row._id) {
       setCellProps({

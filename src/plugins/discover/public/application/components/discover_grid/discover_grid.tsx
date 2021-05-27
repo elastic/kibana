@@ -320,7 +320,7 @@ export const DiscoverGrid = ({
 
   if (!rowCount) {
     return (
-      <div className="euiDataGrid__noResults">
+      <div className="euiDataGrid__loading">
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
           <EuiSpacer size="s" />

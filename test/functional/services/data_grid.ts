@@ -174,14 +174,13 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     public async getHeaderFields(): Promise<string[]> {
-      const result = await find.allByCssSelector('.euiDataGridHeaderCell__content');
+      const result = await find.allByCssSelector(
+        '.euiDataGridHeaderCell__button > .euiDataGridHeaderCell__content'
+      );
+
       const textArr = [];
-      let idx = 0;
       for (const cell of result) {
-        if (idx > 1) {
-          textArr.push(await cell.getVisibleText());
-        }
-        idx++;
+        textArr.push(await cell.getVisibleText());
       }
       return Promise.resolve(textArr);
     }
@@ -270,8 +269,8 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    public async hasNoResults() {
-      return await find.existsByCssSelector('.euiDataGrid__noResults');
+    public async isLoading() {
+      return await find.existsByCssSelector('.euiDataGrid__loading');
     }
   }
 

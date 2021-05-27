@@ -22,7 +22,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   useEffect(() => {
     if ((current as EsHitRecord).isAnchor) {
       setCellProps({
-        className: 'dscDiscoverGrid__cell--highlight',
+        className: 'dscDocsGrid__cell--highlight',
       });
     } else if (expanded && current && expanded._id === current._id) {
       setCellProps({
