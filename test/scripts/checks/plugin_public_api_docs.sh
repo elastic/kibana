@@ -2,6 +2,11 @@
 
 source src/dev/ci_setup/setup_env.sh
 
+export BUILD_TS_REFS_DISABLE=false
+export BUILD_TS_REFS_CACHE_ENABLE=true
+
+yarn kbn bootstrap
+
 ###
 ### rebuild plugin api docs to ensure it's not out of date
 ###
