@@ -184,7 +184,7 @@ export class PieChartService extends FtrService {
     this.log.debug(`PieChart.expectPieChartLabels(${expectedLabels.join(',')})`);
     await this.retry.try(async () => {
       const pieData = await this.getPieChartLabels();
-      expect(pieData).to.eql(expectedLabels);
+      expect(pieData.sort()).to.eql(expectedLabels);
     });
   }
 }
