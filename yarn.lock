@@ -2682,7 +2682,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/monaco@link:packages/kbn-monaco":
+"@kbn/monaco@link:bazel-bin/packages/kbn-monaco/npm_module":
   version "0.0.0"
   uid ""
 

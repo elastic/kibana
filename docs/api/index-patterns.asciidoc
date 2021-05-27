@@ -15,13 +15,16 @@ The following index patterns APIs are available:
     ** <<index-patterns-api-create, Create index pattern API>> to create {kib} index pattern
     ** <<index-patterns-api-update, Update index pattern API>> to partially updated {kib} index pattern
     ** <<index-patterns-api-delete, Delete index pattern API>> to delete {kib} index pattern
+* Default index pattern
+    ** <<index-patterns-api-default-get, Get default index pattern API>> to retrieve a default index pattern
+    ** <<index-patterns-api-default-set, Set default index pattern API>> to set a default index pattern
 * Fields
-    ** <<index-patterns-fields-api-update, Update index pattern field>> to change field metadata, such as `count`, `customLabel` and `format`.
-
-
+    ** <<index-patterns-fields-api-update, Update index pattern field>> to change field metadata, such as `count`, `customLabel` and `format`
 
 include::index-patterns/get.asciidoc[]
 include::index-patterns/create.asciidoc[]
 include::index-patterns/update.asciidoc[]
 include::index-patterns/delete.asciidoc[]
+include::index-patterns/default-get.asciidoc[]
+include::index-patterns/default-set.asciidoc[]
 include::index-patterns/update-fields.asciidoc[]
