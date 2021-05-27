@@ -11,7 +11,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Query } from 'src/plugins/data/public';
 import { search } from '../../../../../../src/plugins/data/public';
 import { parseTimeShift } from '../../../../../../src/plugins/data/common';
@@ -146,6 +146,7 @@ export function TimeShift({
   activeData: IndexPatternDimensionEditorProps['activeData'];
   layerId: string;
 }) {
+  const focusSetRef = useRef(false);
   const [localValue, setLocalValue] = useState(selectedColumn.timeShift);
   useEffect(() => {
     setLocalValue(selectedColumn.timeShift);
@@ -211,7 +212,8 @@ export function TimeShift({
       ref={(r) => {
         if (r && isFocused) {
           const timeShiftInput = r.querySelector('[data-test-subj="comboBoxSearchInput"]');
-          if (timeShiftInput instanceof HTMLInputElement) {
+          if (!focusSetRef.current && timeShiftInput instanceof HTMLInputElement) {
+            focusSetRef.current = true;
             timeShiftInput.focus();
           }
         }

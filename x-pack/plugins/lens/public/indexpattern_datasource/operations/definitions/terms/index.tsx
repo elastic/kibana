@@ -75,7 +75,7 @@ function getDisallowedTermsMessage(
   return {
     message: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShifts', {
       defaultMessage:
-        'In a single layer, you are unable to combine multiple time shifts and dynamic top values. Use the same value for all time shifts, or use filters instead of top values.',
+        'In a single layer, you are unable to combine metrics with different time shifts and dynamic top values. Use the same time shift value for all metrics, or use filters instead of top values.',
     }),
     fixAction: {
       label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
@@ -84,12 +84,15 @@ function getDisallowedTermsMessage(
       newState: async (core: CoreStart, frame: FramePublicAPI, layerId: string) => {
         const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;
         const fieldName = currentColumn.sourceField;
+        const activeDataFieldNameMatch =
+          frame.activeData?.[layerId].columns.find(({ id }) => id === columnId)?.meta.field ===
+          fieldName;
         let currentTerms = uniq(
           frame.activeData?.[layerId].rows
             .map((row) => row[columnId] as string)
             .filter((term) => typeof term === 'string' && term !== '__other__') || []
         );
-        if (currentTerms.length === 0) {
+        if (!activeDataFieldNameMatch || currentTerms.length === 0) {
           const response: FieldStatsResponse<string | number> = await core.http.post(
             `/api/lens/index_stats/${indexPattern.id}/field`,
             {
@@ -115,7 +118,7 @@ function getDisallowedTermsMessage(
             ...layer.columns,
             [columnId]: {
               label: i18n.translate('xpack.lens.indexPattern.pinnedTopValuesLabel', {
-                defaultMessage: 'Pinned top values of {field}',
+                defaultMessage: 'Filters of {field}',
                 values: {
                   field: fieldName,
                 },
