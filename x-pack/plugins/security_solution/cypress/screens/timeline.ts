@@ -118,6 +118,8 @@ export const PINNED_TAB_EVENTS_BODY = '[data-test-subj="pinned-tab-flyout-body"]
 
 export const PINNED_TAB_EVENTS_FOOTER = '[data-test-subj="pinned-tab-flyout-footer"]';
 
+export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
+
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';
@@ -172,6 +174,8 @@ export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="query-tab-flyout-header"
 
 export const TIMELINE_FLYOUT_BODY = '[data-test-subj="query-tab-flyout-body"]';
 
+export const TIMELINE_HEADER = '[data-test-subj="timeline-hide-show-container"]';
+
 export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-icon-button"]`;
 
 export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
@@ -202,4 +206,22 @@ export const TIMELINE_EDIT_MODAL_OPEN_BUTTON = '[data-test-subj="save-timeline-b
 
 export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 
-export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
+export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
+
+export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
+
+export const TIMELINE_ROW_RENDERERS_MODAL = '[data-test-subj="row-renderers-modal"]';
+
+export const TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN = `[data-test-subj="disable-all"]`;
+
+export const TIMELINE_ROW_RENDERERS_ENABLE_ALL_BTN = `button[data-test-subj="enable-alll"]`;
+
+export const TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON = `${TIMELINE_ROW_RENDERERS_MODAL} .euiModal__closeIcon`;
+
+export const TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX = `${TIMELINE_ROW_RENDERERS_MODAL} .euiCheckbox__input`;
+
+export const TIMELINE_ROW_RENDERERS_SEARCHBOX = `${TIMELINE_ROW_RENDERERS_MODAL} input[type="search"]`;
+
+export const TIMELINE_SHOW_ROW_RENDERERS_GEAR = '[data-test-subj="show-row-renderers-gear"]';
+
+export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
