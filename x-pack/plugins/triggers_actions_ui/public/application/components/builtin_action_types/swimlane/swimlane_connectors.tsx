@@ -16,18 +16,22 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<SwimlaneActionConnector>
 > = ({ errors, action, editActionConfig, editActionSecrets, readOnly }) => {
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [connectionStatus, setConnectionStatus] = useState<EuiStepStatus>('incomplete');
-  const [fieldsConfigured, setFieldsConfigured] = useState<EuiStepStatus>('incomplete');
+  const [stepsStatuses, setStepsStatuses] = useState<{
+    connection: EuiStepStatus;
+    fields: EuiStepStatus;
+  }>({ connection: 'incomplete', fields: 'incomplete' });
   const [fields, setFields] = useState<SwimlaneFieldMappingConfig[]>([]);
 
   const updateCurrentStep = useCallback(
     (step: number) => {
       setCurrentStep(step);
       if (step === 2) {
-        setConnectionStatus('complete');
+        setStepsStatuses((statuses) => ({ ...statuses, connection: 'complete' }));
       } else if (step === 1) {
-        setConnectionStatus('incomplete');
-        setFieldsConfigured('incomplete');
+        setStepsStatuses({
+          fields: 'incomplete',
+          connection: 'incomplete',
+        });
         editActionConfig('mappings', action.config.mappings);
       }
     },
@@ -38,29 +42,29 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
     () => [
       {
         title: i18n.SW_CONFIGURE_CONNECTION_LABEL,
-        status: connectionStatus,
+        status: stepsStatuses.connection,
         onClick: () => updateCurrentStep(1),
       },
       {
         title: i18n.SW_MAPPING_TITLE_TEXT_FIELD_LABEL,
-        disabled: connectionStatus !== 'complete',
-        status: fieldsConfigured,
+        disabled: stepsStatuses.connection !== 'complete',
+        status: stepsStatuses.fields,
         onClick: () => updateCurrentStep(2),
       },
     ],
-    [connectionStatus, fieldsConfigured, updateCurrentStep]
+    [stepsStatuses.connection, stepsStatuses.fields, updateCurrentStep]
   );
 
   const editActionConfigCb = useCallback(
     (k: string, v: string) => {
       editActionConfig(k, v);
       if (k === 'mappings' && Object.keys(v).length === 6) {
-        setFieldsConfigured('complete');
-      } else if (fieldsConfigured === 'complete') {
-        setFieldsConfigured('incomplete');
+        setStepsStatuses((statuses) => ({ ...statuses, fields: 'complete' }));
+      } else if (stepsStatuses.fields === 'complete') {
+        setStepsStatuses((statuses) => ({ ...statuses, fields: 'incomplete' }));
       }
     },
-    [editActionConfig, fieldsConfigured]
+    [editActionConfig, stepsStatuses.fields]
   );
   return (
     <Fragment>

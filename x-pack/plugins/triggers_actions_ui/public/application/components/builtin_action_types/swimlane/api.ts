@@ -47,7 +47,7 @@ export async function getApplication({
     });
 
     /**
-     * Fetch does not throws when there is an HTTP error (status >= 400).
+     * Fetch do not throw when there is an HTTP error (status >= 400).
      * We need to do it manually.
      */
 
