@@ -9,7 +9,6 @@ import seedrandom from 'seedrandom';
 import uuid from 'uuid';
 
 const OS_FAMILY = ['windows', 'macos', 'linux'];
-const BOOLEANS = [true, false];
 /** Array of 14 day offsets */
 const DAY_OFFSETS = Array.from({ length: 14 }, (_, i) => 8.64e7 * (i + 1));
 
@@ -50,7 +49,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
 
   /** Generate either `true` or `false` */
   protected randomBoolean(): boolean {
-    return this.randomChoice(BOOLEANS);
+    return Math.random() < 0.5;
   }
 
   /** generate random OS family value */
