@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   Chart,
   ElementClickListener,
@@ -64,10 +63,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   }
 
   if (!yAxisColumn) {
+    // required for tooltip
     chartData.forEach((row) => {
-      row.unifiedY = i18n.translate('xpack.lens.heatmap.emptyYLabel', {
-        defaultMessage: '(empty)',
-      });
+      row.unifiedY = '';
     });
   }
 
@@ -208,8 +206,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       visible: !!yAxisColumn && args.gridConfig.isYAxisLabelVisible,
       // eui color subdued
       fill: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
-      padding: 8,
-      name: yAxisColumn?.name,
+      padding: yAxisColumn?.name ? 8 : 0,
+      name: yAxisColumn?.name ?? '',
       ...(yAxisColumn
         ? {
             formatter: (v: number | string) => formatFactory(yAxisColumn.meta.params).convert(v),
