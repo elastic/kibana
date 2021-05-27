@@ -16,7 +16,7 @@ import { SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL } from '../../waterfall/compo
 import { getChunks } from '../../waterfall/components/middle_truncated_text';
 
 describe('waterfall filter', () => {
-  const url = 'http://www.elastic.co';
+  const url = 'http://www.elastic.co/observability/uptime';
   const index = 0;
   const offsetIndex = index + 1;
   const item: SidebarItem = {
@@ -32,6 +32,7 @@ describe('waterfall filter', () => {
     const chunks = getChunks(url.replace('http://www.', ''));
 
     expect(getByText(`${offsetIndex}. ${chunks.first}`));
+    expect(getByText(`${chunks.last}`));
   });
 
   it('render screen reader text when renderFilterScreenReaderText is true', () => {
