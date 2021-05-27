@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test/target/types/jest';
 
 import React from 'react';
 
 import { FieldTitleBar } from './field_title_bar';
-import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
+import { JOB_FIELD_TYPES } from '../../../../../common';
 
 describe('FieldTitleBar', () => {
   test(`card prop is an empty object`, () => {
     const props = {
       card: {
-        type: ML_JOB_FIELD_TYPES.NUMBER,
+        type: JOB_FIELD_TYPES.NUMBER,
         existsInDocs: true,
         loading: false,
         aggregatable: true,
@@ -35,7 +35,7 @@ describe('FieldTitleBar', () => {
   test(`card.isUnsupportedType is true`, () => {
     const props = {
       card: {
-        type: ML_JOB_FIELD_TYPES.UNKNOWN,
+        type: JOB_FIELD_TYPES.UNKNOWN,
         fieldName: 'foo',
         existsInDocs: true,
         loading: false,
@@ -56,7 +56,7 @@ describe('FieldTitleBar', () => {
   test(`card.fieldName and card.type is set`, () => {
     const props = {
       card: {
-        type: ML_JOB_FIELD_TYPES.KEYWORD,
+        type: JOB_FIELD_TYPES.KEYWORD,
         fieldName: 'bar',
         existsInDocs: true,
         loading: false,
@@ -79,7 +79,7 @@ describe('FieldTitleBar', () => {
 
     const props = {
       card: {
-        type: ML_JOB_FIELD_TYPES.KEYWORD,
+        type: JOB_FIELD_TYPES.KEYWORD,
         fieldName: 'bar',
         existsInDocs: true,
         loading: false,

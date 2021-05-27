@@ -10,14 +10,13 @@ import React, { FC } from 'react';
 import { EuiToken, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
-import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
-import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
-import type { MlJobFieldType } from '../../../../common/types/field_types';
+import { JobFieldType } from '../../../../../common/types';
+import { getJobTypeAriaLabel } from '../../../util/field_types_utils';
+import { JOB_FIELD_TYPES } from '../../../../../common';
 
 interface FieldTypeIconProps {
   tooltipEnabled: boolean;
-  type: MlJobFieldType;
+  type: JobFieldType;
   fieldName?: string;
   needsAria: boolean;
 }
@@ -36,43 +35,43 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({
   fieldName,
   needsAria = true,
 }) => {
-  const ariaLabel = getMLJobTypeAriaLabel(type);
+  const ariaLabel = getJobTypeAriaLabel(type);
 
   let iconType = 'questionInCircle';
   let color = 'euiColorVis6';
 
   switch (type) {
     // Set icon types and colors
-    case ML_JOB_FIELD_TYPES.BOOLEAN:
+    case JOB_FIELD_TYPES.BOOLEAN:
       iconType = 'tokenBoolean';
       color = 'euiColorVis5';
       break;
-    case ML_JOB_FIELD_TYPES.DATE:
+    case JOB_FIELD_TYPES.DATE:
       iconType = 'tokenDate';
       color = 'euiColorVis7';
       break;
-    case ML_JOB_FIELD_TYPES.GEO_POINT:
-    case ML_JOB_FIELD_TYPES.GEO_SHAPE:
+    case JOB_FIELD_TYPES.GEO_POINT:
+    case JOB_FIELD_TYPES.GEO_SHAPE:
       iconType = 'tokenGeo';
       color = 'euiColorVis8';
       break;
-    case ML_JOB_FIELD_TYPES.TEXT:
+    case JOB_FIELD_TYPES.TEXT:
       iconType = 'document';
       color = 'euiColorVis9';
       break;
-    case ML_JOB_FIELD_TYPES.IP:
+    case JOB_FIELD_TYPES.IP:
       iconType = 'tokenIP';
       color = 'euiColorVis3';
       break;
-    case ML_JOB_FIELD_TYPES.KEYWORD:
+    case JOB_FIELD_TYPES.KEYWORD:
       iconType = 'tokenText';
       color = 'euiColorVis0';
       break;
-    case ML_JOB_FIELD_TYPES.NUMBER:
+    case JOB_FIELD_TYPES.NUMBER:
       iconType = 'tokenNumber';
       color = fieldName !== undefined ? 'euiColorVis1' : 'euiColorVis2';
       break;
-    case ML_JOB_FIELD_TYPES.UNKNOWN:
+    case JOB_FIELD_TYPES.UNKNOWN:
       // Use defaults
       break;
   }

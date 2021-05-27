@@ -12,12 +12,12 @@ import { EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FieldTypeIcon } from '../field_type_icon';
-import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
+import { getJobTypeAriaLabel } from '../../../util/field_types_utils';
 import {
   FieldVisConfig,
   FileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
-} from '../../datavisualizer/stats_table/types/field_vis_config';
+} from '../../stats_table/types';
 
 interface Props {
   card: FieldVisConfig | FileBasedFieldVisConfig;
@@ -31,7 +31,7 @@ export const FieldTitleBar: FC<Props> = ({ card }) => {
     });
   const cardTitleAriaLabel = [fieldName];
 
-  const classNames = ['ml-field-title-bar'];
+  const classNames = ['dv-field-title-bar'];
 
   if (card.fieldName === undefined) {
     classNames.push('document_count');
@@ -43,7 +43,7 @@ export const FieldTitleBar: FC<Props> = ({ card }) => {
 
   if (isIndexBasedFieldVisConfig(card) && card.isUnsupportedType !== true) {
     // All the supported field types have aria labels.
-    cardTitleAriaLabel.unshift(getMLJobTypeAriaLabel(card.type)!);
+    cardTitleAriaLabel.unshift(getJobTypeAriaLabel(card.type)!);
   }
 
   return (

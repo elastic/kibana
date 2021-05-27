@@ -9,12 +9,12 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { FieldTypeIcon } from './field_type_icon';
-import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
+import { JOB_FIELD_TYPES } from '../../../../../common';
 
 describe('FieldTypeIcon', () => {
   test(`render component when type matches a field type`, () => {
     const typeIconComponent = shallow(
-      <FieldTypeIcon type={ML_JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} needsAria={false} />
+      <FieldTypeIcon type={JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} needsAria={false} />
     );
     expect(typeIconComponent).toMatchSnapshot();
   });
@@ -24,7 +24,7 @@ describe('FieldTypeIcon', () => {
     jest.useFakeTimers();
 
     const typeIconComponent = mount(
-      <FieldTypeIcon type={ML_JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} needsAria={false} />
+      <FieldTypeIcon type={JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} needsAria={false} />
     );
     const container = typeIconComponent.find({ 'data-test-subj': 'mlFieldTypeIcon' });
 
