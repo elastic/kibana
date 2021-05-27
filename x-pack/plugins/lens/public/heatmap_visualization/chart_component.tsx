@@ -191,6 +191,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       },
       cellHeight: {
         max: 'fill',
+        min: 1,
       },
     },
     cell: {
