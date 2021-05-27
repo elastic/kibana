@@ -44,10 +44,12 @@ export const registerManageDefaultIndexPatternRoutes = (
       path: '/api/index_patterns/default',
       validate: {
         body: schema.object({
-          index_pattern_id: schema.string({
-            minLength: 1,
-            maxLength: 1_000,
-          }),
+          index_pattern_id: schema.nullable(
+            schema.string({
+              minLength: 1,
+              maxLength: 1_000,
+            })
+          ),
           force: schema.boolean({ defaultValue: false }),
         }),
       },

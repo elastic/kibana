@@ -200,6 +200,9 @@ export class IndexPatternsService {
     return null;
   };
 
+  /**
+   * Get default index pattern id
+   */
   getDefaultId = async (): Promise<string | null> => {
     const defaultIndexPatternId = await this.config.get('defaultIndex');
     return defaultIndexPatternId ?? null;
@@ -210,7 +213,7 @@ export class IndexPatternsService {
    * @param id
    * @param force
    */
-  setDefault = async (id: string, force = false) => {
+  setDefault = async (id: string | null, force = false) => {
     if (force || !this.config.get('defaultIndex')) {
       await this.config.set('defaultIndex', id);
     }

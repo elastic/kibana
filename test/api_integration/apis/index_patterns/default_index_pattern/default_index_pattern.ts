@@ -35,6 +35,15 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response3.status).to.be(200);
       const response4 = await supertest.get('/api/index_patterns/default');
       expect(response4.body.index_pattern_id).to.be(defaultId); // original default id is used
+
+      const response5 = await supertest.post('/api/index_patterns/default').send({
+        index_pattern_id: null,
+        force: true,
+      });
+      expect(response5.status).to.be(200);
+
+      const response6 = await supertest.get('/api/index_patterns/default');
+      expect(response6.body.index_pattern_id).to.be(null);
     });
   });
 }

@@ -4,6 +4,8 @@
 
 ## IndexPatternsService.getDefaultId property
 
+Get default index pattern id
+
 <b>Signature:</b>
 
 ```typescript
