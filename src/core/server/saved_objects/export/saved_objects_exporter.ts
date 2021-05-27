@@ -119,7 +119,7 @@ export class SavedObjectsExporter {
     this.#log.debug(`Processing [${savedObjects.length}] saved objects.`);
 
     const {
-      objects: exportedObjects,
+      objects: collectedObjects,
       missingRefs: missingReferences,
     } = await collectExportedObjects({
       objects: savedObjects,
@@ -131,8 +131,7 @@ export class SavedObjectsExporter {
     });
 
     // sort with the provided sort function then with the default export sorting
-    exportedObjects.sort(sortFunction);
-    sortObjects(exportedObjects);
+    const exportedObjects = sortObjects(collectedObjects.sort(sortFunction));
 
     // redact attributes that should not be exported
     const redactedObjects = includeNamespaces
