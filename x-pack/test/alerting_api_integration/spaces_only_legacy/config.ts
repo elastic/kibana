@@ -12,7 +12,8 @@ export default createTestConfig('spaces_only', {
   disabledPlugins: ['security'],
   license: 'trial',
   enableActionsProxy: false,
-  verificationMode: 'none',
+  rejectUnauthorized: false,
+  verificationMode: undefined,
   customizeLocalHostTls: true,
   preconfiguredAlertHistoryEsIndex: true,
 });
