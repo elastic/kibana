@@ -17,7 +17,6 @@ import { UptimeCorePlugins } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../common/lib';
-import { getLatestMonitor } from '../requests/get_latest_monitor';
 
 import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../common/translations';
 
@@ -61,7 +60,7 @@ const getAnomalies = async (
   );
 };
 
-export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _libs, plugins) => ({
+export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, libs, plugins) => ({
   id: 'xpack.uptime.alerts.durationAnomaly',
   name: durationAnomalyTranslations.alertFactoryName,
   validate: {
@@ -94,7 +93,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _li
     const foundAnomalies = anomalies?.length > 0;
 
     if (foundAnomalies) {
-      const monitorInfo = await getLatestMonitor({
+      const monitorInfo = await libs.requests.getLatestMonitor({
         uptimeEsClient,
         dateStart: 'now-15m',
         dateEnd: 'now',
