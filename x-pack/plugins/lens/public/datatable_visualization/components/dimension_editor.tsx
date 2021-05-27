@@ -81,17 +81,17 @@ export function TableDimensionEditor(
       []
     : [accessor];
   const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
+  const currentMinMax = minMaxByColumnId[accessor] || {
+    min: defaultPaletteParams.rangeMin,
+    max: defaultPaletteParams.rangeMax,
+  };
 
   const activePalette = column?.palette || {
     type: 'palette',
     name: defaultPaletteParams.name,
   };
   // need to tell the helper that the colorStops are required to display
-  const displayStops = applyPaletteParams(
-    props.paletteService,
-    activePalette,
-    minMaxByColumnId[accessor]
-  );
+  const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
   return (
     <>
@@ -292,7 +292,7 @@ export function TableDimensionEditor(
                     <CustomizablePalette
                       palettes={props.paletteService}
                       activePalette={activePalette}
-                      dataBounds={minMaxByColumnId[accessor]}
+                      dataBounds={currentMinMax}
                       setPalette={(newPalette) => {
                         setState({
                           ...state,

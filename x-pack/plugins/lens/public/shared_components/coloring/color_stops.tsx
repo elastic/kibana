@@ -24,7 +24,26 @@ import { getDataMinMax, getStepValue, isValidColor } from './utils';
 import { TooltipWrapper, useDebouncedValue } from '../index';
 import { ColorStop } from './types';
 
-const idGenerator = htmlIdGenerator();
+const idGeneratorFn = htmlIdGenerator();
+const idCache: string[] = [];
+const idGenerator = (index: number) => {
+  idCache[index] = idCache[index] || idGeneratorFn();
+  return idCache[index];
+};
+
+function areStopsValid(colorStops: Array<{ color: string; stop: string }>) {
+  return colorStops.every(
+    ({ color, stop }) => isValidColor(color) && !Number.isNaN(parseFloat(stop))
+  );
+}
+
+function shouldSortStops(colorStops: Array<{ color: string; stop: string | number }>) {
+  return colorStops.some(({ stop }, i) => {
+    const numberStop = Number(stop);
+    const prevNumberStop = Number(colorStops[i - 1]?.stop ?? -Infinity);
+    return numberStop < prevNumberStop;
+  });
+}
 
 export interface CustomStopsProps {
   colorStops: ColorStop[];
@@ -32,6 +51,7 @@ export interface CustomStopsProps {
   rangeType: 'number' | 'percent';
   dataBounds: { min: number; max: number };
   reverse?: boolean;
+  palette?: string;
   'data-test-prefix': string;
 }
 export const CustomStops = ({
@@ -40,26 +60,29 @@ export const CustomStops = ({
   rangeType,
   dataBounds,
   reverse,
+  palette,
   ['data-test-prefix']: dataTestPrefix,
 }: CustomStopsProps) => {
   const onChangeWithValidation = useCallback(
     (newColorStops: Array<{ color: string; stop: string }>) => {
-      const areStopsValid = newColorStops.every(({ color, stop }, i) => {
-        const numberStop = Number(stop);
-        const prevNumberStop = Number(newColorStops[i - 1]?.stop ?? -Infinity);
-        return isValidColor(color) && !Number.isNaN(numberStop) && numberStop >= prevNumberStop;
-      });
-      if (areStopsValid) {
+      const areStopsValuesValid = areStopsValid(newColorStops);
+      const shouldSort = shouldSortStops(newColorStops);
+      if (areStopsValuesValid && !shouldSort) {
         onChange(newColorStops.map(({ color, stop }) => ({ color, stop: Number(stop) })));
       }
     },
     [onChange]
   );
-  const memoizedValues = useMemo(
-    () => colorStops.map(({ color, stop }) => ({ color, stop: String(stop), id: idGenerator() })),
+
+  const memoizedValues = useMemo(() => {
+    return colorStops.map(({ color, stop }, i) => ({
+      color,
+      stop: String(stop),
+      id: idGenerator(i),
+    }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [colorStops, reverse]
-  );
+  }, [palette, reverse]);
+
   const { inputValue: localColorStops, handleInputChange: setLocalColorStops } = useDebouncedValue({
     onChange: onChangeWithValidation,
     value: memoizedValues,
@@ -72,16 +95,9 @@ export const CustomStops = ({
   // refresh on unmount:
   // the onChange logic here is a bit different than the one above as it has to actively sort if required
   useUnmount(() => {
-    const areStopsValid = localColorStops.every(({ color, stop }, i) => {
-      const numberStop = Number(stop);
-      return isValidColor(color) && !Number.isNaN(numberStop);
-    });
-    const shouldSort = localColorStops.some(({ stop }, i) => {
-      const numberStop = Number(stop);
-      const prevNumberStop = Number(localColorStops[i - 1]?.stop ?? -Infinity);
-      return numberStop < prevNumberStop;
-    });
-    if (areStopsValid && shouldSort) {
+    const areStopsValuesValid = areStopsValid(localColorStops);
+    const shouldSort = shouldSortStops(localColorStops);
+    if (areStopsValuesValid && shouldSort) {
       onChange(
         localColorStops
           .map(({ color, stop }) => ({ color, stop: Number(stop) }))
@@ -271,7 +287,7 @@ export const CustomStops = ({
           newColorStops.push({
             color: prevColor,
             stop: String(newStop),
-            id: idGenerator(),
+            id: idGenerator(length),
           });
           setLocalColorStops(newColorStops);
         }}
