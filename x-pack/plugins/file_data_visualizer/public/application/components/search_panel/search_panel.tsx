@@ -23,7 +23,7 @@ import {
   ErrorMessage,
   SEARCH_QUERY_LANGUAGE,
   SearchQueryLanguage,
-} from '../../types/combined_query';
+} from '../../index_data_visualizer/types/combined_query';
 
 interface Props {
   indexPattern: IndexPattern;

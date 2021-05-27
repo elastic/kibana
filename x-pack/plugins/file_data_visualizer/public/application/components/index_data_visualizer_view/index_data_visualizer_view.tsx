@@ -41,12 +41,15 @@ import type {
   MetricFieldsStats,
   TotalFieldsStats,
 } from '../stats_table/components/field_count_stats';
-import { OverallStats } from '../../types/overall_stats';
+import { OverallStats } from '../../index_data_visualizer/types/overall_stats';
 import { getActions } from '../field_data_row/action_menu';
 import { IndexBasedDataVisualizerExpandedRow } from '../expanded_row/index_based_expanded_row';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../index_data_visualizer/constants/index_data_visualizer_viewer';
-import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
+import { DataVisualizerIndexBasedAppState } from '../../index_data_visualizer/types/index_data_visualizer_state';
+import {
+  SEARCH_QUERY_LANGUAGE,
+  SearchQueryLanguage,
+} from '../../index_data_visualizer/types/combined_query';
 import { FieldRequestConfig, JobFieldType, SavedSearchSavedObject } from '../../../../common/types';
 import { useFileDataVisualizerKibana } from '../../kibana_context';
 import { FieldCountPanel } from '../field_count_panel';

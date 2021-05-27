@@ -8,7 +8,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { CombinedQuery } from '../../../types/combined_query';
+import { CombinedQuery } from '../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
 import { ExamplesList } from '../../examples_list';

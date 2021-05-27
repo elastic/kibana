@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { CombinedQuery } from '../../../types/combined_query';
+import { CombinedQuery } from '../../../index_data_visualizer/types/combined_query';
 import { FieldVisConfig } from '../../stats_table/types';
 import { LensPublicStart } from '../../../../../../lens/public';
 export function getActions(
