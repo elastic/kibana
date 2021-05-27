@@ -24,7 +24,7 @@ import {
 
 export const InsufficientLicensePage = () => (
   <Fragment>
-    <EuiPage data-test-subj="mlPageAccessDenied">
+    <EuiPage data-test-subj="mlPageInsufficientLicense">
       <EuiPageBody>
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
