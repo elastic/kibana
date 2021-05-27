@@ -71,7 +71,8 @@ describe('terms', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -95,7 +96,8 @@ describe('terms', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
