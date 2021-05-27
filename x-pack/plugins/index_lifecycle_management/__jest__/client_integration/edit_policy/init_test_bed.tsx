@@ -10,6 +10,7 @@ import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
 
 import '../helpers/global_mocks';
 
+import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
 import { licensingMock } from '../../../../licensing/public/mocks';
 import { EditPolicy } from '../../../public/application/sections/edit_policy';
 import { KibanaContextProvider } from '../../../public/shared_imports';
@@ -38,6 +39,7 @@ const EditPolicyContainer = ({ appServicesContext, ...rest }: any) => {
       services={{
         breadcrumbService,
         license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+        managementPageLayout: KibanaPageTemplate,
         ...appServicesContext,
       }}
     >

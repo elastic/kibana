@@ -46,70 +46,86 @@ Array [
 `;
 
 exports[`policy table should show empty state when there are not any policies 1`] = `
-<main
-  class="euiPageBody euiPageBody--borderRadiusNone"
+<div
+  class="euiPage euiPage--grow euiPageTemplate"
 >
-  <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-    role="main"
+  <main
+    class="euiPageBody euiPageBody--borderRadiusNone"
   >
-    <div
-      class="euiEmptyPrompt"
+    <header
+      class="euiPageHeader euiPageHeader--responsive euiPage--restrictWidth-default euiPageHeader--center"
+      data-test-subj="kibana-page-template-header"
+    />
+    <main
+      class="euiPageBody euiPageBody--borderRadiusNone"
     >
-      <span
-        color="subdued"
-        data-euiicon-type="managementApp"
-      />
       <div
-        class="euiSpacer euiSpacer--s"
-      />
-      <span
-        class="euiTextColor euiTextColor--subdued"
+        class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+        role="main"
       >
-        <h1
-          class="euiTitle euiTitle--medium"
-        >
-          Create your first index lifecycle policy
-        </h1>
         <div
-          class="euiSpacer euiSpacer--m"
-        />
-        <div
-          class="euiText euiText--medium"
+          class="euiPageContentBody euiPage--restrictWidth-default"
         >
-          <p>
-             An index lifecycle policy helps you manage your indices as they age.
-          </p>
-        </div>
-      </span>
-      <div
-        class="euiSpacer euiSpacer--l"
-      />
-      <div
-        class="euiSpacer euiSpacer--s"
-      />
-      <button
-        class="euiButton euiButton--primary euiButton--fill"
-        data-test-subj="createPolicyButton"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButton__content"
-        >
-          <span
-            class="euiButtonContent__icon"
-            data-euiicon-type="plusInCircle"
-          />
-          <span
-            class="euiButton__text"
+          <div
+            class="euiEmptyPrompt"
           >
-            Create policy
-          </span>
-        </span>
-      </button>
-    </div>
-  </div>
-</main>
+            <span
+              color="subdued"
+              data-euiicon-type="managementApp"
+            />
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
+            <span
+              class="euiTextColor euiTextColor--subdued"
+            >
+              <h1
+                class="euiTitle euiTitle--medium"
+              >
+                Create your first index lifecycle policy
+              </h1>
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+              <div
+                class="euiText euiText--medium"
+              >
+                <p>
+                   An index lifecycle policy helps you manage your indices as they age.
+                </p>
+              </div>
+            </span>
+            <div
+              class="euiSpacer euiSpacer--l"
+            />
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
+            <button
+              class="euiButton euiButton--primary euiButton--fill"
+              data-test-subj="createPolicyButton"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButtonContent__icon"
+                  data-euiicon-type="plusInCircle"
+                />
+                <span
+                  class="euiButton__text"
+                >
+                  Create policy
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </main>
+</div>
 `;
 
 exports[`policy table should sort when linked indices header is clicked 1`] = `

@@ -8,6 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context';
 import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
 import { licensingMock } from '../../../../licensing/public/mocks';
@@ -17,7 +18,13 @@ const breadcrumbService = createBreadcrumbsMock();
 
 const AppWithContext = (props: any) => {
   return (
-    <KibanaContextProvider services={{ breadcrumbService, license: licensingMock.createLicense() }}>
+    <KibanaContextProvider
+      services={{
+        breadcrumbService,
+        license: licensingMock.createLicense(),
+        managementPageLayout: KibanaPageTemplate,
+      }}
+    >
       <App {...props} />
     </KibanaContextProvider>
   );

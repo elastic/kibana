@@ -18,6 +18,8 @@ import {
 } from '../../../../src/core/public/mocks';
 import { HttpService } from '../../../../src/core/public/http';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
+import { KibanaPageTemplate } from '../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '../public/shared_imports';
 
 import { PolicyFromES } from '../common/types';
 import { PolicyTable } from '../public/application/sections/policy_table/policy_table';
@@ -84,23 +86,35 @@ const openContextMenu = (buttonIndex: number) => {
 describe('policy table', () => {
   beforeEach(() => {
     component = (
-      <PolicyTable
-        policies={policies}
-        history={scopedHistoryMock.create()}
-        navigateToApp={jest.fn()}
-        updatePolicies={jest.fn()}
-      />
+      <KibanaContextProvider
+        services={{
+          managementPageLayout: KibanaPageTemplate,
+        }}
+      >
+        <PolicyTable
+          policies={policies}
+          history={scopedHistoryMock.create()}
+          navigateToApp={jest.fn()}
+          updatePolicies={jest.fn()}
+        />
+      </KibanaContextProvider>
     );
   });
 
   test('should show empty state when there are not any policies', () => {
     component = (
-      <PolicyTable
-        policies={[]}
-        history={scopedHistoryMock.create()}
-        navigateToApp={jest.fn()}
-        updatePolicies={jest.fn()}
-      />
+      <KibanaContextProvider
+        services={{
+          managementPageLayout: KibanaPageTemplate,
+        }}
+      >
+        <PolicyTable
+          policies={[]}
+          history={scopedHistoryMock.create()}
+          navigateToApp={jest.fn()}
+          updatePolicies={jest.fn()}
+        />
+      </KibanaContextProvider>
     );
     const rendered = mountWithIntl(component);
     mountedSnapshot(rendered);
