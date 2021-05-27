@@ -9,21 +9,23 @@
 import { registerTestBed, TestBed } from '@kbn/test/jest';
 
 import { Context } from '../../public/components/field_editor_context';
-import { FieldEditor, Props } from '../../public/components/field_editor/field_editor';
+import { FieldEditor } from '../../public/components/field_editor/field_editor';
+import {
+  FieldEditorFlyoutContent,
+  Props,
+} from '../../public/components/field_editor_flyout_content';
 import { WithFieldEditorDependencies, getCommonActions } from './helpers';
 
-export const defaultProps: Props = {
-  onChange: jest.fn(),
-  syntaxError: {
-    error: null,
-    clear: () => {},
-  },
+const defaultProps: Props = {
+  onSave: () => {},
+  onCancel: () => {},
+  FieldEditor,
+  runtimeFieldValidator: () => Promise.resolve(null),
+  isSavingField: false,
 };
 
-export type FieldEditorTestBed = TestBed & { actions: ReturnType<typeof getCommonActions> };
-
 export const setup = (props?: Partial<Props>, deps?: Partial<Context>) => {
-  const testBed = registerTestBed(WithFieldEditorDependencies(FieldEditor, deps), {
+  const testBed = registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
     memoryRouter: {
       wrapComponent: false,
     },

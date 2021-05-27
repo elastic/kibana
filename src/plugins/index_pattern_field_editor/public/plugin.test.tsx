@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import { registerTestBed } from '@kbn/test/jest';
 
 jest.mock('../../kibana_react/public', () => {
   const original = jest.requireActual('../../kibana_react/public');
@@ -20,8 +21,6 @@ import { CoreStart } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
-
-import { registerTestBed } from './test_utils';
 
 import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
 import { IndexPatternFieldEditorPlugin } from './plugin';

@@ -17,7 +17,6 @@ import {
   EuiCode,
   EuiCallOut,
 } from '@elastic/eui';
-import type { CoreStart } from 'src/core/public';
 
 import {
   Form,
@@ -27,10 +26,9 @@ import {
   UseField,
   TextField,
   RuntimeType,
-  IndexPattern,
-  DataPublicPluginStart,
 } from '../../shared_imports';
-import { Field, InternalFieldType, PluginStart } from '../../types';
+import { Field } from '../../types';
+import { useFieldEditorContext } from '../field_editor_context';
 import { useFieldPreviewContext } from '../field_preview_context';
 
 import { RUNTIME_FIELD_OPTIONS } from './constants';
@@ -64,36 +62,10 @@ export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType'> 
 }
 
 export interface Props {
-  /** Link URLs to our doc site */
-  links: {
-    runtimePainless: string;
-  };
   /** Optional field to edit */
   field?: Field;
   /** Handler to receive state changes updates */
   onChange?: (state: FieldEditorFormState) => void;
-  indexPattern: IndexPattern;
-  fieldFormatEditors: PluginStart['fieldFormatEditors'];
-  fieldFormats: DataPublicPluginStart['fieldFormats'];
-  uiSettings: CoreStart['uiSettings'];
-  /** Context object */
-  ctx: {
-    /** The internal field type we are dealing with (concrete|runtime)*/
-    fieldTypeToProcess: InternalFieldType;
-    /**
-     * An array of field names not allowed.
-     * e.g we probably don't want a user to give a name of an existing
-     * runtime field (for that the user should edit the existing runtime field).
-     */
-    namesNotAllowed: string[];
-    /**
-     * An array of existing concrete fields. If the user gives a name to the runtime
-     * field that matches one of the concrete fields, a callout will be displayed
-     * to indicate that this runtime field will shadow the concrete field.
-     * It is also used to provide the list of field autocomplete suggestions to the code editor.
-     */
-    existingConcreteFields: Array<{ name: string; type: string }>;
-  };
   syntaxError: ScriptSyntaxError;
 }
 
@@ -174,17 +146,13 @@ const formSerializer = (field: FieldFormInternal): Field => {
   };
 };
 
-const FieldEditorComponent = ({
-  field,
-  onChange,
-  links,
-  indexPattern,
-  fieldFormatEditors,
-  fieldFormats,
-  uiSettings,
-  syntaxError,
-  ctx: { fieldTypeToProcess, namesNotAllowed, existingConcreteFields },
-}: Props) => {
+const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
+  const {
+    links,
+    namesNotAllowed,
+    existingConcreteFields,
+    fieldTypeToProcess,
+  } = useFieldEditorContext();
   const { fields, error, updateParams: updatePreviewParams } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -311,12 +279,7 @@ const FieldEditorComponent = ({
         data-test-subj="formatRow"
         withDividerRule
       >
-        <FormatField
-          indexPattern={indexPattern}
-          fieldFormatEditors={fieldFormatEditors}
-          fieldFormats={fieldFormats}
-          uiSettings={uiSettings}
-        />
+        <FormatField />
       </FormRow>
 
       {/* Advanced settings */}

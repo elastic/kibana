@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { act } from 'react-dom/test-utils';
-import { TestBed } from './test_utils';
+import { TestBed } from '@kbn/test/jest';
 
 export const getCommonActions = (testBed: TestBed) => {
   const toggleFormRow = (row: 'customLabel' | 'value' | 'format', value: 'on' | 'off' = 'on') => {
