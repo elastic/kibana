@@ -23,7 +23,11 @@ interface IconPopoverProps {
   onClose: () => void;
   detailsFetchStatus: FETCH_STATUS;
   isOpen: boolean;
-  icon?: string;
+  icon: {
+    type?: string;
+    size?: 's' | 'm' | 'l';
+    color?: string;
+  };
 }
 export function IconPopover({
   icon,
@@ -34,7 +38,7 @@ export function IconPopover({
   detailsFetchStatus,
   isOpen,
 }: IconPopoverProps) {
-  if (!icon) {
+  if (!icon.type) {
     return null;
   }
   const isLoading = detailsFetchStatus === FETCH_STATUS.LOADING;
@@ -44,7 +48,11 @@ export function IconPopover({
       ownFocus={false}
       button={
         <EuiButtonEmpty onClick={onClick} data-test-subj={`popover_${title}`}>
-          <EuiIcon type={icon} size="l" color="text" />
+          <EuiIcon
+            type={icon.type}
+            size={icon.size ?? 'l'}
+            color={icon.color ?? 'text'}
+          />
         </EuiButtonEmpty>
       }
       isOpen={isOpen}

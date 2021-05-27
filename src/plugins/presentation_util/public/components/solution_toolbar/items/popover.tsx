@@ -20,14 +20,20 @@ type AllowedPopoverProps = Omit<
 
 export type Props = AllowedButtonProps & AllowedPopoverProps;
 
-export const SolutionToolbarPopover = ({ label, iconType, primary, ...popover }: Props) => {
+export const SolutionToolbarPopover = ({
+  label,
+  iconType,
+  primary,
+  iconSide,
+  ...popover
+}: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onButtonClick = () => setIsOpen((status) => !status);
   const closePopover = () => setIsOpen(false);
 
   const button = (
-    <SolutionToolbarButton {...{ label, iconType, primary }} onClick={onButtonClick} />
+    <SolutionToolbarButton {...{ label, iconType, primary, iconSide }} onClick={onButtonClick} />
   );
 
   return (

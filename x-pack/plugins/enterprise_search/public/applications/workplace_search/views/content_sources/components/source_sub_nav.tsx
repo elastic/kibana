@@ -45,7 +45,10 @@ export const SourceSubNav: React.FC = () => {
           <SideNavLink to={getContentSourcePath(SOURCE_SCHEMAS_PATH, id, isOrganization)}>
             {NAV.SCHEMA}
           </SideNavLink>
-          <SideNavLink to={getContentSourcePath(SOURCE_DISPLAY_SETTINGS_PATH, id, isOrganization)}>
+          <SideNavLink
+            shouldShowActiveForSubroutes
+            to={getContentSourcePath(SOURCE_DISPLAY_SETTINGS_PATH, id, isOrganization)}
+          >
             {NAV.DISPLAY_SETTINGS}
           </SideNavLink>
         </>

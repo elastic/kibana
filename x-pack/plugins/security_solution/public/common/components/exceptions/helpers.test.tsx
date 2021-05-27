@@ -10,13 +10,8 @@ import { mount } from 'enzyme';
 import moment from 'moment-timezone';
 
 import {
-  getOperatorType,
-  getExceptionOperatorSelect,
   getFormattedComments,
-  filterExceptionItems,
-  getNewExceptionItem,
   formatOperatingSystems,
-  getEntryValue,
   formatExceptionItemForUpdate,
   enrichNewExceptionItemsWithComments,
   enrichExistingExceptionItemWithComments,
@@ -32,36 +27,19 @@ import {
   retrieveAlertOsTypes,
   filterIndexPatterns,
 } from './helpers';
-import { AlertData, EmptyEntry } from './types';
+import { AlertData } from './types';
 import {
-  isOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isNotOneOfOperator,
-  isInListOperator,
-  isNotInListOperator,
-  existsOperator,
-  doesNotExistOperator,
-} from '../autocomplete/operators';
-import { OperatorTypeEnum, OperatorEnum, EntryNested } from '../../../shared_imports';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
-import { getEntryMatchAnyMock } from '../../../../../lists/common/schemas/types/entry_match_any.mock';
-import { getEntryExistsMock } from '../../../../../lists/common/schemas/types/entry_exists.mock';
-import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
-import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
-import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import {
-  ENTRIES,
-  ENTRIES_WITH_IDS,
-  OLD_DATE_RELATIVE_TO_DATE_NOW,
-} from '../../../../../lists/common/constants.mock';
-import {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
+  ListOperatorTypeEnum as OperatorTypeEnum,
   EntriesArray,
   OsTypeArray,
-} from '../../../../../lists/common/schemas';
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
+import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
+import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/common';
 
 jest.mock('uuid', () => ({
@@ -98,6 +76,30 @@ const mockEndpointFields = [
   },
 ];
 
+const mockLinuxEndpointFields = [
+  {
+    name: 'file.path',
+    type: 'string',
+    esTypes: ['keyword'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+  },
+  {
+    name: 'file.Ext.code_signature.status',
+    type: 'string',
+    esTypes: ['text'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+    subType: { nested: { path: 'file.Ext.code_signature' } },
+  },
+];
+
 export const getEndpointField = (name: string) =>
   mockEndpointFields.find((field) => field.name === name) as IFieldType;
 
@@ -113,7 +115,7 @@ describe('Exception helpers', () => {
   describe('#filterIndexPatterns', () => {
     test('it returns index patterns without filtering if list type is "detection"', () => {
       const mockIndexPatterns = getMockIndexPattern();
-      const output = filterIndexPatterns(mockIndexPatterns, 'detection');
+      const output = filterIndexPatterns(mockIndexPatterns, 'detection', ['windows']);
 
       expect(output).toEqual(mockIndexPatterns);
     });
@@ -123,131 +125,19 @@ describe('Exception helpers', () => {
         ...getMockIndexPattern(),
         fields: [...fields, ...mockEndpointFields],
       };
-      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint');
+      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['windows']);
 
       expect(output).toEqual({ ...getMockIndexPattern(), fields: [...mockEndpointFields] });
     });
-  });
 
-  describe('#getOperatorType', () => {
-    test('returns operator type "match" if entry.type is "match"', () => {
-      const payload = getEntryMatchMock();
-      const operatorType = getOperatorType(payload);
+    test('it returns filtered index patterns if list type is "endpoint" and os contains "linux"', () => {
+      const mockIndexPatterns = {
+        ...getMockIndexPattern(),
+        fields: [...fields, ...mockLinuxEndpointFields],
+      };
+      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['linux']);
 
-      expect(operatorType).toEqual(OperatorTypeEnum.MATCH);
-    });
-
-    test('returns operator type "match_any" if entry.type is "match_any"', () => {
-      const payload = getEntryMatchAnyMock();
-      const operatorType = getOperatorType(payload);
-
-      expect(operatorType).toEqual(OperatorTypeEnum.MATCH_ANY);
-    });
-
-    test('returns operator type "list" if entry.type is "list"', () => {
-      const payload = getEntryListMock();
-      const operatorType = getOperatorType(payload);
-
-      expect(operatorType).toEqual(OperatorTypeEnum.LIST);
-    });
-
-    test('returns operator type "exists" if entry.type is "exists"', () => {
-      const payload = getEntryExistsMock();
-      const operatorType = getOperatorType(payload);
-
-      expect(operatorType).toEqual(OperatorTypeEnum.EXISTS);
-    });
-  });
-
-  describe('#getExceptionOperatorSelect', () => {
-    test('it returns "isOperator" when "operator" is "included" and operator type is "match"', () => {
-      const payload = getEntryMatchMock();
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(isOperator);
-    });
-
-    test('it returns "isNotOperator" when "operator" is "excluded" and operator type is "match"', () => {
-      const payload = getEntryMatchMock();
-      payload.operator = 'excluded';
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(isNotOperator);
-    });
-
-    test('it returns "isOneOfOperator" when "operator" is "included" and operator type is "match_any"', () => {
-      const payload = getEntryMatchAnyMock();
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(isOneOfOperator);
-    });
-
-    test('it returns "isNotOneOfOperator" when "operator" is "excluded" and operator type is "match_any"', () => {
-      const payload = getEntryMatchAnyMock();
-      payload.operator = 'excluded';
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(isNotOneOfOperator);
-    });
-
-    test('it returns "existsOperator" when "operator" is "included" and no operator type is provided', () => {
-      const payload = getEntryExistsMock();
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(existsOperator);
-    });
-
-    test('it returns "doesNotExistsOperator" when "operator" is "excluded" and no operator type is provided', () => {
-      const payload = getEntryExistsMock();
-      payload.operator = 'excluded';
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(doesNotExistOperator);
-    });
-
-    test('it returns "isInList" when "operator" is "included" and operator type is "list"', () => {
-      const payload = getEntryListMock();
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(isInListOperator);
-    });
-
-    test('it returns "isNotInList" when "operator" is "excluded" and operator type is "list"', () => {
-      const payload = getEntryListMock();
-      payload.operator = 'excluded';
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(isNotInListOperator);
-    });
-  });
-
-  describe('#getEntryValue', () => {
-    it('returns "match" entry value', () => {
-      const payload = getEntryMatchMock();
-      const result = getEntryValue(payload);
-      const expected = 'some host name';
-      expect(result).toEqual(expected);
-    });
-
-    it('returns "match any" entry values', () => {
-      const payload = getEntryMatchAnyMock();
-      const result = getEntryValue(payload);
-      const expected = ['some host name'];
-      expect(result).toEqual(expected);
-    });
-
-    it('returns "exists" entry value', () => {
-      const payload = getEntryExistsMock();
-      const result = getEntryValue(payload);
-      const expected = undefined;
-      expect(result).toEqual(expected);
-    });
-
-    it('returns "list" entry value', () => {
-      const payload = getEntryListMock();
-      const result = getEntryValue(payload);
-      const expected = 'some-list-id';
-      expect(result).toEqual(expected);
+      expect(output).toEqual({ ...getMockIndexPattern(), fields: [...mockLinuxEndpointFields] });
     });
   });
 
@@ -288,178 +178,6 @@ describe('Exception helpers', () => {
       const wrapper = mount<React.ReactElement>(result[0].children as React.ReactElement);
 
       expect(wrapper.text()).toEqual('some old comment');
-    });
-  });
-
-  describe('#filterExceptionItems', () => {
-    // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
-    // for context around the temporary `id`
-    test('it correctly validates entries that include a temporary `id`', () => {
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        { ...getExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS },
-      ]);
-
-      expect(output).toEqual([{ ...getExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS }]);
-    });
-
-    test('it removes entry items with "value" of "undefined"', () => {
-      const { entries, ...rest } = getExceptionListItemSchemaMock();
-      const mockEmptyException: EmptyEntry = {
-        id: '123',
-        field: 'host.name',
-        type: OperatorTypeEnum.MATCH,
-        operator: OperatorEnum.INCLUDED,
-        value: undefined,
-      };
-      const exceptions = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
-
-      expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
-    });
-
-    test('it removes "match" entry items with "value" of empty string', () => {
-      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
-      const mockEmptyException: EmptyEntry = {
-        id: '123',
-        field: 'host.name',
-        type: OperatorTypeEnum.MATCH,
-        operator: OperatorEnum.INCLUDED,
-        value: '',
-      };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
-
-      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
-    });
-
-    test('it removes "match" entry items with "field" of empty string', () => {
-      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
-      const mockEmptyException: EmptyEntry = {
-        id: '123',
-        field: '',
-        type: OperatorTypeEnum.MATCH,
-        operator: OperatorEnum.INCLUDED,
-        value: 'some value',
-      };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
-
-      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
-    });
-
-    test('it removes "match_any" entry items with "field" of empty string', () => {
-      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
-      const mockEmptyException: EmptyEntry = {
-        id: '123',
-        field: '',
-        type: OperatorTypeEnum.MATCH_ANY,
-        operator: OperatorEnum.INCLUDED,
-        value: ['some value'],
-      };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
-
-      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
-    });
-
-    test('it removes "nested" entry items with "field" of empty string', () => {
-      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
-      const mockEmptyException: EntryNested = {
-        field: '',
-        type: OperatorTypeEnum.NESTED,
-        entries: [getEntryMatchMock()],
-      };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
-
-      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
-    });
-
-    test('it removes the "nested" entry entries with "value" of empty string', () => {
-      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
-      const mockEmptyException: EntryNested = {
-        field: 'host.name',
-        type: OperatorTypeEnum.NESTED,
-        entries: [getEntryMatchMock(), { ...getEntryMatchMock(), value: '' }],
-      };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
-
-      expect(output).toEqual([
-        {
-          ...getExceptionListItemSchemaMock(),
-          entries: [
-            ...getExceptionListItemSchemaMock().entries,
-            { ...mockEmptyException, entries: [getEntryMatchMock()] },
-          ],
-        },
-      ]);
-    });
-
-    test('it removes the "nested" entry item if all its entries are invalid', () => {
-      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
-      const mockEmptyException: EntryNested = {
-        field: 'host.name',
-        type: OperatorTypeEnum.NESTED,
-        entries: [{ ...getEntryMatchMock(), value: '' }],
-      };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
-
-      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
-    });
-
-    test('it removes `temporaryId` from items', () => {
-      const { meta, ...rest } = getNewExceptionItem({
-        listId: '123',
-        namespaceType: 'single',
-        ruleName: 'rule name',
-      });
-      const exceptions = filterExceptionItems([{ ...rest, meta }]);
-
-      expect(exceptions).toEqual([{ ...rest, entries: [], meta: undefined }]);
     });
   });
 

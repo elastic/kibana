@@ -132,6 +132,7 @@ export const getBatchItems = ({
 
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_DUPLICATE_SELECTED}
+      data-test-subj="duplicateRuleBulk"
       icon="copy"
       disabled={missingActionPrivileges || containsLoading || selectedRuleIds.length === 0}
       onClick={async () => {

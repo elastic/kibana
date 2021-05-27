@@ -10,51 +10,50 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiSpacer,
   EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { isEmpty } from 'fp-ts/Array';
 import { SummaryView } from './summary_view';
 import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from './helpers';
-import { getDataFromSourceHits } from '../../../../common/utils/field_formatters';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { INDICATOR_DESTINATION_PATH } from '../../../../common/constants';
+import {
+  FIRSTSEEN,
+  INDICATOR_EVENT_URL,
+  INDICATOR_REFERENCE,
+} from '../../../../common/cti/constants';
+import { EmptyThreatDetailsView } from './empty_threat_details_view';
 
 const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
   fieldName,
   value,
-}) => (
-  <EuiToolTip
-    data-test-subj="message-tool-tip"
-    content={
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <span>{fieldName}</span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    }
-  >
+}) => {
+  const tooltipChild = [INDICATOR_EVENT_URL, INDICATOR_REFERENCE].some(
+    (field) => field === fieldName
+  ) ? (
+    <EuiLink href={value} target="_blank">
+      {value}
+    </EuiLink>
+  ) : (
     <span>{value}</span>
-  </EuiToolTip>
-);
-
-const getSummaryRowsArray = ({
-  data,
-}: {
-  data: TimelineEventsDetailsItem[];
-}): ThreatDetailsRow[][] => {
-  if (!data) return [[]];
-  const threatInfo = data.find(
-    ({ field, originalValue }) => field === INDICATOR_DESTINATION_PATH && originalValue
   );
-  if (!threatInfo) return [[]];
-  const { originalValue } = threatInfo;
-  const values = Array.isArray(originalValue) ? originalValue : [originalValue];
-  return values.map((value) =>
-    getDataFromSourceHits(JSON.parse(value)).map((threatInfoItem) => ({
-      title: threatInfoItem.field.replace(`${INDICATOR_DESTINATION_PATH}.`, ''),
-      description: { fieldName: threatInfoItem.field, value: threatInfoItem.originalValue },
-    }))
+  return (
+    <EuiToolTip
+      data-test-subj="message-tool-tip"
+      content={
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <span>{fieldName}</span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      {tooltipChild}
+    </EuiToolTip>
   );
 };
 
@@ -62,17 +61,51 @@ const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns
   ThreatDetailsDescription
 );
 
+const getISOStringFromThreatDataItem = (threatDataItem: TimelineEventsDetailsItem[]) => {
+  const firstSeen = threatDataItem.find(
+    (item: TimelineEventsDetailsItem) => item.field === FIRSTSEEN
+  );
+  if (firstSeen) {
+    const { originalValue } = firstSeen;
+    const firstSeenValue = Array.isArray(originalValue) ? originalValue[0] : originalValue;
+    if (!Number.isNaN(Date.parse(firstSeenValue))) {
+      return firstSeenValue;
+    }
+  }
+  return new Date(-1).toString();
+};
+
+const getThreatDetailsRowsArray = (threatData: TimelineEventsDetailsItem[][]) =>
+  threatData
+    .sort(
+      (a, b) =>
+        Date.parse(getISOStringFromThreatDataItem(b)) -
+        Date.parse(getISOStringFromThreatDataItem(a))
+    )
+    .map((items) =>
+      items.map(({ field, originalValue }) => ({
+        title: field,
+        description: {
+          fieldName: `${INDICATOR_DESTINATION_PATH}.${field}`,
+          value: Array.isArray(originalValue) ? originalValue[0] : originalValue,
+        },
+      }))
+    );
+
 const ThreatDetailsViewComponent: React.FC<{
-  data: TimelineEventsDetailsItem[];
-}> = ({ data }) => {
-  const summaryRowsArray = useMemo(() => getSummaryRowsArray({ data }), [data]);
-  return (
+  threatData: TimelineEventsDetailsItem[][];
+}> = ({ threatData }) => {
+  const threatDetailsRowsArray = getThreatDetailsRowsArray(threatData);
+  return isEmpty(threatDetailsRowsArray) || isEmpty(threatDetailsRowsArray[0]) ? (
+    <EmptyThreatDetailsView />
+  ) : (
     <>
-      {summaryRowsArray.map((summaryRows, index, arr) => {
+      {threatDetailsRowsArray.map((summaryRows, index, arr) => {
         const key = summaryRows.find((threat) => threat.title === 'matched.id')?.description
           .value[0];
         return (
-          <div key={key}>
+          <div key={`${key}-${index}`}>
+            {index === 0 && <EuiSpacer size="l" />}
             <SummaryView
               summaryColumns={summaryColumns}
               summaryRows={summaryRows}

@@ -20,6 +20,7 @@ export {
   RunContext,
 } from './task';
 
+export { asInterval } from './lib/intervals';
 export { isUnrecoverableError, throwUnrecoverableError } from './task_running';
 
 export {
@@ -44,7 +45,6 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
           message: `setting "${fromPath}.max_workers" (${taskManager?.max_workers}) greater than ${MAX_WORKERS_LIMIT} is deprecated. Values greater than ${MAX_WORKERS_LIMIT} will not be supported starting in 8.0.`,
         });
       }
-      return settings;
     },
   ],
 };

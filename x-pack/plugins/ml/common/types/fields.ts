@@ -50,6 +50,10 @@ export interface NewJobCaps {
   aggs: Aggregation[];
 }
 
+export interface NewJobCapsResponse {
+  [indexPattern: string]: NewJobCaps;
+}
+
 export interface AggFieldPair {
   agg: Aggregation;
   field: Field;

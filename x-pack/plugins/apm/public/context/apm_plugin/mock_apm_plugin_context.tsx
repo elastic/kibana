@@ -7,6 +7,7 @@
 
 import React, { ReactNode } from 'react';
 import { Observable, of } from 'rxjs';
+import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
@@ -96,6 +97,9 @@ const mockPlugin = {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
     },
   },
+  observability: {
+    isAlertingExperienceEnabled: () => false,
+  },
 };
 
 const mockAppMountParameters = {
@@ -107,6 +111,7 @@ export const mockApmPluginContextValue = {
   config: mockConfig,
   core: mockCore,
   plugins: mockPlugin,
+  observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
 };
 
 export function MockApmPluginContextWrapper({

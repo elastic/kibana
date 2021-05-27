@@ -26,7 +26,8 @@ export const getRenderCellValueFn = (
   indexPattern: IndexPattern,
   rows: ElasticSearchHit[] | undefined,
   rowsFlattened: Array<Record<string, unknown>>,
-  useNewFieldsApi: boolean
+  useNewFieldsApi: boolean,
+  maxDocFieldsDisplayed: number
 ) => ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
   const row = rows ? rows[rowIndex] : undefined;
   const rowFlattened = rowsFlattened
@@ -98,7 +99,7 @@ export const getRenderCellValueFn = (
 
     return (
       <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
-        {[...highlightPairs, ...sourcePairs].map(([key, value]) => (
+        {[...highlightPairs, ...sourcePairs].slice(0, maxDocFieldsDisplayed).map(([key, value]) => (
           <Fragment key={key}>
             <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription
@@ -114,7 +115,7 @@ export const getRenderCellValueFn = (
   if (typeof rowFlattened[columnId] === 'object' && isDetails) {
     return (
       <JsonCodeEditor
-        json={rowFlattened[columnId] as Record<string, any>}
+        json={rowFlattened[columnId] as Record<string, unknown>}
         width={defaultMonacoEditorWidth}
       />
     );
@@ -122,7 +123,8 @@ export const getRenderCellValueFn = (
 
   if (field && field.type === '_source') {
     if (isDetails) {
-      return <JsonCodeEditor json={row} width={defaultMonacoEditorWidth} />;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return <JsonCodeEditor json={row as any} width={defaultMonacoEditorWidth} />;
     }
     const formatted = indexPattern.formatHit(row);
 
@@ -141,7 +143,7 @@ export const getRenderCellValueFn = (
 
     return (
       <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
-        {[...highlightPairs, ...sourcePairs].map(([key, value]) => (
+        {[...highlightPairs, ...sourcePairs].slice(0, maxDocFieldsDisplayed).map(([key, value]) => (
           <Fragment key={key}>
             <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription

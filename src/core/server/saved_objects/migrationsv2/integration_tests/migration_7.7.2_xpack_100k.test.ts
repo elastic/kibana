@@ -26,7 +26,7 @@ async function removeLogFile() {
   await asyncUnlink(logFilePath).catch(() => void 0);
 }
 
-// FAILING: https://github.com/elastic/kibana/pull/96788
+// FAILING on 7.13: https://github.com/elastic/kibana/issues/96895
 describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;

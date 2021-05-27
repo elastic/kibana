@@ -25,7 +25,10 @@ import {
   NewTrustedApp,
   OperatingSystem,
 } from '../../../../../../common/endpoint/types';
-import { isValidHash } from '../../../../../../common/endpoint/service/trusted_apps/validations';
+import {
+  isValidHash,
+  isPathValid,
+} from '../../../../../../common/endpoint/service/trusted_apps/validations';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
@@ -42,6 +45,7 @@ import {
   EffectedPolicySelection,
   EffectedPolicySelectProps,
 } from './effected_policy_select';
+import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -52,8 +56,8 @@ const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
   isInvalid: boolean;
-  errors: string[];
-  warnings: string[];
+  errors: React.ReactNode[];
+  warnings: React.ReactNode[];
 }
 interface ValidationResult {
   /** Overall indicator if form is valid */
@@ -71,7 +75,7 @@ const addResultToValidation = (
   validation: ValidationResult,
   field: keyof NewTrustedApp,
   type: 'warnings' | 'errors',
-  resultValue: string
+  resultValue: React.ReactNode
 ) => {
   if (!validation.result[field]) {
     validation.result[field] = {
@@ -80,7 +84,8 @@ const addResultToValidation = (
       warnings: [],
     };
   }
-  validation.result[field]![type].push(resultValue);
+  const errorMarkup: React.ReactNode = type === 'warnings' ? <div>{resultValue}</div> : resultValue;
+  validation.result[field]![type].push(errorMarkup);
   validation.result[field]!.isInvalid = true;
 };
 
@@ -153,6 +158,20 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
             values: { row: index + 1 },
           })
         );
+      } else if (
+        !isPathValid({ os: values.os, field: entry.field, type: entry.type, value: entry.value })
+      ) {
+        // show soft warnings and thus allow entry
+        isValid = true;
+        addResultToValidation(
+          validation,
+          'entries',
+          'warnings',
+          i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldInvalidPathMsg', {
+            defaultMessage: '[{row}] Path may be formed incorrectly; verify value',
+            values: { row: index + 1 },
+          })
+        );
       }
     });
   }
@@ -212,14 +231,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       >
     >({});
 
-    const getTestId = useCallback(
-      (suffix: string): string | undefined => {
-        if (dataTestSubj) {
-          return `${dataTestSubj}-${suffix}`;
-        }
-      },
-      [dataTestSubj]
-    );
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     const notifyOfChange = useCallback(
       (updatedFormValues: TrustedAppFormState['item']) => {
@@ -474,6 +486,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           data-test-subj={getTestId('conditionsRow')}
           isInvalid={wasVisited?.entries && validationResult.result.entries?.isInvalid}
           error={validationResult.result.entries?.errors}
+          helpText={validationResult.result.entries?.warnings}
         >
           <LogicalConditionBuilder
             entries={trustedApp.entries}

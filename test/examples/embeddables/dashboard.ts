@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('saved search', async () => {
-      await dashboardExpect.savedSearchRowCount(50);
+      await dashboardExpect.savedSearchRowCount(10);
     });
   });
 

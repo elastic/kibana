@@ -23,14 +23,8 @@ class ArtifactMigrationError extends Error {
 export const migrateArtifactsToFleet = async (
   soClient: SavedObjectsClient,
   endpointArtifactClient: EndpointArtifactClientInterface,
-  logger: Logger,
-  isFleetServerEnabled: boolean
+  logger: Logger
 ): Promise<void> => {
-  if (!isFleetServerEnabled) {
-    logger.debug('Skipping Artifacts migration. [fleetServerEnabled] flag is off');
-    return;
-  }
-
   let totalArtifactsMigrated = -1;
   let hasMore = true;
 

@@ -68,7 +68,7 @@ export class OsqueryAppContextService {
  */
 export interface OsqueryAppContext {
   logFactory: LoggerFactory;
-  config(): Promise<ConfigType>;
+  config(): ConfigType;
 
   /**
    * Object readiness is tied to plugin start method

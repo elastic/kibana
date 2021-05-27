@@ -37,6 +37,7 @@ import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './co
 import { DiscoverServices } from '../../../build_services';
 import { getDisplayedColumns } from '../../helpers/columns';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
+import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
 
 interface SortObj {
@@ -163,17 +164,33 @@ export const DiscoverGrid = ({
   const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
   const defaultColumns = displayedColumns.includes('_source');
+  const usedSelectedDocs = useMemo(() => {
+    if (!selectedDocs.length || !rows?.length) {
+      return [];
+    }
+    const idMap = rows.reduce((map, row) => map.set(getDocId(row), true), new Map());
+    // filter out selected docs that are no longer part of the current data
+    const result = selectedDocs.filter((docId) => idMap.get(docId));
+    if (result.length === 0 && isFilterActive) {
+      setIsFilterActive(false);
+    }
+    return result;
+  }, [selectedDocs, rows, isFilterActive]);
+
   const displayedRows = useMemo(() => {
     if (!rows) {
       return [];
     }
-    if (!isFilterActive || selectedDocs.length === 0) {
+    if (!isFilterActive || usedSelectedDocs.length === 0) {
       return rows;
     }
-    return rows.filter((row) => {
-      return selectedDocs.includes(getDocId(row));
-    });
-  }, [rows, selectedDocs, isFilterActive]);
+    const rowsFiltered = rows.filter((row) => usedSelectedDocs.includes(getDocId(row)));
+    if (!rowsFiltered.length) {
+      // in case the selected docs are no longer part of the sample of 500, show all docs
+      return rows;
+    }
+    return rowsFiltered;
+  }, [rows, usedSelectedDocs, isFilterActive]);
 
   /**
    * Pagination
@@ -223,9 +240,10 @@ export const DiscoverGrid = ({
         indexPattern,
         displayedRows,
         displayedRows ? displayedRows.map((hit) => indexPattern.flattenHit(hit)) : [],
-        useNewFieldsApi
+        useNewFieldsApi,
+        services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)
       ),
-    [displayedRows, indexPattern, useNewFieldsApi]
+    [displayedRows, indexPattern, useNewFieldsApi, services.uiSettings]
   );
 
   /**
@@ -256,16 +274,16 @@ export const DiscoverGrid = ({
 
   const additionalControls = useMemo(
     () =>
-      selectedDocs.length ? (
+      usedSelectedDocs.length ? (
         <DiscoverGridDocumentToolbarBtn
           isFilterActive={isFilterActive}
           rows={rows!}
-          selectedDocs={selectedDocs}
+          selectedDocs={usedSelectedDocs}
           setSelectedDocs={setSelectedDocs}
           setIsFilterActive={setIsFilterActive}
         />
       ) : null,
-    [selectedDocs, isFilterActive, rows, setIsFilterActive]
+    [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
   );
 
   if (!rowCount) {
@@ -289,7 +307,7 @@ export const DiscoverGrid = ({
         onFilter,
         indexPattern,
         isDarkMode: services.uiSettings.get('theme:darkMode'),
-        selectedDocs,
+        selectedDocs: usedSelectedDocs,
         setSelectedDocs: (newSelectedDocs) => {
           setSelectedDocs(newSelectedDocs);
           if (isFilterActive && newSelectedDocs.length === 0) {

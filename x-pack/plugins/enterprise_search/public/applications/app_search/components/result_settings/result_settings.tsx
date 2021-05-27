@@ -17,11 +17,13 @@ import { SAVE_BUTTON_LABEL } from '../../../shared/constants';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../constants';
+import { getEngineBreadcrumbs } from '../engine';
 
+import { EmptyState } from './components';
 import { RESULT_SETTINGS_TITLE } from './constants';
 import { ResultSettingsTable } from './result_settings_table';
-
 import { SampleResponse } from './sample_response';
 
 import { ResultSettingsLogic } from '.';
@@ -31,12 +33,19 @@ const CLEAR_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Clear all values' }
 );
 
-interface Props {
-  engineBreadcrumb: string[];
-}
+const UNSAVED_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.resultSettings.unsavedChangesMessage',
+  { defaultMessage: 'Result Settings have not been saved. Are you sure you want to leave?' }
+);
 
-export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const { dataLoading } = useValues(ResultSettingsLogic);
+export const ResultSettings: React.FC = () => {
+  const {
+    dataLoading,
+    schema,
+    stagedUpdates,
+    resultFieldsAtDefaultSettings,
+    resultFieldsEmpty,
+  } = useValues(ResultSettingsLogic);
   const {
     initializeResultSettingsData,
     saveResultSettings,
@@ -49,46 +58,58 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
   }, []);
 
   if (dataLoading) return <Loading />;
+  const hasSchema = Object.keys(schema).length > 0;
 
   return (
     <>
-      <SetPageChrome trail={[...engineBreadcrumb, RESULT_SETTINGS_TITLE]} />
+      <SetPageChrome trail={getEngineBreadcrumbs([RESULT_SETTINGS_TITLE])} />
+      <UnsavedChangesPrompt hasUnsavedChanges={stagedUpdates} messageText={UNSAVED_MESSAGE} />
       <EuiPageHeader
         pageTitle={RESULT_SETTINGS_TITLE}
         description={i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.resultSettings.pageDescription',
           { defaultMessage: 'Enrich search results and select which fields will appear.' }
         )}
-        rightSideItems={[
-          <EuiButton
-            data-test-subj="SaveResultSettings"
-            color="primary"
-            fill
-            onClick={saveResultSettings}
-          >
-            {SAVE_BUTTON_LABEL}
-          </EuiButton>,
-          <EuiButton
-            data-test-subj="ResetResultSettings"
-            color="danger"
-            onClick={confirmResetAllFields}
-          >
-            {RESTORE_DEFAULTS_BUTTON_LABEL}
-          </EuiButton>,
-          <EuiButtonEmpty data-test-subj="ClearResultSettings" onClick={clearAllFields}>
-            {CLEAR_BUTTON_LABEL}
-          </EuiButtonEmpty>,
-        ]}
+        rightSideItems={
+          hasSchema
+            ? [
+                <EuiButton
+                  data-test-subj="SaveResultSettings"
+                  color="primary"
+                  fill
+                  onClick={saveResultSettings}
+                  disabled={resultFieldsEmpty || !stagedUpdates}
+                >
+                  {SAVE_BUTTON_LABEL}
+                </EuiButton>,
+                <EuiButton
+                  data-test-subj="ResetResultSettings"
+                  color="danger"
+                  onClick={confirmResetAllFields}
+                  disabled={resultFieldsAtDefaultSettings}
+                >
+                  {RESTORE_DEFAULTS_BUTTON_LABEL}
+                </EuiButton>,
+                <EuiButtonEmpty data-test-subj="ClearResultSettings" onClick={clearAllFields}>
+                  {CLEAR_BUTTON_LABEL}
+                </EuiButtonEmpty>,
+              ]
+            : []
+        }
       />
       <FlashMessages />
-      <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={5}>
-          <ResultSettingsTable />
-        </EuiFlexItem>
-        <EuiFlexItem grow={3}>
-          <SampleResponse />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {hasSchema ? (
+        <EuiFlexGroup alignItems="flexStart">
+          <EuiFlexItem grow={5}>
+            <ResultSettingsTable />
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <SampleResponse />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EmptyState />
+      )}
     </>
   );
 };

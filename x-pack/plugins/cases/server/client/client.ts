@@ -17,6 +17,7 @@ import {
   CasesClientGetUserActions,
   CasesClientGetAlerts,
   CasesClientPush,
+  CasesClientGetCasesByAlert,
 } from './types';
 import { create } from './cases/create';
 import { update } from './cases/update';
@@ -31,7 +32,7 @@ import {
   CaseUserActionServiceSetup,
   AlertServiceContract,
 } from '../services';
-import { CasesPatchRequest, CasePostRequest, User } from '../../common/api';
+import { CasesPatchRequest, CasePostRequest, User } from '../../common';
 import { get } from './cases/get';
 import { get as getUserActions } from './user_actions/get';
 import { get as getAlerts } from './alerts/get';
@@ -245,6 +246,18 @@ export class CasesClientHandler implements CasesClient {
         error,
         logger: this.logger,
       });
+    }
+  }
+
+  public async getCaseIdsByAlertId(args: CasesClientGetCasesByAlert) {
+    try {
+      return this._caseService.getCaseIdsByAlertId({
+        client: this._savedObjectsClient,
+        alertId: args.alertId,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to get case using alert id: ${args.alertId}: ${error}`);
+      throw error;
     }
   }
 }

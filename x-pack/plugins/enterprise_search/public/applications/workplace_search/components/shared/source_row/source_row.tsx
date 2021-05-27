@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import classNames from 'classnames';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,7 +32,11 @@ import {
 import { ContentSourceDetails } from '../../../types';
 import { SourceIcon } from '../source_icon';
 
-const CREDENTIALS_INVALID_ERROR_REASON = 'credentials_invalid';
+import './source_row.scss';
+
+// i18n is not needed here because this is only used to check against the server error, which
+// is not translated by the Kibana team at this time.
+const CREDENTIALS_REFRESH_NEEDED_PREFIX = 'OAuth access token could not be refreshed';
 
 export interface ISourceRow {
   showDetails?: boolean;
@@ -63,7 +69,12 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   const isIndexing = status === statuses.INDEXING;
   const hasError = status === statuses.ERROR || status === statuses.DISCONNECTED;
   const showFix =
-    isOrganization && hasError && allowsReauth && errorReason === CREDENTIALS_INVALID_ERROR_REASON;
+    isOrganization &&
+    hasError &&
+    allowsReauth &&
+    errorReason?.startsWith(CREDENTIALS_REFRESH_NEEDED_PREFIX);
+
+  const rowClass = classNames({ 'source-row--error': hasError });
 
   const fixLink = (
     <EuiLinkTo
@@ -89,7 +100,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   );
 
   return (
-    <EuiTableRow data-test-subj="GroupsRow">
+    <EuiTableRow data-test-subj="GroupsRow" className={rowClass}>
       <EuiTableRowCell>
         <EuiFlexGroup
           justifyContent="flexStart"

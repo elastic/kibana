@@ -25,7 +25,7 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
-    getPrepackagedRules: (): AddPrepackagedRulesSchemaDecoded[] => {
+    getLatestPrepackagedRules: async (): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
       return [
         {
           author: ['Elastic'],

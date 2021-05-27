@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // TODO add test for 'scripted filter and query' viz
     // TODO add test for 'animal weight linked to search' viz
     // TODO add test for the last vega viz
-    await dashboardExpect.savedSearchRowCount(50);
+    await dashboardExpect.savedSearchRowCount(11);
   };
 
   const expectNoDataRenders = async () => {

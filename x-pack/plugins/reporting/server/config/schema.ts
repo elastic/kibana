@@ -9,16 +9,7 @@ import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import moment from 'moment';
 
 const KibanaServerSchema = schema.object({
-  hostname: schema.maybe(
-    schema.string({
-      validate(value) {
-        if (value === '0') {
-          return 'must not be "0" for the headless browser to correctly resolve the host';
-        }
-      },
-      hostname: true,
-    })
-  ),
+  hostname: schema.maybe(schema.string({ hostname: true })),
   port: schema.maybe(schema.number()),
   protocol: schema.maybe(
     schema.string({
@@ -160,6 +151,7 @@ const EncryptionKeySchema = schema.conditional(
 );
 
 const RolesSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
   allow: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
 });
 

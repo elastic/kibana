@@ -9,7 +9,7 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isPlainObject } from 'lodash';
-import { SearchParams } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { TimeCache } from './time_cache';
 import { SearchAPI } from './search_api';
 import {
@@ -226,7 +226,7 @@ export class EsQueryParser {
    * @param {*} obj
    * @param {boolean} isQuery - if true, the `obj` belongs to the req's query portion
    */
-  _injectContextVars(obj: Query | SearchParams['body']['aggs'], isQuery: boolean) {
+  _injectContextVars(obj: Query | estypes.SearchRequest['body']['aggs'], isQuery: boolean) {
     if (obj && typeof obj === 'object') {
       if (Array.isArray(obj)) {
         // For arrays, replace MUST_CLAUSE and MUST_NOT_CLAUSE string elements

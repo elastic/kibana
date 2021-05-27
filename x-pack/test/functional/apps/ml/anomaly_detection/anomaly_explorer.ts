@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
@@ -73,6 +72,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
+    });
+
+    after(async () => {
+      await ml.testResources.deleteMLTestDashboard();
     });
 
     for (const testData of testDataList) {
@@ -235,8 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('updates pagination');
           await ml.swimLane.setPageSize(viewBySwimLaneTestSubj, 5);
 
-          const axisLabels = await ml.swimLane.getAxisLabels(viewBySwimLaneTestSubj, 'y');
-          expect(axisLabels.length).to.eql(5);
+          await ml.swimLane.assertAxisLabelCount(viewBySwimLaneTestSubj, 'y', 5);
 
           await ml.swimLane.selectPage(viewBySwimLaneTestSubj, 3);
 
@@ -324,6 +326,17 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomaliesTable.assertTableRowsCount(25);
           await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
+        });
+
+        it('allows to change the anomalies table pagination', async () => {
+          await ml.testExecution.logTestStep('displays the anomalies table with default config');
+          await ml.anomaliesTable.assertTableExists();
+          await ml.anomaliesTable.assertRowsNumberPerPage(25);
+          await ml.anomaliesTable.assertTableRowsCount(25);
+
+          await ml.testExecution.logTestStep('updates table pagination');
+          await ml.anomaliesTable.setRowsNumberPerPage(10);
+          await ml.anomaliesTable.assertTableRowsCount(10);
         });
 
         it('adds swim lane embeddable to a dashboard', async () => {

@@ -31,108 +31,6 @@ describe('findThresholdSignals', () => {
     mockService = alertsMock.createAlertServices();
   });
 
-  it('should generate a threshold signal for pre-7.12 rules', async () => {
-    await findThresholdSignals({
-      from: 'now-6m',
-      to: 'now',
-      inputIndexPattern: ['*'],
-      services: mockService,
-      logger: mockLogger,
-      filter: queryFilter,
-      threshold: {
-        field: 'host.name',
-        value: 100,
-      },
-      buildRuleMessage,
-      timestampOverride: undefined,
-    });
-    expect(mockSingleSearchAfter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        aggregations: {
-          'threshold_0:host.name': {
-            terms: {
-              field: 'host.name',
-              min_doc_count: 100,
-              size: 10000,
-            },
-            aggs: {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
-                },
-              },
-            },
-          },
-        },
-      })
-    );
-  });
-
-  it('should generate a signal for pre-7.12 rules with no threshold field', async () => {
-    await findThresholdSignals({
-      from: 'now-6m',
-      to: 'now',
-      inputIndexPattern: ['*'],
-      services: mockService,
-      logger: mockLogger,
-      filter: queryFilter,
-      threshold: {
-        field: '',
-        value: 100,
-      },
-      buildRuleMessage,
-      timestampOverride: undefined,
-    });
-    expect(mockSingleSearchAfter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        aggregations: {
-          threshold_0: {
-            terms: {
-              script: {
-                source: '""',
-                lang: 'painless',
-              },
-              min_doc_count: 100,
-            },
-            aggs: {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
-                },
-              },
-            },
-          },
-        },
-      })
-    );
-  });
-
   it('should generate a threshold signal query when only a value is provided', async () => {
     await findThresholdSignals({
       from: 'now-6m',
@@ -246,6 +144,7 @@ describe('findThresholdSignals', () => {
       threshold: {
         field: ['host.name', 'user.name'],
         value: 100,
+        cardinality: [],
       },
       buildRuleMessage,
       timestampOverride: undefined,

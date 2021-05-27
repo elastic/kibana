@@ -8,12 +8,13 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { FilterExpanded } from './filter_expanded';
-import { mockUrlStorage, mockUseValuesList, render } from '../../rtl_helpers';
+import { mockAppIndexPattern, mockUrlStorage, mockUseValuesList, render } from '../../rtl_helpers';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('FilterExpanded', function () {
   it('should render properly', async function () {
     mockUrlStorage({ filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] });
+    mockAppIndexPattern();
 
     render(
       <FilterExpanded

@@ -37,7 +37,7 @@ export const registerDeleteRoute = ({
         // Until then we'll modify the response here.
         if (
           err?.meta &&
-          err.body?.task_failures[0]?.reason?.reason?.includes(
+          err.body?.task_failures?.[0]?.reason?.reason?.includes(
             'Job must be [STOPPED] before deletion'
           )
         ) {

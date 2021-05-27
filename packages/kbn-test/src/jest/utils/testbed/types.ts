@@ -133,7 +133,7 @@ export interface TestBed<T = string> {
     /**
      * Get a list of the form error messages that are visible in the DOM.
      */
-    getErrorsMessages: () => string[];
+    getErrorsMessages: (wrapper?: T | ReactWrapper) => string[];
   };
   table: {
     getMetaData: (tableTestSubject: T) => EuiTableMetaData;

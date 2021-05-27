@@ -7,9 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Map, Style, NavigationControl, MapboxOptions } from 'mapbox-gl';
+import type { Map, Style, MapboxOptions } from '@kbn/mapbox-gl';
 
 import { View, parse } from 'vega';
+
+import { mapboxgl } from '@kbn/mapbox-gl';
+
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
 import { getMapServiceSettings } from '../../services';
@@ -22,9 +25,7 @@ import {
   userConfiguredLayerId,
   vegaLayerId,
 } from './constants';
-
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
-
 import './vega_map_view.scss';
 
 async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
@@ -115,7 +116,7 @@ export class VegaMapView extends VegaBaseView {
     // In some cases, Vega may be initialized twice, e.g. after awaiting...
     if (!this._$container) return;
 
-    const mapBoxInstance = new Map({
+    const mapBoxInstance = new mapboxgl.Map({
       style,
       customAttribution,
       container: this._$container.get(0),
@@ -142,7 +143,7 @@ export class VegaMapView extends VegaBaseView {
 
   private initControls(mapBoxInstance: Map) {
     if (this.shouldShowZoomControl) {
-      mapBoxInstance.addControl(new NavigationControl({ showCompass: false }), 'top-left');
+      mapBoxInstance.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
     }
 
     // disable map rotation using right click + drag
@@ -175,6 +176,7 @@ export class VegaMapView extends VegaBaseView {
       map: mapBoxInstance,
       context: {
         vegaView,
+        vegaControls: this._$controls.get(0),
         updateVegaView,
       },
     });
@@ -182,7 +184,7 @@ export class VegaMapView extends VegaBaseView {
 
   protected async _initViewCustomizations() {
     const vegaView = new View(
-      parse(injectMapPropsIntoSpec(this._parser.spec)),
+      parse(injectMapPropsIntoSpec(this._parser.spec), undefined, { ast: true }),
       this._vegaViewConfig
     );
 

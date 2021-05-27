@@ -12,7 +12,7 @@ import { isDeepStrictEqual } from 'util';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
+import { Logger, LogMeta } from '../logging';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { InternalHttpServiceSetup } from '../http';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
@@ -25,6 +25,10 @@ import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './plugins_status';
+
+interface StatusLogMeta extends LogMeta {
+  kibana: { status: ServiceStatus };
+}
 
 interface SetupDeps {
   elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
@@ -70,7 +74,11 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
           ...Object.entries(coreStatus),
           ...Object.entries(pluginsStatus),
         ]);
-        this.logger.debug(`Recalculated overall status`, { status: summary });
+        this.logger.debug<StatusLogMeta>(`Recalculated overall status`, {
+          kibana: {
+            status: summary,
+          },
+        });
         return summary;
       }),
       distinctUntilChanged(isDeepStrictEqual),
@@ -80,9 +88,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     // Create an unused subscription to ensure all underlying lazy observables are started.
     this.overallSubscription = overall$.subscribe();
 
-    const router = http.createRouter('');
-    registerStatusRoute({
-      router,
+    const commonRouteDeps = {
       config: {
         allowAnonymous: statusConfig.allowAnonymous,
         packageInfo: this.coreContext.env.packageInfo,
@@ -95,7 +101,26 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         plugins$: this.pluginsStatus.getAll$(),
         core$,
       },
+    };
+
+    const router = http.createRouter('');
+    registerStatusRoute({
+      router,
+      ...commonRouteDeps,
     });
+
+    if (http.notReadyServer && commonRouteDeps.config.allowAnonymous) {
+      http.notReadyServer.registerRoutes('', (notReadyRouter) => {
+        registerStatusRoute({
+          router: notReadyRouter,
+          ...commonRouteDeps,
+          config: {
+            ...commonRouteDeps.config,
+            allowAnonymous: true,
+          },
+        });
+      });
+    }
 
     return {
       core$,

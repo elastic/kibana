@@ -7,10 +7,12 @@
 
 import { mockEngineValues } from '../../__mocks__';
 
-import { generateEnginePath } from './utils';
+import { generateEnginePath, getEngineBreadcrumbs } from './utils';
 
 describe('generateEnginePath', () => {
-  mockEngineValues.engineName = 'hello-world';
+  beforeEach(() => {
+    mockEngineValues.engineName = 'hello-world';
+  });
 
   it('generates paths with engineName filled from state', () => {
     expect(generateEnginePath('/engines/:engineName/example')).toEqual(
@@ -25,5 +27,17 @@ describe('generateEnginePath', () => {
         bar: 'baz',
       })
     ).toEqual('/engines/override/foo/baz');
+  });
+});
+
+describe('getEngineBreadcrumbs', () => {
+  beforeEach(() => {
+    mockEngineValues.engineName = 'foo';
+  });
+
+  it('generates breadcrumbs with engineName filled from state', () => {
+    expect(getEngineBreadcrumbs(['bar', 'baz'])).toEqual(['Engines', 'foo', 'bar', 'baz']);
+    expect(getEngineBreadcrumbs(['bar'])).toEqual(['Engines', 'foo', 'bar']);
+    expect(getEngineBreadcrumbs()).toEqual(['Engines', 'foo']);
   });
 });

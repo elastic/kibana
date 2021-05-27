@@ -6,9 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import Joi from 'joi';
-import { errors } from '@elastic/elasticsearch';
 import { has, snakeCase } from 'lodash/fp';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { SanitizedAlert } from '../../../../../alerting/common';
 
 import {
@@ -18,50 +17,12 @@ import {
   SavedObjectsFindResult,
 } from '../../../../../../../src/core/server';
 import { AlertsClient } from '../../../../../alerting/server';
-import { BadRequestError } from '../errors/bad_request_error';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
 export interface OutputError {
   message: string;
   statusCode: number;
 }
-
-export const transformError = (err: Error & Partial<errors.ResponseError>): OutputError => {
-  if (Boom.isBoom(err)) {
-    return {
-      message: err.output.payload.message,
-      statusCode: err.output.statusCode,
-    };
-  } else {
-    if (err.statusCode != null) {
-      if (err.body?.error != null) {
-        return {
-          statusCode: err.statusCode,
-          message: `${err.body.error.type}: ${err.body.error.reason}`,
-        };
-      } else {
-        return {
-          statusCode: err.statusCode,
-          message: err.message,
-        };
-      }
-    } else if (err instanceof BadRequestError) {
-      // allows us to throw request validation errors in the absence of Boom
-      return {
-        message: err.message,
-        statusCode: 400,
-      };
-    } else {
-      // natively return the err and allow the regular framework
-      // to deal with the error when it is a non Boom
-      return {
-        message: err.message ?? '(unknown error message)',
-        statusCode: 500,
-      };
-    }
-  }
-};
-
 export interface BulkError {
   id?: string;
   rule_id?: string;
@@ -233,7 +194,12 @@ export const transformBulkError = (
   }
 };
 
-export const buildRouteValidation = <T>(schema: Joi.Schema): RouteValidationFunction<T> => (
+interface Schema {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  validate: (input: any) => { value: any; error?: Error };
+}
+
+export const buildRouteValidation = <T>(schema: Schema): RouteValidationFunction<T> => (
   payload: T,
   { ok, badRequest }
 ) => {
@@ -360,6 +326,9 @@ export const getFailingRules = async (
         };
       }, {});
   } catch (exc) {
+    if (Boom.isBoom(exc)) {
+      throw exc;
+    }
     throw new Error(`Failed to get executionStatus with AlertsClient: ${exc.message}`);
   }
 };

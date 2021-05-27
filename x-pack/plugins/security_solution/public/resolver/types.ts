@@ -6,6 +6,7 @@
  */
 
 /* eslint-disable no-duplicate-imports */
+import type ResizeObserver from 'resize-observer-polyfill';
 import type React from 'react';
 import { Store } from 'redux';
 import { Middleware, Dispatch } from 'redux';

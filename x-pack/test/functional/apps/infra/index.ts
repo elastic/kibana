@@ -8,15 +8,19 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('InfraOps app', function () {
+  describe('InfraOps App', function () {
     this.tags('ciGroup7');
-
-    loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./log_entry_categories_tab'));
-    loadTestFile(require.resolve('./log_entry_rate_tab'));
-    loadTestFile(require.resolve('./logs_source_configuration'));
-    loadTestFile(require.resolve('./metrics_source_configuration'));
-    loadTestFile(require.resolve('./link_to'));
+    describe('Metrics UI', function () {
+      loadTestFile(require.resolve('./home_page'));
+      loadTestFile(require.resolve('./metrics_source_configuration'));
+      loadTestFile(require.resolve('./metrics_anomalies'));
+    });
+    describe('Logs UI', function () {
+      loadTestFile(require.resolve('./log_entry_categories_tab'));
+      loadTestFile(require.resolve('./log_entry_rate_tab'));
+      loadTestFile(require.resolve('./logs_source_configuration'));
+      loadTestFile(require.resolve('./link_to'));
+    });
   });
 };

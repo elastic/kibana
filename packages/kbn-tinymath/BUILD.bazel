@@ -1,0 +1,70 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("@npm//peggy:index.bzl", "peggy")
+
+PKG_BASE_NAME = "kbn-tinymath"
+PKG_REQUIRE_NAME = "@kbn/tinymath"
+
+SOURCE_FILES = glob(
+  [
+    "src/**/*",
+  ]
+)
+
+TYPE_FILES = [
+  "index.d.ts",
+]
+
+SRCS = SOURCE_FILES + TYPE_FILES
+
+filegroup(
+  name = "srcs",
+  srcs = SRCS,
+)
+
+NPM_MODULE_EXTRA_FILES = [
+  "package.json",
+  "README.md",
+]
+
+DEPS = [
+  "@npm//lodash",
+]
+
+peggy(
+  name = "grammar",
+  data = [
+    ":grammar/grammar.peggy"
+  ],
+  output_dir = True,
+  args = [
+    "-o",
+    "$(@D)/index.js",
+    "./%s/grammar/grammar.peggy" % package_name()
+  ],
+)
+
+js_library(
+  name = PKG_BASE_NAME,
+  srcs = NPM_MODULE_EXTRA_FILES + [
+    ":srcs",
+    ":grammar"
+  ],
+  deps = DEPS,
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm(
+  name = "npm_module",
+  deps = [
+    ":%s" % PKG_BASE_NAME,
+  ]
+)
+
+filegroup(
+  name = "build",
+  srcs = [
+    ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)

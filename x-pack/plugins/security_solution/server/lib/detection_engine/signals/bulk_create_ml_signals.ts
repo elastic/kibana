@@ -8,36 +8,27 @@ import type { estypes } from '@elastic/elasticsearch';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
-import { Logger } from '../../../../../../../src/core/server';
+import { Logger, SavedObject } from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams, RefreshTypes } from '../types';
+import { RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
+import { AlertAttributes } from './types';
+import { MachineLearningRuleParams } from '../schemas/rule_schemas';
 
 interface BulkCreateMlSignalsParams {
-  actions: RuleAlertAction[];
   someResult: AnomalyResults;
-  ruleParams: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes<MachineLearningRuleParams>>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;
   signalsIndex: string;
-  name: string;
-  createdAt: string;
-  createdBy: string;
-  updatedAt: string;
-  updatedBy: string;
-  interval: string;
-  enabled: boolean;
   refresh: RefreshTypes;
-  tags: string[];
-  throttle: string;
   buildRuleMessage: BuildRuleMessage;
 }
 

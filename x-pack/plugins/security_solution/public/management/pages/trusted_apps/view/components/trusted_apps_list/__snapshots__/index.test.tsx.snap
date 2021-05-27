@@ -3583,7 +3583,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   aria-controls="mockId"
                   aria-current="true"
                   aria-label="Page 1 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
@@ -3605,7 +3605,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 2 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-1"
                   href="#mockId"
                   rel="noreferrer"
@@ -3627,7 +3627,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 3 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-2"
                   href="#mockId"
                   rel="noreferrer"
@@ -3649,7 +3649,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 4 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-3"
                   href="#mockId"
                   rel="noreferrer"
@@ -3671,7 +3671,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 5 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-4"
                   href="#mockId"
                   rel="noreferrer"
@@ -3699,7 +3699,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 20 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-19"
                   href="#mockId"
                   rel="noreferrer"
@@ -6543,7 +6543,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   aria-controls="mockId"
                   aria-current="true"
                   aria-label="Page 1 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
@@ -6565,7 +6565,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 2 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-1"
                   href="#mockId"
                   rel="noreferrer"
@@ -6587,7 +6587,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 3 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-2"
                   href="#mockId"
                   rel="noreferrer"
@@ -6609,7 +6609,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 4 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-3"
                   href="#mockId"
                   rel="noreferrer"
@@ -6631,7 +6631,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 5 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-4"
                   href="#mockId"
                   rel="noreferrer"
@@ -6659,7 +6659,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 <a
                   aria-controls="mockId"
                   aria-label="Page 20 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-19"
                   href="#mockId"
                   rel="noreferrer"
@@ -9661,7 +9661,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   aria-controls="mockId"
                   aria-current="true"
                   aria-label="Page 1 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
@@ -9683,7 +9683,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 <a
                   aria-controls="mockId"
                   aria-label="Page 2 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-1"
                   href="#mockId"
                   rel="noreferrer"
@@ -9705,7 +9705,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 <a
                   aria-controls="mockId"
                   aria-label="Page 3 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-2"
                   href="#mockId"
                   rel="noreferrer"
@@ -9727,7 +9727,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 <a
                   aria-controls="mockId"
                   aria-label="Page 4 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-3"
                   href="#mockId"
                   rel="noreferrer"
@@ -9749,7 +9749,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 <a
                   aria-controls="mockId"
                   aria-label="Page 5 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-4"
                   href="#mockId"
                   rel="noreferrer"
@@ -9777,7 +9777,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 <a
                   aria-controls="mockId"
                   aria-label="Page 20 of 20"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-19"
                   href="#mockId"
                   rel="noreferrer"
@@ -12621,7 +12621,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 <a
                   aria-controls="mockId"
                   aria-label="Page 1 of 4"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-0"
                   href="#mockId"
                   rel="noreferrer"
@@ -12643,7 +12643,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 <a
                   aria-controls="mockId"
                   aria-label="Page 2 of 4"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-1"
                   href="#mockId"
                   rel="noreferrer"
@@ -12666,7 +12666,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   aria-controls="mockId"
                   aria-current="true"
                   aria-label="Page 3 of 4"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-2"
                   disabled=""
                   type="button"
@@ -12688,7 +12688,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 <a
                   aria-controls="mockId"
                   aria-label="Page 4 of 4"
-                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
                   data-test-subj="pagination-button-3"
                   href="#mockId"
                   rel="noreferrer"

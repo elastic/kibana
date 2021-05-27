@@ -7,6 +7,7 @@
 
 import { KibanaRequest, Logger } from 'src/core/server';
 import { SavedObject } from 'src/core/types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -14,15 +15,15 @@ import {
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { SetupPlugins } from '../../../../plugin';
+import { MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { RefreshTypes } from '../../types';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
 import { BuildRuleMessage } from '../rule_messages';
 import { RuleStatusService } from '../rule_status_service';
-import { MachineLearningRuleAttributes } from '../types';
+import { AlertAttributes } from '../types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
 
 export const mlExecutor = async ({
@@ -36,7 +37,7 @@ export const mlExecutor = async ({
   refresh,
   buildRuleMessage,
 }: {
-  rule: SavedObject<MachineLearningRuleAttributes>;
+  rule: SavedObject<AlertAttributes<MachineLearningRuleParams>>;
   ml: SetupPlugins['ml'];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
@@ -57,20 +58,28 @@ export const mlExecutor = async ({
   const fakeRequest = {} as KibanaRequest;
   const summaryJobs = await ml
     .jobServiceProvider(fakeRequest, services.savedObjectsClient)
-    .jobsSummary([ruleParams.machineLearningJobId]);
-  const jobSummary = summaryJobs.find((job) => job.id === ruleParams.machineLearningJobId);
+    .jobsSummary(ruleParams.machineLearningJobId);
+  const jobSummaries = summaryJobs.filter((job) =>
+    ruleParams.machineLearningJobId.includes(job.id)
+  );
 
-  if (jobSummary == null || !isJobStarted(jobSummary.jobState, jobSummary.datafeedState)) {
+  if (
+    jobSummaries.length < 1 ||
+    jobSummaries.some((job) => !isJobStarted(job.jobState, job.datafeedState))
+  ) {
     const errorMessage = buildRuleMessage(
-      'Machine learning job is not started:',
-      `job id: "${ruleParams.machineLearningJobId}"`,
-      `job status: "${jobSummary?.jobState}"`,
-      `datafeed status: "${jobSummary?.datafeedState}"`
+      'Machine learning job(s) are not started:',
+      ...jobSummaries.map((job) =>
+        [
+          `job id: "${job.id}"`,
+          `job status: "${job.jobState}"`,
+          `datafeed status: "${job.datafeedState}"`,
+        ].join(', ')
+      )
     );
     logger.warn(errorMessage);
     result.warning = true;
-    // TODO: change this to partialFailure since we don't immediately exit rule function and still do actions at the end?
-    await ruleStatusService.error(errorMessage);
+    await ruleStatusService.partialFailure(errorMessage);
   }
 
   const anomalyResults = await findMlSignals({
@@ -79,7 +88,7 @@ export const mlExecutor = async ({
     // currently unused by the mlAnomalySearch function.
     request: ({} as unknown) as KibanaRequest,
     savedObjectsClient: services.savedObjectsClient,
-    jobId: ruleParams.machineLearningJobId,
+    jobIds: ruleParams.machineLearningJobId,
     anomalyThreshold: ruleParams.anomalyThreshold,
     from: ruleParams.from,
     to: ruleParams.to,
@@ -105,23 +114,13 @@ export const mlExecutor = async ({
     createdItemsCount,
     createdItems,
   } = await bulkCreateMlSignals({
-    actions: rule.attributes.actions,
-    throttle: rule.attributes.throttle,
     someResult: filteredAnomalyResults,
-    ruleParams,
+    ruleSO: rule,
     services,
     logger,
     id: rule.id,
     signalsIndex: ruleParams.outputIndex,
-    name: rule.attributes.name,
-    createdBy: rule.attributes.createdBy,
-    createdAt: rule.attributes.createdAt,
-    updatedBy: rule.attributes.updatedBy,
-    updatedAt: rule.updated_at ?? '',
-    interval: rule.attributes.schedule.interval,
-    enabled: rule.attributes.enabled,
     refresh,
-    tags: rule.attributes.tags,
     buildRuleMessage,
   });
   // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }

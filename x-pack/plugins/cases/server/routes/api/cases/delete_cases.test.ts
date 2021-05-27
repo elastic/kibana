@@ -17,7 +17,7 @@ import {
   mockCaseComments,
 } from '../__fixtures__';
 import { initDeleteCasesApi } from './delete_cases';
-import { CASES_URL } from '../../../../common/constants';
+import { CASES_URL } from '../../../../common';
 
 describe('DELETE case', () => {
   let routeHandler: RequestHandler<any, any, any>;

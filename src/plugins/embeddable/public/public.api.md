@@ -160,7 +160,7 @@ export abstract class Container<TChildInput extends Partial<EmbeddableInput> = {
     // (undocumented)
     addNewEmbeddable<EEI extends EmbeddableInput = EmbeddableInput, EEO extends EmbeddableOutput = EmbeddableOutput, E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>>(type: string, explicitInput: Partial<EEI>): Promise<E | ErrorEmbeddable>;
     // (undocumented)
-    protected readonly children: {
+    readonly children: {
         [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
     };
     // (undocumented)
@@ -378,8 +378,12 @@ export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = Em
     create(initialInput: TEmbeddableInput, parent?: IContainer): Promise<TEmbeddable | ErrorEmbeddable | undefined>;
     createFromSavedObject(savedObjectId: string, input: Partial<TEmbeddableInput>, parent?: IContainer): Promise<TEmbeddable | ErrorEmbeddable>;
     getDefaultInput(partial: Partial<TEmbeddableInput>): Partial<TEmbeddableInput>;
+    getDescription(): string;
     getDisplayName(): string;
     getExplicitInput(): Promise<Partial<TEmbeddableInput>>;
+    getIconType(): string;
+    // Warning: (ae-forgotten-export) The symbol "PresentableGrouping" needs to be exported by the entry point index.d.ts
+    readonly grouping?: PresentableGrouping;
     readonly isContainerType: boolean;
     readonly isEditable: () => Promise<boolean>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectMetaData" needs to be exported by the entry point index.d.ts
@@ -393,7 +397,7 @@ export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = Em
 // Warning: (ae-missing-release-tag) "EmbeddableFactoryDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type EmbeddableFactoryDefinition<I extends EmbeddableInput = EmbeddableInput, O extends EmbeddableOutput = EmbeddableOutput, E extends IEmbeddable<I, O> = IEmbeddable<I, O>, T extends SavedObjectAttributes = SavedObjectAttributes> = Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> & Partial<Pick<EmbeddableFactory<I, O, E, T>, 'createFromSavedObject' | 'isContainerType' | 'getExplicitInput' | 'savedObjectMetaData' | 'canCreateNew' | 'getDefaultInput' | 'telemetry' | 'extract' | 'inject' | 'migrations'>>;
+export type EmbeddableFactoryDefinition<I extends EmbeddableInput = EmbeddableInput, O extends EmbeddableOutput = EmbeddableOutput, E extends IEmbeddable<I, O> = IEmbeddable<I, O>, T extends SavedObjectAttributes = SavedObjectAttributes> = Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> & Partial<Pick<EmbeddableFactory<I, O, E, T>, 'createFromSavedObject' | 'isContainerType' | 'getExplicitInput' | 'savedObjectMetaData' | 'canCreateNew' | 'getDefaultInput' | 'telemetry' | 'extract' | 'inject' | 'migrations' | 'grouping' | 'getIconType' | 'getDescription'>>;
 
 // Warning: (ae-missing-release-tag) "EmbeddableFactoryNotFoundError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -600,6 +604,7 @@ export class EmbeddableStateTransfer {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ApplicationStart"
     navigateToEditor(appId: string, options?: {
         path?: string;
+        openInNewTab?: boolean;
         state: EmbeddableEditorState;
     }): Promise<void>;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ApplicationStart"
@@ -723,6 +728,7 @@ export function openAddPanelFlyout(options: {
     overlays: OverlayStart_2;
     notifications: NotificationsStart_2;
     SavedObjectFinder: React.ComponentType<any>;
+    showCreateNewMenu?: boolean;
 }): OverlayRef_2;
 
 // Warning: (ae-missing-release-tag) "OutputSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

@@ -6,7 +6,6 @@
  */
 
 import { TelemetryEventsSender, TelemetryEvent } from '../../telemetry/sender';
-import { RuleTypeParams } from '../types';
 import { BuildRuleMessage } from './rule_messages';
 import { SignalSearchResponse, SignalSource } from './types';
 import { Logger } from '../../../../../../../src/core/server';
@@ -31,7 +30,6 @@ export function sendAlertTelemetryEvents(
   logger: Logger,
   eventsTelemetry: TelemetryEventsSender | undefined,
   filteredEvents: SignalSearchResponse,
-  ruleParams: RuleTypeParams,
   buildRuleMessage: BuildRuleMessage
 ) {
   if (eventsTelemetry === undefined) {

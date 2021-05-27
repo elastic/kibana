@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { Schema } from '../../../../../shared/types';
+import { Schema } from '../../../../../shared/schema/types';
 import { Result } from '../../../result/result';
 import { Result as ResultType } from '../../../result/types';
 

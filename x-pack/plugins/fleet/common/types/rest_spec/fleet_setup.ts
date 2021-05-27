@@ -15,6 +15,7 @@ export interface GetFleetStatusResponse {
     | 'tls_required'
     | 'api_keys'
     | 'fleet_admin_user'
+    | 'fleet_server'
     | 'encrypted_saved_object_encryption_key_required'
   >;
 }

@@ -12,7 +12,8 @@ import { CoreStart } from 'src/core/public';
 import { text } from '@storybook/addon-knobs';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
-import { FieldValueSelection, FieldValueSelectionProps } from '../field_value_selection';
+import { FieldValueSelectionProps } from '../types';
+import { FieldValueSelection } from '../field_value_selection';
 
 const KibanaReactContext = createKibanaReactContext(({
   uiSettings: { get: () => {}, get$: () => new Observable() },
@@ -30,7 +31,7 @@ export default {
               label="Service name"
               values={['elastic co frontend', 'apm server', 'opbean python']}
               onChange={() => {}}
-              value={''}
+              selectedValue={[]}
               loading={false}
               setQuery={() => {}}
             />
@@ -47,7 +48,7 @@ export function ValuesLoaded() {
       label="Service name"
       values={['elastic co frontend', 'apm server', 'opbean python']}
       onChange={() => {}}
-      value={''}
+      selectedValue={[]}
       loading={false}
       setQuery={() => {}}
     />
@@ -60,7 +61,7 @@ export function LoadingState() {
       label="Service name"
       values={['elastic co frontend', 'apm server', 'opbean python']}
       onChange={() => {}}
-      value={''}
+      selectedValue={[]}
       loading={true}
       setQuery={() => {}}
     />
@@ -73,7 +74,7 @@ export function EmptyState() {
       label="Service name"
       values={[]}
       onChange={() => {}}
-      value={''}
+      selectedValue={[]}
       loading={false}
       setQuery={() => {}}
     />
@@ -93,7 +94,7 @@ export function SearchState(args: FieldValueSelectionProps) {
       label="Service name"
       values={['elastic co frontend', 'apm server', 'opbean python']}
       onChange={() => {}}
-      value={''}
+      selectedValue={[]}
       loading={false}
       setQuery={setQuery}
     />

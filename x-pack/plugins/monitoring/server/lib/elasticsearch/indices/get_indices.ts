@@ -29,12 +29,16 @@ export function handleResponse(
   // map the hits
   const hits = resp?.hits?.hits ?? [];
   return hits.map((hit) => {
-    const stats = hit._source.index_stats;
-    const earliestStats = hit.inner_hits?.earliest?.hits?.hits[0]?._source.index_stats;
+    const stats = hit._source.index_stats ?? hit._source.elasticsearch?.index;
+    const earliestStats =
+      hit.inner_hits?.earliest?.hits?.hits[0]?._source.index_stats ??
+      hit.inner_hits?.earliest?.hits?.hits[0]?._source.elasticsearch?.index;
 
     const rateOptions = {
-      hitTimestamp: hit._source.timestamp,
-      earliestHitTimestamp: hit.inner_hits?.earliest?.hits?.hits[0]?._source.timestamp,
+      hitTimestamp: hit._source.timestamp ?? hit._source['@timestamp'],
+      earliestHitTimestamp:
+        hit.inner_hits?.earliest?.hits?.hits[0]?._source.timestamp ??
+        hit.inner_hits?.earliest?.hits?.hits[0]?._source['@timestamp'],
       timeWindowMin: min,
       timeWindowMax: max,
     };
@@ -53,7 +57,7 @@ export function handleResponse(
       ...rateOptions,
     });
 
-    const shardStatsForIndex = get(shardStats, ['indices', stats?.index ?? '']);
+    const shardStatsForIndex = get(shardStats, ['indices', stats?.index ?? stats?.name ?? '']);
     let status;
     let statusSort;
     let unassignedShards;
@@ -77,7 +81,7 @@ export function handleResponse(
     }
 
     return {
-      name: stats?.index,
+      name: stats?.index ?? stats?.name,
       status,
       doc_count: stats?.primaries?.docs?.count,
       data_size: stats?.total?.store?.size_in_bytes,
@@ -116,22 +120,31 @@ export function buildGetIndicesQuery(
     filterPath: [
       // only filter path can filter for inner_hits
       'hits.hits._source.index_stats.index',
+      'hits.hits._source.elasticsearch.index.name',
       'hits.hits._source.index_stats.primaries.docs.count',
+      'hits.hits._source.elasticsearch.index.primaries.docs.count',
       'hits.hits._source.index_stats.total.store.size_in_bytes',
+      'hits.hits._source.elasticsearch.index.total.store.size_in_bytes',
 
       // latest hits for calculating metrics
       'hits.hits._source.timestamp',
+      'hits.hits._source.@timestamp',
       'hits.hits._source.index_stats.primaries.indexing.index_total',
+      'hits.hits._source.elasticsearch.index.primaries.indexing.index_total',
       'hits.hits._source.index_stats.total.search.query_total',
+      'hits.hits._source.elasticsearch.index.total.search.query_total',
 
       // earliest hits for calculating metrics
       'hits.hits.inner_hits.earliest.hits.hits._source.timestamp',
+      'hits.hits.inner_hits.earliest.hits.hits._source.@timestamp',
       'hits.hits.inner_hits.earliest.hits.hits._source.index_stats.primaries.indexing.index_total',
+      'hits.hits.inner_hits.earliest.hits.hits._source.elasticsearch.index.primaries.indexing.index_total',
       'hits.hits.inner_hits.earliest.hits.hits._source.index_stats.total.search.query_total',
+      'hits.hits.inner_hits.earliest.hits.hits._source.elasticsearch.index.total.search.query_total',
     ],
     body: {
       query: createQuery({
-        type: 'index_stats',
+        types: ['index', 'index_stats'],
         start,
         end,
         clusterUuid,

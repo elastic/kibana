@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -14,9 +15,9 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
-import { getIdError } from './utils';
-import { transformValidate } from './validate';
-import { transformError, buildSiemResponse } from '../utils';
+import { getIdError, transform } from './utils';
+import { buildSiemResponse } from '../utils';
+
 import { deleteNotifications } from '../../notifications/delete_notifications';
 import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
@@ -69,15 +70,11 @@ export const deleteRulesRoute = (router: SecuritySolutionPluginRouter) => {
             searchFields: ['alertId'],
           });
           ruleStatuses.saved_objects.forEach(async (obj) => ruleStatusClient.delete(obj.id));
-          const [validated, errors] = transformValidate(
-            rule,
-            undefined,
-            ruleStatuses.saved_objects[0]
-          );
-          if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
+          const transformed = transform(rule, undefined, ruleStatuses.saved_objects[0]);
+          if (transformed == null) {
+            return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
           } else {
-            return response.ok({ body: validated ?? {} });
+            return response.ok({ body: transformed ?? {} });
           }
         } else {
           const error = getIdError({ id, ruleId });

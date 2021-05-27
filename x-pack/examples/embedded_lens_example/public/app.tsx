@@ -156,13 +156,17 @@ export const App = (props: {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      aria-label="Open lens in new tab"
                       isDisabled={!props.plugins.lens.canUseEditor()}
                       onClick={() => {
-                        props.plugins.lens.navigateToPrefilledEditor({
-                          id: '',
-                          timeRange: time,
-                          attributes: getLensAttributes(props.defaultIndexPattern!, color),
-                        });
+                        props.plugins.lens.navigateToPrefilledEditor(
+                          {
+                            id: '',
+                            timeRange: time,
+                            attributes: getLensAttributes(props.defaultIndexPattern!, color),
+                          },
+                          true
+                        );
                         // eslint-disable-next-line no-bitwise
                         const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
                         setColor(newColor);

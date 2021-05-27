@@ -11,7 +11,8 @@ import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_e
 import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
 import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
-import { PartialFilter, RuleTypeParams } from '../types';
+import { PartialFilter } from '../types';
+import { RuleParams } from '../schemas/rule_schemas';
 
 /**
  * How many rules to update at a time is set to 50 from errors coming from
@@ -73,7 +74,7 @@ export const createPromises = (
   savedObjectsClient: SavedObjectsClientContract,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string
-): Array<Promise<PartialAlert<RuleTypeParams> | null>> => {
+): Array<Promise<PartialAlert<RuleParams> | null>> => {
   return rules.map(async (rule) => {
     const {
       author,

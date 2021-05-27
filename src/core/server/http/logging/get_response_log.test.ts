@@ -81,7 +81,8 @@ describe('getEcsResponseLog', () => {
         },
       });
       const result = getEcsResponseLog(req, logger);
-      expect(result.http.response.responseTime).toBe(1000);
+      // @ts-expect-error ECS custom field
+      expect(result.meta.http.response.responseTime).toBe(1000);
     });
 
     test('with response.info.responded', () => {
@@ -92,14 +93,16 @@ describe('getEcsResponseLog', () => {
         },
       });
       const result = getEcsResponseLog(req, logger);
-      expect(result.http.response.responseTime).toBe(500);
+      // @ts-expect-error ECS custom field
+      expect(result.meta.http.response.responseTime).toBe(500);
     });
 
     test('excludes responseTime from message if none is provided', () => {
       const req = createMockHapiRequest();
       const result = getEcsResponseLog(req, logger);
       expect(result.message).toMatchInlineSnapshot(`"GET /path 200 - 1.2KB"`);
-      expect(result.http.response.responseTime).toBeUndefined();
+      // @ts-expect-error ECS custom field
+      expect(result.meta.http.response.responseTime).toBeUndefined();
     });
   });
 
@@ -112,7 +115,7 @@ describe('getEcsResponseLog', () => {
         },
       });
       const result = getEcsResponseLog(req, logger);
-      expect(result.url.query).toMatchInlineSnapshot(`"a=hello&b=world"`);
+      expect(result.meta.url!.query).toMatchInlineSnapshot(`"a=hello&b=world"`);
       expect(result.message).toMatchInlineSnapshot(`"GET /path?a=hello&b=world 200 - 1.2KB"`);
     });
 
@@ -121,7 +124,7 @@ describe('getEcsResponseLog', () => {
         query: { a: '¡hola!' },
       });
       const result = getEcsResponseLog(req, logger);
-      expect(result.url.query).toMatchInlineSnapshot(`"a=%C2%A1hola!"`);
+      expect(result.meta.url!.query).toMatchInlineSnapshot(`"a=%C2%A1hola!"`);
       expect(result.message).toMatchInlineSnapshot(`"GET /path?a=%C2%A1hola! 200 - 1.2KB"`);
     });
   });
@@ -145,7 +148,7 @@ describe('getEcsResponseLog', () => {
       response: Boom.badRequest(),
     });
     const result = getEcsResponseLog(req, logger);
-    expect(result.http.response.status_code).toBe(400);
+    expect(result.meta.http!.response!.status_code).toBe(400);
   });
 
   describe('filters sensitive headers', () => {
@@ -155,14 +158,16 @@ describe('getEcsResponseLog', () => {
         response: { headers: { 'content-length': 123, 'set-cookie': 'c' } },
       });
       const result = getEcsResponseLog(req, logger);
-      expect(result.http.request.headers).toMatchInlineSnapshot(`
+      // @ts-expect-error ECS custom field
+      expect(result.meta.http.request.headers).toMatchInlineSnapshot(`
         Object {
           "authorization": "[REDACTED]",
           "cookie": "[REDACTED]",
           "user-agent": "hi",
         }
       `);
-      expect(result.http.response.headers).toMatchInlineSnapshot(`
+      // @ts-expect-error ECS custom field
+      expect(result.meta.http.response.headers).toMatchInlineSnapshot(`
         Object {
           "content-length": 123,
           "set-cookie": "[REDACTED]",
@@ -196,9 +201,12 @@ describe('getEcsResponseLog', () => {
         }
       `);
 
-      responseLog.http.request.headers.a = 'testA';
-      responseLog.http.request.headers.b[1] = 'testB';
-      responseLog.http.request.headers.c = 'testC';
+      // @ts-expect-error ECS custom field
+      responseLog.meta.http.request.headers.a = 'testA';
+      // @ts-expect-error ECS custom field
+      responseLog.meta.http.request.headers.b[1] = 'testB';
+      // @ts-expect-error ECS custom field
+      responseLog.meta.http.request.headers.c = 'testC';
       expect(reqHeaders).toMatchInlineSnapshot(`
         Object {
           "a": "foo",
@@ -244,48 +252,41 @@ describe('getEcsResponseLog', () => {
   });
 
   describe('ecs', () => {
-    test('specifies correct ECS version', () => {
-      const req = createMockHapiRequest();
-      const result = getEcsResponseLog(req, logger);
-      expect(result.ecs.version).toBe('1.7.0');
-    });
-
     test('provides an ECS-compatible response', () => {
       const req = createMockHapiRequest();
       const result = getEcsResponseLog(req, logger);
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "client": Object {
-            "ip": undefined,
-          },
-          "ecs": Object {
-            "version": "1.7.0",
-          },
-          "http": Object {
-            "request": Object {
-              "headers": Object {
-                "user-agent": "",
-              },
-              "method": "GET",
-              "mime_type": "application/json",
-              "referrer": "localhost:5601/app/home",
-            },
-            "response": Object {
-              "body": Object {
-                "bytes": 1234,
-              },
-              "headers": Object {},
-              "responseTime": undefined,
-              "status_code": 200,
-            },
-          },
           "message": "GET /path 200 - 1.2KB",
-          "url": Object {
-            "path": "/path",
-            "query": "",
-          },
-          "user_agent": Object {
-            "original": "",
+          "meta": Object {
+            "client": Object {
+              "ip": undefined,
+            },
+            "http": Object {
+              "request": Object {
+                "headers": Object {
+                  "user-agent": "",
+                },
+                "method": "GET",
+                "mime_type": "application/json",
+                "referrer": "localhost:5601/app/home",
+              },
+              "response": Object {
+                "body": Object {
+                  "bytes": 1234,
+                },
+                "headers": Object {},
+                "responseTime": undefined,
+                "status_code": 200,
+              },
+            },
+            "url": Object {
+              "path": "/path",
+              "query": "",
+            },
+            "user_agent": Object {
+              "original": "",
+            },
           },
         }
       `);

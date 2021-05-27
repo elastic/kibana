@@ -6,116 +6,135 @@
  */
 
 import {
+  CustomItemAction,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiBasicTableProps,
-  DefaultItemAction,
-  EuiTableSelectionType,
+  EuiButton,
+  EuiIconTip,
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import {
+  ALERT_DURATION,
+  ALERT_SEVERITY_LEVEL,
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import { asDuration } from '../../../common/utils/formatters';
+import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import type { TopAlert } from './';
 import { AlertsFlyout } from './alerts_flyout';
-
-/**
- * The type of an item in the alert list.
- *
- * The fields here are the minimum to make this work at this time, but
- * eventually this type should be derived from the schema of what is returned in
- * the API response.
- */
-export interface AlertItem {
-  '@timestamp': number;
-  reason: string;
-  severity: string;
-  // These are just made up so we can make example links
-  service?: { name?: string };
-  pod?: string;
-  log?: boolean;
-  // Other fields used in the flyout
-  actualValue?: string;
-  affectedEntity?: string;
-  expectedValue?: string;
-  severityLog?: Array<{ '@timestamp': number; severity: string; message: string }>;
-  status?: string;
-  duration?: string;
-  type?: string;
-}
+import { SeverityBadge } from './severity_badge';
 
 type AlertsTableProps = Omit<
-  EuiBasicTableProps<AlertItem>,
+  EuiBasicTableProps<TopAlert>,
   'columns' | 'isSelectable' | 'pagination' | 'selection'
 >;
 
 export function AlertsTable(props: AlertsTableProps) {
-  const [flyoutAlert, setFlyoutAlert] = useState<AlertItem | undefined>(undefined);
+  const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
-  const { prepend } = usePluginContext().core.http.basePath;
+  const { core } = usePluginContext();
+  const { prepend } = core.http.basePath;
 
-  // This is a contrived implementation of the reason field that shows how
-  // you could link to certain types of resources based on what's contained
-  // in their alert data.
-  function reasonRenderer(text: string, item: AlertItem) {
-    const serviceName = item.service?.name;
-    const pod = item.pod;
-    const log = item.log;
-
-    if (serviceName) {
-      return <EuiLink href={prepend(`/app/apm/services/${serviceName}`)}>{text}</EuiLink>;
-    } else if (pod) {
-      return <EuiLink href={prepend(`/app/metrics/link-to/host-detail/${pod}`)}>{text}</EuiLink>;
-    } else if (log) {
-      return <EuiLink href={prepend(`/app/logs/stream`)}>{text}</EuiLink>;
-    } else {
-      return <>{text}</>;
-    }
-  }
-
-  const actions: Array<DefaultItemAction<AlertItem>> = [
+  const actions: Array<CustomItemAction<TopAlert>> = [
     {
-      name: 'Alert details',
-      description: 'Alert details',
-      onClick: (item) => {
-        setFlyoutAlert(item);
-      },
+      render: (alert) =>
+        alert.link ? (
+          <EuiButton href={prepend(alert.link)} size="s">
+            {i18n.translate('xpack.observability.alertsTable.viewInAppButtonLabel', {
+              defaultMessage: 'View in app',
+            })}
+          </EuiButton>
+        ) : (
+          <></>
+        ),
       isPrimary: true,
     },
   ];
 
-  const columns: Array<EuiBasicTableColumn<AlertItem>> = [
+  const columns: Array<EuiBasicTableColumn<TopAlert>> = [
     {
-      field: '@timestamp',
-      name: 'Triggered',
-      dataType: 'date',
+      field: 'active',
+      name: i18n.translate('xpack.observability.alertsTable.statusColumnDescription', {
+        defaultMessage: 'Status',
+      }),
+      align: 'center',
+      render: (_, alert) => {
+        const { active } = alert;
+
+        return active ? (
+          <EuiIconTip
+            content={i18n.translate('xpack.observability.alertsTable.statusOpenDescription', {
+              defaultMessage: 'Open',
+            })}
+            color="danger"
+            type="alert"
+          />
+        ) : (
+          <EuiIconTip
+            content={i18n.translate('xpack.observability.alertsTable.statusClosedDescription', {
+              defaultMessage: 'Closed',
+            })}
+            type="check"
+          />
+        );
+      },
+    },
+    {
+      field: 'start',
+      name: i18n.translate('xpack.observability.alertsTable.triggeredColumnDescription', {
+        defaultMessage: 'Triggered',
+      }),
+      render: (_, item) => {
+        return <TimestampTooltip time={new Date(item.start).getTime()} timeUnit="milliseconds" />;
+      },
     },
     {
       field: 'duration',
-      name: 'Duration',
+      name: i18n.translate('xpack.observability.alertsTable.durationColumnDescription', {
+        defaultMessage: 'Duration',
+      }),
+      render: (_, alert) => {
+        const { active } = alert;
+        return active ? null : asDuration(alert.fields[ALERT_DURATION], { extended: true });
+      },
     },
     {
       field: 'severity',
-      name: 'Severity',
+      name: i18n.translate('xpack.observability.alertsTable.severityColumnDescription', {
+        defaultMessage: 'Severity',
+      }),
+      render: (_, alert) => {
+        return <SeverityBadge severityLevel={alert.fields[ALERT_SEVERITY_LEVEL]} />;
+      },
     },
     {
       field: 'reason',
-      name: 'Reason',
+      name: i18n.translate('xpack.observability.alertsTable.reasonColumnDescription', {
+        defaultMessage: 'Reason',
+      }),
       dataType: 'string',
-      render: reasonRenderer,
+      render: (_, item) => {
+        return <EuiLink onClick={() => setFlyoutAlert(item)}>{item.reason}</EuiLink>;
+      },
     },
     {
       actions,
-      name: 'Actions',
+      name: i18n.translate('xpack.observability.alertsTable.actionsColumnDescription', {
+        defaultMessage: 'Actions',
+      }),
     },
   ];
 
   return (
     <>
-      {flyoutAlert && <AlertsFlyout {...flyoutAlert} onClose={handleFlyoutClose} />}
-      <EuiBasicTable<AlertItem>
+      {flyoutAlert && <AlertsFlyout alert={flyoutAlert} onClose={handleFlyoutClose} />}
+      <EuiBasicTable<TopAlert>
         {...props}
-        isSelectable={true}
-        selection={{} as EuiTableSelectionType<AlertItem>}
         columns={columns}
+        tableLayout="auto"
         pagination={{ pageIndex: 0, pageSize: 0, totalItemCount: 0 }}
       />
     </>

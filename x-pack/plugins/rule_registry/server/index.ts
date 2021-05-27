@@ -9,21 +9,23 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { RuleRegistryPlugin } from './plugin';
 
-export { RuleRegistryPluginSetupContract } from './plugin';
-export { createLifecycleRuleTypeFactory } from './rule_registry/rule_type_helpers/create_lifecycle_rule_type_factory';
-export { ecsFieldMap } from './generated/ecs_field_map';
-export { pickWithPatterns } from './rule_registry/field_map/pick_with_patterns';
-export { FieldMapOf } from './types';
-export { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_registry_client/types';
+export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
+export { RuleDataClient } from './rule_data_client';
+export { IRuleDataClient } from './rule_data_client/types';
+export { getRuleExecutorData, RuleExecutorData } from './utils/get_rule_executor_data';
+export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
 
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    writeEnabled: schema.boolean({ defaultValue: false }),
+    write: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+    index: schema.string({ defaultValue: '.alerts' }),
   }),
 };
 
-export type RuleRegistryConfig = TypeOf<typeof config.schema>;
+export type RuleRegistryPluginConfig = TypeOf<typeof config.schema>;
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../../../../../../plugins/actions/server/plugin';
 import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerting/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
@@ -15,6 +15,7 @@ import { defineActionTypes } from './action_types';
 import { defineRoutes } from './routes';
 import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
 import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
+import { PluginStartContract as ActionsPluginStart } from '../../../../../../../plugins/actions/server';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -26,9 +27,16 @@ export interface FixtureStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  actions: ActionsPluginStart;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get('fixtures', 'plugins', 'alerts');
+  }
+
   public setup(
     core: CoreSetup<FixtureStartDeps>,
     { features, actions, alerting }: FixtureSetupDeps
@@ -109,7 +117,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
     defineActionTypes(core, { actions });
     defineAlertTypes(core, { alerting });
-    defineRoutes(core);
+    defineRoutes(core, { logger: this.logger });
   }
 
   public start() {}

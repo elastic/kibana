@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { Cluster } from './cluster';
 
 describe('cluster', () => {
@@ -12,7 +13,7 @@ describe('cluster', () => {
     describe('fromUpstreamJSON factory method', () => {
       const upstreamJSON = {
         cluster_uuid: 'S-S4NNZDRV-g9c-JrIhx6A',
-      };
+      } as estypes.RootNodeInfoResponse;
 
       it('returns correct Cluster instance', () => {
         const cluster = Cluster.fromUpstreamJSON(upstreamJSON);

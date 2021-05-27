@@ -23,7 +23,7 @@ export function compose(
   plugins: SetupPlugins,
   endpointContext: EndpointAppContext
 ): AppBackendLibs {
-  const framework = new KibanaBackendFrameworkAdapter(core, plugins);
+  const framework = new KibanaBackendFrameworkAdapter();
   const sources = new Sources(new ConfigurationSourcesAdapter());
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 

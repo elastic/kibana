@@ -27,7 +27,7 @@ interface CloudDetectorOptions {
  */
 export class CloudDetector {
   private readonly cloudServices: CloudService[];
-  private cloudDetails?: CloudServiceResponseJson;
+  private cloudDetails?: CloudServiceResponseJson | null;
 
   constructor(options: CloudDetectorOptions = {}) {
     this.cloudServices =
@@ -70,7 +70,7 @@ export class CloudDetector {
       }
     }
 
-    // explicitly undefined rather than null so that it can be ignored in JSON
-    return undefined;
+    // explicitly null to differentiate from not having populated the field yet
+    return null;
   }
 }

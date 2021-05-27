@@ -15,14 +15,18 @@ import {
   ISessionsClient,
   SearchUsageCollector,
 } from '../../../../../../../src/plugins/data/public';
-import { SearchSessionStatus } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { ACTION } from '../components/actions';
-import { PersistedSearchSessionSavedObjectAttributes, UISession } from '../types';
+import {
+  PersistedSearchSessionSavedObjectAttributes,
+  UISearchSessionState,
+  UISession,
+} from '../types';
 import { SessionsConfigSchema } from '..';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
-function getActions(status: SearchSessionStatus) {
+function getActions(status: UISearchSessionState) {
   const actions: ACTION[] = [];
   actions.push(ACTION.INSPECT);
   actions.push(ACTION.RENAME);
@@ -30,7 +34,31 @@ function getActions(status: SearchSessionStatus) {
     actions.push(ACTION.EXTEND);
     actions.push(ACTION.DELETE);
   }
+
+  if (status === SearchSessionStatus.EXPIRED) {
+    actions.push(ACTION.DELETE);
+  }
+
   return actions;
+}
+
+/**
+ * Status we display on mgtm UI might be different from the one inside the saved object
+ * @param status
+ */
+function getUIStatus(session: PersistedSearchSessionSavedObjectAttributes): UISearchSessionState {
+  const isSessionExpired = () => {
+    const curTime = moment();
+    return curTime.diff(moment(session.expires), 'ms') > 0;
+  };
+
+  switch (session.status) {
+    case SearchSessionStatus.COMPLETE:
+    case SearchSessionStatus.IN_PROGRESS:
+      return isSessionExpired() ? SearchSessionStatus.EXPIRED : session.status;
+  }
+
+  return session.status;
 }
 
 async function getUrlFromState(
@@ -59,12 +87,12 @@ const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) 
     appId,
     created,
     expires,
-    status,
     urlGeneratorId,
     initialState,
     restoreState,
   } = savedObject.attributes;
 
+  const status = getUIStatus(savedObject.attributes);
   const actions = getActions(status);
 
   // TODO: initialState should be saved without the searchSessionID

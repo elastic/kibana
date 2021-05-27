@@ -7,6 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   EVENT_OUTCOME,
@@ -22,7 +27,6 @@ import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
-import { createAPMLifecycleRuleType } from './create_apm_lifecycle_rule_type';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 
 const paramsSchema = schema.object({
@@ -37,11 +41,18 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionErrorRate];
 
 export function registerTransactionErrorRateAlertType({
-  registry,
+  alerting,
+  ruleDataClient,
+  logger,
   config$,
 }: RegisterRuleDependencies) {
-  registry.registerType(
-    createAPMLifecycleRuleType({
+  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
+    ruleDataClient,
+    logger,
+  });
+
+  alerting.registerType(
+    createLifecycleRuleType({
       id: AlertType.TransactionErrorRate,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,
@@ -129,10 +140,10 @@ export function registerTransactionErrorRateAlertType({
           },
         };
 
-        const response = await alertingEsClient(
-          services.scopedClusterClient,
-          searchParams
-        );
+        const response = await alertingEsClient({
+          scopedClusterClient: services.scopedClusterClient,
+          params: searchParams,
+        });
 
         if (!response.aggregations) {
           return {};
@@ -182,6 +193,9 @@ export function registerTransactionErrorRateAlertType({
                 [SERVICE_NAME]: serviceName,
                 ...(environment ? { [SERVICE_ENVIRONMENT]: environment } : {}),
                 [TRANSACTION_TYPE]: transactionType,
+                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+                [ALERT_EVALUATION_VALUE]: errorRate,
+                [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {

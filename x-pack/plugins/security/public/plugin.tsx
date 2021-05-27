@@ -21,19 +21,13 @@ import type { LicensingPluginSetup } from '../../licensing/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import { SecurityLicenseService } from '../common/licensing';
 import { accountManagementApp } from './account_management';
-import type { AuthenticationServiceSetup } from './authentication';
+import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { ConfigType } from './config';
 import { ManagementService } from './management';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
-import type { ISessionTimeout } from './session';
-import {
-  SessionExpired,
-  SessionTimeout,
-  SessionTimeoutHttpInterceptor,
-  UnauthorizedResponseHttpInterceptor,
-} from './session';
+import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -58,7 +52,7 @@ export class SecurityPlugin
       PluginSetupDependencies,
       PluginStartDependencies
     > {
-  private sessionTimeout!: ISessionTimeout;
+  private sessionTimeout!: SessionTimeout;
   private readonly authenticationService = new AuthenticationService();
   private readonly navControlService = new SecurityNavControlService();
   private readonly securityLicenseService = new SecurityLicenseService();
@@ -84,7 +78,6 @@ export class SecurityPlugin
     const sessionExpired = new SessionExpired(logoutUrl, tenant);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
     this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
-    http.intercept(new SessionTimeoutHttpInterceptor(this.sessionTimeout, anonymousPaths));
 
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
@@ -153,7 +146,10 @@ export class SecurityPlugin
       this.managementService.start({ capabilities: core.application.capabilities });
     }
 
-    return { navControlService: this.navControlService.start({ core }) };
+    return {
+      navControlService: this.navControlService.start({ core }),
+      authc: this.authc as AuthenticationServiceStart,
+    };
   }
 
   public stop() {

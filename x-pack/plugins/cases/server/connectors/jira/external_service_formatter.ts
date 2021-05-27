@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JiraFieldsType, ConnectorJiraTypeFields } from '../../../common/api';
+import { JiraFieldsType, ConnectorJiraTypeFields } from '../../../common';
 import { ExternalServiceFormatter } from '../types';
 
 interface ExternalServiceParams extends JiraFieldsType {

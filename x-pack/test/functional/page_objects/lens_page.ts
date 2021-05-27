@@ -18,6 +18,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   const PageObjects = getPageObjects([
     'common',
@@ -169,6 +170,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await browser.html5DragAndDrop(
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector('lnsWorkspace')
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Drags field to geo field workspace
+     *
+     * @param field  - the desired geo_point or geo_shape field
+     * */
+    async dragFieldToGeoFieldWorkspace(field: string) {
+      await browser.html5DragAndDrop(
+        testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
+        testSubjects.getCssSelector('lnsGeoFieldWorkspace')
       );
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
@@ -753,7 +767,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await PageObjects.visualize.clickLensWidget();
+      await dashboardAddPanel.clickCreateNewLink();
       await this.goToTimeRange();
       await this.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

@@ -26,13 +26,19 @@ export const mlAnomalyDetectionAlertParams = schema.object({
       },
     }
   ),
-  severity: schema.number(),
+  /** Anomaly score threshold  */
+  severity: schema.number({ min: 0, max: 100 }),
+  /** Result type to alert upon  */
   resultType: schema.oneOf([
     schema.literal(ANOMALY_RESULT_TYPE.RECORD),
     schema.literal(ANOMALY_RESULT_TYPE.BUCKET),
     schema.literal(ANOMALY_RESULT_TYPE.INFLUENCER),
   ]),
   includeInterim: schema.boolean({ defaultValue: true }),
+  /** User's override for the lookback interval */
+  lookbackInterval: schema.nullable(schema.string()),
+  /** User's override for the top N buckets  */
+  topNBuckets: schema.nullable(schema.number({ min: 1 })),
 });
 
 export const mlAnomalyDetectionAlertPreviewRequest = schema.object({

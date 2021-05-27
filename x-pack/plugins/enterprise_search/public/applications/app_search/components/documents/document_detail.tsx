@@ -25,6 +25,7 @@ import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
 import { useDecodedParams } from '../../utils/encode_path_params';
+import { getEngineBreadcrumbs } from '../engine';
 import { ResultFieldValue } from '../result';
 
 import { DOCUMENTS_TITLE } from './constants';
@@ -36,11 +37,8 @@ const DOCUMENT_DETAIL_TITLE = (documentId: string) =>
     defaultMessage: 'Document: {documentId}',
     values: { documentId },
   });
-interface Props {
-  engineBreadcrumb: string[];
-}
 
-export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
+export const DocumentDetail: React.FC = () => {
   const { dataLoading, fields } = useValues(DocumentDetailLogic);
   const { deleteDocument, getDocumentDetails, setFields } = useActions(DocumentDetailLogic);
 
@@ -77,7 +75,7 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
 
   return (
     <>
-      <SetPageChrome trail={[...engineBreadcrumb, DOCUMENTS_TITLE, documentTitle]} />
+      <SetPageChrome trail={getEngineBreadcrumbs([DOCUMENTS_TITLE, documentTitle])} />
       <EuiPageHeader
         pageTitle={DOCUMENT_DETAIL_TITLE(documentTitle)}
         rightSideItems={[

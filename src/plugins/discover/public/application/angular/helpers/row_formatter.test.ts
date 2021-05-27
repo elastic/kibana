@@ -10,6 +10,8 @@ import { formatRow, formatTopLevelObject } from './row_formatter';
 import { stubbedSavedObjectIndexPattern } from '../../../__mocks__/stubbed_saved_object_index_pattern';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
 import { fieldFormatsMock } from '../../../../../data/common/field_formats/mocks';
+import { setServices } from '../../../kibana_services';
+import { DiscoverServices } from '../../../build_services';
 
 describe('Row formatter', () => {
   const hit = {
@@ -58,11 +60,27 @@ describe('Row formatter', () => {
   beforeEach(() => {
     // @ts-expect-error
     indexPattern.formatHit = formatHitMock;
+    setServices(({
+      uiSettings: {
+        get: () => 100,
+      },
+    } as unknown) as DiscoverServices);
   });
 
   it('formats document properly', () => {
     expect(formatRow(hit, indexPattern).trim()).toMatchInlineSnapshot(
       `"<dl class=\\"source truncate-by-height\\"><dt>also:</dt><dd>with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;</dd> <dt>foo:</dt><dd>bar</dd> <dt>number:</dt><dd>42</dd> <dt>hello:</dt><dd>&lt;h1&gt;World&lt;/h1&gt;</dd> <dt>_id:</dt><dd>a</dd> <dt>_type:</dt><dd>doc</dd> <dt>_score:</dt><dd>1</dd> </dl>"`
+    );
+  });
+
+  it('limits number of rendered items', () => {
+    setServices(({
+      uiSettings: {
+        get: () => 1,
+      },
+    } as unknown) as DiscoverServices);
+    expect(formatRow(hit, indexPattern).trim()).toMatchInlineSnapshot(
+      `"<dl class=\\"source truncate-by-height\\"><dt>also:</dt><dd>with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;</dd> </dl>"`
     );
   });
 

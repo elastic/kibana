@@ -167,22 +167,21 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
 
-    const requestResponder = this.getInspectorAdapters()?.requests?.start(requestName, {
-      id: requestId,
-      description: requestDescription,
-      searchSessionId,
-    });
-
-    let resp;
     try {
-      resp = await searchSource
+      const { rawResponse: resp } = await searchSource
         .fetch$({
           abortSignal: abortController.signal,
           sessionId: searchSessionId,
           legacyHitsTotal: false,
-          requestResponder,
+          inspector: {
+            adapter: this.getInspectorAdapters()?.requests,
+            id: requestId,
+            title: requestName,
+            description: requestDescription,
+          },
         })
         .toPromise();
+      return resp;
     } catch (error) {
       if (isSearchSourceAbortError(error)) {
         throw new DataRequestAbortError();
@@ -195,8 +194,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         })
       );
     }
-
-    return resp;
   }
 
   async makeSearchSource(
@@ -216,7 +213,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof searchFilters.geogridPrecision === 'number'
           ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
           : searchFilters.buffer;
-      const extentFilter = createExtentFilter(buffer, geoField.name);
+      const extentFilter = createExtentFilter(buffer, [geoField.name]);
 
       allFilters.push(extentFilter);
     }

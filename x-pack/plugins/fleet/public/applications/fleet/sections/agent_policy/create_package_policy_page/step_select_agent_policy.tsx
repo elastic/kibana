@@ -94,7 +94,11 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     sortOrder: 'asc',
     full: true,
   });
-  const agentPolicies = useMemo(() => agentPoliciesData?.items || [], [agentPoliciesData?.items]);
+  const agentPolicies = useMemo(
+    () => agentPoliciesData?.items.filter((policy) => !policy.is_managed) || [],
+    [agentPoliciesData?.items]
+  );
+
   const agentPoliciesById = useMemo(() => {
     return agentPolicies.reduce((acc: { [key: string]: GetAgentPoliciesResponseItem }, policy) => {
       acc[policy.id] = policy;

@@ -33,7 +33,11 @@ import {
   DeleteMappingCallout,
   RoleSelector,
 } from '../../../shared/role_mapping';
-import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
+import {
+  ROLE_MAPPINGS_TITLE,
+  ADD_ROLE_MAPPING_TITLE,
+  MANAGE_ROLE_MAPPING_TITLE,
+} from '../../../shared/role_mapping/constants';
 import { AppLogic } from '../../app_logic';
 
 import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
@@ -42,8 +46,6 @@ import { Engine } from '../engine/types';
 import {
   SAVE_ROLE_MAPPING,
   UPDATE_ROLE_MAPPING,
-  ADD_ROLE_MAPPING_TITLE,
-  MANAGE_ROLE_MAPPING_TITLE,
   ADVANCED_ROLE_TYPES,
   STANDARD_ROLE_TYPES,
   ADVANCED_ROLE_SELECTORS_TITLE,
