@@ -132,14 +132,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
-  toEsAggsFn: (column, columnId, _indexPattern, layer) => {
+  toEsAggsFn: (column, columnId, _indexPattern, layer, uiSettings, orderedColumnIds) => {
     return buildExpressionFunction<AggFunctionsMapping['aggTerms']>('aggTerms', {
       id: columnId,
       enabled: true,
       schema: 'segment',
       field: column.sourceField,
       orderBy:
-        column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
+        column.params.orderBy.type === 'alphabetical'
+          ? '_key'
+          : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
       order: column.params.orderDirection,
       size: column.params.size,
       otherBucket: Boolean(column.params.otherBucket),
