@@ -41,12 +41,13 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
       try {
         const summary = await eventFiltersApi.getSummary();
         setStats(summary);
-      } catch (err) {
+      } catch (error) {
         toasts.addDanger(
           i18n.translate(
             'xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersSummaryError',
             {
-              defaultMessage: 'There was an error trying to fetch event filters stats',
+              defaultMessage: 'There was an error trying to fetch event filters stats: "{error}"',
+              values: { error },
             }
           )
         );
