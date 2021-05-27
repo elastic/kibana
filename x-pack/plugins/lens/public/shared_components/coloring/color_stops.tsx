@@ -25,11 +25,6 @@ import { TooltipWrapper, useDebouncedValue } from '../index';
 import { ColorStop } from './types';
 
 const idGeneratorFn = htmlIdGenerator();
-const idCache: string[] = [];
-const idGenerator = (index: number) => {
-  idCache[index] = idCache[index] || idGeneratorFn();
-  return idCache[index];
-};
 
 function areStopsValid(colorStops: Array<{ color: string; stop: string }>) {
   return colorStops.every(
@@ -78,7 +73,7 @@ export const CustomStops = ({
     return colorStops.map(({ color, stop }, i) => ({
       color,
       stop: String(stop),
-      id: idGenerator(i),
+      id: idGeneratorFn(),
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [palette, reverse]);
@@ -287,7 +282,7 @@ export const CustomStops = ({
           newColorStops.push({
             color: prevColor,
             stop: String(newStop),
-            id: idGenerator(length),
+            id: idGeneratorFn(),
           });
           setLocalColorStops(newColorStops);
         }}
