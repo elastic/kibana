@@ -20,6 +20,7 @@ import {
 } from './shared_imports';
 
 import type { PluginStart, InternalFieldType, CloseEditor } from './types';
+import { euiFlyoutClassname, euiFlyoutMaxWidth } from './constants';
 import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
 import { ApiService } from './lib/api';
 export interface OpenFieldEditorOptions {
@@ -116,7 +117,7 @@ export const getFieldEditorOpener = ({
           />
         </KibanaReactContextProvider>
       ),
-      { maxWidth: '960px', size: 'l' }
+      { className: euiFlyoutClassname, maxWidth: `${euiFlyoutMaxWidth}px`, size: 'l' }
     );
 
     return closeEditor;

@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-export const pluginName = 'index_pattern_field_editor';
+import { Panels } from './flyout_panels';
+import { Panel } from './flyout_panel';
+import { Header } from './flyout_panels_header';
+import { Footer } from './flyout_panels_footer';
 
-export const euiFlyoutClassname = 'indexPatternFieldEditorFlyout';
-
-export const euiFlyoutMaxWidth = 1180;
+export const Flyout = {
+  Panels,
+  Panel,
+  Header,
+  Footer,
+};

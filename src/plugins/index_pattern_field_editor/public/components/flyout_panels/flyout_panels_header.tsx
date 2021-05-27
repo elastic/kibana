@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-export const pluginName = 'index_pattern_field_editor';
+import React from 'react';
+import { EuiSpacer, EuiFlyoutHeader, EuiFlyoutHeaderProps } from '@elastic/eui';
 
-export const euiFlyoutClassname = 'indexPatternFieldEditorFlyout';
-
-export const euiFlyoutMaxWidth = 1180;
+export const Header: React.FunctionComponent<
+  { children: React.ReactNode } & Omit<EuiFlyoutHeaderProps, 'children'>
+> = (props) => (
+  <>
+    <EuiFlyoutHeader className="fieldEditor__flyoutPanel__header" {...props} />
+    <EuiSpacer />
+  </>
+);

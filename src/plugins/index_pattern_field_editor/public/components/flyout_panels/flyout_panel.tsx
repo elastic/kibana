@@ -6,17 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import classnames from 'classnames';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
-  EuiFlyoutHeaderProps,
-  EuiFlyoutFooterProps,
-} from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+
+import { useFlyoutPanelsContext } from './flyout_panels';
 
 interface Props {
   /** Width of the panel (in percent %) */
@@ -27,11 +21,7 @@ interface Props {
   withFooter?: boolean;
 }
 
-const Panels: React.FC = (props) => (
-  <EuiFlexGroup className="fieldEditor__flyoutPanels" gutterSize="none" {...props} />
-);
-
-const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
+export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   width = 50,
   children,
   className = '',
@@ -48,6 +38,16 @@ const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   });
   /* eslint-enable @typescript-eslint/naming-convention */
 
+  const { addPanel, removePanel } = useFlyoutPanelsContext();
+
+  useEffect(() => {
+    const panelId = addPanel({ width });
+
+    return () => {
+      removePanel(panelId);
+    };
+  }, [width, addPanel, removePanel]);
+
   return (
     <EuiFlexItem style={{ position: 'relative', flexBasis: `${width}%` }}>
       <div className={classes} {...rest}>
@@ -55,24 +55,4 @@ const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
       </div>
     </EuiFlexItem>
   );
-};
-
-const Header: React.FunctionComponent<
-  { children: React.ReactNode } & Omit<EuiFlyoutHeaderProps, 'children'>
-> = (props) => (
-  <>
-    <EuiFlyoutHeader className="fieldEditor__flyoutPanel__header" {...props} />
-    <EuiSpacer />
-  </>
-);
-
-const Footer: React.FC<{ children: React.ReactNode } & Omit<EuiFlyoutFooterProps, 'children'>> = (
-  props
-) => <EuiFlyoutFooter className="fieldEditor__flyoutPanel__footer" {...props} />;
-
-export const Flyout = {
-  Panels,
-  Panel,
-  Header,
-  Footer,
 };

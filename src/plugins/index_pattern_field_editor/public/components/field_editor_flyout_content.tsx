@@ -10,8 +10,6 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,11 +23,10 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import './field_editor_flyout_content.scss';
-
 import type { Field, EsRuntimeField } from '../types';
 import { RuntimeFieldPainlessError } from '../lib';
-import { Flyout } from './flyout_panel';
+import { euiFlyoutMaxWidth, euiFlyoutClassname } from '../constants';
+import { Flyout } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
 import { FieldPreview } from './preview';
@@ -209,7 +206,7 @@ const FieldEditorFlyoutContentComponent = ({
   return (
     <>
       {FieldEditor && (
-        <Flyout.Panels>
+        <Flyout.Panels flyoutClassName={euiFlyoutClassname} maxWidth={euiFlyoutMaxWidth}>
           {/* Editor panel */}
           <Flyout.Panel width={60} withFooter>
             <Flyout.Header>
