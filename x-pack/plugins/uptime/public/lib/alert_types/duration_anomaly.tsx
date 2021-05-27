@@ -43,7 +43,7 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
         query: {
           dateRangeEnd:
             fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end'],
-          dateRangeStart: moment(new Date(fields['anomaly.start']))
+          dateRangeStart: moment(new Date(fields['anomaly.start']!))
             .subtract('5', 'm')
             .toISOString(),
         },

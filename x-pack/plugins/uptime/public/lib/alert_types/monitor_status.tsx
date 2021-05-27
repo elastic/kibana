@@ -57,7 +57,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
       query: {
         dateRangeEnd:
           fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end'],
-        dateRangeStart: moment(new Date(fields['kibana.rac.alert.start']))
+        dateRangeStart: moment(new Date(fields['kibana.rac.alert.start']!))
           .subtract('5', 'm')
           .toISOString(),
         filters: JSON.stringify([['observer.geo.name', [fields['observer.geo.name'][0]]]]),
