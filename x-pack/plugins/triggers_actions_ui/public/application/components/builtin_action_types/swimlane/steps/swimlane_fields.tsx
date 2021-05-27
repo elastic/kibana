@@ -9,20 +9,18 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiButton, EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import * as i18n from '../translations';
 import { StepProps } from './';
+import { SwimlaneFieldMappingConfig, SwimlaneMappingConfig } from '../types';
 
 const SINGLE_SELECTION = { asPlainText: true };
-const empty = { label: '', value: '' };
+const EMPTY_COMBO_BOX_ARRAY: Array<EuiComboBoxOptionOption<string>> | undefined = [];
 
-const findOption = (
-  options: Array<EuiComboBoxOptionOption<string | number>>,
-  searchValue: string
-): EuiComboBoxOptionOption<string | number> => {
-  return options.find((f) => searchValue === f.value) ?? empty;
-};
+const formatOption = (field: SwimlaneFieldMappingConfig) => ({
+  label: `${field.name} (${field.key})`,
+  value: field.id,
+});
 
-const findItem = (fields: StepProps['fields'], searchValue: string | number) => {
-  return fields.find((f) => searchValue === f.id);
-};
+const createSelectedOption = (field: SwimlaneFieldMappingConfig | null | undefined) =>
+  field != null ? [formatOption(field)] : EMPTY_COMBO_BOX_ARRAY;
 
 export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
   action,
@@ -31,26 +29,42 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
   fields,
 }) => {
   const { mappings } = action.config;
-  const options = useMemo(
+  const [fieldTypeMap, fieldIdMap] = useMemo(
     () =>
-      fields
-        .filter((f) => f.fieldType === 'text' || f.fieldType === 'comments')
-        .map((f) => ({ label: `${f.name} (${f.key})`, value: f.id }))
-        .sort((a, b) => (a.label?.toLowerCase() > b.label?.toLowerCase() ? 1 : -1)),
+      fields.reduce(
+        ([typeMap, idMap], field) => {
+          if (field != null) {
+            typeMap.set(field.fieldType, [
+              ...(typeMap.get(field.fieldType) ?? []),
+              formatOption(field),
+            ]);
+            idMap.set(field.id, field);
+          }
+
+          return [typeMap, idMap];
+        },
+        [
+          new Map<string, Array<EuiComboBoxOptionOption<string>>>(),
+          new Map<string, SwimlaneFieldMappingConfig>(),
+        ]
+      ),
     [fields]
   );
 
+  const textOptions = useMemo(() => fieldTypeMap.get('text') ?? [], [fieldTypeMap]);
+  const commentsOptions = useMemo(() => fieldTypeMap.get('comments') ?? [], [fieldTypeMap]);
+
   const state = useMemo(
     () => ({
-      alertSourceConfig: findOption(options, mappings?.alertSourceConfig?.id),
-      severityConfig: findOption(options, mappings?.severityConfig?.id),
-      alertNameConfig: findOption(options, mappings?.alertNameConfig?.id),
-      caseIdConfig: findOption(options, mappings?.caseIdConfig?.id),
-      caseNameConfig: findOption(options, mappings?.caseNameConfig?.id),
-      commentsConfig: findOption(options, mappings?.commentsConfig?.id),
-      descriptionConfig: findOption(options, mappings?.descriptionConfig?.id),
+      alertSourceConfig: createSelectedOption(mappings?.alertSourceConfig),
+      severityConfig: createSelectedOption(mappings?.severityConfig),
+      alertNameConfig: createSelectedOption(mappings?.alertNameConfig),
+      caseIdConfig: createSelectedOption(mappings?.caseIdConfig),
+      caseNameConfig: createSelectedOption(mappings?.caseNameConfig),
+      commentsConfig: createSelectedOption(mappings?.commentsConfig),
+      descriptionConfig: createSelectedOption(mappings?.descriptionConfig),
     }),
-    [options, mappings]
+    [mappings]
   );
 
   const resetConnection = useCallback(() => {
@@ -58,30 +72,37 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
   }, [updateCurrentStep]);
 
   const editMappings = useCallback(
-    (key: string, e: Array<EuiComboBoxOptionOption<string | number>>) => {
-      const option = e[0];
-      if (!option?.value) {
+    (key: keyof SwimlaneMappingConfig, e: Array<EuiComboBoxOptionOption<string>>) => {
+      if (e.length === 0) {
+        const newProps = {
+          ...mappings,
+          [key]: null,
+        };
+        editActionConfig('mappings', newProps);
         return;
       }
-      const item = findItem(fields, option.value);
+
+      const option = e[0];
+      const item = fieldIdMap.get(option.value ?? '');
       if (!item) {
         return;
       }
+
       const newProps = {
         ...mappings,
         [key]: { id: item.id, name: item.name, key: item.key, fieldType: item.fieldType },
       };
       editActionConfig('mappings', newProps);
     },
-    [editActionConfig, fields, mappings]
+    [editActionConfig, fieldIdMap, mappings]
   );
   return (
     <>
       <EuiFormRow id="alertSourceConfig" fullWidth label={i18n.SW_ALERT_SOURCE_FIELD_LABEL}>
         <EuiComboBox
           fullWidth
-          selectedOptions={[state.alertSourceConfig]}
-          options={options}
+          selectedOptions={state.alertSourceConfig}
+          options={textOptions}
           singleSelection={SINGLE_SELECTION}
           data-test-subj="swimlaneAlertSourceInput"
           onChange={(e) => editMappings('alertSourceConfig', e)}
@@ -90,8 +111,8 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
       <EuiFormRow id="severityConfig" fullWidth label={i18n.SW_SEVERITY_FIELD_LABEL}>
         <EuiComboBox
           fullWidth
-          selectedOptions={[state.severityConfig]}
-          options={options}
+          selectedOptions={state.severityConfig}
+          options={textOptions}
           singleSelection={SINGLE_SELECTION}
           data-test-subj="swimlaneSeverityInput"
           onChange={(e) => editMappings('severityConfig', e)}
@@ -100,8 +121,8 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
       <EuiFormRow id="alertNameConfig" fullWidth label={i18n.SW_ALERT_NAME_FIELD_LABEL}>
         <EuiComboBox
           fullWidth
-          selectedOptions={[state.alertNameConfig]}
-          options={options}
+          selectedOptions={state.alertNameConfig}
+          options={textOptions}
           singleSelection={SINGLE_SELECTION}
           data-test-subj="swimlaneAlertNameInput"
           onChange={(e) => editMappings('alertNameConfig', e)}
@@ -110,8 +131,8 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
       <EuiFormRow id="caseIdConfig" fullWidth label={i18n.SW_CASE_ID_FIELD_LABEL}>
         <EuiComboBox
           fullWidth
-          selectedOptions={[state.caseIdConfig]}
-          options={options}
+          selectedOptions={state.caseIdConfig}
+          options={textOptions}
           singleSelection={SINGLE_SELECTION}
           data-test-subj="swimlaneCaseIdConfig"
           onChange={(e) => editMappings('caseIdConfig', e)}
@@ -120,8 +141,8 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
       <EuiFormRow id="caseNameConfig" fullWidth label={i18n.SW_CASE_NAME_FIELD_LABEL}>
         <EuiComboBox
           fullWidth
-          selectedOptions={[state.caseNameConfig]}
-          options={options}
+          selectedOptions={state.caseNameConfig}
+          options={textOptions}
           singleSelection={SINGLE_SELECTION}
           data-test-subj="swimlaneCaseNameConfig"
           onChange={(e) => editMappings('caseNameConfig', e)}
@@ -130,8 +151,8 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
       <EuiFormRow id="commentsConfig" fullWidth label={i18n.SW_COMMENTS_FIELD_LABEL}>
         <EuiComboBox
           fullWidth
-          selectedOptions={[state.commentsConfig]}
-          options={options}
+          selectedOptions={state.commentsConfig}
+          options={commentsOptions}
           singleSelection={SINGLE_SELECTION}
           data-test-subj="swimlaneCommentsConfig"
           onChange={(e) => editMappings('commentsConfig', e)}
@@ -140,8 +161,8 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
       <EuiFormRow id="descriptionConfig" fullWidth label={i18n.SW_DESCRIPTION_FIELD_LABEL}>
         <EuiComboBox
           fullWidth
-          selectedOptions={[state.descriptionConfig]}
-          options={options}
+          selectedOptions={state.descriptionConfig}
+          options={textOptions}
           singleSelection={SINGLE_SELECTION}
           data-test-subj="swimlaneDescriptionConfig"
           onChange={(e) => editMappings('descriptionConfig', e)}
