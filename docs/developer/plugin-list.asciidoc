@@ -321,7 +321,7 @@ which will load the visualization's editor.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
-|The Kibana alerting plugin provides a common place to set up alerts. You can:
+|The Kibana Alerting plugin provides a common place to set up rules. You can:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/apm/readme.md[apm]
