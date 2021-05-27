@@ -17,7 +17,7 @@ export abstract class AbstractLocator<P extends SerializableState>
     this.migrations = definition.migrations || {};
   }
 
-  // PersistableState ----------------------------------------------------------
+  // PersistableState<P> -------------------------------------------------------
 
   public readonly telemetry: PersistableState<P>['telemetry'] = () => {
     throw new Error('not implemented');
@@ -31,7 +31,7 @@ export abstract class AbstractLocator<P extends SerializableState>
     throw new Error('not implemented');
   };
 
-  // LocatorPublic -------------------------------------------------------------
+  // LocatorPublic<P> ----------------------------------------------------------
 
   public getLocation(params: P): KibanaLocation {
     throw new Error('not implemented');

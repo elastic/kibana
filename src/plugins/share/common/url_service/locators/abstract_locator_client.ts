@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SerializableState } from 'src/plugins/kibana_utils/common';
-import { AbstractLocator } from './abstract_locator';
-import { LocatorClient, LocatorDefinition, LocatorPublic } from './types';
+import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { AbstractLocator } from './abstract_locator';
+import type { LocatorClient, LocatorDefinition, LocatorPublic } from './types';
 
 export abstract class AbstractLocatorClient implements Pick<LocatorClient, 'create' | 'get'> {
   protected abstract readonly Locator: new <P extends SerializableState>(

@@ -18,6 +18,8 @@ import {
   UrlGeneratorsSetup,
   UrlGeneratorsStart,
 } from './url_generators/url_generator_service';
+import { UrlService } from '../common/url_service';
+import { BrowserUrlService } from './url_service';
 
 export interface ShareSetupDependencies {
   securityOss?: SecurityOssPluginSetup;
@@ -26,6 +28,17 @@ export interface ShareSetupDependencies {
 export interface ShareStartDependencies {
   securityOss?: SecurityOssPluginStart;
 }
+
+/** @public */
+export type SharePluginSetup = ShareMenuRegistrySetup & {
+  urlGenerators: UrlGeneratorsSetup;
+  url: UrlService;
+};
+
+/** @public */
+export type SharePluginStart = ShareMenuManagerStart & {
+  urlGenerators: UrlGeneratorsStart;
+};
 
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly shareMenuRegistry = new ShareMenuRegistry();
@@ -37,6 +50,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     return {
       ...this.shareMenuRegistry.setup(),
       urlGenerators: this.urlGeneratorsService.setup(core),
+      url: new BrowserUrlService(),
     };
   }
 
@@ -51,13 +65,3 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     };
   }
 }
-
-/** @public */
-export type SharePluginSetup = ShareMenuRegistrySetup & {
-  urlGenerators: UrlGeneratorsSetup;
-};
-
-/** @public */
-export type SharePluginStart = ShareMenuManagerStart & {
-  urlGenerators: UrlGeneratorsStart;
-};
