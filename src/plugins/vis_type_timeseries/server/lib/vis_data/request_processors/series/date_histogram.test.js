@@ -86,8 +86,7 @@ describe('dateHistogram(req, panel, series)', () => {
             },
           },
           meta: {
-            bucketSize: 10,
-            intervalString: '10s',
+            interval: 10000,
             timeField: '@timestamp',
             seriesId: 'test',
             panelId: 'panelId',
@@ -128,8 +127,7 @@ describe('dateHistogram(req, panel, series)', () => {
             },
           },
           meta: {
-            bucketSize: 10,
-            intervalString: '10s',
+            interval: 10000,
             timeField: '@timestamp',
             seriesId: 'test',
             panelId: 'panelId',
@@ -173,8 +171,7 @@ describe('dateHistogram(req, panel, series)', () => {
             },
           },
           meta: {
-            bucketSize: 20,
-            intervalString: '20s',
+            interval: 20000,
             timeField: 'timestamp',
             seriesId: 'test',
             panelId: 'panelId',
@@ -185,8 +182,11 @@ describe('dateHistogram(req, panel, series)', () => {
   });
 
   describe('dateHistogram for entire time range mode', () => {
-    test('should ignore entire range mode for timeseries', async () => {
+    beforeEach(() => {
       panel.time_range_mode = 'entire_time_range';
+    });
+
+    test('should ignore entire range mode for timeseries', async () => {
       panel.type = 'timeseries';
 
       const next = (doc) => doc;
@@ -204,9 +204,36 @@ describe('dateHistogram(req, panel, series)', () => {
       expect(doc.aggs.test.aggs.timeseries.date_histogram).toBeDefined();
     });
 
-    test('should returns valid date histogram for entire range mode', async () => {
-      panel.time_range_mode = 'entire_time_range';
+    test('should set meta values', async () => {
+      // set 15 minutes (=== 900000ms) interval;
+      req.body.timerange = {
+        min: '2021-01-01T00:00:00Z',
+        max: '2021-01-01T00:15:00Z',
+      };
 
+      const next = (doc) => doc;
+      const doc = await dateHistogram(
+        req,
+        panel,
+        series,
+        config,
+        indexPattern,
+        capabilities,
+        uiSettings
+      )(next)({});
+
+      expect(doc.aggs.test.meta).toMatchInlineSnapshot(`
+        Object {
+          "index": undefined,
+          "interval": 900000,
+          "panelId": "panelId",
+          "seriesId": "test",
+          "timeField": "@timestamp",
+        }
+      `);
+    });
+
+    test('should returns valid date histogram for entire range mode', async () => {
       const next = (doc) => doc;
       const doc = await dateHistogram(
         req,
@@ -232,8 +259,7 @@ describe('dateHistogram(req, panel, series)', () => {
             meta: {
               timeField: '@timestamp',
               seriesId: 'test',
-              bucketSize: 10,
-              intervalString: '10s',
+              interval: 3600000,
               panelId: 'panelId',
             },
           },

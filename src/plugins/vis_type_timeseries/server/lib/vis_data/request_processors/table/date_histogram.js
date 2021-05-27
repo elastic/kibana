@@ -20,6 +20,7 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const { timeField, interval } = getIntervalAndTimefield(panel, {}, seriesIndex);
+    const { from, to } = getTimerange(req);
 
     const meta = {
       timeField,
@@ -34,8 +35,8 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
         capabilities,
         barTargetUiSettings
       );
-      const { from, to } = getTimerange(req);
       const { timezone } = capabilities;
+      const bucketInterval = bucketSize * 1000;
 
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
@@ -53,13 +54,14 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
 
         overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
           ...meta,
-          intervalString,
-          bucketSize,
+          interval: bucketInterval,
         });
       });
     };
 
     const getDateHistogramForEntireTimerangeMode = () => {
+      const bucketInterval = to.valueOf() - from.valueOf();
+
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
 
@@ -68,7 +70,10 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
           buckets: 1,
         });
 
-        overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), meta);
+        overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
+          ...meta,
+          interval: bucketInterval,
+        });
       });
     };
 

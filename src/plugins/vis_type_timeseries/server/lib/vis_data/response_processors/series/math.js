@@ -88,7 +88,7 @@ export function mathAgg(resp, panel, series, meta, extractFields) {
                 _index: index,
                 _timestamp: ts,
                 _all: all,
-                _interval: split.meta.bucketSize * 1000,
+                _interval: split.meta.interval,
               },
             });
             // if the result is an object (usually when the user is working with maps and functions) flatten the results and return the last value.

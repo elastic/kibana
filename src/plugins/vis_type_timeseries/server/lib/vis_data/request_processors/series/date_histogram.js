@@ -29,16 +29,19 @@ export function dateHistogram(
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
 
     const { timeField, interval, maxBars } = getIntervalAndTimefield(panel, series, seriesIndex);
-    const { bucketSize, intervalString } = getBucketSize(
-      req,
-      interval,
-      capabilities,
-      maxBars ? Math.min(maxBarsUiSettings, maxBars) : barTargetUiSettings
-    );
+    const { from, to } = offsetTime(req, series.offset_time);
+
+    let bucketInterval;
 
     const getDateHistogramForLastBucketMode = () => {
-      const { from, to } = offsetTime(req, series.offset_time);
       const { timezone } = capabilities;
+
+      const { bucketSize, intervalString } = getBucketSize(
+        req,
+        interval,
+        capabilities,
+        maxBars ? Math.min(maxBarsUiSettings, maxBars) : barTargetUiSettings
+      );
 
       overwrite(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
         field: timeField,
@@ -50,13 +53,18 @@ export function dateHistogram(
         },
         ...dateHistogramInterval(intervalString),
       });
+
+      bucketInterval = bucketSize * 1000;
     };
 
-    const getDateHistogramForEntireTimerangeMode = () =>
+    const getDateHistogramForEntireTimerangeMode = () => {
       overwrite(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
         field: timeField,
         buckets: 1,
       });
+
+      bucketInterval = to.valueOf() - from.valueOf();
+    };
 
     isLastValueTimerangeMode(panel, series)
       ? getDateHistogramForLastBucketMode()
@@ -64,11 +72,10 @@ export function dateHistogram(
 
     overwrite(doc, `aggs.${series.id}.meta`, {
       timeField,
-      intervalString,
-      bucketSize,
-      seriesId: series.id,
-      index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
       panelId: panel.id,
+      seriesId: series.id,
+      interval: bucketInterval,
+      index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
     });
 
     return next(doc);
