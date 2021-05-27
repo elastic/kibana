@@ -56,7 +56,7 @@ export const PAGE_ROUTING_PATHS = {
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   add_integration_from_policy: '/policies/:policyId/add-integration',
-  add_integration_to_policy: '/integrations/:pkgkey/add-integration',
+  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
   fleet: '/fleet',
   fleet_agent_list: '/fleet/agents',
@@ -77,17 +77,22 @@ export const pagePathGetters: {
   integrations: () => '/integrations',
   integrations_all: () => '/integrations',
   integrations_installed: () => '/integrations/installed',
-  integration_details_overview: ({ pkgkey }) => `/integrations/detail/${pkgkey}/overview`,
-  integration_details_policies: ({ pkgkey }) => `/integrations/detail/${pkgkey}/policies`,
-  integration_details_settings: ({ pkgkey }) => `/integrations/detail/${pkgkey}/settings`,
-  integration_details_custom: ({ pkgkey }) => `/integrations/detail/${pkgkey}/custom`,
+  integration_details_overview: ({ pkgkey, integration }) =>
+    `/integrations/detail/${pkgkey}/overview${integration ? `?integration=${integration}` : ''}`,
+  integration_details_policies: ({ pkgkey, integration }) =>
+    `/integrations/detail/${pkgkey}/policies${integration ? `?integration=${integration}` : ''}`,
+  integration_details_settings: ({ pkgkey, integration }) =>
+    `/integrations/detail/${pkgkey}/settings${integration ? `?integration=${integration}` : ''}`,
+  integration_details_custom: ({ pkgkey, integration }) =>
+    `/integrations/detail/${pkgkey}/custom${integration ? `?integration=${integration}` : ''}`,
   integration_policy_edit: ({ packagePolicyId }) =>
     `/integrations/edit-integration/${packagePolicyId}`,
   policies: () => '/policies',
   policies_list: () => '/policies',
   policy_details: ({ policyId, tabId }) => `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   add_integration_from_policy: ({ policyId }) => `/policies/${policyId}/add-integration`,
-  add_integration_to_policy: ({ pkgkey }) => `/integrations/${pkgkey}/add-integration`,
+  add_integration_to_policy: ({ pkgkey, integration }) =>
+    `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}`,
   edit_integration: ({ policyId, packagePolicyId }) =>
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
   fleet: () => '/fleet',

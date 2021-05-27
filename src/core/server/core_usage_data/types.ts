@@ -254,6 +254,11 @@ export interface CoreConfigUsageData {
   // uiSettings: {
   //   overridesCount: number;
   // };
+
+  deprecatedKeys: {
+    set: string[];
+    unset: string[];
+  };
 }
 
 /** @internal */
