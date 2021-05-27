@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiScreenReaderOnly,
@@ -30,7 +29,7 @@ interface Props {
   url: string;
 }
 
-const OuterContainer = styled.span`
+const OuterContainer = euiStyled.span`
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -39,20 +38,24 @@ const OuterContainer = styled.span`
   }
 `; // NOTE: min-width: 0 ensures flexbox and no-wrap children can co-exist
 
-const InnerContainer = styled.span`
+const InnerContainer = euiStyled.span`
   overflow: hidden;
   display: flex;
   align-items: center;
 `;
 
 const IndexNumber = euiStyled(EuiText)`
-  margin-right: 5px;
+  margin-right: 3px;
   line-height: ${FIXED_AXIS_HEIGHT}px;
   text-align: right;
   background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+
+  &&& > div {
+    margin-right: 2px;
+  }
 `;
 
-const FirstChunk = styled.span`
+const FirstChunk = euiStyled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -60,13 +63,13 @@ const FirstChunk = styled.span`
   text-align: left;
 `; // safari doesn't auto align text left in some cases
 
-const LastChunk = styled.span`
+const LastChunk = euiStyled.span`
   flex-shrink: 0;
   line-height: ${FIXED_AXIS_HEIGHT}px;
   text-align: left;
 `; // safari doesn't auto align text left in some cases
 
-const StyledButton = styled(EuiButtonEmpty)`
+const StyledButton = euiStyled(EuiButtonEmpty)`
   &&& {
     border: none;
 
@@ -75,6 +78,10 @@ const StyledButton = styled(EuiButtonEmpty)`
       padding: 0;
     }
   }
+`;
+
+const SecureIcon = euiStyled(EuiIcon)`
+  margin-right: 3px;
 `;
 
 export const getChunks = (text: string = '') => {
@@ -122,12 +129,12 @@ export const MiddleTruncatedText = ({
                 <IndexNumber
                   color="subdued"
                   size="s"
-                  style={{ minWidth: String(highestIndex).length + 'ch' }}
+                  style={{ minWidth: String(highestIndex).length + 1 + 'ch' }}
                 >
                   {index + '.'}
                 </IndexNumber>
                 {secureHttps && (
-                  <EuiIcon
+                  <SecureIcon
                     type="lock"
                     size="s"
                     color="secondary"
