@@ -11,7 +11,7 @@ Below are some general themes to consider for the *Risk Matrix*:
 
 - What happens when your feature is used in a non-default space or a custom
   space?
-- What happens when Kibana is run in a cluster mode?
+- What happens when there are multiple Kibana nodes using the same Elasticsearch cluster?
 - What happens when a plugin you depend on is disabled?
 - What happens when a feature you depend on is disabled?
 - Is your change working correctly regardless of `kibana.yml` configuration or
