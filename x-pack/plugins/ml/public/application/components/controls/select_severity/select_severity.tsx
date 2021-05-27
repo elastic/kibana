@@ -142,7 +142,7 @@ export const SelectSeverityUI: FC<
   return (
     <EuiSuperSelect
       prepend={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
-        defaultMessage: 'Severity threshold',
+        defaultMessage: 'Severity',
       })}
       id="severityThreshold"
       data-test-subj={'mlAnomalySeverityThresholdControls'}
