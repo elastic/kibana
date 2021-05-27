@@ -7,27 +7,44 @@
 
 import React, { memo, ReactNode } from 'react';
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { GET_SUCCESS_MESSAGE } from './translations';
+import { GET_ISOLATION_SUCCESS_MESSAGE, GET_UNISOLATION_SUCCESS_MESSAGE } from './translations';
 
 export interface EndpointIsolateSuccessProps {
   hostName: string;
+  isolateAction?: 'isolateHost' | 'unisolateHost';
   completeButtonLabel: string;
   onComplete: () => void;
   additionalInfo?: ReactNode;
 }
 
 export const EndpointIsolateSuccess = memo<EndpointIsolateSuccessProps>(
-  ({ hostName, onComplete, completeButtonLabel, additionalInfo }) => {
+  ({
+    hostName,
+    isolateAction = 'isolateHost',
+    onComplete,
+    completeButtonLabel,
+    additionalInfo,
+  }) => {
     return (
       <>
-        <EuiCallOut
-          iconType="check"
-          color="success"
-          title={GET_SUCCESS_MESSAGE(hostName)}
-          data-test-subj="hostIsolateSuccessMessage"
-        >
-          {additionalInfo}
-        </EuiCallOut>
+        {isolateAction === 'isolateHost' ? (
+          <EuiCallOut
+            iconType="check"
+            color="success"
+            title={GET_ISOLATION_SUCCESS_MESSAGE(hostName)}
+            data-test-subj="hostIsolateSuccessMessage"
+          >
+            {additionalInfo}
+          </EuiCallOut>
+        ) : (
+          <EuiCallOut
+            iconType="check"
+            color="success"
+            title={GET_UNISOLATION_SUCCESS_MESSAGE(hostName)}
+          >
+            {additionalInfo}
+          </EuiCallOut>
+        )}
 
         <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>

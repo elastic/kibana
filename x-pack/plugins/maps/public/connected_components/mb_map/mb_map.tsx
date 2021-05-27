@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from 'mapbox-gl';
+import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
 
 // @ts-expect-error
 import { spritesheet } from '@elastic/maki';

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import {
-  GeoJSONSource as MbGeoJSONSource,
+import React from 'react';
+import type {
   Map as MbMap,
+  GeoJSONSource as MbGeoJSONSource,
   VectorSource as MbVectorSource,
-} from 'mapbox-gl';
+} from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import uuid from 'uuid/v4';
 import { parse as parseUrl } from 'url';
