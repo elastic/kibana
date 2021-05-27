@@ -25,7 +25,7 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   );
   return {
     messages: deprecationMessages,
-    migrated,
+    migrated: migrated.config,
   };
 };
 
