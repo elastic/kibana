@@ -24,7 +24,8 @@ export function injectActionParams({
   // Inject kibanaFooterLink if action type is email. This is used by the email action type
   // to inject a "View alert in Kibana" with a URL in the email's footer.
   if (actionTypeId === '.email') {
-    const spacePrefix = spaceId.length > 0 && spaceId !== 'default' ? `/s/${spaceId}` : '';
+    const spacePrefix =
+      spaceId && spaceId.length > 0 && spaceId !== 'default' ? `/s/${spaceId}` : '';
     return {
       ...actionParams,
       kibanaFooterLink: {

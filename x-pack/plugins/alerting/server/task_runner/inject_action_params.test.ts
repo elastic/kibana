@@ -50,6 +50,31 @@ describe('injectActionParams', () => {
     `);
   });
 
+  test('injects viewInKibanaPath and viewInKibanaText when actionTypeId is .email and spaceId is undefined', () => {
+    const actionParams = {
+      body: {
+        message: 'State: "{{state.value}}", Context: "{{context.value}}"',
+      },
+    };
+    const result = injectActionParams({
+      actionParams,
+      ruleId: '1',
+      spaceId: undefined,
+      actionTypeId: '.email',
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "message": "State: \\"{{state.value}}\\", Context: \\"{{context.value}}\\"",
+        },
+        "kibanaFooterLink": Object {
+          "path": "/app/management/insightsAndAlerting/triggersActions/rule/1",
+          "text": "View rule in Kibana",
+        },
+      }
+    `);
+  });
+
   test('injects viewInKibanaPath with space ID and viewInKibanaText when actionTypeId is .email', () => {
     const actionParams = {
       body: {
