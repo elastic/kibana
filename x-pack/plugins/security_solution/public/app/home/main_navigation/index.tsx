@@ -14,7 +14,7 @@ import { navTabs } from '../home_navigations';
 import { useKibana } from '../../../common/lib/kibana';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
-  defaultMessage: 'Security Navigation',
+  defaultMessage: 'Navigation',
 });
 
 const StyledSpan = styled.span`
