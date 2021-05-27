@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { uniq } from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
 import { EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
@@ -40,7 +40,7 @@ export function getSavedObjectFormat({
     references.push(...savedObjectReferences);
   });
 
-  const uniqueFilterableIndexPatternIds = _.uniq(
+  const uniqueFilterableIndexPatternIds = uniq(
     references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
   );
 

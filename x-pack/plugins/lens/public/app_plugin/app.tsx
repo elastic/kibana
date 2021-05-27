@@ -7,7 +7,7 @@
 
 import './app.scss';
 
-import _ from 'lodash';
+import { isEqual, partition } from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Toast } from 'kibana/public';
@@ -138,7 +138,7 @@ export function App({
       // or when the user has configured something without saving
       if (
         application.capabilities.visualize.save &&
-        !_.isEqual(
+        !isEqual(
           appState.persistedDoc?.state,
           getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state
         ) &&
@@ -422,7 +422,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
 
 function getLastKnownDocWithoutPinnedFilters(doc?: Document) {
   if (!doc) return undefined;
-  const [pinnedFilters, appFilters] = _.partition(
+  const [pinnedFilters, appFilters] = partition(
     injectFilterReferences(doc.state?.filters || [], doc.references),
     esFilters.isFilterPinned
   );

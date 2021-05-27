@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
 import { Provider } from 'react-redux';
-import _ from 'lodash';
+import { uniq, isEqual } from 'lodash';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
@@ -308,7 +308,7 @@ export function loadDocument(
           initialInput.savedObjectId
         );
       }
-      const indexPatternIds = _.uniq(
+      const indexPatternIds = uniq(
         doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
       );
       getAllIndexPatterns(indexPatternIds, data.indexPatterns)
@@ -323,7 +323,7 @@ export function loadDocument(
               isAppLoading: false,
               indexPatternsForTopNav: indexPatterns,
               lastKnownDoc: doc,
-              ...(!_.isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
+              ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
             })
           );
         })

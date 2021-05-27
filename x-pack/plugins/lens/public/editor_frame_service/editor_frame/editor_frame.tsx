@@ -7,7 +7,7 @@
 
 import React, { useEffect, useReducer, useState, useCallback } from 'react';
 import { CoreStart } from 'kibana/public';
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { IndexPattern } from '../../../../../../src/plugins/data/public';
 import { getAllIndexPatterns } from '../../utils';
@@ -252,7 +252,7 @@ export function EditorFrame(props: EditorFrameProps) {
       batchedStateToUpdate.isSaveable = incomingIsSaveable;
     }
 
-    if (!_.isEqual(prevState.persistedDoc, doc) && !_.isEqual(prevState.lastKnownDoc, doc)) {
+    if (!isEqual(prevState.persistedDoc, doc) && !isEqual(prevState.lastKnownDoc, doc)) {
       batchedStateToUpdate.lastKnownDoc = doc;
     }
     const hasIndexPatternsChanged =
@@ -274,13 +274,6 @@ export function EditorFrame(props: EditorFrameProps) {
       return batchedStateToUpdate;
     }
   };
-
-  // Frame loader (app or embeddable) is expected to call this when it loads and updates
-  // This should be replaced with a top-down state
-  const onChange = React.useCallback(
-    (batchedStateToUpdate) => dispatchChange(batchedStateToUpdate),
-    [dispatchChange]
-  );
 
   // The frame needs to call onChange every time its internal state changes
   useEffect(
@@ -307,6 +300,8 @@ export function EditorFrame(props: EditorFrameProps) {
         framePublicAPI,
       });
 
+      // Frame loader (app or embeddable) is expected to call this when it loads and updates
+      // This should be replaced with a top-down state
       getStateToUpdate(savedObjectFormat, {
         isSaveable,
         persistedDoc,
@@ -314,7 +309,7 @@ export function EditorFrame(props: EditorFrameProps) {
         lastKnownDoc,
       }).then((batchedStateToUpdate) => {
         if (batchedStateToUpdate) {
-          onChange(batchedStateToUpdate);
+          dispatchChange(batchedStateToUpdate);
         }
       });
     },
@@ -328,6 +323,7 @@ export function EditorFrame(props: EditorFrameProps) {
       filters,
       savedQuery,
       state.title,
+      dispatchChange,
     ]
   );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
@@ -257,7 +257,7 @@ export const LensTopNavMenu = ({
           trackUiEvent('app_query_change');
         }
         if (newQuery) {
-          if (!_.isEqual(newQuery, query)) {
+          if (!isEqual(newQuery, query)) {
             dispatchSetState({ query: newQuery });
           }
         }

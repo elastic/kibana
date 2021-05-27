@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
 
@@ -19,7 +19,7 @@ export const timeRangeMiddleware = (data: DataPublicPluginStart) => (store: Midd
     // if document was modified or sessionId check if too much time passed to update searchSessionId
     if (
       action.payload?.lastKnownDoc &&
-      !_.isEqual(action.payload?.lastKnownDoc, store.getState().app.lastKnownDoc)
+      !isEqual(action.payload?.lastKnownDoc, store.getState().app.lastKnownDoc)
     ) {
       updateTimeRange(data, store.dispatch);
     }
