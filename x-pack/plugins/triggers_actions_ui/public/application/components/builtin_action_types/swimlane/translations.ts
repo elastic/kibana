@@ -183,7 +183,7 @@ export const SW_RETRIEVE_CONFIGURATION_LABEL = i18n.translate(
   { defaultMessage: 'Configure Fields' }
 );
 
-export const SW_RETRIEVE_CONFIGURATION_RESET_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.resetConfigurationLabel',
-  { defaultMessage: 'Reset Configuration' }
+export const SW_CONFIGURE_API_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.configureAPILabel',
+  { defaultMessage: 'Configure API' }
 );

@@ -41,10 +41,10 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
       } else if (step === 1) {
         setConnectionStatus('incomplete');
         setFieldsConfigured('incomplete');
-        editActionConfig('mappings', {});
+        editActionConfig('mappings', action.config.mappings);
       }
     },
-    [editActionConfig]
+    [action.config.mappings, editActionConfig]
   );
 
   const setupSteps = useMemo(

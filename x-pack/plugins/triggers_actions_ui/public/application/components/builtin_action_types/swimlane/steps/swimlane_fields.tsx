@@ -168,9 +168,7 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
           onChange={(e) => editMappings('descriptionConfig', e)}
         />
       </EuiFormRow>
-      <EuiButton color="warning" onClick={resetConnection}>
-        {i18n.SW_RETRIEVE_CONFIGURATION_RESET_LABEL}
-      </EuiButton>
+      <EuiButton onClick={resetConnection}>{i18n.SW_CONFIGURE_API_LABEL}</EuiButton>
     </>
   );
 };
