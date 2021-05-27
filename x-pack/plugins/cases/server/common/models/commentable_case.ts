@@ -35,7 +35,7 @@ import {
   transformNewComment,
 } from '..';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
-import { AttachmentService, CaseService } from '../../services';
+import { AttachmentService, CasesService } from '../../services';
 import { createCaseError } from '../error';
 import { countAlertsForID } from '../index';
 
@@ -53,7 +53,7 @@ interface CommentableCaseParams {
   collection: SavedObject<ESCaseAttributes>;
   subCase?: SavedObject<SubCaseAttributes>;
   soClient: SavedObjectsClientContract;
-  caseService: CaseService;
+  caseService: CasesService;
   attachmentService: AttachmentService;
   logger: Logger;
 }
@@ -66,7 +66,7 @@ export class CommentableCase {
   private readonly collection: SavedObject<ESCaseAttributes>;
   private readonly subCase?: SavedObject<SubCaseAttributes>;
   private readonly soClient: SavedObjectsClientContract;
-  private readonly caseService: CaseService;
+  private readonly caseService: CasesService;
   private readonly attachmentService: AttachmentService;
   private readonly logger: Logger;
 

@@ -13,7 +13,7 @@ import { Authorization } from '../authorization/authorization';
 import {
   AlertServiceContract,
   CaseConfigureService,
-  CaseService,
+  CasesService,
   CaseUserActionService,
   ConnectorMappingsService,
   AttachmentService,
@@ -26,7 +26,7 @@ import { ActionsClient } from '../../../actions/server';
 export interface CasesClientArgs {
   readonly scopedClusterClient: ElasticsearchClient;
   readonly caseConfigureService: CaseConfigureService;
-  readonly caseService: CaseService;
+  readonly caseService: CasesService;
   readonly connectorMappingsService: ConnectorMappingsService;
   readonly user: User;
   readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;

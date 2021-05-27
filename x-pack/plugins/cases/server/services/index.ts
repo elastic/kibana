@@ -7,7 +7,7 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
-export { CaseService } from './cases';
+export { CasesService } from './cases';
 export { CaseConfigureService } from './configure';
 export { CaseUserActionService } from './user_actions';
 export { ConnectorMappingsService } from './connector_mappings';

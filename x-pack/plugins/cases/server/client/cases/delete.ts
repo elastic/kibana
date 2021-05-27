@@ -10,7 +10,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
-import { AttachmentService, CaseService } from '../../services';
+import { AttachmentService, CasesService } from '../../services';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { Operations } from '../../authorization';
 import { ensureAuthorized } from '../utils';
@@ -23,7 +23,7 @@ async function deleteSubCases({
   caseIds,
 }: {
   attachmentService: AttachmentService;
-  caseService: CaseService;
+  caseService: CasesService;
   soClient: SavedObjectsClientContract;
   caseIds: string[];
 }) {

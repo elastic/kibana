@@ -17,7 +17,7 @@ import {
 } from 'kibana/server';
 
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
-import { CaseService } from '../../services';
+import { CasesService } from '../../services';
 import {
   CaseStatuses,
   SubCasesPatchRequest,
@@ -119,7 +119,7 @@ async function getParentCases({
   subCaseIDs,
   subCasesMap,
 }: {
-  caseService: CaseService;
+  caseService: CasesService;
   soClient: SavedObjectsClientContract;
   subCaseIDs: string[];
   subCasesMap: Map<string, SavedObject<SubCaseAttributes>>;
@@ -185,7 +185,7 @@ async function getAlertComments({
   soClient,
 }: {
   subCasesToSync: SubCasePatchRequest[];
-  caseService: CaseService;
+  caseService: CasesService;
   soClient: SavedObjectsClientContract;
 }): Promise<SavedObjectsFindResponse<CommentAttributes>> {
   const ids = subCasesToSync.map((subCase) => subCase.id);
@@ -211,7 +211,7 @@ async function updateAlerts({
   logger,
   subCasesToSync,
 }: {
-  caseService: CaseService;
+  caseService: CasesService;
   soClient: SavedObjectsClientContract;
   casesClientInternal: CasesClientInternal;
   logger: Logger;

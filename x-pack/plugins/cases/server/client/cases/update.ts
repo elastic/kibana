@@ -38,7 +38,7 @@ import {
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import { ensureAuthorized, getCaseToUpdate } from '../utils';
 
-import { CaseService } from '../../services';
+import { CasesService } from '../../services';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -137,7 +137,7 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
   soClient,
 }: {
   requests: ESCasePatchRequest[];
-  caseService: CaseService;
+  caseService: CasesService;
   soClient: SavedObjectsClientContract;
 }) {
   const getAlertsForID = async (caseToUpdate: ESCasePatchRequest) => {
@@ -199,7 +199,7 @@ async function getAlertComments({
   soClient,
 }: {
   casesToSync: ESCasePatchRequest[];
-  caseService: CaseService;
+  caseService: CasesService;
   soClient: SavedObjectsClientContract;
 }): Promise<SavedObjectsFindResponse<CommentAttributes>> {
   const idsOfCasesToSync = casesToSync.map((casePatchReq) => casePatchReq.id);
@@ -228,7 +228,7 @@ async function getSubCasesToStatus({
   soClient,
 }: {
   totalAlerts: SavedObjectsFindResponse<CommentAttributes>;
-  caseService: CaseService;
+  caseService: CasesService;
   soClient: SavedObjectsClientContract;
 }): Promise<Map<string, CaseStatuses>> {
   const subCasesToRetrieve = totalAlerts.saved_objects.reduce((acc, alertComment) => {
@@ -298,7 +298,7 @@ async function updateAlerts({
   casesWithSyncSettingChangedToOn: ESCasePatchRequest[];
   casesWithStatusChangedAndSynced: ESCasePatchRequest[];
   casesMap: Map<string, SavedObject<ESCaseAttributes>>;
-  caseService: CaseService;
+  caseService: CasesService;
   soClient: SavedObjectsClientContract;
   casesClientInternal: CasesClientInternal;
 }) {

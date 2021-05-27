@@ -9,13 +9,13 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   AlertServiceContract,
   CaseConfigureService,
-  CaseService,
+  CasesService,
   CaseUserActionService,
   ConnectorMappingsService,
   AttachmentService,
 } from '.';
 
-export type CaseServiceMock = jest.Mocked<CaseService>;
+export type CaseServiceMock = jest.Mocked<CasesService>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureService>;
 export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsService>;
 export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionService>;
@@ -23,7 +23,7 @@ export type AlertServiceMock = jest.Mocked<AlertServiceContract>;
 export type AttachmentServiceMock = jest.Mocked<AttachmentService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
-  const service: PublicMethodsOf<CaseService> = {
+  const service: PublicMethodsOf<CasesService> = {
     createSubCase: jest.fn(),
     deleteCase: jest.fn(),
     deleteSubCase: jest.fn(),

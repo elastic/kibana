@@ -12,7 +12,7 @@ import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { checkEnabledCaseConnectorOrThrow, CommentableCase } from '../../common';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
-import { AttachmentService, CaseService } from '../../services';
+import { AttachmentService, CasesService } from '../../services';
 import { CaseResponse, CommentPatchRequest } from '../../../common/api';
 import { CasesClientArgs } from '..';
 import { decodeCommentRequest, ensureAuthorized } from '../utils';
@@ -39,7 +39,7 @@ export interface UpdateArgs {
 
 interface CombinedCaseParams {
   attachmentService: AttachmentService;
-  caseService: CaseService;
+  caseService: CasesService;
   soClient: SavedObjectsClientContract;
   caseID: string;
   logger: Logger;
