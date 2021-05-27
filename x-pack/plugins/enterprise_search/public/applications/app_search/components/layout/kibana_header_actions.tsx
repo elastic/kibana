@@ -18,18 +18,16 @@ export const KibanaHeaderActions: React.FC = () => {
   const { engineName } = useValues(EngineLogic);
 
   return (
-    <EuiHeaderLinks>
-      <EuiFlexGroup gutterSize="s">
-        {engineName && (
-          <EuiFlexItem>
-            <EuiButtonEmpty iconType="beaker" size="s">
-              {i18n.translate('xpack.enterpriseSearch.appSearch.engine.queryTesterButtonLabel', {
-                defaultMessage: 'Query tester',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiHeaderLinks>
+    <EuiFlexGroup gutterSize="s">
+      {engineName && (
+        <EuiFlexItem>
+          <EuiButtonEmpty iconType="beaker" size="s">
+            {i18n.translate('xpack.enterpriseSearch.appSearch.engine.queryTesterButtonLabel', {
+              defaultMessage: 'Query tester',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
