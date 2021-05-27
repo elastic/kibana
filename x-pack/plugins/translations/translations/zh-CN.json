@@ -9764,7 +9764,7 @@
     "xpack.fleet.settings.cancelButtonLabel": "取消",
     "xpack.fleet.settings.elasticHostError": "URL 无效",
     "xpack.fleet.settings.elasticsearchUrlLabel": "Elasticsearch 主机",
-    "xpack.fleet.settings.elasticsearchUrlsHelpTect": "指定代理用于发送数据的 Elasticsearch URL。",
+    "xpack.fleet.settings.elasticsearchUrlsHelpTect": "指定代理用于发送数据的 Elasticsearch URL。请参阅 {link}。",
     "xpack.fleet.settings.fleetServerHostsDifferentPathOrProtocolError": "对于每个 URL，协议和路径必须相同",
     "xpack.fleet.settings.fleetServerHostsEmptyError": "至少需要一个 URL",
     "xpack.fleet.settings.fleetServerHostsError": "URL 无效",
