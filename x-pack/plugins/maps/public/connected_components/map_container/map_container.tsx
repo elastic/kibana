@@ -15,6 +15,7 @@ import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
+import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
@@ -26,6 +27,7 @@ import { MapSettingsPanel } from '../map_settings_panel';
 import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapRefreshConfig } from '../../../common/descriptor_types';
+import { ILayer } from '../../classes/layers/layer';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -47,11 +49,14 @@ export interface Props {
   title?: string;
   description?: string;
   settings: MapSettings;
+  layerList: ILayer[];
 }
 
 interface State {
   isInitialLoadRenderTimeoutComplete: boolean;
   domId: string;
+  showFitToBoundsButton: boolean;
+  showTimesliderButton: boolean;
 }
 
 export class MapContainer extends Component<Props, State> {
@@ -64,16 +69,22 @@ export class MapContainer extends Component<Props, State> {
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
     domId: uuid(),
+    showFitToBoundsButton: false,
+    showTimesliderButton: false,
   };
 
   componentDidMount() {
     this._isMounted = true;
     this._setRefreshTimer();
+    this._loadShowFitToBoundsButton();
+    this._loadShowTimesliderButton();
     registerLayerWizards();
   }
 
   componentDidUpdate() {
     this._setRefreshTimer();
+    this._loadShowFitToBoundsButton();
+    this._loadShowTimesliderButton();
     if (this.props.areLayersLoaded && !this._isInitalLoadRenderTimerStarted) {
       this._isInitalLoadRenderTimerStarted = true;
       this._startInitialLoadRenderTimer();
@@ -100,6 +111,35 @@ export class MapContainer extends Component<Props, State> {
       el.dispatchEvent(new CustomEvent(RENDER_COMPLETE_EVENT, { bubbles: true }));
     }
   };
+
+  async _loadShowFitToBoundsButton() {
+    const promises = this.props.layerList.map(async (layer) => {
+      return await layer.isFittable();
+    });
+    const showFitToBoundsButton = (await Promise.all(promises)).some((isFittable) => isFittable);
+    if (this._isMounted && this.state.showFitToBoundsButton !== showFitToBoundsButton) {
+      this.setState({ showFitToBoundsButton });
+    }
+  }
+
+  async _loadShowTimesliderButton() {
+    if (!this.props.settings.showTimesliderToggleButton) {
+      if (this.state.showTimesliderButton) {
+        this.setState({ showTimesliderButton: false });
+      }
+      return;
+    }
+
+    const promises = this.props.layerList.map(async (layer) => {
+      return await layer.isFilteredByGlobalTime();
+    });
+    const showTimesliderButton = (await Promise.all(promises)).some(
+      (isFilteredByGlobalTime) => isFilteredByGlobalTime
+    );
+    if (this._isMounted && this.state.showTimesliderButton !== showTimesliderButton) {
+      this.setState({ showTimesliderButton });
+    }
+  }
 
   _setRefreshTimer = () => {
     const { isPaused, interval } = this.props.refreshConfig;
@@ -212,10 +252,14 @@ export class MapContainer extends Component<Props, State> {
               addFilters={addFilters}
               getFilterActions={getFilterActions}
               getActionContext={getActionContext}
+              showFitToBoundsButton={this.state.showFitToBoundsButton}
+              showTimesliderButton={this.state.showTimesliderButton}
             />
           )}
           <RightSideControls />
         </EuiFlexItem>
+
+        <Timeslider />
 
         <EuiFlexItem
           className={classNames('mapMapLayerPanel', {

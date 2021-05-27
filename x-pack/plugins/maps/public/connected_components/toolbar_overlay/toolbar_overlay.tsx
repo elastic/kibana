@@ -12,27 +12,40 @@ import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
 import { FitToData } from './fit_to_data';
+import { TimesliderToggleButton } from './timeslider_toggle_button';
 
 export interface Props {
   addFilters?: ((filters: Filter[], actionId: string) => Promise<void>) | null;
   showToolsControl: boolean;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
+  showFitToBoundsButton: boolean;
+  showTimesliderButton: boolean;
 }
 
 export function ToolbarOverlay(props: Props) {
-  function renderToolsControl() {
-    const { addFilters, showToolsControl, getFilterActions, getActionContext } = props;
-    if (!addFilters || !showToolsControl) {
-      return null;
-    }
-
-    return (
+  const toolsButton =
+    props.addFilters && props.showToolsControl ? (
       <EuiFlexItem>
-        <ToolsControl getFilterActions={getFilterActions} getActionContext={getActionContext} />
+        <ToolsControl
+          geoFields={props.geoFields}
+          getFilterActions={props.getFilterActions}
+          getActionContext={props.getActionContext}
+        />
       </EuiFlexItem>
-    );
-  }
+    ) : null;
+
+  const fitToBoundsButton = props.showFitToBoundsButton ? (
+    <EuiFlexItem>
+      <FitToData />
+    </EuiFlexItem>
+  ) : null;
+
+  const timesliderToogleButon = props.showTimesliderButton ? (
+    <EuiFlexItem>
+      <TimesliderToggleButton />
+    </EuiFlexItem>
+  ) : null;
 
   return (
     <EuiFlexGroup
@@ -46,11 +59,11 @@ export function ToolbarOverlay(props: Props) {
         <SetViewControl />
       </EuiFlexItem>
 
-      <EuiFlexItem>
-        <FitToData />
-      </EuiFlexItem>
+      {fitToBoundsButton}
 
-      {renderToolsControl()}
+      {toolsButton}
+
+      {timesliderToogleButon}
     </EuiFlexGroup>
   );
 }
