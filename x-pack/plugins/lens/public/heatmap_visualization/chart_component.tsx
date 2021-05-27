@@ -78,6 +78,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const xValuesFormatter = formatFactory(xAxisMeta.params);
   const valueFormatter = formatFactory(valueColumn.meta.params);
 
+  // Enable xDomain when https://github.com/elastic/elastic-charts/issues/1165 is resolved.
+  // @ts-ignore
   const xDomain = (() => {
     if (!isTimeBasedSwimLane) return null;
     const dateInterval = search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
@@ -240,7 +242,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         showLegend={args.legend.isVisible}
         legendPosition={args.legend.position}
         debugState={window._echDebugStateFlag ?? false}
-        {...(xDomain ? { xDomain } : {})}
       />
       <Heatmap
         id={'heatmap'}
