@@ -123,6 +123,7 @@ export async function migrationStateActionMachine({
   let prevTimestamp = startTime;
   let lastState: State | undefined;
   try {
+    // we either return from here or an error is thrown
     const finalState = await stateActionMachine<State>(
       initialState,
       (state) => next(state),

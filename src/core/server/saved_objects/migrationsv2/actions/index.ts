@@ -27,6 +27,7 @@ import {
   DocumentsTransformSuccess,
 } from '../../migrations/core/migrate_raw_docs';
 export type { RetryableEsClientError };
+export { cleanup } from './cleanup';
 
 /**
  * Batch size for updateByQuery and reindex operations.

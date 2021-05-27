@@ -38,6 +38,7 @@ import type {
   WaitForYellowSourceState,
   TransformedDocumentsBulkIndex,
   ReindexSourceToTempIndexBulk,
+  CleanupFatalState,
 } from './types';
 import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
@@ -850,7 +851,7 @@ describe('migrations v2 model', () => {
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
 
-      it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if no outdated documents to reindex and transform failures seen with previous outdated documents', () => {
+      it('REINDEX_SOURCE_TO_TEMP_READ -> CLEANUP_FATAL if no outdated documents to reindex and transform failures seen with previous outdated documents', () => {
         const testState: ReindexSourceToTempRead = {
           ...state,
           corruptDocumentIds: ['a:b'],
@@ -861,12 +862,55 @@ describe('migrations v2 model', () => {
           lastHitSortValue: undefined,
           totalHits: undefined,
         });
-        const newState = model(testState, res) as FatalState;
-        expect(newState.controlState).toBe('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(
+        const newState = model(testState, res) as CleanupFatalState;
+        expect(newState.controlState).toBe('CLEANUP_FATAL');
+        expect(newState.fatalReason).toMatchInlineSnapshot(
           `"Migrations failed. Reason: Corrupt saved object documents: a:b. To allow migrations to proceed, please delete these documents."`
         );
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
+      });
+    });
+
+    describe('CLEANUP_FATAL', () => {
+      const state: CleanupFatalState = {
+        ...baseState,
+        controlState: 'CLEANUP_FATAL',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        pitId: 'pit_id',
+        targetIndex: '.kibana_7.11.0_001',
+        tempIndexMappings: { properties: {} },
+        fatalReason: 'something went wrong',
+      };
+      it('transitions to FATAL state if the cleanup actions succeeded, passing through the original fatal transition reason', () => {
+        const testState: CleanupFatalState = { ...state };
+        const res: ResponseType<'CLEANUP_FATAL'> = Either.right({ type: 'cleanup_complete' });
+        const newState = model(testState, res) as FatalState;
+        expect(newState.controlState).toBe('FATAL');
+        expect(newState.reason).toBe(testState.fatalReason);
+      });
+      it('transitions to FATAL state if the cleanup action did not need to be performed when there is no pitId', () => {
+        const testState: CleanupFatalState = { ...state, pitId: undefined };
+        const res: ResponseType<'CLEANUP_FATAL'> = Either.right({
+          type: 'cleanup_closepit_skipped',
+        });
+        const newState = model(testState, res) as FatalState;
+        expect(newState.controlState).toBe('FATAL');
+        expect(newState.reason).toBe(testState.fatalReason);
+      });
+      it('transitions to FATAL state if the cleanup actions failed and appends the cleanup failure to the original fatal transition reason', () => {
+        const testState: CleanupFatalState = { ...state };
+        const closePitError: RetryableEsClientError = {
+          type: 'retryable_es_client_error',
+          message: 'random documents bulk index error',
+        };
+        const res: ResponseType<'CLEANUP_FATAL'> = Either.left({
+          type: 'cleanup_failed',
+          cleanupFatalError: closePitError,
+        });
+        const newState = model(testState, res) as FatalState;
+        expect(newState.controlState).toBe('FATAL');
+        expect(newState.reason).toEqual(testState.fatalReason + ' ' + closePitError.message);
       });
     });
 
@@ -1172,12 +1216,12 @@ describe('migrations v2 model', () => {
           corruptDocumentIds: [...corruptDocumentIdsCarriedOver],
           transformErrors: [...transformationErrors],
         };
-        const newState = model(transformErrorsState, res) as FatalState;
-        expect(newState.controlState).toBe('FATAL');
-        expect(newState.reason.includes('Migrations failed. Reason:')).toBe(true);
-        expect(newState.reason.includes('Corrupt saved object documents: ')).toBe(true);
-        expect(newState.reason.includes('Transformation errors: ')).toBe(true);
-        expect(newState.reason.includes('bob:tail')).toBe(true);
+        const newState = model(transformErrorsState, res) as CleanupFatalState;
+        expect(newState.controlState).toBe('CLEANUP_FATAL');
+        expect(newState.fatalReason.includes('Migrations failed. Reason:')).toBe(true);
+        expect(newState.fatalReason.includes('Corrupt saved object documents: ')).toBe(true);
+        expect(newState.fatalReason.includes('Transformation errors: ')).toBe(true);
+        expect(newState.fatalReason.includes('bob:tail')).toBe(true);
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
     });
@@ -1550,9 +1594,9 @@ describe('migrations v2 model', () => {
             settings: {},
           },
         });
-        const newState = model(markVersionIndexConflictState, res) as FatalState;
-        expect(newState.controlState).toEqual('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(
+        const newState = model(markVersionIndexConflictState, res) as CleanupFatalState;
+        expect(newState.controlState).toEqual('CLEANUP_FATAL');
+        expect(newState.fatalReason).toMatchInlineSnapshot(
           `"Multiple versions of Kibana are attempting a migration in parallel. Another Kibana instance on version 7.12.0 completed this migration (this instance is running 7.11.0). Ensure that all Kibana instances are running on same version and try again."`
         );
         expect(newState.retryCount).toEqual(0);

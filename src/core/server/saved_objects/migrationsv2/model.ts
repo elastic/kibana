@@ -125,6 +125,10 @@ function extractTransformFailuresReason(
   return `Migrations failed. Reason:${corruptDocumentIdReason}${transformErrorsReason}. To allow migrations to proceed, please delete these documents.`;
 }
 
+function formatFinalFatalReason(originalReason: string, cleanupErrorMessage?: string): string {
+  return originalReason + (cleanupErrorMessage ? ` ${cleanupErrorMessage}` : '');
+}
+
 const delayRetryState = <S extends State>(
   state: S,
   errorMessage: string,
@@ -541,8 +545,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           );
           return {
             ...stateP,
-            controlState: 'FATAL',
-            reason: transformFailureReason,
+            controlState: 'CLEANUP_FATAL',
+            // pass through the reason for transitioning to the FATAL state after cleanup actions have been performed
+            fatalReason: transformFailureReason,
           };
         } else {
           // we don't have any more outdated documents and we haven't encountered any document transformation issues.
@@ -725,8 +730,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           );
           return {
             ...stateP,
-            controlState: 'FATAL',
-            reason: transformFailureReason,
+            controlState: 'CLEANUP_FATAL',
+            fatalReason: transformFailureReason,
           };
         } else {
           // If there are no more results we have transformed all outdated
@@ -939,12 +944,30 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           indexVersion(aliases[stateP.currentAlias]) ?? aliases[stateP.currentAlias];
         return {
           ...stateP,
-          controlState: 'FATAL',
-          reason: `Multiple versions of Kibana are attempting a migration in parallel. Another Kibana instance on version ${conflictingKibanaVersion} completed this migration (this instance is running ${stateP.kibanaVersion}). Ensure that all Kibana instances are running on same version and try again.`,
+          controlState: 'CLEANUP_FATAL',
+          fatalReason: `Multiple versions of Kibana are attempting a migration in parallel. Another Kibana instance on version ${conflictingKibanaVersion} completed this migration (this instance is running ${stateP.kibanaVersion}). Ensure that all Kibana instances are running on same version and try again.`,
         };
       }
     } else {
       throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'CLEANUP_FATAL') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    const { fatalReason, ...state } = stateP;
+    if (Either.isRight(res)) {
+      return {
+        ...state,
+        controlState: 'FATAL',
+        reason: fatalReason,
+      };
+    } else {
+      return {
+        ...state,
+        controlState: 'FATAL',
+        // we append any extra errors caused during cleanup.
+        // Alternatively, we could ignore cleanup errors but I chose to make everything as visible as possible
+        reason: formatFinalFatalReason(fatalReason, res.left.cleanupFatalError?.message),
+      };
     }
   } else if (stateP.controlState === 'DONE' || stateP.controlState === 'FATAL') {
     // The state-action machine will never call the model in the terminating states

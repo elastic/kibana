@@ -10,7 +10,7 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { estypes } from '@elastic/elasticsearch';
 import { ControlState } from './state_action_machine';
-import { AliasAction } from './actions';
+import { AliasAction, RetryableEsClientError } from './actions';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '..';
 import { TransformErrorObjects } from '../migrations/core';
@@ -381,6 +381,17 @@ export interface LegacyDeleteState extends LegacyBaseState {
   readonly controlState: 'LEGACY_DELETE';
 }
 
+export interface CleanupFatalState extends PostInitState {
+  /**
+   * Before transitioning to the FATAL state, we need to execute any cleanup actions
+   * e.g. closePit
+   */
+  readonly controlState: 'CLEANUP_FATAL';
+  readonly fatalReason: string;
+  readonly pitId?: string;
+  readonly cleanupFatalError?: RetryableEsClientError;
+}
+
 export type State = Readonly<
   | FatalState
   | InitState
@@ -412,6 +423,7 @@ export type State = Readonly<
   | LegacyReindexState
   | LegacyReindexWaitForTaskState
   | LegacyDeleteState
+  | CleanupFatalState
 >;
 
 export type AllControlStates = State['controlState'];

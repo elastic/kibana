@@ -39,6 +39,7 @@ import type {
   OutdatedDocumentsSearchClosePit,
   RefreshTarget,
   OutdatedDocumentsRefresh,
+  CleanupFatalState,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -160,6 +161,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.waitForReindexTask(client, state.legacyReindexTaskId, '60s'),
     LEGACY_DELETE: (state: LegacyDeleteState) =>
       Actions.updateAliases(client, state.legacyPreMigrationDoneActions),
+    CLEANUP_FATAL: (state: CleanupFatalState) => Actions.cleanup.cleanupFatal(client, state.pitId), // right now, we only need state.pitId
   };
 };
 
