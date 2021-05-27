@@ -7,7 +7,7 @@
  */
 
 import { List, ListArray } from '.';
-import { ENDPOINT_LIST_ID } from '../../constants';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 export const getListMock = (): List => ({
   id: 'some_uuid',

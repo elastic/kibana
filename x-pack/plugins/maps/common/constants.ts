@@ -41,6 +41,7 @@ export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 export const INDEX_SOURCE_API_PATH = `${GIS_API_PATH}/docSource`;
+export const INDEX_FEATURE_PATH = `/${GIS_API_PATH}/feature`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';

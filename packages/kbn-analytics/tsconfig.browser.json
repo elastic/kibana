@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.browser.json",
   "compilerOptions": {
     "incremental": true,
-    "outDir": "./target/web",
+    "outDir": "./target_web",
     "stripInternal": true,
     "declaration": false,
     "isolatedModules": true,
