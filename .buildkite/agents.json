@@ -26,15 +26,16 @@
         "machineType": "e2-small"
       },
       {
-        "queue": "baseline",
-        "name": "kb-baseline",
+        "queue": "c2-8",
+        "name": "kb-c2-8",
         "machineType": "c2-standard-8",
-        "diskSizeGb": 128
+        "localSsds": 1
       },
       {
-        "queue": "baseline-small",
-        "name": "kb-baseline-small",
-        "machineType": "c2-standard-4"
+        "queue": "c2-4",
+        "name": "kb-c2-4",
+        "machineType": "c2-standard-4",
+        "localSsds": 1
       },
       {
         "queue": "jest",
@@ -69,7 +70,7 @@
       {
         "queue": "packer",
         "name": "kb-packer",
-        "serviceAccount": "buildkite-packer-agent@elastic-kibana-184716.iam.gserviceaccount.com",
+        "serviceAccount": "buildkite-packer-agent@elastic-kibana-ci.iam.gserviceaccount.com",
         "maximumAgents": 10,
         "machineType": "e2-small"
       }

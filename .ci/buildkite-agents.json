@@ -26,14 +26,14 @@
         "machineType": "e2-small"
       },
       {
-        "queue": "baseline",
-        "name": "kb-baseline",
+        "queue": "c2-8",
+        "name": "kb-c2-8",
         "machineType": "c2-standard-8",
         "localSsds": 1
       },
       {
-        "queue": "baseline-small",
-        "name": "kb-baseline-small",
+        "queue": "c2-4",
+        "name": "kb-c2-4",
         "machineType": "c2-standard-4",
         "localSsds": 1
       },
