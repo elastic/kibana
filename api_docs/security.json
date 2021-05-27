@@ -1307,13 +1307,6 @@
                 }
               },
               {
-                "plugin": "cases",
-                "link": {
-                  "path": "x-pack/plugins/cases/server/plugin.ts",
-                  "lineNumber": 89
-                }
-              },
-              {
                 "plugin": "ml",
                 "link": {
                   "path": "x-pack/plugins/ml/server/routes/annotations.ts",
@@ -1321,31 +1314,10 @@
                 }
               },
               {
-                "plugin": "securitySolution",
+                "plugin": "cases",
                 "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts",
-                  "lineNumber": 48
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts",
-                  "lineNumber": 45
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts",
-                  "lineNumber": 45
-                }
-              },
-              {
-                "plugin": "beatsManagement",
-                "link": {
-                  "path": "x-pack/plugins/beats_management/server/lib/adapters/framework/kibana_framework_adapter.ts",
-                  "lineNumber": 44
+                  "path": "x-pack/plugins/cases/server/plugin.ts",
+                  "lineNumber": 89
                 }
               },
               {
@@ -1367,6 +1339,27 @@
                 "link": {
                   "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts",
                   "lineNumber": 41
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts",
+                  "lineNumber": 48
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts",
+                  "lineNumber": 45
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts",
+                  "lineNumber": 45
                 }
               },
               {

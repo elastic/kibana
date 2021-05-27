@@ -359,7 +359,7 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "id": Array [
-                            "col1",
+                            "0",
                           ],
                           "schema": Array [
                             "metric",
@@ -388,7 +388,7 @@ describe('IndexPattern Data Source', () => {
                             "timestamp",
                           ],
                           "id": Array [
-                            "col2",
+                            "1",
                           ],
                           "interval": Array [
                             "1d",
@@ -442,7 +442,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"col-0-col1\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"Records\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-col2\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}",
+                  "{\\"col-0-0\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"Records\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-1\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}",
                 ],
               },
               "function": "lens_rename_columns",
@@ -563,7 +563,7 @@ describe('IndexPattern Data Source', () => {
                             "{\\"language\\":\\"kuery\\",\\"query\\":\\"bytes > 5\\"}",
                           ],
                           "id": Array [
-                            "col1-filter",
+                            "0-filter",
                           ],
                           "schema": Array [
                             "bucket",
@@ -585,7 +585,7 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "id": Array [
-                            "col1-metric",
+                            "0-metric",
                           ],
                           "schema": Array [
                             "metric",
@@ -602,7 +602,7 @@ describe('IndexPattern Data Source', () => {
                   true,
                 ],
                 "id": Array [
-                  "col1",
+                  "0",
                 ],
                 "schema": Array [
                   "metric",
@@ -795,9 +795,9 @@ describe('IndexPattern Data Source', () => {
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
       expect(ast.chain[0].arguments.metricsAtAllLevels).toEqual([false]);
       expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
-        'col-0-bucket1': expect.any(Object),
-        'col-1-bucket2': expect.any(Object),
-        'col-2-metric': expect.any(Object),
+        'col-0-0': expect.objectContaining({ id: 'bucket1' }),
+        'col-1-1': expect.objectContaining({ id: 'bucket2' }),
+        'col-2-2': expect.objectContaining({ id: 'metric' }),
       });
     });
 
@@ -919,7 +919,7 @@ describe('IndexPattern Data Source', () => {
 
         const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
         expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
-          'col-0-col1': expect.objectContaining({
+          'col-0-0': expect.objectContaining({
             id: 'col1',
           }),
         });
