@@ -62,42 +62,8 @@ const defaultDefaultValues: ApiKeyFormValues = {
   customExpiration: false,
   customPrivileges: false,
   includeMetadata: false,
-  role_descriptors: JSON.stringify(
-    {
-      'role-a': {
-        cluster: ['all'],
-        indices: [
-          {
-            names: ['index-a*'],
-            privileges: ['read'],
-          },
-        ],
-      },
-      'role-b': {
-        cluster: ['all'],
-        indices: [
-          {
-            names: ['index-b*'],
-            privileges: ['all'],
-          },
-        ],
-      },
-    },
-    null,
-    2
-  ),
-  metadata: JSON.stringify(
-    {
-      application: 'my-application',
-      environment: {
-        level: 1,
-        trusted: true,
-        tags: ['dev', 'staging'],
-      },
-    },
-    null,
-    2
-  ),
+  role_descriptors: '{}',
+  metadata: '{}',
 };
 
 export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
@@ -242,7 +208,6 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
           <EuiSpacer />
           <EuiFormFieldset>
             <EuiSwitch
-              id="apiKeyCustom"
               label={i18n.translate(
                 'xpack.security.accountManagement.createApiKey.customPrivilegesLabel',
                 {
@@ -285,7 +250,6 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
           <EuiSpacer />
           <EuiFormFieldset>
             <EuiSwitch
-              name="customExpiration"
               label={i18n.translate(
                 'xpack.security.accountManagement.createApiKey.customExpirationLabel',
                 {
@@ -330,7 +294,6 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
           <EuiSpacer />
           <EuiFormFieldset>
             <EuiSwitch
-              id="apiKeyCustom"
               label={i18n.translate(
                 'xpack.security.accountManagement.createApiKey.includeMetadataLabel',
                 {
