@@ -383,7 +383,7 @@ export class SavedSearchEmbeddable
       this.pushContainerStateParamsToProps(this.searchProps, { forceFetch: true });
   }
 
-  getSavedSearch(): SavedSearch {
+  public getSavedSearch(): SavedSearch {
     return this.savedSearch;
   }
 
