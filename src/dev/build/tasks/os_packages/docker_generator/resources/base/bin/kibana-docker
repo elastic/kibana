@@ -175,6 +175,8 @@ kibana_vars=(
     xpack.actions.rejectUnauthorized
     xpack.actions.maxResponseContentLength
     xpack.actions.responseTimeout
+    xpack.actions.tls.verificationMode
+    xpack.actions.tls.proxyVerificationMode
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
