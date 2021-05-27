@@ -2,10 +2,7 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 kibanaPipeline(timeoutMinutes: 300) {
-  slackNotifications.onFailure(
-    title: "*<${env.BUILD_URL}|[${params.branch}] Package Testing Failure>*",
-    message: "[${params.branch}/${params.commit}] Package Testing Failure",
-  ) {
+  slackNotifications.onFailure {
     ciStats.trackBuild {
       workers.ci(ramDisk: false, name: "package-build", size: 'l', runErrorReporter: false) {
         withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
