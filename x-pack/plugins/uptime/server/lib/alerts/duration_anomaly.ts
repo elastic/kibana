@@ -8,7 +8,7 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { updateState } from './common';
+import { updateState, generateAlertMessage } from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { AnomaliesTableRecord } from '../../../../ml/common/types/anomalies';
@@ -18,6 +18,8 @@ import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../common/lib';
 import { getLatestMonitor } from '../requests/get_latest_monitor';
+
+import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../common/translations';
 
 export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Ping) => {
   return {
@@ -98,13 +100,31 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _li
         dateEnd: 'now',
         monitorId: params.monitorId,
       });
+
       anomalies.forEach((anomaly, index) => {
-        const alertInstance = alertWithLifecycle(DURATION_ANOMALY.id + index);
         const summary = getAnomalySummary(anomaly, monitorInfo);
-        alertInstance.state = {
+
+        const alertInstance = alertWithLifecycle({
+          id: DURATION_ANOMALY.id + index,
+          fields: {
+            'monitor.id': params.monitorId,
+            'url.full': summary.monitorUrl,
+            'anomaly.severity': summary.severity,
+            'anomaly.severity_score': summary.severityScore,
+            'anomaly.start': summary.anomalyStartTimestamp,
+            'anomaly.slowest_response': Math.round(anomaly.actualSort / 1000),
+            'anomaly.expected_response': Math.round(anomaly.typicalSort / 1000),
+            'anomaly.observer_location': summary.observerLocation,
+            reason: generateAlertMessage(
+              CommonDurationAnomalyTranslations.defaultActionMessage,
+              summary
+            ),
+          },
+        });
+        alertInstance.replaceState({
           ...updateState(state, false),
           ...summary,
-        };
+        });
         alertInstance.scheduleActions(DURATION_ANOMALY.id);
       });
     }
