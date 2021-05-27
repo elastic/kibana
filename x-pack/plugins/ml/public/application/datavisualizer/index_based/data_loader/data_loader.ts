@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from 'src/core/public';
 
-import { IndexPattern, KBN_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 import { SavedSearchQuery } from '../../../contexts/ml';
 import { OMIT_FIELDS } from '../../../../../common/constants/field_types';
@@ -17,7 +17,7 @@ import { IndexPatternTitle } from '../../../../../common/types/kibana';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../common/constants/field_histograms';
 
 import { ml } from '../../../services/ml_api_service';
-import { FieldHistogramRequestConfig, FieldRequestConfig } from '../common/request';
+import { FieldHistogramRequestConfig } from '../common/request';
 import { RuntimeMappings } from '../../../../../common/types/fields';
 import {
   ToastNotificationService,
@@ -42,69 +42,6 @@ export class DataLoader {
     this._runtimeMappings = this._indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
     this._indexPatternTitle = indexPattern.title;
     this._toastNotificationsService = toastNotificationServiceProvider(toastNotifications);
-  }
-
-  async loadOverallData(
-    query: string | SavedSearchQuery,
-    samplerShardSize: number,
-    earliest: number | undefined,
-    latest: number | undefined
-  ): Promise<any> {
-    const aggregatableFields: string[] = [];
-    const nonAggregatableFields: string[] = [];
-    this._indexPattern.fields.forEach((field) => {
-      const fieldName = field.displayName !== undefined ? field.displayName : field.name;
-      if (this.isDisplayField(fieldName) === true) {
-        if (field.aggregatable === true && field.type !== KBN_FIELD_TYPES.GEO_SHAPE) {
-          aggregatableFields.push(fieldName);
-        } else {
-          nonAggregatableFields.push(fieldName);
-        }
-      }
-    });
-
-    // Need to find:
-    // 1. List of aggregatable fields that do exist in docs
-    // 2. List of aggregatable fields that do not exist in docs
-    // 3. List of non-aggregatable fields that do exist in docs.
-    // 4. List of non-aggregatable fields that do not exist in docs.
-    const stats = await ml.getVisualizerOverallStats({
-      indexPatternTitle: this._indexPatternTitle,
-      query,
-      timeFieldName: this._indexPattern.timeFieldName,
-      samplerShardSize,
-      earliest,
-      latest,
-      aggregatableFields,
-      nonAggregatableFields,
-      runtimeMappings: this._runtimeMappings,
-    });
-
-    return stats;
-  }
-
-  async loadFieldStats(
-    query: string | SavedSearchQuery,
-    samplerShardSize: number,
-    earliest: number | undefined,
-    latest: number | undefined,
-    fields: FieldRequestConfig[],
-    interval?: number
-  ): Promise<any[]> {
-    const stats = await ml.getVisualizerFieldStats({
-      indexPatternTitle: this._indexPatternTitle,
-      query,
-      timeFieldName: this._indexPattern.timeFieldName,
-      earliest,
-      latest,
-      samplerShardSize,
-      interval,
-      fields,
-      maxExamples: this._maxExamples,
-      runtimeMappings: this._runtimeMappings,
-    });
-
-    return stats;
   }
 
   async loadFieldHistograms(

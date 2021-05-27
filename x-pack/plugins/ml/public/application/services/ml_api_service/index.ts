@@ -35,10 +35,7 @@ import {
   ModelSnapshot,
   IndicesOptions,
 } from '../../../../common/types/anomaly_detection_jobs';
-import {
-  FieldHistogramRequestConfig,
-  FieldRequestConfig,
-} from '../../datavisualizer/index_based/common/request';
+import { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
 import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
 import type { RuntimeMappings } from '../../../../common/types/fields';
@@ -107,11 +104,6 @@ export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
 
 export const ml = mlApiServicesProvider(new HttpService(proxyHttpStart));
 
-// @remove
-// ml.getVisualizerOverallStats
-// ml.getVisualizerFieldStats;
-// ml.getVisualizerFieldHistograms;
-// getTimeFieldRange
 export function mlApiServicesProvider(httpService: HttpService) {
   return {
     getJobs(obj?: { jobId?: string }) {
@@ -462,48 +454,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    getVisualizerFieldStats({
-      indexPatternTitle,
-      query,
-      timeFieldName,
-      earliest,
-      latest,
-      samplerShardSize,
-      interval,
-      fields,
-      maxExamples,
-      runtimeMappings,
-    }: {
-      indexPatternTitle: string;
-      query: any;
-      timeFieldName?: string;
-      earliest?: number;
-      latest?: number;
-      samplerShardSize?: number;
-      interval?: number;
-      fields?: FieldRequestConfig[];
-      maxExamples?: number;
-      runtimeMappings?: RuntimeMappings;
-    }) {
-      const body = JSON.stringify({
-        query,
-        timeFieldName,
-        earliest,
-        latest,
-        samplerShardSize,
-        interval,
-        fields,
-        maxExamples,
-        runtimeMappings,
-      });
-
-      return httpService.http<any>({
-        path: `${basePath()}/data_visualizer/get_field_stats/${indexPatternTitle}`,
-        method: 'POST',
-        body,
-      });
-    },
-
     getVisualizerFieldHistograms({
       indexPatternTitle,
       query,
@@ -526,45 +476,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
       return httpService.http<any>({
         path: `${basePath()}/data_visualizer/get_field_histograms/${indexPatternTitle}`,
-        method: 'POST',
-        body,
-      });
-    },
-
-    getVisualizerOverallStats({
-      indexPatternTitle,
-      query,
-      timeFieldName,
-      earliest,
-      latest,
-      samplerShardSize,
-      aggregatableFields,
-      nonAggregatableFields,
-      runtimeMappings,
-    }: {
-      indexPatternTitle: string;
-      query: any;
-      timeFieldName?: string;
-      earliest?: number;
-      latest?: number;
-      samplerShardSize?: number;
-      aggregatableFields: string[];
-      nonAggregatableFields: string[];
-      runtimeMappings?: RuntimeMappings;
-    }) {
-      const body = JSON.stringify({
-        query,
-        timeFieldName,
-        earliest,
-        latest,
-        samplerShardSize,
-        aggregatableFields,
-        nonAggregatableFields,
-        runtimeMappings,
-      });
-
-      return httpService.http<any>({
-        path: `${basePath()}/data_visualizer/get_overall_stats/${indexPatternTitle}`,
         method: 'POST',
         body,
       });
