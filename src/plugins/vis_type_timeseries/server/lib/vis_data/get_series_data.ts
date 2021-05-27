@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 // not typed yet
 // @ts-expect-error
 import { handleErrorResponse } from './handle_error_response';
+import { getCustomFieldFormatter } from './get_custom_field_formatter';
 import { getAnnotations } from './get_annotations';
 import { handleResponseBody } from './series/handle_response_body';
 import { getSeriesRequestParams } from './series/get_request_params';
@@ -29,13 +30,16 @@ export async function getSeriesData(
   panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
+  const {
+    cachedIndexPatternFetcher,
+    searchStrategyRegistry,
+    indexPatternsService,
+    uiSettings,
+  } = services;
 
-  const strategy = await services.searchStrategyRegistry.getViableStrategy(
-    requestContext,
-    req,
-    panelIndex
-  );
+  const panelIndex = await cachedIndexPatternFetcher(panel.index_pattern);
+
+  const strategy = await searchStrategyRegistry.getViableStrategy(requestContext, req, panelIndex);
 
   if (!strategy) {
     throw new Error(
@@ -56,15 +60,26 @@ export async function getSeriesData(
       getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services)
     );
 
-    const searches = await Promise.all(bodiesPromises);
-    const data = await searchStrategy.search(requestContext, req, searches);
-
-    const handleResponseBodyFn = handleResponseBody(panel, req, {
-      indexPatternsService: services.indexPatternsService,
-      cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
+    const customFieldFormatter = await getCustomFieldFormatter(
+      uiSettings,
+      panelIndex.indexPattern?.fieldFormatMap
+    );
+    const fieldFetchServices = {
+      indexPatternsService,
+      cachedIndexPatternFetcher,
       searchStrategy,
       capabilities,
-    });
+    };
+
+    const handleResponseBodyFn = handleResponseBody(
+      panel,
+      req,
+      fieldFetchServices,
+      customFieldFormatter
+    );
+
+    const searches = await Promise.all(bodiesPromises);
+    const data = await searchStrategy.search(requestContext, req, searches);
 
     const series = await Promise.all(
       data.map(

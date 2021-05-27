@@ -25,6 +25,7 @@ import type {
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
 import type { Panel } from '../../../common/types';
+import { getCustomFieldFormatter } from './get_custom_field_formatter';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -32,13 +33,17 @@ export async function getTableData(
   panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
+  const {
+    cachedIndexPatternFetcher,
+    searchStrategyRegistry,
+    indexPatternsService,
+    esQueryConfig,
+    uiSettings,
+  } = services;
 
-  const strategy = await services.searchStrategyRegistry.getViableStrategy(
-    requestContext,
-    req,
-    panelIndex
-  );
+  const panelIndex = await cachedIndexPatternFetcher(panel.index_pattern);
+
+  const strategy = await searchStrategyRegistry.getViableStrategy(requestContext, req, panelIndex);
 
   if (!strategy) {
     throw new Error(
@@ -51,8 +56,8 @@ export async function getTableData(
   const { searchStrategy, capabilities } = strategy;
 
   const extractFields = createFieldsFetcher(req, {
-    indexPatternsService: services.indexPatternsService,
-    cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
+    indexPatternsService,
+    cachedIndexPatternFetcher,
     searchStrategy,
     capabilities,
   });
@@ -75,10 +80,10 @@ export async function getTableData(
     const body = await buildRequestBody(
       req,
       panel,
-      services.esQueryConfig,
+      esQueryConfig,
       panelIndex,
       capabilities,
-      services.uiSettings
+      uiSettings
     );
 
     const [resp] = await searchStrategy.search(requestContext, req, [
@@ -97,8 +102,15 @@ export async function getTableData(
       []
     );
 
+    const customFieldFormatter = await getCustomFieldFormatter(
+      uiSettings,
+      panelIndex.indexPattern?.fieldFormatMap
+    );
+
     const series = await Promise.all(
-      buckets.map(processBucket(panel, req, searchStrategy, capabilities, extractFields))
+      buckets.map(
+        processBucket(panel, req, searchStrategy, capabilities, extractFields, customFieldFormatter)
+      )
     );
 
     return {

@@ -17,6 +17,7 @@ import {
 import { Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
 import { first, map } from 'rxjs/operators';
+import { setFieldFormats } from './services';
 import { VisTypeTimeseriesConfig } from './config';
 import { getVisData } from './lib/get_vis_data';
 import { UsageCollectionSetup } from '../../usage_collection/server';
@@ -138,5 +139,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     };
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart, { data }: VisTypeTimeseriesPluginStartDependencies) {
+    setFieldFormats(data.fieldFormats);
+  }
 }
