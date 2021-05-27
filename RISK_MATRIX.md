@@ -12,7 +12,7 @@ Below are some general themes to consider for the *Risk Matrix*:
 - What happens when your feature is used in a non-default space or a custom
   space?
 - What happens when Kibana is run in a cluster mode?
-- What happens when plugin you depend on is disabled?
+- What happens when a plugin you depend on is disabled?
 - What happens when feature you depend on is disabled?
 - Is your change working correctly regardless of `kibana.yml` configuration or
   UI Setting configuration? (For example, does it support both
