@@ -69,7 +69,7 @@ export class KbnClientImportExport {
     formData.append('file', objects.map((obj) => JSON.stringify(obj)).join('\n'), 'import.ndjson');
 
     if (options?.space) {
-      this.log.info('creating space required for import', options.space);
+      this.log.info('ensuring space', options.space, 'exits');
 
       try {
         await this.spaces.create({
