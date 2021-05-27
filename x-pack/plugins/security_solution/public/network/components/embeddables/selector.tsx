@@ -24,7 +24,8 @@ export const getDefaultSourcererSelector = () => {
 
   const mapStateToProps = (state: State): DefaultSourcererSelector => {
     const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
-    const scope = getScopesSelector(state)[SourcererScopeName.default];
+    // SourcererScopeName.networkMap
+    const scope = getScopesSelector(state)[SourcererScopeName.timeline];
 
     return {
       kibanaIndexPatterns,

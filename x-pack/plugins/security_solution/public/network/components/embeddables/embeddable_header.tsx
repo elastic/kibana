@@ -8,6 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { Sourcerer } from '../../../common/components/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 const Header = styled.header.attrs(({ className }) => ({
   className: `siemEmbeddable__header ${className}`,
@@ -25,12 +27,17 @@ export interface EmbeddableHeaderProps {
 export const EmbeddableHeader = React.memo<EmbeddableHeaderProps>(({ children, title }) => (
   <Header>
     <EuiFlexGroup alignItems="center" gutterSize="m">
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiTitle size="xxxs">
           <h6 data-test-subj="header-embeddable-title">{title}</h6>
         </EuiTitle>
       </EuiFlexItem>
-
+      <EuiFlexItem>
+        <div>
+          {/*  SourcererScopeName.networkMap */}
+          <Sourcerer scope={SourcererScopeName.timeline} />
+        </div>
+      </EuiFlexItem>
       {children && (
         <EuiFlexItem data-test-subj="header-embeddable-supplements" grow={false}>
           {children}
