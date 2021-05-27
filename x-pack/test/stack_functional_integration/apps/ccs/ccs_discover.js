@@ -261,7 +261,7 @@ export default ({ getService, getPageObjects }) => {
         log.debug('id: ' + signalsId);
       });
 
-      before('Prepare data:.monitoring-es-*', async function () {
+      before('Prepare data:metricbeat-*', async function () {
         log.info('Create index');
         await esArchiver.load('metricbeat');
 
@@ -271,8 +271,7 @@ export default ({ getService, getPageObjects }) => {
           .set('kbn-xsrf', 'true')
           .send({
             index_pattern: {
-              title: 'data:.monitoring-es-*',
-              timeFieldName: 'timestamp',
+              title: 'data:metricbeat-*',
             },
             override: true,
           })
@@ -292,10 +291,9 @@ export default ({ getService, getPageObjects }) => {
             interval: '10s',
             name: 'CCS_Detection_test',
             type: 'query',
-            from: 'now-1d',
-            index: ['data:.monitoring-es-*'],
-            timestamp_override: 'timestamp',
-            query: 'type:shards',
+            from: 'now-1y',
+            index: ['data:metricbeat-*'],
+            query: '*:*',
             language: 'kuery',
             enabled: true,
           })
@@ -314,7 +312,7 @@ export default ({ getService, getPageObjects }) => {
         }
       });
 
-      after('Clean up data:.monitoring-es-*', async function () {
+      after('Clean up data:metricbeat-*', async function () {
         if (dataId !== undefined) {
           log.info('Delete index pattern');
           log.debug('id: ' + dataId);
@@ -351,10 +349,10 @@ export default ({ getService, getPageObjects }) => {
         log.info('Check if any alert got to .siem-signals-*');
         await PageObjects.common.navigateToApp('discover', { insertTimestamp: false });
         await PageObjects.discover.selectIndexPattern('.siem-signals-*');
-        await retry.tryForTime(40000, async () => {
+        await retry.tryForTime(30000, async () => {
           const hitCount = await PageObjects.discover.getHitCount();
           log.debug('### hit count = ' + hitCount);
-          expect(hitCount).to.be.greaterThan('0');
+          expect(hitCount).to.be('100');
         });
       });
     });
