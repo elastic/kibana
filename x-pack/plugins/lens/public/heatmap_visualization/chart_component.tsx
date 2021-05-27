@@ -115,11 +115,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         column: xAxisColumnIndex,
         value: x,
       },
-      {
-        row: table.rows.findIndex((r) => r[yAxisColumn.id] === y),
-        column: yAxisColumnIndex,
-        value: y,
-      },
+      ...(yAxisColumn
+        ? [
+            {
+              row: table.rows.findIndex((r) => r[yAxisColumn.id] === y),
+              column: yAxisColumnIndex,
+              value: y,
+            },
+          ]
+        : []),
     ];
 
     const context: LensFilterEvent['data'] = {
@@ -149,13 +153,17 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       };
       onSelectRange(context);
     } else {
-      const points = (y as string[]).map((v) => {
-        return {
-          row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
-          column: yAxisColumnIndex,
-          value: v,
-        };
-      });
+      const points: Array<{ row: number; column: number; value: string | number }> = [];
+
+      if (yAxisColumn) {
+        (y as string[]).forEach((v) => {
+          points.push({
+            row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
+            column: yAxisColumnIndex,
+            value: v,
+          });
+        });
+      }
 
       (x as string[]).forEach((v) => {
         points.push({
