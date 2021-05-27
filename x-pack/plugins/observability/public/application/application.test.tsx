@@ -9,6 +9,7 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from 'src/core/public';
+import { KibanaPageTemplate } from '../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from './';
@@ -59,6 +60,7 @@ describe('renderApp', () => {
         plugins,
         appMountParameters: params,
         observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+        ObservabilityPageTemplate: KibanaPageTemplate,
       });
       unmount();
     }).not.toThrowError();
