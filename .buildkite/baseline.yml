@@ -12,13 +12,8 @@ steps:
     agents:
       queue: baseline
 
-  - command: .buildkite/scripts/steps/baseline_ts_refs.sh
-    label: Build TS Refs
-    agents:
-      queue: baseline-small
-
-  - command: .buildkite/scripts/steps/baseline_public_api_docs.sh
-    label: Check Public API Docs
+  - command: .buildkite/scripts/steps/baseline_ts_refs_api_docs.sh
+    label: Build TS Refs and Check Public API Docs
     agents:
       queue: baseline-small
 
