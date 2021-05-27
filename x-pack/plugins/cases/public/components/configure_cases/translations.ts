@@ -84,34 +84,30 @@ export const CASE_CLOSURE_OPTIONS_CLOSED_INCIDENT = i18n.translate(
     defaultMessage: 'Automatically close cases when incident is closed in external system',
   }
 );
-export const FIELD_MAPPING_TITLE = (thirdPartyName: string): string => {
-  return i18n.translate('xpack.cases.configureCases.fieldMappingTitle', {
+export const FIELD_MAPPING_TITLE = (thirdPartyName: string): string =>
+  i18n.translate('xpack.cases.configureCases.fieldMappingTitle', {
     values: { thirdPartyName },
     defaultMessage: '{ thirdPartyName } field mappings',
   });
-};
 
-export const FIELD_MAPPING_DESC = (thirdPartyName: string): string => {
-  return i18n.translate('xpack.cases.configureCases.fieldMappingDesc', {
+export const FIELD_MAPPING_DESC = (thirdPartyName: string): string =>
+  i18n.translate('xpack.cases.configureCases.fieldMappingDesc', {
     values: { thirdPartyName },
     defaultMessage:
       'Map Case fields to { thirdPartyName } fields when pushing data to { thirdPartyName }. Field mappings require an established connection to { thirdPartyName }.',
   });
-};
 
-export const FIELD_MAPPING_DESC_ERR = (thirdPartyName: string): string => {
-  return i18n.translate('xpack.cases.configureCases.fieldMappingDescErr', {
+export const FIELD_MAPPING_DESC_ERR = (thirdPartyName: string): string =>
+  i18n.translate('xpack.cases.configureCases.fieldMappingDescErr', {
     values: { thirdPartyName },
     defaultMessage:
       'Field mappings require an established connection to { thirdPartyName }. Please check your connection credentials.',
   });
-};
-export const EDIT_FIELD_MAPPING_TITLE = (thirdPartyName: string): string => {
-  return i18n.translate('xpack.cases.configureCases.editFieldMappingTitle', {
+export const EDIT_FIELD_MAPPING_TITLE = (thirdPartyName: string): string =>
+  i18n.translate('xpack.cases.configureCases.editFieldMappingTitle', {
     values: { thirdPartyName },
     defaultMessage: 'Edit { thirdPartyName } field mappings',
   });
-};
 
 export const FIELD_MAPPING_FIRST_COL = i18n.translate(
   'xpack.cases.configureCases.fieldMappingFirstCol',
@@ -120,12 +116,11 @@ export const FIELD_MAPPING_FIRST_COL = i18n.translate(
   }
 );
 
-export const FIELD_MAPPING_SECOND_COL = (thirdPartyName: string): string => {
-  return i18n.translate('xpack.cases.configureCases.fieldMappingSecondCol', {
+export const FIELD_MAPPING_SECOND_COL = (thirdPartyName: string): string =>
+  i18n.translate('xpack.cases.configureCases.fieldMappingSecondCol', {
     values: { thirdPartyName },
     defaultMessage: '{ thirdPartyName } field',
   });
-};
 
 export const FIELD_MAPPING_THIRD_COL = i18n.translate(
   'xpack.cases.configureCases.fieldMappingThirdCol',
@@ -193,35 +188,32 @@ export const COMMENT = i18n.translate('xpack.cases.configureCases.commentMapping
   defaultMessage: 'Comments',
 });
 
-export const NO_FIELDS_ERROR = (connectorName: string): string => {
-  return i18n.translate('xpack.cases.configureCases.noFieldsError', {
+export const NO_FIELDS_ERROR = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.noFieldsError', {
     values: { connectorName },
     defaultMessage:
       'No { connectorName } fields found. Please check your { connectorName } connector settings or your { connectorName } instance settings to resolve.',
   });
-};
 
-export const BLANK_MAPPINGS = (connectorName: string): string => {
-  return i18n.translate('xpack.cases.configureCases.blankMappings', {
+export const BLANK_MAPPINGS = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.blankMappings', {
     values: { connectorName },
     defaultMessage: 'At least one field needs to be mapped to { connectorName }',
   });
-};
 
-export const REQUIRED_MAPPINGS = (connectorName: string, fields: string): string => {
-  return i18n.translate('xpack.cases.configureCases.requiredMappings', {
+export const REQUIRED_MAPPINGS = (connectorName: string, fields: string): string =>
+  i18n.translate('xpack.cases.configureCases.requiredMappings', {
     values: { connectorName, fields },
     defaultMessage:
       'At least one Case field needs to be mapped to the following required { connectorName } fields: { fields }',
   });
-};
+
 export const UPDATE_FIELD_MAPPINGS = i18n.translate('xpack.cases.configureCases.updateConnector', {
   defaultMessage: 'Update field mappings',
 });
 
-export const UPDATE_SELECTED_CONNECTOR = (connectorName: string): string => {
-  return i18n.translate('xpack.cases.configureCases.updateSelectedConnector', {
+export const UPDATE_SELECTED_CONNECTOR = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.updateSelectedConnector', {
     values: { connectorName },
     defaultMessage: 'Update { connectorName }',
   });
-};

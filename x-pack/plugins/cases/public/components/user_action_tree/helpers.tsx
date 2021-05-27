@@ -32,20 +32,18 @@ interface LabelTitle {
   field: string;
 }
 
-const getStatusTitle = (id: string, status: CaseStatuses) => {
-  return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems={'center'}
-      data-test-subj={`${id}-user-action-status-title`}
-    >
-      <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <Status type={status} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+const getStatusTitle = (id: string, status: CaseStatuses) => (
+  <EuiFlexGroup
+    gutterSize="s"
+    alignItems={'center'}
+    data-test-subj={`${id}-user-action-status-title`}
+  >
+    <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <Status type={status} />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 const isStatusValid = (status: string): status is CaseStatuses =>
   Object.prototype.hasOwnProperty.call(statuses, status);
@@ -221,50 +219,48 @@ export const getAlertAttachment = ({
   loadingAlertData: boolean;
   ruleId?: string | null;
   ruleName?: string | null;
-}): EuiCommentProps => {
-  return {
-    username: (
-      <UserActionUsernameWithAvatar
-        username={action.actionBy.username}
-        fullName={action.actionBy.fullName}
-      />
-    ),
-    className: 'comment-alert',
-    type: 'update',
-    event: (
-      <AlertCommentEvent
-        alertId={alertId}
-        getRuleDetailsHref={getRuleDetailsHref}
-        loadingAlertData={loadingAlertData}
-        onRuleDetailsClick={onRuleDetailsClick}
-        ruleId={ruleId}
-        ruleName={ruleName}
-        commentType={CommentType.alert}
-      />
-    ),
-    'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
-    timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-    timelineIcon: 'bell',
-    actions: (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <UserActionCopyLink
-            id={action.actionId}
-            getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UserActionShowAlert
-            id={action.actionId}
-            alertId={alertId}
-            index={index}
-            onShowAlertDetails={onShowAlertDetails}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-  };
-};
+}): EuiCommentProps => ({
+  username: (
+    <UserActionUsernameWithAvatar
+      username={action.actionBy.username}
+      fullName={action.actionBy.fullName}
+    />
+  ),
+  className: 'comment-alert',
+  type: 'update',
+  event: (
+    <AlertCommentEvent
+      alertId={alertId}
+      getRuleDetailsHref={getRuleDetailsHref}
+      loadingAlertData={loadingAlertData}
+      onRuleDetailsClick={onRuleDetailsClick}
+      ruleId={ruleId}
+      ruleName={ruleName}
+      commentType={CommentType.alert}
+    />
+  ),
+  'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+  timelineIcon: 'bell',
+  actions: (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <UserActionCopyLink
+          id={action.actionId}
+          getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <UserActionShowAlert
+          id={action.actionId}
+          alertId={alertId}
+          index={index}
+          onShowAlertDetails={onShowAlertDetails}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ),
+});
 
 export const toStringArray = (value: unknown): string[] => {
   if (Array.isArray(value)) {
@@ -319,40 +315,38 @@ export const getGeneratedAlertsAttachment = ({
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
   ruleId: string;
   ruleName: string;
-}): EuiCommentProps => {
-  return {
-    username: <EuiIcon type="logoSecurity" size="m" />,
-    className: 'comment-alert',
-    type: 'update',
-    event: (
-      <AlertCommentEvent
-        alertId={alertIds[0]}
-        getRuleDetailsHref={getRuleDetailsHref}
-        onRuleDetailsClick={onRuleDetailsClick}
-        ruleId={ruleId}
-        ruleName={ruleName}
-        alertsCount={alertIds.length}
-        commentType={CommentType.generatedAlert}
-      />
-    ),
-    'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
-    timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-    timelineIcon: 'bell',
-    actions: (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <UserActionCopyLink
-            getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-            id={action.actionId}
-          />
-        </EuiFlexItem>
-        {renderInvestigateInTimelineActionComponent ? (
-          <EuiFlexItem>{renderInvestigateInTimelineActionComponent(alertIds)}</EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    ),
-  };
-};
+}): EuiCommentProps => ({
+  username: <EuiIcon type="logoSecurity" size="m" />,
+  className: 'comment-alert',
+  type: 'update',
+  event: (
+    <AlertCommentEvent
+      alertId={alertIds[0]}
+      getRuleDetailsHref={getRuleDetailsHref}
+      onRuleDetailsClick={onRuleDetailsClick}
+      ruleId={ruleId}
+      ruleName={ruleName}
+      alertsCount={alertIds.length}
+      commentType={CommentType.generatedAlert}
+    />
+  ),
+  'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+  timelineIcon: 'bell',
+  actions: (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <UserActionCopyLink
+          getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+          id={action.actionId}
+        />
+      </EuiFlexItem>
+      {renderInvestigateInTimelineActionComponent ? (
+        <EuiFlexItem>{renderInvestigateInTimelineActionComponent(alertIds)}</EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
+  ),
+});
 
 interface Signal {
   rule: {

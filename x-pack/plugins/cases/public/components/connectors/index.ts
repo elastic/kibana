@@ -50,8 +50,6 @@ class CaseConnectors {
 
 const caseConnectors = new CaseConnectors();
 
-export const getCaseConnectors = (): GetCaseConnectorsReturn => {
-  return {
-    caseConnectorsRegistry: caseConnectors.registry(),
-  };
-};
+export const getCaseConnectors = (): GetCaseConnectorsReturn => ({
+  caseConnectorsRegistry: caseConnectors.registry(),
+});

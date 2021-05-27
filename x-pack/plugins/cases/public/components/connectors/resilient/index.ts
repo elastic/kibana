@@ -13,12 +13,10 @@ import * as i18n from './translations';
 
 export * from './types';
 
-export const getCaseConnector = (): CaseConnector<ResilientFieldsType> => {
-  return {
-    id: '.resilient',
-    fieldsComponent: lazy(() => import('./case_fields')),
-  };
-};
+export const getCaseConnector = (): CaseConnector<ResilientFieldsType> => ({
+  id: '.resilient',
+  fieldsComponent: lazy(() => import('./case_fields')),
+});
 
 export const fieldLabels = {
   incidentTypes: i18n.INCIDENT_TYPES_LABEL,

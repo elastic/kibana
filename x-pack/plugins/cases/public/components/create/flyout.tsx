@@ -44,27 +44,25 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
   onSuccess,
   afterCaseCreated,
   onCloseFlyout,
-}) => {
-  return (
-    <StyledFlyout onClose={onCloseFlyout} data-test-subj="create-case-flyout">
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>{i18n.CREATE_TITLE}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <FormWrapper>
-          <FormContext onSuccess={onSuccess} afterCaseCreated={afterCaseCreated}>
-            <CreateCaseForm withSteps={false} />
-            <Container>
-              <SubmitCaseButton />
-            </Container>
-          </FormContext>
-        </FormWrapper>
-      </EuiFlyoutBody>
-    </StyledFlyout>
-  );
-};
+}) => (
+  <StyledFlyout onClose={onCloseFlyout} data-test-subj="create-case-flyout">
+    <EuiFlyoutHeader hasBorder>
+      <EuiTitle size="m">
+        <h2>{i18n.CREATE_TITLE}</h2>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <FormWrapper>
+        <FormContext onSuccess={onSuccess} afterCaseCreated={afterCaseCreated}>
+          <CreateCaseForm withSteps={false} />
+          <Container>
+            <SubmitCaseButton />
+          </Container>
+        </FormContext>
+      </FormWrapper>
+    </EuiFlyoutBody>
+  </StyledFlyout>
+);
 
 export const CreateCaseFlyout = memo(CreateCaseFlyoutComponent);
 

@@ -31,28 +31,23 @@ const UserActionContentToolbarComponent = ({
   isLoading,
   onEdit,
   onQuote,
-}: UserActionContentToolbarProps) => {
-  return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <UserActionCopyLink
-          id={id}
-          getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <UserActionPropertyActions
-          id={id}
-          editLabel={editLabel}
-          quoteLabel={quoteLabel}
-          disabled={disabled}
-          isLoading={isLoading}
-          onEdit={onEdit}
-          onQuote={onQuote}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+}: UserActionContentToolbarProps) => (
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <UserActionCopyLink id={id} getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId} />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <UserActionPropertyActions
+        id={id}
+        editLabel={editLabel}
+        quoteLabel={quoteLabel}
+        disabled={disabled}
+        isLoading={isLoading}
+        onEdit={onEdit}
+        onQuote={onQuote}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 export const UserActionContentToolbar = memo(UserActionContentToolbarComponent);

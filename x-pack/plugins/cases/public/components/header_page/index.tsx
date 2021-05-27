@@ -88,41 +88,39 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   title,
   titleNode,
   ...rest
-}) => {
-  return (
-    <Header border={border} {...rest}>
-      <EuiFlexGroup alignItems="center">
-        <FlexItem>
-          {backOptions && (
-            <LinkBack>
-              <LinkIcon
-                dataTestSubj={backOptions.dataTestSubj}
-                onClick={backOptions.onClick}
-                href={backOptions.href}
-                iconType="arrowLeft"
-              >
-                {backOptions.text}
-              </LinkIcon>
-            </LinkBack>
-          )}
-
-          {!backOptions && backComponent && <>{backComponent}</>}
-
-          {titleNode || <Title title={title} badgeOptions={badgeOptions} />}
-
-          {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
-          {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
-          {border && isLoading && <EuiProgress size="xs" color="accent" />}
-        </FlexItem>
-
-        {children && (
-          <FlexItem data-test-subj="header-page-supplements" grow={false}>
-            {children}
-          </FlexItem>
+}) => (
+  <Header border={border} {...rest}>
+    <EuiFlexGroup alignItems="center">
+      <FlexItem>
+        {backOptions && (
+          <LinkBack>
+            <LinkIcon
+              dataTestSubj={backOptions.dataTestSubj}
+              onClick={backOptions.onClick}
+              href={backOptions.href}
+              iconType="arrowLeft"
+            >
+              {backOptions.text}
+            </LinkIcon>
+          </LinkBack>
         )}
-      </EuiFlexGroup>
-    </Header>
-  );
-};
+
+        {!backOptions && backComponent && <>{backComponent}</>}
+
+        {titleNode || <Title title={title} badgeOptions={badgeOptions} />}
+
+        {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
+        {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
+        {border && isLoading && <EuiProgress size="xs" color="accent" />}
+      </FlexItem>
+
+      {children && (
+        <FlexItem data-test-subj="header-page-supplements" grow={false}>
+          {children}
+        </FlexItem>
+      )}
+    </EuiFlexGroup>
+  </Header>
+);
 
 export const HeaderPage = React.memo(HeaderPageComponent);

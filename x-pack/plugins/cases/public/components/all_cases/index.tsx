@@ -15,9 +15,7 @@ export interface AllCasesProps {
   userCanCrud: boolean;
 }
 
-export const AllCases: React.FC<AllCasesProps> = (props) => {
-  return <AllCasesGeneric {...props} />;
-};
+export const AllCases: React.FC<AllCasesProps> = (props) => <AllCasesGeneric {...props} />;
 
 // eslint-disable-next-line import/no-default-export
 export { AllCases as default };
