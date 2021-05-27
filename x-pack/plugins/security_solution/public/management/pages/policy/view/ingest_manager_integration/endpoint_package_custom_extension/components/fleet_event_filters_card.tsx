@@ -11,10 +11,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  EXCEPTION_LIST_URL,
-} from '@kbn/securitysolution-list-constants';
-import {
   PackageCustomExtensionComponentProps,
   pagePathGetters,
 } from '../../../../../../../../../fleet/public';
@@ -25,6 +21,7 @@ import { PLUGIN_ID as FLEET_PLUGIN_ID } from '../../../../../../../../../fleet/c
 import { MANAGEMENT_APP_ID } from '../../../../../../common/constants';
 import { LinkWithIcon } from './link_with_icon';
 import { ExceptionItemsSummary } from './exception_items_summary';
+import { EventFiltersHttpService } from '../../../../../event_filters/service';
 
 export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(({ pkgkey }) => {
   const {
@@ -36,19 +33,15 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
 
   const [stats, setStats] = useState<GetExceptionSummaryResponse | undefined>();
   const eventFiltersListUrlPath = getEventFiltersListPath();
+  const eventFiltersApi = useMemo(() => new EventFiltersHttpService(http), [http]);
 
   useEffect(() => {
     const fetchStats = async () => {
-      const summary = await http.get(`${EXCEPTION_LIST_URL}/_summary`, {
-        query: {
-          list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
-          namespace_type: 'agnostic',
-        },
-      });
+      const summary = await eventFiltersApi.getSummary();
       setStats(summary);
     };
     fetchStats();
-  }, [http]);
+  }, [eventFiltersApi]);
 
   const eventFiltersRouteState = useMemo(() => {
     const fleetPackageCustomUrlPath = `#${pagePathGetters.integration_details_custom({ pkgkey })}`;
