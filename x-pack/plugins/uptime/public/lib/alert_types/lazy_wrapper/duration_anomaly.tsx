@@ -11,12 +11,12 @@ import { CoreStart } from 'kibana/public';
 import { store } from '../../../state';
 import { AnomalyAlertComponent } from '../../../components/overview/alerts/anomaly_alert/anomaly_alert';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { ClientPluginsSetup } from '../../../apps/plugin';
+import { ClientPluginsStart } from '../../../apps/plugin';
 import { kibanaService } from '../../../state/kibana_service';
 
 interface Props {
   core: CoreStart;
-  plugins: ClientPluginsSetup;
+  plugins: ClientPluginsStart;
   params: any;
 }
 

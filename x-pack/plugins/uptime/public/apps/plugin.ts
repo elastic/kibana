@@ -99,15 +99,15 @@ export class UptimePlugin
 
     const { observabilityRuleTypeRegistry } = plugins.observability;
 
-    core.getStartServices().then(([coreStart]) => {
+    core.getStartServices().then(([coreStart, clientPluginsStart]) => {
       alertTypeInitializers.forEach((init) => {
         const alertInitializer = init({
           core: coreStart,
-          plugins,
+          plugins: clientPluginsStart,
         });
         if (
-          plugins.triggersActionsUi &&
-          !plugins.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
+          clientPluginsStart.triggersActionsUi &&
+          !clientPluginsStart.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
         ) {
           observabilityRuleTypeRegistry.register(alertInitializer);
         }

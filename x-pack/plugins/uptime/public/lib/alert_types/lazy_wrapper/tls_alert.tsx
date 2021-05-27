@@ -10,13 +10,13 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { CoreStart } from 'kibana/public';
 import { store } from '../../../state';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { ClientPluginsSetup } from '../../../apps/plugin';
+import { ClientPluginsStart } from '../../../apps/plugin';
 import { AlertTls } from '../../../components/overview/alerts/alerts_containers/alert_tls';
 import { kibanaService } from '../../../state/kibana_service';
 
 interface Props {
   core: CoreStart;
-  plugins: ClientPluginsSetup;
+  plugins: ClientPluginsStart;
   params: any;
 }
 
