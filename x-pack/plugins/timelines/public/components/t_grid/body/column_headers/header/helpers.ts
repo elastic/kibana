@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  ColumnHeaderOptions,
-  Direction,
-  assertUnreachable,
-} from '../../../../../../common';
+import { ColumnHeaderOptions, Direction } from '../../../../../../common';
+import { assertUnreachable } from '../../../../../../common/utility_types';
 import { Sort, SortDirection } from '../../sort';
 
 interface GetNewSortDirectionOnClickParams {

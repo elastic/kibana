@@ -16,7 +16,7 @@ import {
   ARIA_ROWINDEX_ATTRIBUTE,
   FIRST_ARIA_INDEX,
   onKeyDownFocusHandler,
-} from '@kbn/securitysolution-t-grid';
+} from '../../../../common';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import {
   CellValueElementProps,
