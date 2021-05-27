@@ -20,7 +20,7 @@ Below are some general themes to consider for the *Risk Matrix*:
 - What happens when a third party integration you depend on is not responding?
 - How is authentication handled with third party services?
 - Does the feature work in Elastic Cloud?
-- Does the feautre create a setting that needs to be exposed, or configured
+- Does the feature create a setting that needs to be exposed, or configured
   differently than the default, on the Elastic Cloud?
 - Is there a significant performance impact that may affect Cloud Kibana
   instances?
