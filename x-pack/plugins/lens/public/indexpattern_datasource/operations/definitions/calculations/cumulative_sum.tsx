@@ -13,11 +13,12 @@ import {
   getErrorsForDateReference,
   dateBasedOperationToExpression,
   hasDateField,
+  buildLabelFunction,
 } from './utils';
 import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
-const ofName = (name?: string) => {
+const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {
     defaultMessage: 'Cumulative sum of {name}',
     values: {
@@ -28,7 +29,7 @@ const ofName = (name?: string) => {
         }),
     },
   });
-};
+});
 
 export type CumulativeSumIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -67,7 +68,9 @@ export const cumulativeSumOperation: OperationDefinition<
     return ofName(
       ref && 'sourceField' in ref
         ? indexPattern.getFieldByName(ref.sourceField)?.displayName
-        : undefined
+        : undefined,
+      undefined,
+      column.timeShift
     );
   },
   toExpression: (layer, columnId) => {
@@ -79,7 +82,9 @@ export const cumulativeSumOperation: OperationDefinition<
       label: ofName(
         ref && 'sourceField' in ref
           ? indexPattern.getFieldByName(ref.sourceField)?.displayName
-          : undefined
+          : undefined,
+        undefined,
+        previousColumn?.timeShift
       ),
       dataType: 'number',
       operationType: 'cumulative_sum',
