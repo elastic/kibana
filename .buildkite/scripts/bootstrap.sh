@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 if [[ ! -f "target/.bootstrap-cache" ]]; then
   echo "--- yarn install and bootstrap"
   yarn kbn bootstrap --verbose
