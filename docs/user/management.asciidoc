@@ -24,10 +24,6 @@ and enrichments on your data.
 | {logstash-ref}/logstash-centralized-pipeline-management.html[Logstash Pipelines]
 | Create, edit, and delete your Logstash pipeline configurations.
 
-| <<managing-beats, Beats Central Management>>
-| Manage your Beats configurations in a central location and
-quickly deploy configuration changes to all Beats running across your enterprise.
-
 
 |===
 
@@ -181,8 +177,6 @@ next major version of {es}, and then reindex, if needed.
 --
 
 include::{kib-repo-dir}/management/advanced-options.asciidoc[]
-
-include::{kib-repo-dir}/management/managing-beats.asciidoc[]
 
 include::{kib-repo-dir}/management/action-types.asciidoc[]
 

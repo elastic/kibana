@@ -4364,14 +4364,14 @@
               "plugin": "dashboard",
               "link": {
                 "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx",
-                "lineNumber": 87
+                "lineNumber": 92
               }
             },
             {
               "plugin": "dashboard",
               "link": {
                 "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx",
-                "lineNumber": 172
+                "lineNumber": 177
               }
             },
             {
