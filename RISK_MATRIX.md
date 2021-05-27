@@ -29,7 +29,7 @@ Below are some general themes to consider for the *Risk Matrix*:
 - Are there performance risks associated with your feature? Does it potentially access or create:
   (1) many fields; (2) many indices; (3) lots of data; (4) lots of saved
   objects; (5) large saved objects.
-- Will leaving browser running overnight not have negative impacts ot the page
+- Will leaving the browser running overnight have negative impacts on the page
   and server performance?
 - Will your feature still work if Kibana is run behind a reverse proxy?
 - Does your feature affect other plugins?
