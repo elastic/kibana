@@ -18,7 +18,10 @@ import {
 } from './lists';
 import { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
-import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
+import {
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 
 describe('artifacts lists', () => {
   let mockExceptionClient: ExceptionListClient;
