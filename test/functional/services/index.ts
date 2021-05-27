@@ -8,40 +8,40 @@
 
 import { services as commonServiceProviders } from '../../common/services';
 
-import { AppsMenuProvider } from './apps_menu';
+import { AppsMenuService } from './apps_menu';
 import {
   BrowserProvider,
   FailureDebuggingProvider,
   FindProvider,
-  ScreenshotsProvider,
-  SnapshotsProvider,
+  ScreenshotsService,
+  SnapshotsService,
   TestSubjects,
 } from './common';
-import { ComboBoxProvider } from './combo_box';
+import { ComboBoxService } from './combo_box';
 import {
-  DashboardAddPanelProvider,
-  DashboardReplacePanelProvider,
-  DashboardExpectProvider,
-  DashboardPanelActionsProvider,
-  DashboardVisualizationProvider,
+  DashboardAddPanelService,
+  DashboardReplacePanelService,
+  DashboardExpectService,
+  DashboardPanelActionsService,
+  DashboardVisualizationsService,
 } from './dashboard';
 import { DocTableService } from './doc_table';
 import { EmbeddingProvider } from './embedding';
 import { FilterBarService } from './filter_bar';
-import { FlyoutProvider } from './flyout';
+import { FlyoutService } from './flyout';
 import { GlobalNavService } from './global_nav';
-import { InspectorProvider } from './inspector';
+import { InspectorService } from './inspector';
 import { FieldEditorService } from './field_editor';
-import { ManagementMenuProvider } from './management';
+import { ManagementMenuService } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
-import { ToastsProvider } from './toasts';
+import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
 import {
-  PieChartProvider,
-  ElasticChartProvider,
-  VegaDebugInspectorViewProvider,
+  PieChartService,
+  ElasticChartService,
+  VegaDebugInspectorViewService,
 } from './visualizations';
 import { ListingTableService } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
@@ -58,32 +58,32 @@ export const services = {
   find: FindProvider,
   testSubjects: TestSubjects,
   docTable: DocTableService,
-  screenshots: ScreenshotsProvider,
-  snapshots: SnapshotsProvider,
-  dashboardVisualizations: DashboardVisualizationProvider,
-  dashboardExpect: DashboardExpectProvider,
+  screenshots: ScreenshotsService,
+  snapshots: SnapshotsService,
   failureDebugging: FailureDebuggingProvider,
   listingTable: ListingTableService,
-  dashboardAddPanel: DashboardAddPanelProvider,
-  dashboardReplacePanel: DashboardReplacePanelProvider,
-  dashboardPanelActions: DashboardPanelActionsProvider,
-  flyout: FlyoutProvider,
-  comboBox: ComboBoxProvider,
+  dashboardVisualizations: DashboardVisualizationsService,
+  dashboardExpect: DashboardExpectService,
+  dashboardAddPanel: DashboardAddPanelService,
+  dashboardReplacePanel: DashboardReplacePanelService,
+  dashboardPanelActions: DashboardPanelActionsService,
+  flyout: FlyoutService,
+  comboBox: ComboBoxService,
   dataGrid: DataGridService,
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
   browser: BrowserProvider,
-  pieChart: PieChartProvider,
-  inspector: InspectorProvider,
+  pieChart: PieChartService,
+  inspector: InspectorService,
   fieldEditor: FieldEditorService,
-  vegaDebugInspector: VegaDebugInspectorViewProvider,
-  appsMenu: AppsMenuProvider,
+  vegaDebugInspector: VegaDebugInspectorViewService,
+  appsMenu: AppsMenuService,
   globalNav: GlobalNavService,
-  toasts: ToastsProvider,
+  toasts: ToastsService,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
-  elasticChart: ElasticChartProvider,
+  elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
-  managementMenu: ManagementMenuProvider,
+  managementMenu: ManagementMenuService,
   monacoEditor: MonacoEditorProvider,
   MenuToggle: MenuToggleProvider,
 };
