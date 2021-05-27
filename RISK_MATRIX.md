@@ -13,7 +13,7 @@ Below are some general themes to consider for the *Risk Matrix*:
   space?
 - What happens when Kibana is run in a cluster mode?
 - What happens when a plugin you depend on is disabled?
-- What happens when feature you depend on is disabled?
+- What happens when a feature you depend on is disabled?
 - Is your change working correctly regardless of `kibana.yml` configuration or
   UI Setting configuration? (For example, does it support both
   `state:storeInSessionStorage` UI setting states?)
