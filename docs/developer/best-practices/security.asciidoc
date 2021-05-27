@@ -19,8 +19,6 @@ header.
 using these at all costs:
 ** *React:* https://reactjs.org/docs/dom-elements.html#dangerouslysetinnerhtml[`dangerouslySetInnerHtml`].
 ** *Browser DOM:* `Element.innerHTML` and `Element.outerHTML`.
-** *jQuery:* `$.html`, `$.append`, `$.appendTo`, `$.prepend`, and `$.prependTo`. Consider using `$.text` instead, which is a safe
-alternative to these functions.
 * If using any of the aforementioned unsafe functions/assignments is absolutely necessary, follow
 https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#xss-prevention-rules[these XSS prevention
 rules] to ensure that user input is not inserted into unsafe locations and to make sure that it is escaped properly.
@@ -55,6 +53,7 @@ ESLint rules to restrict vulnerable functions, and by hooking into / hardening u
 * Ensure no usages of dynamic `require`.
 * Check for usages of templating libraries; ensure that user provided input isn't influencing the template and is only used as data for
 rendering the template.
+* Take extra caution when spawning child processes with any user input or parameters that are otherwise user-controlled.
 
 === Prototype Pollution ===
 
@@ -126,3 +125,5 @@ error messages in HTTP 5xx response payloads.
 
 * When writing your code, look for instances where sensitive information may be accidentally revealed, particularly in error messages, in
 the UI, and in URL parameters that are exposed to users.
+* Make sure that sensitive request data is not forwarded to external resources. For example, copying client request headers and using them
+to make an another request could accidentally expose the user's session cookie.
