@@ -101,7 +101,7 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
   >
     <EuiSwitch
       checked={false}
-      disabled={true}
+      disabled={false}
       label={
         <FormattedMessage
           defaultMessage="Use short suffix"

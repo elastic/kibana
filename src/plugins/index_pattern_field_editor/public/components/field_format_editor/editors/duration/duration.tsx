@@ -187,7 +187,9 @@ export class DurationFormatEditor extends DefaultFormatEditor<
             )}
             <EuiFormRow>
               <EuiSwitch
-                disabled={!Boolean(formatParams.showSuffix)}
+                disabled={
+                  !Boolean(formatParams.showSuffix) && !(format as DurationFormat).isHumanPrecise()
+                }
                 label={
                   <FormattedMessage
                     id="indexPatternFieldEditor.duration.showSuffixLabel.short"
