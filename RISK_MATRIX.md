@@ -26,7 +26,7 @@ Below are some general themes to consider for the *Risk Matrix*:
   instances?
 - Does your feature need to be aware of running in a container?
 - Does the feature Work with security disabled, or fails gracefully?
-- Are there performance risks associated with your feature? Does it access:
+- Are there performance risks associated with your feature? Does it potentially access or create:
   (1) many fields; (2) many indices; (3) lots of data; (4) lots of saved
   objects; (5) large saved objects.
 - Will leaving browser running overnight not have negative impacts ot the page
