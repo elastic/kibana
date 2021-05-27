@@ -373,7 +373,8 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
     columnId: string,
     indexPattern: IndexPattern,
     layer: IndexPatternLayer,
-    uiSettings: IUiSettingsClient
+    uiSettings: IUiSettingsClient,
+    orderedColumnIds: string[]
   ) => ExpressionAstFunction;
   /**
    * Validate that the operation has the right preconditions in the state. For example:

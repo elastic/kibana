@@ -93,27 +93,29 @@ function getExpressionForLayer(
       }
     });
 
-    esAggEntries.forEach(([colId, col]) => {
+    const orderedColumnIds = esAggEntries.map(([colId]) => colId);
+    esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input !== 'fullReference' && def.input !== 'managedReference') {
         const wrapInFilter = Boolean(def.filterable && col.filter);
         let aggAst = def.toEsAggsFn(
           col,
-          wrapInFilter ? `${colId}-metric` : colId,
+          wrapInFilter ? `${index}-metric` : String(index),
           indexPattern,
           layer,
-          uiSettings
+          uiSettings,
+          orderedColumnIds
         );
         if (wrapInFilter) {
           aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
             'aggFilteredMetric',
             {
-              id: colId,
+              id: String(index),
               enabled: true,
               schema: 'metric',
               customBucket: buildExpression([
                 buildExpressionFunction<AggFunctionsMapping['aggFilter']>('aggFilter', {
-                  id: `${colId}-filter`,
+                  id: `${index}-filter`,
                   enabled: true,
                   schema: 'bucket',
                   filter: JSON.stringify(col.filter),
@@ -138,7 +140,7 @@ function getExpressionForLayer(
       return null;
     }
     const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
-      const esAggsId = `col-${index}-${colId}`;
+      const esAggsId = `col-${index}-${index}`;
       return {
         ...currentIdMap,
         [esAggsId]: {
