@@ -145,7 +145,7 @@ export const warnMismatchedVersions = (enterpriseSearchVersion: string, log: Log
 
   if (enterpriseSearchVersion !== kibanaVersion) {
     log.warn(
-      `Your Kibana instance (v${kibanaVersion}) is not the same version as your Enterprise Search instance (v${enterpriseSearchVersion}). Please upgrade your instances accordingly to matching versions, otherwise you may see breaking or otherwise buggy behavior.`
+      `Your Kibana instance (v${kibanaVersion}) is not the same version as your Enterprise Search instance (v${enterpriseSearchVersion}), which may cause unexpected behavior. Use matching versions for the best experience.`
     );
   }
 };
