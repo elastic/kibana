@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { LangModule } from '../types';
-import { language, conf } from './css.d';
+import { language, conf } from './language';
 import { LANG } from './constants';
 
 export const Lang: LangModule = { ID: LANG, language, conf };

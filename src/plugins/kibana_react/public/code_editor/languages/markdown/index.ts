@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { language, conf } from './markdown.d';
+import { language, conf } from './language';
 import { LANG } from './constants';
 import { LangModule } from '../types';
 
