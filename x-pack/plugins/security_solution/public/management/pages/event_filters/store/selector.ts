@@ -7,18 +7,20 @@
 import { createSelector } from 'reselect';
 import { Pagination } from '@elastic/eui';
 
-import { EventFiltersServiceGetListOptions } from '../types';
+import type {
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { EventFiltersListPageState, EventFiltersServiceGetListOptions } from '../types';
 
-import { EventFiltersListPageState } from '../state';
-import { ExceptionListItemSchema } from '../../../../shared_imports';
 import { ServerApiError } from '../../../../common/types';
 import {
   isLoadingResourceState,
   isLoadedResourceState,
   isFailedResourceState,
   isUninitialisedResourceState,
+  getLastLoadedResourceState,
 } from '../../../state/async_resource_state';
-import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
@@ -48,15 +50,7 @@ export const getCurrentListPageDataState: EventFiltersSelector<StoreState['listP
 export const getListApiSuccessResponse: EventFiltersSelector<
   Immutable<FoundExceptionListItemSchema> | undefined
 > = createSelector(getCurrentListPageDataState, (listPageData) => {
-  if (isLoadedResourceState(listPageData)) {
-    return listPageData.data.content;
-  } else if (
-    isLoadingResourceState(listPageData) &&
-    isLoadedResourceState(listPageData.previousState)
-  ) {
-    return listPageData.previousState.data.content;
-  }
-  return undefined;
+  return getLastLoadedResourceState(listPageData)?.data.content;
 });
 
 export const getListItems: EventFiltersSelector<
@@ -73,13 +67,7 @@ export const getListItems: EventFiltersSelector<
 export const getCurrentListItemsQuery: EventFiltersSelector<EventFiltersServiceGetListOptions> = createSelector(
   getCurrentListPageDataState,
   (pageDataState) => {
-    return (
-      (isLoadedResourceState(pageDataState) && pageDataState.data.query) ||
-      (isLoadingResourceState(pageDataState) &&
-        isLoadedResourceState(pageDataState.previousState) &&
-        pageDataState.previousState.data.query) ||
-      {}
-    );
+    return getLastLoadedResourceState(pageDataState)?.data.query ?? {};
   }
 );
 
@@ -102,24 +90,21 @@ export const getListFetchError: EventFiltersSelector<
   return (isFailedResourceState(listPageDataState) && listPageDataState.error) || undefined;
 });
 
-export const getListIsLoading: EventFiltersSelector<boolean> = createSelector(
-  getCurrentListPageDataState,
-  (listDataState) => isLoadingResourceState(listDataState)
-);
-
 export const getListPageDataExistsState: EventFiltersSelector<
   StoreState['listPage']['dataExist']
 > = ({ listPage: { dataExist } }) => dataExist;
 
+export const getListIsLoading: EventFiltersSelector<boolean> = createSelector(
+  getCurrentListPageDataState,
+  getListPageDataExistsState,
+  (listDataState, dataExists) =>
+    isLoadingResourceState(listDataState) || isLoadingResourceState(dataExists)
+);
+
 export const getListPageDoesDataExist: EventFiltersSelector<boolean> = createSelector(
   getListPageDataExistsState,
   (dataExistsState) => {
-    if (isLoadedResourceState(dataExistsState)) {
-      return dataExistsState.data;
-    }
-
-    // Until we know for sure that data exists (LoadedState), we assume `true`
-    return true;
+    return !!getLastLoadedResourceState(dataExistsState)?.data;
   }
 );
 
@@ -192,7 +177,47 @@ export const listDataNeedsRefresh: EventFiltersSelector<boolean> = createSelecto
     return (
       forceRefresh ||
       location.page_index + 1 !== currentQuery.page ||
-      location.page_size !== currentQuery.perPage
+      location.page_size !== currentQuery.perPage ||
+      location.filter !== currentQuery.filter
     );
+  }
+);
+
+export const getDeletionState = createSelector(
+  getCurrentListPageState,
+  (listState) => listState.deletion
+);
+
+export const showDeleteModal: EventFiltersSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ item }) => {
+    return Boolean(item);
+  }
+);
+
+export const getItemToDelete: EventFiltersSelector<
+  StoreState['listPage']['deletion']['item']
+> = createSelector(getDeletionState, ({ item }) => item);
+
+export const isDeletionInProgress: EventFiltersSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    return isLoadingResourceState(status);
+  }
+);
+
+export const wasDeletionSuccessful: EventFiltersSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    return isLoadedResourceState(status);
+  }
+);
+
+export const getDeleteError: EventFiltersSelector<ServerApiError | undefined> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    if (isFailedResourceState(status)) {
+      return status.error;
+    }
   }
 );

@@ -6,17 +6,13 @@
  */
 
 import { Action } from 'redux';
-import {
+import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
 import { AsyncResourceState } from '../../../state/async_resource_state';
-import { EventFiltersListPageState } from '../state';
-
-export type EventFiltersListPageStateChanged = Action<'eventFiltersListPageStateChanged'> & {
-  payload: EventFiltersListPageState['listPage'];
-};
+import { EventFiltersListPageState } from '../types';
 
 export type EventFiltersListPageDataChanged = Action<'eventFiltersListPageDataChanged'> & {
   payload: EventFiltersListPageState['listPage']['data'];
@@ -24,6 +20,18 @@ export type EventFiltersListPageDataChanged = Action<'eventFiltersListPageDataCh
 
 export type EventFiltersListPageDataExistsChanged = Action<'eventFiltersListPageDataExistsChanged'> & {
   payload: EventFiltersListPageState['listPage']['dataExist'];
+};
+
+export type EventFilterForDeletion = Action<'eventFilterForDeletion'> & {
+  payload: ExceptionListItemSchema;
+};
+
+export type EventFilterDeletionReset = Action<'eventFilterDeletionReset'>;
+
+export type EventFilterDeleteSubmit = Action<'eventFilterDeleteSubmit'>;
+
+export type EventFilterDeleteStatusChanged = Action<'eventFilterDeleteStatusChanged'> & {
+  payload: EventFiltersListPageState['listPage']['deletion']['status'];
 };
 
 export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
@@ -59,7 +67,6 @@ export type EventFiltersFormStateChanged = Action<'eventFiltersFormStateChanged'
 };
 
 export type EventFiltersPageAction =
-  | EventFiltersListPageStateChanged
   | EventFiltersListPageDataChanged
   | EventFiltersListPageDataExistsChanged
   | EventFiltersInitForm
@@ -70,4 +77,8 @@ export type EventFiltersPageAction =
   | EventFiltersCreateStart
   | EventFiltersCreateSuccess
   | EventFiltersCreateError
-  | EventFiltersFormStateChanged;
+  | EventFiltersFormStateChanged
+  | EventFilterForDeletion
+  | EventFilterDeletionReset
+  | EventFilterDeleteSubmit
+  | EventFilterDeleteStatusChanged;

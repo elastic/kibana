@@ -145,15 +145,7 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    {
-      share,
-      uiActions,
-      embeddable,
-      home,
-      urlForwarding,
-      data,
-      usageCollection,
-    }: DashboardSetupDependencies
+    { share, embeddable, home, urlForwarding, data, usageCollection }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const startServices = core.getStartServices();
@@ -208,6 +200,7 @@ export class DashboardPlugin
         inspector: deps.inspector,
         http: coreStart.http,
         ExitFullScreenButton,
+        presentationUtil: deps.presentationUtil,
       };
     };
 

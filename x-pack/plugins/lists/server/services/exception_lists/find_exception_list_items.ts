@@ -6,27 +6,30 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-
-import {
-  SavedObjectType,
-  exceptionListAgnosticSavedObjectType,
-  exceptionListSavedObjectType,
-} from '../../../common/types';
-import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
-import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
-import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
-import {
-  ExceptionListSoSchema,
+import type {
   FoundExceptionListItemSchema,
   Id,
+  NamespaceTypeArray,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-} from '../../../common/schemas';
-import { escapeQuotes } from '../utils/escape_query';
+} from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  EmptyStringArrayDecoded,
+  NonEmptyStringArrayDecoded,
+} from '@kbn/securitysolution-io-ts-types';
+import {
+  SavedObjectType,
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+  getSavedObjectTypes,
+} from '@kbn/securitysolution-list-utils';
 
-import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionListItem } from './utils';
+import { escapeQuotes } from '../utils/escape_query';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
+
+import { transformSavedObjectsToFoundExceptionListItem } from './utils';
 import { getExceptionList } from './get_exception_list';
 
 interface FindExceptionListItemsOptions {

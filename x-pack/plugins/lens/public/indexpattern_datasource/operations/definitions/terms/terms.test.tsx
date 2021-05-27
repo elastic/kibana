@@ -28,6 +28,7 @@ const defaultProps = {
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
+  operationDefinitionMap: {},
 };
 
 describe('terms', () => {
@@ -70,7 +71,8 @@ describe('terms', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -94,7 +96,8 @@ describe('terms', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

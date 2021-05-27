@@ -10,18 +10,10 @@
     "src/cli/**/*",
     "src/dev/**/*",
     "src/fixtures/**/*",
-    "src/legacy/**/*",
-    "src/optimize/**/*",
 
-    "x-pack/mocks.ts",
-    "x-pack/typings/**/*",
     "x-pack/tasks/**/*",
-    "x-pack/plugins/lists/**/*",
-    "x-pack/plugins/security_solution/**/*"
   ],
-  "exclude": [
-    "x-pack/plugins/security_solution/cypress/**/*"
-  ],
+  "exclude": [],
   "references": [
     { "path": "./src/core/tsconfig.json" },
     { "path": "./src/plugins/telemetry_management_section/tsconfig.json" },
@@ -81,7 +73,6 @@
     { "path": "./x-pack/plugins/actions/tsconfig.json" },
     { "path": "./x-pack/plugins/alerting/tsconfig.json" },
     { "path": "./x-pack/plugins/apm/tsconfig.json" },
-    { "path": "./x-pack/plugins/beats_management/tsconfig.json" },
     { "path": "./x-pack/plugins/canvas/tsconfig.json" },
     { "path": "./x-pack/plugins/cases/tsconfig.json" },
     { "path": "./x-pack/plugins/cloud/tsconfig.json" },
@@ -108,6 +99,7 @@
     { "path": "./x-pack/plugins/license_api_guard/tsconfig.json" },
     { "path": "./x-pack/plugins/license_management/tsconfig.json" },
     { "path": "./x-pack/plugins/licensing/tsconfig.json" },
+    { "path": "./x-pack/plugins/lists/tsconfig.json" },
     { "path": "./x-pack/plugins/logstash/tsconfig.json" },
     { "path": "./x-pack/plugins/maps/tsconfig.json" },
     { "path": "./x-pack/plugins/metrics_entities/tsconfig.json" },
@@ -119,6 +111,7 @@
     { "path": "./x-pack/plugins/saved_objects_tagging/tsconfig.json" },
     { "path": "./x-pack/plugins/searchprofiler/tsconfig.json" },
     { "path": "./x-pack/plugins/security/tsconfig.json" },
+    { "path": "./x-pack/plugins/security_solution/tsconfig.json" },
     { "path": "./x-pack/plugins/snapshot_restore/tsconfig.json" },
     { "path": "./x-pack/plugins/spaces/tsconfig.json" },
     { "path": "./x-pack/plugins/stack_alerts/tsconfig.json" },

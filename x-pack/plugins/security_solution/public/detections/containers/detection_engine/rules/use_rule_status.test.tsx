@@ -70,14 +70,12 @@ const testRule: Rule = {
 };
 
 describe('useRuleStatus', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  (useAppToasts as jest.Mock).mockReturnValue(useAppToastsMock.create());
+
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
-    appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
+
   afterEach(async () => {
     cleanup();
   });
@@ -114,7 +112,7 @@ describe('useRuleStatus', () => {
               gap: null,
               bulk_create_time_durations: ['2235.01'],
               search_after_time_durations: ['616.97'],
-              last_look_back_date: '2020-03-19T00:32:07.996Z',
+              last_look_back_date: '2020-03-19T00:32:07.996Z', // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
             },
             failures: [],
           },
@@ -170,7 +168,7 @@ describe('useRuleStatus', () => {
                 gap: null,
                 last_failure_at: null,
                 last_failure_message: null,
-                last_look_back_date: '2020-03-19T00:32:07.996Z',
+                last_look_back_date: '2020-03-19T00:32:07.996Z', // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
                 last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
                 last_success_message: 'it is a success',
                 search_after_time_durations: ['616.97'],

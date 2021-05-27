@@ -139,11 +139,14 @@ export default function (/* { providerAPI } */) {
 }
 -----------
 
-**Services**:::
-Services are named singleton values produced by a Service Provider. Tests and other services can retrieve service instances by asking for them by name. All functionality except the mocha API is exposed via services.\
+**Service**:::
+A Service is a named singleton created using a subclass of `FtrService`. Tests and other services can retrieve service instances by asking for them by name. All functionality except the mocha API is exposed via services. When you write your own functional tests check for existing services that help with the interactions you're looking to execute, and add new services for interactions which aren't already encoded in a service.
+
+**Service Providers**:::
+For legacy purposes, and for when creating a subclass of `FtrService` is inconvenient, you can also create services using a "Service Provider". These are functions which  which create service instances and return them. These instances are cached and provided to tests. Currently these providers may also return a Promise for the service instance, allowing the service to do some setup work before tests run. We expect to fully deprecate and remove support for async service providers in the near future and instead require that services use the `lifecycle` service to run setup before tests. Providers which return instances of classes other than `FtrService` will likely remain supported for as long as possible.
 
 **Page objects**:::
-Page objects are a special type of service that encapsulate behaviors common to a particular page or plugin. When you write your own plugin, you’ll likely want to add a page object (or several) that describes the common interactions your tests need to execute.
+Page objects are functionally equivalent to services, except they are loaded with a slightly different mechanism and generally defined separate from services. When you write your own functional tests you might want to write some of your services as Page objects, but it is not required.
 
 **Test Files**:::
 The `FunctionalTestRunner`'s primary purpose is to execute test files. These files export a Test Provider that is called with a Provider API but is not expected to return a value. Instead Test Providers define a suite using https://mochajs.org/#bdd[mocha's BDD interface].

@@ -4,5 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import * as t from 'io-ts';
 
 export type Maybe<T> = T | null | undefined;
+
+export const alertStatusRt = t.union([t.literal('all'), t.literal('open'), t.literal('closed')]);
+export type AlertStatus = t.TypeOf<typeof alertStatusRt>;
