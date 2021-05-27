@@ -13,6 +13,7 @@ import { runASTValidation, tryToParse } from './validation';
 import { MemoizedFormulaEditor } from './editor';
 import { regenerateLayerFromAst } from './parse';
 import { generateFormula } from './generate';
+import { filterByVisibleOperation } from './util';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
@@ -50,12 +51,13 @@ export const formulaOperation: OperationDefinition<
     if (!column.params.formula || !operationDefinitionMap) {
       return;
     }
-    const { root, error } = tryToParse(column.params.formula, operationDefinitionMap);
+    const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
+    const { root, error } = tryToParse(column.params.formula, visibleOperationsMap);
     if (error || !root) {
       return [error!.message];
     }
 
-    const errors = runASTValidation(root, layer, indexPattern, operationDefinitionMap);
+    const errors = runASTValidation(root, layer, indexPattern, visibleOperationsMap);
     return errors.length ? errors.map(({ message }) => message) : undefined;
   },
   getPossibleOperation() {

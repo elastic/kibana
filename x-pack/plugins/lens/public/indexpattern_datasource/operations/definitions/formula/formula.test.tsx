@@ -789,6 +789,34 @@ invalid: "
       }
     });
 
+    it('returns an error if formula or math operations are used', () => {
+      const formulaFormulas = ['formula()', 'formula(bytes)', 'formula(formula())'];
+
+      for (const formula of formulaFormulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(['Operation formula not found']);
+      }
+
+      const mathFormulas = ['math()', 'math(bytes)', 'math(math())'];
+
+      for (const formula of mathFormulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(['Operation math not found']);
+      }
+    });
+
     it('returns an error if field operation in formula have the wrong first argument', () => {
       const formulas = [
         'average(7)',

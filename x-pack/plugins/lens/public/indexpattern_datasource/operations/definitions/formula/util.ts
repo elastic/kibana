@@ -13,7 +13,7 @@ import type {
   TinymathNamedArgument,
   TinymathVariable,
 } from 'packages/kbn-tinymath';
-import type { OperationDefinition, IndexPatternColumn } from '../index';
+import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
 import type { GroupedNodes } from './types';
 
 export function groupArgsByType(args: TinymathAST[]) {
@@ -463,4 +463,12 @@ export function findVariables(node: TinymathAST | string): TinymathVariable[] {
     return [node];
   }
   return node.args.flatMap(findVariables);
+}
+
+export function filterByVisibleOperation(
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+) {
+  return Object.fromEntries(
+    Object.entries(operationDefinitionMap).filter(([, operation]) => !operation.hidden)
+  );
 }

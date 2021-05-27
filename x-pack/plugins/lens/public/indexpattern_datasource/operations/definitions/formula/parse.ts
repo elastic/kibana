@@ -13,7 +13,12 @@ import { IndexPattern, IndexPatternLayer } from '../../../types';
 import { mathOperation } from './math';
 import { documentField } from '../../../document_field';
 import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
-import { findVariables, getOperationParams, groupArgsByType } from './util';
+import {
+  filterByVisibleOperation,
+  findVariables,
+  getOperationParams,
+  groupArgsByType,
+} from './util';
 import { FormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
 
@@ -169,7 +174,7 @@ export function regenerateLayerFromAst(
     layer,
     columnId,
     indexPattern,
-    operationDefinitionMap
+    filterByVisibleOperation(operationDefinitionMap)
   );
 
   const columns = { ...layer.columns };
