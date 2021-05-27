@@ -17,7 +17,6 @@ import {
   SwimlaneSecrets,
   SwimlaneActionParams,
 } from './types';
-import swimlaneSvg from './swimlane.svg';
 import * as i18n from './translations';
 import { isValidUrl } from '../../../lib/value_validators';
 
@@ -28,7 +27,7 @@ export function getActionType(): ActionTypeModel<
 > {
   return {
     id: '.swimlane',
-    iconClass: swimlaneSvg,
+    iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.SW_SELECT_MESSAGE_TEXT,
     actionTypeTitle: i18n.SW_ACTION_TYPE_TITLE,
     validateConnector: (
