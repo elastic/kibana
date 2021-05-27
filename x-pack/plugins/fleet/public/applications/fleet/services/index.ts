@@ -20,6 +20,7 @@ export {
   outputRoutesService,
   settingsRoutesService,
   appRoutesService,
+  packageToPackagePolicy,
   packageToPackagePolicyInputs,
   storedPackagePoliciesToAgentInputs,
   fullAgentPolicyToYaml,
@@ -28,4 +29,5 @@ export {
   isValidNamespace,
   LicenseService,
   isAgentUpgradeable,
+  doesPackageHaveIntegrations,
 } from '../../../../common';

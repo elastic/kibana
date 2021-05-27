@@ -173,6 +173,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
                 <LinkedAgentCount
                   count={(agentStatus && agentStatus.total) || 0}
                   agentPolicyId={(agentPolicy && agentPolicy.id) || ''}
+                  showAgentText
                 />
               ),
             },

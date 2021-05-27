@@ -20,14 +20,7 @@ import {
 } from '../../../types';
 import { getAgentIDsForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
-
-export const userCanIsolate = (roles: readonly string[] | undefined): boolean => {
-  // only superusers can write to the fleet index (or look up endpoint data to convert endp ID to agent ID)
-  if (!roles || roles.length === 0) {
-    return false;
-  }
-  return roles.includes('superuser');
-};
+import { userCanIsolate } from '../../../../common/endpoint/actions';
 
 /**
  * Registers the Host-(un-)isolation routes
