@@ -10,6 +10,7 @@ import { PLUGIN_ID } from '../common/constants';
 import { ReportingCore } from './';
 import { initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
+import { registerDeprecations } from './deprecations';
 import { LevelLogger, ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
@@ -39,14 +40,12 @@ export class ReportingPlugin
     // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
     core.http.registerRouteHandlerContext(PLUGIN_ID, () => {
       if (reportingCore.pluginIsStarted()) {
-        return reportingCore.getStartContract();
+        return reportingCore.getContract();
       } else {
         this.logger.error(`Reporting features are not yet ready`);
         return null;
       }
     });
-
-    registerUiSettings(core);
 
     const { http } = core;
     const { screenshotMode, features, licensing, security, spaces, taskManager } = plugins;
@@ -66,6 +65,8 @@ export class ReportingPlugin
       logger: this.logger,
     });
 
+    registerUiSettings(core);
+    registerDeprecations(reportingCore, core);
     registerReportingUsageCollector(reportingCore, plugins);
     registerRoutes(reportingCore, this.logger);
     registerDeprecations({
@@ -86,7 +87,7 @@ export class ReportingPlugin
     });
 
     this.reportingCore = reportingCore;
-    return reportingCore.getStartContract();
+    return reportingCore.getContract();
   }
 
   public start(core: CoreStart, plugins: ReportingStartDeps) {
@@ -121,6 +122,6 @@ export class ReportingPlugin
       this.logger.error(e);
     });
 
-    return reportingCore.getStartContract();
+    return reportingCore.getContract();
   }
 }
