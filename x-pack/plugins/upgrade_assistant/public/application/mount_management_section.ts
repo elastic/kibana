@@ -15,7 +15,6 @@ import { breadcrumbService } from './lib/breadcrumbs';
 
 export async function mountManagementSection(
   coreSetup: CoreSetup,
-  isCloudEnabled: boolean,
   params: ManagementAppMountParams,
   kibanaVersionInfo: KibanaVersionContext
 ) {
@@ -31,7 +30,6 @@ export async function mountManagementSection(
 
   return renderApp({
     element,
-    isCloudEnabled,
     http,
     i18n,
     docLinks,

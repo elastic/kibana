@@ -6,7 +6,6 @@
  */
 
 import { IRouter, Logger, SavedObjectsServiceStart } from 'src/core/server';
-import { CloudSetup } from '../../cloud/server';
 import { CredentialStore } from './lib/reindexing/credential_store';
 import { LicensingPluginSetup } from '../../licensing/server';
 
@@ -16,5 +15,4 @@ export interface RouteDependencies {
   log: Logger;
   getSavedObjectsService: () => SavedObjectsServiceStart;
   licensing: LicensingPluginSetup;
-  cloud?: CloudSetup;
 }

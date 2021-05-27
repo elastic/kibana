@@ -59,12 +59,6 @@ const i18nTexts = {
   flyoutTitle: i18n.translate('xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.title', {
     defaultMessage: 'Upgrade or delete model snapshot',
   }),
-  secondaryFlyoutDescription: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.secondaryDescription',
-    {
-      defaultMessage: 'Upgrade or delete your model snapshot to resolve.',
-    }
-  ),
   upgradeSuccessNotificationText: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.upgradeSuccessNotificationText',
     {
@@ -115,7 +109,10 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
     closeFlyout();
 
     if (error) {
-      notifications.toasts.addDanger(i18nTexts.upgradeErrorNotificationText);
+      const toastError = error.message instanceof Error ? error.message : new Error(error.message);
+      notifications.toasts.addError(toastError, {
+        title: i18nTexts.upgradeErrorNotificationText,
+      });
     } else {
       setSuccessfulRequests({
         [snapshotId.current!]: true,
@@ -136,7 +133,10 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
     closeFlyout();
 
     if (error) {
-      notifications.toasts.addDanger(i18nTexts.deleteErrorNotificationText);
+      const toastError = error.message instanceof Error ? error.message : new Error(error.message);
+      notifications.toasts.addError(toastError, {
+        title: i18nTexts.deleteErrorNotificationText,
+      });
     } else {
       setSuccessfulRequests({
         [snapshotId.current!]: true,
@@ -186,7 +186,6 @@ export const FixSnapshotsProvider = ({ children }: Props) => {
             <EuiFlyoutBody>
               <EuiText>
                 <p>{description.current!}</p>
-                <p>{i18nTexts.secondaryFlyoutDescription}</p>
               </EuiText>
             </EuiFlyoutBody>
             <EuiFlyoutFooter>

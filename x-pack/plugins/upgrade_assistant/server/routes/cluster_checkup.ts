@@ -12,7 +12,7 @@ import { RouteDependencies } from '../types';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../lib/reindexing';
 
-export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: RouteDependencies) {
+export function registerClusterCheckupRoutes({ router, licensing, log }: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/status`,

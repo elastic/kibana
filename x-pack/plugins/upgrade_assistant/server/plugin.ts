@@ -17,7 +17,6 @@ import {
   SavedObjectsServiceStart,
 } from '../../../../src/core/server';
 
-import { CloudSetup } from '../../cloud/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 
@@ -35,7 +34,6 @@ interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
-  cloud?: CloudSetup;
 }
 
 export class UpgradeAssistantServerPlugin implements Plugin {
@@ -65,7 +63,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   setup(
     { http, getStartServices, capabilities, savedObjects }: CoreSetup,
-    { usageCollection, cloud, features, licensing }: PluginsSetup
+    { usageCollection, features, licensing }: PluginsSetup
   ) {
     this.licensing = licensing;
 
@@ -88,7 +86,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     const router = http.createRouter();
 
     const dependencies: RouteDependencies = {
-      cloud,
       router,
       credentialStore: this.credentialStore,
       log: this.logger,
