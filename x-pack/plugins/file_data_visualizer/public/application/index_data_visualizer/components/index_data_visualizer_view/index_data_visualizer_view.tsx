@@ -31,44 +31,40 @@ import {
   UI_SETTINGS,
   Query,
   IndexPattern,
-} from '../../../../../../../src/plugins/data/public';
-import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
-import { getQueryFromSavedSearch } from '../../util/index_utils';
-import { usePageUrlState, useUrlState } from '../../util/url_state';
-import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
-import { FieldVisConfig } from '../stats_table/types';
+} from '../../../../../../../../src/plugins/data/public';
+import { FullTimeRangeSelector } from '../full_time_range_selector';
+import { getQueryFromSavedSearch } from '../../../util/index_utils';
+import { usePageUrlState, useUrlState } from '../../../util/url_state';
+import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../../../components/stats_table';
+import { FieldVisConfig } from '../../../components/stats_table/types';
 import type {
   MetricFieldsStats,
   TotalFieldsStats,
-} from '../stats_table/components/field_count_stats';
-import { OverallStats } from '../../index_data_visualizer/types/overall_stats';
-import { getActions } from '../field_data_row/action_menu';
-import { IndexBasedDataVisualizerExpandedRow } from '../expanded_row/index_based_expanded_row';
-import { DATA_VISUALIZER_INDEX_VIEWER } from '../../index_data_visualizer/constants/index_data_visualizer_viewer';
-import { DataVisualizerIndexBasedAppState } from '../../index_data_visualizer/types/index_data_visualizer_state';
+} from '../../../components/stats_table/components/field_count_stats';
+import { OverallStats } from '../../types/overall_stats';
+import { getActions } from '../../../components/field_data_row/action_menu';
+import { IndexBasedDataVisualizerExpandedRow } from '../../../components/expanded_row/index_based_expanded_row';
+import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
+import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
+import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
 import {
-  SEARCH_QUERY_LANGUAGE,
-  SearchQueryLanguage,
-} from '../../index_data_visualizer/types/combined_query';
-import { FieldRequestConfig, JobFieldType, SavedSearchSavedObject } from '../../../../common/types';
-import { useFileDataVisualizerKibana } from '../../kibana_context';
-import { FieldCountPanel } from '../field_count_panel';
-import { DocumentCountContent } from '../document_count_content';
-import { DataLoader } from '../../index_data_visualizer/data_loader/data_loader';
-import { JOB_FIELD_TYPES } from '../../../../common';
-import { useTimefilter } from '../../index_data_visualizer/hooks/use_time_filter';
-import { kbnTypeToJobType } from '../../util/field_types_utils';
+  FieldRequestConfig,
+  JobFieldType,
+  SavedSearchSavedObject,
+} from '../../../../../common/types';
+import { useFileDataVisualizerKibana } from '../../../kibana_context';
+import { FieldCountPanel } from '../../../components/field_count_panel';
+import { DocumentCountContent } from '../../../components/document_count_content';
+import { DataLoader } from '../../data_loader/data_loader';
+import { JOB_FIELD_TYPES } from '../../../../../common';
+import { useTimefilter } from '../../hooks/use_time_filter';
+import { kbnTypeToJobType } from '../../../util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
-import { DatePickerWrapper } from '../date_picker_wrapper';
-import { mlTimefilterRefresh$ } from '../../index_data_visualizer/services/timefilter_refresh_service';
-import { HelpMenu } from '../help_menu';
-import { TimeBuckets } from '../../index_data_visualizer/services/time_buckets';
-
-export interface Refresh {
-  lastRefresh: number;
-  timeRange?: { start: string; end: string };
-}
+import { DatePickerWrapper } from '../../../components/date_picker_wrapper';
+import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
+import { HelpMenu } from '../../../components/help_menu';
+import { TimeBuckets } from '../../services/time_buckets';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;

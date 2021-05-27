@@ -20,11 +20,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FindFileStructureResponse } from '../../../../../file_upload/common';
+import { FindFileStructureResponse } from '../../../../../../file_upload/common';
 
-import { FileContents } from '../../file_data_visualizer/components/file_contents';
-import { AnalysisSummary } from '../../file_data_visualizer/components/analysis_summary';
-import { FieldsStatsGrid } from '../fields_stats_grid';
+import { FileContents } from '../file_contents';
+import { AnalysisSummary } from '../analysis_summary';
+import { FieldsStatsGrid } from '../../../components/fields_stats_grid';
 
 interface Props {
   data: string;

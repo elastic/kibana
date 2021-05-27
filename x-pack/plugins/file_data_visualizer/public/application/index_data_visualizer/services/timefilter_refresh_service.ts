@@ -7,6 +7,10 @@
 
 import { Subject } from 'rxjs';
 import { Required } from 'utility-types';
-import { Refresh } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
+
+export interface Refresh {
+  lastRefresh: number;
+  timeRange?: { start: string; end: string };
+}
 
 export const mlTimefilterRefresh$ = new Subject<Required<Refresh>>();

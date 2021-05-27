@@ -9,9 +9,9 @@ import moment from 'moment';
 import { estypes } from '@elastic/elasticsearch';
 import { Query, TimefilterContract } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
-import { isPopulatedObject } from '../utils/object_utils';
-import { getTimeFieldRange } from '../../../api';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { isPopulatedObject } from '../../../components/utils/object_utils';
+import { getTimeFieldRange } from '../../../../api';
 
 export interface TimeRange {
   from: number;

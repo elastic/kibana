@@ -7,8 +7,8 @@
 
 import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Option, MultiSelectPicker } from '../multi_select_picker';
-import { OverallStats } from '../../index_data_visualizer/types/overall_stats';
+import { Option, MultiSelectPicker } from '../../../components/multi_select_picker';
+import { OverallStats } from '../../types/overall_stats';
 
 interface Props {
   overallStats: OverallStats;

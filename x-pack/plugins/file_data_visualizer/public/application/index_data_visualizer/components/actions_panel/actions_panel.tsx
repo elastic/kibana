@@ -13,11 +13,11 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGeneratorState,
-} from '../../../../../../../src/plugins/discover/public';
-import type { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
-import { useFileDataVisualizerKibana } from '../../kibana_context';
-import { useUrlState } from '../../util/url_state';
-import { LinkCard } from '../link_card';
+} from '../../../../../../../../src/plugins/discover/public';
+import type { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { useFileDataVisualizerKibana } from '../../../kibana_context';
+import { useUrlState } from '../../../util/url_state';
+import { LinkCard } from '../../../components/link_card';
 
 interface Props {
   indexPattern: IndexPattern;
@@ -27,7 +27,6 @@ interface Props {
 
 // @todo: add back create job card
 export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQueryLanguage }) => {
-  // const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
   const [globalState] = useUrlState('_g');
 
   const [discoverLink, setDiscoverLink] = useState('');
@@ -39,13 +38,6 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
       },
     },
   } = useFileDataVisualizerKibana();
-
-  // const recognizerResults = {
-  //   count: 0,
-  //   onChange() {
-  //     setRecognizerResultsCount(recognizerResults.count);
-  //   },
-  // };
 
   useEffect(() => {
     let unmounted = false;
@@ -82,21 +74,13 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
       if (!unmounted) {
         setDiscoverLink(discoverUrl);
       }
-
-      // let mlUrlGenerator;
-      // try {
-      //   discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
-      // } catch (error) {
-      //   // ignore error thrown when url generator is not available
-      //   return;
-      // }
     };
 
     getDiscoverUrl();
     return () => {
       unmounted = true;
     };
-  }, [indexPattern, searchString, searchQueryLanguage, globalState]);
+  }, [indexPattern, searchString, searchQueryLanguage, globalState, capabilities, getUrlGenerator]);
 
   // Note we use display:none for the DataRecognizer section as it needs to be
   // passed the recognizerResults object, and then run the recognizer check which

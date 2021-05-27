@@ -6,3 +6,4 @@
  */
 
 export { IndexDataVisualizer, IndexDataVisualizerSpec } from './index_data_visualizer';
+export type { IndexDataVisualizerViewProps } from './components/index_data_visualizer_view';

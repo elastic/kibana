@@ -13,17 +13,17 @@ import {
   esQuery,
   Query,
   QueryStringInput,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../../../../../../../src/plugins/data/public';
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DatavisualizerFieldTypeFilter } from './field_type_filter';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { JobFieldType } from '../../../../common/types';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { JobFieldType } from '../../../../../common/types';
 import {
   ErrorMessage,
   SEARCH_QUERY_LANGUAGE,
   SearchQueryLanguage,
-} from '../../index_data_visualizer/types/combined_query';
+} from '../../types/combined_query';
 
 interface Props {
   indexPattern: IndexPattern;

@@ -8,9 +8,9 @@
 import React, { FC, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JOB_FIELD_TYPES, JobFieldType } from '../../../../common';
-import { FieldTypeIcon } from '../field_type_icon';
-import { MultiSelectPicker, Option } from '../multi_select_picker';
+import { JOB_FIELD_TYPES, JobFieldType } from '../../../../../common';
+import { FieldTypeIcon } from '../../../components/field_type_icon';
+import { MultiSelectPicker, Option } from '../../../components/multi_select_picker';
 
 const ML_JOB_FIELD_TYPES_OPTIONS = {
   [JOB_FIELD_TYPES.BOOLEAN]: { name: 'Boolean', icon: 'tokenBoolean' },

@@ -14,7 +14,7 @@ import { isEqual } from 'lodash';
 
 import { AboutPanel, LoadingPanel } from '../../../components/about_panel';
 import { BottomBar } from '../bottom_bar';
-import { ResultsView } from '../../../components/results_view';
+import { ResultsView } from '../results_view';
 import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { EditFlyout } from '../edit_flyout';
 import { ExplanationFlyout } from '../explanation_flyout';
