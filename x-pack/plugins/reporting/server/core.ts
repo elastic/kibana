@@ -25,14 +25,14 @@ import { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { ReportingConfig } from './';
+import { ReportingConfig, ReportingSetup } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import { ReportingPluginRouter, ReportingStart } from './types';
+import { ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
@@ -69,7 +69,7 @@ export class ReportingCore {
   private config?: ReportingConfig; // final config, includes dynamic values based on OS type
   private executing: Set<string>;
 
-  public getStartContract: () => ReportingStart;
+  public getContract: () => ReportingSetup;
 
   constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
     const syncConfig = context.config.get<ReportingConfigType>();
@@ -77,11 +77,9 @@ export class ReportingCore {
     this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
     this.monitorTask = new MonitorReportsTask(this, syncConfig, this.logger);
 
-    this.getStartContract = (): ReportingStart => {
-      return {
-        usesUiCapabilities: () => syncConfig.roles.enabled === false,
-      };
-    };
+    this.getContract = () => ({
+      usesUiCapabilities: () => syncConfig.roles.enabled === false,
+    });
 
     this.executing = new Set();
   }
