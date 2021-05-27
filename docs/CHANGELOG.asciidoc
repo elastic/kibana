@@ -86,13 +86,30 @@ Upgrade to {kib} 7.13.0.
 
 [float]
 [[known-issue-7.13.0]]
-=== Known issue
+=== Known issues
 
+.*Dev Tools* displays a 403 error with the `Access to Fleet API require the superuser role` message
+[%collapsible]
+====
 *Details* +
 When pages load, {kib} calls the Fleet packages API. For more information, refer to {kibana-issue}100285[#100285].
 
 *Impact* +
 In some cases, *Dev Tools* displays a 403 error with the `Access to Fleet API require the superuser role` message, but you can continue to access *Fleet*.
+====
+
+.{agent}s unenrolling from a self-managed {fleet-server} hang at "Updating" and API keys are not invalidated
+[%collapsible]
+====
+*Details*  +
+In {kib}, when you unenroll an {agent} from a self-managed {fleet-server},
+the status may hang at "Updating". This problem only occurs with {agent}s
+connecting to a {fleet-server} started with a service token.
+
+*Impact* +
+You must do a force unenroll to remove the {agent} and invalidate the API keys,
+or unenrollment hangs indefinitely. https://github.com/elastic/fleet-server/issues/380[#380]
+====
 
 [float]
 [[breaking-changes-7.13.0]]
