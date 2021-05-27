@@ -42,7 +42,6 @@ import {
   metadataCurrentIndexPattern,
 } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
-import { resolvePathVariables } from '../../trusted_apps/service/utils';
 import {
   createFailedResourceState,
   createLoadedResourceState,
@@ -50,6 +49,7 @@ import {
 } from '../../../state';
 import { isolateHost } from '../../../../common/lib/host_isolation';
 import { AppAction } from '../../../../common/store/actions';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 

@@ -25,8 +25,8 @@ import {
   UpdateAlertStatusProps,
   CasesFromAlertsResponse,
 } from './types';
-import { resolvePathVariables } from '../../../../management/pages/trusted_apps/service/utils';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/host_isolation';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 /**
  * Fetch Alerts by providing a query

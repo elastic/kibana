@@ -29,8 +29,8 @@ import {
   GetOneTrustedAppRequestParams,
   GetOneTrustedAppResponse,
 } from '../../../../../common/endpoint/types/trusted_apps';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
-import { resolvePathVariables } from './utils';
 import { sendGetEndpointSpecificPackagePolicies } from '../../policy/store/services/ingest';
 
 export interface TrustedAppsService {
