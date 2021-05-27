@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './header_menu';
+export { createLazyObservabilityPageTemplate } from './lazy_page_template';
