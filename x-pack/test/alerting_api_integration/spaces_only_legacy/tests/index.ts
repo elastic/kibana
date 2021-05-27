@@ -13,7 +13,7 @@ export default function alertingApiIntegrationTests({ loadTestFile }: FtrProvide
   describe('alerting api integration spaces only legacy configuration', function () {
     this.tags('ciGroup12');
 
-    loadTestFile(require.resolve('./actions/webhook'));
+    loadTestFile(require.resolve('./actions/builtin_action_types/webhook'));
   });
 }
 
