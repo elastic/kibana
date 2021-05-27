@@ -321,6 +321,62 @@ describe('collectExportedObjects', () => {
       expect(objects.map(toIdTuple)).toEqual([foo1, bar2, dolly3].map(toIdTuple));
     });
 
+    it('does not fetch duplicates of references', async () => {
+      const foo1 = createObject({
+        type: 'foo',
+        id: '1',
+        references: [
+          {
+            type: 'dolly',
+            id: '3',
+            name: 'dolly-3',
+          },
+          {
+            type: 'baz',
+            id: '4',
+            name: 'baz-4',
+          },
+        ],
+      });
+      const bar2 = createObject({
+        type: 'bar',
+        id: '2',
+        references: [
+          {
+            type: 'dolly',
+            id: '3',
+            name: 'dolly-3',
+          },
+        ],
+      });
+      const dolly3 = createObject({
+        type: 'dolly',
+        id: '3',
+      });
+      const baz4 = createObject({
+        type: 'baz',
+        id: '4',
+      });
+
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [dolly3, baz4],
+      });
+
+      await collectExportedObjects({
+        objects: [foo1, bar2],
+        savedObjectsClient,
+        request,
+        exportTransforms: {},
+        includeReferences: true,
+      });
+
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
+        [dolly3, baz4].map(toIdTuple),
+        expect.any(Object)
+      );
+    });
+
     it('fetch references for additional objects returned by the export transform', async () => {
       const foo1 = createObject({
         type: 'foo',

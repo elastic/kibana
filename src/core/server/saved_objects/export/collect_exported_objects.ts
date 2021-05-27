@@ -112,18 +112,16 @@ const collectReferences = (
   objects: SavedObject[],
   alreadyProcessed: Set<ObjectKey>
 ): CollectedReference[] => {
-  const references: CollectedReference[] = [];
+  const references: Map<string, CollectedReference> = new Map();
   objects.forEach((obj) => {
     obj.references?.forEach((ref) => {
-      if (!alreadyProcessed.has(objKey(ref))) {
-        references.push({
-          type: ref.type,
-          id: ref.id,
-        });
+      const refKey = objKey(ref);
+      if (!alreadyProcessed.has(refKey)) {
+        references.set(refKey, { type: ref.type, id: ref.id });
       }
     });
   });
-  return references;
+  return [...references.values()];
 };
 
 interface FetchReferencesResult {
