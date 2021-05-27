@@ -15,8 +15,6 @@ import { getPersonalInfoComponent } from '../account_management/personal_info';
 import type { PluginStartDependencies } from '../plugin';
 import { LazyWrapper } from './lazy_wrapper';
 
-export { PersonalInfo } from '../account_management/personal_info';
-
 export interface GetComponentsOptions {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
