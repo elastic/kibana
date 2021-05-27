@@ -9,7 +9,7 @@ import { APMPlugin, APMRouteHandlerResources } from '../..';
 import { listConfigurations } from '../settings/agent_configuration/list_configurations';
 import { setupRequest } from '../helpers/setup_request';
 import { APMPluginStartDependencies } from '../../types';
-import { ExternalCallback } from 'x-pack/plugins/fleet/server';
+import { ExternalCallback } from '../../../../fleet/server';
 
 export async function registerFleetPolicyCallbacks({
   plugins,
@@ -84,9 +84,9 @@ function registerAgentConfigExternalCallback({
       ruleDataClient,
     });
     const configurations = await listConfigurations({ setup });
-    const agentConfigValue = configurations.map((config) => ({
-      service: config.service,
-      settings: config.settings,
+    const agentConfigValue = configurations.map((configuration) => ({
+      service: configuration.service,
+      settings: configuration.settings,
     }));
     packagePolicy.inputs[0].config = {
       agent_config: {

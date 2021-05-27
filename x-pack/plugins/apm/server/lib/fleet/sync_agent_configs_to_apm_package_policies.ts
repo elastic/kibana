@@ -42,7 +42,7 @@ export async function syncAgentConfigsToApmPackagePolicies({
 
   return Promise.all(
     packagePolicies.items.map(async (item) => {
-      const { id, revision, updated_at, updated_by, ...packagePolicy } = item;
+      const { id, revision, updated_at, updated_by, ...packagePolicy } = item; //eslint-disable-line @typescript-eslint/naming-convention
       packagePolicy.inputs[0].config = {
         agent_config: {
           value: agentConfigs,
