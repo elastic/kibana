@@ -393,7 +393,11 @@ const renameOperationsForFormula: SavedObjectMigrationFn<
   LensDocShapePre712,
   LensDocShapePost712
 > = (doc) => {
-  return commonRenameOperationsForFormula(doc) as SavedObjectUnsanitizedDoc<LensDocShapePost712>;
+  const newDoc = cloneDeep(doc);
+  return {
+    ...newDoc,
+    attributes: commonRenameOperationsForFormula(newDoc.attributes),
+  };
 };
 
 export const migrations: SavedObjectMigrationMap = {

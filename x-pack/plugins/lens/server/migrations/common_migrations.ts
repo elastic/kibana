@@ -6,12 +6,11 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { SavedObjectUnsanitizedDoc } from '../../../../../src/core/server';
 import { LensDocShapePre712, OperationTypePre712, LensDocShapePost712 } from './types';
 
-export const commonRenameOperationsForFormula = (doc: {
-  attributes: LensDocShapePre712;
-}): { attributes: LensDocShapePost712 } => {
+export const commonRenameOperationsForFormula = (
+  attributes: LensDocShapePre712
+): LensDocShapePost712 => {
   const renameMapping = {
     avg: 'average',
     cardinality: 'unique_count',
@@ -20,9 +19,9 @@ export const commonRenameOperationsForFormula = (doc: {
   function shouldBeRenamed(op: OperationTypePre712): op is keyof typeof renameMapping {
     return op in renameMapping;
   }
-  const newDoc = cloneDeep(doc);
-  const datasourceLayers = newDoc.attributes.state.datasourceStates.indexpattern.layers || {};
-  (newDoc.attributes as LensDocShapePost712).state.datasourceStates.indexpattern.layers = Object.fromEntries(
+  const newAttributes = cloneDeep(attributes);
+  const datasourceLayers = newAttributes.state.datasourceStates.indexpattern.layers || {};
+  (newAttributes as LensDocShapePost712).state.datasourceStates.indexpattern.layers = Object.fromEntries(
     Object.entries(datasourceLayers).map(([layerId, layer]) => {
       return [
         layerId,
@@ -43,5 +42,5 @@ export const commonRenameOperationsForFormula = (doc: {
       ];
     })
   );
-  return newDoc as SavedObjectUnsanitizedDoc<LensDocShapePost712>;
+  return newAttributes as LensDocShapePost712;
 };
