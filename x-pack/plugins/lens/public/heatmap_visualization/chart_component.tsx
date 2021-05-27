@@ -204,7 +204,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       },
     },
     yAxisLabel: {
-      visible: args.gridConfig.isYAxisLabelVisible,
+      visible: !!yAxisColumn && args.gridConfig.isYAxisLabelVisible,
       // eui color subdued
       fill: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
       padding: 8,
