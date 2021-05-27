@@ -119,7 +119,9 @@ export class Plugin
         mount,
         updater$,
       });
+    }
 
+    if (config.unsafe.cases.enabled) {
       coreSetup.application.register({
         id: 'observability-cases',
         title: 'Cases',

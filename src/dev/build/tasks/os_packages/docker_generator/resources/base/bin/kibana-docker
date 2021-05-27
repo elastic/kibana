@@ -231,6 +231,7 @@ kibana_vars=(
     xpack.maps.showMapVisualizationTypes
     xpack.ml.enabled
     xpack.observability.unsafe.alertingExperience.enabled
+    xpack.observability.unsafe.cases.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect

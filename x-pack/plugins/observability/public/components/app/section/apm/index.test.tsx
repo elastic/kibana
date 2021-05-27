@@ -41,7 +41,7 @@ describe('APMSection', () => {
         http: { basePath: { prepend: jest.fn() } },
       } as unknown) as CoreStart,
       appMountParameters: {} as AppMountParameters,
-      config: { unsafe: { alertingExperience: { enabled: true } } },
+      config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       plugins: ({
         data: {
