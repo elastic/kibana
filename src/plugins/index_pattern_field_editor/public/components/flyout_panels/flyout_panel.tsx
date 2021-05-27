@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { CSSProperties, useEffect } from 'react';
 import classnames from 'classnames';
 import { EuiFlexItem } from '@elastic/eui';
 
@@ -22,8 +22,8 @@ interface Props {
 }
 
 export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
-  width = 50,
   children,
+  width,
   className = '',
   backgroundColor,
   withFooter,
@@ -38,18 +38,24 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   });
   /* eslint-enable @typescript-eslint/naming-convention */
 
-  const { addPanel, removePanel } = useFlyoutPanelsContext();
+  const { addPanel } = useFlyoutPanelsContext();
 
   useEffect(() => {
-    const panelId = addPanel({ width });
+    const removePanel = addPanel({ width });
 
-    return () => {
-      removePanel(panelId);
-    };
-  }, [width, addPanel, removePanel]);
+    return removePanel;
+  }, [width, addPanel]);
+
+  const styles: CSSProperties = {
+    position: 'relative',
+  };
+
+  if (width) {
+    styles.flexBasis = `${width}%`;
+  }
 
   return (
-    <EuiFlexItem style={{ position: 'relative', flexBasis: `${width}%` }}>
+    <EuiFlexItem style={styles}>
       <div className={classes} {...rest}>
         {children}
       </div>

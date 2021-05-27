@@ -6,18 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, createContext, useContext, useCallback, useMemo, useEffect } from 'react';
+import React, {
+  useState,
+  createContext,
+  useContext,
+  useCallback,
+  useMemo,
+  useLayoutEffect,
+} from 'react';
 import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
 
 import './flyout_panels.scss';
 
 interface Panel {
-  width: number;
+  width?: number;
 }
 
 interface Context {
-  addPanel: (panel: Panel) => number;
-  removePanel: (id: number) => void;
+  addPanel: (panel: Panel) => () => void;
 }
 
 let idx = 0;
@@ -26,9 +32,8 @@ const panelId = () => idx++;
 
 const flyoutPanelsContext = createContext<Context>({
   addPanel() {
-    return -1;
+    return () => {};
   },
-  removePanel() {},
 });
 
 interface Props {
@@ -56,12 +61,6 @@ export const Panels: React.FC<Props> = ({ maxWidth, flyoutClassName, ...props })
 
   const [panels, setPanels] = useState<{ [id: number]: Panel }>({});
 
-  const addPanel = useCallback((panel: Panel) => {
-    const nextId = panelId();
-    setPanels((prev) => ({ ...prev, [nextId]: panel }));
-    return nextId;
-  }, []);
-
   const removePanel = useCallback((id: number) => {
     setPanels((prev) => {
       const { [id]: panelToRemove, ...rest } = prev;
@@ -69,16 +68,29 @@ export const Panels: React.FC<Props> = ({ maxWidth, flyoutClassName, ...props })
     });
   }, []);
 
+  const addPanel = useCallback(
+    (panel: Panel) => {
+      const nextId = panelId();
+      setPanels((prev) => {
+        return { ...prev, [nextId]: panel };
+      });
+      return removePanel.bind(null, nextId);
+    },
+    [removePanel]
+  );
+
   const ctx: Context = useMemo(
     () => ({
       addPanel,
-      removePanel,
     }),
-    [addPanel, removePanel]
+    [addPanel]
   );
 
-  useEffect(() => {
-    const totalPercentWidth = Object.values(panels).reduce((acc, { width }) => acc + width, 0);
+  useLayoutEffect(() => {
+    const totalPercentWidth = Math.min(
+      100,
+      Object.values(panels).reduce((acc, { width = 0 }) => acc + width, 0)
+    );
     const currentWidth = (maxWidth * totalPercentWidth) / 100;
 
     flyoutDOMelement.style.maxWidth = `${currentWidth}px`;
@@ -86,13 +98,7 @@ export const Panels: React.FC<Props> = ({ maxWidth, flyoutClassName, ...props })
 
   return (
     <flyoutPanelsContext.Provider value={ctx}>
-      <flyoutPanelsContext.Consumer>
-        {({}) => {
-          return (
-            <EuiFlexGroup className="fieldEditor__flyoutPanels" gutterSize="none" {...props} />
-          );
-        }}
-      </flyoutPanelsContext.Consumer>
+      <EuiFlexGroup className="fieldEditor__flyoutPanels" gutterSize="none" {...props} />
     </flyoutPanelsContext.Provider>
   );
 };

@@ -28,6 +28,8 @@ interface Context {
   error: Record<string, any> | null;
   updateParams: (updated: Partial<Params>) => void;
   currentDocument?: Record<string, any>;
+  isPanelVisible: boolean;
+  setIsPanelVisible: (isVisible: boolean) => void;
   navigation: {
     isFirstDoc: boolean;
     isLastDoc: boolean;
@@ -66,6 +68,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const [params, setParams] = useState<Params>(defaultParams);
   const [documents, setDocuments] = useState<Array<Record<string, any>>>([]);
   const [navDocsIndex, setNavDocsIndex] = useState(0);
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
 
   const areAllParamsDefined =
     Object.values(params).filter(Boolean).length === Object.keys(defaultParams).length;
@@ -165,6 +168,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         next: goToNextDoc,
         prev: goToPrevDoc,
       },
+      isPanelVisible,
+      setIsPanelVisible,
     }),
     [
       previewResponse,
@@ -174,6 +179,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       totalDocs,
       goToNextDoc,
       goToPrevDoc,
+      isPanelVisible,
+      setIsPanelVisible,
     ]
   );
 

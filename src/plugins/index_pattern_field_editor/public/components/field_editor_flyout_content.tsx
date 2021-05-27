@@ -29,7 +29,7 @@ import { euiFlyoutMaxWidth, euiFlyoutClassname } from '../constants';
 import { Flyout } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
-import { FieldPreview } from './preview';
+import { FieldPreview, useFieldPreviewContext } from './preview';
 
 const geti18nTexts = (field?: Field) => {
   return {
@@ -110,6 +110,7 @@ const FieldEditorFlyoutContentComponent = ({
   const isEditingExistingField = !!field;
   const i18nTexts = geti18nTexts(field);
   const { indexPattern } = useFieldEditorContext();
+  const { isPanelVisible } = useFieldPreviewContext();
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,
@@ -286,9 +287,11 @@ const FieldEditorFlyoutContentComponent = ({
           </Flyout.Panel>
 
           {/* Preview panel */}
-          <Flyout.Panel width={40} backgroundColor="euiColorLightestShade">
-            <FieldPreview />
-          </Flyout.Panel>
+          {isPanelVisible && (
+            <Flyout.Panel width={40} backgroundColor="euiColorLightestShade">
+              <FieldPreview />
+            </Flyout.Panel>
+          )}
         </Flyout.Panels>
       )}
 
