@@ -24,7 +24,7 @@ export interface LocatorClient {
    *
    * @param id Unique ID of the locator.
    */
-  get<P>(id: string): LocatorPublic<P>;
+  get<P>(id: string): undefined | LocatorPublic<P>;
 }
 
 /**

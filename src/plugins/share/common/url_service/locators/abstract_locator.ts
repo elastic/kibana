@@ -34,7 +34,7 @@ export abstract class AbstractLocator<P extends SerializableState>
   // LocatorPublic<P> ----------------------------------------------------------
 
   public getLocation(params: P): KibanaLocation {
-    throw new Error('not implemented');
+    return this.definition.getLocation(params);
   }
 
   public navigate(params: P): void {

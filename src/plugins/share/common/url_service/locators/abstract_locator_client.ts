@@ -15,8 +15,17 @@ export abstract class AbstractLocatorClient implements Pick<LocatorClient, 'crea
     definition: LocatorDefinition<P>
   ) => AbstractLocator<P>;
 
+  /**
+   * Collection of registered locators.
+   */
   protected locators: Map<string, AbstractLocator<any>> = new Map();
 
+  /**
+   * Creates and register a URL locator.
+   *
+   * @param definition A definition of URL locator.
+   * @returns A public interface of URL locator.
+   */
   public create<P extends SerializableState>(definition: LocatorDefinition<P>): LocatorPublic<P> {
     const locator = new this.Locator<P>(definition);
 
@@ -25,7 +34,13 @@ export abstract class AbstractLocatorClient implements Pick<LocatorClient, 'crea
     return locator;
   }
 
-  public get<P>(id: string): LocatorPublic<P> {
-    throw new Error('not implemented');
+  /**
+   * Returns a previously registered URL locator.
+   *
+   * @param id ID of a URL locator.
+   * @returns A public interface of a registered URL locator.
+   */
+  public get<P>(id: string): undefined | LocatorPublic<P> {
+    return this.locators.get(id);
   }
 }
