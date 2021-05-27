@@ -8,21 +8,27 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
+import { TimesliderToggleButton } from './timeslider_toggle_button';
+import { closeTimeslider, openTimeslider } from '../../../actions';
+import { getIsTimesliderOpen } from '../../../selectors/ui_selectors';
 import { MapStoreState } from '../../../reducers/store';
-import { fitToDataBounds } from '../../../actions';
-import { FitToData } from './fit_to_data';
 
 function mapStateToProps(state: MapStoreState) {
-  return {};
+  return {
+    isTimesliderOpen: getIsTimesliderOpen(state),
+  };
 }
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    fitToBounds: () => {
-      dispatch(fitToDataBounds());
+    closeTimeslider: () => {
+      dispatch(closeTimeslider());
+    },
+    openTimeslider: () => {
+      dispatch(openTimeslider());
     },
   };
 }
 
-const connectedFitToData = connect(mapStateToProps, mapDispatchToProps)(FitToData);
-export { connectedFitToData as FitToData };
+const connected = connect(mapStateToProps, mapDispatchToProps)(TimesliderToggleButton);
+export { connected as TimesliderToggleButton };
