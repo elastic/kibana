@@ -17,18 +17,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('test large number of fields in sidebar', function () {
     before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader'], false);
       await esArchiver.loadIfNeeded('large_fields');
-      await PageObjects.settings.navigateTo();
+      await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader'], false);
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "2016-10-05T00:00:00", "to": "2016-10-06T00:00:00"}`,
       });
-      await PageObjects.settings.createIndexPattern('*huge*', 'date', true);
       await PageObjects.common.navigateToApp('discover');
     });
 
     it('test_huge data should have expected number of fields', async function () {
-      await PageObjects.discover.selectIndexPattern('*huge*');
+      await PageObjects.discover.selectIndexPattern('testhuge*');
       // initially this field should not be rendered
       const fieldExistsBeforeScrolling = await testSubjects.exists('field-myvar1050');
       expect(fieldExistsBeforeScrolling).to.be(false);
@@ -41,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('large_fields');
-      await kibanaServer.uiSettings.replace({});
+      await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
     });
   });
 }
