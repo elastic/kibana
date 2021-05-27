@@ -53,7 +53,7 @@ import { FieldCountPanel } from '../field_count_panel';
 import { DocumentCountContent } from '../document_count_content';
 import { DataLoader } from '../../data_loader/data_loader';
 import { JOB_FIELD_TYPES } from '../../../../common';
-import { useTimefilter } from '../../hooks/kibana_services';
+import { useTimefilter } from '../../common/hooks/use_time_filter';
 import { kbnTypeToJobType } from '../../util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';

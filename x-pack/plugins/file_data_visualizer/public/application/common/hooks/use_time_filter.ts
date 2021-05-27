@@ -6,11 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useFileDataVisualizerKibana } from '../kibana_context';
-
-export const useNotifications = () => {
-  return useFileDataVisualizerKibana().services.notifications;
-};
+import { useFileDataVisualizerKibana } from '../../kibana_context';
 
 interface UseTimefilterOptions {
   timeRangeSelector?: boolean;
