@@ -1978,7 +1978,7 @@ describe('migration visualization', () => {
     });
   });
 
-  describe('7.13.0 and 7.13.1 tsvb hide Last value indicator by default run twice', () => {
+  describe('7.13.0 and 7.13.1 tsvb migrations can run twice', () => {
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.13.0'](
         doc as Parameters<SavedObjectMigrationFn>[0],
