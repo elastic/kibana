@@ -28,7 +28,6 @@ export function ToolbarOverlay(props: Props) {
     props.addFilters && props.showToolsControl ? (
       <EuiFlexItem>
         <ToolsControl
-          geoFields={props.geoFields}
           getFilterActions={props.getFilterActions}
           getActionContext={props.getActionContext}
         />
