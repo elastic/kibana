@@ -25,14 +25,7 @@ import {
   removeServerGeneratedPropertiesFromUserAction,
   getCaseUserActions,
 } from '../../../../common/lib/utils';
-import {
-  secOnly,
-  secOnlyRead,
-  globalRead,
-  obsOnlyRead,
-  obsSecRead,
-  noKibanaPrivileges,
-} from '../../../../common/lib/authentication/users';
+import { secOnly, usersWithoutWritePermissions } from '../../../../common/lib/authentication/users';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -265,7 +258,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+      for (const user of usersWithoutWritePermissions) {
         it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should NOT create a case`, async () => {

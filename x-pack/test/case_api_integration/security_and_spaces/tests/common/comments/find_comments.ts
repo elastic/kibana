@@ -36,10 +36,14 @@ import {
   secOnly,
   obsOnlyRead,
   secOnlyRead,
-  noKibanaPrivileges,
   superUser,
   globalRead,
   obsSecRead,
+  globalReadMinimal,
+  secOnlyReadMinimal,
+  secOnlyReadCasesAll,
+  secOnlyAllCasesRead,
+  authScenariosWithoutRead,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -229,6 +233,18 @@ export default ({ getService }: FtrProviderContext): void => {
             caseID: obsCase.id,
           },
           {
+            user: globalReadMinimal,
+            numExpectedEntites: 1,
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
+            caseID: secCase.id,
+          },
+          {
+            user: globalReadMinimal,
+            numExpectedEntites: 1,
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
+            caseID: obsCase.id,
+          },
+          {
             user: superUser,
             numExpectedEntites: 1,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
@@ -242,6 +258,24 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           {
             user: secOnlyRead,
+            numExpectedEntites: 1,
+            owners: ['securitySolutionFixture'],
+            caseID: secCase.id,
+          },
+          {
+            user: secOnlyReadMinimal,
+            numExpectedEntites: 1,
+            owners: ['securitySolutionFixture'],
+            caseID: secCase.id,
+          },
+          {
+            user: secOnlyReadCasesAll,
+            numExpectedEntites: 1,
+            owners: ['securitySolutionFixture'],
+            caseID: secCase.id,
+          },
+          {
+            user: secOnlyAllCasesRead,
             numExpectedEntites: 1,
             owners: ['securitySolutionFixture'],
             caseID: secCase.id,
@@ -278,10 +312,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      for (const scenario of [
-        { user: noKibanaPrivileges, space: 'space1' },
-        { user: secOnly, space: 'space2' },
-      ]) {
+      for (const scenario of authScenariosWithoutRead) {
         it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
           scenario.space
         } - should NOT read a comment`, async () => {

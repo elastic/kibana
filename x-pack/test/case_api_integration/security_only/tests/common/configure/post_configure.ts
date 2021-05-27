@@ -19,11 +19,7 @@ import {
 
 import {
   secOnlySpacesAll,
-  obsOnlyReadSpacesAll,
-  secOnlyReadSpacesAll,
-  noKibanaPrivileges,
-  globalRead,
-  obsSecReadSpacesAll,
+  usersWithoutWritePermissionsSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import { secOnlyDefaultSpaceAuth, superUserDefaultSpaceAuth } from '../../../utils';
 
@@ -61,13 +57,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    for (const user of [
-      globalRead,
-      secOnlyReadSpacesAll,
-      obsOnlyReadSpacesAll,
-      obsSecReadSpacesAll,
-      noKibanaPrivileges,
-    ]) {
+    for (const user of usersWithoutWritePermissionsSpacesAll) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should NOT create a configuration`, async () => {

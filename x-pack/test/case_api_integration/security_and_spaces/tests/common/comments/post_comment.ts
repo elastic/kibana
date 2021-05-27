@@ -53,14 +53,10 @@ import {
   getQuerySignalIds,
 } from '../../../../../detection_engine_api_integration/utils';
 import {
-  globalRead,
-  noKibanaPrivileges,
   obsOnly,
-  obsOnlyRead,
-  obsSecRead,
   secOnly,
-  secOnlyRead,
   superUser,
+  usersWithoutWritePermissions,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -563,7 +559,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+      for (const user of usersWithoutWritePermissions) {
         it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should not create a comment`, async () => {

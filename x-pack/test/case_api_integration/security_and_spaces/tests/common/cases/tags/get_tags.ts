@@ -18,8 +18,12 @@ import {
   secOnlyRead,
   obsOnlyRead,
   obsSecRead,
-  noKibanaPrivileges,
   obsSec,
+  globalReadMinimal,
+  secOnlyReadMinimal,
+  secOnlyReadCasesAll,
+  secOnlyAllCasesRead,
+  authScenariosWithoutRead,
 } from '../../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -77,10 +81,17 @@ export default ({ getService }: FtrProviderContext): void => {
             expectedTags: ['sec', 'obs'],
           },
           {
+            user: globalReadMinimal,
+            expectedTags: ['sec', 'obs'],
+          },
+          {
             user: superUser,
             expectedTags: ['sec', 'obs'],
           },
           { user: secOnlyRead, expectedTags: ['sec'] },
+          { user: secOnlyReadMinimal, expectedTags: ['sec'] },
+          { user: secOnlyReadCasesAll, expectedTags: ['sec'] },
+          { user: secOnlyAllCasesRead, expectedTags: ['sec'] },
           { user: obsOnlyRead, expectedTags: ['obs'] },
           {
             user: obsSecRead,
@@ -100,10 +111,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      for (const scenario of [
-        { user: noKibanaPrivileges, space: 'space1' },
-        { user: secOnly, space: 'space2' },
-      ]) {
+      for (const scenario of authScenariosWithoutRead) {
         it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
           scenario.space
         } - should NOT get all tags`, async () => {

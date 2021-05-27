@@ -29,6 +29,7 @@ import {
   SubCasesFindResponse,
   CommentRequest,
 } from '../../../../plugins/cases/common/api';
+import { SEC_SOL_FIXTURE } from '../fixtures/plugins/security_solution/server';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 /**
@@ -49,7 +50,7 @@ export const postCaseReq: CasePostRequest = {
   settings: {
     syncAlerts: true,
   },
-  owner: 'securitySolutionFixture',
+  owner: SEC_SOL_FIXTURE,
 };
 
 /**
@@ -79,7 +80,7 @@ export const userActionPostResp: CasesClientPostRequest = {
 export const postCommentUserReq: CommentRequestUserType = {
   comment: 'This is a cool comment',
   type: CommentType.user,
-  owner: 'securitySolutionFixture',
+  owner: SEC_SOL_FIXTURE,
 };
 
 export const postCommentAlertReq: CommentRequestAlertType = {
@@ -87,7 +88,7 @@ export const postCommentAlertReq: CommentRequestAlertType = {
   index: 'test-index',
   rule: { id: 'test-rule-id', name: 'test-index-id' },
   type: CommentType.alert,
-  owner: 'securitySolutionFixture',
+  owner: SEC_SOL_FIXTURE,
 };
 
 export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
@@ -96,7 +97,7 @@ export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
     { _id: 'test-id2', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
   ]),
   type: CommentType.generatedAlert,
-  owner: 'securitySolutionFixture',
+  owner: SEC_SOL_FIXTURE,
 };
 
 export const postCaseResp = (

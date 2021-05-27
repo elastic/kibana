@@ -21,6 +21,102 @@ export const noKibanaPrivileges: Role = {
   },
 };
 
+export const securitySolutionOnlyAllCasesNone: Role = {
+  name: 'sec_only_all_cases_none',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['minimal_all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyAllCasesRead: Role = {
+  name: 'sec_only_all_cases_read',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['minimal_all', 'cases_read'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyReadCasesNone: Role = {
+  name: 'sec_only_read_cases_none',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['minimal_read'],
+          actions: ['read'],
+          actionsSimulators: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyReadCasesAll: Role = {
+  name: 'sec_only_read_cases_all',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['minimal_read', 'cases_all'],
+          actions: ['read'],
+          actionsSimulators: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const globalRead: Role = {
   name: 'global_read',
   privileges: {
@@ -36,6 +132,31 @@ export const globalRead: Role = {
       {
         feature: {
           securitySolutionFixture: ['read'],
+          observabilityFixture: ['read'],
+          actions: ['read'],
+          actionsSimulators: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const globalReadMinimal: Role = {
+  name: 'global_read_minimal',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['minimal_read', 'cases_read'],
           observabilityFixture: ['read'],
           actions: ['read'],
           actionsSimulators: ['read'],
@@ -70,6 +191,30 @@ export const securitySolutionOnlyAll: Role = {
   },
 };
 
+export const securitySolutionOnlyAllMinimal: Role = {
+  name: 'sec_only_all_minimal',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['minimal_all', 'cases_all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const securitySolutionOnlyRead: Role = {
   name: 'sec_only_read',
   privileges: {
@@ -89,6 +234,30 @@ export const securitySolutionOnlyRead: Role = {
           actionsSimulators: ['read'],
         },
         spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyReadMinimal: Role = {
+  name: 'sec_only_read_minimal',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['minimal_read', 'cases_read'],
+          actions: ['read'],
+          actionsSimulators: ['read'],
+        },
+        spaces: ['*'],
       },
     ],
   },
@@ -144,9 +313,16 @@ export const observabilityOnlyRead: Role = {
 
 export const roles = [
   noKibanaPrivileges,
+  securitySolutionOnlyAllCasesNone,
+  securitySolutionOnlyReadCasesNone,
+  securitySolutionOnlyReadCasesAll,
+  securitySolutionOnlyAllCasesRead,
   globalRead,
+  globalReadMinimal,
   securitySolutionOnlyAll,
   securitySolutionOnlyRead,
+  securitySolutionOnlyAllMinimal,
+  securitySolutionOnlyReadMinimal,
   observabilityOnlyAll,
   observabilityOnlyRead,
 ];
@@ -156,7 +332,7 @@ export const roles = [
  */
 
 export const securitySolutionOnlyAllSpacesAll: Role = {
-  name: 'sec_only_all',
+  name: 'sec_only_all_spaces_all',
   privileges: {
     elasticsearch: {
       indices: [
@@ -180,7 +356,7 @@ export const securitySolutionOnlyAllSpacesAll: Role = {
 };
 
 export const securitySolutionOnlyReadSpacesAll: Role = {
-  name: 'sec_only_read',
+  name: 'sec_only_read_spaces_all',
   privileges: {
     elasticsearch: {
       indices: [
@@ -204,7 +380,7 @@ export const securitySolutionOnlyReadSpacesAll: Role = {
 };
 
 export const observabilityOnlyAllSpacesAll: Role = {
-  name: 'obs_only_all',
+  name: 'obs_only_all_spaces_all',
   privileges: {
     elasticsearch: {
       indices: [
@@ -228,7 +404,7 @@ export const observabilityOnlyAllSpacesAll: Role = {
 };
 
 export const observabilityOnlyReadSpacesAll: Role = {
-  name: 'obs_only_read',
+  name: 'obs_only_read_spaces_all',
   privileges: {
     elasticsearch: {
       indices: [
@@ -259,8 +435,15 @@ export const observabilityOnlyReadSpacesAll: Role = {
 export const rolesDefaultSpace = [
   noKibanaPrivileges,
   globalRead,
+  globalReadMinimal,
   securitySolutionOnlyAllSpacesAll,
   securitySolutionOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAll,
   observabilityOnlyReadSpacesAll,
+  securitySolutionOnlyReadMinimal,
+  securitySolutionOnlyAllMinimal,
+  securitySolutionOnlyAllCasesNone,
+  securitySolutionOnlyAllCasesRead,
+  securitySolutionOnlyReadCasesAll,
+  securitySolutionOnlyReadCasesNone,
 ];

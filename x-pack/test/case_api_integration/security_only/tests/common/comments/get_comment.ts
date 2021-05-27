@@ -15,15 +15,13 @@ import {
   getComment,
 } from '../../../../common/lib/utils';
 import {
-  globalRead,
   noKibanaPrivileges,
   obsOnlySpacesAll,
   obsOnlyReadSpacesAll,
-  obsSecSpacesAll,
-  obsSecReadSpacesAll,
   secOnlySpacesAll,
-  secOnlyReadSpacesAll,
-  superUser,
+  usersWithReadPermissionsSpacesAll,
+  secOnlyAllCasesNone,
+  secOnlyReadCasesNone,
 } from '../../../../common/lib/authentication/users';
 import { superUserDefaultSpaceAuth } from '../../../utils';
 
@@ -53,14 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: superUserDefaultSpaceAuth,
       });
 
-      for (const user of [
-        globalRead,
-        superUser,
-        secOnlySpacesAll,
-        secOnlyReadSpacesAll,
-        obsSecSpacesAll,
-        obsSecReadSpacesAll,
-      ]) {
+      for (const user of usersWithReadPermissionsSpacesAll) {
         await getComment({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
@@ -85,7 +76,13 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: superUserDefaultSpaceAuth,
       });
 
-      for (const user of [noKibanaPrivileges, obsOnlySpacesAll, obsOnlyReadSpacesAll]) {
+      for (const user of [
+        noKibanaPrivileges,
+        secOnlyAllCasesNone,
+        secOnlyReadCasesNone,
+        obsOnlySpacesAll,
+        obsOnlyReadSpacesAll,
+      ]) {
         await getComment({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,

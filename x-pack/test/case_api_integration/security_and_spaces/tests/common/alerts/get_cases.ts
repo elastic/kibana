@@ -19,14 +19,18 @@ import {
 import { CaseResponse } from '../../../../../../plugins/cases/common';
 import {
   globalRead,
-  noKibanaPrivileges,
+  globalReadMinimal,
   obsOnly,
   obsOnlyRead,
   obsSec,
   obsSecRead,
   secOnly,
+  secOnlyAllCasesRead,
   secOnlyRead,
+  secOnlyReadCasesAll,
+  secOnlyReadMinimal,
   superUser,
+  authScenariosWithoutRead,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -179,10 +183,17 @@ export default ({ getService }: FtrProviderContext): void => {
             caseIDs: [case1.id, case2.id, case3.id],
           },
           {
+            user: globalReadMinimal,
+            caseIDs: [case1.id, case2.id, case3.id],
+          },
+          {
             user: superUser,
             caseIDs: [case1.id, case2.id, case3.id],
           },
           { user: secOnlyRead, caseIDs: [case1.id, case2.id] },
+          { user: secOnlyReadMinimal, caseIDs: [case1.id, case2.id] },
+          { user: secOnlyAllCasesRead, caseIDs: [case1.id, case2.id] },
+          { user: secOnlyReadCasesAll, caseIDs: [case1.id, case2.id] },
           { user: obsOnlyRead, caseIDs: [case3.id] },
           {
             user: obsSecRead,
@@ -205,10 +216,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      for (const scenario of [
-        { user: noKibanaPrivileges, space: 'space1' },
-        { user: secOnly, space: 'space2' },
-      ]) {
+      for (const scenario of authScenariosWithoutRead) {
         it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
           scenario.space
         } - should not get cases`, async () => {

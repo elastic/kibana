@@ -22,12 +22,8 @@ import {
 
 import {
   secOnly,
-  obsOnlyRead,
-  secOnlyRead,
-  noKibanaPrivileges,
-  globalRead,
-  obsSecRead,
   superUser,
+  usersWithoutWritePermissions,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -222,7 +218,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+      for (const user of usersWithoutWritePermissions) {
         it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should NOT create a configuration`, async () => {

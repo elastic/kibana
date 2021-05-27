@@ -17,13 +17,9 @@ import {
   getCaseUserActions,
 } from '../../../../common/lib/utils';
 import {
-  globalRead,
-  noKibanaPrivileges,
-  obsSecSpacesAll,
-  obsSecReadSpacesAll,
   secOnlySpacesAll,
-  secOnlyReadSpacesAll,
-  superUser,
+  usersWithoutReadPermissionsSpacesAll,
+  usersWithReadPermissionsSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import { superUserDefaultSpaceAuth } from '../../../utils';
 
@@ -63,14 +59,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should get the user actions for a case when the user has the correct permissions', async () => {
-      for (const user of [
-        globalRead,
-        superUser,
-        secOnlySpacesAll,
-        secOnlyReadSpacesAll,
-        obsSecSpacesAll,
-        obsSecReadSpacesAll,
-      ]) {
+      for (const user of usersWithReadPermissionsSpacesAll) {
         const userActions = await getCaseUserActions({
           supertest: supertestWithoutAuth,
           caseID: caseInfo.id,
@@ -81,16 +70,18 @@ export default ({ getService }: FtrProviderContext): void => {
       }
     });
 
-    it(`should 403 when requesting the user actions of a case with user ${
-      noKibanaPrivileges.username
-    } with role(s) ${noKibanaPrivileges.roles.join()}`, async () => {
-      await getCaseUserActions({
-        supertest: supertestWithoutAuth,
-        caseID: caseInfo.id,
-        auth: { user: noKibanaPrivileges, space: null },
-        expectedHttpCode: 403,
+    for (const user of usersWithoutReadPermissionsSpacesAll) {
+      it(`should 403 when requesting the user actions of a case with user ${
+        user.username
+      } with role(s) ${user.roles.join()}`, async () => {
+        await getCaseUserActions({
+          supertest: supertestWithoutAuth,
+          caseID: caseInfo.id,
+          auth: { user, space: null },
+          expectedHttpCode: 403,
+        });
       });
-    });
+    }
 
     it('should return a 404 when attempting to access a space', async () => {
       await getCaseUserActions({

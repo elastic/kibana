@@ -17,12 +17,16 @@ import {
 } from '../../../../common/lib/utils';
 import {
   globalRead,
-  noKibanaPrivileges,
   obsOnlyReadSpacesAll,
   obsSecSpacesAll,
   obsSecReadSpacesAll,
   secOnlyReadSpacesAll,
   superUser,
+  globalReadMinimal,
+  secOnlyReadMinimal,
+  secOnlyReadCasesAll,
+  secOnlyAllCasesRead,
+  usersWithoutReadPermissionsSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import {
   obsOnlyDefaultSpaceAuth,
@@ -82,10 +86,17 @@ export default ({ getService }: FtrProviderContext): void => {
           caseIDs: [case1.id, case2.id, case3.id],
         },
         {
+          user: globalReadMinimal,
+          caseIDs: [case1.id, case2.id, case3.id],
+        },
+        {
           user: superUser,
           caseIDs: [case1.id, case2.id, case3.id],
         },
         { user: secOnlyReadSpacesAll, caseIDs: [case1.id, case2.id] },
+        { user: secOnlyReadMinimal, caseIDs: [case1.id, case2.id] },
+        { user: secOnlyReadCasesAll, caseIDs: [case1.id, case2.id] },
+        { user: secOnlyAllCasesRead, caseIDs: [case1.id, case2.id] },
         { user: obsOnlyReadSpacesAll, caseIDs: [case3.id] },
         {
           user: obsSecReadSpacesAll,
@@ -108,28 +119,30 @@ export default ({ getService }: FtrProviderContext): void => {
       }
     });
 
-    it(`User ${
-      noKibanaPrivileges.username
-    } with role(s) ${noKibanaPrivileges.roles.join()} - should not get cases`, async () => {
-      const caseInfo = await createCase(supertest, getPostCaseRequest(), 200, {
-        user: superUser,
-        space: null,
-      });
+    for (const user of usersWithoutReadPermissionsSpacesAll) {
+      it(`User ${
+        user.username
+      } with role(s) ${user.roles.join()} - should not get cases`, async () => {
+        const caseInfo = await createCase(supertest, getPostCaseRequest(), 200, {
+          user: superUser,
+          space: null,
+        });
 
-      await createComment({
-        supertest: supertestWithoutAuth,
-        caseId: caseInfo.id,
-        params: postCommentAlertReq,
-        auth: superUserDefaultSpaceAuth,
-      });
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          params: postCommentAlertReq,
+          auth: superUserDefaultSpaceAuth,
+        });
 
-      await getCaseIDsByAlert({
-        supertest: supertestWithoutAuth,
-        alertID: postCommentAlertReq.alertId as string,
-        auth: { user: noKibanaPrivileges, space: null },
-        expectedHttpCode: 403,
+        await getCaseIDsByAlert({
+          supertest: supertestWithoutAuth,
+          alertID: postCommentAlertReq.alertId as string,
+          auth: { user, space: null },
+          expectedHttpCode: 403,
+        });
       });
-    });
+    }
 
     it('should return a 404 when attempting to access a space', async () => {
       const [case1, case2] = await Promise.all([

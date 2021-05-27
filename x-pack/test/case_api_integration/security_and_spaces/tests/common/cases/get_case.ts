@@ -28,13 +28,12 @@ import {
 import {
   secOnly,
   obsOnly,
-  globalRead,
   superUser,
-  secOnlyRead,
   obsOnlyRead,
-  obsSecRead,
   noKibanaPrivileges,
-  obsSec,
+  usersWithReadPermissions,
+  secOnlyReadCasesNone,
+  secOnlyAllCasesNone,
 } from '../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../common/lib/authentication';
 
@@ -106,7 +105,7 @@ export default ({ getService }: FtrProviderContext): void => {
           }
         );
 
-        for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
+        for (const user of usersWithReadPermissions) {
           const theCase = await getCase({
             supertest: supertestWithoutAuth,
             caseId: newCase.id,
@@ -174,7 +173,13 @@ export default ({ getService }: FtrProviderContext): void => {
           }
         );
 
-        for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
+        for (const user of [
+          noKibanaPrivileges,
+          secOnlyReadCasesNone,
+          secOnlyAllCasesNone,
+          obsOnly,
+          obsOnlyRead,
+        ]) {
           await getCase({
             supertest: supertestWithoutAuth,
             caseId: newCase.id,

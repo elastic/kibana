@@ -18,10 +18,14 @@ import {
   secOnlySpacesAll,
   obsOnlyReadSpacesAll,
   secOnlyReadSpacesAll,
-  noKibanaPrivileges,
   superUser,
   globalRead,
   obsSecReadSpacesAll,
+  globalReadMinimal,
+  secOnlyReadMinimal,
+  secOnlyReadCasesAll,
+  secOnlyAllCasesRead,
+  usersWithoutReadPermissionsSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import {
   obsOnlyDefaultSpaceAuth,
@@ -62,12 +66,32 @@ export default ({ getService }: FtrProviderContext): void => {
           owners: ['securitySolutionFixture', 'observabilityFixture'],
         },
         {
+          user: globalReadMinimal,
+          numberOfExpectedCases: 2,
+          owners: ['securitySolutionFixture', 'observabilityFixture'],
+        },
+        {
           user: superUser,
           numberOfExpectedCases: 2,
           owners: ['securitySolutionFixture', 'observabilityFixture'],
         },
         {
           user: secOnlyReadSpacesAll,
+          numberOfExpectedCases: 1,
+          owners: ['securitySolutionFixture'],
+        },
+        {
+          user: secOnlyReadMinimal,
+          numberOfExpectedCases: 1,
+          owners: ['securitySolutionFixture'],
+        },
+        {
+          user: secOnlyReadCasesAll,
+          numberOfExpectedCases: 1,
+          owners: ['securitySolutionFixture'],
+        },
+        {
+          user: secOnlyAllCasesRead,
           numberOfExpectedCases: 1,
           owners: ['securitySolutionFixture'],
         },
@@ -100,27 +124,29 @@ export default ({ getService }: FtrProviderContext): void => {
       }
     });
 
-    it(`User ${
-      noKibanaPrivileges.username
-    } with role(s) ${noKibanaPrivileges.roles.join()} - should NOT read a case configuration`, async () => {
-      // super user creates a configuration at the appropriate space
-      await createConfiguration(
-        supertestWithoutAuth,
-        getConfigurationRequest(),
-        200,
-        superUserDefaultSpaceAuth
-      );
+    for (const user of usersWithoutReadPermissionsSpacesAll) {
+      it(`User ${
+        user.username
+      } with role(s) ${user.roles.join()} - should NOT read a case configuration`, async () => {
+        // super user creates a configuration at the appropriate space
+        await createConfiguration(
+          supertestWithoutAuth,
+          getConfigurationRequest(),
+          200,
+          superUserDefaultSpaceAuth
+        );
 
-      // user should not be able to read configurations at the appropriate space
-      await getConfiguration({
-        supertest: supertestWithoutAuth,
-        expectedHttpCode: 403,
-        auth: {
-          user: noKibanaPrivileges,
-          space: null,
-        },
+        // user should not be able to read configurations at the appropriate space
+        await getConfiguration({
+          supertest: supertestWithoutAuth,
+          expectedHttpCode: 403,
+          auth: {
+            user,
+            space: null,
+          },
+        });
       });
-    });
+    }
 
     it('should return a 404 when attempting to access a space', async () => {
       await createConfiguration(

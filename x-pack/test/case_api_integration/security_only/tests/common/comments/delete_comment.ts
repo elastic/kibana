@@ -20,12 +20,8 @@ import {
   getAuthWithSuperUser,
 } from '../../../../common/lib/utils';
 import {
-  globalRead,
-  noKibanaPrivileges,
-  obsOnlyReadSpacesAll,
-  obsSecReadSpacesAll,
   secOnlySpacesAll,
-  secOnlyReadSpacesAll,
+  usersWithoutWritePermissionsSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import { obsOnlyDefaultSpaceAuth, secOnlyDefaultSpaceAuth } from '../../../utils';
 
@@ -130,12 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    for (const user of [
-      globalRead,
-      secOnlyReadSpacesAll,
-      obsOnlyReadSpacesAll,
-      obsSecReadSpacesAll,
-    ]) {
+    for (const user of usersWithoutWritePermissionsSpacesAll) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should NOT delete a comment`, async () => {
@@ -169,38 +160,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
     }
-
-    it('should not delete a comment with no kibana privileges', async () => {
-      const postedCase = await createCase(
-        supertestWithoutAuth,
-        getPostCaseRequest(),
-        200,
-        superUserNoSpaceAuth
-      );
-
-      const commentResp = await createComment({
-        supertest: supertestWithoutAuth,
-        caseId: postedCase.id,
-        params: postCommentUserReq,
-        auth: superUserNoSpaceAuth,
-      });
-
-      await deleteComment({
-        supertest: supertestWithoutAuth,
-        caseId: postedCase.id,
-        commentId: commentResp.comments![0].id,
-        auth: { user: noKibanaPrivileges, space: null },
-        expectedHttpCode: 403,
-      });
-
-      await deleteAllComments({
-        supertest: supertestWithoutAuth,
-        caseId: postedCase.id,
-        auth: { user: noKibanaPrivileges, space: null },
-        // the find in the delete all will return no results
-        expectedHttpCode: 404,
-      });
-    });
 
     it('should return a 404 when attempting to access a space', async () => {
       const postedCase = await createCase(

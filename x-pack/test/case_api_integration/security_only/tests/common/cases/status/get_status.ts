@@ -18,12 +18,16 @@ import {
 } from '../../../../../common/lib/utils';
 import {
   globalRead,
-  noKibanaPrivileges,
   obsOnlyReadSpacesAll,
   obsSecReadSpacesAll,
   secOnlySpacesAll,
   secOnlyReadSpacesAll,
   superUser,
+  globalReadMinimal,
+  secOnlyReadCasesAll,
+  secOnlyReadMinimal,
+  secOnlyAllCasesRead,
+  usersWithoutReadPermissionsSpacesAll,
 } from '../../../../../common/lib/authentication/users';
 import { superUserDefaultSpaceAuth } from '../../../../utils';
 
@@ -88,8 +92,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
       for (const scenario of [
         { user: globalRead, stats: { open: 1, inProgress: 2, closed: 1 } },
+        { user: globalReadMinimal, stats: { open: 1, inProgress: 2, closed: 1 } },
         { user: superUser, stats: { open: 1, inProgress: 2, closed: 1 } },
         { user: secOnlyReadSpacesAll, stats: { open: 0, inProgress: 1, closed: 1 } },
+        { user: secOnlyReadCasesAll, stats: { open: 0, inProgress: 1, closed: 1 } },
+        { user: secOnlyReadMinimal, stats: { open: 0, inProgress: 1, closed: 1 } },
+        { user: secOnlyAllCasesRead, stats: { open: 0, inProgress: 1, closed: 1 } },
         { user: obsOnlyReadSpacesAll, stats: { open: 1, inProgress: 1, closed: 0 } },
         { user: obsSecReadSpacesAll, stats: { open: 1, inProgress: 2, closed: 1 } },
         {
@@ -119,17 +127,24 @@ export default ({ getService }: FtrProviderContext): void => {
       }
     });
 
-    it(`should return a 403 when retrieving the statuses when the user ${
-      noKibanaPrivileges.username
-    } with role(s) ${noKibanaPrivileges.roles.join()}`, async () => {
-      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserDefaultSpaceAuth);
+    for (const user of usersWithoutReadPermissionsSpacesAll) {
+      it(`should return a 403 when retrieving the statuses when the user ${
+        user.username
+      } with role(s) ${user.roles.join()}`, async () => {
+        await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest(),
+          200,
+          superUserDefaultSpaceAuth
+        );
 
-      await getAllCasesStatuses({
-        supertest: supertestWithoutAuth,
-        auth: { user: noKibanaPrivileges, space: null },
-        expectedHttpCode: 403,
+        await getAllCasesStatuses({
+          supertest: supertestWithoutAuth,
+          auth: { user, space: null },
+          expectedHttpCode: 403,
+        });
       });
-    });
+    }
 
     it('should return a 404 when attempting to access a space', async () => {
       await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserDefaultSpaceAuth);

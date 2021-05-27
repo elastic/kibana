@@ -38,11 +38,15 @@ import {
   secOnly,
   obsOnlyRead,
   secOnlyRead,
-  noKibanaPrivileges,
   superUser,
   globalRead,
   obsSecRead,
   obsSec,
+  globalReadMinimal,
+  secOnlyReadMinimal,
+  secOnlyReadCasesAll,
+  secOnlyAllCasesRead,
+  authScenariosWithoutRead,
 } from '../../../../common/lib/authentication/users';
 
 interface CaseAttributes {
@@ -607,11 +611,31 @@ export default ({ getService }: FtrProviderContext): void => {
             owners: ['securitySolutionFixture', 'observabilityFixture'],
           },
           {
+            user: globalReadMinimal,
+            numberOfExpectedCases: 2,
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
+          },
+          {
             user: superUser,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
           },
           { user: secOnlyRead, numberOfExpectedCases: 1, owners: ['securitySolutionFixture'] },
+          {
+            user: secOnlyReadMinimal,
+            numberOfExpectedCases: 1,
+            owners: ['securitySolutionFixture'],
+          },
+          {
+            user: secOnlyReadCasesAll,
+            numberOfExpectedCases: 1,
+            owners: ['securitySolutionFixture'],
+          },
+          {
+            user: secOnlyAllCasesRead,
+            numberOfExpectedCases: 1,
+            owners: ['securitySolutionFixture'],
+          },
           { user: obsOnlyRead, numberOfExpectedCases: 1, owners: ['observabilityFixture'] },
           {
             user: obsSecRead,
@@ -631,10 +655,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      for (const scenario of [
-        { user: noKibanaPrivileges, space: 'space1' },
-        { user: secOnly, space: 'space2' },
-      ]) {
+      for (const scenario of authScenariosWithoutRead) {
         it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
           scenario.space
         } - should NOT read a case`, async () => {

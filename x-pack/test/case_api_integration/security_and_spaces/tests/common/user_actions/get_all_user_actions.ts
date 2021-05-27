@@ -28,13 +28,9 @@ import {
   superUserSpace1Auth,
 } from '../../../../common/lib/utils';
 import {
-  globalRead,
-  noKibanaPrivileges,
-  obsSec,
-  obsSecRead,
-  secOnly,
-  secOnlyRead,
+  authScenariosWithoutRead,
   superUser,
+  usersWithReadPermissions,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -364,7 +360,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should get the user actions for a case when the user has the correct permissions', async () => {
-        for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
+        for (const user of usersWithReadPermissions) {
           const userActions = await getCaseUserActions({
             supertest: supertestWithoutAuth,
             caseID: caseInfo.id,
@@ -375,10 +371,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      for (const scenario of [
-        { user: noKibanaPrivileges, space: 'space1' },
-        { user: secOnly, space: 'space2' },
-      ]) {
+      for (const scenario of authScenariosWithoutRead) {
         it(`should 403 when requesting the user actions of a case with user ${
           scenario.user.username
         } with role(s) ${scenario.user.roles.join()} and space ${scenario.space}`, async () => {

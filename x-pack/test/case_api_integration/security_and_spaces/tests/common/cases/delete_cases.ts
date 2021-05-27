@@ -31,13 +31,9 @@ import { getSubCaseDetailsUrl } from '../../../../../../plugins/cases/common/api
 import { CaseResponse } from '../../../../../../plugins/cases/common/api';
 import {
   secOnly,
-  secOnlyRead,
-  globalRead,
-  obsOnlyRead,
-  obsSecRead,
-  noKibanaPrivileges,
   obsOnly,
   superUser,
+  usersWithoutWritePermissions,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -250,7 +246,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+      for (const user of usersWithoutWritePermissions) {
         it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should NOT delete a case`, async () => {

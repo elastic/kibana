@@ -18,12 +18,15 @@ import {
   superUserSpace1Auth,
 } from '../../../../../common/lib/utils';
 import {
+  authScenariosWithoutRead,
   globalRead,
-  noKibanaPrivileges,
+  globalReadMinimal,
   obsOnlyRead,
   obsSecRead,
-  secOnly,
+  secOnlyAllCasesRead,
   secOnlyRead,
+  secOnlyReadCasesAll,
+  secOnlyReadMinimal,
   superUser,
 } from '../../../../../common/lib/authentication/users';
 
@@ -130,8 +133,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
         for (const scenario of [
           { user: globalRead, stats: { open: 1, inProgress: 2, closed: 1 } },
+          { user: globalReadMinimal, stats: { open: 1, inProgress: 2, closed: 1 } },
           { user: superUser, stats: { open: 1, inProgress: 2, closed: 1 } },
           { user: secOnlyRead, stats: { open: 0, inProgress: 1, closed: 1 } },
+          { user: secOnlyReadMinimal, stats: { open: 0, inProgress: 1, closed: 1 } },
+          { user: secOnlyReadCasesAll, stats: { open: 0, inProgress: 1, closed: 1 } },
+          { user: secOnlyAllCasesRead, stats: { open: 0, inProgress: 1, closed: 1 } },
           { user: obsOnlyRead, stats: { open: 1, inProgress: 1, closed: 0 } },
           { user: obsSecRead, stats: { open: 1, inProgress: 2, closed: 1 } },
           {
@@ -161,10 +168,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      for (const scenario of [
-        { user: noKibanaPrivileges, space: 'space1' },
-        { user: secOnly, space: 'space2' },
-      ]) {
+      for (const scenario of authScenariosWithoutRead) {
         it(`should return a 403 when retrieving the statuses when the user ${
           scenario.user.username
         } with role(s) ${scenario.user.roles.join()} and space ${scenario.space}`, async () => {

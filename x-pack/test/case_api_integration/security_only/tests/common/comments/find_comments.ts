@@ -30,10 +30,14 @@ import {
   secOnlySpacesAll,
   obsOnlyReadSpacesAll,
   secOnlyReadSpacesAll,
-  noKibanaPrivileges,
   superUser,
   globalRead,
   obsSecReadSpacesAll,
+  globalReadMinimal,
+  secOnlyReadMinimal,
+  secOnlyReadCasesAll,
+  secOnlyAllCasesRead,
+  usersWithoutReadPermissionsSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import {
   obsOnlyDefaultSpaceAuth,
@@ -101,6 +105,18 @@ export default ({ getService }: FtrProviderContext): void => {
           caseID: obsCase.id,
         },
         {
+          user: globalReadMinimal,
+          numExpectedEntites: 1,
+          owners: ['securitySolutionFixture', 'observabilityFixture'],
+          caseID: secCase.id,
+        },
+        {
+          user: globalReadMinimal,
+          numExpectedEntites: 1,
+          owners: ['securitySolutionFixture', 'observabilityFixture'],
+          caseID: obsCase.id,
+        },
+        {
           user: superUser,
           numExpectedEntites: 1,
           owners: ['securitySolutionFixture', 'observabilityFixture'],
@@ -114,6 +130,24 @@ export default ({ getService }: FtrProviderContext): void => {
         },
         {
           user: secOnlyReadSpacesAll,
+          numExpectedEntites: 1,
+          owners: ['securitySolutionFixture'],
+          caseID: secCase.id,
+        },
+        {
+          user: secOnlyReadMinimal,
+          numExpectedEntites: 1,
+          owners: ['securitySolutionFixture'],
+          caseID: secCase.id,
+        },
+        {
+          user: secOnlyReadCasesAll,
+          numExpectedEntites: 1,
+          owners: ['securitySolutionFixture'],
+          caseID: secCase.id,
+        },
+        {
+          user: secOnlyAllCasesRead,
           numExpectedEntites: 1,
           owners: ['securitySolutionFixture'],
           caseID: secCase.id,
@@ -150,30 +184,32 @@ export default ({ getService }: FtrProviderContext): void => {
       }
     });
 
-    it(`User ${
-      noKibanaPrivileges.username
-    } with role(s) ${noKibanaPrivileges.roles.join()} - should NOT read a comment`, async () => {
-      // super user creates a case and comment in the appropriate space
-      const caseInfo = await createCase(
-        supertestWithoutAuth,
-        getPostCaseRequest(),
-        200,
-        superUserDefaultSpaceAuth
-      );
+    for (const user of usersWithoutReadPermissionsSpacesAll) {
+      it(`User ${
+        user.username
+      } with role(s) ${user.roles.join()} - should NOT read a comment`, async () => {
+        // super user creates a case and comment in the appropriate space
+        const caseInfo = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest(),
+          200,
+          superUserDefaultSpaceAuth
+        );
 
-      await createComment({
-        supertest: supertestWithoutAuth,
-        auth: { user: superUser, space: null },
-        params: { ...postCommentUserReq, owner: 'securitySolutionFixture' },
-        caseId: caseInfo.id,
+        await createComment({
+          supertest: supertestWithoutAuth,
+          auth: { user: superUser, space: null },
+          params: { ...postCommentUserReq, owner: 'securitySolutionFixture' },
+          caseId: caseInfo.id,
+        });
+
+        // user should not be able to read comments
+        await supertestWithoutAuth
+          .get(`${getSpaceUrlPrefix(null)}${CASES_URL}/${caseInfo.id}/comments/_find`)
+          .auth(user.username, user.password)
+          .expect(403);
       });
-
-      // user should not be able to read comments
-      await supertestWithoutAuth
-        .get(`${getSpaceUrlPrefix(null)}${CASES_URL}/${caseInfo.id}/comments/_find`)
-        .auth(noKibanaPrivileges.username, noKibanaPrivileges.password)
-        .expect(403);
-    });
+    }
 
     it('should return a 404 when attempting to access a space', async () => {
       const caseInfo = await createCase(

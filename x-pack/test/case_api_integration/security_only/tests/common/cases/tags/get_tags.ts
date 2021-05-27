@@ -17,7 +17,11 @@ import {
   secOnlyReadSpacesAll,
   obsOnlyReadSpacesAll,
   obsSecReadSpacesAll,
-  noKibanaPrivileges,
+  globalReadMinimal,
+  secOnlyReadCasesAll,
+  secOnlyReadMinimal,
+  secOnlyAllCasesRead,
+  usersWithoutReadPermissionsSpacesAll,
 } from '../../../../../common/lib/authentication/users';
 import {
   secOnlyDefaultSpaceAuth,
@@ -57,10 +61,17 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedTags: ['sec', 'obs'],
         },
         {
+          user: globalReadMinimal,
+          expectedTags: ['sec', 'obs'],
+        },
+        {
           user: superUser,
           expectedTags: ['sec', 'obs'],
         },
         { user: secOnlyReadSpacesAll, expectedTags: ['sec'] },
+        { user: secOnlyReadCasesAll, expectedTags: ['sec'] },
+        { user: secOnlyReadMinimal, expectedTags: ['sec'] },
+        { user: secOnlyAllCasesRead, expectedTags: ['sec'] },
         { user: obsOnlyReadSpacesAll, expectedTags: ['obs'] },
         {
           user: obsSecReadSpacesAll,
@@ -80,24 +91,26 @@ export default ({ getService }: FtrProviderContext): void => {
       }
     });
 
-    it(`User ${
-      noKibanaPrivileges.username
-    } with role(s) ${noKibanaPrivileges.roles.join()} - should NOT get all tags`, async () => {
-      // super user creates a case at the appropriate space
-      await createCase(
-        supertestWithoutAuth,
-        getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
-        200,
-        superUserDefaultSpaceAuth
-      );
+    for (const user of usersWithoutReadPermissionsSpacesAll) {
+      it(`User ${
+        user.username
+      } with role(s) ${user.roles.join()} - should NOT get all tags`, async () => {
+        // super user creates a case at the appropriate space
+        await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
+          200,
+          superUserDefaultSpaceAuth
+        );
 
-      // user should not be able to get all tags at the appropriate space
-      await getTags({
-        supertest: supertestWithoutAuth,
-        expectedHttpCode: 403,
-        auth: { user: noKibanaPrivileges, space: null },
+        // user should not be able to get all tags at the appropriate space
+        await getTags({
+          supertest: supertestWithoutAuth,
+          expectedHttpCode: 403,
+          auth: { user, space: null },
+        });
       });
-    });
+    }
 
     it('should return a 404 when attempting to access a space', async () => {
       // super user creates a case at the appropriate space

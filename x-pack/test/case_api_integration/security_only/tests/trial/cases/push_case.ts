@@ -19,12 +19,8 @@ import {
   getExternalServiceSimulatorPath,
 } from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 import {
-  globalRead,
-  noKibanaPrivileges,
-  obsOnlyReadSpacesAll,
-  obsSecReadSpacesAll,
   secOnlySpacesAll,
-  secOnlyReadSpacesAll,
+  usersWithoutWritePermissionsSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import { secOnlyDefaultSpaceAuth } from '../../../utils';
 
@@ -83,13 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    for (const user of [
-      globalRead,
-      secOnlyReadSpacesAll,
-      obsOnlyReadSpacesAll,
-      obsSecReadSpacesAll,
-      noKibanaPrivileges,
-    ]) {
+    for (const user of usersWithoutWritePermissionsSpacesAll) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should NOT push a case`, async () => {

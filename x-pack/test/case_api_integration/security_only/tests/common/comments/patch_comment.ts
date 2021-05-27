@@ -20,12 +20,8 @@ import {
   updateComment,
 } from '../../../../common/lib/utils';
 import {
-  globalRead,
-  noKibanaPrivileges,
-  obsOnlyReadSpacesAll,
-  obsSecReadSpacesAll,
   secOnlySpacesAll,
-  secOnlyReadSpacesAll,
+  usersWithoutWritePermissionsSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import {
   obsOnlyDefaultSpaceAuth,
@@ -116,13 +112,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    for (const user of [
-      globalRead,
-      secOnlyReadSpacesAll,
-      obsOnlyReadSpacesAll,
-      obsSecReadSpacesAll,
-      noKibanaPrivileges,
-    ]) {
+    for (const user of usersWithoutWritePermissionsSpacesAll) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should NOT update a comment`, async () => {

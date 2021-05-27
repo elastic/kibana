@@ -20,13 +20,11 @@ import {
 import {
   secOnlySpacesAll,
   obsOnlySpacesAll,
-  globalRead,
-  superUser,
-  secOnlyReadSpacesAll,
   obsOnlyReadSpacesAll,
-  obsSecReadSpacesAll,
   noKibanaPrivileges,
-  obsSecSpacesAll,
+  usersWithReadPermissionsSpacesAll,
+  secOnlyAllCasesNone,
+  secOnlyReadCasesNone,
 } from '../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../common/lib/authentication';
 import { secOnlyDefaultSpaceAuth, superUserDefaultSpaceAuth } from '../../../utils';
@@ -49,14 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
         superUserDefaultSpaceAuth
       );
 
-      for (const user of [
-        globalRead,
-        superUser,
-        secOnlySpacesAll,
-        secOnlyReadSpacesAll,
-        obsSecSpacesAll,
-        obsSecReadSpacesAll,
-      ]) {
+      for (const user of usersWithReadPermissionsSpacesAll) {
         const theCase = await getCase({
           supertest: supertestWithoutAuth,
           caseId: newCase.id,
@@ -115,7 +106,13 @@ export default ({ getService }: FtrProviderContext): void => {
         superUserDefaultSpaceAuth
       );
 
-      for (const user of [noKibanaPrivileges, obsOnlySpacesAll, obsOnlyReadSpacesAll]) {
+      for (const user of [
+        noKibanaPrivileges,
+        secOnlyAllCasesNone,
+        secOnlyReadCasesNone,
+        obsOnlySpacesAll,
+        obsOnlyReadSpacesAll,
+      ]) {
         await getCase({
           supertest: supertestWithoutAuth,
           caseId: newCase.id,

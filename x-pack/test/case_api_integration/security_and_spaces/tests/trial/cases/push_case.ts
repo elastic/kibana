@@ -35,12 +35,8 @@ import {
 } from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 import { CaseStatuses, CaseUserActionResponse } from '../../../../../../plugins/cases/common/api';
 import {
-  globalRead,
-  noKibanaPrivileges,
-  obsOnlyRead,
-  obsSecRead,
   secOnly,
-  secOnlyRead,
+  usersWithoutWritePermissions,
   superUser,
 } from '../../../../common/lib/authentication/users';
 
@@ -273,7 +269,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+      for (const user of usersWithoutWritePermissions) {
         it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should NOT push a case`, async () => {

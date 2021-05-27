@@ -10,6 +10,7 @@ import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
 import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
+import { SEC_SOL_FIXTURE } from './index';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -20,18 +21,6 @@ export interface FixtureStartDeps {
   spaces?: SpacesPluginStart;
 }
 
-/**
- * These are a copy of the values here: x-pack/plugins/cases/common/constants.ts because when the plugin attempts to
- * import them from the constants.ts file it gets an error.
- */
-const casesSavedObjectTypes = [
-  'cases',
-  'cases-connector-mappings',
-  'cases-sub-case',
-  'cases-user-actions',
-  'cases-comments',
-  'cases-configure',
-];
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {
     const { features } = deps;
@@ -40,27 +29,59 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'SecuritySolutionFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
-      cases: ['securitySolutionFixture'],
+      cases: [SEC_SOL_FIXTURE],
+      subFeatures: [
+        {
+          name: 'Cases',
+          privilegeGroups: [
+            {
+              groupType: 'mutually_exclusive',
+              privileges: [
+                {
+                  name: 'All',
+                  id: 'cases_all',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                  cases: {
+                    all: [SEC_SOL_FIXTURE],
+                  },
+                },
+                {
+                  name: 'Read',
+                  id: 'cases_read',
+                  includeIn: 'read',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                  cases: {
+                    read: [SEC_SOL_FIXTURE],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
       privileges: {
         all: {
           app: ['kibana'],
-          cases: {
-            all: ['securitySolutionFixture'],
-          },
           savedObject: {
-            all: ['alert', ...casesSavedObjectTypes],
+            all: [],
             read: [],
           },
           ui: [],
         },
         read: {
           app: ['kibana'],
-          cases: {
-            read: ['securitySolutionFixture'],
-          },
           savedObject: {
             all: [],
-            read: [...casesSavedObjectTypes],
+            read: [],
           },
           ui: [],
         },

@@ -50,14 +50,10 @@ import {
   getQuerySignalIds,
 } from '../../../../../detection_engine_api_integration/utils';
 import {
-  globalRead,
-  noKibanaPrivileges,
   obsOnly,
-  obsOnlyRead,
-  obsSecRead,
   secOnly,
-  secOnlyRead,
   superUser,
+  usersWithoutWritePermissions,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -1178,7 +1174,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(resp.cases[2].title).to.eql(postCaseReq.title);
       });
 
-      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+      for (const user of usersWithoutWritePermissions) {
         it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should NOT update a case`, async () => {

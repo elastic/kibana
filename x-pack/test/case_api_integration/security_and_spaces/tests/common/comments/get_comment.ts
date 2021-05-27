@@ -21,15 +21,14 @@ import {
 } from '../../../../common/lib/utils';
 import { CommentType } from '../../../../../../plugins/cases/common/api';
 import {
-  globalRead,
   noKibanaPrivileges,
   obsOnly,
   obsOnlyRead,
-  obsSec,
-  obsSecRead,
   secOnly,
-  secOnlyRead,
+  usersWithReadPermissions,
   superUser,
+  secOnlyAllCasesNone,
+  secOnlyReadCasesNone,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -105,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: superUserSpace1Auth,
         });
 
-        for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
+        for (const user of usersWithReadPermissions) {
           await getComment({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
@@ -130,7 +129,13 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: superUserSpace1Auth,
         });
 
-        for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
+        for (const user of [
+          noKibanaPrivileges,
+          secOnlyAllCasesNone,
+          secOnlyReadCasesNone,
+          obsOnly,
+          obsOnlyRead,
+        ]) {
           await getComment({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,

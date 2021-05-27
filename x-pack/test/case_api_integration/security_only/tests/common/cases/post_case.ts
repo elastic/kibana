@@ -11,11 +11,7 @@ import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { deleteCasesByESQuery, createCase } from '../../../../common/lib/utils';
 import {
   secOnlySpacesAll,
-  secOnlyReadSpacesAll,
-  globalRead,
-  obsOnlyReadSpacesAll,
-  obsSecReadSpacesAll,
-  noKibanaPrivileges,
+  usersWithoutWritePermissionsSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { secOnlyDefaultSpaceAuth } from '../../../utils';
@@ -49,13 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    for (const user of [
-      globalRead,
-      secOnlyReadSpacesAll,
-      obsOnlyReadSpacesAll,
-      obsSecReadSpacesAll,
-      noKibanaPrivileges,
-    ]) {
+    for (const user of usersWithoutWritePermissionsSpacesAll) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should NOT create a case`, async () => {

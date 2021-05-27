@@ -53,6 +53,7 @@ import { SignalHit } from '../../../../plugins/security_solution/server/lib/dete
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
+import { SEC_SOL_FIXTURE } from '../fixtures/plugins/security_solution/server';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -287,7 +288,7 @@ export const getConfigurationRequest = ({
       fields,
     } as CaseConnector,
     closure_type: 'close-by-user',
-    owner: 'securitySolutionFixture',
+    owner: SEC_SOL_FIXTURE,
   };
 };
 
@@ -856,7 +857,7 @@ export const updateComment = async ({
 
 export const getConfiguration = async ({
   supertest,
-  query = { owner: 'securitySolutionFixture' },
+  query = { owner: SEC_SOL_FIXTURE },
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {

@@ -18,8 +18,12 @@ import {
   secOnlyRead,
   obsOnlyRead,
   obsSecRead,
-  noKibanaPrivileges,
   obsSec,
+  globalReadMinimal,
+  secOnlyReadMinimal,
+  secOnlyReadCasesAll,
+  secOnlyAllCasesRead,
+  authScenariosWithoutRead,
 } from '../../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../../common/lib/authentication';
 
@@ -77,10 +81,17 @@ export default ({ getService }: FtrProviderContext): void => {
             expectedReporters: [getUserInfo(secOnly), getUserInfo(obsOnly)],
           },
           {
+            user: globalReadMinimal,
+            expectedReporters: [getUserInfo(secOnly), getUserInfo(obsOnly)],
+          },
+          {
             user: superUser,
             expectedReporters: [getUserInfo(secOnly), getUserInfo(obsOnly)],
           },
           { user: secOnlyRead, expectedReporters: [getUserInfo(secOnly)] },
+          { user: secOnlyReadMinimal, expectedReporters: [getUserInfo(secOnly)] },
+          { user: secOnlyReadCasesAll, expectedReporters: [getUserInfo(secOnly)] },
+          { user: secOnlyAllCasesRead, expectedReporters: [getUserInfo(secOnly)] },
           { user: obsOnlyRead, expectedReporters: [getUserInfo(obsOnly)] },
           {
             user: obsSecRead,
@@ -100,10 +111,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      for (const scenario of [
-        { user: noKibanaPrivileges, space: 'space1' },
-        { user: secOnly, space: 'space2' },
-      ]) {
+      for (const scenario of authScenariosWithoutRead) {
         it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
           scenario.space
         } - should NOT get all reporters`, async () => {

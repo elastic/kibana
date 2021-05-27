@@ -8,3 +8,4 @@
 import { FixturePlugin } from './plugin';
 
 export const plugin = () => new FixturePlugin();
+export const SEC_SOL_FIXTURE = 'securitySolutionFixture';
