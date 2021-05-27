@@ -2782,7 +2782,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-shared-deps@link:packages/kbn-ui-shared-deps":
+"@kbn/ui-shared-deps@link:bazel-bin/packages/kbn-ui-shared-deps/npm_module":
   version "0.0.0"
   uid ""
 

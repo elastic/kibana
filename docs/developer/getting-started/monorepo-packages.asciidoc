@@ -99,5 +99,6 @@ yarn kbn watch-bazel
 - @kbn/std
 - @kbn/telemetry-utils
 - @kbn/tinymath
+- @kbn/ui-shared-deps
 - @kbn/utility-types
 - @kbn/utils
