@@ -120,11 +120,7 @@ export async function fetchIndexShardSize(
     for (const indexBucket of indexBuckets) {
       const shardIndex = indexBucket.key;
       const topHit = indexBucket.hits?.hits?.hits[0] as TopHitType;
-      if (
-        !topHit ||
-        shardIndex.charAt() === '.' ||
-        !ESGlobPatterns.isValid(shardIndex, validIndexPatterns)
-      ) {
+      if (!topHit || !ESGlobPatterns.isValid(shardIndex, validIndexPatterns)) {
         continue;
       }
       const {
