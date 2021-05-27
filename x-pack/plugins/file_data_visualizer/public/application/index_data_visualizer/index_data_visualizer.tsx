@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import './_index.scss';
+import '../_index.scss';
 import React, { FC, useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 // @ts-ignore
 import { encode } from 'rison-node';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { getCoreStart, getPluginsStart } from '../kibana_services';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
-} from './components/index_data_visualizer_view';
+} from '../components/index_data_visualizer_view';
 import {
   Accessor,
   Provider as UrlStateContextProvider,
@@ -25,7 +25,7 @@ import {
   SetUrlState,
   getNestedProperty,
   isRisonSerializationRequired,
-} from '../application/util/url_state';
+} from '../util/url_state';
 
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 

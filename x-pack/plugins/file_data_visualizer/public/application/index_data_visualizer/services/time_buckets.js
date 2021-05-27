@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FIELD_FORMAT_IDS, UI_SETTINGS } from '../../../../../../src/plugins/data/common';
+import { FIELD_FORMAT_IDS, UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
 import { ary, assign, isPlainObject, isString, sortBy } from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import { parseInterval } from '../util/parse_interval';
+import { parseInterval } from '../../util/parse_interval';
 
 const { duration: d } = moment;
 

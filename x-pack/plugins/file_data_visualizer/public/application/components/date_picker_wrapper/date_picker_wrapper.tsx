@@ -18,7 +18,7 @@ import {
 
 import { useUrlState } from '../../util/url_state';
 import { useFileDataVisualizerKibana } from '../../kibana_context';
-import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
+import { mlTimefilterRefresh$ } from '../../index_data_visualizer/services/timefilter_refresh_service';
 
 interface TimePickerQuickRange {
   from: string;

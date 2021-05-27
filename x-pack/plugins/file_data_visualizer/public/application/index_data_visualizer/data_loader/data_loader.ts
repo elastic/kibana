@@ -9,15 +9,15 @@
 import { CoreSetup } from 'kibana/public';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
-import { DEFAULT_SAMPLER_SHARD_SIZE, OMIT_FIELDS } from '../../../common/constants';
-import { FieldHistogramRequestConfig, FieldRequestConfig } from '../../../common/types';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
+import { DEFAULT_SAMPLER_SHARD_SIZE, OMIT_FIELDS } from '../../../../common/constants';
+import { FieldHistogramRequestConfig, FieldRequestConfig } from '../../../../common/types';
 import {
   getVisualizerFieldHistograms,
   getVisualizerFieldStats,
   getVisualizerOverallStats,
-} from '../../api';
+} from '../../../api';
 
 type IndexPatternTitle = string;
 type SavedSearchQuery = Record<string, any> | null | undefined;
