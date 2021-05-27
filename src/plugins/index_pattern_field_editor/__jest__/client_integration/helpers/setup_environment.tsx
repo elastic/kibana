@@ -16,7 +16,7 @@ import { merge } from 'lodash';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
-import { FieldPreviewProvider } from '../../../public/components/field_preview_context';
+import { FieldPreviewProvider } from '../../../public/components/preview';
 import { initApi, ApiService } from '../../../public/lib';
 import { init as initHttpRequests } from './http_requests';
 
