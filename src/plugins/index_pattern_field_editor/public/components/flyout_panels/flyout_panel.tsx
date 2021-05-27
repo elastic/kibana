@@ -6,19 +6,32 @@
  * Side Public License, v 1.
  */
 
-import React, { CSSProperties, useEffect } from 'react';
+import React, {
+  CSSProperties,
+  useState,
+  useEffect,
+  useCallback,
+  createContext,
+  useContext,
+} from 'react';
 import classnames from 'classnames';
 import { EuiFlexItem } from '@elastic/eui';
 
 import { useFlyoutPanelsContext } from './flyout_panels';
 
-interface Props {
+interface Context {
+  registerFooter: () => void;
+}
+
+const flyoutPanelContext = createContext<Context>({
+  registerFooter: () => {},
+});
+
+export interface Props {
   /** Width of the panel (in percent %) */
   width?: number;
   /** EUI sass background */
   backgroundColor?: 'euiColorLightestShade' | 'euiColorLightShade' | 'euiColorMediumShade';
-  /** Flag to indicate if this panel has a footer */
-  withFooter?: boolean;
 }
 
 export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
@@ -26,19 +39,24 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   width,
   className = '',
   backgroundColor,
-  withFooter,
   ...rest
 }) => {
+  const [hasFooter, setHasFooter] = useState(false);
+
   /* eslint-disable @typescript-eslint/naming-convention */
   const classes = classnames('fieldEditor__flyoutPanel', className, {
     'fieldEditor__flyoutPanel--lightestShade': backgroundColor === 'euiColorLightestShade',
     'fieldEditor__flyoutPanel--lightShade': backgroundColor === 'euiColorLightShade',
     'fieldEditor__flyoutPanel--mediumShade': backgroundColor === 'euiColorMediumShade',
-    'fieldEditor__flyoutPanel--withFooter': Boolean(withFooter),
+    'fieldEditor__flyoutPanel--withFooter': hasFooter,
   });
   /* eslint-enable @typescript-eslint/naming-convention */
 
   const { addPanel } = useFlyoutPanelsContext();
+
+  const registerFooter = useCallback(() => {
+    setHasFooter(true);
+  }, []);
 
   useEffect(() => {
     const removePanel = addPanel({ width });
@@ -56,9 +74,21 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
 
   return (
     <EuiFlexItem style={styles}>
-      <div className={classes} {...rest}>
-        {children}
-      </div>
+      <flyoutPanelContext.Provider value={{ registerFooter }}>
+        <div className={classes} {...rest}>
+          {children}
+        </div>
+      </flyoutPanelContext.Provider>
     </EuiFlexItem>
   );
+};
+
+export const useFlyoutPanelContext = (): Context => {
+  const ctx = useContext(flyoutPanelContext);
+
+  if (ctx === undefined) {
+    throw new Error('useFlyoutPanel() must be used within a <flyoutPanelContext.Provider />');
+  }
+
+  return ctx;
 };

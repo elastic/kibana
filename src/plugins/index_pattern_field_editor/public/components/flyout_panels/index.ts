@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Panels } from './flyout_panels';
+import { PanelFooter } from './flyout_panels_footer';
+import { PanelHeader } from './flyout_panels_header';
 import { Panel } from './flyout_panel';
-import { Header } from './flyout_panels_header';
-import { Footer } from './flyout_panels_footer';
+import { Panels } from './flyout_panels';
 
 export const Flyout = {
   Panels,
   Panel,
-  Header,
-  Footer,
+  PanelHeader,
+  PanelFooter,
 };

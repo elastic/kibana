@@ -25,7 +25,7 @@ import {
 
 import type { Field, EsRuntimeField } from '../types';
 import { RuntimeFieldPainlessError } from '../lib';
-import { euiFlyoutMaxWidth, euiFlyoutClassname } from '../constants';
+import { euiFlyoutClassname } from '../constants';
 import { Flyout } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
@@ -207,10 +207,10 @@ const FieldEditorFlyoutContentComponent = ({
   return (
     <>
       {FieldEditor && (
-        <Flyout.Panels flyoutClassName={euiFlyoutClassname} maxWidth={euiFlyoutMaxWidth}>
+        <Flyout.Panels flyoutClassName={euiFlyoutClassname} maxWidth={1180}>
           {/* Editor panel */}
-          <Flyout.Panel width={60} withFooter>
-            <Flyout.Header>
+          <Flyout.Panel width={60}>
+            <Flyout.PanelHeader>
               <EuiTitle data-test-subj="flyoutTitle">
                 <h2>
                   {field ? (
@@ -240,11 +240,11 @@ const FieldEditorFlyoutContentComponent = ({
                   />
                 </p>
               </EuiText>
-            </Flyout.Header>
+            </Flyout.PanelHeader>
 
             <FieldEditor field={field} onChange={setFormState} syntaxError={syntaxError} />
 
-            <Flyout.Footer>
+            <Flyout.PanelFooter>
               <>
                 {isSubmitted && hasErrors && (
                   <>
@@ -283,7 +283,7 @@ const FieldEditorFlyoutContentComponent = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </>
-            </Flyout.Footer>
+            </Flyout.PanelFooter>
           </Flyout.Panel>
 
           {/* Preview panel */}

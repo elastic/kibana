@@ -36,7 +36,7 @@ const flyoutPanelsContext = createContext<Context>({
   },
 });
 
-interface Props {
+export interface Props {
   /**
    * The total max width with all the panels in the DOM
    * Corresponds to the "maxWidth" prop passed to the EuiFlyout

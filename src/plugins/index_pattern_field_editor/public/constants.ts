@@ -9,5 +9,3 @@
 export const pluginName = 'index_pattern_field_editor';
 
 export const euiFlyoutClassname = 'indexPatternFieldEditorFlyout';
-
-export const euiFlyoutMaxWidth = 1180;

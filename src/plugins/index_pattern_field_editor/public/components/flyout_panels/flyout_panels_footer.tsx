@@ -5,9 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiFlyoutFooter, EuiFlyoutFooterProps } from '@elastic/eui';
 
-export const Footer: React.FC<
+import { useFlyoutPanelContext } from './flyout_panel';
+
+export const PanelFooter: React.FC<
   { children: React.ReactNode } & Omit<EuiFlyoutFooterProps, 'children'>
-> = (props) => <EuiFlyoutFooter className="fieldEditor__flyoutPanel__footer" {...props} />;
+> = (props) => {
+  const { registerFooter } = useFlyoutPanelContext();
+
+  useEffect(() => {
+    registerFooter();
+  }, [registerFooter]);
+
+  return <EuiFlyoutFooter className="fieldEditor__flyoutPanel__footer" {...props} />;
+};

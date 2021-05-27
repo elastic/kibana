@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiSpacer, EuiFlyoutHeader, EuiFlyoutHeaderProps } from '@elastic/eui';
 
-export const Header: React.FunctionComponent<
+export const PanelHeader: React.FunctionComponent<
   { children: React.ReactNode } & Omit<EuiFlyoutHeaderProps, 'children'>
 > = (props) => (
   <>
