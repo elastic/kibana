@@ -7,7 +7,6 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import teamsSvg from './teams.svg';
 import {
   ActionTypeModel,
   GenericValidationResult,
@@ -19,7 +18,7 @@ import { isValidUrl } from '../../../lib/value_validators';
 export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsActionParams> {
   return {
     id: '.teams',
-    iconClass: teamsSvg,
+    iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.selectMessageText',
       {
