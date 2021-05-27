@@ -152,7 +152,6 @@
 /src/plugins/region_map/ @elastic/kibana-gis
 /packages/kbn-mapbox-gl @elastic/kibana-gis
 
-
 # Operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
