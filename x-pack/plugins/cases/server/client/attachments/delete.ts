@@ -59,7 +59,7 @@ export async function deleteAll(
 ): Promise<void> {
   const {
     user,
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     caseService,
     attachmentService,
     userActionService,
@@ -136,7 +136,7 @@ export async function deleteComment(
 ) {
   const {
     user,
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     attachmentService,
     userActionService,
     logger,

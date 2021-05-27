@@ -24,12 +24,6 @@ import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_CONFIGURE_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  CASE_USER_ACTION_SAVED_OBJECT,
-} from '../../cases/common';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -37,13 +31,6 @@ interface PluginSetup {
   features: FeaturesSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
 }
-
-const caseSavedObjects = [
-  CASE_SAVED_OBJECT,
-  CASE_USER_ACTION_SAVED_OBJECT,
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_CONFIGURE_SAVED_OBJECT,
-];
 
 const OBS_CASES_ID = 'observabilityCases';
 const OBSERVABILITY = 'observability';

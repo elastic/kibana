@@ -22,13 +22,19 @@ export const get = async (
   { caseId, subCaseId }: UserActionGet,
   clientArgs: CasesClientArgs
 ): Promise<CaseUserActionsResponse> => {
-  const { savedObjectsClient, userActionService, logger, authorization, auditLogger } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    userActionService,
+    logger,
+    authorization,
+    auditLogger,
+  } = clientArgs;
 
   try {
     checkEnabledCaseConnectorOrThrow(subCaseId);
 
     const userActions = await userActionService.getAll({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       caseId,
       subCaseId,
     });

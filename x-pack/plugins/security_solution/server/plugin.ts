@@ -122,14 +122,6 @@ const securitySubPlugins = [
   `${APP_ID}:${SecurityPageName.administration}`,
 ];
 
-const caseSavedObjects = [
-  'cases',
-  'cases-comments',
-  'cases-sub-case',
-  'cases-configure',
-  'cases-user-actions',
-];
-
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config: ConfigType;
@@ -236,7 +228,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                   includeIn: 'all',
                   name: 'All',
                   savedObject: {
-                    all: [...caseSavedObjects],
+                    all: [],
                     read: [],
                   },
                   // using variables with underscores here otherwise when we retrieve them from the kibana
@@ -252,7 +244,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                   name: 'Read',
                   savedObject: {
                     all: [],
-                    read: [...caseSavedObjects],
+                    read: [],
                   },
                   // using variables with underscores here otherwise when we retrieve them from the kibana
                   // capabilities in a hook I get type errors regarding boolean | ReadOnly<{[x: string]: boolean}>
@@ -268,18 +260,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ],
       privileges: {
         all: {
-          cases: {
-            all: [APP_ID],
-          },
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-all', 'lists-read'],
           savedObject: {
             all: ['alert', 'exception-list', 'exception-list-agnostic', ...savedObjectTypes],
-            read: ['config'],
+            read: [],
           },
           alerting: {
             all: [SIGNALS_ID, NOTIFICATIONS_ID],
+          },
+          cases: {
+            all: [APP_ID],
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
@@ -287,18 +279,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ui: ['show', 'crud'],
         },
         read: {
-          cases: {
-            read: [APP_ID],
-          },
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-read'],
           savedObject: {
             all: [],
-            read: ['config', 'exception-list', 'exception-list-agnostic', ...savedObjectTypes],
+            read: ['exception-list', 'exception-list-agnostic', ...savedObjectTypes],
           },
           alerting: {
             read: [SIGNALS_ID, NOTIFICATIONS_ID],
+          },
+          cases: {
+            read: [APP_ID],
           },
           management: {
             insightsAndAlerting: ['triggersActions'],

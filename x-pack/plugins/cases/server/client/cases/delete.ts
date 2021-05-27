@@ -57,7 +57,7 @@ async function deleteSubCases({
  */
 export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   const {
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     caseService,
     attachmentService,
     user,

@@ -56,6 +56,7 @@ import { UpdateAlertRequest } from '../alerts/client';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
+import { OwnerEntity } from '../types';
 
 /**
  * Throws an error if any of the requests attempt to update a collection style cases' status field.
@@ -356,11 +357,12 @@ function partitionPatchRequest(
 ): {
   nonExistingCases: CasePatchRequest[];
   conflictedCases: CasePatchRequest[];
-  casesToAuthorize: Array<SavedObject<ESCaseAttributes>>;
+  // This will be a deduped array of case IDs with their corresponding owner
+  casesToAuthorize: OwnerEntity[];
 } {
   const nonExistingCases: CasePatchRequest[] = [];
   const conflictedCases: CasePatchRequest[] = [];
-  const casesToAuthorize: Array<SavedObject<ESCaseAttributes>> = [];
+  const casesToAuthorize: Map<string, OwnerEntity> = new Map<string, OwnerEntity>();
 
   for (const reqCase of patchReqCases) {
     const foundCase = casesMap.get(reqCase.id);
@@ -370,16 +372,16 @@ function partitionPatchRequest(
     } else if (foundCase.version !== reqCase.version) {
       conflictedCases.push(reqCase);
       // let's try to authorize the conflicted case even though we'll fail after afterwards just in case
-      casesToAuthorize.push(foundCase);
+      casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
     } else {
-      casesToAuthorize.push(foundCase);
+      casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
     }
   }
 
   return {
     nonExistingCases,
     conflictedCases,
-    casesToAuthorize,
+    casesToAuthorize: Array.from(casesToAuthorize.values()),
   };
 }
 
@@ -394,7 +396,7 @@ export const update = async (
   casesClientInternal: CasesClientInternal
 ): Promise<CasesResponse> => {
   const {
-    savedObjectsClient,
+    unsecuredSavedObjectsClient,
     caseService,
     userActionService,
     user,
@@ -409,7 +411,7 @@ export const update = async (
 
   try {
     const myCases = await caseService.getCases({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       caseIds: query.cases.map((q) => q.id),
     });
 
@@ -426,7 +428,7 @@ export const update = async (
     await ensureAuthorized({
       authorization,
       auditLogger,
-      owners: casesToAuthorize.map((caseInfo) => caseInfo.attributes.owner),
+      owners: casesToAuthorize.map((caseInfo) => caseInfo.owner),
       operation: Operations.updateCase,
       savedObjectIDs: casesToAuthorize.map((caseInfo) => caseInfo.id),
     });
@@ -479,16 +481,17 @@ export const update = async (
     await throwIfInvalidUpdateOfTypeWithAlerts({
       requests: updateFilterCases,
       caseService,
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
     });
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;
     const updatedDt = new Date().toISOString();
     const updatedCases = await caseService.patchCases({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       cases: updateFilterCases.map((thisCase) => {
-        const { id: caseId, version, ...updateCaseAttributes } = thisCase;
+        // intentionally removing owner from the case so that we don't accidentally allow it to be updated
+        const { id: caseId, version, owner, ...updateCaseAttributes } = thisCase;
         let closedInfo = {};
         if (updateCaseAttributes.status && updateCaseAttributes.status === CaseStatuses.closed) {
           closedInfo = {
@@ -547,7 +550,7 @@ export const update = async (
       casesWithStatusChangedAndSynced,
       casesWithSyncSettingChangedToOn,
       caseService,
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       casesClientInternal,
       casesMap,
     });
@@ -570,7 +573,7 @@ export const update = async (
       });
 
     await userActionService.bulkCreate({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       actions: buildCaseUserActions({
         originalCases: myCases.saved_objects,
         updatedCases: updatedCases.saved_objects,

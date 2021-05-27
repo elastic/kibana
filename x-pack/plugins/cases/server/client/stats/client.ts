@@ -51,7 +51,7 @@ async function getStatusTotalsByType(
   clientArgs: CasesClientArgs
 ): Promise<CasesStatusResponse> {
   const {
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     caseService,
     logger,
     authorization,

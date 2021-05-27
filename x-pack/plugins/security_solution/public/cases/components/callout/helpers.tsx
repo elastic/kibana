@@ -13,8 +13,8 @@ import { ErrorMessage } from './types';
 
 export const savedObjectReadOnlyErrorMessage: ErrorMessage = {
   id: 'read-only-privileges-error',
-  title: i18n.READ_ONLY_SAVED_OBJECT_TITLE,
-  description: <>{i18n.READ_ONLY_SAVED_OBJECT_MSG}</>,
+  title: i18n.READ_ONLY_FEATURE_TITLE,
+  description: <>{i18n.READ_ONLY_FEATURE_MSG}</>,
   errorType: 'warning',
 };
 

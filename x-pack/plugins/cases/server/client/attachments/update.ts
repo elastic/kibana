@@ -100,7 +100,7 @@ export async function update(
   const {
     attachmentService,
     caseService,
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     logger,
     user,
     userActionService,

@@ -16,7 +16,7 @@ export const updateMappings = async (
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<ConnectorMappingsAttributes[]> => {
-  const { savedObjectsClient, connectorMappingsService, logger } = clientArgs;
+  const { unsecuredSavedObjectsClient, connectorMappingsService, logger } = clientArgs;
 
   try {
     if (connectorType === ConnectorTypes.none) {
@@ -29,7 +29,7 @@ export const updateMappings = async (
     });
 
     const theMapping = await connectorMappingsService.update({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       mappingId,
       attributes: {
         mappings: res.defaultMappings,

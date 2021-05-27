@@ -69,7 +69,7 @@ export const push = async (
   casesClientInternal: CasesClientInternal
 ): Promise<CaseResponse> => {
   const {
-    savedObjectsClient,
+    unsecuredSavedObjectsClient,
     attachmentService,
     caseService,
     caseConfigureService,
@@ -151,12 +151,12 @@ export const push = async (
     /* Start of update case with push information */
     const [myCase, myCaseConfigure, comments] = await Promise.all([
       caseService.getCase({
-        soClient: savedObjectsClient,
+        soClient: unsecuredSavedObjectsClient,
         id: caseId,
       }),
-      caseConfigureService.find({ soClient: savedObjectsClient }),
+      caseConfigureService.find({ soClient: unsecuredSavedObjectsClient }),
       caseService.getAllCaseComments({
-        soClient: savedObjectsClient,
+        soClient: unsecuredSavedObjectsClient,
         id: caseId,
         options: {
           fields: [],
@@ -186,7 +186,7 @@ export const push = async (
 
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
-        soClient: savedObjectsClient,
+        soClient: unsecuredSavedObjectsClient,
         caseId,
         updatedAttributes: {
           ...(shouldMarkAsClosed
@@ -204,7 +204,7 @@ export const push = async (
       }),
 
       attachmentService.bulkUpdate({
-        soClient: savedObjectsClient,
+        soClient: unsecuredSavedObjectsClient,
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
@@ -218,7 +218,7 @@ export const push = async (
       }),
 
       userActionService.bulkCreate({
-        soClient: savedObjectsClient,
+        soClient: unsecuredSavedObjectsClient,
         actions: [
           ...(shouldMarkAsClosed
             ? [

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, Logger } from 'kibana/server';
 import Boom from '@hapi/boom';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AuthorizationFilter, GetSpaceFn } from './types';
 import { getOwnersFilter } from './utils';
 import { AuthorizationAuditLogger, OperationDetails } from '.';
+import { createCaseError } from '../common';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -49,12 +50,14 @@ export class Authorization {
     getSpace,
     features,
     auditLogger,
+    logger,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
     getSpace: GetSpaceFn;
     features: FeaturesPluginStart;
     auditLogger: AuthorizationAuditLogger;
+    logger: Logger;
   }): Promise<Authorization> {
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseOwners: Set<string>;
@@ -69,7 +72,11 @@ export class Authorization {
           .flatMap((feature) => feature.cases ?? [])
       );
     } catch (error) {
-      caseOwners = new Set<string>();
+      throw createCaseError({
+        message: `Failed to create Authorization class: ${error}`,
+        error,
+        logger,
+      });
     }
 
     return new Authorization({ request, securityAuth, caseOwners, auditLogger });

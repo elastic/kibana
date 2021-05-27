@@ -91,7 +91,7 @@ export async function find(
   clientArgs: CasesClientArgs
 ): Promise<CommentsResponse> {
   const {
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     caseService,
     logger,
     authorization,
@@ -184,7 +184,7 @@ export async function get(
 ): Promise<CommentResponse> {
   const {
     attachmentService,
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     logger,
     authorization,
     auditLogger,
@@ -225,7 +225,7 @@ export async function getAll(
   clientArgs: CasesClientArgs
 ): Promise<AllCommentsResponse> {
   const {
-    savedObjectsClient: soClient,
+    unsecuredSavedObjectsClient: soClient,
     caseService,
     logger,
     authorization,

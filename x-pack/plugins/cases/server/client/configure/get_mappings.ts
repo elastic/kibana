@@ -16,7 +16,7 @@ export const getMappings = async (
   { connectorType, connectorId }: MappingsArgs,
   clientArgs: CasesClientArgs
 ): Promise<SavedObjectsFindResponse<ConnectorMappings>['saved_objects']> => {
-  const { savedObjectsClient, connectorMappingsService, logger } = clientArgs;
+  const { unsecuredSavedObjectsClient, connectorMappingsService, logger } = clientArgs;
 
   try {
     if (connectorType === ConnectorTypes.none) {
@@ -24,7 +24,7 @@ export const getMappings = async (
     }
 
     const myConnectorMappings = await connectorMappingsService.find({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       options: {
         hasReference: {
           type: ACTION_SAVED_OBJECT_TYPE,

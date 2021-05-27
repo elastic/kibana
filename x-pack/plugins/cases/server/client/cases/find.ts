@@ -36,7 +36,13 @@ export const find = async (
   params: CasesFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<CasesFindResponse> => {
-  const { savedObjectsClient, caseService, authorization: auth, auditLogger, logger } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    caseService,
+    authorization: auth,
+    auditLogger,
+    logger,
+  } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -65,7 +71,7 @@ export const find = async (
 
     const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });
     const cases = await caseService.findCasesGroupedByID({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       caseOptions: {
         ...queryParams,
         ...caseQueries.case,
@@ -86,7 +92,7 @@ export const find = async (
       ...caseStatuses.map((status) => {
         const statusQuery = constructQueryOptions({ ...queryArgs, status, authorizationFilter });
         return caseService.findCaseStatusStats({
-          soClient: savedObjectsClient,
+          soClient: unsecuredSavedObjectsClient,
           caseOptions: statusQuery.case,
           subCaseOptions: statusQuery.subCase,
           ensureSavedObjectsAreAuthorized,

@@ -45,7 +45,7 @@ export const create = async (
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
   const {
-    savedObjectsClient,
+    unsecuredSavedObjectsClient,
     caseService,
     caseConfigureService,
     userActionService,
@@ -87,11 +87,13 @@ export const create = async (
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;
     const createdDate = new Date().toISOString();
-    const myCaseConfigure = await caseConfigureService.find({ soClient: savedObjectsClient });
+    const myCaseConfigure = await caseConfigureService.find({
+      soClient: unsecuredSavedObjectsClient,
+    });
     const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
 
     const newCase = await caseService.postNewCase({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       attributes: transformNewCase({
         createdDate,
         newCase: query,
@@ -104,7 +106,7 @@ export const create = async (
     });
 
     await userActionService.bulkCreate({
-      soClient: savedObjectsClient,
+      soClient: unsecuredSavedObjectsClient,
       actions: [
         buildCaseUserActionItem({
           action: 'create',
