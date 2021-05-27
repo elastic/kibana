@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { visualizationSavedObjectTypeMigrations } from './visualization_migrations';
+import { visualizationSavedObjectTypeMigrations } from './visualization_saved_object_migrations';
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
@@ -1975,6 +1975,46 @@ describe('migration visualization', () => {
 
       expect(params).not.toHaveProperty('default_index_pattern');
       expect(params).not.toHaveProperty('default_timefield');
+    });
+  });
+
+  describe('7.13.0 and 7.13.1 tsvb migrations can run twice', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.13.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const migrateAgain = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.13.1'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const createTestDocWithType = (type: string) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{"type":"metrics","params":{"type":"${type}","default_index_pattern":"test", "default_timefield":"test", "index_pattern":"testme"}}`,
+      },
+    });
+
+    it('the migrations can be applied twice without breaking anything', () => {
+      const migratedTestDoc = migrate(createTestDocWithType('markdown'));
+      const { params } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(params.hide_last_value_indicator).toBeTruthy();
+      expect(params).not.toHaveProperty('default_index_pattern');
+      expect(params).not.toHaveProperty('default_timefield');
+      expect(params.use_kibana_indexes).toBeFalsy();
+
+      const migratedTestDocNew = migrateAgain(migratedTestDoc);
+      const visState = JSON.parse(migratedTestDocNew.attributes.visState);
+
+      expect(visState.params.hide_last_value_indicator).toBeTruthy();
+      expect(visState.params).not.toHaveProperty('default_index_pattern');
+      expect(visState.params).not.toHaveProperty('default_timefield');
+      expect(params.use_kibana_indexes).toBeFalsy();
     });
   });
 });
