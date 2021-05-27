@@ -34,7 +34,7 @@ Below are some general themes to consider for the *Risk Matrix*:
 - Will your feature still work if Kibana is run behind a reverse proxy?
 - Does your feature affect other plugins?
 - If you write to the file system, what happens if Kibana node goes down? What
-  happens if Kibana is run in cluster mode?
+  happens if there are multiple Kibana nodes?
 - Are migrations handled gracefully? Does the feature affect old indices or
   saved objects?
 - Are you using any technologies, protocols, techniques, conventions, libraries,
