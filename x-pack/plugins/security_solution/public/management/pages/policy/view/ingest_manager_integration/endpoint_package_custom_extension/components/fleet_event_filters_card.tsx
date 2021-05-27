@@ -19,6 +19,7 @@ import { getEventFiltersListPath } from '../../../../../../common/routing';
 import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
 import { PLUGIN_ID as FLEET_PLUGIN_ID } from '../../../../../../../../../fleet/common';
 import { MANAGEMENT_APP_ID } from '../../../../../../common/constants';
+import { useToasts } from '../../../../../../../common/lib/kibana';
 import { LinkWithIcon } from './link_with_icon';
 import { ExceptionItemsSummary } from './exception_items_summary';
 import { EventFiltersHttpService } from '../../../../../event_filters/service';
@@ -30,18 +31,29 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
       http,
     },
   } = useKibana<CoreStart & { application: ApplicationStart }>();
-
+  const toasts = useToasts();
   const [stats, setStats] = useState<GetExceptionSummaryResponse | undefined>();
   const eventFiltersListUrlPath = getEventFiltersListPath();
   const eventFiltersApi = useMemo(() => new EventFiltersHttpService(http), [http]);
 
   useEffect(() => {
     const fetchStats = async () => {
-      const summary = await eventFiltersApi.getSummary();
-      setStats(summary);
+      try {
+        const summary = await eventFiltersApi.getSummary();
+        setStats(summary);
+      } catch (err) {
+        toasts.addDanger(
+          i18n.translate(
+            'xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersSummaryError',
+            {
+              defaultMessage: 'There was an error trying to fetch event filters stats',
+            }
+          )
+        );
+      }
     };
     fetchStats();
-  }, [eventFiltersApi]);
+  }, [eventFiltersApi, toasts]);
 
   const eventFiltersRouteState = useMemo(() => {
     const fleetPackageCustomUrlPath = `#${pagePathGetters.integration_details_custom({ pkgkey })}`;
