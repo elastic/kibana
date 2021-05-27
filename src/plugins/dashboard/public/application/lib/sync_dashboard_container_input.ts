@@ -82,7 +82,7 @@ export const syncDashboardContainerInput = (
 };
 
 export const applyContainerChangesToState = ({
-  services,
+  query,
   applyFilters,
   dashboardContainer,
   getLatestDashboardState,
@@ -93,7 +93,7 @@ export const applyContainerChangesToState = ({
   if (Object.keys(latestState).length === 0) {
     return;
   }
-  const filterManager = services.data.query.filterManager;
+  const { filterManager } = query;
   if (
     !esFilters.compareFilters(
       input.filters,
@@ -122,12 +122,14 @@ export const applyContainerChangesToState = ({
 
 export const applyStateChangesToContainer = ({
   force,
+  search,
   history,
-  services,
   savedDashboard,
   dashboardContainer,
   kbnUrlStateStorage,
+  query: queryService,
   isEmbeddedExternally,
+  dashboardCapabilities,
   getLatestDashboardState,
 }: ApplyStateChangesToContainerProps) => {
   const latestState = getLatestDashboardState();
@@ -137,8 +139,9 @@ export const applyStateChangesToContainer = ({
   const currentDashboardStateAsInput = stateToDashboardContainerInput({
     dashboardState: latestState,
     isEmbeddedExternally,
+    dashboardCapabilities,
+    query: queryService,
     savedDashboard,
-    services,
   });
   const differences = diffDashboardContainerInput(
     dashboardContainer.getInput(),
@@ -157,7 +160,7 @@ export const applyStateChangesToContainer = ({
       // do not update session id if this is irrelevant state change to prevent excessive searches
       if (!shouldRefetch) return;
 
-      const sessionApi = services.data.search.session;
+      const sessionApi = search.session;
       let searchSessionIdFromURL = getSearchSessionIdFromURL(history);
       if (searchSessionIdFromURL) {
         if (sessionApi.isRestore() && sessionApi.isCurrentSession(searchSessionIdFromURL)) {

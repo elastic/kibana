@@ -108,19 +108,30 @@ export interface DashboardAppState {
 /**
  * The shared services and tools used to build a dashboard from a saved object ID.
  */
-export interface DashboardBuildContext {
+export type DashboardBuildContext = Pick<
+  DashboardAppServices,
+  | 'embeddable'
+  | 'indexPatterns'
+  | 'savedDashboards'
+  | 'usageCollection'
+  | 'initializerContext'
+  | 'savedObjectsTagging'
+  | 'dashboardCapabilities'
+> & {
+  query: DashboardAppServices['data']['query'];
+  search: DashboardAppServices['data']['search'];
+  notifications: DashboardAppServices['core']['notifications'];
+
   history: History;
   kibanaVersion: string;
-  savedDashboardId?: string;
   isEmbeddedExternally: boolean;
-  services: DashboardAppServices;
   kbnUrlStateStorage: IKbnUrlStateStorage;
   $checkForUnsavedChanges: Subject<unknown>;
   getLatestDashboardState: () => DashboardState;
   dispatchDashboardStateChange: Dispatch<AnyAction>;
   $triggerDashboardRefresh: Subject<{ force?: boolean }>;
   $onDashboardStateChange: BehaviorSubject<DashboardState>;
-}
+};
 
 export interface DashboardOptions {
   hidePanelTitles: boolean;

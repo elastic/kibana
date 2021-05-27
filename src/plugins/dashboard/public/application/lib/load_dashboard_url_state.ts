@@ -25,8 +25,8 @@ import { migrateLegacyQuery } from './migrate_legacy_query';
  * Loads any dashboard state from the URL, and removes the state from the URL.
  */
 export const loadDashboardUrlState = ({
-  services,
   kibanaVersion,
+  usageCollection,
   kbnUrlStateStorage,
 }: DashboardBuildContext): Partial<DashboardState> => {
   const rawAppStateInUrl = kbnUrlStateStorage.get<RawDashboardState>(DASHBOARD_STATE_STORAGE_KEY);
@@ -34,7 +34,7 @@ export const loadDashboardUrlState = ({
 
   const panelsMap: DashboardPanelMap = {};
   if (rawAppStateInUrl.panels && rawAppStateInUrl.panels.length > 0) {
-    const rawState = migrateAppState(rawAppStateInUrl, kibanaVersion, services.usageCollection);
+    const rawState = migrateAppState(rawAppStateInUrl, kibanaVersion, usageCollection);
     rawState.panels?.forEach((panel: SavedDashboardPanel) => {
       panelsMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
     });

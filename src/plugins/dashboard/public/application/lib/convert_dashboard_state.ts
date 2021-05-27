@@ -21,6 +21,7 @@ import {
   SavedDashboardPanel,
   DashboardAppServices,
   DashboardContainerInput,
+  DashboardBuildContext,
 } from '../../types';
 
 interface SavedObjectToDashboardStateProps {
@@ -34,10 +35,11 @@ interface SavedObjectToDashboardStateProps {
 interface StateToDashboardContainerInputProps {
   searchSessionId?: string;
   isEmbeddedExternally?: boolean;
-  services: DashboardAppServices;
   dashboardState: DashboardState;
   savedDashboard: DashboardSavedObject;
+  query: DashboardBuildContext['query'];
   incomingEmbeddable?: EmbeddablePackageState;
+  dashboardCapabilities: DashboardBuildContext['dashboardCapabilities'];
 }
 
 interface StateToRawDashboardStateProps {
@@ -77,36 +79,44 @@ export const savedObjectToDashboardState = ({
 };
 
 export const stateToDashboardContainerInput = ({
+  dashboardCapabilities,
   isEmbeddedExternally,
+  query: queryService,
   searchSessionId,
   savedDashboard,
   dashboardState,
-  services,
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
+  const { filterManager, timefilter: timefilterService } = queryService;
+  const { timefilter } = timefilterService;
+
   const {
-    dashboardCapabilities,
-    data: { query: queryService },
-  } = services;
+    expandedPanelId,
+    fullScreenMode,
+    description,
+    options,
+    viewMode,
+    panels,
+    query,
+    title,
+  } = dashboardState;
 
   return {
-    refreshConfig: queryService.timefilter.timefilter.getRefreshInterval(),
-    hidePanelTitles: dashboardState.options?.hidePanelTitles,
-    filters: queryService.filterManager.getFilters(),
-    isFullScreenMode: dashboardState.fullScreenMode,
-    expandedPanelId: dashboardState.expandedPanelId,
-    useMargins: dashboardState.options?.useMargins,
-    syncColors: dashboardState.options?.syncColors,
-    description: dashboardState.description,
-    viewMode: dashboardState.viewMode,
-    panels: dashboardState.panels,
+    refreshConfig: timefilter.getRefreshInterval(),
+    filters: filterManager.getFilters(),
+    isFullScreenMode: fullScreenMode,
     id: savedDashboard.id || '',
-    query: dashboardState.query,
-    title: dashboardState.title,
     dashboardCapabilities,
     isEmbeddedExternally,
+    ...(options || {}),
     searchSessionId,
+    expandedPanelId,
+    description,
+    viewMode,
+    panels,
+    query,
+    title,
     timeRange: {
-      ..._.cloneDeep(queryService.timefilter.timefilter.getTime()),
+      ..._.cloneDeep(timefilter.getTime()),
     },
   };
 };

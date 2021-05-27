@@ -35,18 +35,16 @@ type SyncDashboardFilterStateProps = DashboardBuildContext & {
  * and the dashboard Redux store.
  */
 export const syncDashboardFilterState = ({
-  services,
+  search,
   savedDashboard,
   kbnUrlStateStorage,
+  query: queryService,
   initialDashboardState,
   $checkForUnsavedChanges,
   $onDashboardStateChange,
   $triggerDashboardRefresh,
   dispatchDashboardStateChange,
 }: SyncDashboardFilterStateProps) => {
-  const {
-    data: { query: queryService, search },
-  } = services;
   const { filterManager, queryString, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
 

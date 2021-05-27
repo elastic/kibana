@@ -8,13 +8,13 @@
 
 import _ from 'lodash';
 
-import { getDashboard60Warning } from '../../dashboard_strings';
-import { DashboardConstants, DashboardSavedObject } from '../..';
-import { DashboardBuildContext, DashboardState } from '../../types';
 import { savedObjectToDashboardState } from './convert_dashboard_state';
-import { ViewMode } from '../../services/embeddable';
-import { cleanFiltersForSerialize } from './filter_utils';
+import { DashboardState, DashboardBuildContext } from '../../types';
+import { DashboardConstants, DashboardSavedObject } from '../..';
+import { getDashboard60Warning } from '../../dashboard_strings';
 import { migrateLegacyQuery } from './migrate_legacy_query';
+import { cleanFiltersForSerialize } from './filter_utils';
+import { ViewMode } from '../../services/embeddable';
 
 interface LoadSavedDashboardStateReturn {
   savedDashboardState: DashboardState;
@@ -25,22 +25,21 @@ interface LoadSavedDashboardStateReturn {
  * Loads, migrates, and returns state from a dashboard saved object.
  */
 export const loadSavedDashboardState = async ({
+  query,
   history,
-  services,
+  notifications,
+  indexPatterns,
+  savedDashboards,
+  usageCollection,
   savedDashboardId,
-}: DashboardBuildContext): Promise<LoadSavedDashboardStateReturn | undefined> => {
-  const {
-    indexPatterns,
-    savedDashboards,
-    usageCollection,
-    initializerContext,
-    savedObjectsTagging,
-    core: { notifications },
-    dashboardCapabilities: { hideWriteControls },
-    data: {
-      query: { queryString },
-    },
-  } = services;
+  initializerContext,
+  savedObjectsTagging,
+  dashboardCapabilities,
+}: DashboardBuildContext & { savedDashboardId?: string }): Promise<
+  LoadSavedDashboardStateReturn | undefined
+> => {
+  const { hideWriteControls } = dashboardCapabilities;
+  const { queryString } = query;
 
   // BWC - remove for 8.0
   if (savedDashboardId === 'create') {

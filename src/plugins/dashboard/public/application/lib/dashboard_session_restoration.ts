@@ -100,19 +100,20 @@ function getUrlGeneratorState({
   shouldRestoreSearchSession: boolean;
 }): DashboardUrlGeneratorState {
   const appState = stateToRawDashboardState({ state: getAppState(), version: kibanaVersion });
+  const { filterManager, queryString } = data.query;
+  const { timefilter } = data.query.timefilter;
+
   return {
-    dashboardId: getDashboardId(),
-    timeRange: shouldRestoreSearchSession
-      ? data.query.timefilter.timefilter.getAbsoluteTime()
-      : data.query.timefilter.timefilter.getTime(),
-    filters: data.query.filterManager.getFilters(),
-    query: data.query.queryString.formatQuery(appState.query),
+    timeRange: shouldRestoreSearchSession ? timefilter.getAbsoluteTime() : timefilter.getTime(),
+    searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
+    panels: getDashboardId() ? undefined : appState.panels,
+    query: queryString.formatQuery(appState.query),
+    filters: filterManager.getFilters(),
     savedQuery: appState.savedQuery,
-    useHash: false,
+    dashboardId: getDashboardId(),
     preserveSavedFilters: false,
     viewMode: appState.viewMode,
-    panels: getDashboardId() ? undefined : appState.panels,
-    searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
+    useHash: false,
     refreshInterval: shouldRestoreSearchSession
       ? {
           pause: true, // force pause refresh interval when restoring a session

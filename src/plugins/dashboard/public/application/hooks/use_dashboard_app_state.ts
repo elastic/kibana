@@ -53,56 +53,97 @@ export const useDashboardAppState = ({
   kbnUrlStateStorage,
   isEmbeddedExternally,
 }: UseDashboardStateProps) => {
-  const services = useKibana<DashboardAppServices>().services;
   const dispatchDashboardStateChange = useDashboardDispatch();
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
-  const [lastSavedState, setLastSavedState] = useState<DashboardState>();
 
+  /**
+   *  Dashboard app state is the return value for this hook and contains interaction points that the rest of the app can use
+   * to read or manipulate dashboard state.
+   */
   const [dashboardAppState, setDashboardAppState] = useState<DashboardAppState>(() => ({
     $onDashboardStateChange: new BehaviorSubject({} as DashboardState),
     $triggerDashboardRefresh: new Subject<{ force?: boolean }>(),
   }));
 
+  /**
+   *  Last saved state is diffed against the current dashboard state any time either changes. This is used to set the
+   * unsaved changes portion of the dashboardAppState.
+   */
+  const [lastSavedState, setLastSavedState] = useState<DashboardState>();
   const $onLastSavedStateChange = useMemo(() => new Subject<DashboardState>(), []);
 
   /**
-   * This useEffect triggers when the dashboard ID changes, and is in charge of loading the saved dashboard,
-   * fetching the initial state, building the Dashboard Container embeddable, and setting up all state syncing.
+   * Unpack services
    */
-  useEffect(() => {
-    /**
-     * Unpack services inside UseEffect to keep deps array small. Services do not change during runtime.
-     */
-    const {
-      data,
-      chrome,
-      embeddable,
-      initializerContext,
-      dashboardCapabilities,
-      dashboardSessionStorage,
-    } = services;
+  const services = useKibana<DashboardAppServices>().services;
+  const {
+    data,
+    core,
+    chrome,
+    embeddable,
+    indexPatterns,
+    usageCollection,
+    savedDashboards,
+    initializerContext,
+    savedObjectsTagging,
+    dashboardCapabilities,
+    dashboardSessionStorage,
+  } = services;
+  const { docTitle } = chrome;
+  const { notifications } = core;
+  const { query, search } = data;
+  const { getStateTransfer } = embeddable;
+  const { version: kibanaVersion } = initializerContext.env.packageInfo;
 
-    const { docTitle } = chrome;
-    const { getStateTransfer } = embeddable;
-    const timefilter = data.query.timefilter.timefilter;
-    const { version: kibanaVersion } = initializerContext.env.packageInfo;
-
-    /**
-     * Create dashboard build context package which will be used in all of the following steps.
-     */
-    const dashboardBuildContext: DashboardBuildContext = {
+  /**
+   * The dashboard build context is a collection of all of the services and props required in subsequent steps to build the dashboard
+   * from the dashboardId. This build context should be created only once on mount, and doesn't contain any extrenuous services
+   */
+  const dashboardBuildContext = useMemo(() => {
+    const context: DashboardBuildContext = {
+      query,
+      search,
       history,
-      services,
+      embeddable,
+      indexPatterns,
+      notifications,
       kibanaVersion,
-      savedDashboardId,
+      savedDashboards,
       kbnUrlStateStorage,
+      initializerContext,
       isEmbeddedExternally,
+      dashboardCapabilities,
       dispatchDashboardStateChange,
       $checkForUnsavedChanges: new Subject(),
       $onDashboardStateChange: dashboardAppState.$onDashboardStateChange,
       $triggerDashboardRefresh: dashboardAppState.$triggerDashboardRefresh,
       getLatestDashboardState: () => dashboardAppState.$onDashboardStateChange.value,
     };
+    return context;
+  }, [
+    query,
+    search,
+    history,
+    embeddable,
+    indexPatterns,
+    notifications,
+    kibanaVersion,
+    savedDashboards,
+    kbnUrlStateStorage,
+    initializerContext,
+    isEmbeddedExternally,
+    dashboardCapabilities,
+    dispatchDashboardStateChange,
+    dashboardAppState.$onDashboardStateChange,
+    dashboardAppState.$triggerDashboardRefresh,
+  ]);
+
+  /**
+   * This useEffect triggers when the dashboard ID changes, and is in charge of loading the saved dashboard,
+   * fetching the initial state, building the Dashboard Container embeddable, and setting up all state syncing.
+   */
+  useEffect(() => {
+    const { timefilter } = dashboardBuildContext.query.timefilter;
 
     // fetch incoming embeddable from state transfer service.
     const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
@@ -117,7 +158,10 @@ export const useDashboardAppState = ({
       /**
        * Load and unpack state from dashboard saved object.
        */
-      const loadSavedDashboardResult = await loadSavedDashboardState(dashboardBuildContext);
+      const loadSavedDashboardResult = await loadSavedDashboardState({
+        ...dashboardBuildContext,
+        savedDashboardId,
+      });
       if (canceled || !loadSavedDashboardResult) return;
       const { savedDashboard, savedDashboardState } = loadSavedDashboardResult;
 
@@ -153,6 +197,7 @@ export const useDashboardAppState = ({
         initialDashboardState,
         incomingEmbeddable,
         savedDashboard,
+        data,
       });
       if (canceled || !dashboardContainer) {
         tryDestroyDashboardContainer(dashboardContainer);
@@ -164,9 +209,9 @@ export const useDashboardAppState = ({
        */
       const indexPatternsSubscription = syncDashboardIndexPatterns({
         dashboardContainer,
-        indexPatterns: services.indexPatterns,
-        onUpdateIndexPatterns: (indexPatterns) =>
-          setDashboardAppState((s) => ({ ...s, indexPatterns })),
+        indexPatterns: dashboardBuildContext.indexPatterns,
+        onUpdateIndexPatterns: (newIndexPatterns) =>
+          setDashboardAppState((s) => ({ ...s, indexPatterns: newIndexPatterns })),
       });
 
       /**
@@ -195,13 +240,15 @@ export const useDashboardAppState = ({
             current.viewMode === ViewMode.EDIT ? diffDashboardState(lastSaved, current) : {};
 
           if (current.viewMode === ViewMode.EDIT) {
-            const lastSavedTimeRange = {
-              from: savedDashboard?.timeFrom,
-              to: savedDashboard?.timeTo,
-            };
             const savedTimeChanged =
               lastSaved.timeRestore &&
-              !areTimeRangesEqual(lastSavedTimeRange, timefilter.getTime());
+              !areTimeRangesEqual(
+                {
+                  from: savedDashboard?.timeFrom,
+                  to: savedDashboard?.timeTo,
+                },
+                timefilter.getTime()
+              );
             const hasUnsavedChanges = Object.keys(unsavedChanges).length > 0 || savedTimeChanged;
             setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
           }
@@ -219,10 +266,10 @@ export const useDashboardAppState = ({
       const updateLastSavedState = () => {
         setLastSavedState(
           savedObjectToDashboardState({
-            hideWriteControls: dashboardCapabilities.hideWriteControls,
-            savedObjectsTagging: services.savedObjectsTagging,
+            hideWriteControls: dashboardBuildContext.dashboardCapabilities.hideWriteControls,
             version: dashboardBuildContext.kibanaVersion,
-            usageCollection: services.usageCollection,
+            savedObjectsTagging,
+            usageCollection,
             savedDashboard,
           })
         );
@@ -258,19 +305,22 @@ export const useDashboardAppState = ({
       onDestroy?.();
     };
   }, [
-    dashboardAppState.$triggerDashboardRefresh,
     dashboardAppState.$onDashboardStateChange,
     dispatchDashboardStateChange,
     $onLastSavedStateChange,
-    isEmbeddedExternally,
-    kbnUrlStateStorage,
+    dashboardSessionStorage,
+    dashboardBuildContext,
+    savedObjectsTagging,
     savedDashboardId,
-    redirectTo,
-    history,
-    services,
+    getStateTransfer,
+    usageCollection,
+    docTitle,
+    data,
   ]);
 
-  // rebuild reset to last saved state callback whenever last saved state changes
+  /**
+   *  rebuild reset to last saved state callback whenever last saved state changes
+   */
   const resetToLastSavedState = useCallback(() => {
     if (
       !lastSavedState ||
@@ -281,26 +331,25 @@ export const useDashboardAppState = ({
     }
 
     if (dashboardAppState.getLatestDashboardState().timeRestore) {
-      const timefilter = services.data.query.timefilter.timefilter;
+      const { timefilter } = data.query.timefilter;
       const { timeFrom: from, timeTo: to, refreshInterval } = dashboardAppState.savedDashboard;
       if (from && to) timefilter.setTime({ from, to });
       if (refreshInterval) timefilter.setRefreshInterval(refreshInterval);
     }
     dispatchDashboardStateChange(setDashboardState(lastSavedState));
-  }, [
-    lastSavedState,
-    dashboardAppState,
-    dispatchDashboardStateChange,
-    services.data.query.timefilter.timefilter,
-  ]);
+  }, [lastSavedState, dashboardAppState, data.query.timefilter, dispatchDashboardStateChange]);
 
-  // publish state to the state change observable when redux state changes;
+  /**
+   *  publish state to the state change observable when redux state changes
+   */
   useEffect(() => {
     if (!dashboardState || Object.keys(dashboardState).length === 0) return;
     dashboardAppState.$onDashboardStateChange.next(dashboardState);
   }, [dashboardAppState.$onDashboardStateChange, dashboardState]);
 
-  // push last saved state to the state change observable when last saved state changes
+  /**
+   * push last saved state to the state change observable when last saved state changes
+   */
   useEffect(() => {
     if (!lastSavedState) return;
     $onLastSavedStateChange.next(lastSavedState);

@@ -9,7 +9,12 @@
 import _ from 'lodash';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
-import { DashboardBuildContext, DashboardState, DashboardContainerInput } from '../../types';
+import {
+  DashboardBuildContext,
+  DashboardState,
+  DashboardContainerInput,
+  DashboardAppServices,
+} from '../../types';
 import {
   enableDashboardSearchSessions,
   getSearchSessionIdFromURL,
@@ -25,6 +30,7 @@ import {
 } from '../../services/embeddable';
 
 type BuildDashboardContainerProps = DashboardBuildContext & {
+  data: DashboardAppServices['data']; // the whole data service is required here because it is required by getUrlGeneratorState
   savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState;
@@ -37,13 +43,14 @@ export const buildDashboardContainer = async ({
   getLatestDashboardState,
   initialDashboardState,
   isEmbeddedExternally,
+  dashboardCapabilities,
   incomingEmbeddable,
   savedDashboard,
   kibanaVersion,
-  services,
+  embeddable,
   history,
+  data,
 }: BuildDashboardContainerProps) => {
-  const { data, embeddable, dashboardCapabilities } = services;
   const {
     search: { session },
   } = data;
@@ -76,9 +83,10 @@ export const buildDashboardContainer = async ({
     searchSessionId: searchSessionIdFromURL ?? session.start(),
     isEmbeddedExternally: Boolean(isEmbeddedExternally),
     dashboardState: initialDashboardState,
+    dashboardCapabilities,
     incomingEmbeddable,
+    query: data.query,
     savedDashboard,
-    services,
   });
 
   // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
