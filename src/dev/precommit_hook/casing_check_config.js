@@ -40,6 +40,7 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
+  'test/package/Vagrantfile',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -94,7 +95,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
-  'src/legacy/ui/public/flot-charts',
   'test/functional/fixtures/es_archiver/visualize_source-filters',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',

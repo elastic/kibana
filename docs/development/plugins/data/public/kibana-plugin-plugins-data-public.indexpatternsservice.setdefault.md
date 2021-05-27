@@ -9,5 +9,5 @@ Optionally set default index pattern, unless force = true
 <b>Signature:</b>
 
 ```typescript
-setDefault: (id: string, force?: boolean) => Promise<void>;
+setDefault: (id: string | null, force?: boolean) => Promise<void>;
 ```

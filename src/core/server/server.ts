@@ -153,6 +153,7 @@ export class Server {
       http: httpSetup,
       metrics: metricsSetup,
       savedObjectsStartPromise: this.savedObjectsStartPromise,
+      changedDeprecatedConfigPath$: this.configService.getDeprecatedConfigPath$(),
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
@@ -265,6 +266,7 @@ export class Server {
     await this.http.start();
 
     startTransaction?.end();
+
     return this.coreStart;
   }
 
