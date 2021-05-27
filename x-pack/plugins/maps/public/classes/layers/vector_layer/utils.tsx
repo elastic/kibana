@@ -6,7 +6,7 @@
  */
 
 import { FeatureCollection } from 'geojson';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import {
   EMPTY_FEATURE_COLLECTION,
   SOURCE_BOUNDS_DATA_REQUEST_ID,

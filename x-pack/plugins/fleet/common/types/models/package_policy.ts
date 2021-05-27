@@ -58,6 +58,7 @@ export interface NewPackagePolicy {
   output_id: string;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
+  vars?: PackagePolicyConfigRecord;
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {

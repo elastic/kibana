@@ -26,7 +26,7 @@ const template: string = `module.exports = {
 };
 `;
 
-const roots: string[] = ['x-pack/plugins', 'packages', 'src/legacy', 'src/plugins', 'test', 'src'];
+const roots: string[] = ['x-pack/plugins', 'packages', 'src/plugins', 'test', 'src'];
 
 export async function runCheckJestConfigsCli() {
   run(

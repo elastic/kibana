@@ -163,7 +163,7 @@ services:
   {hosted-ems}:
     image: {ems-docker-image}
     volumes:
-      - ./elastic-maps-server.yml:/usr/src/app/config/elastic-maps-server.yml
+      - ./elastic-maps-server.yml:/usr/src/app/server/config/elastic-maps-server.yml
 --------------------------------------------
 
 [float]
