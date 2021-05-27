@@ -30,12 +30,12 @@ describe('NewsfeedApiDriver', () => {
     });
 
     it('returns true if last fetch time precedes page load time', () => {
-      storage.getLastFetchTime.mockReturnValue(new Date(322642800000)); // 1980-03-23
+      storage.getLastFetchTime.mockReturnValue(new Date(Date.now() - 456789));
       expect(driver.shouldFetch()).toBe(true);
     });
 
     it('returns false if last fetch time is recent enough', () => {
-      storage.getLastFetchTime.mockReturnValue(new Date(3005017200000)); // 2065-03-23
+      storage.getLastFetchTime.mockReturnValue(new Date(Date.now() + 745678));
       expect(driver.shouldFetch()).toBe(false);
     });
   });

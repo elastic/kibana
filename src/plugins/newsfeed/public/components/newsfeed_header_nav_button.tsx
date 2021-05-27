@@ -7,12 +7,11 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import * as Rx from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { NewsfeedApi } from '../lib/api';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../types';
-import { NewsfeedApi } from '../lib/api';
 
 export interface INewsfeedContext {
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -20,8 +19,6 @@ export interface INewsfeedContext {
 }
 
 export const NewsfeedContext = React.createContext({} as INewsfeedContext);
-
-export type NewsfeedApiFetchResult = Rx.Observable<void | FetchResult | null>;
 
 export interface Props {
   newsfeedApi: NewsfeedApi;

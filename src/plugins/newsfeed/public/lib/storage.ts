@@ -44,8 +44,7 @@ export class NewsfeedStorage {
       newReadStatus[hash] = currentReadStatus[hash] ?? false;
     });
 
-    this.setReadStatus(newReadStatus);
-    return anyUnread(newReadStatus);
+    return this.setReadStatus(newReadStatus);
   }
 
   /**
@@ -56,8 +55,7 @@ export class NewsfeedStorage {
     itemHashes.forEach((hash) => {
       updatedReadStatus[hash] = true;
     });
-    this.setReadStatus(updatedReadStatus);
-    return anyUnread(updatedReadStatus);
+    return this.setReadStatus(updatedReadStatus);
   }
 
   isAnyUnread(): boolean {
@@ -77,8 +75,10 @@ export class NewsfeedStorage {
   }
 
   private setReadStatus(status: Record<string, boolean>) {
+    const hasUnread = anyUnread(status);
     this.unreadStatus$.next(anyUnread(status));
     localStorage.setItem(this.readStatusStorageKey, JSON.stringify(status));
+    return hasUnread;
   }
 }
 
