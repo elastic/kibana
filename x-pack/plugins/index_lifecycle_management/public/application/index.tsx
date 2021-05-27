@@ -9,6 +9,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nStart, ScopedHistory, ApplicationStart } from 'kibana/public';
 import { UnmountCallback } from 'src/core/public';
+
+import type { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { CloudSetup } from '../../../cloud/public';
 import { ILicense } from '../../../licensing/public';
 
@@ -26,11 +28,12 @@ export const renderApp = (
   getUrlForApp: ApplicationStart['getUrlForApp'],
   breadcrumbService: BreadcrumbService,
   license: ILicense,
+  managementPageLayout: ManagementAppMountParams['managementPageLayout'],
   cloud?: CloudSetup
 ): UnmountCallback => {
   render(
     <I18nContext>
-      <KibanaContextProvider services={{ cloud, breadcrumbService, license }}>
+      <KibanaContextProvider services={{ cloud, breadcrumbService, license, managementPageLayout }}>
         <AppWithRouter
           history={history}
           navigateToApp={navigateToApp}

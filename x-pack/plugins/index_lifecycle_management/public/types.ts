@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { ManagementAppMountParams } from '../../../../src/plugins/management/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
@@ -36,5 +38,6 @@ export interface ClientConfigType {
 export interface AppServicesContext {
   breadcrumbService: BreadcrumbService;
   license: ILicense;
+  managementPageLayout: ManagementAppMountParams['managementPageLayout'];
   cloud?: CloudSetup;
 }

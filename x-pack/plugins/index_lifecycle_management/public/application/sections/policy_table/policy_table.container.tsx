@@ -10,9 +10,10 @@ import { ApplicationStart } from 'kibana/public';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PolicyTable as PresentationComponent } from './policy_table';
+
 import { useKibana } from '../../../shared_imports';
 import { useLoadPoliciesList } from '../../services/api';
+import { PolicyTable as PolicyTableContent } from './policy_table';
 
 interface Props {
   navigateToApp: ApplicationStart['navigateToApp'];
@@ -23,7 +24,7 @@ export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> =
   history,
 }) => {
   const {
-    services: { breadcrumbService },
+    services: { breadcrumbService, managementPageLayout: ManagementPageLayout },
   } = useKibana();
   const { data: policies, isLoading, error, resendRequest } = useLoadPoliciesList(true);
 
@@ -33,48 +34,53 @@ export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> =
 
   if (isLoading) {
     return (
-      <EuiEmptyPrompt
-        title={<EuiLoadingSpinner size="xl" />}
-        body={
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.policyTable.policiesLoading"
-            defaultMessage="Loading policies..."
-          />
-        }
-      />
+      <ManagementPageLayout isEmptyState={true}>
+        <EuiEmptyPrompt
+          title={<EuiLoadingSpinner size="xl" />}
+          body={
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.policyTable.policiesLoading"
+              defaultMessage="Loading policies..."
+            />
+          }
+        />
+      </ManagementPageLayout>
     );
   }
+
   if (error) {
     const { statusCode, message } = error ? error : { statusCode: '', message: '' };
     return (
-      <EuiEmptyPrompt
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyTable.policiesLoadingFailedTitle"
-              defaultMessage="Unable to load existing lifecycle policies"
-            />
-          </h2>
-        }
-        body={
-          <p>
-            {message} ({statusCode})
-          </p>
-        }
-        actions={
-          <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyTable.policiesReloadButton"
-              defaultMessage="Try again"
-            />
-          </EuiButton>
-        }
-      />
+      <ManagementPageLayout isEmptyState={true}>
+        <EuiEmptyPrompt
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyTable.policiesLoadingFailedTitle"
+                defaultMessage="Unable to load existing lifecycle policies"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              {message} ({statusCode})
+            </p>
+          }
+          actions={
+            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyTable.policiesReloadButton"
+                defaultMessage="Try again"
+              />
+            </EuiButton>
+          }
+        />
+      </ManagementPageLayout>
     );
   }
 
   return (
-    <PresentationComponent
+    <PolicyTableContent
       policies={policies || []}
       history={history}
       navigateToApp={navigateToApp}
