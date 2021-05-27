@@ -13,14 +13,25 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from 'react-intl';
 import * as i18n from '../translations';
-import { StepProps } from './';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGetApplication } from '../use_get_application';
+import { SwimlaneConfig, SwimlaneFieldMappingConfig, SwimlaneSecrets } from '../types';
+import { IErrorObject, UserConfiguredActionConnector } from '../../../../../types';
 
-export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
+interface Props {
+  action: UserConfiguredActionConnector<SwimlaneConfig, SwimlaneSecrets>;
+  editActionConfig: (property: string, value: any) => void;
+  editActionSecrets: (property: string, value: any) => void;
+  errors: IErrorObject;
+  readOnly: boolean;
+  updateCurrentStep: (step: number) => void;
+  updateFields: (items: SwimlaneFieldMappingConfig[]) => void;
+}
+
+const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({
   action,
   editActionConfig,
   editActionSecrets,
@@ -41,7 +52,7 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
     appId,
     apiUrl,
   });
-  const isValid = useMemo(() => apiUrl && apiToken && appId, [apiToken, apiUrl, appId]);
+  const isValid = apiUrl && apiToken && appId;
 
   const connectSwimlane = useCallback(async () => {
     // fetch swimlane application configuration
@@ -166,3 +177,5 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
     </>
   );
 };
+
+export const SwimlaneConnection = React.memo(SwimlaneConnectionComponent);

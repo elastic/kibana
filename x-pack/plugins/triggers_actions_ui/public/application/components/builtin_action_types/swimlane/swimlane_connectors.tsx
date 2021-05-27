@@ -16,21 +16,8 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<SwimlaneActionConnector>
 > = ({ errors, action, editActionConfig, editActionSecrets, readOnly }) => {
   const [currentStep, setCurrentStep] = useState<number>(1);
-
-  const stepMap = useMemo<{ [key: number]: any }>(
-    () => ({
-      1: SwimlaneConnection,
-      2: SwimlaneFields,
-    }),
-    []
-  );
-
-  const CurrentStepForm = useMemo(() => {
-    return stepMap[currentStep];
-  }, [currentStep, stepMap]);
   const [connectionStatus, setConnectionStatus] = useState<EuiStepStatus>('incomplete');
   const [fieldsConfigured, setFieldsConfigured] = useState<EuiStepStatus>('incomplete');
-
   const [fields, setFields] = useState<SwimlaneFieldMappingConfig[]>([]);
 
   const updateCurrentStep = useCallback(
@@ -52,16 +39,16 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
       {
         title: i18n.SW_CONFIGURE_CONNECTION_LABEL,
         status: connectionStatus,
-        onClick: () => {},
+        onClick: () => updateCurrentStep(1),
       },
       {
         title: i18n.SW_MAPPING_TITLE_TEXT_FIELD_LABEL,
         disabled: connectionStatus !== 'complete',
         status: fieldsConfigured,
-        onClick: () => {},
+        onClick: () => updateCurrentStep(2),
       },
     ],
-    [connectionStatus, fieldsConfigured]
+    [connectionStatus, fieldsConfigured, updateCurrentStep]
   );
 
   const editActionConfigCb = useCallback(
@@ -80,16 +67,25 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
       <EuiStepsHorizontal steps={setupSteps} />
       <EuiSpacer size="l" />
       <EuiForm>
-        <CurrentStepForm
-          action={action}
-          editActionConfig={editActionConfigCb}
-          editActionSecrets={editActionSecrets}
-          readOnly={readOnly}
-          errors={errors}
-          updateCurrentStep={updateCurrentStep}
-          updateFields={setFields}
-          fields={fields}
-        />
+        {currentStep === 1 && (
+          <SwimlaneConnection
+            action={action}
+            editActionConfig={editActionConfigCb}
+            editActionSecrets={editActionSecrets}
+            readOnly={readOnly}
+            errors={errors}
+            updateCurrentStep={updateCurrentStep}
+            updateFields={setFields}
+          />
+        )}
+        {currentStep === 2 && (
+          <SwimlaneFields
+            action={action}
+            editActionConfig={editActionConfigCb}
+            updateCurrentStep={updateCurrentStep}
+            fields={fields}
+          />
+        )}
       </EuiForm>
     </Fragment>
   );

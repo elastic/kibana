@@ -8,8 +8,13 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiButton, EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import * as i18n from '../translations';
-import { StepProps } from './';
-import { SwimlaneFieldMappingConfig, SwimlaneMappingConfig } from '../types';
+import { UserConfiguredActionConnector } from '../../../../../types';
+import {
+  SwimlaneFieldMappingConfig,
+  SwimlaneMappingConfig,
+  SwimlaneConfig,
+  SwimlaneSecrets,
+} from '../types';
 
 const SINGLE_SELECTION = { asPlainText: true };
 const EMPTY_COMBO_BOX_ARRAY: Array<EuiComboBoxOptionOption<string>> | undefined = [];
@@ -22,7 +27,14 @@ const formatOption = (field: SwimlaneFieldMappingConfig) => ({
 const createSelectedOption = (field: SwimlaneFieldMappingConfig | null | undefined) =>
   field != null ? [formatOption(field)] : EMPTY_COMBO_BOX_ARRAY;
 
-export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
+interface Props {
+  action: UserConfiguredActionConnector<SwimlaneConfig, SwimlaneSecrets>;
+  editActionConfig: (property: string, value: any) => void;
+  updateCurrentStep: (step: number) => void;
+  fields: SwimlaneFieldMappingConfig[];
+}
+
+const SwimlaneFieldsComponent: React.FC<Props> = ({
   action,
   editActionConfig,
   updateCurrentStep,
@@ -172,3 +184,5 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
     </>
   );
 };
+
+export const SwimlaneFields = React.memo(SwimlaneFieldsComponent);
