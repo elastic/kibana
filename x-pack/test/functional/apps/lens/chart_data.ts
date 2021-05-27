@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '93.28.27.24',
         '97.220.3.248',
       ]);
-      expect(debugState.axes!.y[0].labels).to.eql(['(empty)']);
+      expect(debugState.axes!.y[0].labels).to.eql(['']);
 
       // assert cells
       expect(debugState.heatmap!.cells.length).to.eql(6);
