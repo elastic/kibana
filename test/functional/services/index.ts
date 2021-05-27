@@ -8,7 +8,7 @@
 
 import { services as commonServiceProviders } from '../../common/services';
 
-import { AppsMenuProvider } from './apps_menu';
+import { AppsMenuService } from './apps_menu';
 import {
   BrowserProvider,
   FailureDebuggingProvider,
@@ -17,7 +17,7 @@ import {
   SnapshotsService,
   TestSubjects,
 } from './common';
-import { ComboBoxProvider } from './combo_box';
+import { ComboBoxService } from './combo_box';
 import {
   DashboardAddPanelService,
   DashboardReplacePanelService,
@@ -28,15 +28,15 @@ import {
 import { DocTableService } from './doc_table';
 import { EmbeddingProvider } from './embedding';
 import { FilterBarService } from './filter_bar';
-import { FlyoutProvider } from './flyout';
+import { FlyoutService } from './flyout';
 import { GlobalNavService } from './global_nav';
-import { InspectorProvider } from './inspector';
+import { InspectorService } from './inspector';
 import { FieldEditorService } from './field_editor';
-import { ManagementMenuProvider } from './management';
+import { ManagementMenuService } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
-import { ToastsProvider } from './toasts';
+import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
 import {
   PieChartService,
@@ -67,23 +67,23 @@ export const services = {
   dashboardAddPanel: DashboardAddPanelService,
   dashboardReplacePanel: DashboardReplacePanelService,
   dashboardPanelActions: DashboardPanelActionsService,
-  flyout: FlyoutProvider,
-  comboBox: ComboBoxProvider,
+  flyout: FlyoutService,
+  comboBox: ComboBoxService,
   dataGrid: DataGridService,
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
   browser: BrowserProvider,
   pieChart: PieChartService,
-  inspector: InspectorProvider,
+  inspector: InspectorService,
   fieldEditor: FieldEditorService,
   vegaDebugInspector: VegaDebugInspectorViewService,
-  appsMenu: AppsMenuProvider,
+  appsMenu: AppsMenuService,
   globalNav: GlobalNavService,
-  toasts: ToastsProvider,
+  toasts: ToastsService,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
   elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
-  managementMenu: ManagementMenuProvider,
+  managementMenu: ManagementMenuService,
   monacoEditor: MonacoEditorProvider,
   MenuToggle: MenuToggleProvider,
 };
