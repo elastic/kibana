@@ -92,6 +92,11 @@ export type AppDeepLink = {
     title: string;
     keywords?: string[];
     navLinkStatus?: AppNavLinkStatus;
+    order?: number;
+    tooltip?: string;
+    euiIconType?: string;
+    icon?: string;
+    exactRoute?: boolean;
 } & ({
     path: string;
     deepLinks?: AppDeepLink[];
@@ -305,6 +310,7 @@ export interface ChromeNavControls {
 export interface ChromeNavLink {
     readonly baseUrl: string;
     readonly category?: AppCategory;
+    readonly deepLinkPath?: string;
     readonly disabled?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
