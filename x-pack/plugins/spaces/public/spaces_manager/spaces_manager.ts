@@ -23,6 +23,8 @@ interface SavedObjectTarget {
   id: string;
 }
 
+const TAG_TYPE = 'tag';
+
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
 
@@ -142,9 +144,19 @@ export class SpacesManager {
   public async getShareableReferences(
     objects: SavedObjectTarget[]
   ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
-    return this.http.post(`/api/spaces/_get_shareable_references`, {
-      body: JSON.stringify({ objects }),
-    });
+    const response = await this.http.post<SavedObjectsCollectMultiNamespaceReferencesResponse>(
+      `/api/spaces/_get_shareable_references`,
+      { body: JSON.stringify({ objects }) }
+    );
+
+    // We should exclude any child-reference tags because we don't yet support reconciling/merging duplicate tags. In other words: tags can
+    // be shared directly, but if a tag is only included as a reference of a requested object, it should not be shared.
+    // To filter accordingly, we allow the first N objects of the response, where N is the number of requested objects, then filter out any
+    // tags after that.
+    const filteredObjects = response.objects.filter(
+      ({ type }, i) => i < objects.length || type !== TAG_TYPE
+    );
+    return { objects: filteredObjects };
   }
 
   public async updateSavedObjectsSpaces(
