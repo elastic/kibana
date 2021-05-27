@@ -24,14 +24,14 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
-import { ReportingConfig } from './';
+import { ReportingConfig, ReportingSetup } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
 import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
-import { ReportingPluginRouter, ReportingStart } from './types';
+import { ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
@@ -64,17 +64,15 @@ export class ReportingCore {
   private exportTypesRegistry = getExportTypesRegistry();
   private config?: ReportingConfig;
 
-  public getStartContract: () => ReportingStart;
+  public getContract: () => ReportingSetup;
 
   constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
     const syncConfig = context.config.get<ReportingConfigType>();
     this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
 
-    this.getStartContract = (): ReportingStart => {
-      return {
-        usesUiCapabilities: () => syncConfig.roles.enabled === false,
-      };
-    };
+    this.getContract = () => ({
+      usesUiCapabilities: () => syncConfig.roles.enabled === false,
+    });
   }
 
   /*
