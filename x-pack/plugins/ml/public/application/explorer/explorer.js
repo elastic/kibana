@@ -401,9 +401,9 @@ export class ExplorerUI extends React.Component {
                 <EuiSpacer size="m" />
               </>
             )}
-            {loading === false && tableData.anomalies?.length && (
+            {loading === false && tableData.anomalies?.length ? (
               <AnomaliesMap anomalies={tableData.anomalies} jobIds={selectedJobIds} />
-            )}
+            ) : null}
             {annotationsData.length > 0 && (
               <>
                 <EuiPanel data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded">
@@ -492,7 +492,7 @@ export class ExplorerUI extends React.Component {
                 <EuiSpacer size="m" />
 
                 <div className="euiText explorer-charts">
-                  {showCharts && (
+                  {showCharts ? (
                     <ExplorerChartsContainer
                       {...{
                         ...chartsData,
@@ -503,7 +503,7 @@ export class ExplorerUI extends React.Component {
                         onSelectEntity: this.applyFilter,
                       }}
                     />
-                  )}
+                  ) : null}
                 </div>
 
                 <AnomaliesTable
