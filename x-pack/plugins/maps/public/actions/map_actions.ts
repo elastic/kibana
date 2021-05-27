@@ -10,7 +10,6 @@ import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
-
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
