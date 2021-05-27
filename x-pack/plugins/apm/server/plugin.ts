@@ -101,7 +101,6 @@ export class APMPlugin
         kibanaVersion: this.initContext.env.packageInfo.version,
       });
     }
-
     plugins.home?.tutorials.registerTutorial(
       tutorialProvider({
         isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
@@ -114,6 +113,7 @@ export class APMPlugin
           sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
           transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
         },
+        basePath: core.http.basePath,
       })
     );
 

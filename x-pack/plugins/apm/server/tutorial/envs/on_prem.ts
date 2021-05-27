@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INSTRUCTION_VARIANT } from '../../../../../../src/plugins/home/server';
+import { IBasePath } from 'kibana/server';
+import url from 'url';
+import {
+  INSTRUCTION_VARIANT,
+  TutorialSchema,
+} from '../../../../../../src/plugins/home/server';
 import {
   createWindowsServerInstructions,
   createEditConfig,
@@ -35,13 +40,15 @@ export function onPremInstructions({
   metricsIndices,
   sourcemapIndices,
   onboardingIndices,
+  basePath,
 }: {
   errorIndices: string;
   transactionIndices: string;
   metricsIndices: string;
   sourcemapIndices: string;
   onboardingIndices: string;
-}) {
+  basePath: IBasePath;
+}): TutorialSchema['onPrem'] {
   const EDIT_CONFIG = createEditConfig();
   const START_SERVER_UNIX = createStartServerUnix();
   const START_SERVER_UNIX_SYSV = createStartServerUnixSysv();
@@ -66,6 +73,32 @@ export function onPremInstructions({
           iconType: 'alert',
         },
         instructionVariants: [
+          {
+            id: INSTRUCTION_VARIANT.FLEET,
+            instructions: [
+              {
+                title: i18n.translate(
+                  'xpack.apm.tutorial.apmServer.fleet.title',
+                  {
+                    defaultMessage:
+                      'Elastic APM (beta) now available in Fleet!',
+                  }
+                ),
+                textPre: i18n.translate(
+                  'xpack.apm.tutorial.apmServer.fleet.message',
+                  {
+                    defaultMessage:
+                      'The [APM integration]({apmIntegrationTest}) installs Elasticsearch templates and Ingest Node pipelines for APM data.',
+                    values: {
+                      apmIntegrationTest: `${url.format(
+                        basePath.prepend('/app/fleet#/policies')
+                      )}`,
+                    },
+                  }
+                ),
+              },
+            ],
+          },
           {
             id: INSTRUCTION_VARIANT.OSX,
             instructions: [

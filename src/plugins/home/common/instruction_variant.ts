@@ -24,6 +24,7 @@ export const INSTRUCTION_VARIANT = {
   DOTNET: 'dotnet',
   LINUX: 'linux',
   PHP: 'php',
+  FLEET: 'fleet',
 };
 
 const DISPLAY_MAP = {
@@ -44,6 +45,7 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.DOTNET]: '.NET',
   [INSTRUCTION_VARIANT.LINUX]: 'Linux',
   [INSTRUCTION_VARIANT.PHP]: 'PHP',
+  [INSTRUCTION_VARIANT.FLEET]: 'Elastic APM (beta) in Fleet',
 };
 
 /**

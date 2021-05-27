@@ -27,4 +27,4 @@ export const plugin = (initContext: PluginInitializerContext) => new HomeServerP
 
 export { INSTRUCTION_VARIANT } from '../common/instruction_variant';
 export { TutorialsCategory } from './services/tutorials';
-export type { ArtifactsSchema } from './services/tutorials';
+export type { ArtifactsSchema, TutorialSchema, InstructionSetSchema } from './services/tutorials';

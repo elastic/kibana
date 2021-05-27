@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { IBasePath } from 'kibana/server';
 import { onPremInstructions } from './envs/on_prem';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import apmIndexPattern from './index_pattern.json';
@@ -13,6 +14,7 @@ import { CloudSetup } from '../../../cloud/server';
 import {
   ArtifactsSchema,
   TutorialsCategory,
+  TutorialSchema,
 } from '../../../../../src/plugins/home/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
 
@@ -27,6 +29,7 @@ export const tutorialProvider = ({
   indexPatternTitle,
   indices,
   cloud,
+  basePath,
 }: {
   isEnabled: boolean;
   indexPatternTitle: string;
@@ -38,6 +41,7 @@ export const tutorialProvider = ({
     sourcemapIndices: string;
     onboardingIndices: string;
   };
+  basePath: IBasePath;
 }) => () => {
   const savedObjects = [
     {
@@ -102,7 +106,7 @@ It allows you to monitor the performance of thousands of applications in real ti
     ),
     euiIconType: 'apmApp',
     artifacts,
-    onPrem: onPremInstructions(indices),
+    onPrem: onPremInstructions({ ...indices, basePath }),
     elasticCloud: createElasticCloudInstructions(cloud),
     previewImagePath: '/plugins/apm/assets/apm.png',
     savedObjects,
@@ -113,5 +117,5 @@ It allows you to monitor the performance of thousands of applications in real ti
           'An APM index pattern is required for some features in the APM UI.',
       }
     ),
-  };
+  } as TutorialSchema;
 };
