@@ -7,12 +7,17 @@ date: 2021-03-30
 tags: ['kibana','dev', 'contributor', 'api docs']
 ---
 
-Kibana index patterns (KIPs) are the central method of describing sets of indices for queries. They're defined by a
+Kibana index patterns (KIPs) are the central method of describing sets of indices for queries. Usage is strongly recommended
+as a number of high level building blocks use them, (TODO LINK) in addition to allowing users to look at the same data 
+sets in a variety of KIP supporting Kibana apps.
+
+KIPs are defined by a
 wildcard string (an index pattern) which matches indices, datastreams, and index aliases, optionally specify a
 timestamp field for time series data, and are stored as a <DocLink id="kibDevDocsSavedObjectsIntro" text="saved
 object"/>. They have a field list which comprises all the fields in matching indices plus fields defined specifically
-on the KIP via runtime fields. Schema-on-read functionality is provided by KIP defined runtime fields. In all, KIPs
-allow users to look at the same data set in a variety of KIP supporting Kibana apps.
+on the KIP via runtime fields. Schema-on-read functionality is provided by KIP defined runtime fields.
+
+
 
 KIP functionlity is available via the data plugin (`data.indexPatterns`) and most commonly used with SearchSource
 (`data.search.search`) to perform queries. SearchSource will apply existing filters and queries from the search bar UI.
@@ -20,5 +25,5 @@ KIP functionlity is available via the data plugin (`data.indexPatterns`) and mos
 Users can create KIPs via [Index pattern management](https://www.elastic.co/guide/en/kibana/current/index-patterns.html)
 although they can also be created through the index patterns API.
 
-KIPs also allows formatters and custom labels to be defined for fields.
+KIPs also allow formatters and custom labels to be defined for fields.
 
