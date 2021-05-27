@@ -79,7 +79,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
   }),
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params, logger } = resources;
+    const { params, logger, core } = resources;
 
     const { service } = params.body;
 
@@ -96,10 +96,23 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
       `Deleting config ${service.name}/${service.environment} (${config._id})`
     );
 
-    return await deleteConfiguration({
+    const deleteConfigurationResult = await deleteConfiguration({
       configurationId: config._id,
       setup,
     });
+
+    if (resources.plugins.fleet) {
+      await syncAgentConfigsToApmPackagePolicies({
+        core,
+        fleetPluginStart: await resources.plugins.fleet.start(),
+        setup,
+      });
+      logger.info(
+        `Saved latest agent settings to Fleet integration policy for APM.`
+      );
+    }
+
+    return deleteConfigurationResult;
   },
 });
 
