@@ -10,8 +10,8 @@ import { estypes } from '@elastic/elasticsearch';
 import { Query, TimefilterContract } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
-import { isPopulatedObject } from '../../../components/utils/object_utils';
-import { getTimeFieldRange } from '../../../../api';
+import { isPopulatedObject } from '../../../../../common/utils/object_utils';
+import { getTimeFieldRange } from '../../services/time_field_range';
 
 export interface TimeRange {
   from: number;

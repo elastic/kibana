@@ -17,7 +17,7 @@ import {
   getVisualizerFieldHistograms,
   getVisualizerFieldStats,
   getVisualizerOverallStats,
-} from '../../../api';
+} from '../services/visualizer_stats';
 
 type IndexPatternTitle = string;
 type SavedSearchQuery = Record<string, any> | null | undefined;
@@ -30,7 +30,6 @@ export class DataLoader {
   private _indexPatternTitle: IndexPatternTitle = '';
   private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
   private _toastNotifications: CoreSetup['notifications']['toasts'];
-  // private _toastNotificationsService: ToastNotificationService;
 
   constructor(
     indexPattern: IndexPattern,
@@ -41,7 +40,6 @@ export class DataLoader {
       .runtimeFields as estypes.RuntimeFields;
     this._indexPatternTitle = indexPattern.title;
     this._toastNotifications = toastNotifications;
-    // this._toastNotificationsService = toastNotificationServiceProvider(toastNotifications);
   }
 
   async loadOverallData(
