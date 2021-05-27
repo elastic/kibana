@@ -1999,7 +1999,7 @@ describe('migration visualization', () => {
       },
     });
 
-    it('the migration can run twice without affecting the object', () => {
+    it('the migrations can be applied twice without breaking anything', () => {
       const migratedTestDoc = migrate(createTestDocWithType('markdown'));
       const { params } = JSON.parse(migratedTestDoc.attributes.visState);
 
