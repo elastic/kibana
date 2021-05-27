@@ -33,10 +33,10 @@ export class SuspenseErrorBoundary extends Component<PropsWithChildren<Props>, S
   public componentDidCatch(error: Error) {
     const { notifications } = this.props;
     if (notifications) {
-      const title = i18n.translate('xpack.spaces.uiApi.errorBoundaryToastTitle', {
+      const title = i18n.translate('xpack.security.uiApi.errorBoundaryToastTitle', {
         defaultMessage: 'Failed to load Kibana asset',
       });
-      const toastMessage = i18n.translate('xpack.spaces.uiApi.errorBoundaryToastMessage', {
+      const toastMessage = i18n.translate('xpack.security.uiApi.errorBoundaryToastMessage', {
         defaultMessage: 'Reload page to continue.',
       });
       notifications.toasts.addError(error, { title, toastMessage });
