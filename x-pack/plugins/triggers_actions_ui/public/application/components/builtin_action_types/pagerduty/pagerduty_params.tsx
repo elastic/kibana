@@ -104,6 +104,8 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   const isDedupKeyInvalid: boolean = errors.dedupKey !== undefined && errors.dedupKey.length > 0;
   const isSummaryInvalid: boolean =
     errors.summary !== undefined && errors.summary.length > 0 && summary !== undefined;
+  const isTimestampInvalid: boolean =
+    errors.timestamp !== undefined && errors.timestamp.length > 0 && timestamp !== undefined;
 
   return (
     <>
@@ -215,7 +217,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               <EuiFormRow
                 fullWidth
                 error={errors.timestamp}
-                isInvalid={errors.timestamp.length > 0 && timestamp !== undefined}
+                isInvalid={isTimestampInvalid}
                 label={i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.timestampTextFieldLabel',
                   {

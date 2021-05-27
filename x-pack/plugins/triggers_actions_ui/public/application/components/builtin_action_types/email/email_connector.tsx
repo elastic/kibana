@@ -44,6 +44,11 @@ export const EmailActionConnectorFields: React.FunctionComponent<
     host !== undefined && errors.host !== undefined && errors.host.length > 0;
   const isPortInvalid: boolean =
     port !== undefined && errors.port !== undefined && errors.port.length > 0;
+
+  const isPasswordInvalid: boolean =
+    password !== undefined && errors.password !== undefined && errors.password.length > 0;
+  const isUserInvalid: boolean =
+    user !== undefined && errors.user !== undefined && errors.user.length > 0;
   return (
     <>
       <EuiFlexGroup>
@@ -227,9 +232,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                 id="emailUser"
                 fullWidth
                 error={errors.user}
-                isInvalid={
-                  user !== undefined && errors.user !== undefined && errors.user.length > 0
-                }
+                isInvalid={isUserInvalid}
                 label={i18n.translate(
                   'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
                   {
@@ -239,9 +242,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               >
                 <EuiFieldText
                   fullWidth
-                  isInvalid={
-                    user !== undefined && errors.user !== undefined && errors.user.length > 0
-                  }
+                  isInvalid={isUserInvalid}
                   name="user"
                   readOnly={readOnly}
                   value={user || ''}
@@ -262,11 +263,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                 id="emailPassword"
                 fullWidth
                 error={errors.password}
-                isInvalid={
-                  password !== undefined &&
-                  errors.password !== undefined &&
-                  errors.password.length > 0
-                }
+                isInvalid={isPasswordInvalid}
                 label={i18n.translate(
                   'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
                   {
@@ -277,11 +274,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                 <EuiFieldPassword
                   fullWidth
                   readOnly={readOnly}
-                  isInvalid={
-                    password !== undefined &&
-                    errors.password !== undefined &&
-                    errors.password.length > 0
-                  }
+                  isInvalid={isPasswordInvalid}
                   name="password"
                   value={password || ''}
                   data-test-subj="emailPasswordInput"

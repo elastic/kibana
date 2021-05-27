@@ -190,7 +190,7 @@ export const IndexParamsFields = ({
           defaultMessage: 'Code editor',
         }
       )}
-      errors={(errors.documents ?? []) as string[]}
+      errors={errors.documents as string[]}
       onDocumentsChange={onDocumentsChange}
       helpText={
         <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
