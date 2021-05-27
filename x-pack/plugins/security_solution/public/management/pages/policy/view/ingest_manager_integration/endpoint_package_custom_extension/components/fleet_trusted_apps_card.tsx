@@ -46,7 +46,7 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
       } catch (error) {
         toasts.addDanger(
           i18n.translate(
-            'xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersSummaryError',
+            'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummaryError',
             {
               defaultMessage: 'There was an error trying to fetch trusted apps stats: "{error}"',
               values: { error },
