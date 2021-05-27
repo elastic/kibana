@@ -27,7 +27,7 @@ export function HealthLabel(props) {
     });
   }
 
-  const { product, status } = props;
+  const { product } = props;
   if (product === 'es') {
     if (props.status === 'yellow') {
       return i18n.translate('xpack.monitoring.cluster.health.replicaShards', {
@@ -42,7 +42,7 @@ export function HealthLabel(props) {
     }
   }
 
-  if (product === 'kb' && status === 'red') {
+  if (product === 'kb') {
     return (
       <EuiText>
         {i18n.translate('xpack.monitoring.cluster.health.pluginIssues', {
