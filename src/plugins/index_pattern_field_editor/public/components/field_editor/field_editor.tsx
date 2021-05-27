@@ -29,7 +29,7 @@ import {
 } from '../../shared_imports';
 import { Field } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';
-import { useFieldPreviewContext } from '../field_preview_context';
+import { useFieldPreviewContext } from '../preview';
 
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 import { schema } from './form_schema';

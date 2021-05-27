@@ -29,8 +29,10 @@ import './field_editor_flyout_content.scss';
 
 import type { Field, EsRuntimeField } from '../types';
 import { RuntimeFieldPainlessError } from '../lib';
+import { Flyout } from './flyout_panel';
 import { useFieldEditorContext } from './field_editor_context';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
+import { FieldPreview } from './preview';
 
 const geti18nTexts = (field?: Field) => {
   return {
@@ -207,157 +209,90 @@ const FieldEditorFlyoutContentComponent = ({
   return (
     <>
       {FieldEditor && (
-        <>
-          <div className="fieldEditorFlyoutContent__left">
-            <div className="fieldEditorFlyoutContent__left__wrapper">
-              <div className="fieldEditorFlyoutContent__left__body">
-                <EuiFlyoutHeader style={{ padding: 0 }}>
-                  <EuiTitle data-test-subj="flyoutTitle">
-                    <h2>
-                      {field ? (
-                        <FormattedMessage
-                          id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
-                          defaultMessage="Edit field '{fieldName}'"
-                          values={{
-                            fieldName: field.name,
-                          }}
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="indexPatternFieldEditor.editor.flyoutDefaultTitle"
-                          defaultMessage="Create field"
-                        />
-                      )}
-                    </h2>
-                  </EuiTitle>
-                  <EuiText color="subdued">
-                    <p>
-                      <FormattedMessage
-                        id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
-                        defaultMessage="Index pattern: {patternName}"
-                        values={{
-                          patternName: <i>{indexPattern.title}</i>,
-                        }}
-                      />
-                    </p>
-                  </EuiText>
-                </EuiFlyoutHeader>
+        <Flyout.Panels>
+          {/* Editor panel */}
+          <Flyout.Panel width={60} withFooter>
+            <Flyout.Header>
+              <EuiTitle data-test-subj="flyoutTitle">
+                <h2>
+                  {field ? (
+                    <FormattedMessage
+                      id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
+                      defaultMessage="Edit field '{fieldName}'"
+                      values={{
+                        fieldName: field.name,
+                      }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="indexPatternFieldEditor.editor.flyoutDefaultTitle"
+                      defaultMessage="Create field"
+                    />
+                  )}
+                </h2>
+              </EuiTitle>
+              <EuiText color="subdued">
+                <p>
+                  <FormattedMessage
+                    id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
+                    defaultMessage="Index pattern: {patternName}"
+                    values={{
+                      patternName: <i>{indexPattern.title}</i>,
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </Flyout.Header>
 
-                <EuiSpacer />
+            <FieldEditor field={field} onChange={setFormState} syntaxError={syntaxError} />
 
-                <FieldEditor field={field} onChange={setFormState} syntaxError={syntaxError} />
-
-                <EuiSpacer />
-              </div>
-              <EuiFlyoutFooter className="fieldEditorFlyoutContent__left__footer">
-                {FieldEditor && (
+            <Flyout.Footer>
+              <>
+                {isSubmitted && hasErrors && (
                   <>
-                    {isSubmitted && hasErrors && (
-                      <>
-                        <EuiCallOut
-                          title={i18nTexts.formErrorsCalloutTitle}
-                          color="danger"
-                          iconType="cross"
-                          data-test-subj="formError"
-                        />
-                        <EuiSpacer size="m" />
-                      </>
-                    )}
-                    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          iconType="cross"
-                          flush="left"
-                          onClick={onCancel}
-                          data-test-subj="closeFlyoutButton"
-                        >
-                          {i18nTexts.closeButtonLabel}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          color="primary"
-                          onClick={onClickSave}
-                          data-test-subj="fieldSaveButton"
-                          fill
-                          disabled={hasErrors}
-                          isLoading={isSavingField || isValidating}
-                        >
-                          {i18nTexts.saveButtonLabel}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <EuiCallOut
+                      title={i18nTexts.formErrorsCalloutTitle}
+                      color="danger"
+                      iconType="cross"
+                      data-test-subj="formError"
+                    />
+                    <EuiSpacer size="m" />
                   </>
                 )}
-              </EuiFlyoutFooter>
-            </div>
-          </div>
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="cross"
+                      flush="left"
+                      onClick={onCancel}
+                      data-test-subj="closeFlyoutButton"
+                    >
+                      {i18nTexts.closeButtonLabel}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
 
-          <div className="fieldEditorFlyoutContent__right">
-            <h1>Preview</h1>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi
-              perferendis alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse
-              ipsa, repudiandae eveniet distinctio? Modi doloribus assumenda eum!
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi
-              perferendis alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse
-              ipsa, repudiandae eveniet distinctio? Modi doloribus assumenda eum!
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi
-              perferendis alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse
-              ipsa, repudiandae eveniet distinctio? Modi doloribus assumenda eum!
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi
-              perferendis alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse
-              ipsa, repudiandae eveniet distinctio? Modi doloribus assumenda eum!
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi
-              perferendis alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse
-              ipsa, repudiandae eveniet distinctio? Modi doloribus assumenda eum!
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi
-              perferendis alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse
-              ipsa, repudiandae eveniet distinctio? Modi doloribus assumenda eum!
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi
-              perferendis alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse
-              ipsa, repudiandae eveniet distinctio? Modi doloribus assumenda eum!
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi
-              perferendis alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse
-              ipsa, repudiandae eveniet distinctio? Modi doloribus assumenda eum!
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi
-              perferendis alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse
-              ipsa, repudiandae eveniet distinctio? Modi doloribus assumenda eum!
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi
-              perferendis alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse
-              ipsa, repudiandae eveniet distinctio? Modi doloribus assumenda eum!
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi
-              perferendis alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse
-              ipsa, repudiandae eveniet distinctio? Modi doloribus assumenda eum!
-            </p>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi
-              perferendis alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse
-              ipsa, repudiandae eveniet distinctio? Modi doloribus assumenda eum!
-            </p>
-          </div>
-        </>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="primary"
+                      onClick={onClickSave}
+                      data-test-subj="fieldSaveButton"
+                      fill
+                      disabled={hasErrors}
+                      isLoading={isSavingField || isValidating}
+                    >
+                      {i18nTexts.saveButtonLabel}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            </Flyout.Footer>
+          </Flyout.Panel>
+
+          {/* Preview panel */}
+          <Flyout.Panel width={40} backgroundColor="euiColorLightestShade">
+            <FieldPreview />
+          </Flyout.Panel>
+        </Flyout.Panels>
       )}
 
       {modal}

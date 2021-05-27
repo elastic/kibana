@@ -24,7 +24,7 @@ import { deserializeField, getRuntimeFieldValidator, getLinks, ApiService } from
 import type { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 import { FieldEditorProvider } from './field_editor_context';
-import { FieldPreviewProvider } from './field_preview_context';
+import { FieldPreviewProvider } from './preview';
 
 export interface Props {
   /** Handler for the "save" footer button */
