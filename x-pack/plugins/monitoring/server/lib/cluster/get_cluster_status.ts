@@ -14,11 +14,11 @@ import { ElasticsearchSource } from '../../../common/types/es';
  * @return top-level cluster summary data
  */
 export function getClusterStatus(cluster: ElasticsearchSource, shardStats: unknown) {
-  const clusterStats = cluster.cluster_stats ?? {};
-  const clusterNodes = clusterStats.nodes ?? {};
-  const clusterIndices = clusterStats.indices ?? {};
+  const clusterStatsLegacy = cluster.cluster_stats;
+  const clusterStatsMB = cluster.elasticsearch?.cluster?.stats;
 
-  const clusterTotalShards = clusterIndices.shards?.total ?? 0;
+  const clusterTotalShards =
+    clusterStatsLegacy?.indices?.shards?.total ?? clusterStatsMB?.indices?.shards?.count ?? 0;
   let unassignedShardsTotal = 0;
   const unassignedShards = get(shardStats, 'indicesTotals.unassigned');
   if (unassignedShards !== undefined) {
@@ -28,17 +28,31 @@ export function getClusterStatus(cluster: ElasticsearchSource, shardStats: unkno
   const totalShards = clusterTotalShards + unassignedShardsTotal;
 
   return {
-    status: cluster.cluster_state?.status ?? 'unknown',
+    status:
+      cluster.elasticsearch?.cluster?.stats?.status ?? cluster.cluster_state?.status ?? 'unknown',
     // index-based stats
-    indicesCount: clusterIndices.count ?? 0,
-    documentCount: clusterIndices.docs?.count ?? 0,
-    dataSize: clusterIndices.store?.size_in_bytes ?? 0,
+    indicesCount: clusterStatsLegacy?.indices?.count ?? clusterStatsMB?.indices?.total ?? 0,
+    documentCount:
+      clusterStatsLegacy?.indices?.docs?.count ?? clusterStatsMB?.indices?.docs?.total ?? 0,
+    dataSize:
+      clusterStatsMB?.indices?.store?.size?.bytes ??
+      clusterStatsLegacy?.indices?.store?.size_in_bytes ??
+      0,
     // node-based stats
-    nodesCount: clusterNodes.count?.total ?? 0,
-    upTime: clusterNodes.jvm?.max_uptime_in_millis ?? 0,
-    version: clusterNodes.versions ?? null,
-    memUsed: clusterNodes.jvm?.mem?.heap_used_in_bytes ?? 0,
-    memMax: clusterNodes.jvm?.mem?.heap_max_in_bytes ?? 0,
+    nodesCount: clusterStatsLegacy?.nodes?.count?.total ?? clusterStatsMB?.nodes?.count ?? 0,
+    upTime:
+      clusterStatsMB?.nodes?.jvm?.max_uptime?.ms ??
+      clusterStatsLegacy?.nodes?.jvm?.max_uptime_in_millis ??
+      0,
+    version: clusterStatsMB?.nodes?.versions ?? clusterStatsLegacy?.nodes?.versions ?? null,
+    memUsed:
+      clusterStatsMB?.nodes?.jvm?.memory?.heap?.used?.bytes ??
+      clusterStatsLegacy?.nodes?.jvm?.mem?.heap_used_in_bytes ??
+      0,
+    memMax:
+      clusterStatsMB?.nodes?.jvm?.memory?.heap?.max?.bytes ??
+      clusterStatsLegacy?.nodes?.jvm?.mem?.heap_max_in_bytes ??
+      0,
     unassignedShards: unassignedShardsTotal,
     totalShards,
   };

@@ -20,7 +20,6 @@ import {
   PagerDutyActionParams,
   EventActionOptions,
 } from '.././types';
-import pagerDutySvg from './pagerduty.svg';
 import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
 
 export function getActionType(): ActionTypeModel<
@@ -30,7 +29,7 @@ export function getActionType(): ActionTypeModel<
 > {
   return {
     id: '.pagerduty',
-    iconClass: pagerDutySvg,
+    iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText',
       {

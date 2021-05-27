@@ -74,7 +74,10 @@ export function OperationTypeSelect({
 
   return (
     <EuiSuperSelect
-      prepend="Calculation"
+      fullWidth
+      prepend={i18n.translate('xpack.observability.expView.operationType.label', {
+        defaultMessage: 'Calculation',
+      })}
       data-test-subj="operationTypeSelect"
       compressed
       valueOfSelected={operationType || defaultOperationType}

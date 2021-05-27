@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common';
 
-import { createMockSavedObjectsRepository, mockCaseMappings } from '../../routes/api/__fixtures__';
+import {
+  createMockSavedObjectsRepository,
+  mockCaseMappingsResilient,
+  mockCaseMappingsBad,
+} from '../../routes/api/__fixtures__';
 import { createCasesClientWithMockSavedObjectsClient } from '../mocks';
 import { actionsClientMock } from '../../../../actions/server/actions_client.mock';
 import { mappings, mockGetFieldsResponse } from './mock';
@@ -26,7 +30,20 @@ describe('get_mappings', () => {
   describe('happy path', () => {
     test('it gets existing mappings', async () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
-        caseMappingsSavedObject: mockCaseMappings,
+        caseMappingsSavedObject: mockCaseMappingsResilient,
+      });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.getMappings({
+        actionsClient: actionsMock,
+        connectorType: ConnectorTypes.jira,
+        connectorId: '123',
+      });
+
+      expect(res).toEqual(mappings[ConnectorTypes.resilient]);
+    });
+    test('it creates new mappings', async () => {
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseMappingsSavedObject: [],
       });
       const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await casesClient.client.getMappings({
@@ -37,9 +54,11 @@ describe('get_mappings', () => {
 
       expect(res).toEqual(mappings[ConnectorTypes.jira]);
     });
-    test('it creates new mappings', async () => {
+  });
+  describe('unhappy path', () => {
+    test('it gets existing mappings, but attributes object is empty so it creates new mappings', async () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
-        caseMappingsSavedObject: [],
+        caseMappingsSavedObject: mockCaseMappingsBad,
       });
       const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await casesClient.client.getMappings({

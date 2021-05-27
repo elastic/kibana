@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const security = getService('security');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';
   const FILE_LOAD_DIR = 'test_upload_files';
@@ -32,6 +33,10 @@ export default function ({ getService, getPageObjects }) {
 
     const indexName = uuid();
     await PageObjects.maps.setIndexName(indexName);
+    await retry.try(async () => {
+      const importButtonActive = await PageObjects.maps.importFileButtonEnabled();
+      expect(importButtonActive).to.be(true);
+    });
     await PageObjects.maps.clickImportFileButton();
     return indexName;
   }

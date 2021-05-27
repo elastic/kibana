@@ -33,6 +33,7 @@ describe('SourceLogic', () => {
     flashAPIErrors,
     setSuccessMessage,
     setQueuedSuccessMessage,
+    setErrorMessage,
   } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount, getListeners } = new LogicMounter(SourceLogic);
@@ -203,6 +204,19 @@ describe('SourceLogic', () => {
         await expectedAsyncError(promise);
 
         expect(navigateToUrl).toHaveBeenCalledWith(NOT_FOUND_PATH);
+      });
+
+      it('renders error messages passed in success response from server', async () => {
+        const errors = ['ERROR'];
+        const promise = Promise.resolve({
+          ...contentSource,
+          errors,
+        });
+        http.get.mockReturnValue(promise);
+        SourceLogic.actions.initializeSource(contentSource.id);
+        await promise;
+
+        expect(setErrorMessage).toHaveBeenCalledWith(errors);
       });
     });
 

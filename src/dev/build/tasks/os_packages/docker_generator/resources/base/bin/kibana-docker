@@ -162,6 +162,7 @@ kibana_vars=(
     timelion.enabled
     vega.enableExternalUrls
     xpack.actions.allowedHosts
+    xpack.actions.customHostSettings
     xpack.actions.enabled
     xpack.actions.enabledActionTypes
     xpack.actions.preconfiguredAlertHistoryEsIndex
@@ -230,6 +231,7 @@ kibana_vars=(
     xpack.maps.showMapVisualizationTypes
     xpack.ml.enabled
     xpack.observability.unsafe.alertingExperience.enabled
+    xpack.observability.unsafe.cases.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect
@@ -273,8 +275,9 @@ kibana_vars=(
     xpack.reporting.queue.pollIntervalErrorMultiplier
     xpack.reporting.queue.timeout
     xpack.reporting.roles.allow
+    xpack.reporting.roles.enabled
     xpack.rollup.enabled
-    xpack.ruleRegistry.unsafe.write.enabled
+    xpack.ruleRegistry.write.enabled
     xpack.searchprofiler.enabled
     xpack.security.audit.enabled
     xpack.security.audit.appender.type

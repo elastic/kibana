@@ -41,7 +41,8 @@ export function decorateShards(shards, nodes) {
         );
       }
     }
-    return upperFirst(shard.state.toLowerCase());
+    const state = get(shard, 'state', get(shard, 'shard.state'));
+    return upperFirst(state.toLowerCase());
   }
 
   return shards.map((shard) => {

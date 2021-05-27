@@ -14,10 +14,15 @@ export default function ({ getPageObjects, getService }) {
   const FILE_LOAD_DIR = 'test_upload_files';
   const DEFAULT_LOAD_FILE_NAME = 'point.json';
   const security = getService('security');
+  const retry = getService('retry');
 
   describe('GeoJSON import layer panel', () => {
     before(async () => {
-      await security.testUser.setRoles(['global_maps_all', 'global_index_pattern_management_all']);
+      await security.testUser.setRoles([
+        'global_maps_all',
+        'geoall_data_writer',
+        'global_index_pattern_management_all',
+      ]);
       await PageObjects.maps.openNewMap();
     });
 
@@ -87,23 +92,23 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should prevent import button from activating unless valid index name provided', async () => {
-      // Set index to invalid name
       await PageObjects.maps.setIndexName('NoCapitalLetters');
-      // Check button
-      let importButtonActive = await PageObjects.maps.importFileButtonEnabled();
-      expect(importButtonActive).to.be(false);
+      await retry.try(async () => {
+        const importButtonActive = await PageObjects.maps.importFileButtonEnabled();
+        expect(importButtonActive).to.be(false);
+      });
 
-      // Set index to valid name
       await PageObjects.maps.setIndexName('validindexname');
-      // Check button
-      importButtonActive = await PageObjects.maps.importFileButtonEnabled();
-      expect(importButtonActive).to.be(true);
+      await retry.try(async () => {
+        const importButtonActive = await PageObjects.maps.importFileButtonEnabled();
+        expect(importButtonActive).to.be(true);
+      });
 
-      // Set index back to invalid name
       await PageObjects.maps.setIndexName('?noquestionmarks?');
-      // Check button
-      importButtonActive = await PageObjects.maps.importFileButtonEnabled();
-      expect(importButtonActive).to.be(false);
+      await retry.try(async () => {
+        const importButtonActive = await PageObjects.maps.importFileButtonEnabled();
+        expect(importButtonActive).to.be(false);
+      });
     });
   });
 }

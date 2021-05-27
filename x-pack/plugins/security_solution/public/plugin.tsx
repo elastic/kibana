@@ -47,7 +47,7 @@ import {
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
-import { registerSearchLinks, getSearchDeepLinksAndKeywords } from './app/search';
+import { registerDeepLinks, getDeepLinksAndKeywords } from './app/search';
 import { manageOldSiemRoutes } from './helpers';
 import {
   OVERVIEW,
@@ -63,7 +63,6 @@ import {
   IndexFieldsStrategyResponse,
 } from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
-import { getCaseConnectorUI } from './cases/components/connectors';
 import { licenseService } from './common/hooks/use_license';
 import { SecuritySolutionUiConfigType } from './common/types';
 
@@ -259,7 +258,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_TIMELINES_PATH,
-      meta: getSearchDeepLinksAndKeywords(SecurityPageName.timelines),
+      ...getDeepLinksAndKeywords(SecurityPageName.timelines),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { timelines: subPlugin } = await this.subPlugins();
@@ -301,7 +300,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_MANAGEMENT_PATH,
-      meta: getSearchDeepLinksAndKeywords(SecurityPageName.administration),
+      ...getDeepLinksAndKeywords(SecurityPageName.administration),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { management: managementSubPlugin } = await this.subPlugins();
@@ -326,8 +325,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         return () => true;
       },
     });
-
-    plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUI());
 
     return {
       resolver: async () => {
@@ -369,19 +366,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     licenseService.start(plugins.licensing.license$);
     const licensing = licenseService.getLicenseInformation$();
     /**
-     * Register searchDeepLinks and pass an appUpdater for each subPlugin, to change searchDeepLinks as needed when licensing changes.
+     * Register deepLinks and pass an appUpdater for each subPlugin, to change deepLinks as needed when licensing changes.
      */
     if (licensing !== null) {
       this.licensingSubscription = licensing.subscribe((currentLicense) => {
         if (currentLicense.type !== undefined) {
-          registerSearchLinks(SecurityPageName.network, this.networkUpdater$, currentLicense.type);
-          registerSearchLinks(
+          registerDeepLinks(SecurityPageName.network, this.networkUpdater$, currentLicense.type);
+          registerDeepLinks(
             SecurityPageName.detections,
             this.detectionsUpdater$,
             currentLicense.type
           );
-          registerSearchLinks(SecurityPageName.hosts, this.hostsUpdater$, currentLicense.type);
-          registerSearchLinks(SecurityPageName.case, this.caseUpdater$, currentLicense.type);
+          registerDeepLinks(SecurityPageName.hosts, this.hostsUpdater$, currentLicense.type);
+          registerDeepLinks(SecurityPageName.case, this.caseUpdater$, currentLicense.type);
         }
       });
     }

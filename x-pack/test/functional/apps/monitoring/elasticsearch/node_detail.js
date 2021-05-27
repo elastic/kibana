@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
+        await setup('monitoring/singlecluster_three_nodes_shard_relocation', {
           from: 'Oct 5, 2017 @ 20:31:48.354',
           to: 'Oct 5, 2017 @ 20:35:12.176',
         });
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-red-platinum', {
+        await setup('monitoring/singlecluster_red_platinum', {
           from: 'Oct 6, 2017 @ 19:53:06.748',
           to: 'Oct 6, 2017 @ 20:15:30.212',
         });
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }) {
         const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
         before(async () => {
-          await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
+          await setup('monitoring/singlecluster_three_nodes_shard_relocation', {
             from: 'Oct 5, 2017 @ 20:31:48.354',
             to: 'Oct 5, 2017 @ 20:35:12.176',
           });

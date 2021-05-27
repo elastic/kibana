@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }) {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('monitoring/singlecluster-yellow-platinum', {
+      await setup('monitoring/singlecluster_yellow_platinum', {
         from: 'Aug 29, 2017 @ 17:24:14.254',
         to: 'Aug 29, 2017 @ 17:25:44.142',
       });

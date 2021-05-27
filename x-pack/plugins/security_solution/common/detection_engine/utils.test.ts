@@ -7,13 +7,15 @@
 
 import {
   hasEqlSequenceQuery,
-  hasLargeValueList,
   hasNestedEntry,
   isThreatMatchRule,
   normalizeMachineLearningJobIds,
   normalizeThresholdField,
 } from './utils';
-import { EntriesArray } from '../shared_imports';
+
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+
+import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('#hasLargeValueList', () => {
   test('it returns false if empty array', () => {

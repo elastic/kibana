@@ -6,7 +6,6 @@
  */
 
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
-import type { AppRequestContext } from '../../security_solution/server';
 import type { ActionsApiRequestHandlerContext } from '../../actions/server';
 import { CasesClient } from './client';
 
@@ -20,9 +19,6 @@ export interface CaseRequestContext {
 export interface CasesRequestHandlerContext extends RequestHandlerContext {
   cases: CaseRequestContext;
   actions: ActionsApiRequestHandlerContext;
-  // TODO: Remove when triggers_ui do not import case's types.
-  // PR https://github.com/elastic/kibana/pull/84587.
-  securitySolution: AppRequestContext;
 }
 
 /**

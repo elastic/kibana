@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../triggers_actions_ui/public';
 import {
   AppMountParameters,
   AppUpdater,
@@ -25,31 +29,30 @@ import type {
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
 import type { LensPublicStart } from '../../lens/public';
-import type { RuleRegistryPublicPluginSetupContract } from '../../rule_registry/public';
-import type { ObservabilityRuleFieldMap } from '../common/rules/observability_rule_field_map';
-import { observabilityRuleRegistrySettings } from '../common/rules/observability_rule_registry_settings';
 import { registerDataHandler } from './data_handler';
-import { FormatterRuleRegistry } from './rules/formatter_rule_registry';
 import { createCallObservabilityApi } from './services/call_observability_api';
+import { createNavigationRegistry } from './services/navigation_registry';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { ConfigSchema } from '.';
+import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+import { createLazyObservabilityPageTemplate } from './components/shared';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
-export type ObservabilityRuleRegistry = ObservabilityPublicSetup['ruleRegistry'];
 
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
-  ruleRegistry: RuleRegistryPublicPluginSetupContract;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
   home?: HomePublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   lens: LensPublicStart;
 }
 
-export type ObservabilityPublicStart = void;
+export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
 export class Plugin
   implements
@@ -60,13 +63,14 @@ export class Plugin
       ObservabilityPublicPluginsStart
     > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly navigationRegistry = createNavigationRegistry();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
   public setup(
-    coreSetup: CoreSetup<ObservabilityPublicPluginsStart>,
+    coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
@@ -75,24 +79,23 @@ export class Plugin
 
     createCallObservabilityApi(coreSetup.http);
 
-    const observabilityRuleRegistry = pluginsSetup.ruleRegistry.registry.create({
-      ...observabilityRuleRegistrySettings,
-      fieldMap: {} as ObservabilityRuleFieldMap,
-      ctor: FormatterRuleRegistry,
-    });
+    const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
+      pluginsSetup.triggersActionsUi.alertTypeRegistry
+    );
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
       const { renderApp } = await import('./application');
       // Get start services
-      const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+      const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
 
       return renderApp({
         config,
         core: coreStart,
         plugins: pluginsStart,
         appMountParameters: params,
-        observabilityRuleRegistry,
+        observabilityRuleTypeRegistry,
+        ObservabilityPageTemplate: navigation.PageTemplate,
       });
     };
 
@@ -120,7 +123,9 @@ export class Plugin
         mount,
         updater$,
       });
+    }
 
+    if (config.unsafe.cases.enabled) {
       coreSetup.application.register({
         id: 'observability-cases',
         title: 'Cases',
@@ -163,13 +168,39 @@ export class Plugin
       });
     }
 
+    this.navigationRegistry.registerSections(
+      of([
+        {
+          label: '',
+          sortKey: 100,
+          entries: [{ label: 'Overview', app: 'observability-overview', path: '/overview' }],
+        },
+      ])
+    );
+
     return {
       dashboard: { register: registerDataHandler },
-      ruleRegistry: observabilityRuleRegistry,
+      observabilityRuleTypeRegistry,
       isAlertingExperienceEnabled: () => config.unsafe.alertingExperience.enabled,
+      navigation: {
+        registerSections: this.navigationRegistry.registerSections,
+      },
     };
   }
   public start({ application }: CoreStart) {
     toggleOverviewLinkInNav(this.appUpdater$, application);
+
+    const PageTemplate = createLazyObservabilityPageTemplate({
+      currentAppId$: application.currentAppId$,
+      getUrlForApp: application.getUrlForApp,
+      navigateToApp: application.navigateToApp,
+      navigationSections$: this.navigationRegistry.sections$,
+    });
+
+    return {
+      navigation: {
+        PageTemplate,
+      },
+    };
   }
 }

@@ -74,6 +74,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
 
+    after(async () => {
+      await ml.testResources.deleteMLTestDashboard();
+    });
+
     for (const testData of testDataList) {
       describe(testData.suiteSuffix, function () {
         before(async () => {
@@ -322,6 +326,17 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomaliesTable.assertTableRowsCount(25);
           await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
+        });
+
+        it('allows to change the anomalies table pagination', async () => {
+          await ml.testExecution.logTestStep('displays the anomalies table with default config');
+          await ml.anomaliesTable.assertTableExists();
+          await ml.anomaliesTable.assertRowsNumberPerPage(25);
+          await ml.anomaliesTable.assertTableRowsCount(25);
+
+          await ml.testExecution.logTestStep('updates table pagination');
+          await ml.anomaliesTable.setRowsNumberPerPage(10);
+          await ml.anomaliesTable.assertTableRowsCount(10);
         });
 
         it('adds swim lane embeddable to a dashboard', async () => {

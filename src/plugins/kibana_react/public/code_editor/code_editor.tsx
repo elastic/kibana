@@ -34,14 +34,14 @@ export interface Props {
   value: string;
 
   /** Function invoked when text in editor is changed */
-  onChange: (value: string) => void;
+  onChange: (value: string, event: monaco.editor.IModelContentChangedEvent) => void;
 
   /**
    * Options for the Monaco Code Editor
    * Documentation of options can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.ieditorconstructionoptions.html
+   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandaloneeditorconstructionoptions.html
    */
-  options?: monaco.editor.IEditorConstructionOptions;
+  options?: monaco.editor.IStandaloneEditorConstructionOptions;
 
   /**
    * Suggestion provider for autocompletion

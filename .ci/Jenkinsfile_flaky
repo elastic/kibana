@@ -73,11 +73,7 @@ def agentProcess(Map params = [:]) {
       ]) {
         task {
           if (config.needBuild) {
-            if (!config.isXpack) {
-              kibanaPipeline.buildOss()
-            } else {
-              kibanaPipeline.buildXpack()
-            }
+            kibanaPipeline.buildKibana()
           }
 
           for(def i = 0; i < config.agentExecutions; i++) {

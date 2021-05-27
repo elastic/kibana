@@ -294,10 +294,12 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       return await testSubjects.isEnabled('savedObjectsManagementDelete');
     }
 
-    async clickDelete() {
+    async clickDelete({ confirmDelete = true }: { confirmDelete?: boolean } = {}) {
       await testSubjects.click('savedObjectsManagementDelete');
-      await testSubjects.click('confirmModalConfirmButton');
-      await this.waitTableIsLoaded();
+      if (confirmDelete) {
+        await testSubjects.click('confirmModalConfirmButton');
+        await this.waitTableIsLoaded();
+      }
     }
 
     async getImportWarnings() {

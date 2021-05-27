@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FileUploadComponentProps, lazyLoadModules } from '../lazy_load_bundle';
+import { lazyLoadModules } from '../lazy_load_bundle';
 import type { IImporter, ImportFactoryOptions } from '../importer';
 import type { HasImportPermission, FindFileStructureResponse } from '../../common';
 import type { getMaxBytes, getMaxBytesFormatted } from '../importer/get_max_bytes';
+import { JsonUploadAndParseAsyncWrapper } from './json_upload_and_parse_async_wrapper';
+import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
 
 export interface FileUploadStartApi {
-  getFileUploadComponent(): ReturnType<typeof getFileUploadComponent>;
+  FileUploadComponent: typeof JsonUploadAndParseAsyncWrapper;
+  IndexNameFormComponent: typeof IndexNameFormAsyncWrapper;
   importerFactory: typeof importerFactory;
   getMaxBytes: typeof getMaxBytes;
   getMaxBytesFormatted: typeof getMaxBytesFormatted;
@@ -28,12 +30,8 @@ export interface GetTimeFieldRangeResponse {
   end: { epoch: number; string: string };
 }
 
-export async function getFileUploadComponent(): Promise<
-  React.ComponentType<FileUploadComponentProps>
-> {
-  const fileUploadModules = await lazyLoadModules();
-  return fileUploadModules.JsonUploadAndParse;
-}
+export const FileUploadComponent = JsonUploadAndParseAsyncWrapper;
+export const IndexNameFormComponent = IndexNameFormAsyncWrapper;
 
 export async function importerFactory(
   format: string,
@@ -83,13 +81,17 @@ export async function checkIndexExists(
 ): Promise<boolean> {
   const body = JSON.stringify({ index });
   const fileUploadModules = await lazyLoadModules();
-  const { exists } = await fileUploadModules.getHttp().fetch<{ exists: boolean }>({
-    path: `/internal/file_upload/index_exists`,
-    method: 'POST',
-    body,
-    query: params,
-  });
-  return exists;
+  try {
+    const { exists } = await fileUploadModules.getHttp().fetch<{ exists: boolean }>({
+      path: `/internal/file_upload/index_exists`,
+      method: 'POST',
+      body,
+      query: params,
+    });
+    return exists;
+  } catch (error) {
+    return false;
+  }
 }
 
 export async function getTimeFieldRange(index: string, query: unknown, timeFieldName?: string) {

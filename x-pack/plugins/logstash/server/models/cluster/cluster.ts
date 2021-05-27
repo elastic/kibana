@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 
 /**
  * This model deals with a cluster object from ES and converts it to Kibana downstream
  */
 export class Cluster {
   public readonly uuid: string;
+
   constructor({ uuid }: { uuid: string }) {
     this.uuid = uuid;
   }
 
   public get downstreamJSON() {
-    const json = {
+    return {
       uuid: this.uuid,
     };
-
-    return json;
   }
 
   // generate Pipeline object from elasticsearch response
-  static fromUpstreamJSON(upstreamCluster: Record<string, string>) {
-    const uuid = get(upstreamCluster, 'cluster_uuid') as string;
+  static fromUpstreamJSON(upstreamCluster: estypes.RootNodeInfoResponse) {
+    const uuid = upstreamCluster.cluster_uuid;
     return new Cluster({ uuid });
   }
 }

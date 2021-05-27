@@ -19,6 +19,10 @@ const isConcliftOnGetError = (error: any) => {
   );
 };
 
+const isIgnorableError = (error: any, ignorableErrors: number[] = []) => {
+  return isAxiosResponseError(error) && ignorableErrors.includes(error.response.status);
+};
+
 export const uriencode = (
   strings: TemplateStringsArray,
   ...values: Array<string | number | boolean>
@@ -53,6 +57,7 @@ export interface ReqOptions {
   body?: any;
   retries?: number;
   headers?: Record<string, string>;
+  ignoreErrors?: number[];
   responseType?: ResponseType;
 }
 
@@ -124,6 +129,10 @@ export class KbnClientRequester {
         const conflictOnGet = isConcliftOnGetError(error);
         const requestedRetries = options.retries !== undefined;
         const failedToGetResponse = isAxiosRequestError(error);
+
+        if (isIgnorableError(error, options.ignoreErrors)) {
+          return error.response;
+        }
 
         let errorMessage;
         if (conflictOnGet) {

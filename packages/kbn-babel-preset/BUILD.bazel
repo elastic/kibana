@@ -38,7 +38,7 @@ DEPS = [
 
 js_library(
   name = PKG_BASE_NAME,
-  srcs = [
+  srcs = NPM_MODULE_EXTRA_FILES + [
     ":srcs",
   ],
   deps = DEPS,
@@ -48,7 +48,6 @@ js_library(
 
 pkg_npm(
   name = "npm_module",
-  srcs = NPM_MODULE_EXTRA_FILES,
   deps = [
     ":%s" % PKG_BASE_NAME,
   ]
