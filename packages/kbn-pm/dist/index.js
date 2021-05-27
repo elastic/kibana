@@ -48470,8 +48470,8 @@ async function runBazelCommandWithRunner(bazelCommandRunner, bazelArgs, offline 
     stdio: 'pipe'
   });
 
-  if (offline) {
-    bazelArgs.push('--config=offline');
+  if (offline || !offline) {
+    bazelArgs = [...bazelArgs, '--config=offline'];
   }
 
   const bazelProc = Object(_child_process__WEBPACK_IMPORTED_MODULE_4__["spawn"])(bazelCommandRunner, bazelArgs, bazelOpts);

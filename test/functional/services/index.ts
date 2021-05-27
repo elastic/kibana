@@ -8,7 +8,7 @@
 
 import { services as commonServiceProviders } from '../../common/services';
 
-import { AppsMenuProvider } from './apps_menu';
+import { AppsMenuService } from './apps_menu';
 import {
   BrowserProvider,
   FailureDebuggingProvider,
@@ -17,7 +17,7 @@ import {
   SnapshotsService,
   TestSubjects,
 } from './common';
-import { ComboBoxProvider } from './combo_box';
+import { ComboBoxService } from './combo_box';
 import {
   DashboardAddPanelService,
   DashboardReplacePanelService,
@@ -68,7 +68,7 @@ export const services = {
   dashboardReplacePanel: DashboardReplacePanelService,
   dashboardPanelActions: DashboardPanelActionsService,
   flyout: FlyoutService,
-  comboBox: ComboBoxProvider,
+  comboBox: ComboBoxService,
   dataGrid: DataGridService,
   embedding: EmbeddingService,
   renderable: RenderableService,
@@ -77,7 +77,7 @@ export const services = {
   inspector: InspectorService,
   fieldEditor: FieldEditorService,
   vegaDebugInspector: VegaDebugInspectorViewService,
-  appsMenu: AppsMenuProvider,
+  appsMenu: AppsMenuService,
   globalNav: GlobalNavService,
   toasts: ToastsService,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
