@@ -11,19 +11,11 @@ export function MonitoringPageProvider({ getPageObjects, getService }: FtrProvid
   const PageObjects = getPageObjects(['common', 'header', 'security', 'login']);
   const testSubjects = getService('testSubjects');
   const security = getService('security');
-
   return new (class MonitoringPage {
     async navigateTo(useSuperUser = false) {
-      // always create this because our tear down tries to delete it
-      await security.user.create('basic_monitoring_user', {
-        password: 'monitoring_user_password',
-        roles: ['monitoring_user', 'kibana_admin'],
-        full_name: 'basic monitoring',
-      });
-
       if (!useSuperUser) {
         await PageObjects.security.forceLogout();
-        await PageObjects.login.login('basic_monitoring_user', 'monitoring_user_password');
+        await PageObjects.login.login('test_user', 'changeme');
       }
       await PageObjects.common.navigateToApp('monitoring');
     }

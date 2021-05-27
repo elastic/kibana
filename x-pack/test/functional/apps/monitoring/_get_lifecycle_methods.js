@@ -14,6 +14,7 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
   return {
     async setup(archive, { from, to, useSuperUser = false }) {
       _archive = archive;
+      await security.testUser.setRoles(['monitoring_user', 'kibana_admin']);
 
       const kibanaServer = getService('kibanaServer');
       const browser = getService('browser');
@@ -35,7 +36,7 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
 
     async tearDown() {
       await PageObjects.security.forceLogout();
-      await security.user.delete('basic_monitoring_user');
+      await security.testUser.restoreDefaults();
       return esArchiver.unload(_archive);
     },
   };
