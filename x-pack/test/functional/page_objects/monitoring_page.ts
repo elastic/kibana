@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function MonitoringPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'security', 'login']);
   const testSubjects = getService('testSubjects');
-  const security = getService('security');
   return new (class MonitoringPage {
     async navigateTo(useSuperUser = false) {
       if (!useSuperUser) {
