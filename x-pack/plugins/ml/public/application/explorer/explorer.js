@@ -477,7 +477,7 @@ export class ExplorerUI extends React.Component {
 
                 <EuiFlexGroup direction="row" gutterSize="l" responsive={true} alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <SelectSeverity c />
+                    <SelectSeverity />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <SelectInterval />
