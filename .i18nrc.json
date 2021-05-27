@@ -1,6 +1,5 @@
 {
   "paths": {
-    "common.ui": "src/legacy/ui",
     "console": "src/plugins/console",
     "core": "src/core",
     "discover": "src/plugins/discover",
@@ -62,6 +61,5 @@
     "apmOss": "src/plugins/apm_oss",
     "usageCollection": "src/plugins/usage_collection"
   },
-  "exclude": ["src/legacy/ui/ui_render/ui_render_mixin.js"],
   "translations": []
 }

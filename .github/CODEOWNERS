@@ -95,9 +95,6 @@
 /x-pack/plugins/apm/server/projections/rum_page_load_transactions.ts @elastic/uptime
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
-# Beats
-/x-pack/plugins/beats_management/  @elastic/beats
-#CC# /x-pack/plugins/beats_management/ @elastic/beats
 
 # Presentation
 /src/plugins/dashboard/ @elastic/kibana-presentation

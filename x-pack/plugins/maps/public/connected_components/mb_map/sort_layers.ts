@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Map as MbMap, Layer as MbLayer } from 'mapbox-gl';
+import type { Map as MbMap, Layer as MbLayer } from '@kbn/mapbox-gl';
 import { ILayer } from '../../classes/layers/layer';
 
 // "Layer" is overloaded and can mean the following

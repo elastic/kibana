@@ -7,186 +7,184 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrService } from '../../ftr_provider_context';
 
 const pieChartSelector = 'visTypePieChart';
 
-export function PieChartProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const log = getService('log');
-  const retry = getService('retry');
-  const config = getService('config');
-  const inspector = getService('inspector');
-  const testSubjects = getService('testSubjects');
-  const find = getService('find');
-  const defaultFindTimeout = config.get('timeouts.find');
-  const panelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['visChart']);
+export class PieChartService extends FtrService {
+  private readonly log = this.ctx.getService('log');
+  private readonly retry = this.ctx.getService('retry');
+  private readonly config = this.ctx.getService('config');
+  private readonly inspector = this.ctx.getService('inspector');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly find = this.ctx.getService('find');
+  private readonly panelActions = this.ctx.getService('dashboardPanelActions');
+  private readonly defaultFindTimeout = this.config.get('timeouts.find');
+  private readonly pageObjects = this.ctx.getPageObjects(['visChart']);
 
-  return new (class PieChart {
-    private readonly filterActionText = 'Apply filter to current view';
+  private readonly filterActionText = 'Apply filter to current view';
 
-    async clickOnPieSlice(name?: string) {
-      log.debug(`PieChart.clickOnPieSlice(${name})`);
-      if (await PageObjects.visChart.isNewLibraryChart(pieChartSelector)) {
-        const slices =
-          (await PageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
-            ?.partitions ?? [];
-        let sliceLabel = name || slices[0].name;
-        if (name === 'Other') {
-          sliceLabel = '__other__';
-        }
-        const pieSlice = slices.find((slice) => slice.name === sliceLabel);
-        const pie = await testSubjects.find(pieChartSelector);
-        if (pieSlice) {
-          const pieSize = await pie.getSize();
-          const pieHeight = pieSize.height;
-          const pieWidth = pieSize.width;
-          await pie.clickMouseButton({
-            xOffset: pieSlice.coords[0] - Math.floor(pieWidth / 2),
-            yOffset: Math.floor(pieHeight / 2) - pieSlice.coords[1],
-          });
-        }
-      } else {
-        if (name) {
-          await testSubjects.click(`pieSlice-${name.split(' ').join('-')}`);
-        } else {
-          // If no pie slice has been provided, find the first one available.
-          await retry.try(async () => {
-            const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
-            log.debug('Slices found:' + slices.length);
-            return slices[0].click();
-          });
-        }
-      }
-    }
-
-    async filterOnPieSlice(name?: string) {
-      log.debug(`PieChart.filterOnPieSlice(${name})`);
-      await this.clickOnPieSlice(name);
-      const hasUiActionsPopup = await testSubjects.exists('multipleActionsContextMenu');
-      if (hasUiActionsPopup) {
-        const actionElement = await panelActions.getActionWebElementByText(this.filterActionText);
-        await actionElement.click();
-      }
-    }
-
-    async filterByLegendItem(label: string) {
-      log.debug(`PieChart.filterByLegendItem(${label})`);
-      await testSubjects.click(`legend-${label}`);
-      await testSubjects.click(`legend-${label}-filterIn`);
-    }
-
-    async getPieSlice(name: string) {
-      return await testSubjects.find(`pieSlice-${name.split(' ').join('-')}`);
-    }
-
-    async getAllPieSlices(name: string) {
-      return await testSubjects.findAll(`pieSlice-${name.split(' ').join('-')}`);
-    }
-
-    async getPieSliceStyle(name: string) {
-      log.debug(`VisualizePage.getPieSliceStyle(${name})`);
-      if (await PageObjects.visChart.isNewLibraryChart(pieChartSelector)) {
-        const slices =
-          (await PageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
-            ?.partitions ?? [];
-        const selectedSlice = slices.filter((slice) => {
-          return slice.name.toString() === name.replace(',', '');
-        });
-        return selectedSlice[0].color;
-      }
-      const pieSlice = await this.getPieSlice(name);
-      return await pieSlice.getAttribute('style');
-    }
-
-    async getAllPieSliceStyles(name: string) {
-      log.debug(`VisualizePage.getAllPieSliceStyles(${name})`);
-      if (await PageObjects.visChart.isNewLibraryChart(pieChartSelector)) {
-        const slices =
-          (await PageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
-            ?.partitions ?? [];
-        const selectedSlice = slices.filter((slice) => {
-          return slice.name.toString() === name.replace(',', '');
-        });
-        return selectedSlice.map((slice) => slice.color);
-      }
-      const pieSlices = await this.getAllPieSlices(name);
-      return await Promise.all(
-        pieSlices.map(async (pieSlice) => await pieSlice.getAttribute('style'))
-      );
-    }
-
-    async getPieChartData() {
-      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
-      return await Promise.all(chartTypes.map(async (chart) => await chart.getAttribute('d')));
-    }
-
-    async expectPieChartTableData(expectedTableData: Array<[]>) {
-      await inspector.open();
-      await inspector.setTablePageSize(50);
-      await inspector.expectTableData(expectedTableData);
-    }
-
-    async getPieChartLabels() {
-      if (await PageObjects.visChart.isNewLibraryChart(pieChartSelector)) {
-        const slices =
-          (await PageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
-            ?.partitions ?? [];
-        return slices.map((slice) => {
-          if (slice.name === '__missing__') {
-            return 'Missing';
-          } else if (slice.name === '__other__') {
-            return 'Other';
-          } else if (typeof slice.name === 'number') {
-            // debugState of escharts returns the numbers without comma
-            const val = slice.name as number;
-            return val.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',');
-          } else {
-            return slice.name;
-          }
-        });
-      }
-      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
-      return await Promise.all(
-        chartTypes.map(async (chart) => await chart.getAttribute('data-label'))
-      );
-    }
-
-    async getPieSliceCount() {
-      log.debug('PieChart.getPieSliceCount');
-
-      if (await PageObjects.visChart.isNewLibraryChart(pieChartSelector)) {
-        const slices =
-          (await PageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
-            ?.partitions ?? [];
-        return slices?.length;
-      }
-
-      const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
-      return slices.length;
-    }
-
-    async expectPieSliceCountEsCharts(expectedCount: number) {
+  async clickOnPieSlice(name?: string) {
+    this.log.debug(`PieChart.clickOnPieSlice(${name})`);
+    if (await this.pageObjects.visChart.isNewLibraryChart(pieChartSelector)) {
       const slices =
-        (await PageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
+        (await this.pageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
           ?.partitions ?? [];
-      expect(slices.length).to.be(expectedCount);
+      let sliceLabel = name || slices[0].name;
+      if (name === 'Other') {
+        sliceLabel = '__other__';
+      }
+      const pieSlice = slices.find((slice) => slice.name === sliceLabel);
+      const pie = await this.testSubjects.find(pieChartSelector);
+      if (pieSlice) {
+        const pieSize = await pie.getSize();
+        const pieHeight = pieSize.height;
+        const pieWidth = pieSize.width;
+        await pie.clickMouseButton({
+          xOffset: pieSlice.coords[0] - Math.floor(pieWidth / 2),
+          yOffset: Math.floor(pieHeight / 2) - pieSlice.coords[1],
+        });
+      }
+    } else {
+      if (name) {
+        await this.testSubjects.click(`pieSlice-${name.split(' ').join('-')}`);
+      } else {
+        // If no pie slice has been provided, find the first one available.
+        await this.retry.try(async () => {
+          const slices = await this.find.allByCssSelector('svg > g > g.arcs > path.slice');
+          this.log.debug('Slices found:' + slices.length);
+          return slices[0].click();
+        });
+      }
     }
+  }
 
-    async expectPieSliceCount(expectedCount: number) {
-      log.debug(`PieChart.expectPieSliceCount(${expectedCount})`);
-      await retry.try(async () => {
-        const slicesCount = await this.getPieSliceCount();
-        expect(slicesCount).to.be(expectedCount);
+  async filterOnPieSlice(name?: string) {
+    this.log.debug(`PieChart.filterOnPieSlice(${name})`);
+    await this.clickOnPieSlice(name);
+    const hasUiActionsPopup = await this.testSubjects.exists('multipleActionsContextMenu');
+    if (hasUiActionsPopup) {
+      const actionElement = await this.panelActions.getActionWebElementByText(
+        this.filterActionText
+      );
+      await actionElement.click();
+    }
+  }
+
+  async filterByLegendItem(label: string) {
+    this.log.debug(`PieChart.filterByLegendItem(${label})`);
+    await this.testSubjects.click(`legend-${label}`);
+    await this.testSubjects.click(`legend-${label}-filterIn`);
+  }
+
+  async getPieSlice(name: string) {
+    return await this.testSubjects.find(`pieSlice-${name.split(' ').join('-')}`);
+  }
+
+  async getAllPieSlices(name: string) {
+    return await this.testSubjects.findAll(`pieSlice-${name.split(' ').join('-')}`);
+  }
+
+  async getPieSliceStyle(name: string) {
+    this.log.debug(`VisualizePage.getPieSliceStyle(${name})`);
+    if (await this.pageObjects.visChart.isNewLibraryChart(pieChartSelector)) {
+      const slices =
+        (await this.pageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
+          ?.partitions ?? [];
+      const selectedSlice = slices.filter((slice) => {
+        return slice.name.toString() === name.replace(',', '');
+      });
+      return selectedSlice[0].color;
+    }
+    const pieSlice = await this.getPieSlice(name);
+    return await pieSlice.getAttribute('style');
+  }
+
+  async getAllPieSliceStyles(name: string) {
+    this.log.debug(`VisualizePage.getAllPieSliceStyles(${name})`);
+    if (await this.pageObjects.visChart.isNewLibraryChart(pieChartSelector)) {
+      const slices =
+        (await this.pageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
+          ?.partitions ?? [];
+      const selectedSlice = slices.filter((slice) => {
+        return slice.name.toString() === name.replace(',', '');
+      });
+      return selectedSlice.map((slice) => slice.color);
+    }
+    const pieSlices = await this.getAllPieSlices(name);
+    return await Promise.all(
+      pieSlices.map(async (pieSlice) => await pieSlice.getAttribute('style'))
+    );
+  }
+
+  async getPieChartData() {
+    const chartTypes = await this.find.allByCssSelector('path.slice', this.defaultFindTimeout * 2);
+    return await Promise.all(chartTypes.map(async (chart) => await chart.getAttribute('d')));
+  }
+
+  async expectPieChartTableData(expectedTableData: Array<[]>) {
+    await this.inspector.open();
+    await this.inspector.setTablePageSize(50);
+    await this.inspector.expectTableData(expectedTableData);
+  }
+
+  async getPieChartLabels() {
+    if (await this.pageObjects.visChart.isNewLibraryChart(pieChartSelector)) {
+      const slices =
+        (await this.pageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
+          ?.partitions ?? [];
+      return slices.map((slice) => {
+        if (slice.name === '__missing__') {
+          return 'Missing';
+        } else if (slice.name === '__other__') {
+          return 'Other';
+        } else if (typeof slice.name === 'number') {
+          // debugState of escharts returns the numbers without comma
+          const val = slice.name as number;
+          return val.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',');
+        } else {
+          return slice.name;
+        }
       });
     }
+    const chartTypes = await this.find.allByCssSelector('path.slice', this.defaultFindTimeout * 2);
+    return await Promise.all(
+      chartTypes.map(async (chart) => await chart.getAttribute('data-label'))
+    );
+  }
 
-    async expectPieChartLabels(expectedLabels: string[]) {
-      log.debug(`PieChart.expectPieChartLabels(${expectedLabels.join(',')})`);
-      await retry.try(async () => {
-        const pieData = await this.getPieChartLabels();
-        expect(pieData.sort()).to.eql(expectedLabels);
-      });
+  async getPieSliceCount() {
+    this.log.debug('PieChart.getPieSliceCount');
+    if (await this.pageObjects.visChart.isNewLibraryChart(pieChartSelector)) {
+      const slices =
+        (await this.pageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
+          ?.partitions ?? [];
+      return slices?.length;
     }
-  })();
+    const slices = await this.find.allByCssSelector('svg > g > g.arcs > path.slice');
+    return slices.length;
+  }
+
+  async expectPieSliceCountEsCharts(expectedCount: number) {
+    const slices =
+      (await this.pageObjects.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]
+        ?.partitions ?? [];
+    expect(slices.length).to.be(expectedCount);
+  }
+
+  async expectPieSliceCount(expectedCount: number) {
+    this.log.debug(`PieChart.expectPieSliceCount(${expectedCount})`);
+    await this.retry.try(async () => {
+      const slicesCount = await this.getPieSliceCount();
+      expect(slicesCount).to.be(expectedCount);
+    });
+  }
+
+  async expectPieChartLabels(expectedLabels: string[]) {
+    this.log.debug(`PieChart.expectPieChartLabels(${expectedLabels.join(',')})`);
+    await this.retry.try(async () => {
+      const pieData = await this.getPieChartLabels();
+      expect(pieData).to.eql(expectedLabels);
+    });
+  }
 }
