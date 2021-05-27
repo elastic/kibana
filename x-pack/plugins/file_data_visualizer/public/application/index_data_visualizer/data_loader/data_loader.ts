@@ -11,13 +11,9 @@ import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
-import { DEFAULT_SAMPLER_SHARD_SIZE, OMIT_FIELDS } from '../../../../common/constants';
-import { FieldHistogramRequestConfig, FieldRequestConfig } from '../../../../common/types';
-import {
-  getVisualizerFieldHistograms,
-  getVisualizerFieldStats,
-  getVisualizerOverallStats,
-} from '../services/visualizer_stats';
+import { OMIT_FIELDS } from '../../../../common/constants';
+import { FieldRequestConfig } from '../../../../common/types';
+import { getVisualizerFieldStats, getVisualizerOverallStats } from '../services/visualizer_stats';
 
 type IndexPatternTitle = string;
 type SavedSearchQuery = Record<string, any> | null | undefined;
@@ -100,23 +96,6 @@ export class DataLoader {
       fields,
       maxExamples: this._maxExamples,
       runtimeMappings: this._runtimeMappings,
-    });
-
-    return stats;
-  }
-
-  async loadFieldHistograms(
-    fields: FieldHistogramRequestConfig[],
-    query: string | SavedSearchQuery,
-    samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE,
-    editorRuntimeMappings?: estypes.RuntimeFields
-  ): Promise<any[]> {
-    const stats = await getVisualizerFieldHistograms({
-      indexPatternTitle: this._indexPatternTitle,
-      query,
-      fields,
-      samplerShardSize,
-      runtimeMappings: editorRuntimeMappings || this._runtimeMappings,
     });
 
     return stats;

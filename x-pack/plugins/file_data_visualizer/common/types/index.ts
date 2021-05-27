@@ -7,7 +7,13 @@
 
 import type { SimpleSavedObject } from 'kibana/public';
 export type { JobFieldType } from './job_field_type';
-export type { FieldRequestConfig, FieldHistogramRequestConfig } from './field_request_config';
+export type {
+  FieldRequestConfig,
+  DocumentCountBuckets,
+  DocumentCounts,
+  FieldVisStats,
+  Percentile,
+} from './field_request_config';
 export type InputData = any[];
 
 export interface DataVisualizerTableState {

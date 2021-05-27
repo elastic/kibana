@@ -7,7 +7,8 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { lazyLoadModules } from '../../../lazy_load_bundle';
-import type { FieldHistogramRequestConfig, FieldRequestConfig } from '../../../../common/types';
+import type { DocumentCounts, FieldRequestConfig, FieldVisStats } from '../../../../common/types';
+import { OverallStats } from '../types/overall_stats';
 
 export function basePath() {
   // @todo: change to internal/data_visualizer
@@ -48,7 +49,7 @@ export async function getVisualizerOverallStats({
 
   const fileUploadModules = await lazyLoadModules();
   // @todo: update
-  return await fileUploadModules.getHttp().fetch<any>({
+  return await fileUploadModules.getHttp().fetch<OverallStats>({
     path: `${basePath()}/data_visualizer/get_overall_stats/${indexPatternTitle}`,
     method: 'POST',
     body,
@@ -92,37 +93,8 @@ export async function getVisualizerFieldStats({
 
   const fileUploadModules = await lazyLoadModules();
   // @todo: update
-  return await fileUploadModules.getHttp().fetch<any>({
+  return await fileUploadModules.getHttp().fetch<[DocumentCounts, FieldVisStats]>({
     path: `${basePath()}/data_visualizer/get_field_stats/${indexPatternTitle}`,
-    method: 'POST',
-    body,
-  });
-}
-
-export async function getVisualizerFieldHistograms({
-  indexPatternTitle,
-  query,
-  fields,
-  samplerShardSize,
-  runtimeMappings,
-}: {
-  indexPatternTitle: string;
-  query: any;
-  fields: FieldHistogramRequestConfig[];
-  samplerShardSize?: number;
-  runtimeMappings?: estypes.RuntimeFields;
-}) {
-  const body = JSON.stringify({
-    query,
-    fields,
-    samplerShardSize,
-    runtimeMappings,
-  });
-
-  const fileUploadModules = await lazyLoadModules();
-  // @todo: update type
-  return await fileUploadModules.getHttp().fetch<any>({
-    path: `${basePath()}/data_visualizer/get_field_histograms/${indexPatternTitle}`,
     method: 'POST',
     body,
   });

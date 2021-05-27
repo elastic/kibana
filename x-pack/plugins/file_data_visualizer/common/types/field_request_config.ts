@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { KBN_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import type { JobFieldType } from './index';
+
+export interface Percentile {
+  percent: number;
+  minValue: number;
+  maxValue: number;
+}
 
 export interface FieldRequestConfig {
   fieldName?: string;
@@ -14,7 +19,42 @@ export interface FieldRequestConfig {
   cardinality: number;
 }
 
-export interface FieldHistogramRequestConfig {
-  fieldName: string;
-  type?: KBN_FIELD_TYPES;
+export interface DocumentCountBuckets {
+  [key: string]: number;
+}
+
+export interface DocumentCounts {
+  buckets?: DocumentCountBuckets;
+  interval?: number;
+}
+
+export interface FieldVisStats {
+  cardinality?: number;
+  count?: number;
+  sampleCount?: number;
+  trueCount?: number;
+  falseCount?: number;
+  earliest?: number;
+  latest?: number;
+  documentCounts?: {
+    buckets?: DocumentCountBuckets;
+    interval?: number;
+  };
+  avg?: number;
+  distribution?: {
+    percentiles: Percentile[];
+    maxPercentile: number;
+    minPercentile: 0;
+  };
+  fieldName?: string;
+  isTopValuesSampled?: boolean;
+  max?: number;
+  median?: number;
+  min?: number;
+  topValues?: Array<{ key: number | string; doc_count: number }>;
+  topValuesSampleSize?: number;
+  topValuesSamplerShardSize?: number;
+  examples?: Array<string | object>;
+  timeRangeEarliest?: number;
+  timeRangeLatest?: number;
 }

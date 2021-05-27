@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import { JobFieldType } from '../../../../../common';
-
-export interface Percentile {
-  percent: number;
-  minValue: number;
-  maxValue: number;
-}
+import type { Percentile, JobFieldType, FieldVisStats } from '../../../../../common/types';
 
 export interface MetricFieldVisStats {
   avg?: number;
@@ -23,41 +17,6 @@ export interface MetricFieldVisStats {
   max?: number;
   median?: number;
   min?: number;
-}
-
-interface DocumentCountBuckets {
-  [key: string]: number;
-}
-
-export interface FieldVisStats {
-  cardinality?: number;
-  count?: number;
-  sampleCount?: number;
-  trueCount?: number;
-  falseCount?: number;
-  earliest?: number;
-  latest?: number;
-  documentCounts?: {
-    buckets?: DocumentCountBuckets;
-    interval?: number;
-  };
-  avg?: number;
-  distribution?: {
-    percentiles: Percentile[];
-    maxPercentile: number;
-    minPercentile: 0;
-  };
-  fieldName?: string;
-  isTopValuesSampled?: boolean;
-  max?: number;
-  median?: number;
-  min?: number;
-  topValues?: Array<{ key: number | string; doc_count: number }>;
-  topValuesSampleSize?: number;
-  topValuesSamplerShardSize?: number;
-  examples?: Array<string | object>;
-  timeRangeEarliest?: number;
-  timeRangeLatest?: number;
 }
 
 // The internal representation of the configuration used to build the visuals
