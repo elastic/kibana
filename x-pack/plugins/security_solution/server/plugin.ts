@@ -79,6 +79,7 @@ import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
+import { securitySolutionOpenIndexPatternProvider } from './search_strategy/open_index_pattern';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -319,6 +320,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
       const securitySolutionIndexFields = securitySolutionIndexFieldsProvider();
 
+      const securitySolutionOpenIndexPattern = securitySolutionOpenIndexPatternProvider();
+
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
@@ -327,6 +330,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         'securitySolutionIndexFields',
         securitySolutionIndexFields
       );
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionOpenIndexPattern',
+        securitySolutionOpenIndexPattern
+      );
+
       plugins.data.search.registerSearchStrategy(
         'securitySolutionTimelineSearchStrategy',
         securitySolutionTimelineSearchStrategy

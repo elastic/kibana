@@ -7,11 +7,15 @@
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import {
+  OpenIndexPatternStrategyResponse,
+  OpenIndexPatternStrategyRequest,
+} from '../../../common/search_strategy/open_index_pattern';
 import { esQuery } from '../../../../../../src/plugins/data/public';
 import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
@@ -108,6 +112,24 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     );
 
     const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+
+    const { data } = useKibana().services;
+
+    useEffect(() => {
+      if (selectedPatterns.length > 0) {
+        data.search
+          .search<OpenIndexPatternStrategyRequest, OpenIndexPatternStrategyResponse>(
+            { indices: selectedPatterns },
+            {
+              // abortSignal: abortCtrl.current.signal,
+              strategy: 'securitySolutionOpenIndexPattern',
+            }
+          )
+          .toPromise()
+          .then((r) => console.log('=================', r))
+          .catch((e) => console.error('=================', e));
+      }
+    }, [selectedPatterns, data.search]);
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
