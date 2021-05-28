@@ -151,7 +151,7 @@ String str = doc['customer_first_name.keyword'].value;
 char ch1 = str.charAt(0);
 emit(doc['customer_last_name.keyword'].value + ", " + ch1);
 ```
-. Simply the the document table by removing `customer_first_name` and `customer_last_name` and adding `customer` in their place.
+. Simplify the the document table by removing `customer_first_name` and `customer_last_name` and adding `customer` in their place.
 +
 [role="screenshot"]
 image:images/customer.png[Customer last name, first initial in the document table]
