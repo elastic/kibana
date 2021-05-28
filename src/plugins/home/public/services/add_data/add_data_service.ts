@@ -23,7 +23,7 @@ export class AddDataService {
   public setup() {
     return {
       /**
-       * Registers a component that will be rendered next to tutorial directory title/header area.
+       * Registers a component that will be rendered as a new tab in the Add data page
        */
       registerAddDataTab: (tab: AddDataTab) => {
         if (this.addDataTabs[tab.id]) {
