@@ -333,6 +333,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
