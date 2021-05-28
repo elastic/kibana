@@ -8,6 +8,12 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
+import {
+  ALERT_SEVERITY_LEVEL,
+  ALERT_SEVERITY_VALUE,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+} from '@kbn/rule-data-utils/target/technical_field_names';
 import { updateState, generateAlertMessage } from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
@@ -114,6 +120,8 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, lib
             'anomaly.slowest_response': Math.round(anomaly.actualSort / 1000),
             'anomaly.expected_response': Math.round(anomaly.typicalSort / 1000),
             'anomaly.observer_location': summary.observerLocation,
+            [ALERT_SEVERITY_LEVEL]: summary.severity,
+            [ALERT_SEVERITY_VALUE]: summary.severityScore,
             reason: generateAlertMessage(
               CommonDurationAnomalyTranslations.defaultActionMessage,
               summary

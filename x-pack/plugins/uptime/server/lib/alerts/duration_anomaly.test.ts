@@ -12,6 +12,10 @@ import { DynamicSettings } from '../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { getSeverityType } from '../../../../ml/common/util/anomaly_utils';
 import { Ping } from '../../../common/runtime_types/ping';
+import {
+  ALERT_SEVERITY_LEVEL,
+  ALERT_SEVERITY_VALUE,
+} from '@kbn/rule-data-utils/target/technical_field_names';
 
 /**
  * This function aims to provide an easy way to give mock props that will
@@ -157,6 +161,8 @@ describe('duration anomaly alert', () => {
             'anomaly.slowest_response': slowestResponse,
             'anomaly.expected_response': typicalResponse,
             'anomaly.observer_location': anomaly.entityValue,
+            [ALERT_SEVERITY_LEVEL]: getSeverityType(anomaly.severity),
+            [ALERT_SEVERITY_VALUE]: anomaly.severity,
             reason: `Abnormal (${getSeverityType(
               anomaly.severity
             )} level) response time detected on uptime-monitor with url ${
