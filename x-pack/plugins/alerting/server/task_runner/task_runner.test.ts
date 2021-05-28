@@ -270,6 +270,12 @@ describe('Task Runner', () => {
         },
         "kibana": Object {
           "alerting": Object {
+            "primary_saved_object": Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+            },
+            "rule_type_id": "test",
             "status": "ok",
           },
           "saved_objects": Array [
@@ -378,6 +384,12 @@ describe('Task Runner', () => {
           action_group_id: 'default',
           action_subgroup: 'subDefault',
           instance_id: '1',
+          primary_saved_object: {
+            id: '1',
+            namespace: undefined,
+            type: 'alert',
+          },
+          rule_type_id: 'test',
         },
         saved_objects: [
           {
@@ -399,6 +411,12 @@ describe('Task Runner', () => {
           instance_id: '1',
           action_group_id: 'default',
           action_subgroup: 'subDefault',
+          primary_saved_object: {
+            id: '1',
+            namespace: undefined,
+            type: 'alert',
+          },
+          rule_type_id: 'test',
         },
         saved_objects: [
           {
@@ -421,6 +439,12 @@ describe('Task Runner', () => {
           instance_id: '1',
           action_group_id: 'default',
           action_subgroup: 'subDefault',
+          primary_saved_object: {
+            id: '1',
+            namespace: undefined,
+            type: 'alert',
+          },
+          rule_type_id: 'test',
         },
         saved_objects: [
           {
@@ -447,6 +471,12 @@ describe('Task Runner', () => {
       },
       kibana: {
         alerting: {
+          primary_saved_object: {
+            id: '1',
+            namespace: undefined,
+            type: 'alert',
+          },
+          rule_type_id: 'test',
           status: 'active',
         },
         saved_objects: [
@@ -524,6 +554,12 @@ describe('Task Runner', () => {
         alerting: {
           action_group_id: 'default',
           instance_id: '1',
+          primary_saved_object: {
+            id: '1',
+            namespace: undefined,
+            type: 'alert',
+          },
+          rule_type_id: 'test',
         },
         saved_objects: [
           {
@@ -544,6 +580,12 @@ describe('Task Runner', () => {
         alerting: {
           instance_id: '1',
           action_group_id: 'default',
+          primary_saved_object: {
+            id: '1',
+            namespace: undefined,
+            type: 'alert',
+          },
+          rule_type_id: 'test',
         },
         saved_objects: [
           {
@@ -564,6 +606,12 @@ describe('Task Runner', () => {
       },
       kibana: {
         alerting: {
+          primary_saved_object: {
+            id: '1',
+            namespace: undefined,
+            type: 'alert',
+          },
+          rule_type_id: 'test',
           status: 'active',
         },
         saved_objects: [
@@ -695,6 +743,12 @@ describe('Task Runner', () => {
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
               },
               "saved_objects": Array [
                 Object {
@@ -717,6 +771,12 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
                 "status": "active",
               },
               "saved_objects": Array [
@@ -924,6 +984,12 @@ describe('Task Runner', () => {
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
               },
               "saved_objects": Array [
                 Object {
@@ -946,6 +1012,12 @@ describe('Task Runner', () => {
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
               },
               "saved_objects": Array [
                 Object {
@@ -969,6 +1041,12 @@ describe('Task Runner', () => {
                 "action_group_id": "default",
                 "action_subgroup": undefined,
                 "instance_id": "1",
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
               },
               "saved_objects": Array [
                 Object {
@@ -996,6 +1074,12 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
                 "status": "active",
               },
               "saved_objects": Array [
@@ -1379,6 +1463,12 @@ describe('Task Runner', () => {
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "2",
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
               },
               "saved_objects": Array [
                 Object {
@@ -1401,6 +1491,12 @@ describe('Task Runner', () => {
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
               },
               "saved_objects": Array [
                 Object {
@@ -1423,6 +1519,12 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
                 "status": "active",
               },
               "saved_objects": Array [
@@ -1633,6 +1735,12 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
                 "status": "error",
               },
               "saved_objects": Array [
@@ -1692,6 +1800,12 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
                 "status": "error",
               },
               "saved_objects": Array [
@@ -1759,6 +1873,12 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
                 "status": "error",
               },
               "saved_objects": Array [
@@ -1826,6 +1946,12 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
                 "status": "error",
               },
               "saved_objects": Array [
@@ -1892,6 +2018,12 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "primary_saved_object": Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "alert",
+                },
+                "rule_type_id": "test",
                 "status": "error",
               },
               "saved_objects": Array [

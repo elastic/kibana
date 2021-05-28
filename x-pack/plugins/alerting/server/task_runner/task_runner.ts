@@ -331,6 +331,7 @@ export class TaskRunner<
       alertId,
       alertLabel,
       namespace,
+      ruleTypeId: alert.alertTypeId,
     });
 
     if (!muteAll) {
@@ -488,6 +489,14 @@ export class TaskRunner<
       '@timestamp': runDate,
       event: { action: EVENT_LOG_ACTIONS.execute },
       kibana: {
+        alerting: {
+          primary_saved_object: {
+            id: alertId,
+            type: 'alert',
+            namespace,
+          },
+          rule_type_id: this.alertType.id,
+        },
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,
@@ -598,6 +607,7 @@ interface GenerateNewAndRecoveredInstanceEventsParams<
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
+  ruleTypeId: string;
 }
 
 function generateNewAndRecoveredInstanceEvents<
@@ -611,6 +621,7 @@ function generateNewAndRecoveredInstanceEvents<
     currentAlertInstances,
     originalAlertInstances,
     recoveredAlertInstances,
+    ruleTypeId,
   } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
@@ -621,14 +632,28 @@ function generateNewAndRecoveredInstanceEvents<
     const { group: actionGroup, subgroup: actionSubgroup } =
       recoveredAlertInstances[id].getLastScheduledActions() ?? {};
     const message = `${params.alertLabel} instance '${id}' has recovered`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.recoveredInstance, message, actionGroup, actionSubgroup);
+    logInstanceEvent(
+      id,
+      EVENT_LOG_ACTIONS.recoveredInstance,
+      message,
+      ruleTypeId,
+      actionGroup,
+      actionSubgroup
+    );
   }
 
   for (const id of newIds) {
     const { actionGroup, subgroup: actionSubgroup } =
       currentAlertInstances[id].getScheduledActionOptions() ?? {};
     const message = `${params.alertLabel} created new instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message, actionGroup, actionSubgroup);
+    logInstanceEvent(
+      id,
+      EVENT_LOG_ACTIONS.newInstance,
+      message,
+      ruleTypeId,
+      actionGroup,
+      actionSubgroup
+    );
   }
 
   for (const id of currentAlertInstanceIds) {
@@ -639,13 +664,21 @@ function generateNewAndRecoveredInstanceEvents<
         ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
         : `actionGroup: '${actionGroup}'`
     }`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message, actionGroup, actionSubgroup);
+    logInstanceEvent(
+      id,
+      EVENT_LOG_ACTIONS.activeInstance,
+      message,
+      ruleTypeId,
+      actionGroup,
+      actionSubgroup
+    );
   }
 
   function logInstanceEvent(
     instanceId: string,
     action: string,
     message: string,
+    ruleId: string,
     group?: string,
     subgroup?: string
   ) {
@@ -658,6 +691,12 @@ function generateNewAndRecoveredInstanceEvents<
           instance_id: instanceId,
           ...(group ? { action_group_id: group } : {}),
           ...(subgroup ? { action_subgroup: subgroup } : {}),
+          primary_saved_object: {
+            id: alertId,
+            type: 'alert',
+            namespace,
+          },
+          rule_type_id: ruleId,
         },
         saved_objects: [
           {

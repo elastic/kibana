@@ -124,6 +124,13 @@ export class ActionExecutor {
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
       kibana: {
+        alerting: {
+          primary_saved_object: {
+            id: actionId,
+            type: 'action',
+            ...namespace,
+          },
+        },
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,

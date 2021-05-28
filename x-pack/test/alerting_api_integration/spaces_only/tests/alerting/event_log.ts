@@ -127,6 +127,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         switch (event?.event?.action) {
           case 'execute':
             validateEvent(event, {
+              ruleTypeId: 'test.patternFiring',
               spaceId: Spaces.space1.id,
               savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
               outcome: 'success',
@@ -136,6 +137,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             break;
           case 'execute-action':
             validateEvent(event, {
+              ruleTypeId: 'test.patternFiring',
               spaceId: Spaces.space1.id,
               savedObjects: [
                 { type: 'alert', id: alertId, rel: 'primary' },
@@ -163,6 +165,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
       function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
         validateEvent(event, {
+          ruleTypeId: 'test.patternFiring',
           spaceId: Spaces.space1.id,
           savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
@@ -259,6 +262,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         switch (event?.event?.action) {
           case 'execute':
             validateEvent(event, {
+              ruleTypeId: 'test.patternFiring',
               spaceId: Spaces.space1.id,
               savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
               outcome: 'success',
@@ -271,6 +275,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               [firstSubgroup, secondSubgroup].includes(event?.kibana?.alerting?.action_subgroup!)
             ).to.be(true);
             validateEvent(event, {
+              ruleTypeId: 'test.patternFiring',
               spaceId: Spaces.space1.id,
               savedObjects: [
                 { type: 'alert', id: alertId, rel: 'primary' },
@@ -304,6 +309,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
       function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
         validateEvent(event, {
+          ruleTypeId: 'test.patternFiring',
           spaceId: Spaces.space1.id,
           savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
           message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
@@ -344,6 +350,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       expect(event).to.be.ok();
 
       validateEvent(event, {
+        ruleTypeId: 'test.throw',
         spaceId: Spaces.space1.id,
         savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
         outcome: 'failure',
@@ -367,6 +374,7 @@ interface ValidateEventLogParams {
   savedObjects: SavedObject[];
   outcome?: string;
   message: string;
+  ruleTypeId: string;
   errorMessage?: string;
   status?: string;
   actionGroupId?: string;
@@ -376,7 +384,7 @@ interface ValidateEventLogParams {
 
 export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
   const { spaceId, savedObjects, outcome, message, errorMessage } = params;
-  const { status, actionGroupId, instanceId, reason } = params;
+  const { status, actionGroupId, instanceId, reason, ruleTypeId } = params;
 
   if (status) {
     expect(event?.kibana?.alerting?.status).to.be(status);
@@ -415,6 +423,16 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   }
 
   expect(event?.event?.outcome).to.equal(outcome);
+
+  expect(event?.kibana?.alerting?.rule_type_id).to.be(ruleTypeId);
+
+  const primarySavedObject = savedObjects.find((obj) => obj.rel === 'primary');
+  if (primarySavedObject) {
+    expect(event?.kibana?.alerting?.primary_saved_object).to.eql({
+      id: primarySavedObject.id,
+      type: primarySavedObject.type,
+    });
+  }
 
   for (const savedObject of savedObjects) {
     expect(
