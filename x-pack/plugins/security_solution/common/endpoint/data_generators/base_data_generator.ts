@@ -9,6 +9,8 @@ import seedrandom from 'seedrandom';
 import uuid from 'uuid';
 
 const OS_FAMILY = ['windows', 'macos', 'linux'];
+/** Array of 14 day offsets */
+const DAY_OFFSETS = Array.from({ length: 14 }, (_, i) => 8.64e7 * (i + 1));
 
 /**
  * A generic base class to assist in creating domain specific data generators. It includes
@@ -16,6 +18,7 @@ const OS_FAMILY = ['windows', 'macos', 'linux'];
  * public method named `generate()` which should be implemented by sub-classes.
  */
 export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
+  /** A javascript seeded random number (float between 0 and 1). Don't use `Math.random()` */
   protected random: seedrandom.prng;
 
   constructor(seed: string | seedrandom.prng = Math.random().toString()) {
@@ -31,6 +34,23 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
    */
   public generate(): GeneratedDoc {
     throw new Error('method not implemented!');
+  }
+
+  /** Returns a future ISO date string */
+  protected randomFutureDate(from?: Date): string {
+    const now = from ? from.getTime() : Date.now();
+    return new Date(now + this.randomChoice(DAY_OFFSETS)).toISOString();
+  }
+
+  /** Returns a past ISO date string */
+  protected randomPastDate(from?: Date): string {
+    const now = from ? from.getTime() : Date.now();
+    return new Date(now - this.randomChoice(DAY_OFFSETS)).toISOString();
+  }
+
+  /** Generate either `true` or `false` */
+  protected randomBoolean(): boolean {
+    return this.random() < 0.5;
   }
 
   /** generate random OS family value */
