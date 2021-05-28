@@ -44,7 +44,7 @@ import {
   VegaDebugInspectorViewService,
 } from './visualizations';
 import { ListingTableService } from './listing_table';
-import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
+import { SavedQueryManagementComponentService } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
 import { MenuToggleService } from './menu_toggle';
 import { MonacoEditorProvider } from './monaco_editor';
@@ -80,7 +80,7 @@ export const services = {
   appsMenu: AppsMenuService,
   globalNav: GlobalNavService,
   toasts: ToastsService,
-  savedQueryManagementComponent: SavedQueryManagementComponentProvider,
+  savedQueryManagementComponent: SavedQueryManagementComponentService,
   elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
   managementMenu: ManagementMenuService,
