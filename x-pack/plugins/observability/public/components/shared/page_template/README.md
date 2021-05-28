@@ -64,7 +64,7 @@ This can be accessed like so:
 
 ```
 const [coreStart, pluginsStart] = await core.getStartServices();
-const pageTemplateComponent = pluginsStart.observability.navigation.PageTemplate;
+const ObservabilityPageTemplate = pluginsStart.observability.navigation.PageTemplate;
 ```
 
 Now that you have access to the component you can render your solution's content using it.
