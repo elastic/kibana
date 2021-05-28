@@ -240,6 +240,7 @@ export class IndexPattern implements IIndexPattern {
    * @param script script code
    * @param fieldType
    * @param lang
+   * @deprecated
    */
   async addScriptedField(name: string, script: string, fieldType: string = 'string') {
     const scriptedFields = this.getScriptedFields();
@@ -265,6 +266,7 @@ export class IndexPattern implements IIndexPattern {
   /**
    * Remove scripted field from field list
    * @param fieldName
+   * @deprecated
    */
 
   removeScriptedField(fieldName: string) {
@@ -274,10 +276,18 @@ export class IndexPattern implements IIndexPattern {
     }
   }
 
+  /**
+   *
+   * @deprecated
+   */
   getNonScriptedFields() {
     return [...this.fields.getAll().filter((field) => !field.scripted)];
   }
 
+  /**
+   *
+   * @deprecated
+   */
   getScriptedFields() {
     return [...this.fields.getAll().filter((field) => field.scripted)];
   }
