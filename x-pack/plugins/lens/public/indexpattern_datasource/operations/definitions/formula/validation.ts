@@ -136,7 +136,7 @@ export const getRawQueryValidationError = (text: string, operations: Record<stri
 
 const validateQueryQuotes = (rawQuery: string, language: 'kql' | 'lucene') => {
   // check if the raw argument has the minimal requirements
-  const [_, rawValue] = rawQuery.split('=');
+  const [, rawValue] = rawQuery.split('=');
   // it must start with a single quote, and quotes must have a closure
   if (rawValue.trim()[0] !== "'" || !/'\s*([^']+?)\s*'/.test(rawValue)) {
     return i18n.translate('xpack.lens.indexPattern.formulaOperationQueryError', {
@@ -147,11 +147,11 @@ const validateQueryQuotes = (rawQuery: string, language: 'kql' | 'lucene') => {
 };
 
 export const getQueryValidationError = (
-  { value: query, name: language, text }: { value: string; name: 'kql' | 'lucene'; text: string },
+  { value: query, name: language, text }: TinymathNamedArgument,
   indexPattern: IndexPattern
 ): string | undefined => {
   // check if the raw argument has the minimal requirements
-  const result = validateQueryQuotes(text, language);
+  const result = validateQueryQuotes(text, language as 'kql' | 'lucene');
   // forward the error here is ok?
   if (result) {
     return result;

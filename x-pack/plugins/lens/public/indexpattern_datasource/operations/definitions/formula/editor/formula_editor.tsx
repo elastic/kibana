@@ -24,10 +24,10 @@ import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
 import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type { CodeEditorProps } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useDebounceWithOptions } from '../../../../../shared_components';
 import { ParamEditorProps } from '../../index';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
 import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
-import { useDebounceWithOptions } from '../../helpers';
 import {
   LensMathSuggestion,
   SUGGESTION_TYPE,
