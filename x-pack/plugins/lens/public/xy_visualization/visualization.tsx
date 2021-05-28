@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import _ from 'lodash';
+import { uniq } from 'lodash';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -43,7 +43,7 @@ function getVisualizationType(state: State): VisualizationType | 'mixed' {
     );
   }
   const visualizationType = visualizationTypes.find((t) => t.id === state.layers[0].seriesType);
-  const seriesTypes = _.uniq(state.layers.map((l) => l.seriesType));
+  const seriesTypes = uniq(state.layers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
@@ -111,7 +111,7 @@ export const getXyVisualization = ({
   },
 
   appendLayer(state, layerId) {
-    const usedSeriesTypes = _.uniq(state.layers.map((layer) => layer.seriesType));
+    const usedSeriesTypes = uniq(state.layers.map((layer) => layer.seriesType));
     return {
       ...state,
       layers: [
@@ -235,7 +235,7 @@ export const getXyVisualization = ({
                   triggerIcon: 'colorBy',
                   palette: paletteService
                     .get(layer.palette?.name || 'default')
-                    .getColors(10, layer.palette?.params),
+                    .getCategoricalColors(10, layer.palette?.params),
                 },
               ]
             : [],
@@ -255,10 +255,11 @@ export const getXyVisualization = ({
   },
 
   setDimension({ prevState, layerId, columnId, groupId }) {
-    const newLayer = prevState.layers.find((l) => l.layerId === layerId);
-    if (!newLayer) {
+    const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
+    if (!foundLayer) {
       return prevState;
     }
+    const newLayer = { ...foundLayer };
 
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
@@ -277,11 +278,11 @@ export const getXyVisualization = ({
   },
 
   removeDimension({ prevState, layerId, columnId }) {
-    const newLayer = prevState.layers.find((l) => l.layerId === layerId);
-    if (!newLayer) {
+    const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
+    if (!foundLayer) {
       return prevState;
     }
-
+    const newLayer = { ...foundLayer };
     if (newLayer.xAccessor === columnId) {
       delete newLayer.xAccessor;
     } else if (newLayer.splitAccessor === columnId) {
