@@ -14,6 +14,7 @@ import {
   ShapeTreeNode,
   ArrayEntry,
 } from '@elastic/charts';
+import { isEqual } from 'lodash';
 import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { DatatableRow } from '../../../expressions/public';
@@ -35,15 +36,19 @@ export const computeColor = (
   const { parentSeries, allSeries } = getDistinctSeries(rows, columns);
 
   if (visParams.distinctColors) {
-    if (Object.keys(overwriteColors).includes(d.dataName.toString())) {
-      return overwriteColors[d.dataName];
+    const dataName = d.dataName;
+    // console.dir(Object.keys(overwriteColors));
+    if (Object.keys(overwriteColors).includes(dataName.toString())) {
+      return overwriteColors[dataName];
     }
-    const index = allSeries.findIndex((name) => name === d.dataName);
+    // console.log(dataName.toString());
+
+    const index = allSeries.findIndex((name) => isEqual(name, dataName));
     return palettes?.get(visParams.palette.name).getColor(
       [
         {
-          name: d.dataName,
-          rankAtDepth: index > -1 ? allSeries.findIndex((name) => name === d.dataName) : 0,
+          name: dataName,
+          rankAtDepth: index > -1 ? index : 0,
           totalSeriesAtDepth: allSeries.length || 1,
         },
       ],
