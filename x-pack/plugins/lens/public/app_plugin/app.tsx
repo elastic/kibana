@@ -21,8 +21,8 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
 import { injectFilterReferences } from '../persistence';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { esFilters, syncQueryStateWithUrl } from '../../../../../src/plugins/data/public';
-import { getFullPath, APP_ID } from '../../common';
+import { DataPublicPluginStart, esFilters, syncQueryStateWithUrl } from '../../../../../src/plugins/data/public';
+import { getFullPath, APP_ID, LENS_EMBEDDABLE_TYPE } from '../../common';
 import { LensAppProps, LensAppServices, RunSave } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { Document } from '../persistence';
@@ -40,6 +40,7 @@ import {
 } from '../state_management';
 import SaveModalContainer from './save_modal_container';
 import { LensAttributeService } from '../lens_attribute_service';
+import { getAllIndexPatterns } from '../utils';
 
 export const getLastKnownDoc = async ({
   initialInput,
