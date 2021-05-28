@@ -40,6 +40,7 @@ import type {
   RefreshTarget,
   OutdatedDocumentsRefresh,
   CleanupFatalState,
+  CleanupBadResponse,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -161,7 +162,10 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.waitForReindexTask(client, state.legacyReindexTaskId, '60s'),
     LEGACY_DELETE: (state: LegacyDeleteState) =>
       Actions.updateAliases(client, state.legacyPreMigrationDoneActions),
+    // the following two control states trigger pretty much the same cleanup actions but these might change.
     CLEANUP_FATAL: (state: CleanupFatalState) => Actions.cleanup.cleanupFatal(client, state.pitId), // right now, we only need state.pitId
+    CLEANUP_BAD_RESPONSE: (state: CleanupBadResponse) =>
+      Actions.cleanup.cleanupBadResponse(client, state.pitId), // right now, we only need state.pitId
   };
 };
 

@@ -10,8 +10,9 @@ import { gt, valid } from 'semver';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
+import { cloneDeep } from 'lodash';
 import { AliasAction, FetchIndexResponse, isLeftTypeof, RetryableEsClientError } from './actions';
-import { AllActionStates, InitState, State } from './types';
+import { AllActionStates, BadResponseSource, CleanupBadResponse, InitState, State } from './types';
 import { IndexMapping } from '../mappings';
 import { ResponseType } from './next';
 import { SavedObjectsMigrationVersion } from '../types';
@@ -129,6 +130,17 @@ function formatFinalFatalReason(originalReason: string, cleanupErrorMessage?: st
   return originalReason + (cleanupErrorMessage ? ` ${cleanupErrorMessage}` : '');
 }
 
+const cleanupBadResponseState = (state: any, res: any) => {
+  return {
+    ...state,
+    controlState: 'CLEANUP_BAD_RESPONSE',
+    badResponseSource: {
+      state: cloneDeep(state),
+      res,
+    },
+  };
+};
+
 const delayRetryState = <S extends State>(
   state: S,
   errorMessage: string,
@@ -243,7 +255,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       ) {
         return {
           ...stateP,
-          controlState: 'FATAL',
+          controlState: 'FATAL', // TINA: I didn't change this to CLEANUP_FATAL because we haven't done anything yet
           reason: `The ${
             stateP.currentAlias
           } alias is pointing to a newer version of Kibana: v${indexVersion(
@@ -949,7 +961,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res);
     }
   } else if (stateP.controlState === 'CLEANUP_FATAL') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -968,6 +980,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // Alternatively, we could ignore cleanup errors but I chose to make everything as visible as possible
         reason: formatFinalFatalReason(fatalReason, res.left.cleanupFatalError?.message),
       };
+    }
+  } else if (stateP.controlState === 'CLEANUP_BAD_RESPONSE') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    const { badResponseSource } = stateP;
+    if (Either.isRight(res)) {
+      throwBadResponse(badResponseSource.state, badResponseSource.res as never);
+    } else {
+      // how should we handle a failed cleanup phase? We're only throwing the original bad response
+      throwBadResponse(badResponseSource.state, badResponseSource.res as never);
     }
   } else if (stateP.controlState === 'DONE' || stateP.controlState === 'FATAL') {
     // The state-action machine will never call the model in the terminating states

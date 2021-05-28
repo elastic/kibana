@@ -392,6 +392,23 @@ export interface CleanupFatalState extends PostInitState {
   readonly cleanupFatalError?: RetryableEsClientError;
 }
 
+/** @internal */
+export interface BadResponseSource {
+  state: State;
+  res: any;
+}
+export interface CleanupBadResponse extends PostInitState {
+  /**
+   * Before throwing the bad response, we need to execute any cleanup actions
+   * e.g. closePit
+   * the bad response takes the state.controlState that threw and the res from that controlState's action, so we pass those along
+   */
+  readonly controlState: 'CLEANUP_BAD_RESPONSE';
+  readonly badResponseSource: BadResponseSource;
+  readonly pitId?: string;
+  readonly cleanupFatalError?: RetryableEsClientError;
+}
+
 export type State = Readonly<
   | FatalState
   | InitState
@@ -424,6 +441,7 @@ export type State = Readonly<
   | LegacyReindexWaitForTaskState
   | LegacyDeleteState
   | CleanupFatalState
+  | CleanupBadResponse
 >;
 
 export type AllControlStates = State['controlState'];
