@@ -53,7 +53,8 @@ export const Panels: React.FC<Props> = ({ maxWidth, flyoutClassName, ...props })
     const el = document.getElementsByClassName(flyoutClassName);
 
     if (el.length === 0) {
-      throw new Error(`Flyout with className "${flyoutClassName}" not found.`);
+      // throw new Error(`Flyout with className "${flyoutClassName}" not found.`);
+      return null;
     }
 
     return el.item(0) as HTMLDivElement;
@@ -87,6 +88,10 @@ export const Panels: React.FC<Props> = ({ maxWidth, flyoutClassName, ...props })
   );
 
   useLayoutEffect(() => {
+    if (!flyoutDOMelement) {
+      return;
+    }
+
     const totalPercentWidth = Math.min(
       100,
       Object.values(panels).reduce((acc, { width = 0 }) => acc + width, 0)
