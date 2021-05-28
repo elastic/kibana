@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { PackageInfo } from '../../../../../types';
+import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
@@ -16,6 +16,7 @@ import { Details } from './details';
 
 interface Props {
   packageInfo: PackageInfo;
+  integrationInfo?: RegistryPolicyTemplate;
 }
 
 const LeftColumn = styled(EuiFlexItem)`
@@ -25,14 +26,19 @@ const LeftColumn = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
+export const OverviewPage: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
+  const screenshots = useMemo(() => integrationInfo?.screenshots || packageInfo.screenshots || [], [
+    integrationInfo,
+    packageInfo.screenshots,
+  ]);
+
   return (
     <EuiFlexGroup alignItems="flexStart">
       <LeftColumn grow={2} />
       <EuiFlexItem grow={9} className="eui-textBreakWord">
         {packageInfo.readme ? (
           <Readme
-            readmePath={packageInfo.readme}
+            readmePath={integrationInfo?.readme || packageInfo.readme}
             packageName={packageInfo.name}
             version={packageInfo.version}
           />
@@ -40,10 +46,10 @@ export const OverviewPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
         <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
-          {packageInfo.screenshots && packageInfo.screenshots.length ? (
+          {screenshots.length ? (
             <EuiFlexItem>
               <Screenshots
-                images={packageInfo.screenshots}
+                images={screenshots}
                 packageName={packageInfo.name}
                 version={packageInfo.version}
               />

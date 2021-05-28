@@ -175,6 +175,8 @@ kibana_vars=(
     xpack.actions.rejectUnauthorized
     xpack.actions.maxResponseContentLength
     xpack.actions.responseTimeout
+    xpack.actions.tls.verificationMode
+    xpack.actions.tls.proxyVerificationMode
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
@@ -231,6 +233,7 @@ kibana_vars=(
     xpack.maps.showMapVisualizationTypes
     xpack.ml.enabled
     xpack.observability.unsafe.alertingExperience.enabled
+    xpack.observability.unsafe.cases.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect
