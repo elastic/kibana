@@ -15,6 +15,8 @@ import {
   // NOTES_COUNT,
   NOTES_TEXT_AREA,
   PIN_EVENT,
+  TIMELINE_COLLAPSED_ITEMS_BTN,
+  TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN,
   TIMELINE_DESCRIPTION,
   TIMELINE_QUERY,
   TIMELINE_TITLE,
@@ -25,9 +27,10 @@ import {
   TIMELINES_NOTES_COUNT,
   TIMELINES_FAVORITE,
 } from '../../screens/timelines';
+import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import {
   addDescriptionToTimeline,
@@ -41,9 +44,9 @@ import {
   populateTimeline,
   waitForTimelineChanges,
 } from '../../tasks/timeline';
-import { openTimeline } from '../../tasks/timelines';
+import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
-import { OVERVIEW_URL } from '../../urls/navigation';
+import { OVERVIEW_URL, TIMELINES_URL } from '../../urls/navigation';
 
 describe('Timeline Templates', () => {
   beforeEach(() => {
@@ -70,7 +73,7 @@ describe('Timeline Templates', () => {
       const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
 
       addDescriptionToTimeline(timeline.description);
-      addNotesToTimeline(timeline.notes);
+      addNotesToTimeline(timeline.notes, 1);
       markAsFavorite();
       waitForTimelineChanges();
       createNewTimelineTemplate();
@@ -95,6 +98,25 @@ describe('Timeline Templates', () => {
       cy.get(NOTES_TAB_BUTTON).click();
       cy.get(NOTES_TEXT_AREA).should('exist');
       cy.get(NOTES).should('have.text', timeline.notes);
+    });
+  });
+
+  it('Create template from timeline', () => {
+    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    waitForTimelinesPanelToBeLoaded();
+
+    createTimeline(timeline);
+
+    cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).first().click();
+    cy.get(TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN).click({ force: true });
+
+    cy.wait('@timeline').then(({ request }) => {
+      expect(request.body.timeline).to.haveOwnProperty('templateTimelineId');
+      expect(request.body.timeline).to.haveOwnProperty('description', timeline.description);
+      expect(request.body.timeline.kqlQuery.filterQuery.kuery).to.haveOwnProperty(
+        'expression',
+        timeline.query
+      );
     });
   });
 });

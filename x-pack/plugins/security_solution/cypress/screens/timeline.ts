@@ -238,3 +238,14 @@ export const TIMELINE_EVENTS_COUNT_PER_PAGE_OPTION = (itemsPerPage: number) =>
 export const TIMELINE_EVENTS_COUNT_NEXT_PAGE = '[data-test-subj="pagination-button-next"]';
 
 export const TIMELINE_EVENTS_COUNT_PREV_PAGE = '[data-test-subj="pagination-button-previous"]';
+
+export const TIMELINE_COLLAPSED_ITEMS_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
+
+export const TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN =
+  '[data-test-subj="create-template-from-timeline"]';
+
+export const TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN = '[data-test-subj="create-from-template"]';
+
+export const TIMELINE_CORRELATION_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
+
+export const TIMELINE_CORRELATION_TAB = '[data-test-subj="timelineTabs-eql"]';

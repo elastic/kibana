@@ -57,6 +57,8 @@ import {
   TIMELINE_DATA_PROVIDER_VALUE,
   SAVE_DATA_PROVIDER_BTN,
   EVENT_NOTE,
+  TIMELINE_CORRELATION_INPUT,
+  TIMELINE_CORRELATION_TAB,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
@@ -100,6 +102,16 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
   return cy.root().find(NOTES_TAB_BUTTON);
 };
 
+export const goToCorrelationTab = () => {
+  cy.root()
+    .pipe(($el) => {
+      $el.find(TIMELINE_CORRELATION_TAB).trigger('click');
+      return $el.find(TIMELINE_CORRELATION_INPUT);
+    })
+    .should('be.visible');
+  return cy.root().find(TIMELINE_CORRELATION_TAB);
+};
+
 export const getNotePreviewByNoteId = (noteId: string) => {
   return cy.get(`[data-test-subj="note-preview-${noteId}"]`);
 };
@@ -126,6 +138,12 @@ export const addNotesToTimeline = (notes: string, notesCount: number) => {
 
   goToQueryTab();
   goToNotesTab();
+};
+
+export const addEqlToTimeline = () => {
+  goToCorrelationTab().then(() => {
+    cy.get(TIMELINE_CORRELATION_INPUT).type('process where process.name == "cmd.exe"');
+  });
 };
 
 export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {

@@ -23,8 +23,6 @@ import { HOSTS_URL } from '../../urls/navigation';
 
 const defaultPageSize = 25;
 describe('Pagination', () => {
-  before(() => {});
-
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);

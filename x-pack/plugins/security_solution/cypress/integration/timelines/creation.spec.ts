@@ -12,13 +12,16 @@ import {
   LOCKED_ICON,
   NOTES_TEXT,
   PIN_EVENT,
+  TIMELINE_COLLAPSED_ITEMS_BTN,
+  TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN,
   TIMELINE_FILTER,
   TIMELINE_PANEL,
 } from '../../screens/timeline';
+import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import {
   addFilter,
@@ -33,7 +36,8 @@ import {
   waitForTimelineChanges,
 } from '../../tasks/timeline';
 
-import { OVERVIEW_URL } from '../../urls/navigation';
+import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
+import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 describe('Timelines', (): void => {
   before(() => {
@@ -84,7 +88,7 @@ describe('Timelines', (): void => {
     });
 
     it('can be added notes', () => {
-      addNotesToTimeline(timeline.notes);
+      addNotesToTimeline(timeline.notes, 1);
       cy.get(NOTES_TEXT).should('have.text', timeline.notes);
     });
 
@@ -92,6 +96,31 @@ describe('Timelines', (): void => {
       markAsFavorite();
       waitForTimelineChanges();
       cy.get(FAVORITE_TIMELINE).should('have.text', 'Remove from favorites');
+    });
+  });
+});
+
+describe('Create a timeline from a template', () => {
+  before(() => {
+    cleanKibana();
+    loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
+    waitForTimelinesPanelToBeLoaded();
+  });
+
+  it('Should have the same query', () => {
+    createTimelineTemplate(timeline);
+
+    cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).first().click();
+    cy.intercept('PATCH', '/api/timeline').as('timeline');
+
+    cy.get(TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN).click({ force: true });
+
+    cy.wait('@timeline').then(({ request }) => {
+      expect(request.body.timeline).to.haveOwnProperty('description', timeline.description);
+      expect(request.body.timeline.kqlQuery.filterQuery.kuery).to.haveOwnProperty(
+        'expression',
+        timeline.query
+      );
     });
   });
 });
