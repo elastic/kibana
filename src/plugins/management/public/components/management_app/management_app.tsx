@@ -10,11 +10,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiPage } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 
 import { ManagementRouter } from './management_router';
-import { ManagementSidebarNav } from '../management_sidebar_nav';
-import { KibanaPageTemplate, reactRouterNavigate } from '../../../../kibana_react/public';
+import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
+import {
+  KibanaPageTemplate,
+  KibanaPageTemplateProps,
+  reactRouterNavigate,
+} from '../../../../kibana_react/public';
 import { SectionsServiceStart } from '../../types';
 
 import './management_app.scss';
@@ -64,13 +69,22 @@ export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => 
     return null;
   }
 
+  const solution: KibanaPageTemplateProps['solutionNav'] = {
+    name: i18n.translate('management.nav.label', {
+      defaultMessage: 'Management',
+    }),
+    icon: 'managementApp',
+    'data-test-subj': 'mgtSideBarNav',
+    items: managementSidebarNav({
+      selectedId,
+      sections,
+      history,
+    }),
+  };
+
   return (
     <I18nProvider>
-      <KibanaPageTemplate
-        pageSideBar={
-          <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
-        }
-      >
+      <KibanaPageTemplate solutionNav={solution}>
         <ManagementRouter
           history={history}
           setBreadcrumbs={setBreadcrumbsScoped}
