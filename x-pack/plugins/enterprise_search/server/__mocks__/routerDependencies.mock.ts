@@ -9,7 +9,7 @@ import { loggingSystemMock } from 'src/core/server/mocks';
 
 import {
   EnterpriseSearchConfig,
-  EnteepriseSearchConfigType,
+  EnterpriseSearchConfigType,
 } from '../lib/enterprise_search_config';
 
 export const mockLogger = loggingSystemMock.createLogger().get();
@@ -29,7 +29,7 @@ export const mockRawConfig = {
   ssl: {
     rejectUnauthorized: false,
   },
-} as EnteepriseSearchConfigType;
+} as EnterpriseSearchConfigType;
 
 export const mockConfig = new EnterpriseSearchConfig(mockRawConfig);
 

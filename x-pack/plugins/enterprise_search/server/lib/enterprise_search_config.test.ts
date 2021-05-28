@@ -12,10 +12,9 @@ import https from 'https';
 
 import { EnterpriseSearchConfig, config } from './enterprise_search_config';
 
-// -----------------------------------------------------------------------------
 test('set correct defaults', () => {
   const configValue = new EnterpriseSearchConfig(config.schema.validate({}));
-  expect(configValue).toMatchSnapshot({
+  expect(configValue).toEqual({
     host: undefined,
     enabled: true,
     accessCheckTimeout: 5000,
@@ -26,7 +25,6 @@ test('set correct defaults', () => {
   });
 });
 
-// -----------------------------------------------------------------------------
 describe('httpAgent', () => {
   it('should be an http.Agent when host URL is using HTTP', () => {
     const configValue = new EnterpriseSearchConfig(
@@ -48,7 +46,6 @@ describe('httpAgent', () => {
   });
 });
 
-// -----------------------------------------------------------------------------
 describe('reads files', () => {
   beforeEach(() => {
     mockReadFileSync.mockReset();

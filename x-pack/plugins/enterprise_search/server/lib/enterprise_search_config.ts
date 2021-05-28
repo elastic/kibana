@@ -11,8 +11,8 @@ import http from 'http';
 import https from 'https';
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'src/core/server';
 
-// -----------------------------------------------------------------------------
 export const configSchema = schema.object({
   host: schema.maybe(schema.string()),
   enabled: schema.boolean({ defaultValue: true }),
@@ -26,7 +26,7 @@ export const configSchema = schema.object({
   }),
 });
 
-type EnterpriseSearchConfigType = TypeOf<typeof configSchema>;
+export type EnterpriseSearchConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<EnterpriseSearchConfigType> = {
   schema: configSchema,
@@ -35,7 +35,6 @@ export const config: PluginConfigDescriptor<EnterpriseSearchConfigType> = {
   },
 };
 
-// -----------------------------------------------------------------------------
 /**
  * Wrapper of config schema.
  * @public
@@ -44,7 +43,7 @@ export class EnterpriseSearchConfig {
   /**
    * Base URL (schema://host:port) of the Enterprise Search deployment
    */
-  public host: string;
+  public host?: string;
 
   /**
    * Specifies if Enterprise Search plugin should be enabled
@@ -98,7 +97,7 @@ export class EnterpriseSearchConfig {
   /**
    * Loads custom CA certificate files and returns all certificates as an array
    **/
-  private loadCertificateAuthorities(ca) {
+  private loadCertificateAuthorities(ca: string | string[] | undefined) {
     const parsedCerts = [];
     if (ca) {
       const paths = Array.isArray(ca) ? ca : [ca];
@@ -115,17 +114,19 @@ export class EnterpriseSearchConfig {
   /**
    * Returns an HTTP agent object to be used for connecting to a given host
    */
-  private httpAgentFor(host) {
-    try {
-      const parsedHost = new URL(host);
-      if (parsedHost.protocol === 'https:') {
-        return new https.Agent({
-          ca: this.certificateAuthorities,
-          rejectUnauthorized: this.rejectUnauthorized,
-        });
+  private httpAgentFor(host: string | undefined) {
+    if (host) {
+      try {
+        const parsedHost = new URL(host);
+        if (parsedHost.protocol === 'https:') {
+          return new https.Agent({
+            ca: this.certificateAuthorities,
+            rejectUnauthorized: this.rejectUnauthorized,
+          });
+        }
+      } catch (_error) {
+        // ignore the error
       }
-    } catch (_error) {
-      // ignore the error
     }
 
     // Use HTTP agent by default

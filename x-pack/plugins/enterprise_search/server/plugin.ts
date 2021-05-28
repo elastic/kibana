@@ -31,7 +31,7 @@ import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } 
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
 
 import { checkAccess } from './lib/check_access';
-import { EnterpriseSearchConfig } from './lib/enterprise_search_config';
+import { EnterpriseSearchConfig, EnterpriseSearchConfigType } from './lib/enterprise_search_config';
 import {
   EnterpriseSearchRequestHandler,
   IEnterpriseSearchRequestHandler,
@@ -69,7 +69,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
-    const rawConfig = initializerContext.config.get<ConfigType>();
+    const rawConfig = initializerContext.config.get<EnterpriseSearchConfigType>();
     this.config = new EnterpriseSearchConfig(rawConfig);
     this.logger = initializerContext.logger.get();
   }
