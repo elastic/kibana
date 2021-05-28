@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ecs } from '../../../../../security_solution/common/ecs';
+import { Ecs } from '../../../../common/ecs';
 import { stringifyEvent } from './helpers';
 
 describe('helpers', () => {

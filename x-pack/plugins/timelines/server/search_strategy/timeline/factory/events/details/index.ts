@@ -16,8 +16,7 @@ import {
   TimelineEventsDetailsItem,
   EventSource,
 } from '../../../../../../common/search_strategy';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { inspectStringifyObject } from '../../../../../../../security_solution/server/utils/build_query';
+import { inspectStringifyObject } from '../../../../../../server/utils/build_query';
 import { TimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
 import {

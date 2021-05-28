@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash/fp';
 import { esFilters, EsQueryConfig, Filter } from '../../../../../../src/plugins/data/public';
-import { DataProviderType } from '../../../../security_solution/common/types/timeline';
+import { DataProviderType } from '../../../common/types/timeline';
 import { mockBrowserFields, mockDataProviders, mockIndexPattern } from '../../mock';
 
 import { buildGlobalQuery, combineQueries, resolverIsShowing, showGlobalFilters } from './helpers';

@@ -8,7 +8,7 @@
 import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
-import { Ecs } from '../../../../../../security_solution/common/ecs';
+import { Ecs } from '../../../../../common/ecs';
 import { mockBrowserFields, mockTimelineData } from '../../../../mock';
 
 import { plainRowRenderer } from './plain_row_renderer';

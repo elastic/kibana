@@ -7,7 +7,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { Direction } from '../../../../../../security_solution/common/search_strategy';
+import { Direction } from '../../../../../common/search_strategy';
 
 import * as i18n from '../translations';
 

@@ -14,8 +14,7 @@ import {
   TimelineEqlRequestOptions,
   TimelineEqlResponse,
 } from '../../../../common/search_strategy/timeline/events/eql';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { inspectStringifyObject } from '../../../../../security_solution/server/utils/build_query';
+import { inspectStringifyObject } from '../../../server/utils/build_query';
 import { TIMELINE_EVENTS_FIELDS } from '../factory/events/all/constants';
 import { formatTimelineData } from '../factory/events/all/helpers';
 

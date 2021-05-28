@@ -16,8 +16,8 @@ import {
   CellValueElementProps,
   ColumnHeaderOptions,
   TimelineTabs,
-} from '../../../../../../security_solution/common/types/timeline';
-import { TimelineNonEcsData } from '../../../../../../security_solution/common/search_strategy';
+} from '../../../../../common/types/timeline';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { mockTimelineData } from '../../../../mock/mock_timeline_data';
 
 /**

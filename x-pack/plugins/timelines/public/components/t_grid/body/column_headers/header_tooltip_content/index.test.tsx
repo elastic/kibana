@@ -9,7 +9,7 @@ import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { ColumnHeaderOptions } from '../../../../../../../security_solution/common/types/timeline';
+import { ColumnHeaderOptions } from '../../../../../../common/types/timeline';
 import { defaultHeaders } from '../default_headers';
 import { HeaderToolTipContent } from '.';
 

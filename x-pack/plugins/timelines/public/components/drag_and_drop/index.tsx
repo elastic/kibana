@@ -12,8 +12,7 @@ import React from 'react';
 import { useCallback } from 'react';
 import { DropResult, DragDropContext, BeforeCapture } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
-import { ColumnHeaderOptions } from '../../../../security_solution/common';
-import { BrowserFields } from '../../../common';
+import { ColumnHeaderOptions, BrowserFields } from '../../../common';
 import {
   draggableIsField,
   fieldWasDroppedOnTimelineColumns,

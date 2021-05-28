@@ -13,8 +13,7 @@ import {
   TimelineEventsAllRequestOptions,
   TimelineRequestSortField,
 } from '../../../../../../common/search_strategy';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createQueryFilterClauses } from '../../../../../../../security_solution/server/utils/build_query';
+import { createQueryFilterClauses } from '../../../../../../server/utils/build_query';
 
 export const buildTimelineEventsAllQuery = ({
   defaultIndex,

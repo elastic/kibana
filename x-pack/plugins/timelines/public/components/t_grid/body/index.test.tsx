@@ -13,11 +13,11 @@ import '../../../../common/mock/match_media';
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
 import { defaultControlColumn } from './control_columns';
-import { Direction } from '../../../../../security_solution/common/search_strategy';
-import { mockTimelineModel } from '../../../../../security_solution/public/common/mock';
+import { Direction } from '../../../../common/search_strategy';
+import { mockTimelineModel } from '../../../../public/common/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { defaultHeaders, mockBrowserFields, mockTimelineData, TestProviders } from '../../../mock';
-import { TimelineTabs } from '../../../../../security_solution/common/types/timeline';
+import { TimelineTabs } from '../../../../common/types/timeline';
 import { TestCellRenderer } from '../../../mock/cell_renderer';
 
 const mockSort: Sort[] = [

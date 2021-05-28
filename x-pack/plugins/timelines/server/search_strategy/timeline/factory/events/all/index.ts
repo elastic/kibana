@@ -19,9 +19,7 @@ import { TimelineFactory } from '../../types';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { buildFieldsRequest, formatTimelineData } from './helpers';
-// TODO we need to move this functionality inside of  the plugin
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { inspectStringifyObject } from '../../../../../../../security_solution/server/utils/build_query';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
 
 export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
   buildDsl: (options: TimelineEventsAllRequestOptions) => {

@@ -2726,9 +2726,6 @@
   version "0.0.0"
   uid ""
 
-<<<<<<< HEAD
-"@kbn/securitysolution-t-grid@link:bazel-bin/packages/kbn-securitysolution-t-grid/npm_module":
-=======
 "@kbn/securitysolution-list-api@link:bazel-bin/packages/kbn-securitysolution-list-api/npm_module":
   version "0.0.0"
   uid ""
@@ -2742,7 +2739,10 @@
   uid ""
 
 "@kbn/securitysolution-list-utils@link:bazel-bin/packages/kbn-securitysolution-list-utils/npm_module":
->>>>>>> d50a3db2b15858586c9141fb2ec5bc137cab94b7
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-t-grid@link:bazel-bin/packages/kbn-securitysolution-t-grid/npm_module":
   version "0.0.0"
   uid ""
 

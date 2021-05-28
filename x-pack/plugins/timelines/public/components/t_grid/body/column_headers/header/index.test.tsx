@@ -14,8 +14,8 @@ import { defaultHeaders } from '../default_headers';
 
 import { HeaderComponent } from '.';
 import { getNewSortDirectionOnClick, getNextSortDirection, getSortDirection } from './helpers';
-import { ColumnHeaderType } from '../../../../../../../security_solution/common/types/timeline';
-import { Direction } from '../../../../../../../security_solution/common/search_strategy';
+import { ColumnHeaderType } from '../../../../../../common/types/timeline';
+import { Direction } from '../../../../../../common/search_strategy';
 import { TestProviders } from '../../../../../mock';
 import { tGridActions } from '../../../../../store/t_grid';
 

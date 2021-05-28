@@ -16,11 +16,7 @@ import { EventColumnView } from './event_column_view';
 import { TestCellRenderer } from '../../../../mock/cell_renderer';
 import { defaultControlColumn } from '../control_columns';
 import { useShallowEqualSelector } from '../../../../hooks/use_selector';
-import {
-  TimelineId,
-  TimelineTabs,
-  TimelineType,
-} from '../../../../../../security_solution/common/types/timeline';
+import { TimelineId, TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../mock/test_providers';
 import { testLeadingControlColumn } from '../../../../mock/mock_timeline_control_columns';
 

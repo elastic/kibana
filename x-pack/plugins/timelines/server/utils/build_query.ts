@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import { isEmpty, isString } from 'lodash/fp';
+
+import { ESQuery } from '../../common/typed_json';
+
+export const createQueryFilterClauses = (filterQuery: ESQuery | string | undefined) =>
+  !isEmpty(filterQuery) ? [isString(filterQuery) ? JSON.parse(filterQuery) : filterQuery] : [];
+
 export const inspectStringifyObject = (obj: unknown) => {
   try {
     return JSON.stringify(obj, null, 2);
