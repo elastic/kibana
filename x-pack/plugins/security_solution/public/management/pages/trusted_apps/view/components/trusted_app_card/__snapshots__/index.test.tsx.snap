@@ -41,21 +41,21 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
     }
   />
   <ItemPropertySummary
-    name="Date Updated"
+    name="Date Modified"
     value={
       <Memo(FormattedDate)
         className="eui-textTruncate"
-        fieldName="Date Updated"
+        fieldName="Date Modified"
         value="1 minute ago"
       />
     }
   />
   <ItemPropertySummary
-    name="Updated By"
+    name="Modified By"
     value={
       <Memo(FormattedDate)
         className="eui-textTruncate"
-        fieldName="Updated By"
+        fieldName="Modified By"
         value="someone"
       />
     }
@@ -165,21 +165,21 @@ exports[`trusted_app_card TrustedAppCard should trim long texts 1`] = `
     }
   />
   <ItemPropertySummary
-    name="Date Updated"
+    name="Date Modified"
     value={
       <Memo(FormattedDate)
         className="eui-textTruncate"
-        fieldName="Date Updated"
+        fieldName="Date Modified"
         value="1 minute ago"
       />
     }
   />
   <ItemPropertySummary
-    name="Updated By"
+    name="Modified By"
     value={
       <Memo(FormattedDate)
         className="eui-textTruncate"
-        fieldName="Updated By"
+        fieldName="Modified By"
         value="someone"
       />
     }
