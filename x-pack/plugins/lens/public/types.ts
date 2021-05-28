@@ -19,9 +19,8 @@ import {
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
-import { Document } from './persistence';
 import { DateRange } from '../common';
-import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
+import { Query, Filter, IFieldFormat } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
 import {
@@ -47,22 +46,7 @@ export interface PublicAPIProps<T> {
 
 export interface EditorFrameProps {
   onError: ErrorCallback;
-  doc?: Document;
-  dateRange: DateRange;
-  query: Query;
-  filters: Filter[];
-  savedQuery?: SavedQuery;
-  searchSessionId: string;
   initialContext?: VisualizeFieldContext;
-
-  // Frame loader (app or embeddable) is expected to call this when it loads and updates
-  // This should be replaced with a top-down state
-  onChange: (newState: {
-    filterableIndexPatterns: string[];
-    doc: Document;
-    isSaveable: boolean;
-    activeData?: Record<string, Datatable>;
-  }) => void;
   showNoDataPopover: () => void;
 }
 export interface EditorFrameInstance {
