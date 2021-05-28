@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import { ApplicationStart, CoreStart } from 'kibana/public';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -26,6 +26,7 @@ import { useToasts } from '../../../../../../../common/lib/kibana';
 import { LinkWithIcon } from './link_with_icon';
 import { ExceptionItemsSummary } from './exception_items_summary';
 import { TrustedAppsHttpService } from '../../../../../trusted_apps/service';
+import { StyledEuiFlexGridGroup, StyledEuiFlexGridItem } from './styled_components';
 
 export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>(({ pkgkey }) => {
   const {
@@ -80,8 +81,8 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
 
   return (
     <EuiPanel paddingSize="l">
-      <EuiFlexGroup alignItems="baseline">
-        <EuiFlexItem grow={false}>
+      <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center">
+        <StyledEuiFlexGridItem gridArea="title" alignItems="flex-start">
           <EuiText>
             <h4>
               <FormattedMessage
@@ -90,11 +91,11 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
               />
             </h4>
           </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ alignItems: 'center', justifyContent: 'center' }}>
+        </StyledEuiFlexGridItem>
+        <StyledEuiFlexGridItem gridArea="summary">
           <ExceptionItemsSummary stats={stats} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        </StyledEuiFlexGridItem>
+        <StyledEuiFlexGridItem gridArea="link" alignItems="flex-end">
           <>
             <LinkWithIcon
               appId={MANAGEMENT_APP_ID}
@@ -109,8 +110,8 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
               />
             </LinkWithIcon>
           </>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </StyledEuiFlexGridItem>
+      </StyledEuiFlexGridGroup>
     </EuiPanel>
   );
 });

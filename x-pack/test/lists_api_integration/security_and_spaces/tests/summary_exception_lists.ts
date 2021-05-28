@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 
+import { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { LIST_ID } from '../../../../plugins/lists/common/constants.mock';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -14,6 +15,9 @@ import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lis
 import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
 import { createListsIndex, deleteListsIndex, deleteAllExceptions } from '../../utils';
 
+interface SummaryResponseType {
+  body: ExceptionListSummarySchema;
+}
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -21,12 +25,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('summary_exception_lists', () => {
     describe('summary exception lists', () => {
+      beforeEach(async () => {
+        await createListsIndex(supertest);
+      });
       afterEach(async () => {
         await deleteListsIndex(supertest);
         await deleteAllExceptions(es);
-      });
-      beforeEach(async () => {
-        await createListsIndex(supertest);
       });
 
       it('should give a validation error if the list_id and the id are not supplied', async () => {
@@ -43,18 +47,19 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return init summary when there are no items created', async () => {
-        const { body } = await supertest
+        const { body }: SummaryResponseType = await supertest
           .get(`${EXCEPTION_LIST_URL}/summary?list_id=${LIST_ID}`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
 
-        expect(body).to.eql({
+        const expected: ExceptionListSummarySchema = {
           linux: 0,
           macos: 0,
           total: 0,
           windows: 0,
-        });
+        };
+        expect(body).to.eql(expected);
       });
 
       it('should return right summary when there are items created', async () => {
@@ -74,19 +79,19 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
         }
 
-        const { body } = await supertest
+        const { body }: SummaryResponseType = await supertest
           .get(`${EXCEPTION_LIST_URL}/summary?list_id=${LIST_ID}`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
 
-        delete body.cursor;
-        expect(body).to.eql({
+        const expected: ExceptionListSummarySchema = {
           linux: 1,
           macos: 1,
           total: 3,
           windows: 1,
-        });
+        };
+        expect(body).to.eql(expected);
       });
     });
   });

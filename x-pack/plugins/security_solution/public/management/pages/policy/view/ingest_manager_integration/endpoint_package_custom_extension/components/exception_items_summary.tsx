@@ -44,7 +44,7 @@ interface ExceptionItemsSummaryProps {
 
 export const ExceptionItemsSummary = memo<ExceptionItemsSummaryProps>(({ stats }) => {
   return (
-    <EuiFlexGroup responsive={false}>
+    <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
       {SUMMARY_KEYS.map((stat) => {
         return (
           <EuiFlexItem>
@@ -68,12 +68,7 @@ const SummaryStat: FC<{ value: number; color?: EuiBadgeProps['color'] }> = memo(
   ({ children, value, color, ...commonProps }) => {
     return (
       <EuiText className="eui-displayInlineBlock" size="s">
-        <EuiFlexGroup
-          responsive={false}
-          justifyContent="center"
-          direction="row"
-          alignItems="center"
-        >
+        <EuiFlexGroup justifyContent="center" direction="row" alignItems="center">
           <EuiFlexItem grow={false} style={color === 'primary' ? CSS_BOLD : undefined}>
             {children}
           </EuiFlexItem>
