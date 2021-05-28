@@ -661,13 +661,14 @@ function wrapWithTry(
   migrationFn: SavedObjectMigrationFn,
   log: Logger
 ) {
+  const context = Object.freeze({
+    log: new MigrationLogger(log),
+    migrationVersion: version,
+    convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
+  });
+
   return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
     try {
-      const context = {
-        log: new MigrationLogger(log),
-        migrationVersion: version,
-        convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
-      };
       const result = migrationFn(doc, context);
 
       // A basic sanity check to help migration authors detect basic errors
@@ -678,19 +679,8 @@ function wrapWithTry(
 
       return { transformedDoc: result, additionalDocs: [] };
     } catch (error) {
-      const failedTransform = `${type.name}:${version}`;
-      const failedDoc = JSON.stringify(doc);
       log.error(error);
-      // To make debugging failed migrations easier, we add items needed to convert the
-      // saved object id to the full raw id (the id only contains the uuid part) and the full error itself
-      throw new TransformSavedObjectDocumentError(
-        doc.id,
-        doc.type,
-        doc.namespace,
-        failedTransform,
-        failedDoc,
-        error
-      );
+      throw new TransformSavedObjectDocumentError(error);
     }
   };
 }
