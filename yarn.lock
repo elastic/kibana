@@ -764,7 +764,7 @@
   dependencies:
     "@commercial/hoek" "^8.5.1"
 
-"@commercial/boom@^7.4.11", "@hapi/boom@npm:@commercial/boom@^7.4.12":
+"@commercial/boom@^7.4.11":
   version "7.4.12"
   resolved "https://registry.yarnpkg.com/@commercial/boom/-/boom-7.4.12.tgz#31398c7cb8018d8a23e7963baf44c89d71fe9b72"
   integrity sha512-UAQ8Xol2rEpJ+DcFrICCw7EwP4pk9D6rcOaYLr0X3VBsFcvtul7SiQOvPQOIy0aggDlma4++UMm5XRpkC1PeZA==
@@ -913,7 +913,7 @@
   resolved "https://registry.yarnpkg.com/@commercial/pinpoint/-/pinpoint-1.0.2.tgz#04bdb015b00839962bffe2b1cc5908e478906912"
   integrity sha512-+ny+n7pUFlfIYLf95F+Nl47ams2cWGAH10Rg3/iE3BsUYqUZQfeG07pK4McxhNM4unmJGOSQvJQElPqtuiLDWQ==
 
-"@commercial/podium@^3.4.3", "@hapi/podium@npm:@commercial/podium@^3.4.3":
+"@commercial/podium@^3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@commercial/podium/-/podium-3.4.3.tgz#b25ca90a205b34e1997dada42b910c0d1cfa9fd2"
   integrity sha512-CfK9bl8AQojDjO0wGRtrWQkYjkAmrKwdbsSASYaQ75wTJtajZSmoT7sOmvg+aWczXfEh8IbRltUGAt0NQ8EpQQ==
@@ -937,7 +937,7 @@
     "@commercial/bounce" "^1.3.2"
     "@commercial/hoek" "^8.5.1"
 
-"@commercial/statehood@^6.1.2", "@hapi/statehood@npm:@commercial/statehood@^6.1.2":
+"@commercial/statehood@^6.1.2":
   version "6.1.2"
   resolved "https://registry.yarnpkg.com/@commercial/statehood/-/statehood-6.1.2.tgz#0c30a622ba3ea68106b42d8c306fa60900e7912a"
   integrity sha512-H2PdoOXr7ex9YjMRZrWoxmO1THlZ2SgD7Ok1bRiYOVuvtfY39JtcNFAYsdIBrQvP/Abv+tNki6V0iLPjF9xZKw==
@@ -1107,6 +1107,13 @@
   dependencies:
     "@hapi/hoek" "8.x.x"
 
+"@hapi/boom@npm:@commercial/boom@^7.4.12":
+  version "7.4.12"
+  resolved "https://registry.yarnpkg.com/@commercial/boom/-/boom-7.4.12.tgz#31398c7cb8018d8a23e7963baf44c89d71fe9b72"
+  integrity sha512-UAQ8Xol2rEpJ+DcFrICCw7EwP4pk9D6rcOaYLr0X3VBsFcvtul7SiQOvPQOIy0aggDlma4++UMm5XRpkC1PeZA==
+  dependencies:
+    "@commercial/hoek" "^8.5.1"
+
 "@hapi/bounce@1.x.x":
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/@hapi/bounce/-/bounce-1.3.2.tgz#3b096bb02f67de6115e6e4f0debc390be5a86bad"
@@ -1216,6 +1223,27 @@
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@hapi/pinpoint/-/pinpoint-1.0.2.tgz#025b7a36dbbf4d35bf1acd071c26b20ef41e0d13"
   integrity sha512-dtXC/WkZBfC5vxscazuiJ6iq4j9oNx1SHknmIr8hofarpKUZKmlUVYVIhNVzIEgK5Wrc4GMHL5lZtt1uS2flmQ==
+
+"@hapi/podium@npm:@commercial/podium@^3.4.3":
+  version "3.4.3"
+  resolved "https://registry.yarnpkg.com/@commercial/podium/-/podium-3.4.3.tgz#b25ca90a205b34e1997dada42b910c0d1cfa9fd2"
+  integrity sha512-CfK9bl8AQojDjO0wGRtrWQkYjkAmrKwdbsSASYaQ75wTJtajZSmoT7sOmvg+aWczXfEh8IbRltUGAt0NQ8EpQQ==
+  dependencies:
+    "@commercial/hoek" "^8.5.1"
+    "@commercial/joi" "^16.1.8"
+
+"@hapi/statehood@npm:@commercial/statehood@^6.1.2":
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/@commercial/statehood/-/statehood-6.1.2.tgz#0c30a622ba3ea68106b42d8c306fa60900e7912a"
+  integrity sha512-H2PdoOXr7ex9YjMRZrWoxmO1THlZ2SgD7Ok1bRiYOVuvtfY39JtcNFAYsdIBrQvP/Abv+tNki6V0iLPjF9xZKw==
+  dependencies:
+    "@commercial/boom" "^7.4.11"
+    "@commercial/bounce" "^1.3.2"
+    "@commercial/bourne" "^1.3.2"
+    "@commercial/cryptiles" "^4.2.1"
+    "@commercial/hoek" "^8.5.1"
+    "@commercial/iron" "^5.1.4"
+    "@commercial/joi" "^16.1.8"
 
 "@hapi/topo@^3.1.3":
   version "3.1.6"
