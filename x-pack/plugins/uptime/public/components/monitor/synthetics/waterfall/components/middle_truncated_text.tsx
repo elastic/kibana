@@ -116,7 +116,7 @@ export const MiddleTruncatedText = ({
       </EuiScreenReaderOnly>
       <WaterfallTooltipResponsiveMaxWidth
         as={EuiToolTip}
-        content={fullText}
+        content={`${index}. ${fullText}`}
         data-test-subj="middleTruncatedTextToolTip"
         delay="long"
         position="top"
