@@ -23,7 +23,6 @@ import { EventsTdContent } from '../../styles';
 import * as i18n from '../translations';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
 import { TimelineId, ActionProps, OnPinEvent } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
@@ -53,8 +52,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const dispatch = useDispatch();
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-
-  const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
 
   const onPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
@@ -91,8 +88,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const eventType = getEventType(ecsData);
 
   const isEventContextMenuEnabled = useMemo(
-    () => isEventFilteringEnabled && !!ecsData.event?.kind && ecsData.event?.kind[0] === 'event',
-    [ecsData.event?.kind, isEventFilteringEnabled]
+    () => !!ecsData.event?.kind && ecsData.event?.kind[0] === 'event',
+    [ecsData.event?.kind]
   );
 
   return (

@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
 import React, { ReactElement, ReactNode } from 'react';
@@ -42,6 +42,7 @@ import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { getJoinAggKey } from '../../../common/get_agg_key';
 import { LICENSED_FEATURES } from '../../licensed_features';
+import { IESSource } from '../sources/es_source';
 
 export interface ILayer {
   getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
@@ -101,6 +102,7 @@ export interface ILayer {
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
   getDescriptor(): LayerDescriptor;
+  getGeoFieldNames(): string[];
 }
 
 export type CustomIconAndTooltipContent = {
@@ -512,5 +514,10 @@ export class AbstractLayer implements ILayer {
 
   async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
     return [];
+  }
+
+  getGeoFieldNames(): string[] {
+    const source = this.getSource();
+    return source.isESSource() ? [(source as IESSource).getGeoFieldName()] : [];
   }
 }

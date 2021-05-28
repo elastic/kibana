@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiSpacer, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { AppAction } from '../../../../common/store/actions';
 import { getEventFiltersListPath } from '../../../common/routing';
 import { AdministrationListPage as _AdministrationListPage } from '../../../components/administration_list_page';
@@ -33,7 +34,6 @@ import {
   showDeleteModal,
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
-import { ExceptionListItemSchema } from '../../../../../../lists/common';
 import { Immutable } from '../../../../../common/endpoint/types';
 import {
   ExceptionItem,

@@ -16,6 +16,7 @@ import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HeaderSection } from '../../../common/components/header_section';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import { inputsSelectors, State, inputsModel } from '../../../common/store';
@@ -27,6 +28,8 @@ import {
   requiredFieldsForActions,
   alertsDefaultModel,
   buildAlertStatusFilter,
+  alertsDefaultModelRuleRegistry,
+  buildAlertStatusFilterRuleRegistry,
 } from './default_config';
 import { FILTER_OPEN, AlertsTableFilterGroup } from './alerts_filter_group';
 import { AlertsUtilityBar } from './alerts_utility_bar';
@@ -102,6 +105,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();
+  // TODO: Once we are past experimental phase this code should be removed
+  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -240,7 +245,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       refetchQuery: inputsModel.Refetch,
       { status, selectedStatus }: UpdateAlertsStatusProps
     ) => {
-      const currentStatusFilter = buildAlertStatusFilter(status);
+      // TODO: Once we are past experimental phase this code should be removed
+      const currentStatusFilter = ruleRegistryEnabled
+        ? buildAlertStatusFilterRuleRegistry(status)
+        : buildAlertStatusFilter(status);
+
       await updateAlertStatusAction({
         query: showClearSelectionAction
           ? getGlobalQuery(currentStatusFilter)?.filterQuery
@@ -262,6 +271,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       showClearSelectionAction,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,
+      ruleRegistryEnabled,
     ]
   );
 
@@ -305,17 +315,31 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const defaultFiltersMemo = useMemo(() => {
+    // TODO: Once we are past experimental phase this code should be removed
+    const alertStatusFilter = ruleRegistryEnabled
+      ? buildAlertStatusFilterRuleRegistry(filterGroup)
+      : buildAlertStatusFilter(filterGroup);
+
     if (isEmpty(defaultFilters)) {
-      return buildAlertStatusFilter(filterGroup);
+      return alertStatusFilter;
     } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
-      return [...defaultFilters, ...buildAlertStatusFilter(filterGroup)];
+      return [...defaultFilters, ...alertStatusFilter];
     }
-  }, [defaultFilters, filterGroup]);
+  }, [defaultFilters, filterGroup, ruleRegistryEnabled]);
   const { filterManager } = useKibana().services.data.query;
+
+  // TODO: Once we are past experimental phase this code should be removed
+  const defaultTimelineModel = ruleRegistryEnabled
+    ? alertsDefaultModelRuleRegistry
+    : alertsDefaultModel;
 
   useEffect(() => {
     dispatch(
       timelineActions.initializeTGrid({
+        // defaultModel: {
+        //   ...defaultTimelineModel,
+        //   columns,
+        // },
         defaultColumns: columns,
         documentType: i18n.ALERTS_DOCUMENT_TYPE,
         filterManager,
@@ -346,7 +370,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   return (
     <StatefulEventsViewer
       pageFilters={defaultFiltersMemo}
-      defaultModel={alertsDefaultModel}
+      defaultModel={defaultTimelineModel}
       end={to}
       headerFilterGroup={headerFilterGroup}
       id={timelineId}
