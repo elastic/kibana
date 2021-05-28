@@ -224,7 +224,9 @@ export type SetTempWriteBlock = PostInitState & {
 
 export interface CloneTempToSource extends PostInitState {
   /**
-   * Clone the temporary reindex index into
+   * Clone the temporary reindex index into the target index
+   * sourceIndex is the temp index
+   * target is the destination index
    */
   readonly controlState: 'CLONE_TEMP_TO_TARGET';
   readonly sourceIndex: Option.Some<string>;

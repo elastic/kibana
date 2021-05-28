@@ -12,7 +12,7 @@ import * as Option from 'fp-ts/lib/Option';
 
 import { cloneDeep } from 'lodash';
 import { AliasAction, FetchIndexResponse, isLeftTypeof, RetryableEsClientError } from './actions';
-import { AllActionStates, BadResponseSource, CleanupBadResponse, InitState, State } from './types';
+import { AllActionStates, InitState, State } from './types';
 import { IndexMapping } from '../mappings';
 import { ResponseType } from './next';
 import { SavedObjectsMigrationVersion } from '../types';
@@ -130,7 +130,7 @@ function formatFinalFatalReason(originalReason: string, cleanupErrorMessage?: st
   return originalReason + (cleanupErrorMessage ? ` ${cleanupErrorMessage}` : '');
 }
 
-const cleanupBadResponseState = (state: any, res: any) => {
+const cleanupBadResponseState = <S extends State>(state: S, res: any): S => {
   return {
     ...state,
     controlState: 'CLEANUP_BAD_RESPONSE',
@@ -255,7 +255,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       ) {
         return {
           ...stateP,
-          controlState: 'FATAL', // TINA: I didn't change this to CLEANUP_FATAL because we haven't done anything yet
+          controlState: 'FATAL',
           reason: `The ${
             stateP.currentAlias
           } alias is pointing to a newer version of Kibana: v${indexVersion(
@@ -343,7 +343,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
     } else {
-      return throwBadResponse(stateP, res);
+      return throwBadResponse(stateP, res); // nothing to clean up
     }
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -572,7 +572,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         }
       }
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res); // cleanup pit if error is thrown
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -584,7 +584,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         sourceIndex: stateP.sourceIndex as Option.Some<string>,
       };
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res); // retry closing the pit search before throwing
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX') {
     // We follow a similar control flow as for
@@ -629,7 +629,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       } else {
         // should never happen
-        throwBadResponse(stateP, res as never);
+        // if it by some chance does, we cleanup the open pit search
+        return cleanupBadResponseState(stateP, res as never);
       }
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK') {
@@ -643,7 +644,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         transformErrors: [],
       };
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res);
     }
   } else if (stateP.controlState === 'SET_TEMP_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -716,7 +717,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         transformErrors: [],
       };
     } else {
-      throwBadResponse(stateP, res);
+      // clean up any possible open pit
+      return cleanupBadResponseState(stateP, res);
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH_READ') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -756,7 +758,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         }
       }
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res);
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -797,7 +799,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           progress,
         };
       } else {
-        throwBadResponse(stateP, res as never);
+        return cleanupBadResponseState(stateP, res as never);
       }
     }
   } else if (stateP.controlState === 'TRANSFORMED_DOCUMENTS_BULK_INDEX') {
@@ -811,7 +813,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         hasTransformedDocs: true,
       };
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res);
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -849,7 +851,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'UPDATE_TARGET_MAPPINGS',
       };
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res);
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

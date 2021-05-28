@@ -11,7 +11,6 @@ import * as Option from 'fp-ts/lib/Option';
 import { Logger, LogMeta } from '../../logging';
 import type { ElasticsearchClient } from '../../elasticsearch';
 import { Model, Next, stateActionMachine } from './state_action_machine';
-import { cleanup } from './migrations_state_machine_cleanup';
 import { State } from './types';
 
 interface StateLogMeta extends LogMeta {
@@ -129,6 +128,7 @@ export async function migrationStateActionMachine({
       (state) => next(state),
       (state, res) => {
         lastState = state;
+
         executionLog.push({
           type: 'response',
           res,
@@ -181,7 +181,6 @@ export async function migrationStateActionMachine({
         };
       }
     } else if (finalState.controlState === 'FATAL') {
-      await cleanup(client, executionLog, finalState);
       dumpExecutionLog(logger, logMessagePrefix, executionLog);
       return Promise.reject(
         new Error(
@@ -193,7 +192,6 @@ export async function migrationStateActionMachine({
       throw new Error('Invalid terminating control state');
     }
   } catch (e) {
-    await cleanup(client, executionLog, lastState);
     if (e instanceof EsErrors.ResponseError) {
       logger.error(
         logMessagePrefix + `[${e.body?.error?.type}]: ${e.body?.error?.reason ?? e.message}`
