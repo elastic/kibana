@@ -7,8 +7,13 @@
 
 import React, { FC } from 'react';
 import { EuiPanel, EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
+import { ComponentStrings } from '../../../i18n/components';
 
-export const CanvasLoading: FC<{ msg?: string }> = ({ msg = 'Loading...' }) => (
+const { CanvasLoading: strings } = ComponentStrings;
+
+export const CanvasLoading: FC<{ msg?: string }> = ({
+  msg = `${strings.getLoadingLabel()}...`,
+}) => (
   <div className="canvasContainer--loading">
     <EuiPanel>
       <EuiLoadingChart size="m" />

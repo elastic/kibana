@@ -99,7 +99,7 @@ export const KioskControls = ({ autoplayInterval, onSetInterval }: Props) => {
                     <EuiButtonIcon
                       iconType="cross"
                       onClick={disableAutoplay}
-                      aria-label={'something' || strings.getDisableTooltip()}
+                      aria-label={strings.getDisableTooltip()}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>

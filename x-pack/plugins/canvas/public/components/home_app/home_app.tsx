@@ -10,16 +10,16 @@ import { useDispatch } from 'react-redux';
 import { getBaseBreadcrumb } from '../../lib/breadcrumbs';
 import { resetWorkpad } from '../../state/actions/workpad';
 import { HomeApp as Component } from './home_app.component';
-import { useServices } from '../../services';
+import { usePlatformService } from '../../services';
 
 export const HomeApp = () => {
-  const services = useServices();
+  const { setBreadcrumbs } = usePlatformService();
   const dispatch = useDispatch();
   const onLoad = () => dispatch(resetWorkpad());
 
   useEffect(() => {
-    services.platform.setBreadcrumbs([getBaseBreadcrumb()]);
-  }, [services.platform]);
+    setBreadcrumbs([getBaseBreadcrumb()]);
+  }, [setBreadcrumbs]);
 
   return <Component onLoad={onLoad} />;
 };

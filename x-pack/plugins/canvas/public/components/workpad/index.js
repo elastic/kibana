@@ -22,7 +22,7 @@ import { zoomHandlerCreators } from '../../lib/app_handler_creators';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY } from '../../../common/lib/constants';
 import { WorkpadRoutingContext } from '../../routes/workpad';
-import { Workpad as Component } from './workpad';
+import { Workpad as WorkpadComponent } from './workpad';
 
 const mapStateToProps = (state) => {
   const { width, height, id: workpadId, css: workpadCss } = getWorkpad(state);
@@ -73,7 +73,7 @@ const AddContexts = (props) => {
   );
 
   return (
-    <Component
+    <WorkpadComponent
       {...props}
       setFullscreen={setFullscreenWithEffect}
       isFullscreen={isFullscreen}

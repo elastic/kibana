@@ -175,6 +175,12 @@ export const ComponentStrings = {
         defaultMessage: 'Asset thumbnail',
       }),
   },
+  CanvasLoading: {
+    getLoadingLabel: () =>
+      i18n.translate('xpack.canvas.canvasLoading.loadingMessage', {
+        defaultMessage: 'Loading',
+      }),
+  },
   ColorManager: {
     getAddAriaLabel: () =>
       i18n.translate('xpack.canvas.colorManager.addAriaLabel', {

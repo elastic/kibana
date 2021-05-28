@@ -32,10 +32,12 @@ export const PageManager: FC<{ onPreviousPage: () => void }> = ({ onPreviousPage
     dispatch,
     gotoPage,
   ]);
+
   const onMovePage = useCallback(
     (id: string, position: number) => dispatch(pageActions.movePage(id, position, gotoPage)),
     [dispatch, gotoPage]
   );
+
   const onRemovePage = useCallback(
     (id: string) => dispatch(pageActions.removePage({ id, gotoPage })),
     [dispatch, gotoPage]

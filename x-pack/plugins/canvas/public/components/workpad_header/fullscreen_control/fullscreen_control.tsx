@@ -39,6 +39,12 @@ export class FullscreenControl extends React.PureComponent<Props> {
     children: PropTypes.func.isRequired,
   };
 
+  /*
+    We need these instance functions because ReactShortcuts bind the handlers on it's mount, 
+    but then does no rebinding if it's props change. Using these instance functions will 
+    properly handle changes to incoming props since the instance functions are bound to the components
+    "this" context
+  */
   _toggleFullscreen = () => {
     const { setFullscreen, isFullscreen } = this.props;
     setFullscreen(!isFullscreen);

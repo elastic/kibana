@@ -30,31 +30,29 @@ export const WorkpadRoute = () => (
   <Route
     path={'/workpad/:id'}
     exact={false}
-    children={(route: WorkpadRouteProps) => {
-      return [
-        <WorkpadLoaderComponent params={route.match.params} key="workpad-loader">
-          {(workpad: CanvasWorkpad) => (
-            <Switch>
-              <Route
-                path="/workpad/:id/page/:pageNumber"
-                children={(pageRoute) => (
-                  <WorkpadHistoryManager>
-                    <WorkpadRoutingContextComponent>
-                      <WorkpadPresentationHelper>
-                        <WorkpadApp />
-                      </WorkpadPresentationHelper>
-                    </WorkpadRoutingContextComponent>
-                  </WorkpadHistoryManager>
-                )}
-              />
-              <Route path="/workpad/:id" strict={false} exact={true}>
-                <Redirect to={`/workpad/${route.match.params.id}/page/${workpad.page + 1}`} />
-              </Route>
-            </Switch>
-          )}
-        </WorkpadLoaderComponent>,
-      ];
-    }}
+    children={(route: WorkpadRouteProps) => (
+      <WorkpadLoaderComponent params={route.match.params} key="workpad-loader">
+        {(workpad: CanvasWorkpad) => (
+          <Switch>
+            <Route
+              path="/workpad/:id/page/:pageNumber"
+              children={(pageRoute) => (
+                <WorkpadHistoryManager>
+                  <WorkpadRoutingContextComponent>
+                    <WorkpadPresentationHelper>
+                      <WorkpadApp />
+                    </WorkpadPresentationHelper>
+                  </WorkpadRoutingContextComponent>
+                </WorkpadHistoryManager>
+              )}
+            />
+            <Route path="/workpad/:id" strict={false} exact={true}>
+              <Redirect to={`/workpad/${route.match.params.id}/page/${workpad.page + 1}`} />
+            </Route>
+          </Switch>
+        )}
+      </WorkpadLoaderComponent>
+    )}
   />
 );
 

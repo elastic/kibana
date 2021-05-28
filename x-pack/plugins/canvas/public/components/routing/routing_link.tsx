@@ -12,6 +12,7 @@ import { useHistory } from 'react-router-dom';
 interface RoutingProps {
   to: string;
 }
+
 type RoutingLinkProps = Omit<EuiLinkProps, 'href' | 'onClick'> & RoutingProps;
 
 export const RoutingLink: FC<RoutingLinkProps> = ({ to, ...rest }) => {

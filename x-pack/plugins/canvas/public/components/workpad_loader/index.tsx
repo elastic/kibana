@@ -11,30 +11,32 @@ import { useSelector } from 'react-redux';
 import moment from 'moment';
 // @ts-expect-error
 import { getDefaultWorkpad } from '../../state/defaults';
-import { canUserWrite } from '../../state/selectors/app';
+import { canUserWrite as canUserWriteSelector } from '../../state/selectors/app';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { getId } from '../../lib/get_id';
 import { downloadWorkpad } from '../../lib/download_workpad';
 import { ComponentStrings, ErrorStrings } from '../../../i18n';
 import { State, CanvasWorkpad } from '../../../types';
-import { useServices } from '../../services';
+import { useNotifyService, useWorkpadService, usePlatformService } from '../../services';
 // @ts-expect-error
 import { WorkpadLoader as Component } from './workpad_loader';
 
 const { WorkpadLoader: strings } = ComponentStrings;
 const { WorkpadLoader: errors } = ErrorStrings;
 
-type WorkpadStatePromise = ReturnType<ReturnType<typeof useServices>['workpad']['find']>;
+type WorkpadStatePromise = ReturnType<ReturnType<typeof useWorkpadService>['find']>;
 type WorkpadState = WorkpadStatePromise extends PromiseLike<infer U> ? U : never;
 
 export const WorkpadLoader: FC<{ onClose: () => void }> = ({ onClose }) => {
   const fromState = useSelector((state: State) => ({
     workpadId: getWorkpad(state).id,
-    canUserWrite: canUserWrite(state),
+    canUserWrite: canUserWriteSelector(state),
   }));
 
   const [workpadsState, setWorkpadsState] = useState<WorkpadState | null>(null);
-  const services = useServices();
+  const workpadService = useWorkpadService();
+  const notifyService = useNotifyService();
+  const platformService = usePlatformService();
   const history = useHistory();
 
   const createWorkpad = useCallback(
@@ -42,29 +44,29 @@ export const WorkpadLoader: FC<{ onClose: () => void }> = ({ onClose }) => {
       const workpad = _workpad || getDefaultWorkpad();
       if (workpad != null) {
         try {
-          await services.workpad.create(workpad);
+          await workpadService.create(workpad);
           history.push(`/workpad/${workpad.id}/page/1`);
         } catch (err) {
-          services.notify.error(err, {
+          notifyService.error(err, {
             title: errors.getUploadFailureErrorMessage(),
           });
         }
         return;
       }
     },
-    [services.workpad, services.notify, history]
+    [workpadService, notifyService, history]
   );
 
   const findWorkpads = useCallback(
     async (text) => {
       try {
-        const fetchedWorkpads = await services.workpad.find(text);
+        const fetchedWorkpads = await workpadService.find(text);
         setWorkpadsState(fetchedWorkpads);
       } catch (err) {
-        services.notify.error(err, { title: errors.getFindFailureErrorMessage() });
+        notifyService.error(err, { title: errors.getFindFailureErrorMessage() });
       }
     },
-    [services.notify, services.workpad]
+    [notifyService, workpadService]
   );
 
   const onDownloadWorkpad = useCallback((workpadId: string) => downloadWorkpad(workpadId), []);
@@ -72,16 +74,16 @@ export const WorkpadLoader: FC<{ onClose: () => void }> = ({ onClose }) => {
   const cloneWorkpad = useCallback(
     async (workpadId: string) => {
       try {
-        const workpad = await services.workpad.get(workpadId);
+        const workpad = await workpadService.get(workpadId);
         workpad.name = strings.getClonedWorkpadName(workpad.name);
         workpad.id = getId('workpad');
-        await services.workpad.create(workpad);
+        await workpadService.create(workpad);
         history.push(`/workpad/${workpad.id}/page/1`);
       } catch (err) {
-        services.notify.error(err, { title: errors.getCloneFailureErrorMessage() });
+        notifyService.error(err, { title: errors.getCloneFailureErrorMessage() });
       }
     },
-    [services.notify, services.workpad, history]
+    [notifyService, workpadService, history]
   );
 
   const removeWorkpads = useCallback(
@@ -92,7 +94,7 @@ export const WorkpadLoader: FC<{ onClose: () => void }> = ({ onClose }) => {
 
       const removedWorkpads = workpadIds.map(async (id) => {
         try {
-          await services.workpad.remove(id);
+          await workpadService.remove(id);
           return { id, err: null };
         } catch (err) {
           return { id, err };
@@ -127,7 +129,7 @@ export const WorkpadLoader: FC<{ onClose: () => void }> = ({ onClose }) => {
         };
 
         if (errored.length > 0) {
-          services.notify.error(errors.getDeleteFailureErrorMessage());
+          notifyService.error(errors.getDeleteFailureErrorMessage());
         }
 
         setWorkpadsState(workpadState);
@@ -139,29 +141,33 @@ export const WorkpadLoader: FC<{ onClose: () => void }> = ({ onClose }) => {
         return errored;
       });
     },
-    [history, services.workpad, fromState.workpadId, workpadsState, services.notify]
+    [history, workpadService, fromState.workpadId, workpadsState, notifyService]
   );
 
   const formatDate = useCallback(
     (date: any) => {
-      const dateFormat = services.platform.getUISetting('dateFormat');
+      const dateFormat = platformService.getUISetting('dateFormat');
       return date && moment(date).format(dateFormat);
     },
-    [services.platform]
+    [platformService]
   );
+
+  const { workpadId, canUserWrite } = fromState;
 
   return (
     <Component
-      workpadId={fromState.workpadId}
-      canUserWrite={fromState.canUserWrite}
-      cloneWorkpad={cloneWorkpad}
-      createWorkpad={createWorkpad}
-      findWorkpads={findWorkpads}
-      downloadWorkpad={onDownloadWorkpad}
-      removeWorkpads={removeWorkpads}
-      onClose={onClose}
-      workpads={workpadsState}
-      formatDate={formatDate}
+      {...{
+        downloadWorkpad: onDownloadWorkpad,
+        workpads: workpadsState,
+        workpadId,
+        canUserWrite,
+        cloneWorkpad,
+        createWorkpad,
+        findWorkpads,
+        removeWorkpads,
+        formatDate,
+        onClose,
+      }}
     />
   );
 };
