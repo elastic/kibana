@@ -38,6 +38,7 @@ describe('estimateCapacity', () => {
         )
       ).value
     ).toMatchObject({
+      assumed_kibana_instances: 1,
       min_required_kibana: 1,
       minutes_to_drain_overdue: 0,
       max_throughput_per_minute: 200,
@@ -73,6 +74,7 @@ describe('estimateCapacity', () => {
         )
       ).value
     ).toMatchObject({
+      assumed_kibana_instances: 1,
       min_required_kibana: 2,
       minutes_to_drain_overdue: 0,
       max_throughput_per_minute: 200,
@@ -109,6 +111,7 @@ describe('estimateCapacity', () => {
         )
       ).value
     ).toMatchObject({
+      assumed_kibana_instances: 1,
       min_required_kibana: 1,
       minutes_to_drain_overdue: 0,
       max_throughput_per_minute: 200,
@@ -146,6 +149,7 @@ describe('estimateCapacity', () => {
         )
       ).value
     ).toMatchObject({
+      assumed_kibana_instances: 3,
       min_required_kibana: 1,
       minutes_to_drain_overdue: 0,
       max_throughput_per_minute: 3 * 200, // 3 kibana, 200tpm each
@@ -168,6 +172,12 @@ describe('estimateCapacity', () => {
             },
           },
           {
+            load: {
+              p50: 40,
+              p90: 100,
+              p95: 100,
+              p99: 100,
+            },
             execution: {
               duration: {},
               // no non-recurring executions in the system in recent history
@@ -185,6 +195,7 @@ describe('estimateCapacity', () => {
       status: 'warn',
       timestamp: expect.any(String),
       value: {
+        assumed_kibana_instances: 1,
         min_required_kibana: 2,
         minutes_to_drain_overdue: 0,
         max_throughput_per_minute: 200,
@@ -194,7 +205,57 @@ describe('estimateCapacity', () => {
     });
   });
 
-  test('marks estimated capacity as Error state when capacity is insufficient for the workload', async () => {
+  test('marks estimated capacity as OK state when workload and load suggest capacity is sufficient', async () => {
+    expect(
+      estimateCapacity(
+        mockStats(
+          { max_workers: 10, poll_interval: 3000 },
+          {
+            owner_ids: 1,
+            overdue_non_recurring: 0,
+            capacity_requirments: {
+              per_minute: 170,
+              per_hour: 0,
+              per_day: 0,
+            },
+          },
+          {
+            load: {
+              p50: 40,
+              // as avg p90 load is only 50%, it seems we have sufficient
+              // capacity, but if we saw a higher load (say 80% here), it would fail
+              // as status would be Warn (as seen in a previous test)
+              p90: 50,
+              p95: 80,
+              p99: 80,
+            },
+            execution: {
+              duration: {},
+              // 20% average of non-recurring executions in the system in recent history
+              persistence: {
+                ephemeral: 0,
+                non_recurring: 20,
+                recurring: 80,
+              },
+              result_frequency_percent_as_number: {},
+            },
+          }
+        )
+      )
+    ).toMatchObject({
+      status: 'OK',
+      timestamp: expect.any(String),
+      value: {
+        min_required_kibana: 1,
+        minutes_to_drain_overdue: 0,
+        max_throughput_per_minute: 200,
+        avg_required_throughput_per_minute: 190,
+        avg_recurring_required_throughput_per_minute: 170,
+      },
+    });
+  });
+
+  test('marks estimated capacity as Error state when workload and load suggest capacity is insufficient', async () => {
     expect(
       estimateCapacity(
         mockStats(
@@ -209,6 +270,12 @@ describe('estimateCapacity', () => {
             },
           },
           {
+            load: {
+              p50: 80,
+              p90: 100,
+              p95: 100,
+              p99: 100,
+            },
             execution: {
               duration: {},
               // 20% average of non-recurring executions in the system in recent history
@@ -298,10 +365,10 @@ function mockStats(
         },
         drift_by_type: {},
         load: {
-          p50: 4,
-          p90: 6,
-          p95: 6,
-          p99: 6,
+          p50: 40,
+          p90: 60,
+          p95: 60,
+          p99: 60,
         },
         execution: {
           duration: {},

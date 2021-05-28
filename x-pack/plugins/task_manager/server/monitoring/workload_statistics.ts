@@ -28,27 +28,22 @@ interface TaskTypeStat extends JsonObject {
   };
 }
 
-export interface WorkloadStat extends JsonObject {
+interface RawWorkloadStat extends JsonObject {
   count: number;
   task_types: TaskTypeStat;
   schedule: Array<[string, number]>;
   non_recurring: number;
-  owner_ids: number[];
   overdue: number;
   overdue_non_recurring: number;
   estimated_schedule_density: number[];
   capacity_requirments: CapacityRequirments;
 }
-export interface SummarizedWorkloadStat extends JsonObject {
-  count: number;
-  task_types: TaskTypeStat;
-  schedule: Array<[string, number]>;
-  non_recurring: number;
+
+export interface WorkloadStat extends RawWorkloadStat {
+  owner_ids: number[];
+}
+export interface SummarizedWorkloadStat extends RawWorkloadStat {
   owner_ids: number;
-  overdue: number;
-  overdue_non_recurring: number;
-  estimated_schedule_density: number[];
-  capacity_requirments: CapacityRequirments;
 }
 export interface CapacityRequirments extends JsonObject {
   per_minute: number;

@@ -530,8 +530,6 @@ describe('Workload Statistics Aggregator', () => {
   test('returns an estimate of the workload by task type', async () => {
     // poll every 3 seconds
     const pollingIntervalInSeconds = 3;
-    // with 10 workers at most
-    const maxWorkers = 10;
 
     const taskStore = taskStoreMock.create({});
     taskStore.aggregate.mockResolvedValue(
@@ -627,6 +625,7 @@ describe('Workload Statistics Aggregator', () => {
 
         expect(result.value).toMatchObject({
           capacity_requirments: {
+            // these are buckets of required capacity, rather than aggregated requirmenets.
             per_minute: 150,
             per_hour: 360,
             per_day: 820,

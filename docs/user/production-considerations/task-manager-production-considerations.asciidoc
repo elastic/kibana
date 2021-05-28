@@ -126,6 +126,20 @@ Throughput is best thought of as a measurements in tasks per minute.
 
 A default {kib} instance can support up to `200/tpm`.
 
+[float]
+===== Automatic estimation
+
+As demonstrated in <<task-manager-health-evaluate-the-capacity-estimation, Evaluate your capacity estimation>>, the Task Manager <<task-manager-health-monitoring, health monitoring>> performs these estimations automatically.
+
+These are estimates based on historical data and should not be used as predictions, but can be used as a rough guide when scaling the system.
+
+We recommend provisioning at least as many {kib} instances as estimated by `min_required_kibana`, but keep in mind that this number is based on the estimated `avg_required_throughput_per_minute`, which is based on average historical performance, and cannot accurately predict future requirments.
+
+We recommend provisioning enough {kib} instances to ensure a buffer between the estimated `max_throughput_per_minute` and `avg_required_throughput_per_minute`, otherwise there might be insufficient capacity to handle spikes of ad-hoc tasks. How much of a buffer is required largely depends on your use case, but keep in mind that `avg_required_throughput_per_minute` takes into account recent spikes and, as long as they are representative of your system's behaviour, shouldn't require much of a buffer.
+
+[float]
+===== Manual estimation
+
 Given a deployment of 100 recurring tasks, estimating the required throughput depends on the scheduled cadence.
 Suppose you expect to run 50 tasks at a cadence of `10s`, the other 50 tasks at `20m`. In addition, you expect a couple dozen non-recurring tasks every minute.
 
@@ -140,4 +154,5 @@ Given the predicted workload, you can estimate a lower bound throughput of `340/
 As a default, a {kib} instance provides a throughput of `200/tpm`. A good starting point for your deployment is to provision 2 {kib} instances. You could then monitor their performance and reassess as the required throughput becomes clearer.
 
 Although this is a _rough_ estimate, the  _tasks per minute_ provides the lower bound needed to execute tasks on time.
-Once you calculate the rough _tasks per minute_ estimate, add a 20% buffer for non-recurring tasks. How much of a buffer is required largely depends on your use case, so <<task-manager-health-evaluate-the-workload,evaluate your workload>> as it grows to ensure enough of a buffer is provisioned.
+
+Once you calculate the rough _tasks per minute_ estimate, add a buffer for non-recurring tasks. How much of a buffer is required largely depends on your use case. Ensure enough of a buffer is provisioned by <<task-manager-health-evaluate-the-workload,evaluating your workload>> as it grows and tracking the ratio of recurring to non-recurring tasks by <<task-manager-health-evaluate-the-runtime,evaluating your runtime>>.
