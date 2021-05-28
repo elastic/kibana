@@ -31,12 +31,11 @@ import {
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,
   getTimelineIdFromColumnDroppableId,
-  IS_DRAGGING_CLASS_NAME,
-  IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
   providerWasDroppedOnTimeline,
   draggableIsField,
   userIsReArrangingProviders,
 } from './helpers';
+import { IS_DRAGGING_CLASS_NAME, IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from './drag_classnames';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
