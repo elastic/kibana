@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableCellText(2, 2)).to.eql('5,541.5');
       expect(await PageObjects.lens.getDatatableCellText(2, 3)).to.eql('3,628');
 
-      expect(await PageObjects.lens.getDatatableHeaderText(0)).to.eql('Pinned top values of ip');
+      expect(await PageObjects.lens.getDatatableHeaderText(0)).to.eql('Filters of ip');
     });
   });
 }
