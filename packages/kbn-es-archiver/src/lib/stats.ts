@@ -56,8 +56,6 @@ export function createStats(name: string, log: ToolingLog) {
   };
 
   return new (class Stats {
-    public readonly log = log;
-
     /**
      * Record that an index was not restored because it already existed
      * @param index
