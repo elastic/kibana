@@ -9,13 +9,16 @@ import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, scan, shareReplay, switchMap } from 'rxjs/operators';
 
 export interface NavigationSection {
+  // the label of the section, should be translated
   label: string | undefined;
+  // the key to sort by in ascending order relative to other entries
   sortKey: number;
+  // the entries to render inside the section
   entries: NavigationEntry[];
 }
 
 export interface NavigationEntry {
-  // the label of the menu entry, should be internationalized
+  // the label of the menu entry, should be translated
   label: string;
   // the kibana app id
   app: string;
