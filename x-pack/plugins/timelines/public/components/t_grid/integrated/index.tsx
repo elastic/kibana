@@ -228,7 +228,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const [
     loading,
-    { events, updatedAt, inspect, loadPage, pageInfo, refetch, totalCount = 0 },
+    { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0 },
   ] = useTimelineEvents({
     docValueFields,
     fields,

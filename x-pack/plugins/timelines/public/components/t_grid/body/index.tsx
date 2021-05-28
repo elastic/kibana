@@ -17,7 +17,6 @@ import {
   FIRST_ARIA_INDEX,
   onKeyDownFocusHandler,
 } from '../../../../common';
-
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import {
   CellValueElementProps,
