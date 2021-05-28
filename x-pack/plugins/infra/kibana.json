@@ -11,7 +11,8 @@
     "dataEnhanced",
     "visTypeTimeseries",
     "alerting",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "ruleRegistry"
   ],
   "optionalPlugins": ["ml", "observability", "home", "embeddable"],
   "server": true,

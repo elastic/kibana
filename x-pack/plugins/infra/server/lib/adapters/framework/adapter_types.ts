@@ -18,6 +18,7 @@ import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_typ
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
 import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerting/server';
+import { RuleRegistryPluginSetupContract } from '../../../../../rule_registry/server';
 import { MlPluginSetup } from '../../../../../ml/server';
 import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
 
@@ -29,6 +30,7 @@ export interface InfraServerPluginSetupDeps {
   visTypeTimeseries: VisTypeTimeseriesSetup;
   features: FeaturesPluginSetup;
   alerting: AlertingPluginContract;
+  ruleRegistry: RuleRegistryPluginSetupContract;
   ml?: MlPluginSetup;
 }
 
