@@ -10,7 +10,7 @@ https://owasp.org/www-community/attacks/xss[_OWASP reference for XSS_]
 
 XSS is a class of attacks where malicious scripts are injected into vulnerable websites. {kib} defends against this primarily by widespread
 use of the React framework to safely encode data that is rendered to pages, widespread use of the EUI framework to
-https://elastic.github.io/eui/#/navigation/link#link-validation[automatically sanitize links], and a restrictive Content-Security-Policy
+https://elastic.github.io/eui/#/navigation/link#link-validation[automatically sanitize links], and a restrictive `Content-Security-Policy`
 header.
 
 *Best practices:*
@@ -25,7 +25,7 @@ rules] to ensure that user input is not inserted into unsafe locations and to ma
 * Use EUI components to build your UI whenever possible, particularly when rendering `href` links. Otherwise, sanitize user input before
 rendering links to ensure that they do not use the `javascript:` protocol.
 
-=== Cross-site Request Forgery (CSRF/XSRF) ===
+=== Cross-Site Request Forgery (CSRF/XSRF) ===
 
 https://owasp.org/www-community/attacks/csrf[_OWASP reference for CSRF_]
 
@@ -49,7 +49,7 @@ ESLint rules to restrict vulnerable functions, and by hooking into / hardening u
 
 *Best practices:*
 
-* Ensure no usages of `eval` and `_.template` -- these are restricted by ESLint rules.
+* Ensure no usages of `eval`, `Function`, and `_.template` functions -- these are restricted by ESLint rules.
 * Ensure no usages of dynamic `require`.
 * Check for usages of templating libraries; ensure that user provided input isn't influencing the template and is only used as data for
 rendering the template.
@@ -64,7 +64,7 @@ default.
 
 *Best practices:*
 
-* Check for instances of `anObject[a][b] = c` where a, b, and c are controlled by user input. This includes code paths where the following
+* Check for instances of `anObject[a][b] = c` where `a`, `b`, and `c` are controlled by user input. This includes code paths where the following
 logical code steps could be performed in separate files by completely different operations, or recursively using dynamic operations.
 * Validate any user input, including API url parameters, query parameters, and payloads. Preferably, use a schema which only allows specific
 keys/values. At a very minimum, implement a deny-list that prevents `__proto__` and `prototype.constructor` from being used within object
@@ -84,7 +84,7 @@ pollution: The dangerous and underrated vulnerability impacting JavaScript appli
 * https://github.com/HoLyVieR/prototype-pollution-nsec18/blob/master/paper/JavaScript_prototype_pollution_attack_in_NodeJS.pdf[Prototype
 pollution attack in NodeJS application | Olivier Arteau]
 
-=== Server-side Request Forgery (SSRF) ===
+=== Server-Side Request Forgery (SSRF) ===
 
 https://owasp.org/www-community/attacks/Server_Side_Request_Forgery[_OWASP reference for SSRF_]
 
@@ -118,7 +118,7 @@ Sheet].
 
 Information Disclosure is not an attack, but it describes whenever sensitive information is accidentally revealed. This can be configuration
 info, stack traces, or other data that the user has not been authorized to access. This is a widespread concern that cannot be addressed
-with a single security control, but at a high level {kib} relies on the Hapi framework to automatically redact stack traces and detailed
+with a single security control, but at a high level {kib} relies on the hapi framework to automatically redact stack traces and detailed
 error messages in HTTP 5xx response payloads.
 
 *Best practices:*
