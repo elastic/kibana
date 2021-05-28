@@ -29,9 +29,10 @@ export async function createDocSource(
 ): Promise<CreateDocSourceResp> {
   try {
     await createIndex(index, mappings, asCurrentUser);
-    await indexPatternsService.createAndSave({ title: index }, true);
+    const { id: indexPatternId } = await indexPatternsService.createAndSave({ title: index }, true);
 
     return {
+      indexPatternId,
       success: true,
     };
   } catch (error) {
