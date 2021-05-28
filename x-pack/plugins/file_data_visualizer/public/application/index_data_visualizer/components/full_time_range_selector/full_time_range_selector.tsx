@@ -10,7 +10,9 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Query, IndexPattern, TimefilterContract } from 'src/plugins/data/public';
 import { EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { setFullTimeRange } from './full_time_range_selector_service';
+import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface Props {
   timefilter: TimefilterContract;
@@ -29,11 +31,25 @@ export const FullTimeRangeSelector: FC<Props> = ({
   disabled,
   callback,
 }) => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useDataVisualizerKibana();
+
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   async function setRange(i: IndexPattern, q: Query) {
-    const fullTimeRange = await setFullTimeRange(timefilter, i, q);
-    if (typeof callback === 'function') {
-      callback(fullTimeRange);
+    try {
+      const fullTimeRange = await setFullTimeRange(timefilter, i, q);
+      if (typeof callback === 'function') {
+        callback(fullTimeRange);
+      }
+    } catch (e) {
+      toasts.addDanger(
+        i18n.translate('dataVisualizer.fullTimeRangeSelector.errorSettingTimeRangeNotification', {
+          defaultMessage: 'An error occurred setting the time range.',
+        })
+      );
     }
   }
   return (
@@ -43,7 +59,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
       data-test-subj="mlButtonUseFullData"
     >
       <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
+        id="dataVisualizer.fullTimeRangeSelector.useFullDataButtonLabel"
         defaultMessage="Use full {indexPatternTitle} data"
         values={{
           indexPatternTitle: indexPattern.title,

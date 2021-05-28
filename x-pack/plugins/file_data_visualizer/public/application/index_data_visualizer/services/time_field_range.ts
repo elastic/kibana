@@ -23,7 +23,7 @@ export async function getTimeFieldRange({
   query: any;
   runtimeMappings?: estypes.RuntimeFields;
   indicesOptions?: IndicesOptions;
-}) {
+}): Promise<GetTimeFieldRangeResponse> {
   const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings, indicesOptions });
   const fileUploadModules = await lazyLoadModules();
 

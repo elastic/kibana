@@ -23,30 +23,19 @@ export async function setFullTimeRange(
   timefilter: TimefilterContract,
   indexPattern: IndexPattern,
   query: Query
-): Promise<GetTimeFieldRangeResponse | undefined> {
-  try {
-    const runtimeMappings = indexPattern.getComputedFields().runtimeFields as estypes.RuntimeFields;
-    const resp = await getTimeFieldRange({
-      index: indexPattern.title,
-      timeFieldName: indexPattern.timeFieldName,
-      query,
-      ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
-    });
-    timefilter.setTime({
-      from: moment(resp.start.epoch).toISOString(),
-      to: moment(resp.end.epoch).toISOString(),
-    });
-    return resp;
-  } catch (resp) {
-    // @todo
-    // const toastNotifications = getToastNotifications();
-    // toastNotifications.addDanger(
-    //   i18n.translate('xpack.ml.fullTimeRangeSelector.errorSettingTimeRangeNotification', {
-    //     defaultMessage: 'An error occurred setting the time range.',
-    //   })
-    // );
-    // return resp;
-  }
+): Promise<GetTimeFieldRangeResponse> {
+  const runtimeMappings = indexPattern.getComputedFields().runtimeFields as estypes.RuntimeFields;
+  const resp = await getTimeFieldRange({
+    index: indexPattern.title,
+    timeFieldName: indexPattern.timeFieldName,
+    query,
+    ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
+  });
+  timefilter.setTime({
+    from: moment(resp.start.epoch).toISOString(),
+    to: moment(resp.end.epoch).toISOString(),
+  });
+  return resp;
 }
 
 export function getTimeFilterRange(timefilter: TimefilterContract): TimeRange {
