@@ -45,6 +45,9 @@ export function createSessionRestorationDataProvider(deps: {
   };
 }
 
+/**
+ * Enables dashboard search sessions.
+ */
 export function enableDashboardSearchSessions({
   canStoreSearchSession,
   initialDashboardState,
@@ -86,6 +89,10 @@ export function enableDashboardSearchSessions({
   );
 }
 
+/**
+ * Fetches the state to store when a session is saved so that this dashboard can be recreated exactly
+ * as it was.
+ */
 function getUrlGeneratorState({
   data,
   getAppState,

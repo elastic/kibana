@@ -46,7 +46,11 @@ interface StateToRawDashboardStateProps {
   version: string;
   state: DashboardState;
 }
-
+/**
+ * Converts a dashboard saved object to a dashboard state by extracting raw state from the given Dashboard
+ * Saved Object migrating the panel states to the latest version, then converting each panel from a saved
+ * dashboard panel to a panel state.
+ */
 export const savedObjectToDashboardState = ({
   version,
   hideWriteControls,
@@ -78,6 +82,9 @@ export const savedObjectToDashboardState = ({
   return { ...rawState, panels };
 };
 
+/**
+ * Converts a dashboard state object to dashboard container input
+ */
 export const stateToDashboardContainerInput = ({
   dashboardCapabilities,
   isEmbeddedExternally,
@@ -121,6 +128,10 @@ export const stateToDashboardContainerInput = ({
   };
 };
 
+/**
+ * Converts a given dashboard state object to raw dashboard state. This is useful for sharing, and session restoration, as
+ * they require panels to be formatted as an array.
+ */
 export const stateToRawDashboardState = ({
   version,
   state,
