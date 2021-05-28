@@ -20,14 +20,12 @@ export const IsolateHost = React.memo(
   ({
     agentId,
     hostName,
-    alertRule,
     cases,
     caseIds,
     cancelCallback,
   }: {
     agentId: string;
     hostName: string;
-    alertRule: string;
     cases: ReactNode;
     caseIds: string[];
     cancelCallback: () => void;
@@ -80,13 +78,12 @@ export const IsolateHost = React.memo(
             messageAppend={
               <FormattedMessage
                 id="xpack.securitySolution.detections.hostIsolation.impactedCases"
-                defaultMessage="This action will be added to the {cases}."
+                defaultMessage="This action will be added to {cases}."
                 values={{
                   cases: (
                     <b>
                       {caseCount}
                       {CASES_ASSOCIATED_WITH_ALERT(caseCount)}
-                      {alertRule}
                     </b>
                   ),
                 }}
@@ -103,7 +100,6 @@ export const IsolateHost = React.memo(
       comment,
       loading,
       caseCount,
-      alertRule,
     ]);
 
     return isIsolated ? hostIsolatedSuccess : hostNotIsolated;
