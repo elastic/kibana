@@ -33,17 +33,20 @@ import {
   IndexPattern,
 } from '../../../../../../../../src/plugins/data/public';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
-import { getQueryFromSavedSearch } from '../../../util/index_utils';
-import { usePageUrlState, useUrlState } from '../../../util/url_state';
-import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../../../components/stats_table';
-import { FieldVisConfig } from '../../../components/stats_table/types';
+import { getQueryFromSavedSearch } from '../../../common/util/index_utils';
+import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
+import {
+  DataVisualizerTable,
+  ItemIdToExpandedRowMap,
+} from '../../../common/components/stats_table';
+import { FieldVisConfig } from '../../../common/components/stats_table/types';
 import type {
   MetricFieldsStats,
   TotalFieldsStats,
-} from '../../../components/stats_table/components/field_count_stats';
+} from '../../../common/components/stats_table/components/field_count_stats';
 import { OverallStats } from '../../types/overall_stats';
-import { getActions } from '../../../components/field_data_row/action_menu';
-import { IndexBasedDataVisualizerExpandedRow } from '../../../components/expanded_row/index_based_expanded_row';
+import { getActions } from '../../../common/components/field_data_row/action_menu';
+import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
@@ -53,17 +56,17 @@ import {
   SavedSearchSavedObject,
 } from '../../../../../common/types';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { FieldCountPanel } from '../../../components/field_count_panel';
-import { DocumentCountContent } from '../../../components/document_count_content';
+import { FieldCountPanel } from '../../../common/components/field_count_panel';
+import { DocumentCountContent } from '../../../common/components/document_count_content';
 import { DataLoader } from '../../data_loader/data_loader';
 import { JOB_FIELD_TYPES } from '../../../../../common';
 import { useTimefilter } from '../../hooks/use_time_filter';
-import { kbnTypeToJobType } from '../../../util/field_types_utils';
+import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
-import { DatePickerWrapper } from '../../../components/date_picker_wrapper';
+import { DatePickerWrapper } from '../../../common/components/date_picker_wrapper';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
-import { HelpMenu } from '../../../components/help_menu';
+import { HelpMenu } from '../../../common/components/help_menu';
 import { TimeBuckets } from '../../services/time_buckets';
 
 interface DataVisualizerPageState {

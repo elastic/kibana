@@ -12,7 +12,7 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { isEqual } from 'lodash';
 
-import { AboutPanel, LoadingPanel } from '../../../components/about_panel';
+import { AboutPanel, LoadingPanel } from '../../../common/components/about_panel';
 import { BottomBar } from '../bottom_bar';
 import { ResultsView } from '../results_view';
 import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
@@ -24,7 +24,7 @@ import {
   readFile,
   createUrlOverrides,
   processResults,
-} from '../../../components/utils';
+} from '../../../common/components/utils';
 
 import { MODE } from './constants';
 

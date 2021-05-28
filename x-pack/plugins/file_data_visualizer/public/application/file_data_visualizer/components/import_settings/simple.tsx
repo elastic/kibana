@@ -10,7 +10,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 
 import { EuiFieldText, EuiFormRow, EuiCheckbox, EuiSpacer } from '@elastic/eui';
-import { CombinedField, CombinedFieldsReadOnlyForm } from '../../../components/combined_fields';
+import {
+  CombinedField,
+  CombinedFieldsReadOnlyForm,
+} from '../../../common/components/combined_fields';
 
 interface Props {
   index: string;

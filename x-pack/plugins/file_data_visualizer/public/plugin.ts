@@ -17,7 +17,7 @@ import type { MapsStartApi } from '../../maps/public';
 import type { SecurityPluginSetup } from '../../security/public';
 import type { LensPublicStart } from '../../lens/public';
 import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from './api';
-import { getMaxBytesFormatted } from './application/util/get_max_bytes';
+import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FileDataVisualizerSetupDependencies {}

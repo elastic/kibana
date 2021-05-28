@@ -25,7 +25,7 @@ import {
   SetUrlState,
   getNestedProperty,
   isRisonSerializationRequired,
-} from '../util/url_state';
+} from '../common/util/url_state';
 
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 

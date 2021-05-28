@@ -16,8 +16,8 @@ import {
 } from '../../../../../../../../src/plugins/discover/public';
 import type { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { useUrlState } from '../../../util/url_state';
-import { LinkCard } from '../../../components/link_card';
+import { useUrlState } from '../../../common/util/url_state';
+import { LinkCard } from '../../../common/components/link_card';
 
 interface Props {
   indexPattern: IndexPattern;
