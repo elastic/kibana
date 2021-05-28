@@ -318,12 +318,12 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
             <EuiButtonEmpty onClick={togglePolicyJsonFlyout} data-test-subj="requestButton">
               {isShowingPolicyJsonFlyout ? (
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
+                  id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButton"
                   defaultMessage="Hide request"
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto"
+                  id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButton"
                   defaultMessage="Show request"
                 />
               )}
