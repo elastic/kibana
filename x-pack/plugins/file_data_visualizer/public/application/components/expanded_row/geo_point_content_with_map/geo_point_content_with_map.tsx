@@ -57,7 +57,8 @@ export const GeoPointContentWithMap: FC<{
       }
     }
     updateIndexPatternSearchLayer();
-  }, [indexPattern, combinedQuery, config, mapsPlugin, layerList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexPattern, combinedQuery, config, mapsPlugin]);
 
   if (stats?.examples === undefined) return null;
   return (
@@ -67,7 +68,7 @@ export const GeoPointContentWithMap: FC<{
       <EuiFlexItem style={{ maxWidth: '50%' }}>
         <ExamplesList examples={stats.examples} />
       </EuiFlexItem>
-      <EuiFlexItem className={'mlDataVisualizerMapWrapper'}>
+      <EuiFlexItem className={'dataVisualizerMapWrapper'}>
         <EmbeddedMapComponent layerList={layerList} />
       </EuiFlexItem>
     </ExpandedRowContent>

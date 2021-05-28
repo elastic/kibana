@@ -9,7 +9,6 @@ import { estypes } from '@elastic/elasticsearch';
 import { IndicesOptions } from '../../../../common/types/indices';
 import { lazyLoadModules } from '../../../lazy_load_bundle';
 import { GetTimeFieldRangeResponse } from '../../../../common/types/time_field_request';
-import { basePath } from './visualizer_stats';
 
 export async function getTimeFieldRange({
   index,
@@ -28,7 +27,7 @@ export async function getTimeFieldRange({
   const fileUploadModules = await lazyLoadModules();
 
   return await fileUploadModules.getHttp().fetch<GetTimeFieldRangeResponse>({
-    path: `${basePath()}/fields_service/time_field_range`,
+    path: `/api/ml/fields_service/time_field_range`,
     method: 'POST',
     body,
   });
