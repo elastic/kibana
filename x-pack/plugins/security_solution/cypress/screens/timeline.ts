@@ -225,3 +225,16 @@ export const TIMELINE_ROW_RENDERERS_SEARCHBOX = `${TIMELINE_ROW_RENDERERS_MODAL}
 export const TIMELINE_SHOW_ROW_RENDERERS_GEAR = '[data-test-subj="show-row-renderers-gear"]';
 
 export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
+
+export const TIMELINE_EVENT = '[data-test-subj="event"]';
+
+export const TIMELINE_EVENTS_COUNT_PER_PAGE = '[data-test-subj="local-events-count"]';
+
+export const TIMELINE_EVENTS_COUNT_PER_PAGE_BTN = '[data-test-subj="local-events-count-button"]';
+
+export const TIMELINE_EVENTS_COUNT_PER_PAGE_OPTION = (itemsPerPage: number) =>
+  `[data-test-subj="items-per-page-option-${itemsPerPage}"]`;
+
+export const TIMELINE_EVENTS_COUNT_NEXT_PAGE = '[data-test-subj="pagination-button-next"]';
+
+export const TIMELINE_EVENTS_COUNT_PREV_PAGE = '[data-test-subj="pagination-button-previous"]';
