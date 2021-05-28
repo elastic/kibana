@@ -18,7 +18,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import { TRANSACTION_DURATION_US } from './constants';
+import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 
 import type { SearchServiceParams } from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
@@ -31,8 +31,8 @@ export const getHistogramIntervalRequest = (
     query: getQueryWithParams(params),
     size: 0,
     aggs: {
-      transaction_duration_min: { min: { field: TRANSACTION_DURATION_US } },
-      transaction_duration_max: { max: { field: TRANSACTION_DURATION_US } },
+      transaction_duration_min: { min: { field: TRANSACTION_DURATION } },
+      transaction_duration_max: { max: { field: TRANSACTION_DURATION } },
     },
   },
 });
@@ -51,9 +51,13 @@ export const fetchTransactionDurationHistogramRangesteps = async (
 
   const steps = 100;
   const min = 1; // (resp.body.aggregations.transaction_duration_min as estypes.ValueAggregate).value;
-  const max = (resp.body.aggregations.transaction_duration_max as estypes.ValueAggregate).value * 2;
+  const max =
+    (resp.body.aggregations.transaction_duration_max as estypes.ValueAggregate)
+      .value * 2;
 
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
   const logFn = scaleLog().domain([min, max]).range([1, steps]);
-  return [...Array(steps).keys()].map(logFn.invert).map((d) => (isNaN(d) ? 0 : d));
+  return [...Array(steps).keys()]
+    .map(logFn.invert)
+    .map((d) => (isNaN(d) ? 0 : d));
 };

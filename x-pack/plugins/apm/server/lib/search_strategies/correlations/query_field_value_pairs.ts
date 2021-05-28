@@ -9,7 +9,10 @@ import type { ElasticsearchClient } from 'src/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { AsyncSearchProviderProgress, SearchServiceParams } from './async_search_service';
+import type {
+  AsyncSearchProviderProgress,
+  SearchServiceParams,
+} from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
 
 interface FieldValuePair {
@@ -45,9 +48,12 @@ export const fetchTransactionDurationFieldValuePairs = async (
   let fieldValuePairsProgress = 0;
   for (const fieldCandidate of fieldCandidates) {
     // mutate progress
-    progress.loadedFieldValuePairs = fieldValuePairsProgress / fieldCandidates.length;
+    progress.loadedFieldValuePairs =
+      fieldValuePairsProgress / fieldCandidates.length;
 
-    const resp = await esClient.search(getTermsAggRequest(params, fieldCandidate));
+    const resp = await esClient.search(
+      getTermsAggRequest(params, fieldCandidate)
+    );
 
     if (resp.body.aggregations === undefined) {
       throw new Error(
@@ -55,7 +61,8 @@ export const fetchTransactionDurationFieldValuePairs = async (
       );
     }
 
-    const buckets = (resp.body.aggregations.attribute_terms as estypes.MultiBucketAggregate<{
+    const buckets = (resp.body.aggregations
+      .attribute_terms as estypes.MultiBucketAggregate<{
       key: string;
     }>).buckets;
 

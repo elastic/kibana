@@ -62,7 +62,7 @@ export const useCorrelations = (params: CorrelationsOptions) => {
     // Submit the search request using the `data.search` service.
     searchSubscription$.current = data.search
       .search(req, {
-        strategy: 'mlCorrelationsSearchStrategy',
+        strategy: 'apmCorrelationsSearchStrategy',
         abortSignal: abortCtrl.current.signal,
       })
       .subscribe({

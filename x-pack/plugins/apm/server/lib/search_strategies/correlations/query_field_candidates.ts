@@ -14,7 +14,9 @@ import { getQueryWithParams } from './get_query_with_params';
 
 const fieldCandidatesFilter = ['parent.id', 'trace.id', 'transaction.id'];
 
-export const getRandomDocsRequest = (params: SearchServiceParams): estypes.SearchRequest => ({
+export const getRandomDocsRequest = (
+  params: SearchServiceParams
+): estypes.SearchRequest => ({
   index: params.index,
   body: {
     fields: ['*'],
@@ -52,8 +54,13 @@ export const fetchTransactionDurationFieldCandidates = async (
   // to a list of unique field names used across all docs
   // and filter by fields of type keyword and some APM specific unique fields.
   const fieldCandidates = [...new Set(docs.map(Object.keys).flat(1))]
-    .filter((d) => keywordFields.includes(d) && !fieldCandidatesFilter.includes(d))
+    .filter(
+      (d) => keywordFields.includes(d) && !fieldCandidatesFilter.includes(d)
+    )
     .sort();
 
-  return { fieldCandidates, totalHits: (resp.body.hits.total as estypes.TotalHits).value };
+  return {
+    fieldCandidates,
+    totalHits: (resp.body.hits.total as estypes.TotalHits).value,
+  };
 };

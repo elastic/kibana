@@ -84,7 +84,8 @@ export const asyncSearchServiceProvider = (
         params,
         params.percentileThreshold ? [params.percentileThreshold] : undefined
       );
-      percentileThresholdValue = percentileThreshold[`${params.percentileThreshold}.0`];
+      percentileThresholdValue =
+        percentileThreshold[`${params.percentileThreshold}.0`];
 
       const histogramRangeSteps = await fetchTransactionDurationHistogramRangesteps(
         esClient,
@@ -109,15 +110,17 @@ export const asyncSearchServiceProvider = (
         return;
       }
 
-      const { fieldCandidates, totalHits } = await fetchTransactionDurationFieldCandidates(
-        esClient,
-        params
-      );
+      const {
+        fieldCandidates,
+        totalHits,
+      } = await fetchTransactionDurationFieldCandidates(esClient, params);
       progress.loadedFieldCanditates = 1;
 
-      const percentiles = await fetchTransactionDurationPecentiles(esClient, params, [
-        ...Array(100).keys(),
-      ]);
+      const percentiles = await fetchTransactionDurationPecentiles(
+        esClient,
+        params,
+        [...Array(100).keys()]
+      );
 
       if (isCancelled) {
         isRunning = false;
@@ -168,7 +171,9 @@ export const asyncSearchServiceProvider = (
           const fullHistogram = overallLogHistogramChartData.map((h) => {
             const histogramItem = logHistogram.find((di) => di.key === h.key);
             const docCount =
-              item !== undefined && histogramItem !== undefined ? histogramItem.doc_count : 0;
+              item !== undefined && histogramItem !== undefined
+                ? histogramItem.doc_count
+                : 0;
             return {
               key: h.key,
               doc_count_full: h.doc_count,
@@ -187,7 +192,9 @@ export const asyncSearchServiceProvider = (
       let loadedHistograms = 0;
       for await (const item of fetchTransactionDurationHistograms()) {
         values.push(item);
-        values = values.sort((a, b) => b.correlation - a.correlation).slice(0, 15);
+        values = values
+          .sort((a, b) => b.correlation - a.correlation)
+          .slice(0, 15);
         loadedHistograms++;
         progress.loadedHistograms = loadedHistograms / fieldValuePairs.length;
       }

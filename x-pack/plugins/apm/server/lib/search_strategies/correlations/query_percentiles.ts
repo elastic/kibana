@@ -9,7 +9,8 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import { TRANSACTION_DURATION_US } from './constants';
+import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+
 import type { SearchServiceParams } from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
 
@@ -25,9 +26,9 @@ interface ResponseHit {
   _source: ResponseHitSource;
 }
 
-export const getTransactionDurationRangesRequest = (
+export const getTransactionDurationPercentilesRequest = (
   params: SearchServiceParams,
-  rangesSteps: number[],
+  percents?: number[],
   fieldName?: string,
   fieldValue?: string
 ): estypes.SearchRequest => {
@@ -42,15 +43,6 @@ export const getTransactionDurationRangesRequest = (
       },
     });
   }
-  const ranges = rangesSteps.reduce(
-    (p, to) => {
-      const from = p[p.length - 1].to;
-      p.push({ from, to });
-      return p;
-    },
-    [{ to: 0 }] as Array<{ from?: number; to?: number }>
-  );
-  ranges.push({ from: ranges[ranges.length - 1].to });
 
   return {
     index: params.index,
@@ -58,10 +50,10 @@ export const getTransactionDurationRangesRequest = (
       query,
       size: 0,
       aggs: {
-        logspace_ranges: {
-          range: {
-            field: TRANSACTION_DURATION_US,
-            ranges,
+        transaction_duration_percentiles: {
+          percentiles: {
+            field: TRANSACTION_DURATION,
+            ...(Array.isArray(percents) ? { percents } : {}),
           },
         },
       },
@@ -69,25 +61,31 @@ export const getTransactionDurationRangesRequest = (
   };
 };
 
-export const fetchTransactionDurationRanges = async (
+export const fetchTransactionDurationPecentiles = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams,
-  rangesSteps: number[],
+  percents?: number[],
   fieldName?: string,
   fieldValue?: string
-): Promise<any> => {
+): Promise<Record<string, number>> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationRangesRequest(params, rangesSteps, fieldName, fieldValue)
+    getTransactionDurationPercentilesRequest(
+      params,
+      percents,
+      fieldName,
+      fieldValue
+    )
   );
 
   if (resp.body.aggregations === undefined) {
-    throw new Error('fetchTransactionDurationCorrelation failed, did not return aggregations.');
+    throw new Error(
+      'fetchTransactionDurationPecentiles failed, did not return aggregations.'
+    );
   }
 
-  return resp.body.aggregations.logspace_ranges.buckets
-    .map((d) => ({
-      key: d.from,
-      doc_count: d.doc_count,
-    }))
-    .filter((d) => d.key !== undefined);
+  return (
+    (resp.body.aggregations
+      .transaction_duration_percentiles as estypes.TDigestPercentilesAggregate)
+      .values ?? {}
+  );
 };

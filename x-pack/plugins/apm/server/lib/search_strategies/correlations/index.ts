@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const TRANSACTION_DURATION_US = 'transaction.duration.us';
+export { apmCorrelationsSearchStrategyProvider } from './search_strategy';

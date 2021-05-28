@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import { TRANSACTION_DURATION_US } from './constants';
+import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 
 import type { SearchServiceParams } from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
@@ -24,8 +24,8 @@ export const getHistogramIntervalRequest = (
     query: getQueryWithParams(params),
     size: 0,
     aggs: {
-      transaction_duration_min: { min: { field: TRANSACTION_DURATION_US } },
-      transaction_duration_max: { max: { field: TRANSACTION_DURATION_US } },
+      transaction_duration_min: { min: { field: TRANSACTION_DURATION } },
+      transaction_duration_max: { max: { field: TRANSACTION_DURATION } },
     },
   },
 });
@@ -43,8 +43,10 @@ export const fetchTransactionDurationHistogramInterval = async (
   }
 
   const transactionDurationDelta =
-    (resp.body.aggregations.transaction_duration_max as estypes.ValueAggregate).value -
-    (resp.body.aggregations.transaction_duration_min as estypes.ValueAggregate).value;
+    (resp.body.aggregations.transaction_duration_max as estypes.ValueAggregate)
+      .value -
+    (resp.body.aggregations.transaction_duration_min as estypes.ValueAggregate)
+      .value;
 
   return transactionDurationDelta / (HISTOGRAM_INTERVALS - 1);
 };

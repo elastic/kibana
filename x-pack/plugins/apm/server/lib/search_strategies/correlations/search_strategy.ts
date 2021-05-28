@@ -21,13 +21,18 @@ import {
 } from './async_search_service';
 
 export type PartialSearchRequest = IKibanaSearchRequest<SearchServiceParams>;
-export type PartialSearchResponse = IKibanaSearchResponse<{ values: SearchServiceValue[] }>;
+export type PartialSearchResponse = IKibanaSearchResponse<{
+  values: SearchServiceValue[];
+}>;
 
-export const mlCorrelationsSearchStrategyProvider = (): ISearchStrategy<
+export const apmCorrelationsSearchStrategyProvider = (): ISearchStrategy<
   PartialSearchRequest,
   PartialSearchResponse
 > => {
-  const asyncSearchServiceMap = new Map<string, ReturnType<typeof asyncSearchServiceProvider>>();
+  const asyncSearchServiceMap = new Map<
+    string,
+    ReturnType<typeof asyncSearchServiceProvider>
+  >();
 
   return {
     search: (request, options, deps) => {

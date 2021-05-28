@@ -9,7 +9,8 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import { TRANSACTION_DURATION_US } from './constants';
+import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+
 import type { SearchServiceParams } from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
 
@@ -25,9 +26,9 @@ interface ResponseHit {
   _source: ResponseHitSource;
 }
 
-export const getTransactionDurationPercentilesRequest = (
+export const getTransactionDurationHistogramRequest = (
   params: SearchServiceParams,
-  percents?: number[],
+  interval: number,
   fieldName?: string,
   fieldValue?: string
 ): estypes.SearchRequest => {
@@ -49,34 +50,39 @@ export const getTransactionDurationPercentilesRequest = (
       query,
       size: 0,
       aggs: {
-        transaction_duration_percentiles: {
-          percentiles: {
-            field: TRANSACTION_DURATION_US,
-            ...(Array.isArray(percents) ? { percents } : {}),
-          },
+        transaction_duration_histogram: {
+          histogram: { field: TRANSACTION_DURATION, interval },
         },
       },
     },
   };
 };
 
-export const fetchTransactionDurationPecentiles = async (
+export const fetchTransactionDurationHistogram = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams,
-  percents?: number[],
+  interval: number,
   fieldName?: string,
   fieldValue?: string
-): Promise<Record<string, number>> => {
+): Promise<HistogramItem[]> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationPercentilesRequest(params, percents, fieldName, fieldValue)
+    getTransactionDurationHistogramRequest(
+      params,
+      interval,
+      fieldName,
+      fieldValue
+    )
   );
 
   if (resp.body.aggregations === undefined) {
-    throw new Error('fetchTransactionDurationPecentiles failed, did not return aggregations.');
+    throw new Error(
+      'fetchTransactionDurationHistogram failed, did not return aggregations.'
+    );
   }
 
   return (
-    (resp.body.aggregations.transaction_duration_percentiles as estypes.TDigestPercentilesAggregate)
-      .values ?? {}
+    (resp.body.aggregations
+      .transaction_duration_histogram as estypes.MultiBucketAggregate<HistogramItem>)
+      .buckets ?? []
   );
 };

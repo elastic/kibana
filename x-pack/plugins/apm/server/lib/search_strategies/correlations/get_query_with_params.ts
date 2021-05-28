@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { SearchServiceParams } from './async_search_service';
 
-import { TRANSACTION_DURATION_US } from './constants';
+import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 
 export enum ProcessorEvent {
   transaction = 'transaction',
@@ -30,12 +30,18 @@ const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL';
 const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED';
 
 const environmentLabels: Record<string, string> = {
-  [ENVIRONMENT_ALL_VALUE]: i18n.translate('xpack.ml.filter.environment.allLabel', {
-    defaultMessage: 'All',
-  }),
-  [ENVIRONMENT_NOT_DEFINED_VALUE]: i18n.translate('xpack.ml.filter.environment.notDefinedLabel', {
-    defaultMessage: 'Not defined',
-  }),
+  [ENVIRONMENT_ALL_VALUE]: i18n.translate(
+    'xpack.apm.filter.environment.allLabel',
+    {
+      defaultMessage: 'All',
+    }
+  ),
+  [ENVIRONMENT_NOT_DEFINED_VALUE]: i18n.translate(
+    'xpack.apm.filter.environment.notDefinedLabel',
+    {
+      defaultMessage: 'Not defined',
+    }
+  ),
 };
 
 const ENVIRONMENT_ALL = {
@@ -75,11 +81,13 @@ const getRangeQuery = (start?: string, end?: string): QueryContainer[] => {
   ];
 };
 
-const getPercentileThresholdValueQuery = (percentileThresholdValue: number): QueryContainer[] => {
+const getPercentileThresholdValueQuery = (
+  percentileThresholdValue: number
+): QueryContainer[] => {
   return [
     {
       range: {
-        [TRANSACTION_DURATION_US]: {
+        [TRANSACTION_DURATION]: {
           gte: percentileThresholdValue,
         },
       },
@@ -100,7 +108,9 @@ export const getQueryWithParams = ({
       filter: [
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
-        ...(transactionType ? [{ term: { [TRANSACTION_TYPE]: transactionType } }] : []),
+        ...(transactionType
+          ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
+          : []),
         ...getRangeQuery(start, end),
         ...getEnvironmentQuery(environment),
         ...(percentileThresholdValue

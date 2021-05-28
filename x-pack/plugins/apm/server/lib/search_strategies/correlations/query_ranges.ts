@@ -9,7 +9,8 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import { TRANSACTION_DURATION_US } from './constants';
+import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+
 import type { SearchServiceParams } from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
 
@@ -25,9 +26,9 @@ interface ResponseHit {
   _source: ResponseHitSource;
 }
 
-export const getTransactionDurationHistogramRequest = (
+export const getTransactionDurationRangesRequest = (
   params: SearchServiceParams,
-  interval: number,
+  rangesSteps: number[],
   fieldName?: string,
   fieldValue?: string
 ): estypes.SearchRequest => {
@@ -42,6 +43,15 @@ export const getTransactionDurationHistogramRequest = (
       },
     });
   }
+  const ranges = rangesSteps.reduce(
+    (p, to) => {
+      const from = p[p.length - 1].to;
+      p.push({ from, to });
+      return p;
+    },
+    [{ to: 0 }] as Array<{ from?: number; to?: number }>
+  );
+  ranges.push({ from: ranges[ranges.length - 1].to });
 
   return {
     index: params.index,
@@ -49,31 +59,43 @@ export const getTransactionDurationHistogramRequest = (
       query,
       size: 0,
       aggs: {
-        transaction_duration_histogram: {
-          histogram: { field: TRANSACTION_DURATION_US, interval },
+        logspace_ranges: {
+          range: {
+            field: TRANSACTION_DURATION,
+            ranges,
+          },
         },
       },
     },
   };
 };
 
-export const fetchTransactionDurationHistogram = async (
+export const fetchTransactionDurationRanges = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams,
-  interval: number,
+  rangesSteps: number[],
   fieldName?: string,
   fieldValue?: string
-): Promise<HistogramItem[]> => {
+): Promise<any> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationHistogramRequest(params, interval, fieldName, fieldValue)
+    getTransactionDurationRangesRequest(
+      params,
+      rangesSteps,
+      fieldName,
+      fieldValue
+    )
   );
 
   if (resp.body.aggregations === undefined) {
-    throw new Error('fetchTransactionDurationHistogram failed, did not return aggregations.');
+    throw new Error(
+      'fetchTransactionDurationCorrelation failed, did not return aggregations.'
+    );
   }
 
-  return (
-    (resp.body.aggregations
-      .transaction_duration_histogram as estypes.MultiBucketAggregate<HistogramItem>).buckets ?? []
-  );
+  return resp.body.aggregations.logspace_ranges.buckets
+    .map((d) => ({
+      key: d.from,
+      doc_count: d.doc_count,
+    }))
+    .filter((d) => d.key !== undefined);
 };

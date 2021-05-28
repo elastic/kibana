@@ -9,7 +9,8 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import { TRANSACTION_DURATION_US } from './constants';
+import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+
 import type { SearchServiceParams } from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
 
@@ -76,7 +77,7 @@ export const getTransactionDurationCorrelationRequest = (
       aggs: {
         latency_ranges: {
           range: {
-            field: TRANSACTION_DURATION_US,
+            field: TRANSACTION_DURATION,
             ranges,
           },
         },
@@ -107,11 +108,19 @@ export const fetchTransactionDurationCorrelation = async (
   fieldValue?: string
 ): Promise<any> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationCorrelationRequest(params, percentiles, totalHits, fieldName, fieldValue)
+    getTransactionDurationCorrelationRequest(
+      params,
+      percentiles,
+      totalHits,
+      fieldName,
+      fieldValue
+    )
   );
 
   if (resp.body.aggregations === undefined) {
-    throw new Error('fetchTransactionDurationCorrelation failed, did not return aggregations.');
+    throw new Error(
+      'fetchTransactionDurationCorrelation failed, did not return aggregations.'
+    );
   }
 
   return {
