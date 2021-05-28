@@ -62,6 +62,11 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
     onChange(Number(e.target.value));
   };
 
+  const ticks = new Array(10).fill(null).map((x, i) => {
+    const v = i * 10;
+    return { value: v, label: v };
+  });
+
   return (
     <EuiFormRow fullWidth>
       <EuiFlexGroup>
@@ -89,7 +94,7 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
               defaultMessage: 'Select severity threshold',
             })}
             showTicks
-            tickInterval={10}
+            ticks={ticks}
             showRange={false}
             levels={levels}
             data-test-subj={'mlAnomalyAlertScoreSelection'}
