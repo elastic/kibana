@@ -14,6 +14,14 @@ import { makeMapStateToProps } from '../../../common/components/url_state/helper
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { CONSTANTS } from '../../../common/components/url_state/constants';
 
+const DASHBOARD_SO_TITLE_PREFIX = '[Filebeat Threat Intel] ';
+const BUTTON_LINK_TITLE = 'Overview';
+const TAG_REQUEST_BODY = {
+  type: 'tag',
+  search: 'threat intel',
+  searchFields: ['name'],
+};
+
 export interface DashboardLink {
   path: string;
   title: string;
@@ -24,35 +32,23 @@ interface ButtonLink {
   path: string;
 }
 
-const isDashboardLink = (
-  link: DashboardLink | { path: string; title?: string; count?: number }
-): link is DashboardLink => typeof link.title === 'string' && typeof link.count === 'number';
+const isDashboardLink = (link: DashboardLink | Partial<DashboardLink>): link is DashboardLink =>
+  typeof link.title === 'string' && typeof link.path === 'string' && typeof link.count === 'number';
 
-const DASHBOARD_SO_TITLE_PREFIX = '[Filebeat Threat Intel] ';
-const BUTTON_LINK_TITLE = 'Overview';
-const isButtonLink = (link: { path: string; title?: string }) => link.title === BUTTON_LINK_TITLE;
-
-const TAG_REQUEST_BODY = {
-  type: 'tag',
-  search: 'threat intel',
-  searchFields: ['name'],
-};
+const isButtonLink = (link: { path?: string; title?: string }) => link.title === BUTTON_LINK_TITLE;
 
 export const useThreatIntelDashboardLinks = (props: ThreatIntelLinkPanelProps) => {
   const savedObjectsClient = useKibana().services.savedObjects.client;
-  const getUrlForApp = useKibana().services.application.getUrlForApp;
 
   const mapState = makeMapStateToProps();
   const { urlState } = useDeepEqualSelector(mapState);
-  const timeRange = urlState[CONSTANTS.timerange].global[CONSTANTS.timerange];
-  const dashboardUrlSearch = useMemo(() => {
-    // TODO: apply timeRange
-    return '';
-  }, []);
-
+  const timeRange = useMemo(() => urlState[CONSTANTS.timerange].global[CONSTANTS.timerange], [
+    urlState,
+  ]);
+  const createUrl = useKibana().services.dashboard.dashboardUrlGenerator?.createUrl;
   const { eventCounts, total } = useCTIEventCounts(props);
 
-  const [buttonLink, setButtonLink] = useState<ButtonLink | null>(null);
+  const [buttonLink, setButtonLink] = useState<Partial<ButtonLink> | null>(null);
   const [dashboardLinks, setDashboardLinks] = useState<DashboardLink[]>([]);
 
   const prevTotal = usePrevious(total);
@@ -69,9 +65,12 @@ export const useThreatIntelDashboardLinks = (props: ThreatIntelLinkPanelProps) =
             });
           }
         })
-        .then((DashboardsSO) => {
-          if (DashboardsSO?.savedObjects?.length) {
-            const links = DashboardsSO.savedObjects.reduce((acc, dashboardSO) => {
+        .then(async (DashboardsSO) => {
+          if (DashboardsSO?.savedObjects?.length && createUrl) {
+            const dashboardUrls = await Promise.all(
+              DashboardsSO.savedObjects.map((SO) => createUrl({ dashboardId: SO.id, timeRange }))
+            ).then((values) => values);
+            const links = DashboardsSO.savedObjects.reduce((acc, dashboardSO, i) => {
               const title =
                 typeof dashboardSO.attributes.title === 'string'
                   ? dashboardSO.attributes.title.replace(DASHBOARD_SO_TITLE_PREFIX, '')
@@ -83,9 +82,7 @@ export const useThreatIntelDashboardLinks = (props: ThreatIntelLinkPanelProps) =
               const link = {
                 title,
                 count,
-                path: getUrlForApp('dashboards', {
-                  path: `#/view/${encodeURIComponent(dashboardSO.id)}${dashboardUrlSearch}`,
-                }),
+                path: dashboardUrls[i],
               };
               if (isButtonLink(link)) {
                 setButtonLink(link);
@@ -98,15 +95,7 @@ export const useThreatIntelDashboardLinks = (props: ThreatIntelLinkPanelProps) =
           }
         });
     }
-  }, [
-    dashboardUrlSearch,
-    eventCounts,
-    getUrlForApp,
-    prevTotal,
-    savedObjectsClient,
-    timeRange,
-    total,
-  ]);
+  }, [eventCounts, prevTotal, savedObjectsClient, timeRange, total, createUrl]);
 
   return {
     buttonLink,

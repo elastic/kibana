@@ -19,6 +19,7 @@ import { Overview } from './index';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
+import { useThreatIntelDashboardLinks } from '../containers/overview_cti_links';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -42,6 +43,7 @@ jest.mock('../../common/components/query_bar', () => ({
 }));
 jest.mock('../../common/hooks/endpoint/ingest_enabled');
 jest.mock('../../common/containers/local_storage/use_messages_storage');
+jest.mock('../containers/overview_cti_links');
 
 const endpointNoticeMessage = (hasMessageValue: boolean) => {
   return {
@@ -56,6 +58,15 @@ const mockUseSourcererScope = useSourcererScope as jest.Mock;
 const mockUseIngestEnabledCheck = useIngestEnabledCheck as jest.Mock;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
+const useThreatIntelDashboardLinksMock = useThreatIntelDashboardLinks as jest.Mock;
+useThreatIntelDashboardLinksMock.mockReturnValue({
+  buttonLink: { path: '/button-link-path' },
+  dashboardLinks: [
+    { count: 1, title: 'anomali', path: '/dashboard-link-0' },
+    { count: 99, title: 'alienvault', path: '/dashboard-link-1' },
+  ],
+  totalEventCount: 100,
+});
 describe('Overview', () => {
   beforeEach(() => {
     mockUseFetchIndex.mockReturnValue([

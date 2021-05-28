@@ -23,6 +23,7 @@
     "encryptedSavedObjects",
     "fleet",
     "ml",
+    "dashboard",
     "newsfeed",
     "security",
     "spaces",
