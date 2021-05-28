@@ -34,17 +34,6 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { KQLHeaderGlobal } from './kql_global';
 import { useMainNavigationVisibility } from './temp_collapse_sidenav_context';
 
-const StyledEuiPanel = styled(EuiPanel).attrs<{ paddingTop: number }>(({ paddingTop }) => ({
-  style: {
-    paddingTop: `${paddingTop}px`,
-  },
-}))<{ paddingTop: number }>`
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-`;
-
 const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   style: {
     paddingTop: `${paddingTop}px`,

@@ -112,7 +112,7 @@ export const AppContainer: FunctionComponent<Props> = ({
           <EuiLoadingElastic aria-label="Loading application" size="xxl" />
         </div>
       )}
-      <div key={appId} ref={elementRef} />
+      <div className="kbnAppWrapper" key={appId} ref={elementRef} />
     </Fragment>
   );
 };

@@ -84,6 +84,7 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
   .${SCROLLING_DISABLED_CLASS_NAME} ${SecuritySolutionAppWrapper} {
     max-height: calc(100vh - ${GLOBAL_HEADER_HEIGHT}px);
+    overflow-y: scroll;
   }
 
   /*
