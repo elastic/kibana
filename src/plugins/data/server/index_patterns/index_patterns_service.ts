@@ -28,7 +28,7 @@ import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
 import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
-import { createScriptedFieldsDeprecationsConfig } from './deprications';
+import { createScriptedFieldsDeprecationsConfig } from './deprecations';
 
 export interface IndexPatternsServiceStart {
   indexPatternsServiceFactory: (
