@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiHeaderSectionItemButton,
   EuiCallOut,
   EuiPopover,
