@@ -1,0 +1,17 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "basic_index",
+    "id": "1",
+    "source": {
+      "foo": 1,
+      "bar": false,
+      "baz": "hello",
+      "nestedField": [
+        {
+          "child": "nestedValue"
+        }
+      ]
+    }
+  }
+}

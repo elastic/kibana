@@ -7,12 +7,10 @@
     "source": {
       "test-actions-export-hidden": {
         "title": "hidden object 1"
-      },
-      "type": "test-actions-export-hidden",
-      "migrationVersion": {},
-      "updated_at": "2018-12-21T00:43:07.096Z"
-    }
-  }
+    },
+    "references": [],
+    "type": "test-actions-export-hidden",
+    "updated_at": "2018-12-21T00:43:07.096Z"
 }
 
 {
@@ -24,12 +22,10 @@
     "source": {
       "test-actions-export-hidden": {
         "title": "hidden object 2"
-      },
-      "type": "test-actions-export-hidden",
-      "migrationVersion": {},
-      "updated_at": "2018-12-21T00:43:07.096Z"
-    }
-  }
+    },
+    "references": [],
+    "type": "test-actions-export-hidden",
+    "updated_at": "2018-12-21T00:43:07.096Z"
 }
 
 {
@@ -46,20 +42,18 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+            "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         }
-      },
-      "type": "visualization",
-      "updated_at": "2019-01-22T19:32:31.206Z"
     },
-    "references" : [
-      {
-        "name" : "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type" : "index-pattern",
-        "id" : "logstash-*"
-      }
-    ]
-  }
+    "references": [
+        {
+            "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+            "type": "index-pattern",
+            "id": "logstash-*"
+        }
+    ],
+    "type": "visualization",
+    "updated_at": "2019-01-22T19:32:31.206Z"
 }
 
 {
@@ -78,11 +72,10 @@
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+            "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         }
-      },
-      "type": "dashboard",
-      "updated_at": "2019-01-22T19:32:47.232Z"
-    }
-  }
+    },
+    "references": [],
+    "type": "dashboard",
+    "updated_at": "2019-01-22T19:32:47.232Z"
 }

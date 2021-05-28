@@ -10,19 +10,26 @@ import { SuperTest, Test } from 'supertest';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
 const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest') as SuperTest<Test>;
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const SPACE_ID = 'ftr-so-mgmt-scroll-count';
+  const apiUrl = `/s/${SPACE_ID}/api/kibana/management/saved_objects/scroll/counts`;
 
   describe('scroll_count', () => {
     before(async () => {
-      await esArchiver.load('management/saved_objects/scroll_count');
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
+      await kibanaServer.importExport.load('management/saved_objects/scroll_count', {
+        space: SPACE_ID,
+      });
     });
     after(async () => {
-      await esArchiver.unload('management/saved_objects/scroll_count');
+      await kibanaServer.importExport.unload('management/saved_objects/scroll_count', {
+        space: SPACE_ID,
+      });
+      await kibanaServer.spaces.delete(SPACE_ID);
     });
 
     it('returns the count for each included types', async () => {

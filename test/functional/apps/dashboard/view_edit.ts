@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize', 'timePicker']);
@@ -21,13 +20,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard view edit mode', function viewEditModeTests() {
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.importExport.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
     });
+
+    after(() => kibanaServer.importExport.unload('dashboard/current/kibana'));
 
     it('create new dashboard opens in edit mode', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();

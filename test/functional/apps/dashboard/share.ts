@@ -10,13 +10,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['dashboard', 'common', 'share']);
 
   describe('share dashboard', () => {
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.importExport.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -24,6 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
+
+    after(() => kibanaServer.importExport.unload('dashboard/current/kibana'));
 
     it('has "panels" state when sharing a snapshot', async () => {
       await PageObjects.share.clickShareTopNavButton();

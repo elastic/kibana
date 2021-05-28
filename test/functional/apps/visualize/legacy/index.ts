@@ -30,6 +30,8 @@ export default function ({ getPageObjects, getService, loadTestFile }: FtrProvid
       });
     });
 
+    after(() => kibanaServer.importExport.unload('visualize'));
+
     describe('legacy data table visualization', function () {
       this.tags('ciGroup9');
 

@@ -1,0 +1,8 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "elasticsearch",
+    "id": "somedocid",
+    "source": {}
+  }
+}

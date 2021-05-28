@@ -17,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const pieChart = getService('pieChart');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const PageObjects = getPageObjects([
@@ -31,12 +30,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard filter bar', () => {
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.importExport.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
     });
+
+    after(() => kibanaServer.importExport.unload('dashboard/current/kibana'));
 
     describe('Add a filter bar', function () {
       before(async () => {
@@ -200,6 +201,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('bad filters are loaded properly', function () {
       before(async () => {
+        await kibanaServer.savedObjects.delete({
+          type: 'index-pattern',
+          id: 'to-be-removed',
+        });
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.loadSavedDashboard('dashboard with bad filters');

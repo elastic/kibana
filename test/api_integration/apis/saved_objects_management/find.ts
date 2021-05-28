@@ -12,8 +12,9 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+
+  const SPACE_ID = 'ftr-so-mgmt-find';
 
   describe('find', () => {
     let KIBANA_VERSION: string;
@@ -22,15 +23,21 @@ export default function ({ getService }: FtrProviderContext) {
       KIBANA_VERSION = await kibanaServer.version.get();
       expect(typeof KIBANA_VERSION).to.eql('string');
       expect(KIBANA_VERSION.length).to.be.greaterThan(0);
+
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
     });
 
+    after(() => kibanaServer.spaces.delete(SPACE_ID));
+
     describe('with kibana index', () => {
-      before(() => kibanaServer.importExport.load('saved_objects/basic'));
-      after(() => kibanaServer.importExport.unload('saved_objects/basic'));
+      before(() => kibanaServer.importExport.load('saved_objects/basic', { space: SPACE_ID }));
+      after(() => kibanaServer.importExport.unload('saved_objects/basic', { space: SPACE_ID }));
 
       it('should return 200 with individual responses', async () =>
         await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=visualization&fields=title')
+          .get(
+            `/s/${SPACE_ID}/api/kibana/management/saved_objects/_find?type=visualization&fields=title`
+          )
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
@@ -41,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('unknown type', () => {
         it('should return 200 with empty response', async () =>
           await supertest
-            .get('/api/kibana/management/saved_objects/_find?type=wigwags')
+            .get(`/s/${SPACE_ID}/api/kibana/management/saved_objects/_find?type=wigwags`)
             .expect(200)
             .then((resp: Response) => {
               expect(resp.body).to.eql({
@@ -57,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return 200 with empty response', async () =>
           await supertest
             .get(
-              '/api/kibana/management/saved_objects/_find?type=visualization&page=100&perPage=100'
+              `/s/${SPACE_ID}/api/kibana/management/saved_objects/_find?type=visualization&page=100&perPage=100`
             )
             .expect(200)
             .then((resp: Response) => {
@@ -73,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('unknown search field', () => {
         it('should return 400 when using searchFields', async () =>
           await supertest
-            .get('/api/kibana/management/saved_objects/_find?type=url&searchFields=a')
+            .get(`/s/${SPACE_ID}/api/kibana/management/saved_objects/_find?type=url&searchFields=a`)
             .expect(400)
             .then((resp: Response) => {
               expect(resp.body).to.eql({
@@ -85,12 +92,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('`hasReference` and `hasReferenceOperator` parameters', () => {
-        before(() => kibanaServer.importExport.load('saved_objects/references'));
-        after(() => kibanaServer.importExport.unload('saved_objects/references'));
+        before(() =>
+          kibanaServer.importExport.load('saved_objects/references', { space: SPACE_ID })
+        );
+        after(() =>
+          kibanaServer.importExport.unload('saved_objects/references', { space: SPACE_ID })
+        );
 
         it('search for a reference', async () => {
           await supertest
-            .get('/api/kibana/management/saved_objects/_find')
+            .get(`/s/${SPACE_ID}/api/kibana/management/saved_objects/_find`)
             .query({
               type: 'visualization',
               hasReference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
@@ -104,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('search for multiple references with OR operator', async () => {
           await supertest
-            .get('/api/kibana/management/saved_objects/_find')
+            .get(`/s/${SPACE_ID}/api/kibana/management/saved_objects/_find`)
             .query({
               type: 'visualization',
               hasReference: JSON.stringify([
@@ -126,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('search for multiple references with AND operator', async () => {
           await supertest
-            .get('/api/kibana/management/saved_objects/_find')
+            .get(`/s/${SPACE_ID}/api/kibana/management/saved_objects/_find`)
             .query({
               type: 'visualization',
               hasReference: JSON.stringify([
@@ -145,12 +156,16 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('meta attributes injected properly', () => {
-      before(() => esArchiver.load('management/saved_objects/search'));
-      after(() => esArchiver.unload('management/saved_objects/search'));
+      before(() =>
+        kibanaServer.importExport.load('management/saved_objects/search', { space: SPACE_ID })
+      );
+      after(() =>
+        kibanaServer.importExport.unload('management/saved_objects/search', { space: SPACE_ID })
+      );
 
       it('should inject meta attributes for searches', async () =>
         await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=search')
+          .get(`/s/${SPACE_ID}/api/kibana/management/saved_objects/_find?type=search`)
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(1);
@@ -170,7 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should inject meta attributes for dashboards', async () =>
         await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=dashboard')
+          .get(`/s/${SPACE_ID}/api/kibana/management/saved_objects/_find?type=dashboard`)
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(1);
@@ -190,7 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should inject meta attributes for visualizations', async () =>
         await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=visualization')
+          .get(`/s/${SPACE_ID}/api/kibana/management/saved_objects/_find?type=visualization`)
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(2);
@@ -222,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should inject meta attributes for index patterns', async () =>
         await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=index-pattern')
+          .get(`/s/${SPACE_ID}/api/kibana/management/saved_objects/_find?type=index-pattern`)
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(1);

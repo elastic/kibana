@@ -1,0 +1,59 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "yearly-2017",
+    "id": "AVv2tOTlSsf_5dYb1tNz",
+    "source": {
+      "time": "2017-01-01T00:00Z",
+      "count": 1
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "yearly-2016",
+    "id": "AVv2tOTlSsf_5dYb1tNy",
+    "source": {
+      "time": "2016-01-01T00:00Z",
+      "count": 1
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "yearly-2018",
+    "id": "AVv2tOTlSsf_5dYb1tN0",
+    "source": {
+      "time": "2018-01-01T00:00Z",
+      "count": 1
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "monthly-invalid",
+    "id": "AVv2tOTlSsf_5dYb1tN1",
+    "source": {
+      "time": "2018-01-01T00:00Z",
+      "count": 1
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "monthly-2017.01",
+    "id": "AVv2tOTlSsf_5dYb1tN2",
+    "source": {
+      "time": "2018-01-01T00:00Z",
+      "count": 1
+    }
+  }
+}

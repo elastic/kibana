@@ -1,0 +1,55 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-2017.01.02",
+    "id": "di6ChV0Bz4BR9SDcnfdn",
+    "source": {
+      "@timestamp": "2017-01-02T00:00:00Z",
+      "success": true,
+      "string_conflict": "another sample",
+      "number_conflict": 2.1
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-2017.01.02",
+    "id": "dS6ChV0Bz4BR9SDcmPdQ",
+    "source": {
+      "@timestamp": "2017-01-02T00:00:00Z",
+      "success": true,
+      "string_conflict": "sample",
+      "number_conflict": 1.1
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-2017.01.01",
+    "id": "cy6ChV0Bz4BR9SDciPdp",
+    "source": {
+      "@timestamp": "2017-01-01T00:00:00Z",
+      "success": "true",
+      "string_conflict": "sample",
+      "number_conflict": 1
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-2017.01.01",
+    "id": "dC6ChV0Bz4BR9SDci_dx",
+    "source": {
+      "@timestamp": "2017-01-01T00:00:00Z",
+      "success": "true",
+      "string_conflict": "another sample",
+      "number_conflict": 2
+    }
+  }
+}

@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -49,11 +50,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/89958
   describe.skip('visualize integration', () => {
     before(async () => {
-      await esArchiver.load('visualize');
+      await kibanaServer.importExport.load('visualize');
       await esArchiver.loadIfNeeded('logstash_functional');
     });
     after(async () => {
-      await esArchiver.unload('visualize');
+      await kibanaServer.importExport.load('visualize');
       await esArchiver.unload('logstash_functional');
     });
 

@@ -10,18 +10,19 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'visualize', 'visChart', 'visEditor', 'vegaChart']);
   const visualTesting = getService('visualTesting');
 
   describe('vega chart in visualize app', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('kibana_sample_data_flights');
-      await esArchiver.loadIfNeeded('visualize');
+      await kibanaServer.importExport.load('visualize');
     });
 
     after(async () => {
       await esArchiver.unload('kibana_sample_data_flights');
-      await esArchiver.unload('visualize');
+      await kibanaServer.importExport.unload('visualize');
     });
 
     it('should show map with vega layer', async function () {

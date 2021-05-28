@@ -12,12 +12,12 @@
     "title": "New TimeLion Sheet",
     "version": 1
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.14.0",
   "id": "190f3e90-2ec3-11e8-ba48-69fc4e41e1f6",
   "references": [],
   "type": "timelion-sheet",
   "updated_at": "2018-03-23T17:53:30.872Z",
-  "version": "WzgsMl0="
+  "version": "WzcsMl0="
 }
 
 {
@@ -25,7 +25,7 @@
     "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"id\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
     "title": "saved_objects*"
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.14.0",
   "id": "8963ca30-3224-11e8-a572-ffca06da1357",
   "migrationVersion": {
     "index-pattern": "7.11.0"
@@ -33,7 +33,7 @@
   "references": [],
   "type": "index-pattern",
   "updated_at": "2018-03-28T01:08:34.290Z",
-  "version": "WzksMl0="
+  "version": "WzgsMl0="
 }
 
 {
@@ -55,7 +55,7 @@
     "title": "OneRecord",
     "version": 1
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.14.0",
   "id": "960372e0-3224-11e8-a572-ffca06da1357",
   "migrationVersion": {
     "search": "7.9.3"
@@ -69,7 +69,7 @@
   ],
   "type": "search",
   "updated_at": "2018-03-28T01:08:55.182Z",
-  "version": "WzExLDJd"
+  "version": "WzEwLDJd"
 }
 
 {
@@ -84,7 +84,7 @@
     "version": 1,
     "visState": "{\"title\":\"VisualizationFromSavedSearch\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showToolbar\":true},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}]}"
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.14.0",
   "id": "a42c0580-3224-11e8-a572-ffca06da1357",
   "migrationVersion": {
     "visualization": "7.13.0"
@@ -112,7 +112,7 @@
     "version": 1,
     "visState": "{\"title\":\"Visualization\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":60}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}]}"
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "7.14.0",
   "id": "add810b0-3224-11e8-a572-ffca06da1357",
   "migrationVersion": {
     "visualization": "7.13.0"
@@ -126,7 +126,7 @@
   ],
   "type": "visualization",
   "updated_at": "2018-03-28T01:09:35.163Z",
-  "version": "WzEzLDJd"
+  "version": "WzEyLDJd"
 }
 
 {
@@ -161,40 +161,5 @@
   ],
   "type": "dashboard",
   "updated_at": "2018-03-28T01:09:50.606Z",
-  "version": "WzE0LDJd"
-}
-
-{
-  "attributes": {
-    "description": "",
-    "hits": 0,
-    "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
-    },
-    "optionsJSON": "{}",
-    "panelsJSON": "[]",
-    "timeRestore": false,
-    "title": "Dashboard",
-    "version": 1
-  },
-  "coreMigrationVersion": "8.0.0",
-  "id": "invalid-refs",
-  "migrationVersion": {
-    "dashboard": "7.11.0"
-  },
-  "references": [
-    {
-      "id": "add810b0-3224-11e8-a572-ffca06da1357",
-      "name": "valid-ref",
-      "type": "visualization"
-    },
-    {
-      "id": "invalid-vis",
-      "name": "missing-ref",
-      "type": "visualization"
-    }
-  ],
-  "type": "dashboard",
-  "updated_at": "2018-03-28T01:09:50.606Z",
-  "version": "WzE1LDJd"
+  "version": "WzEzLDJd"
 }

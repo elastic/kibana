@@ -1,0 +1,23 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-2017.01.01",
+    "id": "1",
+    "source": {
+      "@timestamp": "2017-01-01T00:00:00Z",
+      "Jan01": true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-2017.01.02",
+    "id": "1",
+    "source": {
+      "@timestamp": "2017-01-02T00:00:00Z",
+      "Jan02": true
+    }
+  }
+}

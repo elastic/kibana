@@ -14,13 +14,15 @@ export default function ({ getService, loadTestFile }) {
   describe('custom visualizations', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/visualize');
+      await kibanaServer.importExport.load('visualize');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
         defaultIndex: 'logstash-*',
       });
       await browser.setWindowSize(1300, 900);
     });
+
+    after(async () => kibanaServer.importExport.unload('visualize'));
 
     loadTestFile(require.resolve('./self_changing_vis'));
   });

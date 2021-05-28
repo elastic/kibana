@@ -22,7 +22,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('long_window_logstash');
+      await kibanaServer.importExport.load('visualize');
     });
+
+    after(() => kibanaServer.importExport.unload('visualize'));
 
     // TODO: Remove when vislib is removed
     describe('new charts library visualize ciGroup7', function () {

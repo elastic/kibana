@@ -213,6 +213,10 @@ export default async function ({ readConfigFile }) {
       directory: resolve(__dirname, 'es_archives'),
     },
 
+    kbnArchiver: {
+      directory: resolve(__dirname, 'kbn_archives'),
+    },
+
     // choose where screenshots should be saved
     screenshots: {
       directory: resolve(__dirname, 'screenshots'),

@@ -195,6 +195,7 @@ export default function ({ getService }) {
           'size',
           'isFrozen',
           'aliases',
+          'data_stream',
           // Cloud disables CCR, so wouldn't expect follower indices.
           'isFollowerIndex', // data enricher
           'ilm', // data enricher
@@ -227,6 +228,7 @@ export default function ({ getService }) {
             'size',
             'isFrozen',
             'aliases',
+            'data_stream',
             // Cloud disables CCR, so wouldn't expect follower indices.
             'isFollowerIndex', // data enricher
             'ilm', // data enricher
