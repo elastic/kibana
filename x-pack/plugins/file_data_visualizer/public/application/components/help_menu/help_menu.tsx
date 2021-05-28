@@ -19,8 +19,8 @@ export const HelpMenu: FC<HelpMenuProps> = React.memo(({ docLink }) => {
 
   useEffect(() => {
     chrome.setHelpExtension({
-      appName: i18n.translate('xpack.ml.chrome.help.appName', {
-        defaultMessage: 'Machine Learning',
+      appName: i18n.translate('xpack.fileDataVisualizer.chrome.help.appName', {
+        defaultMessage: 'Data Visualizer',
       }),
       links: [
         {

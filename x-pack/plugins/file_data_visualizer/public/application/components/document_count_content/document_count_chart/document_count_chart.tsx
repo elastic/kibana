@@ -41,9 +41,12 @@ export const DocumentCountChart: FC<Props> = ({
   timeRangeLatest,
   interval,
 }) => {
-  const seriesName = i18n.translate('xpack.ml.fieldDataCard.documentCountChart.seriesLabel', {
-    defaultMessage: 'document count',
-  });
+  const seriesName = i18n.translate(
+    'xpack.fileDataVisualizer.fieldDataCard.documentCountChart.seriesLabel',
+    {
+      defaultMessage: 'document count',
+    }
+  );
 
   const xDomain = {
     min: timeRangeEarliest,
@@ -65,6 +68,7 @@ export const DocumentCountChart: FC<Props> = ({
       ];
     }
     return chartPoints;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPoints, timeRangeEarliest, timeRangeLatest, interval]);
 
   return (

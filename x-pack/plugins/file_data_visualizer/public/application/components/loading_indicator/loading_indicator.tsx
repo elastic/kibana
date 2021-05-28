@@ -21,7 +21,10 @@ export const LoadingIndicator: FC = () => (
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
         <EuiText color="subdued">
-          <FormattedMessage id="xpack.ml.fieldDataCard.loadingLabel" defaultMessage="Loading" />
+          <FormattedMessage
+            id="xpack.fileDataVisualizer.fieldDataCard.loadingLabel"
+            defaultMessage="Loading"
+          />
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -178,13 +178,19 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   useEffect(() => {
     if (!currentIndexPattern.isTimeBased()) {
       toasts.addWarning({
-        title: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationTitle', {
-          defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
-          values: { indexPatternTitle: currentIndexPattern.title },
-        }),
-        text: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationDescription', {
-          defaultMessage: 'Anomaly detection only runs over time-based indices',
-        }),
+        title: i18n.translate(
+          'xpack.fileDataVisualizer.indexPatternNotBasedOnTimeSeriesNotificationTitle',
+          {
+            defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
+            values: { indexPatternTitle: currentIndexPattern.title },
+          }
+        ),
+        text: i18n.translate(
+          'xpack.fileDataVisualizer.indexPatternNotBasedOnTimeSeriesNotificationDescription',
+          {
+            defaultMessage: 'Anomaly detection only runs over time-based indices',
+          }
+        ),
       });
     }
   }, [currentIndexPattern, toasts]);
@@ -755,7 +761,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     const actionColumn: EuiTableActionsColumnType<FieldVisConfig> = {
       name: (
         <FormattedMessage
-          id="xpack.ml.dataVisualizer.indexBasedDataGrid.actionsColumnLabel"
+          id="xpack.fileDataVisualizer.indexBasedDataGrid.actionsColumnLabel"
           defaultMessage="Actions"
         />
       ),
