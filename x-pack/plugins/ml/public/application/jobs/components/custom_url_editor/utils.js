@@ -15,6 +15,7 @@ import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../../src/plugins
 import { getPartitioningFieldNames } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
+import { getIndexPatternIdFromName } from '../../../util/index_utils';
 import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
@@ -38,7 +39,7 @@ export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
   }
 
   // For the Discover option, set the default index pattern to that
-  // which matches the (first) index configured in the job datafeed.
+  // which matches the indices configured in the job datafeed.
   const datafeedConfig = job.datafeed_config;
   if (
     indexPatterns !== undefined &&
@@ -47,16 +48,9 @@ export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
     datafeedConfig.indices !== undefined &&
     datafeedConfig.indices.length > 0
   ) {
-    const datafeedIndex = datafeedConfig.indices[0];
-    let defaultIndexPattern = indexPatterns.find((indexPattern) => {
-      return indexPattern.title === datafeedIndex;
-    });
-
-    if (defaultIndexPattern === undefined) {
-      defaultIndexPattern = indexPatterns[0];
-    }
-
-    kibanaSettings.discoverIndexPatternId = defaultIndexPattern.id;
+    const defaultIndexPatternId =
+      getIndexPatternIdFromName(datafeedConfig.indices.join()) ?? indexPatterns[0].id;
+    kibanaSettings.discoverIndexPatternId = defaultIndexPatternId;
   }
 
   return {
