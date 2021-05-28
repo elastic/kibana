@@ -122,8 +122,6 @@ active in case of failure from the currently used instance.
 Kibana can be configured to connect to multiple Elasticsearch nodes in the same cluster.  In situations where a node becomes unavailable,
 Kibana will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion.
 
-Currently the Console application is limited to connecting to the first node listed.
-
 In kibana.yml:
 [source,js]
 --------
