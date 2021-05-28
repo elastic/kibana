@@ -269,7 +269,6 @@ The API returns the following:
         "proposed": {
           "min_required_kibana": 1,
           "avg_recurring_required_throughput_per_minute_per_kibana": 28,
-          "avg_required_throughput_per_minute": 28,
           "avg_required_throughput_per_minute_per_kibana": 28
         }
       }
