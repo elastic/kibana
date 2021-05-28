@@ -86,10 +86,6 @@ export class EnterpriseSearchRequestHandler {
           agent: this.httpAgent,
         };
 
-        this.log.debug(
-          `Proxying request to Enterprise Search: url=${url}, method=${options.method}`
-        );
-
         // Call the Enterprise Search API
         const apiResponse = await fetch(url, options);
 
