@@ -103,9 +103,17 @@ export const EventSchema = schema.maybe(
         server_uuid: ecsString(),
         alerting: schema.maybe(
           schema.object({
-            instance_id: ecsString(),
             action_group_id: ecsString(),
             action_subgroup: ecsString(),
+            instance_id: ecsString(),
+            primary_saved_object: schema.maybe(
+              schema.object({
+                id: ecsString(),
+                type: ecsString(),
+                namespace: ecsString(),
+              })
+            ),
+            rule_type_id: ecsString(),
             status: ecsString(),
           })
         ),

@@ -20,15 +20,35 @@ exports.EcsCustomPropertyMappings = {
       // alerting specific fields
       alerting: {
         properties: {
-          instance_id: {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
           action_group_id: {
             type: 'keyword',
             ignore_above: 1024,
           },
           action_subgroup: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          instance_id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          primary_saved_object: {
+            properties: {
+              id: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              type: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              namespace: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+            },
+          },
+          rule_type_id: {
             type: 'keyword',
             ignore_above: 1024,
           },
