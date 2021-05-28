@@ -55,7 +55,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
     link: getMonitorRouteFromMonitorId({
       monitorId: fields['monitor.id']!,
       dateRangeEnd:
-        fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end'],
+        fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end']!,
       dateRangeStart: moment(new Date(fields['kibana.rac.alert.start']!))
         .subtract('5', 'm')
         .toISOString(),
