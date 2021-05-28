@@ -528,7 +528,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "Component",
-            "description": [],
+            "description": [
+              "A component deferred by `React.lazy`"
+            ],
             "signature": [
               "React.ComponentType<P>"
             ],
@@ -545,7 +547,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fallback",
-            "description": [],
+            "description": [
+              "A fallback component to render while things load; default is `EuiLoadingSpinner`"
+            ],
             "signature": [
               "React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null"
             ],

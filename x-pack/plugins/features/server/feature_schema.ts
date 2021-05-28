@@ -81,8 +81,18 @@ const kibanaPrivilegeSchema = schema.object({
   app: schema.maybe(schema.arrayOf(schema.string())),
   alerting: schema.maybe(
     schema.object({
-      all: schema.maybe(alertingSchema),
-      read: schema.maybe(alertingSchema),
+      rule: schema.maybe(
+        schema.object({
+          all: schema.maybe(alertingSchema),
+          read: schema.maybe(alertingSchema),
+        })
+      ),
+      alert: schema.maybe(
+        schema.object({
+          all: schema.maybe(alertingSchema),
+          read: schema.maybe(alertingSchema),
+        })
+      ),
     })
   ),
   cases: schema.maybe(
@@ -113,8 +123,18 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
   catalogue: schema.maybe(catalogueSchema),
   alerting: schema.maybe(
     schema.object({
-      all: schema.maybe(alertingSchema),
-      read: schema.maybe(alertingSchema),
+      rule: schema.maybe(
+        schema.object({
+          all: schema.maybe(alertingSchema),
+          read: schema.maybe(alertingSchema),
+        })
+      ),
+      alert: schema.maybe(
+        schema.object({
+          all: schema.maybe(alertingSchema),
+          read: schema.maybe(alertingSchema),
+        })
+      ),
     })
   ),
   cases: schema.maybe(
@@ -290,8 +310,8 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
   }
 
   function validateAlertingEntry(privilegeId: string, entry: FeatureKibanaPrivileges['alerting']) {
-    const all = entry?.all ?? [];
-    const read = entry?.read ?? [];
+    const all: string[] = [...(entry?.rule?.all ?? []), ...(entry?.alert?.all ?? [])];
+    const read: string[] = [...(entry?.rule?.read ?? []), ...(entry?.alert?.read ?? [])];
 
     all.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
     read.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));

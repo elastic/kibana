@@ -10,13 +10,10 @@ import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { MapStoreState } from '../../../reducers/store';
 import { fitToDataBounds } from '../../../actions';
-import { getLayerList } from '../../../selectors/map_selectors';
 import { FitToData } from './fit_to_data';
 
 function mapStateToProps(state: MapStoreState) {
-  return {
-    layerList: getLayerList(state),
-  };
+  return {};
 }
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {

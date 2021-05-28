@@ -6,6 +6,7 @@
  */
 
 import { History } from 'history';
+import { OnSaveProps } from 'src/plugins/saved_objects/public';
 import {
   ApplicationStart,
   AppMountParameters,
@@ -16,14 +17,7 @@ import {
   OverlayStart,
   SavedObjectsStart,
 } from '../../../../../src/core/public';
-import {
-  DataPublicPluginStart,
-  Filter,
-  IndexPattern,
-  Query,
-  SavedQuery,
-} from '../../../../../src/plugins/data/public';
-import { Document } from '../persistence';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import { LensAttributeService } from '../lens_attribute_service';
@@ -38,28 +32,7 @@ import {
   EmbeddableEditorState,
   EmbeddableStateTransfer,
 } from '../../../../../src/plugins/embeddable/public';
-import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { EditorFrameInstance } from '../types';
-
-export interface LensAppState {
-  isLoading: boolean;
-  persistedDoc?: Document;
-  lastKnownDoc?: Document;
-
-  // index patterns used to determine which filters are available in the top nav.
-  indexPatternsForTopNav: IndexPattern[];
-
-  // Determines whether the lens editor shows the 'save and return' button, and the originating app breadcrumb.
-  isLinkedToOriginatingApp?: boolean;
-
-  query: Query;
-  filters: Filter[];
-  savedQuery?: SavedQuery;
-  isSaveable: boolean;
-  activeData?: TableInspectorAdapter;
-  searchSessionId: string;
-}
-
 export interface RedirectToOriginProps {
   input?: LensEmbeddableInput;
   isCopied?: boolean;
@@ -80,6 +53,32 @@ export interface LensAppProps {
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
   initialContext?: VisualizeFieldContext;
+}
+
+export type RunSave = (
+  saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
+    returnToOrigin: boolean;
+    dashboardId?: string | null;
+    onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
+    newDescription?: string;
+    newTags?: string[];
+  },
+  options: {
+    saveToLibrary: boolean;
+  }
+) => Promise<void>;
+
+export interface LensTopNavMenuProps {
+  onAppLeave: AppMountParameters['onAppLeave'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+
+  redirectToOrigin?: (props?: RedirectToOriginProps) => void;
+  // The initial input passed in by the container when editing. Can be either by reference or by value.
+  initialInput?: LensEmbeddableInput;
+  getIsByValueMode: () => boolean;
+  indicateNoData: boolean;
+  setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  runSave: RunSave;
 }
 
 export interface HistoryLocationState {
