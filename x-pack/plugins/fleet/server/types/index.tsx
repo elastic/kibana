@@ -71,6 +71,7 @@ export {
   InstallType,
   InstallSource,
   InstallResult,
+  GetCategoriesRequest,
   DataType,
   dataTypes,
   // Fleet Server types

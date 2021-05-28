@@ -7,9 +7,8 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Map as MapboxMap, MapboxOptions, MapMouseEvent } from 'mapbox-gl';
-// @ts-expect-error
-import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
+import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
+
 // @ts-expect-error
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
@@ -17,6 +16,9 @@ import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+
+import { mapboxgl } from '@kbn/mapbox-gl';
+
 import { DrawFilterControl } from './draw_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
@@ -45,13 +47,6 @@ import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapExtentState } from '../../actions';
 import { TileStatusTracker } from './tile_status_tracker';
-// @ts-expect-error
-import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
-// @ts-expect-error
-import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
-
-mapboxgl.workerUrl = mbWorkerUrl;
-mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
 export interface Props {
   isMapReady: boolean;
@@ -423,11 +418,11 @@ export class MBMap extends Component<Props, State> {
   };
 
   render() {
-    let drawControl;
+    let drawFilterControl;
     let tooltipControl;
     let scaleControl;
     if (this.state.mbMap) {
-      drawControl = this.props.addFilters ? (
+      drawFilterControl = this.props.addFilters ? (
         <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
       ) : null;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
@@ -452,7 +447,7 @@ export class MBMap extends Component<Props, State> {
         ref={this._setContainerRef}
         data-test-subj="mapContainer"
       >
-        {drawControl}
+        {drawFilterControl}
         {scaleControl}
         {tooltipControl}
       </div>

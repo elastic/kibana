@@ -16,10 +16,10 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   isValidNumber,
-  useDebounceWithOptions,
   getFilter,
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
+import { useDebounceWithOptions } from '../../../shared_components';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
