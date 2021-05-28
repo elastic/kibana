@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import { DraggableArguments, BadgeOptions, TitleProp } from './types';
 import { DefaultDraggable } from '../draggables';
+import { TruncatableText } from '../truncatable_text';
 
 const StyledEuiBetaBadge = styled(EuiBetaBadge)`
   vertical-align: middle;
@@ -33,7 +34,9 @@ const TitleComponent: React.FC<Props> = ({ draggableArguments, title, badgeOptio
   <EuiTitle size="l">
     <h1 data-test-subj="header-page-title">
       {!draggableArguments ? (
-        title
+        <TruncatableText>
+          {title}
+        </TruncatableText>
       ) : (
         <DefaultDraggable
           data-test-subj="header-page-draggable"
