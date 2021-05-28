@@ -28,7 +28,7 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
       panelId: panel.id,
     };
 
-    const getDateHistogramForLastBucketMode = () => {
+    const overwriteDateHistogramForLastBucketMode = () => {
       const { bucketSize, intervalString } = getBucketSize(
         req,
         interval,
@@ -59,7 +59,7 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
       });
     };
 
-    const getDateHistogramForEntireTimerangeMode = () => {
+    const overwriteDateHistogramForEntireTimerangeMode = () => {
       const bucketInterval = to.valueOf() - from.valueOf();
 
       panel.series.forEach((column) => {
@@ -78,8 +78,8 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
     };
 
     isLastValueTimerangeMode(panel)
-      ? getDateHistogramForLastBucketMode()
-      : getDateHistogramForEntireTimerangeMode();
+      ? overwriteDateHistogramForLastBucketMode()
+      : overwriteDateHistogramForEntireTimerangeMode();
 
     return next(doc);
   };

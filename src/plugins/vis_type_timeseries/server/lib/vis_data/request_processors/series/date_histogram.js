@@ -33,7 +33,7 @@ export function dateHistogram(
 
     let bucketInterval;
 
-    const getDateHistogramForLastBucketMode = () => {
+    const overwriteDateHistogramForLastBucketMode = () => {
       const { timezone } = capabilities;
 
       const { bucketSize, intervalString } = getBucketSize(
@@ -57,7 +57,7 @@ export function dateHistogram(
       bucketInterval = bucketSize * 1000;
     };
 
-    const getDateHistogramForEntireTimerangeMode = () => {
+    const overwriteDateHistogramForEntireTimerangeMode = () => {
       overwrite(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
         field: timeField,
         buckets: 1,
@@ -67,8 +67,8 @@ export function dateHistogram(
     };
 
     isLastValueTimerangeMode(panel, series)
-      ? getDateHistogramForLastBucketMode()
-      : getDateHistogramForEntireTimerangeMode();
+      ? overwriteDateHistogramForLastBucketMode()
+      : overwriteDateHistogramForEntireTimerangeMode();
 
     overwrite(doc, `aggs.${series.id}.meta`, {
       timeField,
