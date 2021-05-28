@@ -312,9 +312,9 @@ export async function getNamedArgumentSuggestions({
   }
 
   const before = ast.value.split(MARKER)[0];
-  // TODO
+
   const suggestions = await data.autocomplete.getQuerySuggestions({
-    language: 'kuery',
+    language: ast.name === 'kql' ? 'kuery' : 'lucene',
     query: ast.value.split(MARKER)[0],
     selectionStart: before.length,
     selectionEnd: before.length,

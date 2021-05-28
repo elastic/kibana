@@ -46,6 +46,7 @@ import { trackUiEvent } from '../../../../../lens_ui_telemetry';
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { regenerateLayerFromAst } from '../parse';
+import { filterByVisibleOperation } from '../util';
 
 export const MemoizedFormulaEditor = React.memo(FormulaEditor);
 
@@ -68,6 +69,8 @@ export function FormulaEditor({
   const overflowDiv1 = React.useRef<HTMLElement>();
   const disposables = React.useRef<monaco.IDisposable[]>([]);
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
+
+  const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
 
   // The Monaco editor needs to have the overflowDiv in the first render. Using an effect
   // requires a second render to work, so we are using an if statement to guarantee it happens
@@ -134,16 +137,11 @@ export function FormulaEditor({
 
       let errors: ErrorWrapper[] = [];
 
-      const { root, error } = tryToParse(text, operationDefinitionMap);
+      const { root, error } = tryToParse(text, visibleOperationsMap);
       if (error) {
         errors = [error];
       } else if (root) {
-        const validationErrors = runASTValidation(
-          root,
-          layer,
-          indexPattern,
-          operationDefinitionMap
-        );
+        const validationErrors = runASTValidation(root, layer, indexPattern, visibleOperationsMap);
         if (validationErrors.length) {
           errors = validationErrors;
         }
@@ -201,7 +199,7 @@ export function FormulaEditor({
           columnId,
           currentColumn,
           indexPattern,
-          operationDefinitionMap
+          visibleOperationsMap
         );
         updateLayer(newLayer);
 
@@ -209,13 +207,13 @@ export function FormulaEditor({
         const markers: monaco.editor.IMarkerData[] = managedColumns
           .flatMap(([id, column]) => {
             if (locations[id]) {
-              const def = operationDefinitionMap[column.operationType];
+              const def = visibleOperationsMap[column.operationType];
               if (def.getErrorMessage) {
                 const messages = def.getErrorMessage(
                   newLayer,
                   id,
                   indexPattern,
-                  operationDefinitionMap
+                  visibleOperationsMap
                 );
                 if (messages) {
                   const startPosition = offsetToRowColumn(text, locations[id].min);
@@ -304,7 +302,7 @@ export function FormulaEditor({
             position: innerText.length - lengthAfterPosition,
             context,
             indexPattern,
-            operationDefinitionMap,
+            operationDefinitionMap: visibleOperationsMap,
             data,
           });
         }
@@ -314,18 +312,18 @@ export function FormulaEditor({
           position: innerText.length - lengthAfterPosition,
           context,
           indexPattern,
-          operationDefinitionMap,
+          operationDefinitionMap: visibleOperationsMap,
           data,
         });
       }
 
       return {
         suggestions: aSuggestions.list.map((s) =>
-          getSuggestion(s, aSuggestions.type, wordRange, operationDefinitionMap)
+          getSuggestion(s, aSuggestions.type, wordRange, visibleOperationsMap)
         ),
       };
     },
-    [indexPattern, operationDefinitionMap, data]
+    [indexPattern, visibleOperationsMap, data]
   );
 
   const provideSignatureHelp = useCallback(
@@ -347,10 +345,10 @@ export function FormulaEditor({
       return getSignatureHelp(
         model.getValue(),
         innerText.length - lengthAfterPosition,
-        operationDefinitionMap
+        visibleOperationsMap
       );
     },
-    [operationDefinitionMap]
+    [visibleOperationsMap]
   );
 
   const provideHover = useCallback(
@@ -371,10 +369,10 @@ export function FormulaEditor({
       return getHover(
         model.getValue(),
         innerText.length - lengthAfterPosition,
-        operationDefinitionMap
+        visibleOperationsMap
       );
     },
-    [operationDefinitionMap]
+    [visibleOperationsMap]
   );
 
   const onTypeHandler = useCallback(
@@ -654,7 +652,7 @@ export function FormulaEditor({
                         <MemoizedFormulaHelp
                           isFullscreen={isFullscreen}
                           indexPattern={indexPattern}
-                          operationDefinitionMap={operationDefinitionMap}
+                          operationDefinitionMap={visibleOperationsMap}
                         />
                       </EuiPopover>
                     </EuiToolTip>
@@ -701,7 +699,7 @@ export function FormulaEditor({
               <MemoizedFormulaHelp
                 isFullscreen={isFullscreen}
                 indexPattern={indexPattern}
-                operationDefinitionMap={operationDefinitionMap}
+                operationDefinitionMap={visibleOperationsMap}
               />
             </div>
           ) : null}
