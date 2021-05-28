@@ -9,7 +9,7 @@ import { CapacityEstimationParams, estimateCapacity } from './capacity_estimatio
 import { HealthStatus, RawMonitoringStats } from './monitoring_stats_stream';
 
 describe('estimateCapacity', () => {
-  test('estimates the max capacity available to handle the tasks in the workload that repeat within a minute', async () => {
+  test('estimates the max throughput per minute based on the workload and the assumed kibana instances', async () => {
     expect(
       estimateCapacity(
         mockStats(
@@ -39,13 +39,12 @@ describe('estimateCapacity', () => {
       ).value
     ).toMatchObject({
       assumed_kibana_instances: 1,
-      min_required_kibana: 1,
-      minutes_to_drain_overdue: 0,
-      max_throughput_per_minute: 200,
+      assumed_minutes_to_drain_overdue: 0,
+      assumed_max_throughput_per_minute: 200,
     });
   });
 
-  test('estimates the min required capacity to handle the tasks in the workload that repeat within a hour or day', async () => {
+  test('estimates the max throughput per minute based on the workload and the assumed kibana instances when there are tasks that repeat each hour or day', async () => {
     expect(
       estimateCapacity(
         mockStats(
@@ -75,13 +74,12 @@ describe('estimateCapacity', () => {
       ).value
     ).toMatchObject({
       assumed_kibana_instances: 1,
-      min_required_kibana: 2,
-      minutes_to_drain_overdue: 0,
-      max_throughput_per_minute: 200,
+      assumed_minutes_to_drain_overdue: 0,
+      assumed_max_throughput_per_minute: 200,
     });
   });
 
-  test('estimates the max capacity available when there are no active Kibana', async () => {
+  test('estimates the max throughput available when there are no active Kibana', async () => {
     expect(
       estimateCapacity(
         mockStats(
@@ -112,15 +110,12 @@ describe('estimateCapacity', () => {
       ).value
     ).toMatchObject({
       assumed_kibana_instances: 1,
-      min_required_kibana: 1,
-      minutes_to_drain_overdue: 0,
-      max_throughput_per_minute: 200,
-      avg_required_throughput_per_minute: 60,
-      avg_recurring_required_throughput_per_minute: 60,
+      assumed_minutes_to_drain_overdue: 0,
+      assumed_max_throughput_per_minute: 200,
     });
   });
 
-  test('estimates the max capacity available to handle the workload when there are multiple kibana', async () => {
+  test('estimates the max throughput available to handle the workload when there are multiple active kibana instances', async () => {
     expect(
       estimateCapacity(
         mockStats(
@@ -150,23 +145,84 @@ describe('estimateCapacity', () => {
       ).value
     ).toMatchObject({
       assumed_kibana_instances: 3,
-      min_required_kibana: 1,
-      minutes_to_drain_overdue: 0,
-      max_throughput_per_minute: 3 * 200, // 3 kibana, 200tpm each
-      avg_required_throughput_per_minute: 150 + 1, // 150 every minute, plus 60 every hour
+      assumed_minutes_to_drain_overdue: 0,
+      assumed_max_throughput_per_minute: 3 * 200, // 3 kibana, 200tpm each
+      assumed_avg_required_throughput_per_minute: 150 + 1, // 150 every minute, plus 60 every hour
+      assumed_avg_required_throughput_per_minute_per_kibana: Math.ceil((150 + 1) / 3),
     });
   });
 
-  test('marks estimated capacity as Warning state when capacity is insufficient for recent spikes of non-recurring workload, but sufficient for the recurring workload', async () => {
+  test('estimates the max throughput available to handle the workload and historical non-recurring tasks when there are multiple active kibana instances', async () => {
+    const provisionedKibanaInstances = 2;
+    // 50% for non-recurring/epehemral + a 3rd of recurring task workload
+    const expectedAverageRequiredCapacityPerKibana = 200 * 0.5 + (150 + 1) / 2;
+
     expect(
       estimateCapacity(
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
-            owner_ids: 1,
+            owner_ids: provisionedKibanaInstances,
             overdue_non_recurring: 0,
             capacity_requirments: {
-              per_minute: 175,
+              per_minute: 150,
+              per_hour: 60,
+              per_day: 0,
+            },
+          },
+          {
+            load: {
+              p50: 40,
+              // assume running at 100% capacity
+              p90: 100,
+              p95: 100,
+              p99: 100,
+            },
+            execution: {
+              duration: {},
+              persistence: {
+                // 50% of tasks are non-recurring/ephemeral executions in the system in recent history
+                ephemeral: 25,
+                non_recurring: 25,
+                recurring: 50,
+              },
+              result_frequency_percent_as_number: {},
+            },
+          }
+        )
+      ).value
+    ).toMatchObject({
+      assumed_kibana_instances: provisionedKibanaInstances,
+      assumed_minutes_to_drain_overdue: 0,
+      assumed_max_throughput_per_minute: provisionedKibanaInstances * 200, // 2 kibana, 200tpm each
+      assumed_avg_required_throughput_per_minute_per_kibana: Math.ceil(
+        expectedAverageRequiredCapacityPerKibana
+      ),
+      assumed_avg_required_throughput_per_minute: Math.ceil(
+        provisionedKibanaInstances * expectedAverageRequiredCapacityPerKibana
+      ), // same as above but for both instances
+    });
+  });
+
+  test('estimates the min required kibana instances when there is insufficient capacity', async () => {
+    const provisionedKibanaInstances = 2;
+    const recurringTasksPerMinute = 251;
+    // 50% for non-recurring/epehemral + half of recurring task workload
+    // there is insufficent capacity for this, but this is what the workload requires of the Kibana instances
+    const expectedAverageRequiredCapacityPerKibanaCurrently =
+      200 * 0.5 + recurringTasksPerMinute / provisionedKibanaInstances;
+    const expectedAverageRequiredCapacityPerKibanaOnceThereAreEnoughServers =
+      200 * 0.5 + recurringTasksPerMinute / (provisionedKibanaInstances + 1);
+
+    expect(
+      estimateCapacity(
+        mockStats(
+          { max_workers: 10, poll_interval: 3000 },
+          {
+            owner_ids: provisionedKibanaInstances,
+            overdue_non_recurring: 0,
+            capacity_requirments: {
+              per_minute: recurringTasksPerMinute,
               per_hour: 0,
               per_day: 0,
             },
@@ -174,34 +230,46 @@ describe('estimateCapacity', () => {
           {
             load: {
               p50: 40,
+              // assume running at 100% capacity
               p90: 100,
               p95: 100,
               p99: 100,
             },
             execution: {
               duration: {},
-              // no non-recurring executions in the system in recent history
               persistence: {
-                ephemeral: 0,
-                non_recurring: 20,
-                recurring: 80,
+                // 50% of tasks are non-recurring/ephemeral executions in the system in recent history
+                ephemeral: 25,
+                non_recurring: 25,
+                recurring: 50,
               },
               result_frequency_percent_as_number: {},
             },
           }
         )
-      )
+      ).value
     ).toMatchObject({
-      status: 'warn',
-      timestamp: expect.any(String),
-      value: {
-        assumed_kibana_instances: 1,
-        min_required_kibana: 2,
-        minutes_to_drain_overdue: 0,
-        max_throughput_per_minute: 200,
-        avg_required_throughput_per_minute: 215,
-        avg_recurring_required_throughput_per_minute: 175,
-      },
+      assumed_kibana_instances: provisionedKibanaInstances,
+      assumed_minutes_to_drain_overdue: 0,
+      assumed_max_throughput_per_minute: provisionedKibanaInstances * 200, // 2 kibana, 200tpm each
+      assumed_avg_required_throughput_per_minute_per_kibana: Math.ceil(
+        expectedAverageRequiredCapacityPerKibanaCurrently
+      ),
+      assumed_avg_required_throughput_per_minute: Math.ceil(
+        provisionedKibanaInstances * expectedAverageRequiredCapacityPerKibanaCurrently
+      ), // same as above bt for both instances
+      min_required_kibana: provisionedKibanaInstances + 1,
+      avg_recurring_required_throughput_per_minute: Math.ceil(recurringTasksPerMinute),
+      avg_recurring_required_throughput_per_minute_per_kibana: Math.ceil(
+        recurringTasksPerMinute / (provisionedKibanaInstances + 1)
+      ),
+      avg_required_throughput_per_minute: Math.ceil(
+        expectedAverageRequiredCapacityPerKibanaOnceThereAreEnoughServers *
+          (1 + provisionedKibanaInstances)
+      ),
+      avg_required_throughput_per_minute_per_kibana: Math.ceil(
+        expectedAverageRequiredCapacityPerKibanaOnceThereAreEnoughServers
+      ),
     });
   });
 
@@ -245,13 +313,48 @@ describe('estimateCapacity', () => {
     ).toMatchObject({
       status: 'OK',
       timestamp: expect.any(String),
-      value: {
-        min_required_kibana: 1,
-        minutes_to_drain_overdue: 0,
-        max_throughput_per_minute: 200,
-        avg_required_throughput_per_minute: 190,
-        avg_recurring_required_throughput_per_minute: 170,
-      },
+      value: expect.any(Object),
+    });
+  });
+
+  test('marks estimated capacity as Warning state when capacity is insufficient for recent spikes of non-recurring workload, but sufficient for the recurring workload', async () => {
+    expect(
+      estimateCapacity(
+        mockStats(
+          { max_workers: 10, poll_interval: 3000 },
+          {
+            owner_ids: 1,
+            overdue_non_recurring: 0,
+            capacity_requirments: {
+              per_minute: 175,
+              per_hour: 0,
+              per_day: 0,
+            },
+          },
+          {
+            load: {
+              p50: 40,
+              p90: 100,
+              p95: 100,
+              p99: 100,
+            },
+            execution: {
+              duration: {},
+              // no non-recurring executions in the system in recent history
+              persistence: {
+                ephemeral: 0,
+                non_recurring: 20,
+                recurring: 80,
+              },
+              result_frequency_percent_as_number: {},
+            },
+          }
+        )
+      )
+    ).toMatchObject({
+      status: 'warn',
+      timestamp: expect.any(String),
+      value: expect.any(Object),
     });
   });
 
@@ -292,13 +395,7 @@ describe('estimateCapacity', () => {
     ).toMatchObject({
       status: 'error',
       timestamp: expect.any(String),
-      value: {
-        min_required_kibana: 2,
-        minutes_to_drain_overdue: 0,
-        max_throughput_per_minute: 200,
-        avg_required_throughput_per_minute: 250,
-        avg_recurring_required_throughput_per_minute: 210,
-      },
+      value: expect.any(Object),
     });
   });
 });

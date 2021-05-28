@@ -5,15 +5,22 @@
  * 2.0.
  */
 
+import { mapValues } from 'lodash';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
 
 export interface CapacityEstimationStat extends JsonObject {
-  minutes_to_drain_overdue: number;
-  max_throughput_per_minute: number;
+  assumed_kibana_instances: number;
+  assumed_max_throughput_per_minute: number;
+  assumed_minutes_to_drain_overdue: number;
   min_required_kibana: number;
-  avg_required_throughput_per_minute: number;
+  max_throughput_per_minute_per_kibana: number;
   avg_recurring_required_throughput_per_minute: number;
+  avg_recurring_required_throughput_per_minute_per_kibana: number;
+  avg_required_throughput_per_minute: number;
+  avg_required_throughput_per_minute_per_kibana: number;
+  assumed_avg_required_throughput_per_minute: number;
+  assumed_avg_required_throughput_per_minute_per_kibana: number;
 }
 
 export type CapacityEstimationParams = Omit<
@@ -44,50 +51,114 @@ export function estimateCapacity(
   const { overdue, capacity_requirments: capacityRequirments } = workload;
   const { poll_interval: pollInterval, max_workers: maxWorkers } = stats.configuration.value;
 
+  /**
+   * Give nth ecurrent configuration how much task capacity do we have?
+   */
   const capacityPerMinutePerKibana = Math.round(((60 * 1000) / pollInterval) * maxWorkers);
-  const capacityAvailablePerMinute = capacityPerMinutePerKibana * assumedKibanaInstances;
 
-  // assuming this Kibana is representative what capacity has historically been used
-  // for the different types at busy times (load at p90)
-  const averageCapacityUsedByPersistedTasks = percentageOf(
-    capacityAvailablePerMinute,
+  /**
+   * If our assumption about the number of Kibana is correct - how much capacity do we have available?
+   */
+  const assumedCapacityAvailablePerMinute = capacityPerMinutePerKibana * assumedKibanaInstances;
+
+  /**
+   * assuming this Kibana is representative what capacity has historically been used for the
+   * different types at busy times (load at p90)
+   */
+  const averageCapacityUsedByPersistedTasksPerKibana = percentageOf(
+    capacityPerMinutePerKibana,
     percentageOf(
       averageLoadPercentage,
       percentageOfExecutionsUsedByRecurringTasks + percentageOfExecutionsUsedByNonRecurringTasks
     )
   );
 
-  const averageCapacityUsedByNonRecurringTasks = percentageOf(
-    capacityAvailablePerMinute,
+  /**
+   * On average, how much of this kibana's capacity has been historically used to execute
+   * non-recurring and ephemeral tasks
+   */
+  const averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana = percentageOf(
+    capacityPerMinutePerKibana,
     percentageOf(averageLoadPercentage, 100 - percentageOfExecutionsUsedByRecurringTasks)
   );
 
+  /**
+   * On average, how much of this kibana's capacity has been historically available
+   * for recurring tasks
+   */
+  const averageCapacityAvailableForRecurringTasksPerKibana =
+    capacityPerMinutePerKibana - averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana;
+
+  /**
+   * On average, how many tasks per minute does this cluster need to execute?
+   */
   const averageRecurringRequiredPerMinute =
     capacityRequirments.per_minute +
-    Math.ceil(capacityRequirments.per_hour / 60) +
-    Math.ceil(capacityRequirments.per_day / 24 / 60);
+    capacityRequirments.per_hour / 60 +
+    capacityRequirments.per_day / 24 / 60;
 
-  const requiredCapacityInPracticePerMinute =
-    averageCapacityUsedByNonRecurringTasks + averageRecurringRequiredPerMinute;
+  /**
+   * assuming each kibana only has as much capacity for recurring tasks as this kibana has has
+   * available historically- how many kibana are needed to handle the current recurring workload?
+   */
+  const minRequiredKibanaInstances = Math.ceil(
+    averageRecurringRequiredPerMinute / averageCapacityAvailableForRecurringTasksPerKibana
+  );
+
+  /**
+   * Assuming the `minRequiredKibanaInstances` Kibana instances are provisioned - how much
+   * of their throughput would we expect to be used by the recurring task workload
+   */
+  const averageRecurringRequiredPerMinutePerKibana =
+    averageRecurringRequiredPerMinute / minRequiredKibanaInstances;
+
+  /**
+   * assuming the historical capacity needed for ephemeral and non-recurring tasks, plus
+   * the amount we know each kibana would need for recurring tasks, how much capacity would
+   * each kibana need if following the minRequiredKibanaInstances?
+   */
+  const averageRequiredThroughputPerMinutePerKibana =
+    averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana +
+    averageRecurringRequiredPerMinute / minRequiredKibanaInstances;
+
+  const assumedAverageRecurringRequiredThroughputPerMinutePerKibana =
+    averageRecurringRequiredPerMinute / assumedKibanaInstances;
+  /**
+   * assuming the historical capacity needed for ephemeral and non-recurring tasks, plus
+   * the amount we know each kibana would need for recurring tasks, how much capacity would
+   * each kibana need if the assumed current number were correct?
+   */
+  const assumedRequiredThroughputPerMinutePerKibana =
+    averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana +
+    averageRecurringRequiredPerMinute / assumedKibanaInstances;
 
   return {
     status:
-      requiredCapacityInPracticePerMinute < capacityAvailablePerMinute
+      assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana
         ? HealthStatus.OK
-        : averageRecurringRequiredPerMinute < capacityAvailablePerMinute
+        : assumedAverageRecurringRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana
         ? HealthStatus.Warning
         : HealthStatus.Error,
     timestamp: new Date().toISOString(),
-    value: {
-      assumed_kibana_instances: assumedKibanaInstances,
-      minutes_to_drain_overdue: Math.ceil(overdue / averageCapacityUsedByPersistedTasks),
-      min_required_kibana: Math.ceil(
-        requiredCapacityInPracticePerMinute / capacityAvailablePerMinute
-      ),
-      max_throughput_per_minute: capacityAvailablePerMinute,
-      avg_recurring_required_throughput_per_minute: averageRecurringRequiredPerMinute,
-      avg_required_throughput_per_minute: requiredCapacityInPracticePerMinute,
-    },
+    value: mapValues(
+      {
+        assumed_kibana_instances: assumedKibanaInstances,
+        assumed_max_throughput_per_minute: assumedCapacityAvailablePerMinute,
+        assumed_minutes_to_drain_overdue:
+          overdue / (assumedKibanaInstances * averageCapacityUsedByPersistedTasksPerKibana),
+        min_required_kibana: minRequiredKibanaInstances,
+        max_throughput_per_minute_per_kibana: capacityPerMinutePerKibana,
+        avg_recurring_required_throughput_per_minute: averageRecurringRequiredPerMinute,
+        avg_recurring_required_throughput_per_minute_per_kibana: averageRecurringRequiredPerMinutePerKibana,
+        avg_required_throughput_per_minute:
+          averageRequiredThroughputPerMinutePerKibana * minRequiredKibanaInstances,
+        avg_required_throughput_per_minute_per_kibana: averageRequiredThroughputPerMinutePerKibana,
+        assumed_avg_required_throughput_per_minute:
+          assumedRequiredThroughputPerMinutePerKibana * assumedKibanaInstances,
+        assumed_avg_required_throughput_per_minute_per_kibana: assumedRequiredThroughputPerMinutePerKibana,
+      },
+      Math.ceil
+    ),
   };
 }
 
