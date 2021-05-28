@@ -9,7 +9,7 @@
 import React, {
   CSSProperties,
   useState,
-  useEffect,
+  useLayoutEffect,
   useCallback,
   createContext,
   useContext,
@@ -31,7 +31,9 @@ export interface Props {
   /** Width of the panel (in percent %) */
   width?: number;
   /** EUI sass background */
-  backgroundColor?: 'euiColorLightestShade' | 'euiColorLightShade' | 'euiColorMediumShade';
+  backgroundColor?: 'euiPageBackground' | 'euiEmptyShade';
+  /** Add a border to the panel */
+  border?: 'left' | 'right';
 }
 
 export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
@@ -39,15 +41,17 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   width,
   className = '',
   backgroundColor,
+  border,
   ...rest
 }) => {
   const [hasFooter, setHasFooter] = useState(false);
 
   /* eslint-disable @typescript-eslint/naming-convention */
   const classes = classnames('fieldEditor__flyoutPanel', className, {
-    'fieldEditor__flyoutPanel--lightestShade': backgroundColor === 'euiColorLightestShade',
-    'fieldEditor__flyoutPanel--lightShade': backgroundColor === 'euiColorLightShade',
-    'fieldEditor__flyoutPanel--mediumShade': backgroundColor === 'euiColorMediumShade',
+    'fieldEditor__flyoutPanel--pageBackground': backgroundColor === 'euiPageBackground',
+    'fieldEditor__flyoutPanel--emptyShade': backgroundColor === 'euiEmptyShade',
+    'fieldEditor__flyoutPanel--leftBorder': border === 'left',
+    'fieldEditor__flyoutPanel--rightBorder': border === 'right',
     'fieldEditor__flyoutPanel--withFooter': hasFooter,
   });
   /* eslint-enable @typescript-eslint/naming-convention */
@@ -58,7 +62,7 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
     setHasFooter(true);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const removePanel = addPanel({ width });
 
     return removePanel;

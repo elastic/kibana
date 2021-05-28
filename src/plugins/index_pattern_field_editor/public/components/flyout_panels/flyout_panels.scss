@@ -7,14 +7,17 @@
   overflow-y: auto;
   padding: $euiSizeL;
 
-  &--lightestShade {
-    background-color: $euiColorLightestShade;
+  &--pageBackground {
+    background-color: $euiPageBackgroundColor;
   }
-  &--lightShade {
-    background-color: $euiColorLightShade;
+  &--emptyShade {
+    background-color: $euiColorEmptyShade;
   }
-  &--mediumShade {
-    background-color: $euiColorMediumShade;
+  &--leftBorder {
+    border-left: $euiBorderThin;
+  }
+  &--rightBorder {
+    border-right: $euiBorderThin;
   }
   &--withFooter {
     height: calc(100% - #{$euiSizeL * 3});

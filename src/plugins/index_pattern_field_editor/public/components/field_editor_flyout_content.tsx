@@ -208,6 +208,13 @@ const FieldEditorFlyoutContentComponent = ({
     <>
       {FieldEditor && (
         <Flyout.Panels flyoutClassName={euiFlyoutClassname} maxWidth={1180}>
+          {/* Preview panel */}
+          {isPanelVisible && (
+            <Flyout.Panel width={40} backgroundColor="euiPageBackground" border="right">
+              <FieldPreview />
+            </Flyout.Panel>
+          )}
+
           {/* Editor panel */}
           <Flyout.Panel width={60}>
             <Flyout.PanelHeader>
@@ -285,13 +292,6 @@ const FieldEditorFlyoutContentComponent = ({
               </>
             </Flyout.PanelFooter>
           </Flyout.Panel>
-
-          {/* Preview panel */}
-          {isPanelVisible && (
-            <Flyout.Panel width={40} backgroundColor="euiColorLightestShade">
-              <FieldPreview />
-            </Flyout.Panel>
-          )}
         </Flyout.Panels>
       )}
 
