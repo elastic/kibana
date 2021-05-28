@@ -17,7 +17,7 @@ export {
   createLifecycleRuleTypeFactory,
   LifecycleAlertService,
 } from './utils/create_lifecycle_rule_type_factory';
-export { AlertTypeWithExecutor } from './types';
+export type { AlertTypeWithExecutor } from './types';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);
