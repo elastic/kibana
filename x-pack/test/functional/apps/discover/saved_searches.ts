@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await panelActionsTimeRange.clickCommonlyUsedTimeRange('Last_90 days');
         await panelActionsTimeRange.clickModalPrimaryButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        expect(await dataGrid.isLoading()).to.be(true);
+        expect(await dataGrid.hasNoResults()).to.be(true);
       });
     });
   });
