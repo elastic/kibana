@@ -136,12 +136,14 @@ export const getRawQueryValidationError = (text: string, operations: Record<stri
 
 const validateQueryQuotes = (rawQuery: string, language: 'kql' | 'lucene') => {
   // check if the raw argument has the minimal requirements
-  const [, rawValue = ''] = rawQuery.split('=');
-  const cleanedRawValue = rawValue.trim();
+  // use the rest operator here to handle cases where comparison operations are used in the query
+  const [, ...rawValue] = rawQuery.split('=');
+  const fullRawValue = (rawValue || ['']).join('');
+  const cleanedRawValue = fullRawValue.trim();
   // it must start with a single quote, and quotes must have a closure
   if (
     cleanedRawValue.length &&
-    (cleanedRawValue[0] !== "'" || !/'\s*([^']+?)\s*'/.test(rawValue)) &&
+    (cleanedRawValue[0] !== "'" || !/'\s*([^']+?)\s*'/.test(fullRawValue)) &&
     // there's a special case when it's valid as two single quote strings
     cleanedRawValue !== "''"
   ) {

@@ -932,6 +932,9 @@ invalid: "
         `count(kql='')`,
         `count(lucene='')`,
         `moving_average(count(kql=''), window=7)`,
+        `count(kql='bytes >= 4000')`,
+        `count(kql='bytes <= 4000')`,
+        `count(kql='bytes = 4000')`,
       ];
       for (const formula of formulas) {
         expect(
