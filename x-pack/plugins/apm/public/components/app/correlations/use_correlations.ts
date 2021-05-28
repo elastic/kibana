@@ -14,7 +14,8 @@ import {
   isErrorResponse,
 } from '../../../../../../../src/plugins/data/public';
 
-import { useMlKibana } from '../../contexts/kibana';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import type { ApmPluginStartDeps } from '../../../plugin';
 
 interface CorrelationsOptions {
   index: string;
@@ -28,9 +29,8 @@ interface CorrelationsOptions {
 }
 
 export const useCorrelations = (params: CorrelationsOptions) => {
-  const {
-    services: { data },
-  } = useMlKibana();
+  const { pluginsStart } = useApmPluginContext();
+  const data = (pluginsStart.data as unknown) as ApmPluginStartDeps['data'];
 
   const [error, setError] = useState<Error>();
   const [isComplete, setIsComplete] = useState(false);
@@ -95,7 +95,8 @@ export const useCorrelations = (params: CorrelationsOptions) => {
   return {
     error,
     histograms: rawResponse?.values ?? [],
-    percentileThresholdValue: rawResponse?.percentileThresholdValue ?? undefined,
+    percentileThresholdValue:
+      rawResponse?.percentileThresholdValue ?? undefined,
     isComplete,
     isRunning,
     progress: loaded / total,

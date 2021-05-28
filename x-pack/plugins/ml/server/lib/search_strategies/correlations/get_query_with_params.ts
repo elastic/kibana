@@ -30,10 +30,10 @@ const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL';
 const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED';
 
 const environmentLabels: Record<string, string> = {
-  [ENVIRONMENT_ALL_VALUE]: i18n.translate('xpack.apm.filter.environment.allLabel', {
+  [ENVIRONMENT_ALL_VALUE]: i18n.translate('xpack.ml.filter.environment.allLabel', {
     defaultMessage: 'All',
   }),
-  [ENVIRONMENT_NOT_DEFINED_VALUE]: i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
+  [ENVIRONMENT_NOT_DEFINED_VALUE]: i18n.translate('xpack.ml.filter.environment.notDefinedLabel', {
     defaultMessage: 'Not defined',
   }),
 };

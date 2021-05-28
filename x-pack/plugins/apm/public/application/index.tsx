@@ -124,6 +124,7 @@ export const renderApp = ({
     config,
     core: coreStart,
     plugins: pluginsSetup,
+    pluginsStart,
     observabilityRuleTypeRegistry,
   };
 

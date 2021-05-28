@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 
 import {
   AnnotationDomainType,
@@ -70,7 +70,7 @@ const barSeriesSpec: Partial<BarSeriesSpec> = {
   yAccessors: ['doc_count_full', 'doc_count'],
 };
 
-interface CorrelationChartProps {
+interface CorrelationsChartProps {
   field: string;
   value: string;
   histogram: Array<{ key: string; doc_count: number; doc_count_full: number }>;
@@ -93,19 +93,21 @@ const annotationsStyle = {
   },
 };
 
-export const CorrelationChart: FC<CorrelationChartProps> = ({
+export function CorrelationsChart({
   field,
   value,
   histogram,
   markerValue,
   markerPercentile,
-}) => {
+}: CorrelationsChartProps) {
   const annotationsDataValues: LineAnnotationDatum[] = [
     { dataValue: markerValue, details: `${markerPercentile}th percentile` },
   ];
 
   return (
-    <div style={{ width: '610px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+    <div
+      style={{ width: '610px', overflow: 'hidden', textOverflow: 'ellipsis' }}
+    >
       <small
         style={{
           textOverflow: 'ellipsis',
@@ -144,4 +146,4 @@ export const CorrelationChart: FC<CorrelationChartProps> = ({
       <EuiSpacer size="s" />
     </div>
   );
-};
+}
