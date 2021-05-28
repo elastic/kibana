@@ -26,7 +26,7 @@ import {
   DashboardVisualizationsService,
 } from './dashboard';
 import { DocTableService } from './doc_table';
-import { EmbeddingProvider } from './embedding';
+import { EmbeddingService } from './embedding';
 import { FilterBarService } from './filter_bar';
 import { FlyoutService } from './flyout';
 import { GlobalNavService } from './global_nav';
@@ -35,7 +35,7 @@ import { FieldEditorService } from './field_editor';
 import { ManagementMenuService } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
-import { RenderableProvider } from './renderable';
+import { RenderableService } from './renderable';
 import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
 import {
@@ -70,8 +70,8 @@ export const services = {
   flyout: FlyoutService,
   comboBox: ComboBoxService,
   dataGrid: DataGridService,
-  embedding: EmbeddingProvider,
-  renderable: RenderableProvider,
+  embedding: EmbeddingService,
+  renderable: RenderableService,
   browser: BrowserProvider,
   pieChart: PieChartService,
   inspector: InspectorService,
