@@ -301,7 +301,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
               values={{
                 link: (
                   <EuiLink
-                    href="https://www.elastic.co/guide/en/fleet/current/index.html"
+                    href="https://www.elastic.co/guide/en/fleet/current/fleet-settings.html#fleet-server-hosts-setting"
                     target="_blank"
                     external
                   >
