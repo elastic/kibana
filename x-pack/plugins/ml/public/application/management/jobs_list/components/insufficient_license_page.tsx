@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { FC, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { CoreStart } from 'kibana/public';
 
 import {
   EuiCallOut,
@@ -20,11 +21,16 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
 
-export const AccessDeniedPage = () => (
+interface Props {
+  basePath: CoreStart['http']['basePath'];
+}
+
+export const InsufficientLicensePage: FC<Props> = ({ basePath }) => (
   <Fragment>
-    <EuiPage data-test-subj="mlPageAccessDenied">
+    <EuiPage data-test-subj="mlPageInsufficientLicense">
       <EuiPageBody>
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
@@ -41,8 +47,9 @@ export const AccessDeniedPage = () => (
         <EuiPageContentBody>
           <EuiSpacer size="m" />
           <EuiCallOut
-            title={i18n.translate('xpack.ml.management.jobsList.noPermissionToAccessLabel', {
-              defaultMessage: 'Access denied',
+            title={i18n.translate('xpack.ml.management.jobsList.insufficientLicenseLabel', {
+              defaultMessage:
+                'Machine Learning is only available on a trial, platinum or enterprise license',
             })}
             color="danger"
             iconType="cross"
@@ -50,8 +57,20 @@ export const AccessDeniedPage = () => (
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.ml.management.jobsList.noGrantedPrivilegesDescription"
-                  defaultMessage="You don’t have permission to manage ML jobs"
+                  id="xpack.ml.management.jobsList.insufficientLicenseDescription"
+                  defaultMessage="Please {link} to use Machine Learning features"
+                  values={{
+                    link: (
+                      <EuiLink
+                        href={`${basePath.get()}/app/management/stack/license_management/home`}
+                      >
+                        <FormattedMessage
+                          id="xpack.ml.management.jobsList.insufficientLicenseDescription.link"
+                          defaultMessage="upgrade your license or start a trial"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
                 />
               </p>
             </EuiText>
