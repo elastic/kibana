@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`set correct defaults 1`] = `
+Object {
+  "accessCheckTimeout": 5000,
+  "accessCheckTimeoutWarning": 300,
+  "certificateAuthorities": Array [],
+  "enabled": true,
+  "host": undefined,
+  "httpAgent": Any<Agent>,
+  "rejectUnauthorized": false,
+}
+`;

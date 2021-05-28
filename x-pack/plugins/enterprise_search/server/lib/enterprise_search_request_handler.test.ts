@@ -476,6 +476,7 @@ const EnterpriseSearchAPI = {
       headers: { Authorization: 'Basic 123', ...JSON_HEADER },
       method: 'GET',
       body: undefined,
+      agent: mockConfig.httpAgent,
       ...expectedParams,
     });
   },

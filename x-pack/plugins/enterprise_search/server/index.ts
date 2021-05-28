@@ -10,22 +10,8 @@ import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/serve
 
 import { EnterpriseSearchPlugin } from './plugin';
 
+export { config, configSchema } from './lib/enterprise_search_config';
+
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new EnterpriseSearchPlugin(initializerContext);
-};
-
-export const configSchema = schema.object({
-  host: schema.maybe(schema.string()),
-  enabled: schema.boolean({ defaultValue: true }),
-  accessCheckTimeout: schema.number({ defaultValue: 5000 }),
-  accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
-});
-
-export type ConfigType = TypeOf<typeof configSchema>;
-
-export const config: PluginConfigDescriptor<ConfigType> = {
-  schema: configSchema,
-  exposeToBrowser: {
-    host: true,
-  },
 };

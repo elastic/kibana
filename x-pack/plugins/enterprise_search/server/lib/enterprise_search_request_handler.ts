@@ -22,10 +22,10 @@ import {
   READ_ONLY_MODE_HEADER,
 } from '../../common/constants';
 
-import { ConfigType } from '../index';
+import { EnterpriseSearchConfig } from './enterprise_search_config';
 
 interface ConstructorDependencies {
-  config: ConfigType;
+  config: EnterpriseSearchConfig;
   log: Logger;
 }
 interface RequestParams {
@@ -53,12 +53,14 @@ export interface IEnterpriseSearchRequestHandler {
  */
 export class EnterpriseSearchRequestHandler {
   private enterpriseSearchUrl: string;
+  private httpAgent;
   private log: Logger;
   private headers: Record<string, string> = {};
 
   constructor({ config, log }: ConstructorDependencies) {
     this.log = log;
     this.enterpriseSearchUrl = config.host as string;
+    this.httpAgent = config.httpAgent;
   }
 
   createRequest({ path, params = {}, hasValidData = () => true }: RequestParams) {
@@ -77,12 +79,19 @@ export class EnterpriseSearchRequestHandler {
         const url = encodeURI(this.enterpriseSearchUrl) + encodedPath + queryString;
 
         // Set up API options
-        const { method } = request.route;
-        const headers = { Authorization: request.headers.authorization as string, ...JSON_HEADER };
-        const body = this.getBodyAsString(request.body as object | Buffer);
+        const options = {
+          method: request.route.method as string,
+          headers: { Authorization: request.headers.authorization as string, ...JSON_HEADER },
+          body: this.getBodyAsString(request.body as object | Buffer),
+          agent: this.httpAgent,
+        };
+
+        this.log.debug(
+          `Proxying request to Enterprise Search: url=${url}, method=${options.method}`
+        );
 
         // Call the Enterprise Search API
-        const apiResponse = await fetch(url, { method, headers, body });
+        const apiResponse = await fetch(url, options);
 
         // Handle response headers
         this.setResponseHeaders(apiResponse);

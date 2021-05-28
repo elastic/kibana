@@ -14,13 +14,15 @@ import { KibanaRequest, Logger } from 'src/core/server';
 
 import { stripTrailingSlash } from '../../common/strip_slashes';
 import { InitialAppData } from '../../common/types';
-import { ConfigType } from '../index';
+
+import { EnterpriseSearchConfig } from './enterprise_search_config';
 
 interface Params {
   request: KibanaRequest;
-  config: ConfigType;
+  config: EnterpriseSearchConfig;
   log: Logger;
 }
+
 interface Return extends InitialAppData {
   publicUrl?: string;
 }
@@ -54,10 +56,13 @@ export const callEnterpriseSearchConfigAPI = async ({
 
   try {
     const enterpriseSearchUrl = encodeURI(`${config.host}${ENDPOINT}`);
-    const response = await fetch(enterpriseSearchUrl, {
+    const options = {
       headers: { Authorization: request.headers.authorization as string },
       signal: controller.signal,
-    });
+      agent: config.httpAgent,
+    };
+
+    const response = await fetch(enterpriseSearchUrl, options);
     const data = await response.json();
 
     warnMismatchedVersions(data?.version?.number, log);

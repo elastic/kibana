@@ -89,20 +89,27 @@ export class EnterpriseSearchConfig {
     this.accessCheckTimeout = rawConfig.accessCheckTimeout;
     this.accessCheckTimeoutWarning = rawConfig.accessCheckTimeoutWarning;
     this.rejectUnauthorized = rawConfig.ssl.rejectUnauthorized;
+    this.certificateAuthorities = this.loadCertificateAuthorities(
+      rawConfig.ssl.certificateAuthorities
+    );
+    this.httpAgent = this.httpAgentFor(this.host);
+  }
 
-    this.certificateAuthorities = [];
-    const ca = rawConfig.ssl.certificateAuthorities;
+  /**
+   * Loads custom CA certificate files and returns all certificates as an array
+   **/
+  private loadCertificateAuthorities(ca) {
+    const parsedCerts = [];
     if (ca) {
       const paths = Array.isArray(ca) ? ca : [ca];
       if (paths.length > 0) {
         for (const path of paths) {
           const parsedCert = readFileSync(path, 'utf8');
-          this.certificateAuthorities.push(parsedCert);
+          parsedCerts.push(parsedCert);
         }
       }
     }
-
-    this.httpAgent = this.httpAgentFor(this.host);
+    return parsedCerts;
   }
 
   /**
