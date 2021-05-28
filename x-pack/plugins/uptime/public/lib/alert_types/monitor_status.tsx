@@ -14,7 +14,7 @@ import { ValidationResult } from '../../../../triggers_actions_ui/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MonitorStatusTranslations } from '../../../common/translations';
 
-import { format } from './common';
+import { getMonitorRouteFromMonitorId } from './common';
 
 import { AlertTypeInitializer } from '.';
 
@@ -52,15 +52,15 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   requiresAppContext: false,
   format: ({ fields }) => ({
     reason: fields.reason,
-    link: format({
-      pathname: `/app/uptime/monitor/${btoa(fields['monitor.id']!)}`,
-      query: {
-        dateRangeEnd:
-          fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end'],
-        dateRangeStart: moment(new Date(fields['kibana.rac.alert.start']!))
-          .subtract('5', 'm')
-          .toISOString(),
-        filters: JSON.stringify([['observer.geo.name', [fields['observer.geo.name'][0]]]]),
+    link: getMonitorRouteFromMonitorId({
+      monitorId: fields['monitor.id']!,
+      dateRangeEnd:
+        fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end'],
+      dateRangeStart: moment(new Date(fields['kibana.rac.alert.start']!))
+        .subtract('5', 'm')
+        .toISOString(),
+      filters: {
+        'observer.geo.name': [fields['observer.geo.name'][0]],
       },
     }),
   }),

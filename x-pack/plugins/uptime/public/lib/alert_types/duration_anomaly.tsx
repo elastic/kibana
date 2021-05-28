@@ -12,7 +12,7 @@ import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { DurationAnomalyTranslations } from '../../../common/translations';
 import { AlertTypeInitializer } from '.';
 
-import { format } from './common';
+import { getMonitorRouteFromMonitorId } from './common';
 
 import { FormattableAlertTypeModel } from '../../../../observability/public';
 
@@ -35,19 +35,13 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   validate: () => ({ errors: {} }),
   defaultActionMessage,
   requiresAppContext: true,
-  format: ({ fields }) => {
-    return {
-      reason: fields.reason,
-      link: format({
-        pathname: `/app/uptime/monitor/${btoa(fields['monitor.id']!)}`,
-        query: {
-          dateRangeEnd:
-            fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end'],
-          dateRangeStart: moment(new Date(fields['anomaly.start']!))
-            .subtract('5', 'm')
-            .toISOString(),
-        },
-      }),
-    };
-  },
+  format: ({ fields }) => ({
+    reason: fields.reason,
+    link: getMonitorRouteFromMonitorId({
+      monitorId: fields['monitor.id']!,
+      dateRangeEnd:
+        fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end'],
+      dateRangeStart: moment(new Date(fields['anomaly.start']!)).subtract('5', 'm').toISOString(),
+    }),
+  }),
 });
