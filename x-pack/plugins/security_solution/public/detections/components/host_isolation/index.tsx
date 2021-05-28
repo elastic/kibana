@@ -104,7 +104,6 @@ export const HostIsolationPanel = React.memo(
       <UnisolateHost
         agentId={agentId}
         hostName={hostName}
-        alertRule={alertRule}
         cases={associatedCases}
         caseIds={caseIds}
         cancelCallback={cancelCallback}

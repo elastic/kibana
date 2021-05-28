@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { resolvePathVariables } from './utils';
+import { resolvePathVariables } from './resolve_path_variables';
 
 describe('utils', () => {
   describe('resolvePathVariables', () => {
