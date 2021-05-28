@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 
-import { EuiFieldSearch, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { TimelineEntry } from './components/timeline_entry';
 import * as i18 from '../translations';
+import { SearchBar } from '../../../../components/search_bar';
 import { Immutable, EndpointAction } from '../../../../../../common/endpoint/types';
 import { AsyncResourceState } from '../../../../state';
 
 export const EndpointActivityLog = memo(
   ({ endpointActions }: { endpointActions: AsyncResourceState<Immutable<EndpointAction[]>> }) => {
+    // TODO
+    const onSearch = useCallback(() => {}, []);
     return (
       <>
         <EuiSpacer size="l" />
@@ -27,7 +30,7 @@ export const EndpointActivityLog = memo(
           />
         ) : (
           <>
-            <EuiFieldSearch compressed fullWidth placeholder={i18.SEARCH_ACTIVITY_LOG} />
+            <SearchBar onSearch={onSearch} placeholder={i18.SEARCH_ACTIVITY_LOG} />
             <EuiSpacer size="l" />
             {endpointActions.data.map((endpointAction) => (
               <TimelineEntry key={endpointAction.action_id} endpointAction={endpointAction} />
