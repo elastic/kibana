@@ -6,6 +6,8 @@
  */
 
 import type { Direction } from '@elastic/eui';
+import { IUiSettingsClient } from 'kibana/public';
+import { CustomPaletteState, PaletteRegistry } from 'src/plugins/charts/public';
 import type { IAggType } from 'src/plugins/data/public';
 import type { Datatable, RenderMode } from 'src/plugins/expressions';
 import type { FormatFactory, ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
@@ -37,6 +39,8 @@ export type DatatableRenderProps = DatatableProps & {
   dispatchEvent: ILensInterpreterRenderHandlers['event'];
   getType: (name: string) => IAggType;
   renderMode: RenderMode;
+  paletteService: PaletteRegistry;
+  uiSettings: IUiSettingsClient;
 
   /**
    * A boolean for each table row, which is true if the row active
@@ -55,4 +59,10 @@ export interface DataContextType {
   table?: Datatable;
   rowHasRowClickTriggerActions?: boolean[];
   alignments?: Record<string, 'left' | 'right' | 'center'>;
+  minMaxByColumnId?: Record<string, { min: number; max: number }>;
+  getColorForValue?: (
+    value: number | undefined,
+    state: CustomPaletteState,
+    minMax: { min: number; max: number }
+  ) => string | undefined;
 }
