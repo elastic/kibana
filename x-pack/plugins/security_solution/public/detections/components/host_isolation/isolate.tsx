@@ -80,12 +80,7 @@ export const IsolateHost = React.memo(
                 id="xpack.securitySolution.detections.hostIsolation.impactedCases"
                 defaultMessage="This action will be added to {cases}."
                 values={{
-                  cases: (
-                    <b>
-                      {caseCount}
-                      {CASES_ASSOCIATED_WITH_ALERT(caseCount)}
-                    </b>
-                  ),
+                  cases: <b>{CASES_ASSOCIATED_WITH_ALERT(caseCount)}</b>,
                 }}
               />
             }
