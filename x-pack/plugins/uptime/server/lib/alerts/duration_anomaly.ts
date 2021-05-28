@@ -11,8 +11,6 @@ import { schema } from '@kbn/config-schema';
 import {
   ALERT_SEVERITY_LEVEL,
   ALERT_SEVERITY_VALUE,
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
 import { updateState, generateAlertMessage } from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';

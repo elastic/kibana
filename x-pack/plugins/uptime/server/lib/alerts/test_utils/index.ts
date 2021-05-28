@@ -10,7 +10,6 @@ import { UMServerLibs } from '../../lib';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../../adapters';
 import type { UptimeRouter } from '../../../types';
 import type { RuleDataClient } from '../../../../../rule_registry/server';
-import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../alerting/server';
 import { getUptimeESMockClient } from '../../requests/helper';
 import { alertsMock } from '../../../../../alerting/server/mocks';
 import { DynamicSettings } from '../../../../common/runtime_types';
@@ -43,19 +42,11 @@ export const createRuleTypeMocks = (
     certExpirationThreshold: DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
   }
 ) => {
-  let alertExecutor: (...args: any[]) => Promise<any>;
-
   const loggerMock = ({
     debug: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
   } as unknown) as Logger;
-
-  const alerting = {
-    registerType: ({ executor }) => {
-      alertExecutor = executor;
-    },
-  } as AlertingPluginSetupContract;
 
   const scheduleActions = jest.fn();
   const replaceState = jest.fn();
@@ -70,7 +61,6 @@ export const createRuleTypeMocks = (
 
   return {
     dependencies: {
-      alerting,
       logger: loggerMock,
       ruleDataClient: ({
         getReader: () => {
