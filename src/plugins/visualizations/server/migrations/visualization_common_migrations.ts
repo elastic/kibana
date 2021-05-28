@@ -90,4 +90,6 @@ export const commonAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRul
       },
     };
   }
+
+  return visState;
 };
