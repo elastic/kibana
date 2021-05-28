@@ -6,7 +6,6 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { IndicesOptions } from '../../../../common/types/indices';
 import { lazyLoadModules } from '../../../lazy_load_bundle';
 import { GetTimeFieldRangeResponse } from '../../../../common/types/time_field_request';
 
@@ -15,19 +14,17 @@ export async function getTimeFieldRange({
   timeFieldName,
   query,
   runtimeMappings,
-  indicesOptions,
 }: {
   index: string;
   timeFieldName?: string;
   query: any;
   runtimeMappings?: estypes.RuntimeFields;
-  indicesOptions?: IndicesOptions;
-}): Promise<GetTimeFieldRangeResponse> {
-  const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings, indicesOptions });
+}) {
+  const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings });
   const fileUploadModules = await lazyLoadModules();
 
   return await fileUploadModules.getHttp().fetch<GetTimeFieldRangeResponse>({
-    path: `/api/ml/fields_service/time_field_range`,
+    path: `/internal/file_upload/time_field_range`,
     method: 'POST',
     body,
   });
