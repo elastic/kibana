@@ -33,7 +33,10 @@ describe('map_actions', () => {
     describe('store mapState is empty', () => {
       beforeEach(() => {
         require('../selectors/map_selectors').getDataFilters = () => {
-          return {};
+          console.log('get dg');
+          return {
+            zoom: 5,
+          };
         };
 
         require('../selectors/map_selectors').getLayerList = () => {
@@ -61,11 +64,13 @@ describe('map_actions', () => {
             minLat: 5,
             minLon: 95,
           },
+          zoom: 5,
         });
         await action(dispatchMock, getStoreMock);
 
         expect(dispatchMock).toHaveBeenCalledWith({
           mapState: {
+            zoom: 5,
             extent: {
               maxLat: 10,
               maxLon: 100,
@@ -73,10 +78,10 @@ describe('map_actions', () => {
               minLon: 95,
             },
             buffer: {
-              maxLat: 12.5,
-              maxLon: 102.5,
-              minLat: 2.5,
-              minLon: 92.5,
+              maxLat: 21.94305,
+              maxLon: 112.5,
+              minLat: 0,
+              minLon: 90,
             },
           },
           type: 'MAP_EXTENT_CHANGED',
@@ -154,10 +159,10 @@ describe('map_actions', () => {
               minLon: 85,
             },
             buffer: {
-              maxLat: 7.5,
-              maxLon: 92.5,
-              minLat: -2.5,
-              minLon: 82.5,
+              maxLat: 7.71099,
+              maxLon: 92.8125,
+              minLat: -2.81137,
+              minLon: 82.26563,
             },
           },
           type: 'MAP_EXTENT_CHANGED',
@@ -186,10 +191,10 @@ describe('map_actions', () => {
               minLon: 96,
             },
             buffer: {
-              maxLat: 13.5,
-              maxLon: 103.5,
-              minLat: 3.5,
-              minLon: 93.5,
+              maxLat: 13.58192,
+              maxLon: 103.53516,
+              minLat: 3.33795,
+              minLon: 93.33984,
             },
           },
           type: 'MAP_EXTENT_CHANGED',
