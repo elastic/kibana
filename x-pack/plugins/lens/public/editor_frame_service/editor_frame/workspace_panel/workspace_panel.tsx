@@ -55,6 +55,7 @@ import { DropIllustration } from '../../../assets/drop_illustration';
 import { getOriginalRequestErrorMessages } from '../../error_helper';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
 import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
+import { onActiveDataChange, useLensDispatch } from '../../../state_management';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -440,16 +441,15 @@ export const VisualizationWrapper = ({
     ]
   );
 
+  const dispatchLens = useLensDispatch();
+
   const onData$ = useCallback(
     (data: unknown, inspectorAdapters?: Partial<DefaultInspectorAdapters>) => {
       if (inspectorAdapters && inspectorAdapters.tables) {
-        dispatch({
-          type: 'UPDATE_ACTIVE_DATA',
-          tables: inspectorAdapters.tables.tables,
-        });
+        dispatchLens(onActiveDataChange({ activeData: { ...inspectorAdapters.tables.tables } }));
       }
     },
-    [dispatch]
+    [dispatchLens]
   );
 
   if (localState.configurationValidationError?.length) {

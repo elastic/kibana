@@ -16,11 +16,11 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   isValidNumber,
-  useDebounceWithOptions,
   getFilter,
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import { useDebounceWithOptions } from '../../../shared_components';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
