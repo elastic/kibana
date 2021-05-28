@@ -15,20 +15,17 @@ import {
   pagePathGetters,
 } from '../../../../../../../../../fleet/public';
 import { useKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-import { getTrustedAppsListPath } from '../../../../../../common/routing';
-import {
-  TrustedAppsListPageRouteState,
-  GetExceptionSummaryResponse,
-} from '../../../../../../../../common/endpoint/types';
+import { getEventFiltersListPath } from '../../../../../../common/routing';
+import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
 import { PLUGIN_ID as FLEET_PLUGIN_ID } from '../../../../../../../../../fleet/common';
 import { MANAGEMENT_APP_ID } from '../../../../../../common/constants';
 import { useToasts } from '../../../../../../../common/lib/kibana';
 import { LinkWithIcon } from './link_with_icon';
 import { ExceptionItemsSummary } from './exception_items_summary';
-import { TrustedAppsHttpService } from '../../../../../trusted_apps/service';
+import { EventFiltersHttpService } from '../../../../../event_filters/service';
 import { StyledEuiFlexGridGroup, StyledEuiFlexGridItem } from './styled_components';
 
-export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>(({ pkgkey }) => {
+export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(({ pkgkey }) => {
   const {
     services: {
       application: { getUrlForApp },
@@ -37,19 +34,20 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
   } = useKibana<CoreStart & { application: ApplicationStart }>();
   const toasts = useToasts();
   const [stats, setStats] = useState<GetExceptionSummaryResponse | undefined>();
-  const trustedAppsApi = useMemo(() => new TrustedAppsHttpService(http), [http]);
+  const eventFiltersListUrlPath = getEventFiltersListPath();
+  const eventFiltersApi = useMemo(() => new EventFiltersHttpService(http), [http]);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await trustedAppsApi.getTrustedAppsSummary();
-        setStats(response);
+        const summary = await eventFiltersApi.getSummary();
+        setStats(summary);
       } catch (error) {
         toasts.addDanger(
           i18n.translate(
-            'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummaryError',
+            'xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersSummaryError',
             {
-              defaultMessage: 'There was an error trying to fetch trusted apps stats: "{error}"',
+              defaultMessage: 'There was an error trying to fetch event filters stats: "{error}"',
               values: { error },
             }
           )
@@ -57,10 +55,9 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
       }
     };
     fetchStats();
-  }, [toasts, trustedAppsApi]);
-  const trustedAppsListUrlPath = getTrustedAppsListPath();
+  }, [eventFiltersApi, toasts]);
 
-  const trustedAppRouteState = useMemo<TrustedAppsListPageRouteState>(() => {
+  const eventFiltersRouteState = useMemo(() => {
     const fleetPackageCustomUrlPath = `#${pagePathGetters.integration_details_custom({ pkgkey })}`;
     return {
       backButtonLabel: i18n.translate(
@@ -86,8 +83,8 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
           <EuiText>
             <h4>
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsLabel"
-                defaultMessage="Trusted Applications"
+                id="xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersLabel"
+                defaultMessage="Event Filters"
               />
             </h4>
           </EuiText>
@@ -99,14 +96,14 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
           <>
             <LinkWithIcon
               appId={MANAGEMENT_APP_ID}
-              href={getUrlForApp(MANAGEMENT_APP_ID, { path: trustedAppsListUrlPath })}
-              appPath={trustedAppsListUrlPath}
-              appState={trustedAppRouteState}
-              data-test-subj="linkToTrustedApps"
+              href={getUrlForApp(MANAGEMENT_APP_ID, { path: eventFiltersListUrlPath })}
+              appPath={eventFiltersListUrlPath}
+              appState={eventFiltersRouteState}
+              data-test-subj="linkToEventFilters"
             >
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
-                defaultMessage="Manage trusted applications"
+                id="xpack.securitySolution.endpoint.fleetCustomExtension.manageEventFiltersLinkLabel"
+                defaultMessage="Manage event filters"
               />
             </LinkWithIcon>
           </>
@@ -116,4 +113,4 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
   );
 });
 
-FleetTrustedAppsCard.displayName = 'FleetTrustedAppsCard';
+FleetEventFiltersCard.displayName = 'FleetEventFiltersCard';
