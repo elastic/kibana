@@ -16,9 +16,10 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   isValidNumber,
-  useDebounceWithOptions,
+  getFilter,
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
+import { useDebounceWithOptions } from '../../../shared_components';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
@@ -51,6 +52,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     defaultMessage: 'Percentile',
   }),
   input: 'field',
+  operationParams: [{ name: 'percentile', type: 'number', required: false }],
   filterable: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
     if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
@@ -73,13 +75,14 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   },
   getDefaultLabel: (column, indexPattern, columns) =>
     ofName(getSafeName(column.sourceField, indexPattern), column.params.percentile),
-  buildColumn: ({ field, previousColumn, indexPattern }) => {
+  buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileParam =
       previousColumn?.operationType === 'percentile' &&
       previousColumn.params &&
       'percentile' in previousColumn.params &&
       previousColumn.params.percentile;
-    const newPercentileParam = existingPercentileParam || DEFAULT_PERCENTILE_VALUE;
+    const newPercentileParam =
+      columnParams?.percentile ?? (existingPercentileParam || DEFAULT_PERCENTILE_VALUE);
     return {
       label: ofName(getSafeName(field.name, indexPattern), newPercentileParam),
       dataType: 'number',
@@ -87,7 +90,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
-      filter: previousColumn?.filter,
+      filter: getFilter(previousColumn, columnParams),
       params: {
         percentile: newPercentileParam,
         ...getFormatFromPreviousColumn(previousColumn),

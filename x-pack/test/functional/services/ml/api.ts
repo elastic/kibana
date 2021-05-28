@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test/types/ftr';
+import { ProvidedType } from '@kbn/test';
 import { Calendar } from '../../../../plugins/ml/server/models/calendar/index';
 import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
@@ -892,26 +892,17 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED);
     },
 
-    async asignJobToSpaces(jobId: string, jobType: JobType, spacesToAdd: string[], space?: string) {
-      const { body } = await kbnSupertest
-        .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/assign_job_to_space`)
-        .set(COMMON_REQUEST_HEADERS)
-        .send({ jobType, jobIds: [jobId], spaces: spacesToAdd })
-        .expect(200);
-
-      expect(body).to.eql({ [jobId]: { success: true } });
-    },
-
-    async removeJobFromSpaces(
+    async updateJobSpaces(
       jobId: string,
       jobType: JobType,
+      spacesToAdd: string[],
       spacesToRemove: string[],
       space?: string
     ) {
       const { body } = await kbnSupertest
-        .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/remove_job_from_space`)
+        .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/update_jobs_spaces`)
         .set(COMMON_REQUEST_HEADERS)
-        .send({ jobType, jobIds: [jobId], spaces: spacesToRemove })
+        .send({ jobType, jobIds: [jobId], spacesToAdd, spacesToRemove })
         .expect(200);
 
       expect(body).to.eql({ [jobId]: { success: true } });

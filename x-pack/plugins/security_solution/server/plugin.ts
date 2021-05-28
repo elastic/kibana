@@ -27,6 +27,7 @@ import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
+import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
 import { SecurityPluginSetup as SecuritySetup, SecurityPluginStart } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
@@ -101,6 +102,7 @@ export interface StartPlugins {
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
   security: SecurityPluginStart;
+  cases?: CasesPluginStartContract;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -237,7 +239,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             read: ['config'],
           },
           alerting: {
-            all: [SIGNALS_ID, NOTIFICATIONS_ID],
+            rule: {
+              all: [SIGNALS_ID, NOTIFICATIONS_ID],
+            },
+            alert: {
+              all: [SIGNALS_ID, NOTIFICATIONS_ID],
+            },
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
@@ -259,7 +266,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
           },
           alerting: {
-            read: [SIGNALS_ID, NOTIFICATIONS_ID],
+            rule: {
+              read: [SIGNALS_ID, NOTIFICATIONS_ID],
+            },
+            alert: {
+              read: [SIGNALS_ID, NOTIFICATIONS_ID],
+            },
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
@@ -402,6 +414,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       security: plugins.security,
       alerting: plugins.alerting,
       config: this.config!,
+      cases: plugins.cases,
       logger,
       manifestManager,
       registerIngestCallback,

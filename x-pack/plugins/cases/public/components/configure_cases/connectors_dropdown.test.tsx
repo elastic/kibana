@@ -73,7 +73,14 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type="test-file-stub"
+                type={
+                  Object {
+                    "$$typeof": Symbol(react.lazy),
+                    "_ctor": [Function],
+                    "_result": null,
+                    "_status": -1,
+                  }
+                }
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -96,7 +103,14 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type="test-file-stub"
+                type={
+                  Object {
+                    "$$typeof": Symbol(react.lazy),
+                    "_ctor": [Function],
+                    "_result": null,
+                    "_status": -1,
+                  }
+                }
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -119,7 +133,14 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type="test-file-stub"
+                type={
+                  Object {
+                    "$$typeof": Symbol(react.lazy),
+                    "_ctor": [Function],
+                    "_result": null,
+                    "_status": -1,
+                  }
+                }
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -142,7 +163,14 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type="test-file-stub"
+                type={
+                  Object {
+                    "$$typeof": Symbol(react.lazy),
+                    "_ctor": [Function],
+                    "_result": null,
+                    "_status": -1,
+                  }
+                }
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -182,7 +210,9 @@ describe('ConnectorsDropdown', () => {
       wrappingComponent: TestProviders,
     });
 
-    expect(newWrapper.find('button span:not([data-euiicon-type])').text()).toEqual('My Connector');
+    expect(newWrapper.find('button span:not([data-euiicon-type])').at(1).text()).toBe(
+      'My Connector'
+    );
   });
 
   test('if the props hideConnectorServiceNowSir is true, the connector should not be part of the list of options  ', () => {

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { transformError, buildSiemResponse, mergeStatuses, getFailingRules } from '../utils';
+import { buildSiemResponse, mergeStatuses, getFailingRules } from '../utils';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import {
   findRulesStatusesSchema,
