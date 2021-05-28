@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { once } from 'lodash';
 import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import LRU from 'lru-cache';
@@ -27,9 +28,18 @@ import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
+
 import { PluginStartContract as CasesPluginStartContract } from '../../cases/server';
+import {
+  ECS_COMPONENT_TEMPLATE_NAME,
+  TECHNICAL_COMPONENT_TEMPLATE_NAME,
+} from '../../rule_registry/common/assets';
 import { SecurityPluginSetup as SecuritySetup, SecurityPluginStart } from '../../security/server';
-import { RuleDataClient, RuleRegistryPluginSetupContract } from '../../rule_registry/server';
+import {
+  RuleDataClient,
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
+} from '../../rule_registry/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { ListPluginSetup } from '../../lists/server';
@@ -106,7 +116,7 @@ export interface StartPlugins {
   data: DataPluginStart;
   fleet?: FleetStartContract;
   licensing: LicensingPluginStart;
-  ruleRegistry: RuleRegistryPluginSetupContract;
+  ruleRegistry: RuleRegistryPluginStartContract;
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
   security: SecurityPluginStart;
@@ -208,16 +218,54 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
     let ruleDataClient: RuleDataClient | null = null;
     if (experimentalFeatures.ruleRegistryEnabled) {
-      // Create rule-registry data client scoped to security-solution
+      const { ruleDataService } = plugins.ruleRegistry;
       const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
+      const ready = once(async () => {
+        const componentTemplateName = ruleDataService.getFullAssetName(
+          'security-solution-mappings'
+        );
+
+        if (!ruleDataService.isWriteEnabled()) {
+          return;
+        }
+
+        await ruleDataService.createOrUpdateComponentTemplate({
+          name: componentTemplateName,
+          body: {
+            template: {
+              settings: {
+                number_of_shards: 1,
+              },
+              mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
+            },
+          },
+        });
+
+        await ruleDataService.createOrUpdateIndexTemplate({
+          name: ruleDataService.getFullAssetName('security-solution-index-template'),
+          body: {
+            index_patterns: [ruleDataService.getFullAssetName('security-solution*')],
+            composed_of: [
+              ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+              ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
+              componentTemplateName,
+            ],
+          },
+        });
+      });
+
+      ready().catch((err) => {
+        this.logger!.error(err);
+      });
+
       ruleDataClient = new RuleDataClient({
+        alias: plugins.ruleRegistry.ruleDataService.getFullAssetName('security-solution'),
         getClusterClient: async () => {
           const coreStart = await start();
           return coreStart.elasticsearch.client.asInternalUser;
         },
-        ready: () => Promise.resolve(),
-        alias: plugins.ruleRegistry.getFullAssetName(),
+        ready,
       });
 
       // Register reference rule types via rule-registry

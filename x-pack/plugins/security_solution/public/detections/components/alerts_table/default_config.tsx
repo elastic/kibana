@@ -167,30 +167,30 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
         },
       ];
 
-export const requiredFieldsForActionsRuleRegistry = [
-  'alert.id',
-  '@timestamp',
-  'event.kind',
-  'alert.start',
-  'alert.uuid',
-  'event.action',
-  'alert.status',
-  'alert.duration.us',
-  'rule.uuid',
-  'rule.id',
-  'rule.name',
-  'rule.category',
-  'producer',
-  'tags',
-];
+export const requiredFieldMappingsForActionsRuleRegistry = {
+  '@timestamp': '@timestamp',
+  'alert.id': 'kibana.rac.alert.id',
+  'event.kind': 'event.kind',
+  'alert.start': 'kibana.rac.alert.start',
+  'alert.uuid': 'kibana.rac.alert.uuid',
+  'event.action': 'event.action',
+  'alert.status': 'kibana.rac.alert.status',
+  'alert.duration.us': 'kibana.rac.alert.duration.us',
+  'rule.uuid': 'rule.uuid',
+  'rule.id': 'rule.id',
+  'rule.name': 'rule.name',
+  'rule.category': 'rule.category',
+  producer: 'kibana.rac.alert.producer',
+  tags: 'tags',
+};
 
-export const alertsHeadersRuleRegistry: ColumnHeaderOptions[] = requiredFieldsForActionsRuleRegistry.map<ColumnHeaderOptions>(
-  (field) => ({
-    columnHeaderType: defaultColumnHeaderType,
-    id: field,
-    width: 120,
-  })
-);
+export const alertsHeadersRuleRegistry: ColumnHeaderOptions[] = Object.entries(
+  requiredFieldMappingsForActionsRuleRegistry
+).map<ColumnHeaderOptions>(([alias, field]) => ({
+  columnHeaderType: defaultColumnHeaderType,
+  displayAsText: alias,
+  id: field,
+}));
 
 export const alertsDefaultModelRuleRegistry: SubsetTimelineModel = {
   ...timelineDefaults,

@@ -107,7 +107,7 @@ export const initRoutes = (
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
   setSignalsStatusRoute(router);
-  querySignalsRoute(router);
+  querySignalsRoute(router, config);
   getSignalsMigrationStatusRoute(router);
   createSignalsMigrationRoute(router, security);
   finalizeSignalsMigrationRoute(router, security);
@@ -116,7 +116,7 @@ export const initRoutes = (
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
   createIndexRoute(router);
-  readIndexRoute(router);
+  readIndexRoute(router, config);
   deleteIndexRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags

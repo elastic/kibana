@@ -48,36 +48,41 @@ export const createQueryAlertType = (ruleDataClient: RuleDataClient, logger: Log
       services: { alertWithPersistence, findAlerts },
       params: { indexPatterns, customQuery },
     }) {
-      const indexPattern: IIndexPattern = {
-        fields: [],
-        title: indexPatterns.join(),
-      };
+      try {
+        const indexPattern: IIndexPattern = {
+          fields: [],
+          title: indexPatterns.join(),
+        };
 
-      // TODO: kql or lucene?
+        // TODO: kql or lucene?
 
-      const esQuery = buildEsQuery(
-        indexPattern,
-        { query: customQuery, language: 'kuery' },
-        []
-      ) as QueryContainer;
-      const query: ESSearchRequest = {
-        body: {
-          query: esQuery,
-          fields: ['*'],
-          sort: {
-            '@timestamp': 'asc' as const,
+        const esQuery = buildEsQuery(
+          indexPattern,
+          { query: customQuery, language: 'kuery' },
+          []
+        ) as QueryContainer;
+        const query: ESSearchRequest = {
+          body: {
+            query: esQuery,
+            fields: ['*'],
+            sort: {
+              '@timestamp': 'asc' as const,
+            },
           },
-        },
-      };
+        };
 
-      const alerts = await findAlerts(query);
-      alertWithPersistence(alerts).forEach((alert) => {
-        alert.scheduleActions('default', { server: 'server-test' });
-      });
+        const alerts = await findAlerts(query);
+        // console.log('alerts', alerts);
+        alertWithPersistence(alerts).forEach((alert) => {
+          alert.scheduleActions('default', { server: 'server-test' });
+        });
 
-      return {
-        lastChecked: new Date(),
-      };
+        return {
+          lastChecked: new Date(),
+        };
+      } catch (error) {
+        logger.error(error);
+      }
     },
   });
 };

@@ -80,6 +80,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                   ...event,
                   'event.kind': 'signal',
                   'kibana.rac.alert.id': '???',
+                  'kibana.rac.alert.status': 'open',
                   'kibana.rac.alert.uuid': v4(),
                   'kibana.rac.alert.ancestors': isAlert
                     ? ((event['kibana.rac.alert.ancestors'] as string[]) ?? []).concat([
@@ -101,12 +102,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
 
       if (ruleDataClient && numAlerts) {
         await ruleDataClient.getWriter().bulk({
-          body: currentAlerts.map((alert) => ({
-            create: {
-              _index: {},
-            },
-            alert,
-          })),
+          body: currentAlerts.flatMap((event) => [{ index: {} }, event]),
         });
       }
 
