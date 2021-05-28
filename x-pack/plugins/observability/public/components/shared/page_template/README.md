@@ -17,6 +17,8 @@ Now within your solution's **public** plugin `setup` lifecycle method you can ca
 ```typescript
 // x-pack/plugins/example_plugin/public/plugin.ts
 
+import { of } from 'rxjs';
+
 export class Plugin implements PluginClass {
   constructor(_context: PluginInitializerContext) {}
 
