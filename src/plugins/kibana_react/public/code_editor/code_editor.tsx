@@ -187,6 +187,7 @@ export class CodeEditor extends React.Component<Props, {}> {
             wordBasedSuggestions: false,
             wordWrap: 'on',
             wrappingIndent: 'indent',
+            matchBrackets: 'never',
             ...options,
           }}
         />

@@ -472,6 +472,7 @@ export function FormulaEditor({
       wrappingIndent: 'none',
       dimension: { width: 320, height: 200 },
       fixedOverflowWidgets: true,
+      matchBrackets: 'always',
     },
   };
 

@@ -21,5 +21,6 @@ import 'monaco-editor/esm/vs/editor/contrib/folding/folding.js'; // Needed for f
 import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js'; // Needed for suggestions
 import 'monaco-editor/esm/vs/editor/contrib/hover/hover.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/parameterHints.js'; // Needed for signature
+import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/bracketMatching.js'; // Needed for brackets matching highlight
 
 export { monaco };
