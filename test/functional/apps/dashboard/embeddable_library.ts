@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
-  const esArchiver = getService('esArchiver');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -21,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('embeddable library', () => {
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.importExport.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -29,6 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
     });
+
+    after(() => kibanaServer.importExport.unload('dashboard/current/kibana'));
 
     it('unlink visualize panel from embeddable library', async () => {
       // add heatmap panel from library
