@@ -14,7 +14,7 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../../common/constants';
-import { HOST_METADATA_GET_API } from '../../../../../common/endpoint/constants';
+import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   BasicSignals,
@@ -181,6 +181,6 @@ export const getHostMetadata = async ({
   agentId: string;
 }): Promise<HostMetadataInfo> =>
   KibanaServices.get().http.fetch<HostMetadataInfo>(
-    resolvePathVariables(HOST_METADATA_GET_API, { id: agentId }),
+    resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
     { method: 'get' }
   );
