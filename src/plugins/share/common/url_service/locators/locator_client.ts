@@ -7,18 +7,19 @@
  */
 
 import type { SerializableState } from 'src/plugins/kibana_utils/common';
-import type { AbstractLocator } from './abstract_locator';
-import type { LocatorClient, LocatorDefinition, LocatorPublic } from './types';
+import type { LocatorDependencies } from './locator';
+import type { LocatorDefinition, LocatorPublic, ILocatorClient } from './types';
+import { Locator } from './locator';
 
-export abstract class AbstractLocatorClient implements Pick<LocatorClient, 'create' | 'get'> {
+export type LocatorClientDependencies = LocatorDependencies;
+
+export class LocatorClient implements ILocatorClient {
   /**
    * Collection of registered locators.
    */
-  protected locators: Map<string, AbstractLocator<any>> = new Map();
+  protected locators: Map<string, Locator<any>> = new Map();
 
-  protected abstract createLocator<P extends SerializableState>(
-    definition: LocatorDefinition<P>
-  ): AbstractLocator<P>;
+  constructor(protected readonly deps: LocatorClientDependencies) {}
 
   /**
    * Creates and register a URL locator.
@@ -27,7 +28,7 @@ export abstract class AbstractLocatorClient implements Pick<LocatorClient, 'crea
    * @returns A public interface of URL locator.
    */
   public create<P extends SerializableState>(definition: LocatorDefinition<P>): LocatorPublic<P> {
-    const locator = this.createLocator<P>(definition);
+    const locator = new Locator<P>(definition, this.deps);
 
     this.locators.set(definition.id, locator);
 

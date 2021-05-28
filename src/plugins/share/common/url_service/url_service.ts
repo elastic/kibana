@@ -6,14 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { LocatorClient } from './locators';
+import { LocatorClient, LocatorClientDependencies } from './locators';
+
+export type UrlServiceDependencies = LocatorClientDependencies;
 
 /**
  * Common URL Service client interface for server-side and client-side.
  */
-export interface UrlService {
+export class UrlService {
   /**
    * Client to work with locators.
    */
-  locators: LocatorClient;
+  locators: LocatorClient = new LocatorClient(this.deps);
+
+  constructor(protected readonly deps: UrlServiceDependencies) {}
 }

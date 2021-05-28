@@ -7,5 +7,5 @@
  */
 
 export * from './types';
-export * from './abstract_locator';
-export * from './abstract_locator_client';
+export * from './locator';
+export * from './locator_client';
