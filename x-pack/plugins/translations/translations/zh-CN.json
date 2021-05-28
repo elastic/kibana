@@ -10116,7 +10116,6 @@
     "xpack.idxMgmt.indexTemplatesList.viewCloudManagedTemplateLabel": "云托管模板",
     "xpack.idxMgmt.indexTemplatesList.viewManagedTemplateLabel": "托管模板",
     "xpack.idxMgmt.indexTemplatesList.viewSystemTemplateLabel": "系统模板",
-    "xpack.idxMgmt.licenseCheckErrorMessage": "许可证检查失败",
     "xpack.idxMgmt.mappingsEditor.addFieldButtonLabel": "添加字段",
     "xpack.idxMgmt.mappingsEditor.addMultiFieldTooltipLabel": "添加多字段以使用不同的方式索引相同的字段。",
     "xpack.idxMgmt.mappingsEditor.addPropertyButtonLabel": "添加属性",
