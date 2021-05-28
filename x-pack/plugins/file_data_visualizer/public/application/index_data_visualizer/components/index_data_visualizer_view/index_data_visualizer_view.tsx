@@ -52,7 +52,7 @@ import {
   JobFieldType,
   SavedSearchSavedObject,
 } from '../../../../../common/types';
-import { useFileDataVisualizerKibana } from '../../../kibana_context';
+import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../components/field_count_panel';
 import { DocumentCountContent } from '../../../components/document_count_content';
 import { DataLoader } from '../../data_loader/data_loader';
@@ -125,7 +125,7 @@ const restorableDefaults = getDefaultDataVisualizerListState();
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
   const {
     services: { lens: lensPlugin, docLinks, notifications, uiSettings },
-  } = useFileDataVisualizerKibana();
+  } = useDataVisualizerKibana();
   const { toasts } = notifications;
 
   const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(

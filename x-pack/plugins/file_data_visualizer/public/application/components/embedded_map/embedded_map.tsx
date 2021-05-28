@@ -23,7 +23,7 @@ import {
   isErrorEmbeddable,
   ViewMode,
 } from '../../../../../../../src/plugins/embeddable/public';
-import { useFileDataVisualizerKibana } from '../../kibana_context';
+import { useDataVisualizerKibana } from '../../kibana_context';
 
 export function EmbeddedMapComponent({
   layerList,
@@ -41,7 +41,7 @@ export function EmbeddedMapComponent({
 
   const {
     services: { embeddable: embeddablePlugin, maps: mapsPlugin },
-  } = useFileDataVisualizerKibana();
+  } = useDataVisualizerKibana();
 
   const factory:
     | EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput, MapEmbeddable>

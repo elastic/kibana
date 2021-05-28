@@ -15,7 +15,7 @@ import {
   DiscoverUrlGeneratorState,
 } from '../../../../../../../../src/plugins/discover/public';
 import type { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
-import { useFileDataVisualizerKibana } from '../../../kibana_context';
+import { useDataVisualizerKibana } from '../../../kibana_context';
 import { useUrlState } from '../../../util/url_state';
 import { LinkCard } from '../../../components/link_card';
 
@@ -25,7 +25,7 @@ interface Props {
   searchQueryLanguage?: string;
 }
 
-// @todo: add back create job card
+// @todo: Add back create job card in a follow up PR
 export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQueryLanguage }) => {
   const [globalState] = useUrlState('_g');
 
@@ -37,7 +37,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
         urlGenerators: { getUrlGenerator },
       },
     },
-  } = useFileDataVisualizerKibana();
+  } = useDataVisualizerKibana();
 
   useEffect(() => {
     let unmounted = false;

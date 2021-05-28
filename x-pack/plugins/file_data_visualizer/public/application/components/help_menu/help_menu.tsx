@@ -7,7 +7,7 @@
 
 import React, { FC, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useFileDataVisualizerKibana } from '../../kibana_context';
+import { useDataVisualizerKibana } from '../../kibana_context';
 
 interface HelpMenuProps {
   docLink: string;
@@ -15,7 +15,7 @@ interface HelpMenuProps {
 
 // Component for adding a documentation link to the help menu
 export const HelpMenu: FC<HelpMenuProps> = React.memo(({ docLink }) => {
-  const { chrome } = useFileDataVisualizerKibana().services;
+  const { chrome } = useDataVisualizerKibana().services;
 
   useEffect(() => {
     chrome.setHelpExtension({

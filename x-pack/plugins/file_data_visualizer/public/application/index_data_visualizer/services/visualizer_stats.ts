@@ -11,7 +11,6 @@ import type { DocumentCounts, FieldRequestConfig, FieldVisStats } from '../../..
 import { OverallStats } from '../types/overall_stats';
 
 export function basePath() {
-  // @todo: change to internal/data_visualizer
   return '/internal/data_visualizer';
 }
 
@@ -48,7 +47,6 @@ export async function getVisualizerOverallStats({
   });
 
   const fileUploadModules = await lazyLoadModules();
-  // @todo: update
   return await fileUploadModules.getHttp().fetch<OverallStats>({
     path: `${basePath()}/get_overall_stats/${indexPatternTitle}`,
     method: 'POST',
@@ -92,7 +90,6 @@ export async function getVisualizerFieldStats({
   });
 
   const fileUploadModules = await lazyLoadModules();
-  // @todo: update
   return await fileUploadModules.getHttp().fetch<[DocumentCounts, FieldVisStats]>({
     path: `${basePath()}/get_field_stats/${indexPatternTitle}`,
     method: 'POST',

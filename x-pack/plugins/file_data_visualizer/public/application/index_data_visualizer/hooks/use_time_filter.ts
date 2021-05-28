@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useFileDataVisualizerKibana } from '../../kibana_context';
+import { useDataVisualizerKibana } from '../../kibana_context';
 
 interface UseTimefilterOptions {
   timeRangeSelector?: boolean;
@@ -17,7 +17,7 @@ export const useTimefilter = ({
   timeRangeSelector,
   autoRefreshSelector,
 }: UseTimefilterOptions = {}) => {
-  const { services } = useFileDataVisualizerKibana();
+  const { services } = useDataVisualizerKibana();
   const { timefilter } = services.data.query.timefilter;
 
   useEffect(() => {

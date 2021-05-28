@@ -14,7 +14,7 @@ import { DocumentStatsTable } from '../../stats_table/components/field_data_expa
 import { ExamplesList } from '../../examples_list';
 import { FieldVisConfig } from '../../stats_table/types';
 import { LayerDescriptor } from '../../../../../../maps/common/descriptor_types';
-import { useFileDataVisualizerKibana } from '../../../kibana_context';
+import { useDataVisualizerKibana } from '../../../kibana_context';
 import { JOB_FIELD_TYPES } from '../../../../../common';
 import { ES_GEO_FIELD_TYPE } from '../../../../../../maps/common';
 import { EmbeddedMapComponent } from '../../embedded_map';
@@ -28,7 +28,7 @@ export const GeoPointContentWithMap: FC<{
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const {
     services: { maps: mapsPlugin },
-  } = useFileDataVisualizerKibana();
+  } = useDataVisualizerKibana();
 
   // Update the layer list  with updated geo points upon refresh
   useEffect(() => {

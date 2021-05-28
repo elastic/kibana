@@ -9,7 +9,7 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { TopValues } from '../../../top_values';
 import { EMSTermJoinConfig } from '../../../../../../../maps/public';
-import { useFileDataVisualizerKibana } from '../../../../kibana_context';
+import { useDataVisualizerKibana } from '../../../../kibana_context';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 import { ChoroplethMap } from './choropleth_map';
@@ -27,7 +27,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
   const {
     services: { maps: mapsPlugin },
-  } = useFileDataVisualizerKibana();
+  } = useDataVisualizerKibana();
 
   const loadEMSTermSuggestions = useCallback(async () => {
     if (!mapsPlugin) return;

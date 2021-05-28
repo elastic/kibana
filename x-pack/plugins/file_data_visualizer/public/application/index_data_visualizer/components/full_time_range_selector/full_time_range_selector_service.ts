@@ -12,6 +12,7 @@ import dateMath from '@elastic/datemath';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { getTimeFieldRange } from '../../services/time_field_range';
+import { GetTimeFieldRangeResponse } from '../../../../../common/types/time_field_request';
 
 export interface TimeRange {
   from: number;
@@ -22,8 +23,7 @@ export async function setFullTimeRange(
   timefilter: TimefilterContract,
   indexPattern: IndexPattern,
   query: Query
-  // @todo: fix any
-): Promise<any> {
+): Promise<GetTimeFieldRangeResponse | undefined> {
   try {
     const runtimeMappings = indexPattern.getComputedFields().runtimeFields as estypes.RuntimeFields;
     const resp = await getTimeFieldRange({

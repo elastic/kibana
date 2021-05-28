@@ -16,7 +16,7 @@ import {
 import { TimeRange, RefreshInterval } from '../../../../../../../src/plugins/data/public';
 import { FindFileStructureResponse } from '../../../../../file_upload/common';
 import type { FileUploadPluginStart } from '../../../../../file_upload/public';
-import { useFileDataVisualizerKibana } from '../../kibana_context';
+import { useDataVisualizerKibana } from '../../kibana_context';
 
 interface Props {
   fieldStats: FindFileStructureResponse['field_stats'];
@@ -44,7 +44,7 @@ export const ResultsLinks: FC<Props> = ({
 }) => {
   const {
     services: { fileUpload },
-  } = useFileDataVisualizerKibana();
+  } = useDataVisualizerKibana();
 
   const [duration, setDuration] = useState({
     from: 'now-30m',
@@ -63,7 +63,7 @@ export const ResultsLinks: FC<Props> = ({
         urlGenerators: { getUrlGenerator },
       },
     },
-  } = useFileDataVisualizerKibana();
+  } = useDataVisualizerKibana();
 
   useEffect(() => {
     let unmounted = false;

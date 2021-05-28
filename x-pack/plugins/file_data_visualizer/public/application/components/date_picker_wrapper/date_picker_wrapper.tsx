@@ -17,7 +17,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 
 import { useUrlState } from '../../util/url_state';
-import { useFileDataVisualizerKibana } from '../../kibana_context';
+import { useDataVisualizerKibana } from '../../kibana_context';
 import { mlTimefilterRefresh$ } from '../../index_data_visualizer/services/timefilter_refresh_service';
 
 interface TimePickerQuickRange {
@@ -54,7 +54,7 @@ function updateLastRefresh(timeRange: OnRefreshProps) {
 }
 
 export const DatePickerWrapper: FC = () => {
-  const { services } = useFileDataVisualizerKibana();
+  const { services } = useDataVisualizerKibana();
   const config = services.uiSettings;
   const { timefilter, history } = services.data.query.timefilter;
 

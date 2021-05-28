@@ -12,7 +12,7 @@ import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
 
 import { i18n } from '@kbn/i18n';
 
-import { useFileDataVisualizerKibana } from '../../../kibana_context';
+import { useDataVisualizerKibana } from '../../../kibana_context';
 
 /**
  * Custom color scale factory that takes the amount of feature influencers
@@ -211,7 +211,7 @@ export type EuiThemeType = typeof euiThemeLight | typeof euiThemeDark;
 export function useCurrentEuiTheme() {
   const {
     services: { uiSettings },
-  } = useFileDataVisualizerKibana();
+  } = useDataVisualizerKibana();
   return useMemo(
     () => ({ euiTheme: uiSettings.get('theme:darkMode') ? euiThemeDark : euiThemeLight }),
     [uiSettings]
