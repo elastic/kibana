@@ -10,7 +10,7 @@ import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import { TimelineEventsType } from '../../../../common/types/timeline';
-import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/helpers';
+import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/drag_classnames';
 
 import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
 import { EVENTS_TABLE_ARIA_LABEL } from './translations';
