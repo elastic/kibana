@@ -66,14 +66,14 @@ export interface OperationDetails {
   /**
    * The ECS event type that this operation should be audit logged as (creation, deletion, access, etc)
    */
-  type: EcsEventType;
+  ecsType: EcsEventType;
   /**
    * The name of the operation to authorize against for the privilege check.
    * These values need to match one of the operation strings defined here: x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
    */
   name: string;
   /**
-   * The ECS `event.action` field, should be in the form of <operation>-<entity> e.g get-comment, find-cases
+   * The ECS `event.action` field, should be in the form of <entity>_<operation> e.g comment_get, case_fined
    */
   action: string;
   /**
@@ -91,9 +91,23 @@ export interface OperationDetails {
 }
 
 /**
+ * Describes an entity with the necessary fields to identify if the user is authorized to interact with the saved object
+ * returned from some find query.
+ */
+export interface OwnerEntity {
+  owner: string;
+  id: string;
+}
+
+/**
+ * Function callback for making sure the found saved objects are of the authorized owner
+ */
+export type EnsureSOAuthCallback = (entities: OwnerEntity[]) => void;
+
+/**
  * Defines the helper methods and necessary information for authorizing the find API's request.
  */
-export interface AuthorizationFilter {
+export interface AuthFilterHelpers {
   /**
    * The owner filter to pass to the saved object client's find operation that is scoped to the authorized owners
    */
@@ -101,9 +115,5 @@ export interface AuthorizationFilter {
   /**
    * Utility function for checking that the returned entities are in fact authorized for the user making the request
    */
-  ensureSavedObjectIsAuthorized: (owner: string) => void;
-  /**
-   * Logs a successful audit message for the request
-   */
-  logSuccessfulAuthorization: () => void;
+  ensureSavedObjectsAreAuthorized: EnsureSOAuthCallback;
 }

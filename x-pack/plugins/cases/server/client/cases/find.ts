@@ -21,7 +21,7 @@ import {
 } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
-import { constructQueryOptions, getAuthorizationFilter } from '../utils';
+import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import { transformCases } from '../../common';
@@ -36,13 +36,7 @@ export const find = async (
   params: CasesFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<CasesFindResponse> => {
-  const {
-    unsecuredSavedObjectsClient,
-    caseService,
-    authorization: auth,
-    auditLogger,
-    logger,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, authorization, logger } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -53,12 +47,7 @@ export const find = async (
     const {
       filter: authorizationFilter,
       ensureSavedObjectsAreAuthorized,
-      logSuccessfulAuthorization,
-    } = await getAuthorizationFilter({
-      authorization: auth,
-      operation: Operations.findCases,
-      auditLogger,
-    });
+    } = await authorization.getAuthorizationFilter(Operations.findCases);
 
     const queryArgs = {
       tags: queryParams.tags,
@@ -99,8 +88,6 @@ export const find = async (
         });
       }),
     ]);
-
-    logSuccessfulAuthorization();
 
     return CasesFindResponseRt.encode(
       transformCases({

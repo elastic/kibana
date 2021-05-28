@@ -49,7 +49,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
 } from '../../../common';
 
-import { decodeCommentRequest, ensureAuthorized } from '../utils';
+import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
 
 async function getSubCase({
@@ -123,7 +123,6 @@ const addGeneratedAlerts = async (
     caseService,
     userActionService,
     logger,
-    auditLogger,
     authorization,
   } = clientArgs;
 
@@ -143,11 +142,8 @@ const addGeneratedAlerts = async (
     const createdDate = new Date().toISOString();
     const savedObjectID = SavedObjectsUtils.generateId();
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
-      owners: [comment.owner],
-      savedObjectIDs: [savedObjectID],
+    await authorization.ensureAuthorized({
+      entities: [{ owner: comment.owner, id: savedObjectID }],
       operation: Operations.createComment,
     });
 
@@ -336,7 +332,6 @@ export const addComment = async (
     user,
     logger,
     authorization,
-    auditLogger,
   } = clientArgs;
 
   if (isCommentRequestTypeGenAlert(comment)) {
@@ -353,12 +348,9 @@ export const addComment = async (
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
+    await authorization.ensureAuthorized({
       operation: Operations.createComment,
-      owners: [comment.owner],
-      savedObjectIDs: [savedObjectID],
+      entities: [{ owner: comment.owner, id: savedObjectID }],
     });
 
     const createdDate = new Date().toISOString();

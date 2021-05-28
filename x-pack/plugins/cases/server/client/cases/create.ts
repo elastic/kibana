@@ -23,7 +23,7 @@ import {
   OWNER_FIELD,
 } from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { ensureAuthorized, getConnectorFromConfiguration } from '../utils';
+import { getConnectorFromConfiguration } from '../utils';
 
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
@@ -52,7 +52,6 @@ export const create = async (
     user,
     logger,
     authorization: auth,
-    auditLogger,
   } = clientArgs;
 
   // default to an individual case if the type is not defined.
@@ -76,12 +75,9 @@ export const create = async (
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
-    await ensureAuthorized({
+    await auth.ensureAuthorized({
       operation: Operations.createCase,
-      owners: [query.owner],
-      authorization: auth,
-      auditLogger,
-      savedObjectIDs: [savedObjectID],
+      entities: [{ owner: query.owner, id: savedObjectID }],
     });
 
     // eslint-disable-next-line @typescript-eslint/naming-convention

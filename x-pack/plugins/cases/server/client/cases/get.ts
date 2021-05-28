@@ -30,11 +30,7 @@ import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import {
-  combineAuthorizedAndOwnerFilter,
-  ensureAuthorized,
-  getAuthorizationFilter,
-} from '../utils';
+import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
 
 /**
@@ -66,7 +62,6 @@ export const getCaseIDsByAlertID = async (
     caseService,
     logger,
     authorization,
-    auditLogger,
   } = clientArgs;
 
   try {
@@ -78,12 +73,7 @@ export const getCaseIDsByAlertID = async (
     const {
       filter: authorizationFilter,
       ensureSavedObjectsAreAuthorized,
-      logSuccessfulAuthorization,
-    } = await getAuthorizationFilter({
-      authorization,
-      operation: Operations.getCaseIDsByAlertID,
-      auditLogger,
-    });
+    } = await authorization.getAuthorizationFilter(Operations.getCaseIDsByAlertID);
 
     const filter = combineAuthorizedAndOwnerFilter(
       queryParams.owner,
@@ -103,8 +93,6 @@ export const getCaseIDsByAlertID = async (
         id: comment.id,
       }))
     );
-
-    logSuccessfulAuthorization();
 
     return CasesService.getCaseIDsFromAlertAggs(commentsWithAlert);
   } catch (error) {
@@ -145,13 +133,7 @@ export const get = async (
   { id, includeComments, includeSubCaseComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
-  const {
-    unsecuredSavedObjectsClient,
-    caseService,
-    logger,
-    authorization: auth,
-    auditLogger,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
     if (!ENABLE_CASE_CONNECTOR && includeSubCaseComments) {
@@ -181,12 +163,9 @@ export const get = async (
       });
     }
 
-    await ensureAuthorized({
+    await authorization.ensureAuthorized({
       operation: Operations.getCase,
-      owners: [theCase.attributes.owner],
-      authorization: auth,
-      auditLogger,
-      savedObjectIDs: [theCase.id],
+      entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
 
     if (!includeComments) {
@@ -230,13 +209,7 @@ export async function getTags(
   params: AllTagsFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<string[]> {
-  const {
-    unsecuredSavedObjectsClient: soClient,
-    caseService,
-    logger,
-    authorization: auth,
-    auditLogger,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient: soClient, caseService, logger, authorization } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -247,12 +220,7 @@ export async function getTags(
     const {
       filter: authorizationFilter,
       ensureSavedObjectsAreAuthorized,
-      logSuccessfulAuthorization,
-    } = await getAuthorizationFilter({
-      authorization: auth,
-      operation: Operations.findCases,
-      auditLogger,
-    });
+    } = await authorization.getAuthorizationFilter(Operations.findCases);
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
@@ -277,7 +245,6 @@ export async function getTags(
     });
 
     ensureSavedObjectsAreAuthorized(mappedCases);
-    logSuccessfulAuthorization();
 
     return [...tags.values()];
   } catch (error) {
@@ -292,13 +259,7 @@ export async function getReporters(
   params: AllReportersFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<User[]> {
-  const {
-    unsecuredSavedObjectsClient: soClient,
-    caseService,
-    logger,
-    authorization: auth,
-    auditLogger,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient: soClient, caseService, logger, authorization } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -309,12 +270,7 @@ export async function getReporters(
     const {
       filter: authorizationFilter,
       ensureSavedObjectsAreAuthorized,
-      logSuccessfulAuthorization,
-    } = await getAuthorizationFilter({
-      authorization: auth,
-      operation: Operations.getReporters,
-      auditLogger,
-    });
+    } = await authorization.getAuthorizationFilter(Operations.getReporters);
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
@@ -343,7 +299,6 @@ export async function getReporters(
     });
 
     ensureSavedObjectsAreAuthorized(mappedCases);
-    logSuccessfulAuthorization();
 
     return UsersRt.encode([...reporters.values()]);
   } catch (error) {

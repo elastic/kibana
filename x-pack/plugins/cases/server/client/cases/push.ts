@@ -24,7 +24,6 @@ import { createIncident, getCommentContextFromAttributes } from './utils';
 import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } from '../../common';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
-import { ensureAuthorized } from '../utils';
 import { Operations } from '../../authorization';
 
 /**
@@ -77,7 +76,6 @@ export const push = async (
     actionsClient,
     user,
     logger,
-    auditLogger,
     authorization,
   } = clientArgs;
 
@@ -93,12 +91,9 @@ export const push = async (
       casesClient.userActions.getAll({ caseId }),
     ]);
 
-    await ensureAuthorized({
-      authorization,
-      auditLogger,
+    await authorization.ensureAuthorized({
+      entities: [{ owner: theCase.owner, id: caseId }],
       operation: Operations.pushCase,
-      savedObjectIDs: [caseId],
-      owners: [theCase.owner],
     });
 
     // We need to change the logic when we support subcases
