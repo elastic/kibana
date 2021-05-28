@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { migrations, LensDocShape } from './migrations';
-import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'src/core/server';
+import { migrations, LensDocShape } from './saved_object_migrations';
+import {
+  SavedObjectMigrationContext,
+  SavedObjectMigrationFn,
+  SavedObjectUnsanitizedDoc,
+} from 'src/core/server';
 
 describe('Lens migrations', () => {
   describe('7.7.0 missing dimensions in XY', () => {
@@ -767,10 +771,7 @@ describe('Lens migrations', () => {
       },
     };
 
-    it('should rename only specific operation types', () => {
-      const result = migrations['7.13.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+    const validate = (result: SavedObjectUnsanitizedDoc<LensDocShape<unknown>>) => {
       const layers = result.attributes.state.datasourceStates.indexpattern.layers;
       expect(layers).toEqual({
         '5ab74ddc-93ca-44e2-9857-ecf85c86b53e': {
@@ -832,6 +833,23 @@ describe('Lens migrations', () => {
       expect(result.attributes.state.query).toEqual(example.attributes.state.query);
       expect(result.attributes.state.filters).toEqual(example.attributes.state.filters);
       expect(result.attributes.title).toEqual(example.attributes.title);
+    };
+
+    it('should rename only specific operation types', () => {
+      const result = migrations['7.13.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      validate(result);
+    });
+
+    it('can be applied multiple times', () => {
+      const result1 = migrations['7.13.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const result2 = migrations['7.13.1'](result1, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      validate(result2);
     });
   });
 });

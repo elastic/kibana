@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { initialDetectionRulesUsage, updateDetectionRuleUsage } from './detections_metrics_helpers';
-import { DetectionRuleMetric, DetectionRulesTypeUsage } from './index';
+import { initialDetectionRulesUsage, updateDetectionRuleUsage } from './detection_rule_helpers';
+import { DetectionRuleMetric, DetectionRulesTypeUsage } from './types';
 import { v4 as uuid } from 'uuid';
 
 const createStubRule = (
