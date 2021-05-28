@@ -430,6 +430,7 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   if (primarySavedObject) {
     expect(event?.kibana?.alerting?.primary_saved_object).to.eql({
       id: primarySavedObject.id,
+      namespace: spaceId,
       type: primarySavedObject.type,
     });
   }
