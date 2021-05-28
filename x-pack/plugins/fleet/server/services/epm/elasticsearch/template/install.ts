@@ -49,7 +49,9 @@ export const installTemplates = async (
   );
   // build templates per data stream from yml files
   const dataStreams = installablePackage.data_streams;
-  if (!dataStreams) return [];
+  if (!dataStreams) {
+    return [];
+  }
   // get template refs to save
   const installedTemplateRefs = dataStreams.map((dataStream) => ({
     id: generateTemplateName(dataStream),
@@ -58,7 +60,6 @@ export const installTemplates = async (
 
   // add package installation's references to index templates
   await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, installedTemplateRefs);
-
   if (dataStreams) {
     const installTemplatePromises = dataStreams.reduce<Array<Promise<TemplateRef>>>(
       (acc, dataStream) => {
