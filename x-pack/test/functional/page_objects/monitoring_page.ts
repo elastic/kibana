@@ -11,14 +11,6 @@ export function MonitoringPageProvider({ getPageObjects, getService }: FtrProvid
   const PageObjects = getPageObjects(['common', 'header', 'security', 'login']);
   const testSubjects = getService('testSubjects');
   return new (class MonitoringPage {
-    async navigateTo(useSuperUser = false) {
-      if (!useSuperUser) {
-        await PageObjects.security.forceLogout();
-        await PageObjects.login.login('test_user', 'changeme');
-      }
-      await PageObjects.common.navigateToApp('monitoring');
-    }
-
     async getAccessDeniedMessage() {
       return testSubjects.getVisibleText('accessDeniedTitle');
     }
