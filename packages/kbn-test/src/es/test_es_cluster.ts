@@ -35,6 +35,13 @@ interface TestClusterFactoryOptions {
    * - archive data folder: zip -r my_archive.zip data
    * */
   dataArchive?: string;
+  /**
+   * Name of the directory for the node which will be created in `.es/`,
+   * e.g. Providing `my-test-cluster` will create `.es/my-test-cluster`.
+   *
+   * When not provided, the current ES version is used as the directory name.
+   */
+  installDirName?: string;
   esArgs?: string[];
   esJavaOpts?: string;
   clusterName?: string;
@@ -51,6 +58,7 @@ export function createTestEsCluster(options: TestClusterFactoryOptions) {
     basePath = Path.resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
+    installDirName,
     esArgs: customEsArgs = [],
     esJavaOpts,
     clusterName: customClusterName = 'es-test-cluster',
@@ -59,17 +67,18 @@ export function createTestEsCluster(options: TestClusterFactoryOptions) {
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
 
-  const esArgs = [
+  const defaultEsArgs = [
     `cluster.name=${clusterName}`,
     `http.port=${port}`,
     'discovery.type=single-node',
     `transport.port=${esTestConfig.getTransportPort()}`,
-    ...customEsArgs,
   ];
+
+  const esArgs = mergeDefaultArgs(defaultEsArgs, customEsArgs);
 
   const config = {
     version: esTestConfig.getVersion(),
-    installPath: Path.resolve(basePath, clusterName),
+    installPath: Path.resolve(basePath, installDirName ?? clusterName),
     sourcePath: Path.resolve(KIBANA_ROOT, '../elasticsearch'),
     password,
     license,
@@ -138,4 +147,29 @@ export function createTestEsCluster(options: TestClusterFactoryOptions) {
       return format(parts);
     }
   })();
+}
+
+/**
+ * Takes in two arrays of 'key=val' strings, allowing values from the second array
+ * to override values in the first.
+ *
+ * @example
+ *
+ * mergeDefaultArgs(['foo=a', 'bar=b'], ['foo=c', 'baz=d']); // returns ['foo=c', 'bar=b', 'baz=d']
+ */
+function mergeDefaultArgs(defaultArgs: string[], customArgs: string[]): string[] {
+  const toArgsObject = (args: string[]) => {
+    const obj: Record<string, string> = {};
+
+    args.forEach((arg) => {
+      const [key, val] = arg.split('=');
+      obj[key] = val;
+    });
+
+    return obj;
+  };
+
+  return Object.entries({ ...toArgsObject(defaultArgs), ...toArgsObject(customArgs) }).map(
+    ([key, val]) => `${key}=${val}`
+  );
 }

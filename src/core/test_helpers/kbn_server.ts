@@ -247,6 +247,7 @@ export function createTestServers({
       return {
         stop: async () => await es.cleanup(),
         es,
+        // TODO: Need to support multiple URLs here
         hosts: [esTestConfig.getUrl()],
         username: kibanaServerTestUser.username,
         password: kibanaServerTestUser.password,
