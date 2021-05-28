@@ -1813,7 +1813,11 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             status: 'open',
-            rule: fullSignal.signal.rule,
+            rule: {
+              ...fullSignal.signal.rule,
+              name: 'boot',
+              rule_name_override: 'event.action',
+            },
             original_time: fullSignal.signal.original_time,
             depth: 1,
             parent: {
