@@ -81,10 +81,7 @@ export function TableDimensionEditor(
       []
     : [accessor];
   const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
-  const currentMinMax = minMaxByColumnId[accessor] || {
-    min: defaultPaletteParams.rangeMin,
-    max: defaultPaletteParams.rangeMax,
-  };
+  const currentMinMax = minMaxByColumnId[accessor];
 
   const activePalette = column?.palette || {
     type: 'palette',

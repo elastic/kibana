@@ -9,7 +9,7 @@ import { Datatable } from 'src/plugins/expressions';
 import { getOriginalId } from '../transpose_helpers';
 
 export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | undefined) => {
-  const minMax: Record<string, { min: number; max: number }> = {};
+  const minMax: Record<string, { min: number; max: number; fallback?: boolean }> = {};
 
   if (table != null) {
     for (const columnId of columnIds) {
@@ -26,6 +26,10 @@ export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | und
           }
         }
       });
+      // what happens when there's no data in the table? Fallback to a percent range
+      if (minMax[originalId].max === -Infinity) {
+        minMax[originalId] = { max: 100, min: 0, fallback: true };
+      }
     }
   }
   return minMax;
