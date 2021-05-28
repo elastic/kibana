@@ -92,9 +92,7 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
     return removePanel;
   }, [width, addPanel]);
 
-  const styles: CSSProperties = {
-    position: 'relative',
-  };
+  const styles: CSSProperties = {};
 
   if (width) {
     styles.flexBasis = `${width}%`;
