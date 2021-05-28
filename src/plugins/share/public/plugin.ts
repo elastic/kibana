@@ -19,7 +19,6 @@ import {
   UrlGeneratorsStart,
 } from './url_generators/url_generator_service';
 import { UrlService } from '../common/url_service';
-import { BrowserUrlService } from './url_service';
 
 export interface ShareSetupDependencies {
   securityOss?: SecurityOssPluginSetup;
@@ -38,23 +37,33 @@ export type SharePluginSetup = ShareMenuRegistrySetup & {
 /** @public */
 export type SharePluginStart = ShareMenuManagerStart & {
   urlGenerators: UrlGeneratorsStart;
+  url: UrlService;
 };
 
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly shareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
   private readonly urlGeneratorsService = new UrlGeneratorsService();
+  private url?: UrlService;
 
   public setup(core: CoreSetup, plugins: ShareSetupDependencies): SharePluginSetup {
     core.application.register(createShortUrlRedirectApp(core, window.location));
+
+    this.url = new UrlService({
+      navigate: async (location, { replace = false } = {}) => {
+        const [start] = await core.getStartServices();
+        await start.application.navigateToApp(location.app, {
+          path: location.route,
+          state: location.state,
+          replace,
+        });
+      },
+    });
+
     return {
       ...this.shareMenuRegistry.setup(),
       urlGenerators: this.urlGeneratorsService.setup(core),
-      url: new BrowserUrlService({
-        navigate: async () => {
-          throw new Error('not implemented');
-        },
-      }),
+      url: this.url,
     };
   }
 
@@ -66,6 +75,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         plugins.securityOss?.anonymousAccess
       ),
       urlGenerators: this.urlGeneratorsService.start(core),
+      url: this.url!,
     };
   }
 }
