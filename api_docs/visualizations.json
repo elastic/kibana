@@ -85,7 +85,15 @@
             "label": "getSupportedTriggers",
             "description": [],
             "signature": [
-              "(() => string[]) | undefined"
+              "((params?: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              " | undefined) => string[]) | undefined"
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
@@ -3327,7 +3335,15 @@
               "\nIf given, it will return the supported triggers for this vis."
             ],
             "signature": [
-              "(() => string[]) | undefined"
+              "((params?: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              " | undefined) => string[]) | undefined"
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
