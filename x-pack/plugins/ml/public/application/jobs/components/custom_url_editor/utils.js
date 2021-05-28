@@ -49,7 +49,7 @@ export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
     datafeedConfig.indices.length > 0
   ) {
     const defaultIndexPatternId =
-      getIndexPatternIdFromName(datafeedConfig.indices.join()) || indexPatterns[0].id;
+      getIndexPatternIdFromName(datafeedConfig.indices.join()) ?? indexPatterns[0].id;
     kibanaSettings.discoverIndexPatternId = defaultIndexPatternId;
   }
 
