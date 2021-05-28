@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isRuntimeField } from '../../ml/common';
+import { isRuntimeField } from './utils/runtime_field_utils';
 
 export const analyzeFileQuerySchema = schema.object({
   charset: schema.maybe(schema.string()),

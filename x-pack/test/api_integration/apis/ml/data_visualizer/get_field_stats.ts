@@ -167,7 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
     expectedResponsecode: number
   ): Promise<any> {
     const { body } = await supertest
-      .post(`/api/ml/data_visualizer/get_field_stats/${index}`)
+      .post(`/internal/data_visualizer/get_field_stats/${index}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
       .send(requestBody)
