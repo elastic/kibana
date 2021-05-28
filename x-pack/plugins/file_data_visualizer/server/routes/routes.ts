@@ -12,10 +12,10 @@ import {
   dataVisualizerFieldStatsSchema,
   dataVisualizerOverallStatsSchema,
   indexPatternTitleSchema,
-} from './routes/schemas';
-import { DataVisualizer, Field, HistogramField } from './models/data_visualizer';
-import type { StartDeps } from './types';
-import { wrapError } from './utils/error_wrapper';
+} from './schemas';
+import { DataVisualizer, Field, HistogramField } from '../models/data_visualizer';
+import type { StartDeps } from '../types';
+import { wrapError } from '../utils/error_wrapper';
 
 function getOverallStats(
   client: IScopedClusterClient,
