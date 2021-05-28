@@ -11,9 +11,9 @@ import { PanelHeader } from './flyout_panels_header';
 import { Panel } from './flyout_panel';
 import { Panels } from './flyout_panels';
 
-export const Flyout = {
-  Panels,
-  Panel,
-  PanelHeader,
-  PanelFooter,
+export const FlyoutPanels = {
+  Group: Panels,
+  Item: Panel,
+  Header: PanelHeader,
+  Footer: PanelFooter,
 };

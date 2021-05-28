@@ -26,7 +26,7 @@ import {
 import type { Field, EsRuntimeField } from '../types';
 import { RuntimeFieldPainlessError } from '../lib';
 import { euiFlyoutClassname } from '../constants';
-import { Flyout } from './flyout_panels';
+import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
 import { FieldPreview, useFieldPreviewContext } from './preview';
@@ -207,17 +207,17 @@ const FieldEditorFlyoutContentComponent = ({
   return (
     <>
       {FieldEditor && (
-        <Flyout.Panels flyoutClassName={euiFlyoutClassname} maxWidth={1180}>
+        <FlyoutPanels.Group flyoutClassName={euiFlyoutClassname} maxWidth={1180}>
           {/* Preview panel */}
           {isPanelVisible && (
-            <Flyout.Panel width={40} backgroundColor="euiPageBackground" border="right">
+            <FlyoutPanels.Item width={40} backgroundColor="euiPageBackground" border="right">
               <FieldPreview />
-            </Flyout.Panel>
+            </FlyoutPanels.Item>
           )}
 
           {/* Editor panel */}
-          <Flyout.Panel width={60}>
-            <Flyout.PanelHeader>
+          <FlyoutPanels.Item width={60}>
+            <FlyoutPanels.Header>
               <EuiTitle data-test-subj="flyoutTitle">
                 <h2>
                   {field ? (
@@ -247,11 +247,11 @@ const FieldEditorFlyoutContentComponent = ({
                   />
                 </p>
               </EuiText>
-            </Flyout.PanelHeader>
+            </FlyoutPanels.Header>
 
             <FieldEditor field={field} onChange={setFormState} syntaxError={syntaxError} />
 
-            <Flyout.PanelFooter>
+            <FlyoutPanels.Footer>
               <>
                 {isSubmitted && hasErrors && (
                   <>
@@ -290,9 +290,9 @@ const FieldEditorFlyoutContentComponent = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </>
-            </Flyout.PanelFooter>
-          </Flyout.Panel>
-        </Flyout.Panels>
+            </FlyoutPanels.Footer>
+          </FlyoutPanels.Item>
+        </FlyoutPanels.Group>
       )}
 
       {modal}
