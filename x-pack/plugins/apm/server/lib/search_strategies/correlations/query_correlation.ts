@@ -64,11 +64,6 @@ export const getTransactionDurationCorrelationRequest = (
   expectations.unshift(0);
   expectations.push(percentileValues[percentileValues.length - 1]);
 
-  // console.log('totalHits', totalHits);
-  // console.log('percentileValues', percentileValues);
-  // console.log('ranges', ranges);
-  // console.log('expectations', expectations);
-
   return {
     index: params.index,
     body: {
