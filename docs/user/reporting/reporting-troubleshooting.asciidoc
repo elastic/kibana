@@ -70,8 +70,8 @@ the first time Kibana starts when verbose logging is enabled.
 
 [float]
 [[reporting-troubleshooting-centos-6]]
-==== CentOS/RHEL/OL 6 does not support PDF Reports
-PDF Reporting is not support for CentOS, RedHat Enterprise Linux, or Oracle
+==== CentOS/RHEL/OL 6 does not support PDF and PNG Reports
+PDF and PNG reports are not support for CentOS, RedHat Enterprise Linux, or Oracle
 Linux distributions that are version 6 or below. The workaround is to use
 CentOS/RHEL/OL 7+.
 
