@@ -123,7 +123,12 @@ export const getLayers = (
           });
         }
         if (col.format) {
-          return formatter.deserialize(col.format).convert(d) ?? '';
+          const formattedLabel = formatter.deserialize(col.format).convert(d) ?? '';
+          if (visParams.labels.truncate && formattedLabel.length <= visParams.labels.truncate) {
+            return formattedLabel;
+          } else {
+            return `${formattedLabel.slice(0, Number(visParams.labels.truncate))}...`;
+          }
         }
         return String(d);
       },

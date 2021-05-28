@@ -41,12 +41,10 @@ function DecimalSlider<ParamName extends string>({
   paramName,
   value,
   setValue,
-  disabled,
 }: {
   value: number;
   paramName: ParamName;
   setValue: (paramName: ParamName, value: number) => void;
-  disabled: boolean;
 }) {
   return (
     <EuiFormRow
@@ -62,7 +60,6 @@ function DecimalSlider<ParamName extends string>({
         max={10}
         showInput
         compressed
-        disabled={disabled}
         onChange={(e) => {
           setValue(paramName, Number(e.currentTarget.value));
         }}
@@ -276,9 +273,6 @@ const PieOptions = (props: PieOptionsProps) => {
               paramName="percentDecimals"
               value={stateParams.labels.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
               setValue={setLabels}
-              disabled={
-                stateParams.labels.valuesFormat === ValueFormats.VALUE || !stateParams.labels.values
-              }
             />
           </>
         )}
