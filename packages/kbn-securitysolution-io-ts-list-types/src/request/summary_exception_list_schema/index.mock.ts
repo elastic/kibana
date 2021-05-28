@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-export const APM_STATIC_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
+import { ID, LIST_ID, NAMESPACE_TYPE } from '../../constants/index.mock';
+
+import { SummaryExceptionListSchema } from '.';
+
+export const getSummaryExceptionListSchemaMock = (): SummaryExceptionListSchema => ({
+  id: ID,
+  list_id: LIST_ID,
+  namespace_type: NAMESPACE_TYPE,
+});
