@@ -135,7 +135,10 @@ describe('endpoint list middleware', () => {
     const dispatchIsolateEndpointHost = () => {
       dispatch({
         type: 'endpointIsolationRequest',
-        payload: hostIsolationRequestBodyMock(),
+        payload: {
+          type: 'isolate',
+          data: hostIsolationRequestBodyMock(),
+        },
       });
     };
     let isolateApiResponseHandlers: ReturnType<typeof hostIsolationHttpMocks>;

@@ -43,12 +43,11 @@ import { EndpointDetails } from './endpoint_details';
 import { PolicyResponse } from './policy_response';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
-import { EndpointIsolateFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
+import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpoint_details_flyout_subheader';
 import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
 import { getEndpointListPath } from '../../../../common/routing';
 import { ActionsMenu } from './components/actions_menu';
-import { EndpointUnIsolateFlyoutPanel } from './components/endpoint_unisolate_flyout_panel';
 
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -127,9 +126,9 @@ export const EndpointDetailsFlyout = memo(() => {
 
           {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={details} />}
 
-          {show === 'isolate' && <EndpointIsolateFlyoutPanel hostMeta={details} />}
-
-          {show === 'unisolate' && <EndpointUnIsolateFlyoutPanel hostMeta={details} />}
+          {(show === 'isolate' || show === 'unisolate') && (
+            <EndpointIsolationFlyoutPanel hostMeta={details} />
+          )}
 
           {showFlyoutFooter && (
             <EuiFlyoutFooter className="eui-textRight" data-test-subj="endpointDetailsFlyoutFooter">

@@ -48,7 +48,7 @@ import {
   createLoadedResourceState,
   createLoadingResourceState,
 } from '../../../state';
-import { isolateHost } from '../../../../common/lib/host_isolation';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/host_isolation';
 import { AppAction } from '../../../../common/store/actions';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
@@ -477,7 +477,13 @@ const handleIsolateEndpointHost = async (
 
   try {
     // Cast needed below due to the value of payload being `Immutable<>`
-    const response = await isolateHost(action.payload as HostIsolationRequestBody);
+    let response: HostIsolationResponse;
+
+    if (action.payload.type === 'unisolate') {
+      response = await unIsolateHost(action.payload.data as HostIsolationRequestBody);
+    } else {
+      response = await isolateHost(action.payload.data as HostIsolationRequestBody);
+    }
 
     dispatch({
       type: 'endpointIsolationRequestStateChange',

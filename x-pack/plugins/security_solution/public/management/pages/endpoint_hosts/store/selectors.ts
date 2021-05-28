@@ -32,6 +32,7 @@ import {
   isLoadingResourceState,
 } from '../../../state';
 import { ServerApiError } from '../../../../common/types';
+import { isEndpointHostIsolated } from '../../../../common/utils/validators';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -337,4 +338,8 @@ export const getIsolationRequestError: (
   if (isFailedResourceState(isolateHost)) {
     return isolateHost.error;
   }
+});
+
+export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
+  return (details && isEndpointHostIsolated(details)) || false;
 });
