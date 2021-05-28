@@ -45,6 +45,7 @@ export const WaterfallSidebarItem = ({
   };
 
   const text = item.url;
+
   const ariaLabel = `${
     isHighlighted && renderFilterScreenReaderText
       ? `${SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL} `
