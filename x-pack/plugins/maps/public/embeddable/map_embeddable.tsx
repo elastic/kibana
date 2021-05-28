@@ -53,7 +53,6 @@ import {
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
-  getMapReady,
 } from '../selectors/map_selectors';
 import {
   APP_ID,

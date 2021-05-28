@@ -190,7 +190,7 @@ export const applyStateChangesToContainer = ({
   }
 };
 
-const noRefetchKeys: Array<keyof DashboardContainerInput> = [
+const noRefetchKeys: Readonly<Array<keyof DashboardContainerInput>> = [
   'title',
   'viewMode',
   'useMargins',
@@ -198,4 +198,4 @@ const noRefetchKeys: Array<keyof DashboardContainerInput> = [
   'expandedPanelId',
   'isFullScreenMode',
   'isEmbeddedExternally',
-];
+] as const;

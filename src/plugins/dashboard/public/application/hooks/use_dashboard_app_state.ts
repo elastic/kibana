@@ -97,7 +97,7 @@ export const useDashboardAppState = ({
 
   /**
    * The dashboard build context is a collection of all of the services and props required in subsequent steps to build the dashboard
-   * from the dashboardId. This build context should be created only once on mount, and doesn't contain any extrenuous services
+   * from the dashboardId. This build context should be created only once on mount, and doesn't contain any extrenuous services.
    */
   const dashboardBuildContext = useMemo(() => {
     const context: DashboardBuildContext = {
@@ -166,7 +166,7 @@ export const useDashboardAppState = ({
       const { savedDashboard, savedDashboardState } = loadSavedDashboardResult;
 
       /**
-       * Combine initial state from the session storage,  sources, then dispatch it to Redux.
+       * Combine initial state from the saved object, session storage, and URL, then dispatch it to Redux.
        */
       const dashboardSessionStorageState = dashboardSessionStorage.getState(savedDashboardId) || {};
       const dashboardURLState = loadDashboardUrlState(dashboardBuildContext);

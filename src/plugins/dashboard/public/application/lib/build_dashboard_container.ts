@@ -79,6 +79,7 @@ export const buildDashboardContainer = async ({
     throw new EmbeddableFactoryNotFoundError('dashboard app requires dashboard embeddable factory');
   }
 
+  // Build the initial input for the dashboard container based on the dashboard state.
   const initialInput = stateToDashboardContainerInput({
     searchSessionId: searchSessionIdFromURL ?? session.start(),
     isEmbeddedExternally: Boolean(isEmbeddedExternally),
@@ -89,7 +90,12 @@ export const buildDashboardContainer = async ({
     savedDashboard,
   });
 
-  // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
+  /**
+   * Handle the Incoming Embeddable Part 1:
+   * If the incoming embeddable already exists e.g. if it has been edited by value, the incoming state for that panel needs to replace the
+   * state for the matching panel already in the dashboard. This needs to happen BEFORE the dashboard container is built, so that the panel
+   * retains the same placement.
+   */
   if (incomingEmbeddable?.embeddableId && initialInput.panels[incomingEmbeddable.embeddableId]) {
     const originalPanelState = initialInput.panels[incomingEmbeddable.embeddableId];
     initialInput.panels = {
@@ -112,8 +118,11 @@ export const buildDashboardContainer = async ({
     return;
   }
 
-  // If the incoming embeddable is newly created, or doesn't exist in the current panels list,
-  // add it with `addNewEmbeddable`
+  /**
+   * Handle the Incoming Embeddable Part 2:
+   * If the incoming embeddable is new, we can add it to the container using `addNewEmbeddable` after the container is created
+   * this lets the container handle the placement of it (using the default placement algorithm "top left most open space")
+   */
   if (
     incomingEmbeddable &&
     (!incomingEmbeddable?.embeddableId ||

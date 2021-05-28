@@ -48,15 +48,18 @@ export const syncDashboardFilterState = ({
   const { filterManager, queryString, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
 
-  // apply initial filters
+  // apply initial filters to the query service and to the saved dashboard
   filterManager.setAppFilters(_.cloneDeep(initialDashboardState.filters));
   savedDashboard.searchSource.setField('filter', initialDashboardState.filters);
 
-  // apply initial query
+  // apply initial query to the query service and to the saved dashboard
   queryString.setQuery(initialDashboardState.query);
   savedDashboard.searchSource.setField('query', initialDashboardState.query);
 
-  // apply initial timepicker & refresh interval if global state is not provided
+  /**
+   * If a global time range is not set explicitly and the time range was saved with the dashboard, apply
+   * initial time range and refresh interval to the query service.
+   */
   if (initialDashboardState.timeRestore) {
     const initialGlobalQueryState = kbnUrlStateStorage.get<QueryState>('_g');
     if (!initialGlobalQueryState?.time) {
@@ -74,6 +77,7 @@ export const syncDashboardFilterState = ({
     }
   }
 
+  // this callback will be used any time new filters and query need to be applied.
   const applyFilters = (query: Query, filters: Filter[]) => {
     savedDashboard.searchSource.setField('query', query);
     savedDashboard.searchSource.setField('filter', filters);

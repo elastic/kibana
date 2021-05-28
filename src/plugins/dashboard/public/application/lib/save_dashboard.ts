@@ -48,27 +48,26 @@ export const saveDashboard = async ({
   const lastDashboardId = savedDashboard.id;
   const hasTaggingCapabilities = getHasTaggingCapabilitiesGuard(savedObjectsTagging);
 
-  savedDashboard.title = currentState.title;
-  savedDashboard.description = currentState.description;
-  savedDashboard.timeRestore = currentState.timeRestore;
-  savedDashboard.optionsJSON = JSON.stringify(currentState.options);
+  const { panels, title, tags, description, timeRestore, options } = currentState;
 
-  const savedDashboardPanels = Object.values(currentState.panels).map((panel) =>
+  const savedDashboardPanels = Object.values(panels).map((panel) =>
     convertPanelStateToSavedDashboardPanel(panel, version)
   );
 
+  savedDashboard.title = title;
+  savedDashboard.description = description;
+  savedDashboard.timeRestore = timeRestore;
+  savedDashboard.optionsJSON = JSON.stringify(options);
   savedDashboard.panelsJSON = JSON.stringify(savedDashboardPanels);
 
   if (hasTaggingCapabilities(savedDashboard)) {
-    savedDashboard.setTags(currentState.tags);
+    savedDashboard.setTags(tags);
   }
 
-  savedDashboard.timeFrom = savedDashboard.timeRestore
-    ? convertTimeToUTCString(timefilter.getTime().from)
-    : undefined;
-  savedDashboard.timeTo = savedDashboard.timeRestore
-    ? convertTimeToUTCString(timefilter.getTime().to)
-    : undefined;
+  const { from, to } = timefilter.getTime();
+  savedDashboard.timeFrom = savedDashboard.timeRestore ? convertTimeToUTCString(from) : undefined;
+  savedDashboard.timeTo = savedDashboard.timeRestore ? convertTimeToUTCString(to) : undefined;
+
   const timeRestoreObj: RefreshInterval = _.pick(timefilter.getRefreshInterval(), [
     'display',
     'pause',
@@ -77,7 +76,7 @@ export const saveDashboard = async ({
   ]) as RefreshInterval;
   savedDashboard.refreshInterval = savedDashboard.timeRestore ? timeRestoreObj : undefined;
 
-  // save only unpinned filters
+  // only save unpinned filters
   const unpinnedFilters = savedDashboard
     .getFilters()
     .filter((filter) => !esFilters.isFilterPinned(filter));
@@ -90,6 +89,10 @@ export const saveDashboard = async ({
         title: dashboardSaveToastStrings.getSuccessString(currentState.title),
         'data-test-subj': 'saveDashboardSuccess',
       });
+
+      /**
+       * If the dashboard id has been changed, redirect to the new ID to keep the url param in sync.
+       */
       if (newId !== lastDashboardId) {
         dashboardSessionStorage.clearState(lastDashboardId);
         redirectTo({
