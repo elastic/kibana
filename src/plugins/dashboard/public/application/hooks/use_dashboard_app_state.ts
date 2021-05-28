@@ -96,11 +96,24 @@ export const useDashboardAppState = ({
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
 
   /**
-   * The dashboard build context is a collection of all of the services and props required in subsequent steps to build the dashboard
-   * from the dashboardId. This build context should be created only once on mount, and doesn't contain any extrenuous services.
+   * This useEffect triggers when the dashboard ID changes, and is in charge of loading the saved dashboard,
+   * fetching the initial state, building the Dashboard Container embeddable, and setting up all state syncing.
    */
-  const dashboardBuildContext = useMemo(() => {
-    const context: DashboardBuildContext = {
+  useEffect(() => {
+    // fetch incoming embeddable from state transfer service.
+    const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
+      DashboardConstants.DASHBOARDS_ID,
+      true
+    );
+
+    let canceled = false;
+    let onDestroy: () => void;
+
+    /**
+     * The dashboard build context is a collection of all of the services and props required in subsequent steps to build the dashboard
+     * from the dashboardId. This build context doesn't contain any extrenuous services.
+     */
+    const dashboardBuildContext: DashboardBuildContext = {
       query,
       search,
       history,
@@ -119,40 +132,6 @@ export const useDashboardAppState = ({
       $triggerDashboardRefresh: dashboardAppState.$triggerDashboardRefresh,
       getLatestDashboardState: () => dashboardAppState.$onDashboardStateChange.value,
     };
-    return context;
-  }, [
-    query,
-    search,
-    history,
-    embeddable,
-    indexPatterns,
-    notifications,
-    kibanaVersion,
-    savedDashboards,
-    kbnUrlStateStorage,
-    initializerContext,
-    isEmbeddedExternally,
-    dashboardCapabilities,
-    dispatchDashboardStateChange,
-    dashboardAppState.$onDashboardStateChange,
-    dashboardAppState.$triggerDashboardRefresh,
-  ]);
-
-  /**
-   * This useEffect triggers when the dashboard ID changes, and is in charge of loading the saved dashboard,
-   * fetching the initial state, building the Dashboard Container embeddable, and setting up all state syncing.
-   */
-  useEffect(() => {
-    const { timefilter } = dashboardBuildContext.query.timefilter;
-
-    // fetch incoming embeddable from state transfer service.
-    const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
-      DashboardConstants.DASHBOARDS_ID,
-      true
-    );
-
-    let canceled = false;
-    let onDestroy: () => void;
 
     (async () => {
       /**
@@ -228,6 +207,7 @@ export const useDashboardAppState = ({
        * Any time the redux state, or the last saved state changes, compare them, set the unsaved
        * changes state, and and push the unsaved changes to session storage.
        */
+      const { timefilter } = dashboardBuildContext.query.timefilter;
       const lastSavedSubscription = combineLatest([
         $onLastSavedStateChange,
         dashboardAppState.$onDashboardStateChange,
@@ -305,16 +285,28 @@ export const useDashboardAppState = ({
       onDestroy?.();
     };
   }, [
+    dashboardAppState.$triggerDashboardRefresh,
     dashboardAppState.$onDashboardStateChange,
     dispatchDashboardStateChange,
     $onLastSavedStateChange,
     dashboardSessionStorage,
-    dashboardBuildContext,
+    dashboardCapabilities,
+    isEmbeddedExternally,
+    kbnUrlStateStorage,
     savedObjectsTagging,
+    initializerContext,
     savedDashboardId,
     getStateTransfer,
+    savedDashboards,
     usageCollection,
+    notifications,
+    indexPatterns,
+    kibanaVersion,
+    embeddable,
     docTitle,
+    history,
+    search,
+    query,
     data,
   ]);
 
