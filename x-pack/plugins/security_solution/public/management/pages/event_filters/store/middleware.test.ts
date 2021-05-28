@@ -29,6 +29,7 @@ const createEventFiltersServiceMock = (): jest.Mocked<EventFiltersService> => ({
   getOne: jest.fn(),
   updateOne: jest.fn(),
   deleteOne: jest.fn(),
+  getSummary: jest.fn(),
 });
 
 const createStoreSetup = (eventFiltersService: EventFiltersService) => {
