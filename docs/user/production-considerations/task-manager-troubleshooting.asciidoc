@@ -237,33 +237,44 @@ The API returns the following:
           ["60s", 2],
           ["5m", 2],
           ["60m", 4],
-					["3600s", 1],
-					["720m", 1]
+          ["3600s", 1],
+          ["720m", 1]
         ],
-				"non_recurring": 18,
-				"owner_ids": 0,
+        "non_recurring": 18,
+        "owner_ids": 0,
         "overdue": 10,
-				"overdue_non_recurring": 10,
+        "overdue_non_recurring": 10,
         "estimated_schedule_density": [0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0],
-				"capacity_requirments": {
-					"per_minute": 6,
-					"per_hour": 28,
-					"per_day": 2
-				}
+        "capacity_requirments": {
+          "per_minute": 6,
+          "per_hour": 28,
+          "per_day": 2
+        }
       },
       "status": "OK"
     },
-		"capacity_estimation": {
+    "capacity_estimation": {
       "timestamp": "2021-02-16T11:38:06.826Z",
-			"value": {
-				"minutes_to_drain_overdue": 1,
-				"min_required_kibana": 1,
-				"max_throughput_per_minute": 200,
-				"avg_recurring_required_throughput_per_minute": 7,
-				"avg_required_throughput_per_minute": 8
-			},
+      "value": {
+        "observed": {
+          "observed_kibana_instances": 1,
+          "max_throughput_per_minute_per_kibana": 200,
+          "max_throughput_per_minute": 200,
+          "minutes_to_drain_overdue": 1,
+          "avg_recurring_required_throughput_per_minute": 28,
+          "avg_recurring_required_throughput_per_minute_per_kibana": 28,
+          "avg_required_throughput_per_minute": 28,
+          "avg_required_throughput_per_minute_per_kibana": 28
+        },
+        "proposed": {
+          "min_required_kibana": 1,
+          "avg_recurring_required_throughput_per_minute_per_kibana": 28,
+          "avg_required_throughput_per_minute": 28,
+          "avg_required_throughput_per_minute_per_kibana": 28
+        }
+      }
       "status": "OK"
-		}
+    }
   }
 }
 --------------------------------------------------
@@ -846,20 +857,34 @@ Evaluating the health stats above you can see the following output under `stats.
 [source,json]
 --------------------------------------------------
 {
-  "assumed_kibana_instances": 1, # <1>
-  "minutes_to_drain_overdue": 1, # <2>
-  "min_required_kibana": 1, # <3>
-  "max_throughput_per_minute": 200, # <4>
-  "avg_recurring_required_throughput_per_minute": 7, # <5>
-  "avg_required_throughput_per_minute": 8 # <6>
+  "observed": {
+    "observed_kibana_instances": 1, # <1>
+    "minutes_to_drain_overdue": 1, # <2>
+    "max_throughput_per_minute_per_kibana": 200,
+    "max_throughput_per_minute": 200, # <3>
+    "avg_recurring_required_throughput_per_minute": 28, # <4>
+    "avg_recurring_required_throughput_per_minute_per_kibana": 28,
+    "avg_required_throughput_per_minute": 28, # <5>
+    "avg_required_throughput_per_minute_per_kibana": 28
+  },
+  "proposed": {
+    "min_required_kibana": 1, # <6>
+    "avg_recurring_required_throughput_per_minute_per_kibana": 28,
+    "avg_required_throughput_per_minute": 28,
+    "avg_required_throughput_per_minute_per_kibana": 28
+  }
 }
 --------------------------------------------------
 <1> These estimates assume that there is one {kib} instance actively executing tasks
-<2> Based on past throughput the overdue tasks in the system should be executed within 1 minute
-<3> One {kib} instance should be sufficient to run the current workload
-<4> Assuming all {kib} instacnes in the cluster are configured the same as this instance, the maximum available throughput is 200 tasks per minute
-<5> On average the recurring tasks in the system have historically required a throughput of 7 tasks per minute
-<6> On average, regardless of whether they are recurring or otherwise, the tasks in the system have historically required a throughput of 8 tasks per minute
+<2> Based on past throughput the overdue tasks in the system could be executed within 1 minute
+<3> Assuming all {kib} instacnes in the cluster are configured the same as this instance, the maximum available throughput is 200 tasks per minute
+<4> On average the recurring tasks in the system have historically required a throughput of 28 tasks per minute
+<5> On average, regardless of whether they are recurring or otherwise, the tasks in the system have historically required a throughput of 28 tasks per minute
+<6> One {kib} instance should be sufficient to run the current workload
+
+The `capacity_estimation` section is made up of two subsections:
+* `observed` estimates the current capacity by observing historical runtime and workload statistics
+* `proposed` estimates the baseline {kib} cluster size and the expected throughput under such a deployment strategy
 
 You can infer from these estimates that the current system is under-utilised and has enough capacity to handle many more tasks than it currently does.
 
@@ -868,26 +893,38 @@ Suppose an alternate scenario, where you see the following output under `stats.c
 [source,json]
 --------------------------------------------------
 {
-  "assumed_kibana_instances": 2, # <1>
-  "minutes_to_drain_overdue": 12, # <2>
-  "min_required_kibana": 3, # <3>
-  "max_throughput_per_minute": 400, # <4>
-  "avg_recurring_required_throughput_per_minute": 285, # <5>
-  "avg_required_throughput_per_minute": 410 # <6>
+  "observed": {
+    "observed_kibana_instances": 2, # <1>
+    "max_throughput_per_minute_per_kibana": 200,
+    "max_throughput_per_minute": 400, # <2>
+    "minutes_to_drain_overdue": 12, # <3>
+    "avg_recurring_required_throughput_per_minute": 354, # <4>
+    "avg_recurring_required_throughput_per_minute_per_kibana": 177, # <5>
+    "avg_required_throughput_per_minute": 434, # <6>
+    "avg_required_throughput_per_minute_per_kibana": 217
+  },
+  "proposed": {
+    "min_required_kibana": 3, # <7>
+    "avg_recurring_required_throughput_per_minute_per_kibana": 118, # <8>
+    "avg_required_throughput_per_minute_per_kibana": 145 # <9>
+  }
 }
 --------------------------------------------------
 <1> These estimates assume that there are two {kib} instance actively executing tasks
-<2> Based on past throughput the overdue tasks in the system should be executed within 12 minute
-<3> The system estimates that at least three {kib} instances are required to run the current workload
-<4> The maximum available throughput in the system currently is 400 tasks per minute
-<5> On average the recurring tasks in the system have historically required a throughput of 285 tasks per minute
-<6> On average the tasks in the system have historically required a throughput of 410 tasks per minute
+<2> The maximum available throughput in the system currently is 400 tasks per minute
+<3> Based on past throughput the overdue tasks in the system should be executed within 12 minute
+<4> On average the recurring tasks in the system have historically required a throughput of 354 tasks per minute
+<5> On average each {kib} instance utilizes 177 tasks per minute of its capacity to execute recurring tasks
+<6> On average the tasks in the system have historically required a throughput of 434 tasks per minute
+<7> The system estimates that at least three {kib} instances are required to run the current workload
+<8> Once a third {kib} instance is provisioned, the capacity utilized by each instance to execute recurring tasks should drop from 177 to 118 tasks per minute
+<9> Taking into account historical ad-hoc task execution, we estimate the throughput required of each {kib} instance will drop from 217 task per minute to 145, once a third {kib} instance is provisioned
 
 Evaluating by these estimates, we can infer some interesting attributes of our system:
 
 * These estimates are produced based on the assumption that there are two {kib} instances in the cluster. This number is based on the number of {kib} instances actively executing tasks in recent minutes. At times this number might fluctuate if {kib} instances remain idle, so validating these estimates against what you know about the system is recommended.
 * There appear to be so many overdue tasks that it would take 12 minutes of executions to catch up with that backlog. This does not take into account tasks that might become overdue during those 12 minutes, so while this congestion might be temporary, the system could also remain consistently under provisioned and might never drain the backlog entirely.
-* Evauating the recurring tasks in the workload the system requires a throughput of 285 tasks per minute on average to execute tasks on time, which is well below the estimated maximum throughput of 400 tasks per minute. Once we take into account historical throughpout though, we estimate that the required throughput at 410 tasks per minute. This suggests that, historically, over 30% of tasks have been ad-hoc non-recurring tasks, the scale of which are harder to predict than recurring tasks.
+* Evauating the recurring tasks in the workload the system requires a throughput of 354 tasks per minute on average to execute tasks on time, which is lower then the estimated maximum throughput of 400 tasks per minute. Once we take into account historical throughpout though, we estimate that the required throughput at 434 tasks per minute. This suggests that, historically, approximately 20% of tasks have been ad-hoc non-recurring tasks, the scale of which are harder to predict than recurring tasks.
 
 You can infer from these estimates that the capacity in the current system is insufficient and at least one additional {kib} instance is required in order to keep up with the workload.
 

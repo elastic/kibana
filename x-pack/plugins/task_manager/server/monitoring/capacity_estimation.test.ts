@@ -36,11 +36,11 @@ describe('estimateCapacity', () => {
             },
           }
         )
-      ).value
+      ).value.observed
     ).toMatchObject({
-      assumed_kibana_instances: 1,
-      assumed_minutes_to_drain_overdue: 0,
-      assumed_max_throughput_per_minute: 200,
+      observed_kibana_instances: 1,
+      minutes_to_drain_overdue: 0,
+      max_throughput_per_minute: 200,
     });
   });
 
@@ -71,11 +71,11 @@ describe('estimateCapacity', () => {
             },
           }
         )
-      ).value
+      ).value.observed
     ).toMatchObject({
-      assumed_kibana_instances: 1,
-      assumed_minutes_to_drain_overdue: 0,
-      assumed_max_throughput_per_minute: 200,
+      observed_kibana_instances: 1,
+      minutes_to_drain_overdue: 0,
+      max_throughput_per_minute: 200,
     });
   });
 
@@ -107,11 +107,11 @@ describe('estimateCapacity', () => {
             },
           }
         )
-      ).value
+      ).value.observed
     ).toMatchObject({
-      assumed_kibana_instances: 1,
-      assumed_minutes_to_drain_overdue: 0,
-      assumed_max_throughput_per_minute: 200,
+      observed_kibana_instances: 1,
+      minutes_to_drain_overdue: 0,
+      max_throughput_per_minute: 200,
     });
   });
 
@@ -142,13 +142,13 @@ describe('estimateCapacity', () => {
             },
           }
         )
-      ).value
+      ).value.observed
     ).toMatchObject({
-      assumed_kibana_instances: 3,
-      assumed_minutes_to_drain_overdue: 0,
-      assumed_max_throughput_per_minute: 3 * 200, // 3 kibana, 200tpm each
-      assumed_avg_required_throughput_per_minute: 150 + 1, // 150 every minute, plus 60 every hour
-      assumed_avg_required_throughput_per_minute_per_kibana: Math.ceil((150 + 1) / 3),
+      observed_kibana_instances: 3,
+      minutes_to_drain_overdue: 0,
+      max_throughput_per_minute: 3 * 200, // 3 kibana, 200tpm each
+      avg_required_throughput_per_minute: 150 + 1, // 150 every minute, plus 60 every hour
+      avg_required_throughput_per_minute_per_kibana: Math.ceil((150 + 1) / 3),
     });
   });
 
@@ -190,15 +190,15 @@ describe('estimateCapacity', () => {
             },
           }
         )
-      ).value
+      ).value.observed
     ).toMatchObject({
-      assumed_kibana_instances: provisionedKibanaInstances,
-      assumed_minutes_to_drain_overdue: 0,
-      assumed_max_throughput_per_minute: provisionedKibanaInstances * 200, // 2 kibana, 200tpm each
-      assumed_avg_required_throughput_per_minute_per_kibana: Math.ceil(
+      observed_kibana_instances: provisionedKibanaInstances,
+      minutes_to_drain_overdue: 0,
+      max_throughput_per_minute: provisionedKibanaInstances * 200, // 2 kibana, 200tpm each
+      avg_required_throughput_per_minute_per_kibana: Math.ceil(
         expectedAverageRequiredCapacityPerKibana
       ),
-      assumed_avg_required_throughput_per_minute: Math.ceil(
+      avg_required_throughput_per_minute: Math.ceil(
         provisionedKibanaInstances * expectedAverageRequiredCapacityPerKibana
       ), // same as above but for both instances
     });
@@ -212,7 +212,10 @@ describe('estimateCapacity', () => {
     const expectedAverageRequiredCapacityPerKibanaCurrently =
       200 * 0.5 + recurringTasksPerMinute / provisionedKibanaInstances;
     const expectedAverageRequiredCapacityPerKibanaOnceThereAreEnoughServers =
-      200 * 0.5 + recurringTasksPerMinute / (provisionedKibanaInstances + 1);
+      // the non-recurring task load should now be shared between 3 server instead of 2
+      (200 * 0.5 * provisionedKibanaInstances) / (provisionedKibanaInstances + 1) +
+      // so will the recurring tasks
+      recurringTasksPerMinute / (provisionedKibanaInstances + 1);
 
     expect(
       estimateCapacity(
@@ -249,27 +252,27 @@ describe('estimateCapacity', () => {
         )
       ).value
     ).toMatchObject({
-      assumed_kibana_instances: provisionedKibanaInstances,
-      assumed_minutes_to_drain_overdue: 0,
-      assumed_max_throughput_per_minute: provisionedKibanaInstances * 200, // 2 kibana, 200tpm each
-      assumed_avg_required_throughput_per_minute_per_kibana: Math.ceil(
-        expectedAverageRequiredCapacityPerKibanaCurrently
-      ),
-      assumed_avg_required_throughput_per_minute: Math.ceil(
-        provisionedKibanaInstances * expectedAverageRequiredCapacityPerKibanaCurrently
-      ), // same as above bt for both instances
-      min_required_kibana: provisionedKibanaInstances + 1,
-      avg_recurring_required_throughput_per_minute: Math.ceil(recurringTasksPerMinute),
-      avg_recurring_required_throughput_per_minute_per_kibana: Math.ceil(
-        recurringTasksPerMinute / (provisionedKibanaInstances + 1)
-      ),
-      avg_required_throughput_per_minute: Math.ceil(
-        expectedAverageRequiredCapacityPerKibanaOnceThereAreEnoughServers *
-          (1 + provisionedKibanaInstances)
-      ),
-      avg_required_throughput_per_minute_per_kibana: Math.ceil(
-        expectedAverageRequiredCapacityPerKibanaOnceThereAreEnoughServers
-      ),
+      observed: {
+        observed_kibana_instances: provisionedKibanaInstances,
+        minutes_to_drain_overdue: 0,
+        max_throughput_per_minute: provisionedKibanaInstances * 200, // 2 kibana, 200tpm each
+        avg_recurring_required_throughput_per_minute: Math.ceil(recurringTasksPerMinute),
+        avg_required_throughput_per_minute_per_kibana: Math.ceil(
+          expectedAverageRequiredCapacityPerKibanaCurrently
+        ),
+        avg_required_throughput_per_minute: Math.ceil(
+          provisionedKibanaInstances * expectedAverageRequiredCapacityPerKibanaCurrently
+        ), // same as above bt for both instances
+      },
+      proposed: {
+        min_required_kibana: provisionedKibanaInstances + 1,
+        avg_recurring_required_throughput_per_minute_per_kibana: Math.ceil(
+          recurringTasksPerMinute / (provisionedKibanaInstances + 1)
+        ),
+        avg_required_throughput_per_minute_per_kibana: Math.ceil(
+          expectedAverageRequiredCapacityPerKibanaOnceThereAreEnoughServers
+        ),
+      },
     });
   });
 

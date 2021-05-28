@@ -60,11 +60,22 @@ interface MonitoringStats {
     capacity_estimation: {
       timestamp: string;
       value: {
-        minutes_to_drain_overdue: number;
-        max_throughput_per_minute: number;
-        min_required_kibana: number;
-        avg_required_throughput_per_minute: number;
-        avg_recurring_required_throughput_per_minute: number;
+        observed: {
+          observed_kibana_instances: number;
+          max_throughput_per_minute: number;
+          max_throughput_per_minute_per_kibana: number;
+          minutes_to_drain_overdue: number;
+          avg_required_throughput_per_minute: number;
+          avg_required_throughput_per_minute_per_kibana: number;
+          avg_recurring_required_throughput_per_minute: number;
+          avg_recurring_required_throughput_per_minute_per_kibana: number;
+        };
+        proposed: {
+          min_required_kibana: number;
+          avg_recurring_required_throughput_per_minute_per_kibana: number;
+          avg_required_throughput_per_minute: number;
+          avg_required_throughput_per_minute_per_kibana: number;
+        };
       };
     };
   };
@@ -174,16 +185,28 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return a breakdown of idleTasks in the task manager workload', async () => {
       const {
-        capacity_estimation: { value: capacityEstimation },
+        capacity_estimation: {
+          value: { observed, proposed },
+        },
       } = (await getHealth()).stats;
 
-      expect(typeof capacityEstimation.minutes_to_drain_overdue).to.eql('number');
-      expect(typeof capacityEstimation.max_throughput_per_minute).to.eql('number');
-      expect(typeof capacityEstimation.min_required_kibana).to.eql('number');
-      expect(typeof capacityEstimation.avg_required_throughput_per_minute).to.eql('number');
-      expect(typeof capacityEstimation.avg_recurring_required_throughput_per_minute).to.eql(
+      expect(typeof observed.observed_kibana_instances).to.eql('number');
+      expect(typeof observed.max_throughput_per_minute).to.eql('number');
+      expect(typeof observed.max_throughput_per_minute_per_kibana).to.eql('number');
+      expect(typeof observed.minutes_to_drain_overdue).to.eql('number');
+      expect(typeof observed.avg_required_throughput_per_minute).to.eql('number');
+      expect(typeof observed.avg_required_throughput_per_minute_per_kibana).to.eql('number');
+      expect(typeof observed.avg_recurring_required_throughput_per_minute).to.eql('number');
+      expect(typeof observed.avg_recurring_required_throughput_per_minute_per_kibana).to.eql(
         'number'
       );
+
+      expect(typeof proposed.min_required_kibana).to.eql('number');
+      expect(typeof proposed.avg_recurring_required_throughput_per_minute_per_kibana).to.eql(
+        'number'
+      );
+      expect(typeof proposed.avg_required_throughput_per_minute).to.eql('number');
+      expect(typeof proposed.avg_required_throughput_per_minute_per_kibana).to.eql('number');
     });
 
     it('should return an estimation of task manager capacity', async () => {

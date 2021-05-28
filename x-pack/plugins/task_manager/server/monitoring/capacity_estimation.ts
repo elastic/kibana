@@ -10,17 +10,21 @@ import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
 
 export interface CapacityEstimationStat extends JsonObject {
-  assumed_kibana_instances: number;
-  assumed_max_throughput_per_minute: number;
-  assumed_minutes_to_drain_overdue: number;
-  min_required_kibana: number;
-  max_throughput_per_minute_per_kibana: number;
-  avg_recurring_required_throughput_per_minute: number;
-  avg_recurring_required_throughput_per_minute_per_kibana: number;
-  avg_required_throughput_per_minute: number;
-  avg_required_throughput_per_minute_per_kibana: number;
-  assumed_avg_required_throughput_per_minute: number;
-  assumed_avg_required_throughput_per_minute_per_kibana: number;
+  observed: {
+    observed_kibana_instances: number;
+    max_throughput_per_minute: number;
+    max_throughput_per_minute_per_kibana: number;
+    minutes_to_drain_overdue: number;
+    avg_required_throughput_per_minute: number;
+    avg_required_throughput_per_minute_per_kibana: number;
+    avg_recurring_required_throughput_per_minute: number;
+    avg_recurring_required_throughput_per_minute_per_kibana: number;
+  };
+  proposed: {
+    min_required_kibana: number;
+    avg_recurring_required_throughput_per_minute_per_kibana: number;
+    avg_required_throughput_per_minute_per_kibana: number;
+  };
 }
 
 export type CapacityEstimationParams = Omit<
@@ -118,7 +122,8 @@ export function estimateCapacity(
    * each kibana need if following the minRequiredKibanaInstances?
    */
   const averageRequiredThroughputPerMinutePerKibana =
-    averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana +
+    averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana *
+      (assumedKibanaInstances / minRequiredKibanaInstances) +
     averageRecurringRequiredPerMinute / minRequiredKibanaInstances;
 
   const assumedAverageRecurringRequiredThroughputPerMinutePerKibana =
@@ -140,25 +145,31 @@ export function estimateCapacity(
         ? HealthStatus.Warning
         : HealthStatus.Error,
     timestamp: new Date().toISOString(),
-    value: mapValues(
-      {
-        assumed_kibana_instances: assumedKibanaInstances,
-        assumed_max_throughput_per_minute: assumedCapacityAvailablePerMinute,
-        assumed_minutes_to_drain_overdue:
-          overdue / (assumedKibanaInstances * averageCapacityUsedByPersistedTasksPerKibana),
-        min_required_kibana: minRequiredKibanaInstances,
-        max_throughput_per_minute_per_kibana: capacityPerMinutePerKibana,
-        avg_recurring_required_throughput_per_minute: averageRecurringRequiredPerMinute,
-        avg_recurring_required_throughput_per_minute_per_kibana: averageRecurringRequiredPerMinutePerKibana,
-        avg_required_throughput_per_minute:
-          averageRequiredThroughputPerMinutePerKibana * minRequiredKibanaInstances,
-        avg_required_throughput_per_minute_per_kibana: averageRequiredThroughputPerMinutePerKibana,
-        assumed_avg_required_throughput_per_minute:
-          assumedRequiredThroughputPerMinutePerKibana * assumedKibanaInstances,
-        assumed_avg_required_throughput_per_minute_per_kibana: assumedRequiredThroughputPerMinutePerKibana,
-      },
-      Math.ceil
-    ),
+    value: {
+      observed: mapValues(
+        {
+          observed_kibana_instances: assumedKibanaInstances,
+          max_throughput_per_minute_per_kibana: capacityPerMinutePerKibana,
+          max_throughput_per_minute: assumedCapacityAvailablePerMinute,
+          minutes_to_drain_overdue:
+            overdue / (assumedKibanaInstances * averageCapacityUsedByPersistedTasksPerKibana),
+          avg_recurring_required_throughput_per_minute: averageRecurringRequiredPerMinute,
+          avg_recurring_required_throughput_per_minute_per_kibana: assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
+          avg_required_throughput_per_minute:
+            assumedRequiredThroughputPerMinutePerKibana * assumedKibanaInstances,
+          avg_required_throughput_per_minute_per_kibana: assumedRequiredThroughputPerMinutePerKibana,
+        },
+        Math.ceil
+      ),
+      proposed: mapValues(
+        {
+          min_required_kibana: minRequiredKibanaInstances,
+          avg_recurring_required_throughput_per_minute_per_kibana: averageRecurringRequiredPerMinutePerKibana,
+          avg_required_throughput_per_minute_per_kibana: averageRequiredThroughputPerMinutePerKibana,
+        },
+        Math.ceil
+      ),
+    },
   };
 }
 
