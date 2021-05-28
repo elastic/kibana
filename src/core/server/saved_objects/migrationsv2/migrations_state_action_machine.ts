@@ -120,15 +120,12 @@ export async function migrationStateActionMachine({
   // indicate which messages come from which index upgrade.
   const logMessagePrefix = `[${initialState.indexPrefix}] `;
   let prevTimestamp = startTime;
-  let lastState: State | undefined;
   try {
     // we either return from here or an error is thrown
     const finalState = await stateActionMachine<State>(
       initialState,
       (state) => next(state),
       (state, res) => {
-        lastState = state;
-
         executionLog.push({
           type: 'response',
           res,

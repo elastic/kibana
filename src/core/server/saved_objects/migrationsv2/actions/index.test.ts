@@ -129,14 +129,6 @@ describe('actions', () => {
     });
   });
 
-  describe('cleanupFatal', () => {
-    // to properly spy on mocks and create the mocks for actions being called within other actions, we either need to:
-    // refactor a split out all the actions into indivudual files (https://github.com/elastic/kibana/issues/99479)
-    // export an object containing all the actions
-    it.todo('calls closePit');
-    it.todo("doesn't call closePit if there isn't one to close");
-  });
-
   describe('reindex', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
       const task = Actions.reindex(

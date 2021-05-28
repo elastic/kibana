@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { cleanupMock } from './migrations_state_machine_cleanup.mocks';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { loggingSystemMock, elasticsearchServiceMock } from '../../mocks';
 import * as Either from 'fp-ts/lib/Either';
