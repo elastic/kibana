@@ -169,7 +169,7 @@ describe('When on the Trusted Apps Page', () => {
 
     it('should display a Add Trusted App button', async () => {
       const { getByTestId } = await renderWithListData();
-      const addButton = await getByTestId('trustedAppsListAddButton');
+      const addButton = getByTestId('trustedAppsListAddButton');
       expect(addButton.textContent).toBe('Add Trusted Application');
     });
 
@@ -520,6 +520,14 @@ describe('When on the Trusted Apps Page', () => {
       expect(history.location.search).toBe('');
     });
 
+    it('should display the searchbar', async () => {
+      const renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsExistStateChanged');
+      });
+      expect(await renderResult.findByTestId('searchBar')).not.toBeNull();
+    });
+
     describe('and when the form data is valid', () => {
       const fillInCreateForm = async () => {
         mockedContext.store.dispatch({
@@ -555,7 +563,7 @@ describe('When on the Trusted Apps Page', () => {
           // to test the UI behaviours while the API call is in flight
           coreStart.http.post.mockImplementation(
             // @ts-ignore
-            async (path: string, options: HttpFetchOptions) => {
+            async (_path: string, options: HttpFetchOptions) => {
               return new Promise((resolve, reject) => {
                 httpPostBody = options.body as string;
                 resolveHttpPost = resolve;
@@ -860,6 +868,14 @@ describe('When on the Trusted Apps Page', () => {
       });
 
       expect(await renderResult.findByTestId('trustedAppEmptyState')).not.toBeNull();
+    });
+
+    it('should not display the searchbar', async () => {
+      const renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsExistStateChanged');
+      });
+      expect(renderResult.queryByTestId('searchBar')).toBeNull();
     });
   });
 
