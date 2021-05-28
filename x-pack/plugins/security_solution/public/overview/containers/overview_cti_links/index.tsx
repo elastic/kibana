@@ -8,14 +8,14 @@ import { useEffect, useState, useMemo } from 'react';
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import { usePrevious } from 'react-use';
 import { useKibana } from '../../../common/lib/kibana';
-import { useCTIEventCounts } from './get_event_counts';
+import { useCTIEventCounts } from './use_cti_event_counts';
 import { ThreatIntelLinkPanelProps } from '../../components/overview_cti_links';
 import { makeMapStateToProps } from '../../../common/components/url_state/helpers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { CONSTANTS } from '../../../common/components/url_state/constants';
 
 const DASHBOARD_SO_TITLE_PREFIX = '[Filebeat Threat Intel] ';
-const BUTTON_LINK_TITLE = 'Overview';
+const OVERVIEW_DASHBOARD_LINK_TITLE = 'Overview';
 const TAG_REQUEST_BODY = {
   type: 'tag',
   search: 'threat intel',
@@ -35,7 +35,8 @@ interface ButtonLink {
 const isDashboardLink = (link: DashboardLink | Partial<DashboardLink>): link is DashboardLink =>
   typeof link.title === 'string' && typeof link.path === 'string' && typeof link.count === 'number';
 
-const isButtonLink = (link: { path?: string; title?: string }) => link.title === BUTTON_LINK_TITLE;
+const isOverviewDashboardLink = (link: { path?: string; title?: string }) =>
+  link.title === OVERVIEW_DASHBOARD_LINK_TITLE;
 
 export const useThreatIntelDashboardLinks = (props: ThreatIntelLinkPanelProps) => {
   const savedObjectsClient = useKibana().services.savedObjects.client;
@@ -69,7 +70,7 @@ export const useThreatIntelDashboardLinks = (props: ThreatIntelLinkPanelProps) =
           if (DashboardsSO?.savedObjects?.length && createUrl) {
             const dashboardUrls = await Promise.all(
               DashboardsSO.savedObjects.map((SO) => createUrl({ dashboardId: SO.id, timeRange }))
-            ).then((values) => values);
+            );
             const links = DashboardsSO.savedObjects.reduce((acc, dashboardSO, i) => {
               const title =
                 typeof dashboardSO.attributes.title === 'string'
@@ -84,7 +85,7 @@ export const useThreatIntelDashboardLinks = (props: ThreatIntelLinkPanelProps) =
                 count,
                 path: dashboardUrls[i],
               };
-              if (isButtonLink(link)) {
+              if (isOverviewDashboardLink(link)) {
                 setButtonLink(link);
               } else if (isDashboardLink(link)) {
                 acc.push(link);
@@ -94,8 +95,21 @@ export const useThreatIntelDashboardLinks = (props: ThreatIntelLinkPanelProps) =
             setDashboardLinks(links);
           }
         });
+    } else if (total === 0 && buttonLink) {
+      setButtonLink(null);
+      setDashboardLinks([]);
     }
-  }, [eventCounts, prevTotal, savedObjectsClient, timeRange, total, createUrl]);
+  }, [
+    buttonLink,
+    createUrl,
+    eventCounts,
+    prevTotal,
+    savedObjectsClient,
+    setButtonLink,
+    setDashboardLinks,
+    timeRange,
+    total,
+  ]);
 
   return {
     buttonLink,

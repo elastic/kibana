@@ -22,6 +22,7 @@ import {
 import { ThreatIntelLinkPanel } from '.';
 import { createStore, State } from '../../../common/store';
 import { useThreatIntelDashboardLinks } from '../../containers/overview_cti_links';
+import { mockData as mockCtiLinks } from './mock';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -33,22 +34,11 @@ const testProps = {
   setQuery: jest.fn(),
   deleteQuery: jest.fn(),
   filters: [],
-  query: {
-    query: '',
-    language: 'kuery',
-  },
 };
 
 jest.mock('../../containers/overview_cti_links');
 const useThreatIntelDashboardLinksMock = useThreatIntelDashboardLinks as jest.Mock;
-useThreatIntelDashboardLinksMock.mockReturnValue({
-  buttonLink: { path: '/button-link-path' },
-  dashboardLinks: [
-    { count: 1, title: 'anomali', path: '/dashboard-link-0' },
-    { count: 99, title: 'alienvault', path: '/dashboard-link-1' },
-  ],
-  totalEventCount: 100,
-});
+useThreatIntelDashboardLinksMock.mockReturnValue(mockCtiLinks);
 
 describe('OverviewCTILinks', () => {
   const state: State = mockGlobalState;
@@ -71,7 +61,6 @@ describe('OverviewCTILinks', () => {
     expect(wrapper.find('[data-test-subj="header-section-title"]').first().text()).toEqual(
       'Threat Intelligence'
     );
-    wrapper.unmount();
   });
 
   test('does not appear if dashboard links are not present', () => {
@@ -90,7 +79,6 @@ describe('OverviewCTILinks', () => {
     );
     const element = wrapper.find('[data-test-subj="cti-dashboard-links"]').first();
     expect(element).toEqual({});
-    wrapper.unmount();
   });
 
   test('it renders links', () => {
@@ -106,6 +94,5 @@ describe('OverviewCTILinks', () => {
 
     expect(hrefs).toContain('/dashboard-link-0');
     expect(hrefs).toContain('/dashboard-link-1');
-    wrapper.unmount();
   });
 });

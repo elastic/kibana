@@ -20,6 +20,7 @@ import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enable
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
 import { useThreatIntelDashboardLinks } from '../containers/overview_cti_links';
+import { mockData as mockCtiLinks } from '../components/overview_cti_links/mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -59,14 +60,7 @@ const mockUseIngestEnabledCheck = useIngestEnabledCheck as jest.Mock;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
 const useThreatIntelDashboardLinksMock = useThreatIntelDashboardLinks as jest.Mock;
-useThreatIntelDashboardLinksMock.mockReturnValue({
-  buttonLink: { path: '/button-link-path' },
-  dashboardLinks: [
-    { count: 1, title: 'anomali', path: '/dashboard-link-0' },
-    { count: 99, title: 'alienvault', path: '/dashboard-link-1' },
-  ],
-  totalEventCount: 100,
-});
+useThreatIntelDashboardLinksMock.mockReturnValue(mockCtiLinks);
 describe('Overview', () => {
   beforeEach(() => {
     mockUseFetchIndex.mockReturnValue([

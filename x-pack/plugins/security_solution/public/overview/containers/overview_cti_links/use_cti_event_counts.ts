@@ -12,40 +12,16 @@ import { MatrixHistogramType } from '../../../../common/search_strategy/security
 import { useKibana } from '../../../common/lib/kibana';
 import { ThreatIntelLinkPanelProps } from '../../components/overview_cti_links';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { useMatrixHistogram } from '../../../common/containers/matrix_histogram';
 import { EVENT_DATASET } from '../../../../common/cti/constants';
 import { TimeRange } from '../../../resolver/types';
 
 export const ID = 'ctiEventCountQuery';
-
-const ctiEventsFilter: Filter = {
-  meta: {
-    alias: null,
-    disabled: false,
-    key: 'event.dataset',
-    negate: false,
-    params: {
-      query: 'file',
-    },
-    type: 'phrase',
-  },
-  query: {
-    match_phrase: { 'event.module': 'threatintel' },
-  },
-};
+const PREFIX = 'threatintel.';
 
 export const useCTIEventCounts = (
-  {
-    deleteQuery,
-    filters,
-    from,
-    indexNames,
-    indexPattern,
-    query,
-    setQuery,
-    to,
-  }: ThreatIntelLinkPanelProps,
+  { deleteQuery, filters, from, indexNames, indexPattern, setQuery, to }: ThreatIntelLinkPanelProps,
   timeRange: TimeRange
 ) => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -68,15 +44,15 @@ export const useCTIEventCounts = (
       filterQuery: convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
         indexPattern,
-        queries: [query],
-        filters: [...filters, ctiEventsFilter],
+        queries: [{ query: `event.kind = "enrichment"`, language: 'kql' }],
+        filters,
       }),
       histogramType: MatrixHistogramType.events,
       indexNames,
       stackByField: EVENT_DATASET,
       startDate: from,
     }),
-    [filters, from, indexPattern, uiSettings, query, to, indexNames]
+    [filters, from, indexPattern, uiSettings, to, indexNames]
   );
 
   const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogram(
@@ -102,10 +78,10 @@ export const useCTIEventCounts = (
     }
   }, [timeRange, prevTimeRangeString, refetch]);
 
-  const returnVal = {
+  return {
     eventCounts: data.reduce((acc, item) => {
-      if (item.y && item.g?.match('threatintel.')) {
-        const id = item.g.replace('threatintel.', '');
+      if (item.y && item.g) {
+        const id = item.g.replace(PREFIX, '');
         if (typeof acc[id] === 'number') {
           acc[id]! += item.y;
         } else {
@@ -116,6 +92,4 @@ export const useCTIEventCounts = (
     }, {} as { id: number | undefined; [key: string]: number | undefined }),
     total: totalCount,
   };
-
-  return returnVal;
 };

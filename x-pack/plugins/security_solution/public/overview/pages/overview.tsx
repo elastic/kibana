@@ -66,7 +66,6 @@ const OverviewComponent = () => {
     addMessage('management', 'dismissEndpointNotice');
   }, [addMessage]);
   const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
-
   return (
     <>
       {indicesExist ? (
@@ -145,7 +144,6 @@ const OverviewComponent = () => {
                       from={from}
                       indexPattern={indexPattern}
                       indexNames={selectedPatterns}
-                      query={query}
                       setQuery={setQuery}
                       to={to}
                     />

@@ -21,9 +21,9 @@ import { LinkButton } from '../../../common/components/links';
 import { InspectButtonContainer } from '../../../common/components/inspect';
 import { HeaderSection } from '../../../common/components/header_section';
 
-import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/get_event_counts';
+import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_cti_event_counts';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
-import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/common';
+import { Filter, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { useThreatIntelDashboardLinks } from '../../containers/overview_cti_links';
 
 export interface ThreatIntelLinkPanelProps
@@ -32,7 +32,6 @@ export interface ThreatIntelLinkPanelProps
   hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;
   indexNames: string[];
-  query: Query;
 }
 
 const DashboardLink = styled.li`
