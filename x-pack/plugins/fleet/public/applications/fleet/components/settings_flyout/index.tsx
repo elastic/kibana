@@ -277,7 +277,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
             values={{
               link: (
                 <EuiLink
-                  href="https://www.elastic.co/guide/en/fleet/current/index.html"
+                  href="https://www.elastic.co/guide/en/fleet/current/fleet-settings.html#fleet-server-hosts-setting"
                   target="_blank"
                   external
                 >
@@ -301,9 +301,26 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         label={i18n.translate('xpack.fleet.settings.elasticsearchUrlLabel', {
           defaultMessage: 'Elasticsearch hosts',
         })}
-        helpText={i18n.translate('xpack.fleet.settings.elasticsearchUrlsHelpTect', {
-          defaultMessage: 'Specify the Elasticsearch URLs where agents send data.',
-        })}
+        helpText={
+          <FormattedMessage
+            id="xpack.fleet.settings.elasticsearchUrlsHelpTect"
+            defaultMessage="Specify the Elasticsearch URLs where agents send data. Refer to the {link}."
+            values={{
+              link: (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/fleet/current/fleet-settings.html#fleet-server-hosts-setting"
+                  target="_blank"
+                  external
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.settings.userGuideLink"
+                    defaultMessage="Fleet User Guide"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
         {...inputs.elasticsearchUrl.formRowProps}
       >
         <EuiComboBox fullWidth noSuggestions {...inputs.elasticsearchUrl.props} />
