@@ -2,10 +2,13 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-export BUILD_TS_REFS_DISABLE=false
-export BUILD_TS_REFS_CACHE_ENABLE=false
-
-node scripts/build_ts_refs.js --force
+checks-reporter-with-killswitch "Build TS Refs" \
+  node scripts/build_ts_refs \
+    --ignore-type-failures \
+    --clean \
+    --no-cache \
+    --force \
+    --debug
 
 ###
 ### rebuild plugin api docs to ensure it's not out of date
