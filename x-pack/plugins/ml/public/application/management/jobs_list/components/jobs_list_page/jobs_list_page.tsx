@@ -198,7 +198,7 @@ export const JobsListPage: FC<{
   }
 
   if (isPlatinumOrTrialLicense === false) {
-    return <InsufficientLicensePage />;
+    return <InsufficientLicensePage basePath={coreStart.http.basePath} />;
   }
 
   return (
