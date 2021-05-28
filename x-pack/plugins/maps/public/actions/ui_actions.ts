@@ -10,11 +10,12 @@ import { ThunkDispatch } from 'redux-thunk';
 import { MapStoreState } from '../reducers/store';
 import { getFlyoutDisplay } from '../selectors/ui_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { trackMapSettings } from './map_actions';
+import { setQuery, trackMapSettings } from './map_actions';
 import { setSelectedLayer } from './layer_actions';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const SET_IS_LAYER_TOC_OPEN = 'SET_IS_LAYER_TOC_OPEN';
+export const SET_IS_TIME_SLIDER_OPEN = 'SET_IS_TIME_SLIDER_OPEN';
 export const SET_FULL_SCREEN = 'SET_FULL_SCREEN';
 export const SET_READ_ONLY = 'SET_READ_ONLY';
 export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
@@ -85,5 +86,22 @@ export function hideTOCDetails(layerId: string) {
   return {
     type: HIDE_TOC_DETAILS,
     layerId,
+  };
+}
+
+export function openTimeslider() {
+  return {
+    type: SET_IS_TIME_SLIDER_OPEN,
+    isTimesliderOpen: true,
+  };
+}
+
+export function closeTimeslider() {
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    dispatch({
+      type: SET_IS_TIME_SLIDER_OPEN,
+      isTimesliderOpen: false,
+    });
+    dispatch(setQuery({ clearTimeslice: true }));
   };
 }
