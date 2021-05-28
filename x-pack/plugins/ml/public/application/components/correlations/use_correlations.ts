@@ -95,6 +95,7 @@ export const useCorrelations = (params: CorrelationsOptions) => {
   return {
     error,
     histograms: rawResponse?.values ?? [],
+    percentileThresholdValue: rawResponse?.percentileThresholdValue ?? undefined,
     isComplete,
     isRunning,
     progress: loaded / total,

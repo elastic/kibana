@@ -25,9 +25,9 @@ interface ResponseHit {
   _source: ResponseHitSource;
 }
 
-export const getTransactionDurationPercentilesRequest = (
+export const getTransactionDurationRangesRequest = (
   params: SearchServiceParams,
-  percents?: number[],
+  rangesSteps: number[],
   fieldName?: string,
   fieldValue?: string
 ): estypes.SearchRequest => {
@@ -42,6 +42,15 @@ export const getTransactionDurationPercentilesRequest = (
       },
     });
   }
+  const ranges = rangesSteps.reduce(
+    (p, to) => {
+      const from = p[p.length - 1].to;
+      p.push({ from, to });
+      return p;
+    },
+    [{ to: 0 }] as Array<{ from?: number; to?: number }>
+  );
+  ranges.push({ from: ranges[ranges.length - 1].to });
 
   return {
     index: params.index,
@@ -49,10 +58,10 @@ export const getTransactionDurationPercentilesRequest = (
       query,
       size: 0,
       aggs: {
-        transaction_duration_percentiles: {
-          percentiles: {
+        logspace_ranges: {
+          range: {
             field: TRANSACTION_DURATION_US,
-            ...(Array.isArray(percents) ? { percents } : {}),
+            ranges,
           },
         },
       },
@@ -60,23 +69,25 @@ export const getTransactionDurationPercentilesRequest = (
   };
 };
 
-export const fetchTransactionDurationPecentiles = async (
+export const fetchTransactionDurationRanges = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams,
-  percents?: number[],
+  rangesSteps: number[],
   fieldName?: string,
   fieldValue?: string
-): Promise<Record<string, number>> => {
+): Promise<any> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationPercentilesRequest(params, percents, fieldName, fieldValue)
+    getTransactionDurationRangesRequest(params, rangesSteps, fieldName, fieldValue)
   );
 
   if (resp.body.aggregations === undefined) {
-    throw new Error('fetchTransactionDurationPecentiles failed, did not return aggregations.');
+    throw new Error('fetchTransactionDurationCorrelation failed, did not return aggregations.');
   }
 
-  return (
-    (resp.body.aggregations.transaction_duration_percentiles as estypes.TDigestPercentilesAggregate)
-      .values ?? {}
-  );
+  return resp.body.aggregations.logspace_ranges.buckets
+    .map((d) => ({
+      key: d.from,
+      doc_count: d.doc_count,
+    }))
+    .filter((d) => d.key !== undefined);
 };

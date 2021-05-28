@@ -35,9 +35,12 @@ export const Correlations: FC<CorrelationsProps> = (fetchOptions) => {
     services: { notifications },
   } = useMlKibana();
 
+  const percentileThreshold = 95;
+
   const {
     error,
     histograms,
+    percentileThresholdValue,
     isComplete,
     isRunning,
     progress,
@@ -45,7 +48,10 @@ export const Correlations: FC<CorrelationsProps> = (fetchOptions) => {
     cancelFetch,
   } = useCorrelations({
     index: 'apm-*',
-    ...fetchOptions,
+    ...{
+      ...fetchOptions,
+      percentileThreshold,
+    },
   });
 
   // cancel any running async partial request when unmounting the component
@@ -90,10 +96,15 @@ export const Correlations: FC<CorrelationsProps> = (fetchOptions) => {
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGrid columns={3} gutterSize="none">
+      <EuiFlexGrid columns={1} gutterSize="none">
         {histograms.map((histogram) => (
           <EuiFlexItem>
-            <CorrelationChart {...histogram} key={`${histogram.field}:${histogram.value}`} />
+            <CorrelationChart
+              markerPercentile={percentileThreshold}
+              markerValue={percentileThresholdValue}
+              {...histogram}
+              key={`${histogram.field}:${histogram.value}`}
+            />
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>

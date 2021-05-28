@@ -8,7 +8,9 @@
 import React, { FC } from 'react';
 
 import {
+  AnnotationDomainType,
   Chart,
+  CurveType,
   Settings,
   Axis,
   ScaleType,
@@ -18,6 +20,8 @@ import {
   AxisStyle,
   PartialTheme,
   BarSeriesSpec,
+  LineAnnotation,
+  LineAnnotationDatum,
 } from '@elastic/charts';
 
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
@@ -32,20 +36,20 @@ const axes: RecursivePartial<AxisStyle> = {
     stroke: axisColor,
   },
   tickLabel: {
-    fontSize: 8,
+    fontSize: 10,
     fill: axisColor,
-    padding: 10,
+    padding: 0,
   },
   tickLine: {
     stroke: axisColor,
-    size: 0,
+    size: 5,
   },
   gridLine: {
     horizontal: {
       dash: [1, 2],
     },
     vertical: {
-      strokeWidth: 0,
+      strokeWidth: 1,
     },
   },
 };
@@ -53,6 +57,11 @@ const theme: PartialTheme = {
   axes,
   legend: {
     spacingBuffer: 100,
+  },
+  areaSeriesStyle: {
+    line: {
+      visible: false,
+    },
   },
 };
 
@@ -65,11 +74,38 @@ interface CorrelationChartProps {
   field: string;
   value: string;
   histogram: Array<{ key: string; doc_count: number; doc_count_full: number }>;
+  markerValue: number;
+  markerPercentile: number;
 }
 
-export const CorrelationChart: FC<CorrelationChartProps> = ({ field, value, histogram }) => {
+const annotationsStyle = {
+  line: {
+    strokeWidth: 1,
+    stroke: 'gray',
+    opacity: 0.8,
+  },
+  details: {
+    fontSize: 8,
+    fontFamily: 'Arial',
+    fontStyle: 'normal',
+    fill: 'gray',
+    padding: 0,
+  },
+};
+
+export const CorrelationChart: FC<CorrelationChartProps> = ({
+  field,
+  value,
+  histogram,
+  markerValue,
+  markerPercentile,
+}) => {
+  const annotationsDataValues: LineAnnotationDatum[] = [
+    { dataValue: markerValue, details: `${markerPercentile}th percentile` },
+  ];
+
   return (
-    <div style={{ width: '210px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+    <div style={{ width: '610px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
       <small
         style={{
           textOverflow: 'ellipsis',
@@ -79,11 +115,20 @@ export const CorrelationChart: FC<CorrelationChartProps> = ({ field, value, hist
       >{`${field}:${value}`}</small>
       <Chart
         size={{
-          width: '200px',
-          height: '180px',
+          width: '600px',
+          height: '300px',
         }}
       >
         <Settings rotation={0} theme={theme} showLegend={false} />
+
+        <LineAnnotation
+          id="annotation_1"
+          domainType={AnnotationDomainType.XDomain}
+          dataValues={annotationsDataValues}
+          style={annotationsStyle}
+          marker={`${markerPercentile}p`}
+          markerPosition={'top'}
+        />
 
         <Axis id="x-axis" title="" position={Position.Bottom} />
         <Axis id="y-axis" title="" position={Position.Left} />
@@ -92,6 +137,7 @@ export const CorrelationChart: FC<CorrelationChartProps> = ({ field, value, hist
           xScaleType={ScaleType.Log}
           yScaleType={ScaleType.Log}
           data={histogram}
+          curve={CurveType.CURVE_STEP}
           {...barSeriesSpec}
         />
       </Chart>

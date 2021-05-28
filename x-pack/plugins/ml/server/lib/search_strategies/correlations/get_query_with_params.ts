@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 
 import type { SearchServiceParams } from './async_search_service';
 
+import { TRANSACTION_DURATION_US } from './constants';
+
 export enum ProcessorEvent {
   transaction = 'transaction',
   error = 'error',
@@ -73,12 +75,25 @@ const getRangeQuery = (start?: string, end?: string): QueryContainer[] => {
   ];
 };
 
+const getPercentileThresholdValueQuery = (percentileThresholdValue: number): QueryContainer[] => {
+  return [
+    {
+      range: {
+        [TRANSACTION_DURATION_US]: {
+          gte: percentileThresholdValue,
+        },
+      },
+    },
+  ];
+};
+
 export const getQueryWithParams = ({
   environment,
   serviceName,
   transactionType,
   start,
   end,
+  percentileThresholdValue,
 }: SearchServiceParams) => {
   return {
     bool: {
@@ -88,6 +103,9 @@ export const getQueryWithParams = ({
         ...(transactionType ? [{ term: { [TRANSACTION_TYPE]: transactionType } }] : []),
         ...getRangeQuery(start, end),
         ...getEnvironmentQuery(environment),
+        ...(percentileThresholdValue
+          ? getPercentileThresholdValueQuery(percentileThresholdValue)
+          : []),
       ] as QueryContainer[],
     },
   };

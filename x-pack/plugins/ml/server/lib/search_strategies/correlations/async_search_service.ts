@@ -11,10 +11,11 @@ import type { ElasticsearchClient } from 'src/core/server';
 
 import { fetchTransactionDurationFieldCandidates } from './query_field_candidates';
 import { fetchTransactionDurationFieldValuePairs } from './query_field_value_pairs';
-import { fetchTransactionDurationHistogram, HistogramItem } from './query_histogram';
-import { fetchTransactionDurationHistogramInterval } from './query_histogram_interval';
+import { HistogramItem } from './query_histogram';
 import { fetchTransactionDurationPecentiles } from './query_percentiles';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
+import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_rangesteps';
+import { fetchTransactionDurationRanges } from './query_ranges';
 
 export interface SearchServiceParams {
   index: string;
@@ -25,6 +26,8 @@ export interface SearchServiceParams {
   transactionType?: string;
   start?: string;
   end?: string;
+  percentileThreshold?: number;
+  percentileThresholdValue?: number;
 }
 
 export interface SearchServiceValue {
@@ -68,6 +71,7 @@ export const asyncSearchServiceProvider = (
   };
 
   let values: SearchServiceValue[] = [];
+  let percentileThresholdValue: number;
 
   const cancel = () => {
     isCancelled = true;
@@ -75,7 +79,17 @@ export const asyncSearchServiceProvider = (
 
   const fetchCorrelations = async () => {
     try {
-      const histogramStepSize = await fetchTransactionDurationHistogramInterval(esClient, params);
+      const percentileThreshold = await fetchTransactionDurationPecentiles(
+        esClient,
+        params,
+        params.percentileThreshold ? [params.percentileThreshold] : undefined
+      );
+      percentileThresholdValue = percentileThreshold[`${params.percentileThreshold}.0`];
+
+      const histogramRangeSteps = await fetchTransactionDurationHistogramRangesteps(
+        esClient,
+        params
+      );
       progress.loadedHistogramStepsize = 1;
 
       if (isCancelled) {
@@ -83,10 +97,10 @@ export const asyncSearchServiceProvider = (
         return;
       }
 
-      const overallHistogram = await fetchTransactionDurationHistogram(
+      const overallLogHistogramChartData = await fetchTransactionDurationRanges(
         esClient,
         params,
-        histogramStepSize
+        histogramRangeSteps
       );
       progress.loadedOverallHistogram = 1;
 
@@ -101,19 +115,14 @@ export const asyncSearchServiceProvider = (
       );
       progress.loadedFieldCanditates = 1;
 
-      const percentiles = await fetchTransactionDurationPecentiles(esClient, params);
+      const percentiles = await fetchTransactionDurationPecentiles(esClient, params, [
+        ...Array(100).keys(),
+      ]);
 
       if (isCancelled) {
         isRunning = false;
         return;
       }
-
-      const { ranges: overallRanges } = await fetchTransactionDurationCorrelation(
-        esClient,
-        params,
-        percentiles,
-        totalHits
-      );
 
       const fieldValuePairs = await fetchTransactionDurationFieldValuePairs(
         esClient,
@@ -134,15 +143,15 @@ export const asyncSearchServiceProvider = (
             return;
           }
 
-          const histogram = await fetchTransactionDurationHistogram(
+          const logHistogram = await fetchTransactionDurationRanges(
             esClient,
             params,
-            histogramStepSize,
+            histogramRangeSteps,
             item.field,
             item.value
           );
 
-          const { ranges, correlation } = await fetchTransactionDurationCorrelation(
+          const { correlation } = await fetchTransactionDurationCorrelation(
             esClient,
             params,
             percentiles,
@@ -156,8 +165,8 @@ export const asyncSearchServiceProvider = (
             return;
           }
 
-          const fullHistogram = overallHistogram.map((h) => {
-            const histogramItem = histogram.find((di) => di.key === h.key);
+          const fullHistogram = overallLogHistogramChartData.map((h) => {
+            const histogramItem = logHistogram.find((di) => di.key === h.key);
             const docCount =
               item !== undefined && histogramItem !== undefined ? histogramItem.doc_count : 0;
             return {
@@ -166,10 +175,6 @@ export const asyncSearchServiceProvider = (
               doc_count: docCount,
             };
           });
-
-          const docCount = fullHistogram.reduce((p, c) => {
-            return p + c.doc_count;
-          }, 0);
 
           yield {
             ...item,
@@ -182,7 +187,7 @@ export const asyncSearchServiceProvider = (
       let loadedHistograms = 0;
       for await (const item of fetchTransactionDurationHistograms()) {
         values.push(item);
-        values = values.sort((a, b) => b.correlation - a.correlation).slice(0, 9);
+        values = values.sort((a, b) => b.correlation - a.correlation).slice(0, 1);
         loadedHistograms++;
         progress.loadedHistograms = loadedHistograms / fieldValuePairs.length;
       }
@@ -203,6 +208,7 @@ export const asyncSearchServiceProvider = (
       started: progress.started,
       total: 100,
       values,
+      percentileThresholdValue,
       cancel,
     };
   };
