@@ -141,7 +141,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   const {
     flyoutIcon,
     flyoutTitle = i18n.translate('xpack.spaces.shareToSpace.flyoutTitle', {
-      defaultMessage: 'Edit spaces for {objectNoun}',
+      defaultMessage: 'Assign {objectNoun} to spaces',
       values: { objectNoun: savedObjectTarget.noun },
     }),
     enableCreateCopyCallout = false,

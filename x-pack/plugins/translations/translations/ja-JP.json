@@ -22452,7 +22452,6 @@
     "xpack.spaces.shareToSpace.columnTitle": "共有されているスペース",
     "xpack.spaces.shareToSpace.currentSpaceBadge": "現在",
     "xpack.spaces.shareToSpace.featureIsDisabledTooltip": "この機能はこのスペースでは無効です。",
-    "xpack.spaces.shareToSpace.flyoutTitle": "{objectNoun}のスペースを編集",
     "xpack.spaces.shareToSpace.legacyUrlConflictBody": "現在、{objectNoun} [id={currentObjectId}]を表示しています。このページのレガシーURLは別の{objectNoun} [id={otherObjectId}]を示しています。",
     "xpack.spaces.shareToSpace.legacyUrlConflictDismissButton": "閉じる",
     "xpack.spaces.shareToSpace.legacyUrlConflictLinkButton": "他の{objectNoun}に移動",

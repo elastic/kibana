@@ -22808,7 +22808,6 @@
     "xpack.spaces.shareToSpace.columnTitle": "共享工作区",
     "xpack.spaces.shareToSpace.currentSpaceBadge": "当前",
     "xpack.spaces.shareToSpace.featureIsDisabledTooltip": "此功能在此工作区中已禁用。",
-    "xpack.spaces.shareToSpace.flyoutTitle": "编辑 {objectNoun} 的工作区",
     "xpack.spaces.shareToSpace.legacyUrlConflictBody": "当前您正在查看 {objectNoun} [id={currentObjectId}]。此页面的旧 URL 显示不同的 {objectNoun} [id={otherObjectId}]。",
     "xpack.spaces.shareToSpace.legacyUrlConflictDismissButton": "关闭",
     "xpack.spaces.shareToSpace.legacyUrlConflictLinkButton": "前往其他 {objectNoun}",
