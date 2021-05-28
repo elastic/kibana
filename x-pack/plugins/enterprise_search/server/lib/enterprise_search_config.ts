@@ -124,7 +124,7 @@ export class EnterpriseSearchConfig {
             rejectUnauthorized: this.rejectUnauthorized,
           });
         }
-      } catch (_error) {
+      } catch {
         // ignore the error
       }
     }
