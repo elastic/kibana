@@ -186,6 +186,7 @@ export const getOverallBucketsSchema = schema.object({
   bucketSpan: schema.string(),
   start: schema.number(),
   end: schema.number(),
+  overall_score: schema.maybe(schema.number()),
 });
 
 export const getCategoriesSchema = schema.object({
