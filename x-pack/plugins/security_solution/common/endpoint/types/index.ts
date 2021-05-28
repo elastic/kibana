@@ -414,7 +414,7 @@ export type PolicyInfo = Immutable<{
   id: string;
 }>;
 
-export interface HostMetaDataInfo {
+export interface HostMetadataInfo {
   metadata: HostMetadata;
   query_strategy_version: MetadataQueryStrategyVersions;
 }
@@ -1094,4 +1094,14 @@ export interface GetAgentSummaryResponse {
     policy_id?: string;
     versions_count: { [key: string]: number };
   };
+}
+
+/**
+ * REST API response for retrieving exception summary
+ */
+export interface GetExceptionSummaryResponse {
+  total: number;
+  windows: number;
+  macos: number;
+  linux: number;
 }

@@ -46,6 +46,8 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p1!.isRequired).toBe(true);
   expect(p1!.signature?.length).toBe(1);
   expect(linkCount(p1!.signature!)).toBe(0);
+  expect(p1?.description).toBeDefined();
+  expect(p1?.description?.length).toBe(1);
 
   const p2 = fn?.children!.find((c) => c.label === 'b');
   expect(p2).toBeDefined();
@@ -53,12 +55,15 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p2!.type).toBe(TypeKind.NumberKind);
   expect(p2!.signature?.length).toBe(1);
   expect(linkCount(p2!.signature!)).toBe(0);
+  expect(p2?.description?.length).toBe(1);
 
   const p3 = fn?.children!.find((c) => c.label === 'c');
   expect(p3).toBeDefined();
   expect(p3!.isRequired).toBe(true);
   expect(p3!.type).toBe(TypeKind.ArrayKind);
   expect(linkCount(p3!.signature!)).toBe(1);
+  expect(p3?.description).toBeDefined();
+  expect(p3?.description?.length).toBe(1);
 
   const p4 = fn?.children!.find((c) => c.label === 'd');
   expect(p4).toBeDefined();
@@ -66,6 +71,7 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p4!.type).toBe(TypeKind.CompoundTypeKind);
   expect(p4!.signature?.length).toBe(1);
   expect(linkCount(p4!.signature!)).toBe(1);
+  expect(p4?.description?.length).toBe(1);
 
   const p5 = fn?.children!.find((c) => c.label === 'e');
   expect(p5).toBeDefined();
@@ -73,6 +79,7 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p5!.type).toBe(TypeKind.StringKind);
   expect(p5!.signature?.length).toBe(1);
   expect(linkCount(p5!.signature!)).toBe(0);
+  expect(p5?.description?.length).toBe(1);
 }
 
 beforeAll(() => {
