@@ -19,18 +19,24 @@
   &--rightBorder {
     border-right: $euiBorderThin;
   }
-  &--withFooter {
-    height: calc(100% - #{$euiSizeL * 3});
+  &--withContent {
+    padding: 0;
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   &__header {
     padding: 0 !important;
   }
 
+  &__content {
+    flex: 1;
+    overflow-y: auto;
+    padding: $euiSizeL;
+  }
+
   &__footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
+    flex: 0;
   }
 }

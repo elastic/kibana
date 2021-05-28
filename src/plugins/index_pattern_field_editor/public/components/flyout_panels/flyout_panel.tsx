@@ -21,10 +21,12 @@ import { useFlyoutPanelsContext } from './flyout_panels';
 
 interface Context {
   registerFooter: () => void;
+  registerContent: () => void;
 }
 
 const flyoutPanelContext = createContext<Context>({
   registerFooter: () => {},
+  registerContent: () => {},
 });
 
 export interface Props {
@@ -44,7 +46,10 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   border,
   ...rest
 }) => {
-  const [hasFooter, setHasFooter] = useState(false);
+  const [config, setConfig] = useState<{ hasFooter: boolean; hasContent: boolean }>({
+    hasContent: false,
+    hasFooter: false,
+  });
 
   /* eslint-disable @typescript-eslint/naming-convention */
   const classes = classnames('fieldEditor__flyoutPanel', className, {
@@ -52,14 +57,33 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
     'fieldEditor__flyoutPanel--emptyShade': backgroundColor === 'euiEmptyShade',
     'fieldEditor__flyoutPanel--leftBorder': border === 'left',
     'fieldEditor__flyoutPanel--rightBorder': border === 'right',
-    'fieldEditor__flyoutPanel--withFooter': hasFooter,
+    'fieldEditor__flyoutPanel--withContent': config.hasContent,
   });
   /* eslint-enable @typescript-eslint/naming-convention */
 
   const { addPanel } = useFlyoutPanelsContext();
 
+  const registerContent = useCallback(() => {
+    setConfig((prev) => {
+      return {
+        ...prev,
+        hasContent: true,
+      };
+    });
+  }, []);
+
   const registerFooter = useCallback(() => {
-    setHasFooter(true);
+    setConfig((prev) => {
+      if (!prev.hasContent) {
+        throw new Error(
+          'You need to add a <FlyoutPanels.Content /> when you add a <FlyoutPanels.Footer />'
+        );
+      }
+      return {
+        ...prev,
+        hasFooter: true,
+      };
+    });
   }, []);
 
   useLayoutEffect(() => {
@@ -78,7 +102,7 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
 
   return (
     <EuiFlexItem style={styles}>
-      <flyoutPanelContext.Provider value={{ registerFooter }}>
+      <flyoutPanelContext.Provider value={{ registerContent, registerFooter }}>
         <div className={classes} {...rest}>
           {children}
         </div>

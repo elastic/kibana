@@ -8,12 +8,14 @@
 
 import { PanelFooter } from './flyout_panels_footer';
 import { PanelHeader } from './flyout_panels_header';
+import { PanelContent } from './flyout_panels_content';
 import { Panel } from './flyout_panel';
 import { Panels } from './flyout_panels';
 
 export const FlyoutPanels = {
   Group: Panels,
   Item: Panel,
+  Content: PanelContent,
   Header: PanelHeader,
   Footer: PanelFooter,
 };

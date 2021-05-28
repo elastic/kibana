@@ -217,39 +217,41 @@ const FieldEditorFlyoutContentComponent = ({
 
           {/* Editor panel */}
           <FlyoutPanels.Item width={60}>
-            <FlyoutPanels.Header>
-              <EuiTitle data-test-subj="flyoutTitle">
-                <h2>
-                  {field ? (
+            <FlyoutPanels.Content>
+              <FlyoutPanels.Header>
+                <EuiTitle data-test-subj="flyoutTitle">
+                  <h2>
+                    {field ? (
+                      <FormattedMessage
+                        id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
+                        defaultMessage="Edit field '{fieldName}'"
+                        values={{
+                          fieldName: field.name,
+                        }}
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="indexPatternFieldEditor.editor.flyoutDefaultTitle"
+                        defaultMessage="Create field"
+                      />
+                    )}
+                  </h2>
+                </EuiTitle>
+                <EuiText color="subdued">
+                  <p>
                     <FormattedMessage
-                      id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
-                      defaultMessage="Edit field '{fieldName}'"
+                      id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
+                      defaultMessage="Index pattern: {patternName}"
                       values={{
-                        fieldName: field.name,
+                        patternName: <i>{indexPattern.title}</i>,
                       }}
                     />
-                  ) : (
-                    <FormattedMessage
-                      id="indexPatternFieldEditor.editor.flyoutDefaultTitle"
-                      defaultMessage="Create field"
-                    />
-                  )}
-                </h2>
-              </EuiTitle>
-              <EuiText color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
-                    defaultMessage="Index pattern: {patternName}"
-                    values={{
-                      patternName: <i>{indexPattern.title}</i>,
-                    }}
-                  />
-                </p>
-              </EuiText>
-            </FlyoutPanels.Header>
+                  </p>
+                </EuiText>
+              </FlyoutPanels.Header>
 
-            <FieldEditor field={field} onChange={setFormState} syntaxError={syntaxError} />
+              <FieldEditor field={field} onChange={setFormState} syntaxError={syntaxError} />
+            </FlyoutPanels.Content>
 
             <FlyoutPanels.Footer>
               <>
