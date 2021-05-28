@@ -15,9 +15,16 @@ export interface NavigationSection {
 }
 
 export interface NavigationEntry {
+  // the label of the menu entry, should be internationalized
   label: string;
+  // the kibana app id
   app: string;
+  // the path after the application prefix corresponding to this entry
   path: string;
+  // whether to only match when the full path matches, defaults to `false`
+  matchFullPath?: boolean;
+  // whether to ignore trailing slashes, defaults to `true`
+  ignoreTrailingSlash?: boolean;
 }
 
 export interface NavigationRegistry {
