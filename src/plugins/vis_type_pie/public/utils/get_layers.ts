@@ -37,11 +37,9 @@ export const computeColor = (
 
   if (visParams.distinctColors) {
     const dataName = d.dataName;
-    // console.dir(Object.keys(overwriteColors));
     if (Object.keys(overwriteColors).includes(dataName.toString())) {
       return overwriteColors[dataName];
     }
-    // console.log(dataName.toString());
 
     const index = allSeries.findIndex((name) => isEqual(name, dataName));
     return palettes?.get(visParams.palette.name).getColor(
