@@ -32,24 +32,20 @@ describe('getAppInfo', () => {
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
-      meta: {
-        keywords: [],
-        searchDeepLinks: [],
-      },
+      keywords: [],
+      deepLinks: [],
     });
   });
 
-  it('populates default values for nested searchDeepLinks', () => {
+  it('populates default values for nested deepLinks', () => {
     const app = createApp({
-      meta: {
-        searchDeepLinks: [
-          {
-            id: 'sub-id',
-            title: 'sub-title',
-            searchDeepLinks: [{ id: 'sub-sub-id', title: 'sub-sub-title', path: '/sub-sub' }],
-          },
-        ],
-      },
+      deepLinks: [
+        {
+          id: 'sub-id',
+          title: 'sub-title',
+          deepLinks: [{ id: 'sub-sub-id', title: 'sub-sub-title', path: '/sub-sub' }],
+        },
+      ],
     });
     const info = getAppInfo(app);
 
@@ -59,25 +55,23 @@ describe('getAppInfo', () => {
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
-      meta: {
-        keywords: [],
-        searchDeepLinks: [
-          {
-            id: 'sub-id',
-            title: 'sub-title',
-            keywords: [],
-            searchDeepLinks: [
-              {
-                id: 'sub-sub-id',
-                title: 'sub-sub-title',
-                path: '/sub-sub',
-                keywords: [],
-                searchDeepLinks: [], // default empty array added
-              },
-            ],
-          },
-        ],
-      },
+      keywords: [],
+      deepLinks: [
+        {
+          id: 'sub-id',
+          title: 'sub-title',
+          keywords: [],
+          deepLinks: [
+            {
+              id: 'sub-sub-id',
+              title: 'sub-sub-title',
+              path: '/sub-sub',
+              keywords: [],
+              deepLinks: [], // default empty array added
+            },
+          ],
+        },
+      ],
     });
   });
 
@@ -110,22 +104,20 @@ describe('getAppInfo', () => {
 
   it('adds default meta fields to sublinks when needed', () => {
     const app = createApp({
-      meta: {
-        searchDeepLinks: [
-          {
-            id: 'sub-id',
-            title: 'sub-title',
-            searchDeepLinks: [
-              {
-                id: 'sub-sub-id',
-                title: 'sub-sub-title',
-                path: '/sub-sub',
-                keywords: ['sub sub'],
-              },
-            ],
-          },
-        ],
-      },
+      deepLinks: [
+        {
+          id: 'sub-id',
+          title: 'sub-title',
+          deepLinks: [
+            {
+              id: 'sub-sub-id',
+              title: 'sub-sub-title',
+              path: '/sub-sub',
+              keywords: ['sub sub'],
+            },
+          ],
+        },
+      ],
     });
     const info = getAppInfo(app);
 
@@ -135,25 +127,23 @@ describe('getAppInfo', () => {
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
-      meta: {
-        keywords: [],
-        searchDeepLinks: [
-          {
-            id: 'sub-id',
-            title: 'sub-title',
-            keywords: [], // default empty array
-            searchDeepLinks: [
-              {
-                id: 'sub-sub-id',
-                title: 'sub-sub-title',
-                path: '/sub-sub',
-                keywords: ['sub sub'],
-                searchDeepLinks: [],
-              },
-            ],
-          },
-        ],
-      },
+      keywords: [],
+      deepLinks: [
+        {
+          id: 'sub-id',
+          title: 'sub-title',
+          keywords: [], // default empty array
+          deepLinks: [
+            {
+              id: 'sub-sub-id',
+              title: 'sub-sub-title',
+              path: '/sub-sub',
+              keywords: ['sub sub'],
+              deepLinks: [],
+            },
+          ],
+        },
+      ],
     });
   });
 });

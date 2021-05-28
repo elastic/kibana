@@ -5,10 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import './page_template.scss';
+
+import React, { FunctionComponent } from 'react';
+import classNames from 'classnames';
 
 import { EuiEmptyPrompt, EuiPageTemplate, EuiPageTemplateProps } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
 
+import {
+  KibanaPageTemplateSolutionNav,
+  KibanaPageTemplateSolutionNavProps,
+} from './solution_nav/solution_nav';
+
+/**
+ * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
+ */
 export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   /**
    * Changes the template type depending on other props provided.
@@ -17,6 +28,10 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
    * With `pageHeader` and `children`: Uses `centeredContent`
    */
   isEmptyState?: boolean;
+  /**
+   * Quick creation of EuiSideNav. Hooks up mobile instance too
+   */
+  solutionNav?: KibanaPageTemplateSolutionNavProps;
 };
 
 export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
@@ -27,6 +42,8 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   restrictWidth = true,
   bottomBar,
   bottomBarProps,
+  pageSideBar,
+  solutionNav,
   ...rest
 }) => {
   // Needed for differentiating between union types
@@ -39,6 +56,13 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   }
 
   /**
+   * Create the solution nav component
+   */
+  if (solutionNav) {
+    pageSideBar = <KibanaPageTemplateSolutionNav {...solutionNav} />;
+  }
+
+  /**
    * An easy way to create the right content for empty pages
    */
   if (isEmptyState && pageHeader && !children) {
@@ -48,6 +72,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
     children = (
       <EuiEmptyPrompt
         iconType={iconType}
+        iconColor={''} // This is likely a solution or app logo, so keep it multi-color
         title={pageTitle ? <h1>{pageTitle}</h1> : undefined}
         body={description ? <p>{description}</p> : undefined}
         actions={rightSideItems}
@@ -62,8 +87,14 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   return (
     <EuiPageTemplate
       template={template}
-      pageHeader={pageHeader}
       restrictWidth={restrictWidth}
+      paddingSize={template === 'centeredBody' ? 'none' : 'l'}
+      pageHeader={pageHeader}
+      pageSideBar={pageSideBar}
+      pageSideBarProps={{
+        ...rest.pageSideBarProps,
+        className: classNames('kbnPageTemplate__pageSideBar', rest.pageSideBarProps?.className),
+      }}
       {...localBottomBarProps}
       {...rest}
     >
