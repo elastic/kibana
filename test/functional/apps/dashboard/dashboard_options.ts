@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard']);
 
@@ -20,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let originalTitles: string[] = [];
 
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.importExport.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -30,6 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.switchToEditMode();
       originalTitles = await PageObjects.dashboard.getPanelTitles();
     });
+
+    after(() => kibanaServer.importExport.unload('dashboard/current/kibana'));
 
     it('should be able to hide all panel titles', async () => {
       await PageObjects.dashboard.checkHideTitle();

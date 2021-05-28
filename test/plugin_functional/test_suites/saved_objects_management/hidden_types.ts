@@ -18,21 +18,12 @@ const fixturePaths = {
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
 
-  describe('saved objects management with hidden types', () => {
-    before(async () => {
-      await esArchiver.load(
-        '../functional/fixtures/es_archiver/saved_objects_management/hidden_types'
-      );
-    });
-
-    after(async () => {
-      await esArchiver.unload(
-        '../functional/fixtures/es_archiver/saved_objects_management/hidden_types'
-      );
-    });
+  describe('with hidden types', () => {
+    before(() => kibanaServer.importExport.load('saved_objects_management/hidden_types'));
+    after(() => kibanaServer.importExport.unload('saved_objects_management/hidden_types'));
 
     beforeEach(async () => {
       await PageObjects.settings.navigateTo();
