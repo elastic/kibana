@@ -122,7 +122,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     );
   } else {
     return (
-      <ManagementPageLayout isEmptyState={true}>
+      <ManagementPageLayout template="centeredContent">
         <EuiEmptyPrompt
           iconType="managementApp"
           title={

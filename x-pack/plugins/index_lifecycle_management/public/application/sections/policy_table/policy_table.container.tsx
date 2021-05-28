@@ -34,7 +34,7 @@ export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> =
 
   if (isLoading) {
     return (
-      <ManagementPageLayout isEmptyState={true}>
+      <ManagementPageLayout template="centeredContent">
         <EuiEmptyPrompt
           title={<EuiLoadingSpinner size="xl" />}
           body={
@@ -51,7 +51,7 @@ export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> =
   if (error) {
     const { statusCode, message } = error ? error : { statusCode: '', message: '' };
     return (
-      <ManagementPageLayout isEmptyState={true}>
+      <ManagementPageLayout template="centeredContent">
         <EuiEmptyPrompt
           title={
             <h2>

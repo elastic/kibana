@@ -52,7 +52,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
 
   if (isLoading) {
     return (
-      <ManagementPageLayout isEmptyState={true}>
+      <ManagementPageLayout template="centeredContent">
         <EuiEmptyPrompt
           title={<EuiLoadingSpinner size="xl" />}
           body={
@@ -69,7 +69,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   if (error || !policies) {
     const { statusCode, message } = error ? error : { statusCode: '', message: '' };
     return (
-      <ManagementPageLayout isEmptyState={true}>
+      <ManagementPageLayout template="centeredContent">
         <EuiEmptyPrompt
           title={
             <h2>
