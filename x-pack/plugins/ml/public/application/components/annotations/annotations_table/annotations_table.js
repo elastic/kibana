@@ -725,7 +725,7 @@ class AnnotationsTableUI extends Component {
           search={search}
           rowProps={getRowProps}
         />
-        {this.state.datafeedModalVisible && this.state.datafeedEnd && (
+        {this.state.jobId && this.state.datafeedModalVisible && this.state.datafeedEnd ? (
           <DatafeedModal
             onClose={() => {
               this.setState({
@@ -737,7 +737,7 @@ class AnnotationsTableUI extends Component {
             datafeedConfig={this.props.jobs[0].datafeed_config}
             bucketSpan={this.props.jobs[0].analysis_config.bucket_span}
           />
-        )}
+        ) : null}
       </Fragment>
     );
   }

@@ -35,6 +35,12 @@ export interface ResultResponse {
   error?: ErrorType;
 }
 
+export interface BucketResultsForChart extends ResultResponse {
+  results: {
+    data: number[];
+  };
+}
+
 export interface MetricData extends ResultResponse {
   results: Record<string, any>;
 }

@@ -9,13 +9,36 @@ import React, { FC, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
-import { EuiButtonEmpty, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiToolTip,
+} from '@elastic/eui';
+import { estypes } from '@elastic/elasticsearch';
 
 import { ml } from '../../../../services/ml_api_service';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
+import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 
-export const EditQueryDelay: FC<{ datafeedConfig: any }> = ({ datafeedConfig }) => {
+const tooltipContent = i18n.translate(
+  'xpack.ml.jobsList.datafeedModal.editQueryDelay.tooltipContent',
+  {
+    defaultMessage: 'Cannot update query delay when datafeed is running.',
+  }
+);
+
+interface DatafeedWithStats extends Datafeed {
+  state?: estypes.DatafeedState;
+  timing_stats?: estypes.DatafeedTimingStats;
+}
+
+export const EditQueryDelay: FC<{
+  datafeedConfig: DatafeedWithStats;
+}> = ({ datafeedConfig }) => {
   const [newQueryDelay, setNewQueryDelay] = useState<string | undefined>();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { query_delay: queryDelay, datafeed_id: datafeedId, state } = datafeedConfig;
@@ -59,24 +82,33 @@ export const EditQueryDelay: FC<{ datafeedConfig: any }> = ({ datafeedConfig }) 
     setIsEditing(false);
   }, [datafeedConfig.datafeed_id]);
 
+  const editButton = (
+    <EuiButtonEmpty
+      color="primary"
+      size="xs"
+      isDisabled={state !== DATAFEED_STATE.STOPPED}
+      onClick={() => {
+        setIsEditing(true);
+      }}
+      iconType="pencil"
+    >
+      <FormattedMessage
+        id="xpack.ml.jobsList.datafeedModal.queryDelayLabel"
+        defaultMessage="Query delay: {queryDelay}"
+        values={{ queryDelay: newQueryDelay || queryDelay }}
+      />
+    </EuiButtonEmpty>
+  );
+
+  const editButtonWithTooltip = <EuiToolTip content={tooltipContent}>{editButton}</EuiToolTip>;
+
   return (
     <>
-      {isEditing === false ? (
-        <EuiButtonEmpty
-          color="primary"
-          size="xs"
-          onClick={() => {
-            setIsEditing(true);
-          }}
-          iconType="pencil"
-        >
-          <FormattedMessage
-            id="xpack.ml.jobsList.datafeedModal.queryDelayLabel"
-            defaultMessage="Query delay: {queryDelay}"
-            values={{ queryDelay: newQueryDelay || queryDelay }}
-          />
-        </EuiButtonEmpty>
-      ) : null}
+      {isEditing === false
+        ? state !== DATAFEED_STATE.STOPPED
+          ? editButtonWithTooltip
+          : editButton
+        : null}
       {isEditing === true ? (
         <EuiFormRow
           label={
@@ -94,7 +126,6 @@ export const EditQueryDelay: FC<{ datafeedConfig: any }> = ({ datafeedConfig }) 
                 onChange={(e) => {
                   setNewQueryDelay(e.target.value);
                 }}
-                disabled={state !== DATAFEED_STATE.STOPPED}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

@@ -11,6 +11,7 @@ import type { AnomalyRecordDoc } from '../../../../common/types/anomalies';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import { EntityField } from '../../../../common/util/anomaly_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
+import { BucketResultsForChart } from './result_service_rx';
 
 type RecordForInfluencer = AnomalyRecordDoc;
 export function resultsServiceProvider(
@@ -44,7 +45,12 @@ export function resultsServiceProvider(
     interval?: any,
     overallScore?: number
   ): Promise<any>;
-  getBucketResultsForChart(jobId: any, start: any, end: any, desc: any): Promise<any>;
+  getBucketResultsForChart(
+    jobId: string,
+    start: string,
+    end: string,
+    desc: boolean
+  ): Promise<BucketResultsForChart>;
   getInfluencerValueMaxScoreByTime(
     jobIds: string[],
     influencerFieldName: string,

@@ -481,9 +481,6 @@ export function resultsServiceProvider(mlApiServices) {
           success: true,
           results: {
             data: [],
-            label: 'Bucket event count',
-            title: 'Record count',
-            description: 'Record count per bucket',
           },
         };
 
