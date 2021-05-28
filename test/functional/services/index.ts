@@ -33,7 +33,7 @@ import { GlobalNavService } from './global_nav';
 import { InspectorService } from './inspector';
 import { FieldEditorService } from './field_editor';
 import { ManagementMenuService } from './management';
-import { QueryBarProvider } from './query_bar';
+import { QueryBarService } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
 import { ToastsService } from './toasts';
@@ -54,7 +54,7 @@ export const services = {
 
   __webdriver__: RemoteProvider,
   filterBar: FilterBarService,
-  queryBar: QueryBarProvider,
+  queryBar: QueryBarService,
   find: FindProvider,
   testSubjects: TestSubjects,
   docTable: DocTableService,
