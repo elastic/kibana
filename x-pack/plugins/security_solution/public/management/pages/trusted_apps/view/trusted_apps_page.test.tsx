@@ -173,6 +173,11 @@ describe('When on the Trusted Apps Page', () => {
       expect(addButton.textContent).toBe('Add Trusted Application');
     });
 
+    it('should display the searchbar', async () => {
+      const renderResult = await renderWithListData();
+      expect(await renderResult.findByTestId('searchBar')).not.toBeNull();
+    });
+
     describe('and the Grid view is being displayed', () => {
       describe('and the edit trusted app button is clicked', () => {
         let renderResult: ReturnType<AppContextTestRender['render']>;
@@ -520,14 +525,6 @@ describe('When on the Trusted Apps Page', () => {
       expect(history.location.search).toBe('');
     });
 
-    it('should display the searchbar', async () => {
-      const renderResult = render();
-      await act(async () => {
-        await waitForAction('trustedAppsExistStateChanged');
-      });
-      expect(await renderResult.findByTestId('searchBar')).not.toBeNull();
-    });
-
     describe('and when the form data is valid', () => {
       const fillInCreateForm = async () => {
         mockedContext.store.dispatch({
@@ -563,7 +560,7 @@ describe('When on the Trusted Apps Page', () => {
           // to test the UI behaviours while the API call is in flight
           coreStart.http.post.mockImplementation(
             // @ts-ignore
-            async (_path: string, options: HttpFetchOptions) => {
+            async (_, options: HttpFetchOptions) => {
               return new Promise((resolve, reject) => {
                 httpPostBody = options.body as string;
                 resolveHttpPost = resolve;
