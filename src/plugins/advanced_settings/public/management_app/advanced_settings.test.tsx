@@ -16,9 +16,10 @@ import {
   UserProvidedValues,
   UiSettingsType,
 } from '../../../../core/public';
+import { notificationServiceMock, docLinksServiceMock } from '../../../../core/public/mocks';
+import { KibanaPageTemplate } from '../../../kibana_react/public';
 import { FieldSetting } from './types';
 import { AdvancedSettings } from './advanced_settings';
-import { notificationServiceMock, docLinksServiceMock } from '../../../../core/public/mocks';
 import { ComponentRegistry } from '../component_registry';
 import { Search } from './components/search';
 
@@ -251,6 +252,7 @@ describe('AdvancedSettings', () => {
         dockLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={mockConfig().core.uiSettings}
         componentRegistry={new ComponentRegistry().start}
+        managementPageLayout={KibanaPageTemplate}
       />
     );
 
@@ -273,6 +275,7 @@ describe('AdvancedSettings', () => {
         dockLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={mockConfig().core.uiSettings}
         componentRegistry={new ComponentRegistry().start}
+        managementPageLayout={KibanaPageTemplate}
       />
     );
 
@@ -299,6 +302,7 @@ describe('AdvancedSettings', () => {
           dockLinks={docLinksServiceMock.createStartContract().links}
           uiSettings={mockConfig().core.uiSettings}
           componentRegistry={new ComponentRegistry().start}
+          managementPageLayout={KibanaPageTemplate}
         />
       );
 

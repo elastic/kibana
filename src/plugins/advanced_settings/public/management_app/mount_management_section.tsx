@@ -15,7 +15,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 import { LocationDescriptor } from 'history';
 import { url } from '../../../kibana_utils/public';
-import { ManagementAppMountParams } from '../../../management/public';
+import type { ManagementAppMountParams } from '../../../management/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { StartServicesAccessor } from '../../../../core/public';
 
