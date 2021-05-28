@@ -23,7 +23,3 @@ export const isPolicyOutOfDate = (
     reported.endpoint_policy_version >= current.endpoint.revision
   );
 };
-
-export const isEndpointIsolated = (endpointMetadata: HostMetadata): boolean => {
-  return Boolean(endpointMetadata.Endpoint.configuration.isolation);
-};

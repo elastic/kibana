@@ -16,8 +16,8 @@ import { useFormatUrl } from '../../../../../common/components/link_to';
 import { useEndpointSelector } from './hooks';
 import { agentPolicies, uiQueryParams } from '../../store/selectors';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { isEndpointIsolated } from '../../utils';
 import { ContextMenuItemNavByRouterProps } from '../components/context_menu_item_nav_by_rotuer';
+import { isEndpointHostIsolated } from '../../../../../common/utils/validators/is_endpoint_host_isolated';
 
 /**
  * Returns a list (array) of actions for an individual endpoint
@@ -37,7 +37,7 @@ export const useEndpointActionItems = (
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
-      const isIsolated = isEndpointIsolated(endpointMetadata);
+      const isIsolated = isEndpointHostIsolated(endpointMetadata);
       const endpointId = endpointMetadata.agent.id;
       const endpointPolicyId = endpointMetadata.Endpoint.policy.applied.id;
       const endpointHostName = endpointMetadata.host.hostname;
