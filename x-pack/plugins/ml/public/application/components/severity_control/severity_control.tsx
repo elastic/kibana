@@ -62,7 +62,7 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
     onChange(Number(e.target.value));
   };
 
-  const ticks = new Array(10).fill(null).map((x, i) => {
+  const ticks = new Array(11).fill(null).map((x, i) => {
     const v = i * 10;
     return { value: v, label: v };
   });
