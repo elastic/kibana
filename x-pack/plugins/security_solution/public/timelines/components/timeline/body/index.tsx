@@ -15,6 +15,7 @@ import {
   FIRST_ARIA_INDEX,
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
+  onKeyDownFocusHandler,
 } from '../../../../../../timelines/public';
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
@@ -108,7 +109,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
     );
-    const { timelines } = useKibana().services;
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
@@ -212,7 +212,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const onKeyDown = useCallback(
       (e: React.KeyboardEvent) => {
-        timelines.getOnKeyDownFocusHandler({
+        onKeyDownFocusHandler({
           colindexAttribute: ARIA_COLINDEX_ATTRIBUTE,
           containerElement: containerRef.current,
           event: e,
@@ -222,7 +222,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
         });
       },
-      [columnHeaders.length, containerRef, data.length, timelines]
+      [columnHeaders.length, containerRef, data.length]
     );
 
     return (

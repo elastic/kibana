@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import reduceReducers from 'reduce-reducers';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { pluck } from 'rxjs/operators';
+import { AnyAction, Reducer } from 'redux';
 import {
   PluginSetup,
   PluginStart,
@@ -70,6 +72,7 @@ import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/vi
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { TimelineState } from '../../timelines/public';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -446,10 +449,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   private async store(coreStart: CoreStart, startPlugins: StartPlugins): Promise<SecurityAppStore> {
     if (!this._store) {
-      const tGridDeps =
-        startPlugins.timelines.getTimelineStore && startPlugins.timelines.getTimelineStore();
-      const tGridInitialState = tGridDeps && tGridDeps.initialState;
-      const tGridReducer = tGridDeps && tGridDeps.reducer;
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
       const [
         { createStore, createInitialState },
@@ -491,7 +490,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const detectionsStart = detectionsSubPlugin.start(this.storage);
       const hostsStart = hostsSubPlugin.start(this.storage);
       const networkStart = networkSubPlugin.start(this.storage);
-      const timelinesStart = timelinesSubPlugin.start(tGridReducer, tGridInitialState);
+      const timelinesStart = timelinesSubPlugin.start();
       const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
       const timelineInitialState = {
         timeline: {
@@ -501,10 +500,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...detectionsStart.storageTimelines!.timelineById,
             ...hostsStart.storageTimelines!.timelineById,
             ...networkStart.storageTimelines!.timelineById,
-            ...tGridInitialState,
           },
         },
       };
+
+      const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
+      const timelineReducer = (reduceReducers(
+        timelineInitialState.timeline,
+        tGridReducer,
+        timelinesStart.store.reducer.timeline
+      ) as unknown) as Reducer<TimelineState, AnyAction>;
 
       this._store = createStore(
         createInitialState(
@@ -524,16 +529,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         {
           ...hostsStart.store.reducer,
           ...networkStart.store.reducer,
-          ...timelinesStart.store.reducer,
+          timeline: timelineReducer,
           ...managementSubPluginStart.store.reducer,
+          ...tGridReducer,
         },
         libs$.pipe(pluck('kibana')),
         this.storage,
         [...(managementSubPluginStart.store.middleware ?? [])]
       );
-      if (startPlugins.timelines && startPlugins.timelines.setTGridStore) {
-        console.log('store set up');
-        startPlugins.timelines?.setTGridStore(this._store);
+      if (startPlugins.timelines) {
+        startPlugins.timelines.setTGridEmbeddedStore(this._store);
       }
     }
     return this._store;

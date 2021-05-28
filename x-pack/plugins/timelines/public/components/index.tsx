@@ -8,32 +8,33 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
-import { DragDropContext } from 'react-beautiful-dnd';
-import { getReduxDeps } from '../store/t_grid';
+import { Store } from 'redux';
+
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { createStore } from '../store/t_grid';
 
 import { TGrid as TGridComponent } from './tgrid';
 import { TGridProps } from '../types';
+import { DragDropContextWrapper } from './drag_and_drop';
+import { initialTGridState } from '../store/t_grid/reducer';
 
-export const TGrid = (props: TGridProps & { store: any }) => {
-  const reduxStuff = getReduxDeps(props.type);
+export const TGrid = (props: TGridProps & { store?: Store; storage: Storage }) => {
   console.log('TGrid', props.type);
-  // if (props.type === 'standalone') {
+  // eslint-disable-next-line prefer-const
+  const { store, storage, ...tGridProps } = props;
+  let tGridStore = store;
+  if (!tGridStore && props.type === 'standalone') {
+    tGridStore = createStore(initialTGridState, storage);
+  }
   return (
-    <Provider store={props.store}>
+    <Provider store={tGridStore!}>
       <I18nProvider>
-        <DragDropContext>
-          <TGridComponent {...props} />
-        </DragDropContext>
+        <DragDropContextWrapper browserFields={props.browserFields} defaultsHeader={props.columns}>
+          <TGridComponent {...tGridProps} />
+        </DragDropContextWrapper>
       </I18nProvider>
     </Provider>
   );
-  // } else {
-  //   return (
-  //     <I18nProvider>
-  //       <TGridComponent {...props} />
-  //     </I18nProvider>
-  //   );
-  // }
 };
 
 // eslint-disable-next-line import/no-default-export

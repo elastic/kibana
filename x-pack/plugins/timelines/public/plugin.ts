@@ -4,17 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { Store } from 'redux';
+
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { CoreSetup, Plugin, PluginInitializerContext } from '../../../../src/core/public';
 import { TimelinesPluginSetup, TGridProps } from './types';
 import { getLastUpdatedLazy, getLoadingPanelLazy, getTGridLazy } from './methods';
-import { tGridActions, getReduxDeps, tGridSelectors } from './store/t_grid';
-import { initialTGridState, tGridReducer } from './store/t_grid/reducer';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 import { LastUpdatedAtProps, LoadingPanelProps, useDraggableKeyboardWrapper } from './components';
+import { tGridReducer } from './store/t_grid/reducer';
 
 export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
-  private _store: any;
+  private _store: Store | undefined;
+  private _storage = new Storage(localStorage);
   public setup(core: CoreSetup): TimelinesPluginSetup {
     const config = this.initializerContext.config.get<{ enabled: boolean }>();
     if (!config.enabled) {
@@ -23,21 +27,13 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
 
     return {
       getTGrid: (props: TGridProps) => {
-        return getTGridLazy(props, this._store);
+        return getTGridLazy(props, { store: this._store, storage: this._storage });
       },
-      getTimelineStore: () => {
-        return {
-          actions: tGridActions,
-          initialState: initialTGridState,
-          reducer: tGridReducer,
-          selectors: tGridSelectors,
-        };
+      getTGridReducer: () => {
+        return tGridReducer;
       },
-      setTGridStore: (store: any) => {
+      setTGridEmbeddedStore: (store: any) => {
         this._store = store;
-      },
-      getCreatedTgridStore: (type: TGridProps['type']) => {
-        return getReduxDeps(type);
       },
       getLoadingPanel: (props: LoadingPanelProps) => {
         return getLoadingPanelLazy(props);
@@ -64,17 +60,10 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
     }
     return {
       getTGrid: (props: TGridProps) => {
-        return getTGridLazy(props, this._store);
+        return getTGridLazy(props, { store: this._store, storage: this._storage });
       },
-      getTimelineStore: () => {
-        return {
-          actions: tGridActions,
-          initialState: initialTGridState,
-          reducer: tGridReducer,
-        };
-      },
-      getCreatedTgridStore: (type: TGridProps['type']) => {
-        return getReduxDeps(type);
+      getTGridReducer: () => {
+        return tGridReducer;
       },
       getLoadingPanel: (props: LoadingPanelProps) => {
         return getLoadingPanelLazy(props);
@@ -91,7 +80,7 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
       getUseDraggableKeyboardWrapper: () => {
         return useDraggableKeyboardWrapper;
       },
-      setTGridStore: (store: any) => {
+      setTGridEmbeddedStore: (store: any) => {
         this._store = store;
       },
     };

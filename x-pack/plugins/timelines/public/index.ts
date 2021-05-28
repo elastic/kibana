@@ -5,16 +5,20 @@
  * 2.0.
  */
 
+import { PluginInitializerContext } from '../../../../src/core/public';
 import './index.scss';
-
-import { PluginInitializerContext } from 'src/core/public';
 import { TimelinesPlugin } from './plugin';
+
+export * from './types';
+export * as TGridActions from './store/t_grid/actions';
+export * from '../common/utils/accessibility';
+export {
+  addFieldToTimelineColumns,
+  getTimelineIdFromColumnDroppableId,
+} from './components/drag_and_drop/helpers';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin(initializerContext: PluginInitializerContext) {
   return new TimelinesPlugin(initializerContext);
 }
-export * from './types';
-export * as TGridActions from './store/t_grid/actions';
-export * from '../common/utils/accessibility';

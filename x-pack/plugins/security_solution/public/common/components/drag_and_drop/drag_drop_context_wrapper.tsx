@@ -27,10 +27,8 @@ import {
 import { displaySuccessToast, useStateToaster } from '../toasters';
 import { TimelineId, TimelineType } from '../../../../common/types/timeline';
 import {
-  addFieldToTimelineColumns,
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,
-  getTimelineIdFromColumnDroppableId,
   IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
   providerWasDroppedOnTimeline,
   draggableIsField,
@@ -39,6 +37,11 @@ import {
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import {
+  addFieldToTimelineColumns,
+  getTimelineIdFromColumnDroppableId,
+} from '../../../../../timelines/public';
+import { alertsHeaders } from '../alerts_viewer/default_headers';
 
 // @ts-expect-error
 window['__react-beautiful-dnd-disable-dev-warnings'] = true;
@@ -85,6 +88,7 @@ const onDragEndHandler = ({
   } else if (fieldWasDroppedOnTimelineColumns(result)) {
     addFieldToTimelineColumns({
       browserFields,
+      defaultsHeader: alertsHeaders,
       dispatch,
       result,
       timelineId: getTimelineIdFromColumnDroppableId(result.destination?.droppableId ?? ''),

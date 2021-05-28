@@ -5,10 +5,22 @@
  * 2.0.
  */
 
-import { FluidDragActions, Position } from 'react-beautiful-dnd';
+import { DropResult, FluidDragActions, Position } from 'react-beautiful-dnd';
 import { KEYBOARD_DRAG_OFFSET } from '@kbn/securitysolution-t-grid';
 
-import { stopPropagationAndPreventDefault } from '../../../common';
+import { ActionCreator } from 'typescript-fsa';
+import { Dispatch } from 'redux';
+import { isString, keyBy } from 'lodash/fp';
+import {
+  BrowserField,
+  BrowserFields,
+  ColumnHeaderOptions,
+  stopPropagationAndPreventDefault,
+  TimelineId,
+} from '../../../common';
+import { tGridActions } from '../../store/t_grid';
+import { getFieldIdFromDraggable } from '../../../common/types/drag_and_drop';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../t_grid/body/constants';
 
 /**
  * Temporarily disables tab focus on child links of the draggable to work
@@ -39,7 +51,6 @@ export interface DraggableKeyDownHandlerProps {
   draggableElement: HTMLDivElement;
   dragActions: FluidDragActions | null;
   dragToLocation: ({
-    // eslint-disable-next-line @typescript-eslint/no-shadow
     dragActions,
     position,
   }: {
@@ -125,3 +136,82 @@ export const draggableKeyDownHandler = ({
       break;
   }
 };
+const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
+  Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
+    (acc, namespace) => [
+      ...acc,
+      ...Object.values(namespace.fields != null ? namespace.fields : {}),
+    ],
+    []
+  );
+
+const getAllFieldsByName = (
+  browserFields: BrowserFields
+): { [fieldName: string]: Partial<BrowserField> } =>
+  keyBy('name', getAllBrowserFields(browserFields));
+
+const linkFields: Record<string, string> = {
+  'signal.rule.name': 'signal.rule.id',
+  'event.module': 'rule.reference',
+};
+
+interface AddFieldToTimelineColumnsParams {
+  defaultsHeader: ColumnHeaderOptions[];
+  browserFields: BrowserFields;
+  dispatch: Dispatch;
+  result: DropResult;
+  timelineId: string;
+}
+
+export const addFieldToTimelineColumns = ({
+  browserFields,
+  dispatch,
+  result,
+  timelineId,
+  defaultsHeader,
+}: AddFieldToTimelineColumnsParams): void => {
+  const fieldId = getFieldIdFromDraggable(result);
+  const allColumns = getAllFieldsByName(browserFields);
+  const column = allColumns[fieldId];
+  const initColumnHeader =
+    timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage
+      ? defaultsHeader.find((c) => c.id === fieldId) ?? {}
+      : {};
+
+  if (column != null) {
+    dispatch(
+      tGridActions.upsertColumn({
+        column: {
+          category: column.category,
+          columnHeaderType: 'not-filtered',
+          description: isString(column.description) ? column.description : undefined,
+          example: isString(column.example) ? column.example : undefined,
+          id: fieldId,
+          linkField: linkFields[fieldId] ?? undefined,
+          type: column.type,
+          aggregatable: column.aggregatable,
+          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+          ...initColumnHeader,
+        },
+        id: timelineId,
+        index: result.destination != null ? result.destination.index : 0,
+      })
+    );
+  } else {
+    // create a column definition, because it doesn't exist in the browserFields:
+    dispatch(
+      tGridActions.upsertColumn({
+        column: {
+          columnHeaderType: 'not-filtered',
+          id: fieldId,
+          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+        },
+        id: timelineId,
+        index: result.destination != null ? result.destination.index : 0,
+      })
+    );
+  }
+};
+
+export const getTimelineIdFromColumnDroppableId = (droppableId: string) =>
+  droppableId.slice(droppableId.lastIndexOf('.') + 1);

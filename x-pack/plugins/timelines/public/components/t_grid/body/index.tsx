@@ -16,7 +16,8 @@ import {
   ARIA_ROWINDEX_ATTRIBUTE,
   FIRST_ARIA_INDEX,
   onKeyDownFocusHandler,
-} from '@kbn/securitysolution-t-grid';
+} from '../../../../common';
+
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import {
   CellValueElementProps,
@@ -219,7 +220,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       },
       [columnHeaders.length, containerRef, data.length]
     );
-
     return (
       <>
         <TimelineBody data-test-subj="timeline-body" ref={containerRef}>
@@ -301,7 +301,6 @@ const makeMapStateToProps = () => {
 
   const getTGrid = tGridSelectors.getTGridByIdSelector();
   const mapStateToProps = (state: TimelineState, { browserFields, id }: OwnProps) => {
-    console.log('body', state);
     const timeline: TGridModel = getTGrid(state, id);
     const {
       columns,

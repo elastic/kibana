@@ -10,8 +10,14 @@ import { TGridModel } from '.';
 import { tGridDefaults, getTGridManageDefaults } from './defaults';
 
 const getDefaultTgrid = (id: string) => ({ ...tGridDefaults, ...getTGridManageDefaults(id) });
-export const selectTGridById = (state: unknown, timelineId: string): TGridModel =>
-  getOr(getDefaultTgrid(timelineId), ['timelineById', timelineId], state);
+
+export const selectTGridById = (state: unknown, timelineId: string): TGridModel => {
+  return getOr(
+    getOr(getDefaultTgrid(timelineId), ['timelineById', timelineId], state),
+    ['timeline', 'timelineById', timelineId],
+    state
+  );
+};
 
 export const getTGridByIdSelector = () => createSelector(selectTGridById, (tGrid) => tGrid);
 

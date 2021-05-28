@@ -22,10 +22,7 @@ import { TimelineState } from './store/t_grid/types';
 export * from './store/t_grid';
 export interface TimelinesPluginSetup {
   getTGrid: (props: TGridProps) => ReactElement<TGridProps>;
-  getTimelineStore?: () => ReduxDeps;
-  getCreatedTgridStore?: (
-    type: 'standalone' | 'embedded'
-  ) => ReduxDeps | ((type: 'standalone' | 'embedded') => Store);
+  getTGridReducer: () => any;
   getLoadingPanel: (props: LoadingPanelProps) => ReactElement<LoadingPanelProps>;
   getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
   getUseAddToTimeline: () => (props: UseAddToTimelineProps) => UseAddToTimeline;
@@ -33,7 +30,7 @@ export interface TimelinesPluginSetup {
   getUseDraggableKeyboardWrapper: () => (
     props: UseDraggableKeyboardWrapperProps
   ) => UseDraggableKeyboardWrapper;
-  setTGridStore?: (store: any) => void;
+  setTGridEmbeddedStore: (store: Store) => void;
 }
 export interface ReduxDeps {
   actions: typeof tGridActions;

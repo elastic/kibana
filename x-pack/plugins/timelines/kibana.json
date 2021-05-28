@@ -5,6 +5,6 @@
   "configPath": ["xpack", "timelines"],
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "dataEnhanced", "kibanaReact"],
+  "requiredPlugins": ["data", "dataEnhanced", "kibanaReact", "kibanaUtils"],
   "optionalPlugins": []
 }

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { TGridModel } from './model';
 
 export interface AutoSavedWarningMsg {
@@ -25,14 +27,15 @@ export interface InsertTimeline {
 
 export const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
+export interface TGridEpicDependencies<State> {
+  // kibana$: Observable<CoreStart>;
+  storage: Storage;
+  tGridByIdSelector: () => (state: State, timelineId: string) => TGridModel;
+}
+
 /** The state of all timelines is stored here */
 export interface TimelineState {
   timelineById: TimelineById;
-  // autoSavedWarningMsg: AutoSavedWarningMsg;
-  // showCallOutUnauthorizedMsg: boolean;
-  // insertTimeline: InsertTimeline | null;
-  // isTgridLoading: boolean;
-  // isSelectAllSelected: boolean;
 }
 
 export enum TimelineId {
