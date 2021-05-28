@@ -187,7 +187,7 @@ export const asyncSearchServiceProvider = (
       let loadedHistograms = 0;
       for await (const item of fetchTransactionDurationHistograms()) {
         values.push(item);
-        values = values.sort((a, b) => b.correlation - a.correlation).slice(0, 1);
+        values = values.sort((a, b) => b.correlation - a.correlation).slice(0, 15);
         loadedHistograms++;
         progress.loadedHistograms = loadedHistograms / fieldValuePairs.length;
       }

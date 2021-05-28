@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useParams } from 'react-router-dom';
 
 import {
   EuiButton,
-  EuiFlexGrid,
-  EuiFlexItem,
   EuiProgress,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 import { CorrelationsChart } from './correlations_chart';
+import {
+  CorrelationsTable,
+  SelectedSignificantTerm,
+} from './correlations_table';
 import { useCorrelations } from './use_correlations';
 
 const isErrorMessage = (arg: unknown): arg is Error => {
@@ -89,6 +93,21 @@ export function MlCorrelations({ onClose }: Props) {
     }
   }, [error, notifications.toasts]);
 
+  const [
+    selectedSignificantTerm,
+    setSelectedSignificantTerm,
+  ] = useState<SelectedSignificantTerm | null>(null);
+
+  let selectedHistogram = histograms.length > 0 ? histograms[0] : undefined;
+
+  if (histograms.length > 0 && selectedSignificantTerm !== null) {
+    selectedHistogram = histograms.find(
+      (h) =>
+        h.field === selectedSignificantTerm.fieldName &&
+        h.value === selectedSignificantTerm.fieldValue
+    );
+  }
+
   return (
     <>
       <EuiText size="s" color="subdued">
@@ -111,18 +130,42 @@ export function MlCorrelations({ onClose }: Props) {
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGrid columns={1} gutterSize="none">
-        {histograms.map((histogram) => (
-          <EuiFlexItem>
-            <CorrelationsChart
-              markerPercentile={percentileThreshold}
-              markerValue={percentileThresholdValue}
-              {...histogram}
-              key={`${histogram.field}:${histogram.value}`}
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
+      {histograms.length > 0 && (
+        <>
+          <EuiTitle size="xxs">
+            <h4>
+              {i18n.translate('xpack.apm.correlations.latency.chart.title', {
+                defaultMessage: 'Latency distribution',
+              })}
+            </h4>
+          </EuiTitle>
+
+          <CorrelationsChart
+            markerPercentile={percentileThreshold}
+            markerValue={percentileThresholdValue}
+            {...selectedHistogram}
+            key={`${selectedHistogram.field}:${selectedHistogram.value}`}
+          />
+
+          <EuiSpacer size="s" />
+
+          <CorrelationsTable
+            percentageColumnName={i18n.translate(
+              'xpack.apm.correlations.latency.percentageColumnName',
+              { defaultMessage: '% of slow transactions' }
+            )}
+            significantTerms={histograms.map((d) => ({
+              fieldName: d.field,
+              fieldValue: d.value,
+              impact: d.correlation,
+              percentage: d.correlation,
+            }))}
+            status={FETCH_STATUS.SUCCESS}
+            setSelectedSignificantTerm={setSelectedSignificantTerm}
+            onFilter={onClose}
+          />
+        </>
+      )}
     </>
   );
 }

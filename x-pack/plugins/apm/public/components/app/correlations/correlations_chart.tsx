@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { max } from 'd3-array';
+
 import {
   AnnotationDomainType,
   Chart,
@@ -19,7 +21,6 @@ import {
   RecursivePartial,
   AxisStyle,
   PartialTheme,
-  BarSeriesSpec,
   LineAnnotation,
   LineAnnotationDatum,
 } from '@elastic/charts';
@@ -27,6 +28,10 @@ import {
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { EuiSpacer } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import { getDurationFormatter } from '../../../../common/utils/formatters';
 
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
@@ -65,11 +70,6 @@ const theme: PartialTheme = {
   },
 };
 
-const barSeriesSpec: Partial<BarSeriesSpec> = {
-  xAccessor: 'key',
-  yAccessors: ['doc_count_full', 'doc_count'],
-};
-
 interface CorrelationsChartProps {
   field: string;
   value: string;
@@ -104,24 +104,22 @@ export function CorrelationsChart({
     { dataValue: markerValue, details: `${markerPercentile}th percentile` },
   ];
 
+  const xMax = max(histogram.map((d) => parseFloat(d.key))) ?? 0;
+  const durationFormatter = getDurationFormatter(xMax);
+
   return (
-    <div
-      style={{ width: '610px', overflow: 'hidden', textOverflow: 'ellipsis' }}
-    >
-      <small
-        style={{
-          textOverflow: 'ellipsis',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-        }}
-      >{`${field}:${value}`}</small>
+    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
       <Chart
         size={{
-          width: '600px',
-          height: '300px',
+          height: '250px',
         }}
       >
-        <Settings rotation={0} theme={theme} showLegend={false} />
+        <Settings
+          rotation={0}
+          theme={theme}
+          showLegend
+          legendPosition={Position.Bottom}
+        />
 
         <LineAnnotation
           id="annotation_1"
@@ -132,15 +130,42 @@ export function CorrelationsChart({
           markerPosition={'top'}
         />
 
-        <Axis id="x-axis" title="" position={Position.Bottom} />
+        <Axis
+          id="x-axis"
+          title=""
+          position={Position.Bottom}
+          tickFormat={(d) => durationFormatter(d).formatted}
+        />
         <Axis id="y-axis" title="" position={Position.Left} />
         <AreaSeries
-          id="magnitude"
+          id={i18n.translate(
+            'xpack.apm.correlations.latency.chart.overallLatencyDistributionLabel',
+            { defaultMessage: 'Overall latency distribution' }
+          )}
           xScaleType={ScaleType.Log}
           yScaleType={ScaleType.Log}
           data={histogram}
           curve={CurveType.CURVE_STEP}
-          {...barSeriesSpec}
+          xAccessor="key"
+          yAccessors={['doc_count_full']}
+        />
+        <AreaSeries
+          id={i18n.translate(
+            'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
+            {
+              defaultMessage: '{fieldName}:{fieldValue}',
+              values: {
+                fieldName: field,
+                fieldValue: value,
+              },
+            }
+          )}
+          xScaleType={ScaleType.Log}
+          yScaleType={ScaleType.Log}
+          data={histogram}
+          curve={CurveType.CURVE_STEP}
+          xAccessor="key"
+          yAccessors={['doc_count']}
         />
       </Chart>
       <EuiSpacer size="s" />
