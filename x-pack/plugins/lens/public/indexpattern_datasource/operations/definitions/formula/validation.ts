@@ -400,7 +400,7 @@ function getQueryValidationErrors(
   (namedArguments ?? []).forEach((arg) => {
     if (arg.name === 'kql' || arg.name === 'lucene') {
       const message = getQueryValidationError(
-        arg as { value: string; name: 'kql' | 'lucene'; text: string },
+        arg as TinymathNamedArgument & { name: 'kql' | 'lucene' },
         indexPattern
       );
       if (message) {
