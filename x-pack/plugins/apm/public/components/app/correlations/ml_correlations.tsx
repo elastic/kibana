@@ -11,6 +11,8 @@ import { useParams } from 'react-router-dom';
 
 import {
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiProgress,
   EuiSpacer,
   EuiText,
@@ -76,6 +78,13 @@ export function MlCorrelations({ onClose }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => cancelFetch, []);
 
+  // start fetching on load
+  // we want this effect to execute exactly once after the component mounts
+  useEffect(() => {
+    startFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (isComplete) {
       notifications.toasts.addSuccess('Finished');
@@ -119,16 +128,40 @@ export function MlCorrelations({ onClose }: Props) {
         </p>
       </EuiText>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
-      {!isRunning && <EuiButton onClick={startFetch}>Start</EuiButton>}
-      {isRunning && <EuiButton onClick={cancelFetch}>Cancel</EuiButton>}
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          {!isRunning && (
+            <EuiButton size="s" onClick={startFetch}>
+              Reload
+            </EuiButton>
+          )}
+          {isRunning && (
+            <EuiButton size="s" onClick={cancelFetch}>
+              Cancel
+            </EuiButton>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem>
+              <EuiText size="xs" color="subdued">
+                Progress: {Math.round(progress * 100)}%
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiProgress
+                value={Math.round(progress * 100)}
+                max={100}
+                size="m"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-
-      <EuiProgress value={Math.round(progress * 100)} max={100} size="m" />
-
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
       {histograms.length > 0 && (
         <>

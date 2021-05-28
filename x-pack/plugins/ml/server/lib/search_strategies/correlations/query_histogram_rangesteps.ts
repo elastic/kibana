@@ -50,8 +50,8 @@ export const fetchTransactionDurationHistogramRangesteps = async (
   }
 
   const steps = 100;
-  const min = 0.1; // (resp.body.aggregations.transaction_duration_min as estypes.ValueAggregate).value;
-  const max = (resp.body.aggregations.transaction_duration_max as estypes.ValueAggregate).value;
+  const min = 1; // (resp.body.aggregations.transaction_duration_min as estypes.ValueAggregate).value;
+  const max = (resp.body.aggregations.transaction_duration_max as estypes.ValueAggregate).value * 2;
 
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
   const logFn = scaleLog().domain([min, max]).range([1, steps]);

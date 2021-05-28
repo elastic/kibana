@@ -33,6 +33,8 @@ import { i18n } from '@kbn/i18n';
 
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 
+import { useTheme } from '../../../hooks/use_theme';
+
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
 
@@ -58,7 +60,7 @@ const axes: RecursivePartial<AxisStyle> = {
     },
   },
 };
-const theme: PartialTheme = {
+const chartTheme: PartialTheme = {
   axes,
   legend: {
     spacingBuffer: 100,
@@ -104,6 +106,7 @@ export function CorrelationsChart({
     { dataValue: markerValue, details: `${markerPercentile}th percentile` },
   ];
 
+  const euiTheme = useTheme();
   const xMax = max(histogram.map((d) => parseFloat(d.key))) ?? 0;
   const durationFormatter = getDurationFormatter(xMax);
 
@@ -116,7 +119,7 @@ export function CorrelationsChart({
       >
         <Settings
           rotation={0}
-          theme={theme}
+          theme={chartTheme}
           showLegend
           legendPosition={Position.Bottom}
         />
@@ -148,6 +151,7 @@ export function CorrelationsChart({
           curve={CurveType.CURVE_STEP}
           xAccessor="key"
           yAccessors={['doc_count_full']}
+          color={euiTheme.eui.euiColorVis1}
         />
         <AreaSeries
           id={i18n.translate(
@@ -166,6 +170,7 @@ export function CorrelationsChart({
           curve={CurveType.CURVE_STEP}
           xAccessor="key"
           yAccessors={['doc_count']}
+          color={euiTheme.eui.euiColorVis2}
         />
       </Chart>
       <EuiSpacer size="s" />
