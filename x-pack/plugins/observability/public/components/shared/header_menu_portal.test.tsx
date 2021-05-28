@@ -10,13 +10,17 @@ import React from 'react';
 import HeaderMenuPortal from './header_menu_portal';
 
 describe('HeaderMenuPortal', () => {
-  describe('render', () => {
-    it('sets the header action menu', () => {
+  describe('when unmounted', () => {
+    it('calls setHeaderActionMenu with undefined', () => {
       const setHeaderActionMenu = jest.fn();
 
-      render(<HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>test</HeaderMenuPortal>);
+      const { unmount } = render(
+        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>test</HeaderMenuPortal>
+      );
 
-      expect(setHeaderActionMenu).toHaveBeenCalled();
+      unmount();
+
+      expect(setHeaderActionMenu).toHaveBeenCalledWith(undefined);
     });
   });
 });
