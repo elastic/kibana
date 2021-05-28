@@ -33,14 +33,16 @@ export class Plugin implements PluginType {
   public setup(core: CoreSetup, plugins: UptimeCorePlugins) {
     const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
 
-    const ready = once(async () => {
-      const componentTemplateName = plugins.ruleRegistry.getFullAssetName('synthetics-mappings');
+    const { ruleDataService } = plugins.ruleRegistry;
 
-      if (!plugins.ruleRegistry.isWriteEnabled()) {
+    const ready = once(async () => {
+      const componentTemplateName = ruleDataService.getFullAssetName('synthetics-mappings');
+
+      if (!ruleDataService.isWriteEnabled()) {
         return;
       }
 
-      await plugins.ruleRegistry.createOrUpdateComponentTemplate({
+      await ruleDataService.createOrUpdateComponentTemplate({
         name: componentTemplateName,
         body: {
           template: {
@@ -52,12 +54,12 @@ export class Plugin implements PluginType {
         },
       });
 
-      await plugins.ruleRegistry.createOrUpdateIndexTemplate({
-        name: plugins.ruleRegistry.getFullAssetName('synthetics-index-template'),
+      await ruleDataService.createOrUpdateIndexTemplate({
+        name: ruleDataService.getFullAssetName('synthetics-index-template'),
         body: {
-          index_patterns: [plugins.ruleRegistry.getFullAssetName('observability-synthetics*')],
+          index_patterns: [ruleDataService.getFullAssetName('observability-synthetics*')],
           composed_of: [
-            plugins.ruleRegistry.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+            ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
             componentTemplateName,
           ],
         },
@@ -65,7 +67,7 @@ export class Plugin implements PluginType {
     });
 
     const ruleDataClient = new RuleDataClient({
-      alias: plugins.ruleRegistry.getFullAssetName('observability-synthetics'),
+      alias: ruleDataService.getFullAssetName('observability-synthetics'),
       getClusterClient: async () => {
         const coreStart = await getCoreStart();
         return coreStart.elasticsearch.client.asInternalUser;
