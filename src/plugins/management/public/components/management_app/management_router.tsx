@@ -26,36 +26,34 @@ interface ManagementRouterProps {
 export const ManagementRouter = memo(
   ({ dependencies, history, setBreadcrumbs, onAppMounted, sections }: ManagementRouterProps) => (
     <Router history={history}>
-      <EuiPageBody restrictWidth={false} className="mgtPage__body">
-        <Switch>
-          {sections.map((section) =>
-            section
-              .getAppsEnabled()
-              .map((app) => (
-                <Route
-                  path={`${app.basePath}`}
-                  component={() => (
-                    <ManagementAppWrapper
-                      app={app}
-                      setBreadcrumbs={setBreadcrumbs}
-                      onAppMounted={onAppMounted}
-                      history={history}
-                    />
-                  )}
-                />
-              ))
-          )}
-          <Route
-            path={'/'}
-            component={() => (
-              <ManagementLandingPage
-                version={dependencies.kibanaVersion}
-                setBreadcrumbs={setBreadcrumbs}
+      <Switch>
+        {sections.map((section) =>
+          section
+            .getAppsEnabled()
+            .map((app) => (
+              <Route
+                path={`${app.basePath}`}
+                component={() => (
+                  <ManagementAppWrapper
+                    app={app}
+                    setBreadcrumbs={setBreadcrumbs}
+                    onAppMounted={onAppMounted}
+                    history={history}
+                  />
+                )}
               />
-            )}
-          />
-        </Switch>
-      </EuiPageBody>
+            ))
+        )}
+        <Route
+          path={'/'}
+          component={() => (
+            <ManagementLandingPage
+              version={dependencies.kibanaVersion}
+              setBreadcrumbs={setBreadcrumbs}
+            />
+          )}
+        />
+      </Switch>
     </Router>
   )
 );

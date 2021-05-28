@@ -14,7 +14,7 @@ import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 
 import { ManagementRouter } from './management_router';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
-import { reactRouterNavigate } from '../../../../kibana_react/public';
+import { KibanaPageTemplate, reactRouterNavigate } from '../../../../kibana_react/public';
 import { SectionsServiceStart } from '../../types';
 
 import './management_app.scss';
@@ -66,8 +66,11 @@ export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => 
 
   return (
     <I18nProvider>
-      <EuiPage>
-        <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
+      <KibanaPageTemplate
+        pageSideBar={
+          <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
+        }
+      >
         <ManagementRouter
           history={history}
           setBreadcrumbs={setBreadcrumbsScoped}
@@ -75,7 +78,7 @@ export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => 
           sections={sections}
           dependencies={dependencies}
         />
-      </EuiPage>
+      </KibanaPageTemplate>
     </I18nProvider>
   );
 };
