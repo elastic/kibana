@@ -39,7 +39,7 @@ export function CustomReportField({ field, seriesId, options: opts }: Props) {
         value: fd || id,
         inputDisplay: label,
       }))}
-      valueOfSelected={reportDefinitions?.[field]?.[0] || options?.[0].field}
+      valueOfSelected={reportDefinitions?.[field]?.[0] || options?.[0].field || options?.[0].id}
       onChange={(value) => onChange(value)}
     />
   );
