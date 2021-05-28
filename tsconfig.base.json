@@ -4,11 +4,10 @@
     "paths": {
       // Setup @kbn paths for Bazel compilations
       "@kbn/*": [
-        "node_modules/@kbn/*",
         "bazel-out/darwin-fastbuild/bin/packages/kbn-*",
         "bazel-out/k8-fastbuild/bin/packages/kbn-*",
         "bazel-out/x64_windows-fastbuild/bin/packages/kbn-*",
-        "bazel-out/host/bin/packages/kbn-*",
+        "node_modules/@kbn/*",
       ],
       // Allows for importing from `kibana` package for the exported types.
       "kibana": ["./kibana"],
