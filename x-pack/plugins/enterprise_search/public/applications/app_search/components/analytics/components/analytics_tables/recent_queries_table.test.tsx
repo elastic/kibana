@@ -6,6 +6,7 @@
  */
 
 import '../../../../../__mocks__/kea.mock';
+import '../../../../../__mocks__/react_router';
 import '../../../../__mocks__/engine_logic.mock';
 
 import React from 'react';

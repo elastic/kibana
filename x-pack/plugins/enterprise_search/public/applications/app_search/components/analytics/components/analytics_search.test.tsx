@@ -6,6 +6,7 @@
  */
 
 import { mockKibanaValues } from '../../../../__mocks__';
+import '../../../../__mocks__/react_router';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';

@@ -6,8 +6,8 @@
  */
 
 import '../../__mocks__/kea.mock';
-
-import { mockKibanaValues, mockHistory } from '../../__mocks__';
+import { mockKibanaValues } from '../../__mocks__';
+import { mockHistory } from '../../__mocks__/react_router';
 
 import React from 'react';
 

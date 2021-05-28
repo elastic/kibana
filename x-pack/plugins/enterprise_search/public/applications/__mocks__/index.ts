@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { mockHistory, mockLocation } from './react_router_history.mock';
-
 export { mockKibanaValues } from './kibana_logic.mock';
 export { mockLicensingValues } from './licensing_logic.mock';
 export { mockHttpValues } from './http_logic.mock';

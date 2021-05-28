@@ -6,7 +6,7 @@
  */
 
 import { setMockValues, setMockActions } from '../../../../__mocks__';
-import '../../../../__mocks__/react_router_history.mock';
+import { mockUseParams } from '../../../../__mocks__/react_router';
 import '../../../../__mocks__/shallow_useeffect.mock';
 import '../../../__mocks__/engine_logic.mock';
 
@@ -38,7 +38,7 @@ describe('ReindexJob', () => {
   };
 
   beforeEach(() => {
-    (useParams as jest.Mock).mockReturnValueOnce({ reindexJobId: 'abc1234567890' });
+    mockUseParams.mockReturnValueOnce({ reindexJobId: 'abc1234567890' });
     setMockValues(values);
     setMockActions(actions);
   });

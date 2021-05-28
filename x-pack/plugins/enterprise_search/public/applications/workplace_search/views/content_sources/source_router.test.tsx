@@ -8,7 +8,7 @@
 import '../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../__mocks__';
-import { mockLocation } from '../../../__mocks__/react_router_history.mock';
+import { mockLocation, mockUseParams } from '../../../__mocks__/react_router';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { contentSources } from '../../__mocks__/content_sources.mock';
 
@@ -46,7 +46,7 @@ describe('SourceRouter', () => {
       resetSourceState,
     });
     setMockValues({ ...mockValues });
-    (useParams as jest.Mock).mockImplementationOnce(() => ({
+    mockUseParams.mockImplementationOnce(() => ({
       sourceId: contentSource.id,
     }));
   });

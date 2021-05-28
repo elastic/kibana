@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '../../../__mocks__/react_router';
 import '../../../__mocks__/shallow_useeffect.mock';
 import { DEFAULT_INITIAL_APP_DATA } from '../../../../../common/__mocks__';
 import { setMockActions, setMockValues } from '../../../__mocks__';

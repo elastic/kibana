@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '../../../__mocks__/react_router';
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../__mocks__';
 import { groups } from '../../__mocks__/groups.mock';

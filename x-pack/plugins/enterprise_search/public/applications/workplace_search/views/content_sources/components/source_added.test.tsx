@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import '../../../../__mocks__/react_router';
 import '../../../../__mocks__/shallow_useeffect.mock';
-
 import { setMockActions, setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
