@@ -17,6 +17,8 @@ Now within your solution's **public** plugin `setup` lifecycle method you can ca
 ```typescript
 // x-pack/plugins/example_plugin/public/plugin.ts
 
+import { of } from 'rxjs';
+
 export class Plugin implements PluginClass {
   constructor(_context: PluginInitializerContext) {}
 
@@ -64,7 +66,7 @@ This can be accessed like so:
 
 ```
 const [coreStart, pluginsStart] = await core.getStartServices();
-const pageTemplateComponent = pluginsStart.observability.navigation.PageTemplate;
+const ObservabilityPageTemplate = pluginsStart.observability.navigation.PageTemplate;
 ```
 
 Now that you have access to the component you can render your solution's content using it.
