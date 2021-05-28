@@ -527,7 +527,7 @@ export function MachineLearningJobWizardCommonProvider(
 
       const expectedIndex = existingCustomUrls.length;
 
-      await customUrls.assertCustomUrlItem(expectedIndex, customUrl.label);
+      await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
     },
 
     async ensureAdvancedSectionOpen() {

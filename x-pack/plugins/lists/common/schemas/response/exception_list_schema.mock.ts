@@ -6,6 +6,12 @@
  */
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_NAME,
+} from '@kbn/securitysolution-list-constants';
 
 import {
   DATE_NOW,
@@ -21,12 +27,6 @@ import {
   VERSION,
   _VERSION,
 } from '../../constants.mock';
-import { ENDPOINT_LIST_ID } from '../..';
-import {
-  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_NAME,
-} from '../../constants';
 
 export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   _version: _VERSION,
