@@ -9490,7 +9490,6 @@
     "xpack.fleet.settings.cancelButtonLabel": "キャンセル",
     "xpack.fleet.settings.elasticHostError": "無効なURL",
     "xpack.fleet.settings.elasticsearchUrlLabel": "Elasticsearchホスト",
-    "xpack.fleet.settings.elasticsearchUrlsHelpTect": "エージェントがデータを送信するElasticsearch URLを指定します。{link}を参照してください。",
     "xpack.fleet.settings.fleetServerHostsDifferentPathOrProtocolError": "各URLのプロトコルとパスは同じでなければなりません",
     "xpack.fleet.settings.fleetServerHostsEmptyError": "1つ以上のURLが必要です。",
     "xpack.fleet.settings.fleetServerHostsError": "無効なURL",
