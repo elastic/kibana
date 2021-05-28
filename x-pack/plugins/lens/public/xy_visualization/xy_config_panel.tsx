@@ -140,7 +140,7 @@ const getDataBounds = function (
     let min = Number.MAX_VALUE;
     let max = Number.MIN_VALUE;
     axis.series.forEach((series) => {
-      activeData?.[series.layer].rows.forEach((row) => {
+      activeData?.[series.layer]?.rows.forEach((row) => {
         const value = row[series.accessor];
         if (!Number.isNaN(value)) {
           if (value < min) {
