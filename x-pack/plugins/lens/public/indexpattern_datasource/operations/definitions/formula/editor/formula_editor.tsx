@@ -63,8 +63,11 @@ export function FormulaEditor({
   setIsCloseable,
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
-  const [warnings, setWarnings] = useState<Array<{ severity: monaco.MarkerSeverity }>>([]);
+  const [warnings, setWarnings] = useState<
+    Array<{ severity: monaco.MarkerSeverity; message: string }>
+  >([]);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(isFullscreen);
+  const [isWarningOpen, setIsWarningOpen] = useState<boolean>(false);
   const editorModel = React.useRef<monaco.editor.ITextModel>();
   const overflowDiv1 = React.useRef<HTMLElement>();
   const disposables = React.useRef<monaco.IDisposable[]>([]);
@@ -148,6 +151,20 @@ export function FormulaEditor({
       }
 
       if (errors.length) {
+        if (currentColumn.params.isFormulaBroken) {
+          // If the formula is already broken, show the latest error message in the workspace
+          updateLayer(
+            regenerateLayerFromAst(
+              text || '',
+              layer,
+              columnId,
+              currentColumn,
+              indexPattern,
+              visibleOperationsMap
+            ).newLayer
+          );
+        }
+
         const markers = errors
           .flatMap((innerError) => {
             if (innerError.locations.length) {
@@ -188,7 +205,7 @@ export function FormulaEditor({
           .filter((marker) => marker);
 
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', markers);
-        setWarnings(markers.map(({ severity }) => ({ severity })));
+        setWarnings(markers.map(({ severity, message }) => ({ severity, message })));
       } else {
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
 
@@ -234,7 +251,7 @@ export function FormulaEditor({
             return [];
           })
           .filter((marker) => marker);
-        setWarnings(markers.map(({ severity }) => ({ severity })));
+        setWarnings(markers.map(({ severity, message }) => ({ severity, message })));
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', markers);
       }
     },
@@ -435,6 +452,8 @@ export function FormulaEditor({
     []
   );
 
+  const isWordWrapped = editor1.current?.getOption(monaco.editor.EditorOption.wordWrap) !== 'off';
+
   const codeEditorOptions: CodeEditorProps = {
     languageId: LANGUAGE_ID,
     value: text ?? '',
@@ -446,7 +465,7 @@ export function FormulaEditor({
       lineNumbers: 'off',
       scrollBeyondLastLine: false,
       minimap: { enabled: false },
-      wordWrap: 'on',
+      wordWrap: isWordWrapped ? 'on' : 'off',
       // Disable suggestions that appear when we don't provide a default suggestion
       wordBasedSuggestions: false,
       autoIndent: 'brackets',
@@ -493,18 +512,31 @@ export function FormulaEditor({
                 <EuiFlexItem className="lnsFormula__editorHeaderGroup">
                   {/* TODO: Replace `bolt` with `wordWrap` icon (after latest EUI is deployed) and hook up button to enable/disable word wrapping. */}
                   <EuiToolTip
-                    content={i18n.translate('xpack.lens.formula.disableWordWrapToolTip', {
-                      defaultMessage: 'Disable word wrap',
-                    })}
-                    delay="long"
+                    content={
+                      isWordWrapped
+                        ? i18n.translate('xpack.lens.formula.disableWordWrapLabel', {
+                            defaultMessage: 'Disable word wrap',
+                          })
+                        : i18n.translate('xpack.lens.formulaEnableWordWrapLabel', {
+                            defaultMessage: 'Enable word wrap',
+                          })
+                    }
                     position="top"
                   >
                     <EuiButtonIcon
                       iconType="bolt"
-                      color="text"
-                      aria-label={i18n.translate('xpack.lens.formula.disableWordWrapLabel', {
-                        defaultMessage: 'Disable word wrap',
-                      })}
+                      display={!isWordWrapped ? 'fill' : undefined}
+                      color={'text'}
+                      aria-label={
+                        isWordWrapped
+                          ? i18n.translate('xpack.lens.formula.disableWordWrapLabel', {
+                              defaultMessage: 'Disable word wrap',
+                            })
+                          : i18n.translate('xpack.lens.formulaEnableWordWrapLabel', {
+                              defaultMessage: 'Enable word wrap',
+                            })
+                      }
+                      isSelected={!isWordWrapped}
                       onClick={() => {
                         editor1.current?.updateOptions({
                           wordWrap:
@@ -661,33 +693,47 @@ export function FormulaEditor({
 
                 {errorCount || warningCount ? (
                   <EuiFlexItem className="lnsFormula__editorFooterGroup" grow={false}>
-                    <EuiLink
-                      color={errorCount ? 'danger' : 'warning'}
-                      className="lnsFormula__editorError"
-                      onClick={() => {
-                        editor1.current?.trigger('LENS', 'editor.action.marker.next', {});
-                      }}
+                    <EuiPopover
+                      ownFocus={false}
+                      isOpen={isWarningOpen}
+                      closePopover={() => setIsWarningOpen(false)}
+                      button={
+                        <EuiButtonEmpty
+                          color={errorCount ? 'danger' : 'warning'}
+                          className="lnsFormula__editorError"
+                          onClick={() => {
+                            setIsWarningOpen(!isWarningOpen);
+                          }}
+                        >
+                          {errorCount ? (
+                            <EuiText size="xs">
+                              <EuiIcon type="alert" />{' '}
+                              {i18n.translate('xpack.lens.formulaErrorCount', {
+                                defaultMessage:
+                                  '{count} {count, plural, one {error} other {errors}}',
+                                values: { count: errorCount },
+                              })}
+                            </EuiText>
+                          ) : null}
+                          {warningCount ? (
+                            <EuiText size="xs">
+                              <EuiIcon type="alert" />{' '}
+                              {i18n.translate('xpack.lens.formulaWarningCount', {
+                                defaultMessage:
+                                  '{count} {count, plural, one {warning} other {warnings}}',
+                                values: { count: warningCount },
+                              })}
+                            </EuiText>
+                          ) : null}
+                        </EuiButtonEmpty>
+                      }
                     >
-                      {errorCount ? (
-                        <EuiText size="xs">
-                          <EuiIcon type="alert" />{' '}
-                          {i18n.translate('xpack.lens.formulaErrorCount', {
-                            defaultMessage: '{count} {count, plural, one {error} other {errors}}',
-                            values: { count: errorCount },
-                          })}
-                        </EuiText>
-                      ) : null}
-                      {warningCount ? (
-                        <EuiText size="xs">
-                          <EuiIcon type="alert" />{' '}
-                          {i18n.translate('xpack.lens.formulaWarningCount', {
-                            defaultMessage:
-                              '{count} {count, plural, one {warning} other {warnings}}',
-                            values: { count: warningCount },
-                          })}
-                        </EuiText>
-                      ) : null}
-                    </EuiLink>
+                      {warnings.map(({ message }, index) => (
+                        <div key={index} className="lnsFormula__warningText">
+                          <EuiText>{message}</EuiText>
+                        </div>
+                      ))}
+                    </EuiPopover>
                   </EuiFlexItem>
                 ) : null}
               </EuiFlexGroup>

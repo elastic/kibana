@@ -67,6 +67,12 @@
   min-height: 201px;
 }
 
+.lnsFormula__warningText + .lnsFormula__warningText {
+  margin-top: $euiSizeS;
+  border-top: $euiBorderThin;
+  padding-top: $euiSizeS;
+}
+
 .lnsFormula__editorHelp--inline {
   align-items: center;
   display: flex;

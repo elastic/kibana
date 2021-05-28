@@ -582,7 +582,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           </EuiTab>
           {operationSupportMatrix.operationWithoutField.has('formula') ? (
             <EuiTab
-              isSelected={selectedColumn?.operationType === 'formula'}
+              isSelected={!temporaryQuickFunction && selectedColumn?.operationType === 'formula'}
               data-test-subj="lens-dimensionTabs-formula"
               onClick={() => {
                 if (selectedColumn?.operationType !== 'formula') {
