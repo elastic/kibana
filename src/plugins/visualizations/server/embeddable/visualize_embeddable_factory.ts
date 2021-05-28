@@ -13,6 +13,7 @@ import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
   commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
+  commonAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules,
 } from '../migrations/visualization_common_migrations';
 
 const byValueAddSupportOfDualIndexSelectionModeInTSVB = (state: SerializableState) => {
@@ -36,6 +37,15 @@ const byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel = (state: Serial
   };
 };
 
+const byValueAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRule = (
+  state: SerializableState
+) => {
+  return {
+    ...state,
+    savedVis: commonAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules(state.savedVis),
+  };
+};
+
 export const visualizeEmbeddableFactory = (): EmbeddableRegistryDefinition => {
   return {
     id: 'visualization',
@@ -47,6 +57,8 @@ export const visualizeEmbeddableFactory = (): EmbeddableRegistryDefinition => {
           byValueHideTSVBLastValueIndicator,
           byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel
         )(state),
+      '7.14.0': (state) =>
+        flow(byValueAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRule)(state),
     },
   };
 };

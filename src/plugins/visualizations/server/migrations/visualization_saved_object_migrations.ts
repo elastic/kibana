@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, get, omit, has, flow, forOwn, last } from 'lodash';
-import uuid from 'uuid';
+import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 
@@ -16,6 +15,7 @@ import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
   commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
+  commonAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules,
 } from './visualization_common_migrations';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -980,56 +980,17 @@ const addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules: SavedObje
     } catch (e) {
       // Let it go, the data is invalid and we'll leave it as is
     }
+    const newVisState = commonAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules(
+      visState
+    );
 
-    if (visState && visState.type === 'metrics') {
-      const params: any = get(visState, 'params') || {};
-
-      const getRuleWithComparingToZero = (rules: any[] = []) => {
-        const compareWithEqualMethods = ['gte', 'lte'];
-        return last(
-          rules.filter(
-            (rule) => compareWithEqualMethods.includes(rule.operator) && rule.value === 0
-          )
-        );
-      };
-
-      const convertRuleToEmpty = (rule: any = {}) => ({
-        ...rule,
-        id: uuid.v4(),
-        operator: 'empty',
-        value: null,
-      });
-
-      const addEmptyRuleToListIfNecessary = (rules: any[]) => {
-        const rule = getRuleWithComparingToZero(rules);
-
-        if (rule) {
-          return [...rules, convertRuleToEmpty(rule)];
-        }
-
-        return rules;
-      };
-
-      const colorRules = {
-        bar_color_rules: addEmptyRuleToListIfNecessary(params.bar_color_rules),
-        background_color_rules: addEmptyRuleToListIfNecessary(params.background_color_rules),
-        gauge_color_rules: addEmptyRuleToListIfNecessary(params.gauge_color_rules),
-      };
-
-      return {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          visState: JSON.stringify({
-            ...visState,
-            params: {
-              ...params,
-              ...colorRules,
-            },
-          }),
-        },
-      };
-    }
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
   }
   return doc;
 };
@@ -1075,10 +1036,10 @@ export const visualizationSavedObjectTypeMigrations = {
     removeDefaultIndexPatternAndTimeFieldFromTSVBModel
   ),
   '7.13.1': flow(
-    addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules,
     // duplicate these migrations in case a broken by value panel is added to the library
     addSupportOfDualIndexSelectionModeInTSVB,
     hideTSVBLastValueIndicator,
     removeDefaultIndexPatternAndTimeFieldFromTSVBModel
   ),
+  '7.14.0': flow(addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules),
 };
