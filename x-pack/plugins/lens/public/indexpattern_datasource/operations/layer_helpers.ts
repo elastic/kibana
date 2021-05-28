@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _, { partition } from 'lodash';
+import { partition, mapValues, pickBy } from 'lodash';
 import { getSortScoreByPriority } from './operations';
 import type { OperationMetadata, VisualizationDimensionGroupConfig } from '../../types';
 import {
@@ -1071,7 +1071,7 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     }
   });
 
-  const [aggregations, metrics] = _.partition(entries, ([, col]) => col.isBucketed);
+  const [aggregations, metrics] = partition(entries, ([, col]) => col.isBucketed);
 
   return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
 }
@@ -1110,10 +1110,10 @@ export function updateLayerIndexPattern(
   layer: IndexPatternLayer,
   newIndexPattern: IndexPattern
 ): IndexPatternLayer {
-  const keptColumns: IndexPatternLayer['columns'] = _.pickBy(layer.columns, (column) => {
+  const keptColumns: IndexPatternLayer['columns'] = pickBy(layer.columns, (column) => {
     return isColumnTransferable(column, newIndexPattern, layer);
   });
-  const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, (column) => {
+  const newColumns: IndexPatternLayer['columns'] = mapValues(keptColumns, (column) => {
     const operationDefinition = operationDefinitionMap[column.operationType];
     return operationDefinition.transfer
       ? operationDefinition.transfer(column, newIndexPattern)
