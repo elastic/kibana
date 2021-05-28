@@ -257,7 +257,8 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     setShareInProgress(true);
     try {
       await changeSpacesHandler(referenceGraph, spacesToAdd, spacesToRemove);
-      onUpdate();
+      const updatedObjects = referenceGraph.map(({ type, id }) => ({ type, id })); // only use 'type' and 'id' fields
+      onUpdate(updatedObjects);
       onClose();
     } catch (e) {
       setShareInProgress(false);

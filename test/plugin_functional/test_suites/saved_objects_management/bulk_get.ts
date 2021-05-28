@@ -13,7 +13,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('get', () => {
+  describe('_bulk_get', () => {
     describe('saved objects with hidden type', () => {
       before(() =>
         esArchiver.load(
@@ -25,29 +25,45 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         )
       );
-      const hiddenTypeExportableImportable =
-        'test-hidden-importable-exportable/ff3733a0-9fty-11e7-ahb3-3dcb94193fab';
-      const hiddenTypeNonExportableImportable =
-        'test-hidden-non-importable-exportable/op3767a1-9rcg-53u7-jkb3-3dnb74193awc';
+      const hiddenTypeExportableImportable = {
+        type: 'test-hidden-importable-exportable',
+        id: 'ff3733a0-9fty-11e7-ahb3-3dcb94193fab',
+      };
+      const hiddenTypeNonExportableImportable = {
+        type: 'test-hidden-non-importable-exportable',
+        id: 'op3767a1-9rcg-53u7-jkb3-3dnb74193awc',
+      };
 
       it('should return 200 for hidden types that are importableAndExportable', async () =>
         await supertest
-          .get(`/api/kibana/management/saved_objects/${hiddenTypeExportableImportable}`)
+          .post(`/api/kibana/management/saved_objects/_bulk_get`)
+          .send([hiddenTypeExportableImportable])
           .set('kbn-xsrf', 'true')
           .expect(200)
-          .then((resp) => {
-            const { body } = resp;
-            const { type, id, meta } = body;
-            expect(type).to.eql('test-hidden-importable-exportable');
-            expect(id).to.eql('ff3733a0-9fty-11e7-ahb3-3dcb94193fab');
+          .then(({ body }) => {
+            const [{ type, id, meta, error }] = body;
+            expect(type).to.eql(hiddenTypeExportableImportable.type);
+            expect(id).to.eql(hiddenTypeExportableImportable.id);
             expect(meta).to.not.equal(undefined);
+            expect(error).to.equal(undefined);
           }));
 
       it('should return 404 for hidden types that are not importableAndExportable', async () =>
         await supertest
-          .get(`/api/kibana/management/saved_objects/${hiddenTypeNonExportableImportable}`)
+          .post(`/api/kibana/management/saved_objects/_bulk_get`)
+          .send([hiddenTypeNonExportableImportable])
           .set('kbn-xsrf', 'true')
-          .expect(404));
+          .expect(200)
+          .then(({ body }) => {
+            const [{ type, id, error }] = body;
+            expect(type).to.eql(hiddenTypeNonExportableImportable.type);
+            expect(id).to.eql(hiddenTypeNonExportableImportable.id);
+            expect(error).to.eql({
+              message: `Unsupported saved object type: '${hiddenTypeNonExportableImportable.type}': Bad Request`,
+              statusCode: 400,
+              error: 'Bad Request',
+            });
+          }));
     });
   });
 }

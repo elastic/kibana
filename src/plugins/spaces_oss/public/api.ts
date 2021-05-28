@@ -178,9 +178,9 @@ export interface ShareToSpaceFlyoutProps {
     spacesToRemove: string[]
   ) => Promise<void>;
   /**
-   * Optional callback when the target object is updated.
+   * Optional callback when the target object and its relatives are updated.
    */
-  onUpdate?: () => void;
+  onUpdate?: (updatedObjects: Array<{ type: string; id: string }>) => void;
   /**
    * Optional callback when the flyout is closed.
    */

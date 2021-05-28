@@ -19,7 +19,7 @@ import {
 } from '../../../../../core/public';
 import { ISavedObjectsManagementServiceRegistry } from '../../services';
 import { Header, NotFoundErrors, Intro, Form } from './components';
-import { canViewInApp, findObject } from '../../lib';
+import { canViewInApp, bulkGetObjects } from '../../lib';
 import { SubmittedFormData } from '../types';
 import { SavedObjectWithMetadata } from '../../types';
 
@@ -60,7 +60,7 @@ export class SavedObjectEdition extends Component<
   componentDidMount() {
     const { http, id } = this.props;
     const { type } = this.state;
-    findObject(http, type, id).then((object) => {
+    bulkGetObjects(http, [{ type, id }]).then(([object]) => {
       this.setState({
         object,
       });
