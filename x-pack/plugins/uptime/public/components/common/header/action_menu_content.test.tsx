@@ -18,8 +18,8 @@ describe('ActionMenuContent', () => {
     fireEvent.click(alertsDropdown);
 
     await waitFor(() => {
-      expect(getByText('Create alert'));
-      expect(getByText('Manage alerts'));
+      expect(getByText('Create rule'));
+      expect(getByText('Manage rules'));
     });
   });
 
