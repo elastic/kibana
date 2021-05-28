@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreSetup, CoreStart } from 'kibana/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { SharePluginStart } from '../../../../src/plugins/share/public';
 import { Plugin } from '../../../../src/core/public';
 
 import { setStartServices } from './kibana_services';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import type { FileUploadPluginStart } from '../../file_upload/public';
 import type { MapsStartApi } from '../../maps/public';
 import type { SecurityPluginSetup } from '../../security/public';
 import { getFileDataVisualizerComponent } from './api';
 import { getMaxBytesFormatted } from './application/util/get_max_bytes';
+import { registerHomeAddData } from './register_home';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FileDataVisualizerSetupDependencies {}
+export interface FileDataVisualizerSetupDependencies {
+  home: HomePublicPluginSetup;
+}
 export interface FileDataVisualizerStartDependencies {
   data: DataPublicPluginStart;
   fileUpload: FileUploadPluginStart;
@@ -40,7 +43,9 @@ export class FileDataVisualizerPlugin
       FileDataVisualizerSetupDependencies,
       FileDataVisualizerStartDependencies
     > {
-  public setup() {}
+  public setup(core: CoreSetup, plugins: FileDataVisualizerSetupDependencies) {
+    registerHomeAddData(plugins.home);
+  }
 
   public start(core: CoreStart, plugins: FileDataVisualizerStartDependencies) {
     setStartServices(core, plugins);

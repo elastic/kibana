@@ -10,7 +10,8 @@
     "embeddable",
     "share",
     "discover",
-    "fileUpload"
+    "fileUpload",
+    "home"
   ],
   "optionalPlugins": [
     "security",
