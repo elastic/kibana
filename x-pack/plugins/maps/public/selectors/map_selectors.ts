@@ -176,6 +176,8 @@ export const getMouseCoordinates = ({ map }: MapStoreState) => map.mapState.mous
 export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
   map.mapState.timeFilters ? map.mapState.timeFilters : getTimeFilter().getTime();
 
+export const getTimeslice = ({ map }: MapStoreState) => map.mapState.timeslice;
+
 export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.mapState.query;
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
@@ -234,6 +236,7 @@ export const getDataFilters = createSelector(
   getMapBuffer,
   getMapZoom,
   getTimeFilters,
+  getTimeslice,
   getRefreshTimerLastTriggeredAt,
   getQuery,
   getFilters,
@@ -244,6 +247,7 @@ export const getDataFilters = createSelector(
     mapBuffer,
     mapZoom,
     timeFilters,
+    timeslice,
     refreshTimerLastTriggeredAt,
     query,
     filters,
@@ -255,6 +259,7 @@ export const getDataFilters = createSelector(
       buffer: searchSessionId && searchSessionMapBuffer ? searchSessionMapBuffer : mapBuffer,
       zoom: mapZoom,
       timeFilters,
+      timeslice,
       refreshTimerLastTriggeredAt,
       query,
       filters,
@@ -398,6 +403,26 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
       });
     }
     return _.uniq(indexPatternIds);
+  }
+);
+
+export const getGeoFieldNames = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    const geoFieldNames: string[] = [];
+
+    if (waitingForMapReadyLayerList.length) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        const layer = createLayerInstance(layerDescriptor);
+        geoFieldNames.push(...layer.getGeoFieldNames());
+      });
+    } else {
+      layerList.forEach((layer) => {
+        geoFieldNames.push(...layer.getGeoFieldNames());
+      });
+    }
+    return _.uniq(geoFieldNames);
   }
 );
 
