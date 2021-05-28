@@ -50,7 +50,11 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     return {
       ...this.shareMenuRegistry.setup(),
       urlGenerators: this.urlGeneratorsService.setup(core),
-      url: new BrowserUrlService(),
+      url: new BrowserUrlService({
+        navigate: async () => {
+          throw new Error('not implemented');
+        },
+      }),
     };
   }
 

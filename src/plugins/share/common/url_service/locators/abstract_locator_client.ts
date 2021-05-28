@@ -11,14 +11,14 @@ import type { AbstractLocator } from './abstract_locator';
 import type { LocatorClient, LocatorDefinition, LocatorPublic } from './types';
 
 export abstract class AbstractLocatorClient implements Pick<LocatorClient, 'create' | 'get'> {
-  protected abstract readonly Locator: new <P extends SerializableState>(
-    definition: LocatorDefinition<P>
-  ) => AbstractLocator<P>;
-
   /**
    * Collection of registered locators.
    */
   protected locators: Map<string, AbstractLocator<any>> = new Map();
+
+  protected abstract createLocator<P extends SerializableState>(
+    definition: LocatorDefinition<P>
+  ): AbstractLocator<P>;
 
   /**
    * Creates and register a URL locator.
@@ -27,7 +27,7 @@ export abstract class AbstractLocatorClient implements Pick<LocatorClient, 'crea
    * @returns A public interface of URL locator.
    */
   public create<P extends SerializableState>(definition: LocatorDefinition<P>): LocatorPublic<P> {
-    const locator = new this.Locator<P>(definition);
+    const locator = this.createLocator<P>(definition);
 
     this.locators.set(definition.id, locator);
 

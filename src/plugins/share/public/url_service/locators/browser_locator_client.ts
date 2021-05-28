@@ -6,9 +6,20 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { BrowserLocatorDependencies } from './browser_locator';
+import type { LocatorDefinition } from '../../../common/url_service';
 import { AbstractLocatorClient } from '../../../common/url_service';
 import { BrowserLocator } from './browser_locator';
 
+export type BrowserLocatorClientDependencies = BrowserLocatorDependencies;
+
 export class BrowserLocatorsClient extends AbstractLocatorClient {
-  protected readonly Locator = BrowserLocator;
+  constructor(protected readonly deps: BrowserLocatorClientDependencies) {
+    super();
+  }
+
+  protected createLocator<P extends SerializableState>(definition: LocatorDefinition<P>) {
+    return new BrowserLocator(definition, this.deps);
+  }
 }

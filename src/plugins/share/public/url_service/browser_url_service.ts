@@ -7,8 +7,13 @@
  */
 
 import { UrlService } from '../../common/url_service';
+import type { BrowserLocatorClientDependencies } from './locators';
 import { BrowserLocatorsClient } from './locators';
 
+export type BrowserUrlServiceDependencies = BrowserLocatorClientDependencies;
+
 export class BrowserUrlService implements UrlService {
-  public readonly locators = new BrowserLocatorsClient();
+  public readonly locators = new BrowserLocatorsClient(this.deps);
+
+  constructor(protected readonly deps: BrowserUrlServiceDependencies) {}
 }
