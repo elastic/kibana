@@ -7,7 +7,7 @@
 
 import '../../../../__mocks__/react_router_history.mock';
 import '../../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues, rerender } from '../../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
@@ -18,6 +18,7 @@ import { EuiPageHeader } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { Loading } from '../../../../shared/loading';
+import { rerender } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 import { CurationLogic } from './curation_logic';

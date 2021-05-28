@@ -6,6 +6,7 @@
  */
 
 export { mockHistory, mockLocation } from './react_router_history.mock';
+
 export { mockKibanaValues } from './kibana_logic.mock';
 export { mockLicensingValues } from './licensing_logic.mock';
 export { mockHttpValues } from './http_logic.mock';
@@ -23,10 +24,4 @@ export {
   LogicMounter,
 } from './kea.mock';
 
-export { mountAsync } from './mount_async.mock';
-export { mountWithIntl } from './mount_with_i18n.mock';
-export { shallowWithIntl } from './shallow_with_i18n.mock';
-export { rerender } from './enzyme_rerender.mock';
 // Note: shallow_useeffect must be imported directly as a file
-
-export { expectedAsyncError } from './expected_async_error';

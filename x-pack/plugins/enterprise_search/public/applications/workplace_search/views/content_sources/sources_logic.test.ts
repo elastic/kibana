@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockFlashMessageHelpers,
-  mockHttpValues,
-  expectedAsyncError,
-} from '../../../__mocks__';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
 import { configuredSources, contentSources } from '../../__mocks__/content_sources.mock';
+
+import { expectedAsyncError } from '../../../test_helpers';
 
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },

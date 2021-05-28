@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
-import { setMockValues, rerender } from '../__mocks__';
+import { setMockValues } from '../__mocks__';
 import '../__mocks__/shallow_useeffect.mock';
 import '../__mocks__/enterprise_search_url.mock';
 import '../__mocks__/react_router_history.mock';
@@ -18,6 +18,8 @@ import { Redirect, useRouteMatch } from 'react-router-dom';
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
+
+import { rerender } from '../test_helpers';
 
 jest.mock('./app_logic', () => ({ AppLogic: jest.fn() }));
 import { AppLogic } from './app_logic';

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '../../../../../__mocks__';
+import '../../../../../__mocks__/kea.mock';
 import '../../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { EuiBasicTable, EuiLink, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
+
+import { mountWithIntl } from '../../../../../test_helpers';
 
 import { QueryClicksTable } from './';
 
