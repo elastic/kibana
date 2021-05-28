@@ -42,12 +42,15 @@ export const computeColor = (
     }
 
     const index = allSeries.findIndex((name) => isEqual(name, dataName));
+    const isSplitParentLayer = isSplitChart && parentSeries.includes(dataName);
     return palettes?.get(visParams.palette.name).getColor(
       [
         {
           name: dataName,
-          rankAtDepth: index > -1 ? index : 0,
-          totalSeriesAtDepth: allSeries.length || 1,
+          rankAtDepth: isSplitParentLayer
+          ? parentSeries.findIndex((name) => name === dataName) : index > -1 ? index : 0,
+          totalSeriesAtDepth: isSplitParentLayer
+          ? parentSeries.length : allSeries.length || 1,
         },
       ],
       {
