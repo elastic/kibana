@@ -12048,7 +12048,6 @@
     "xpack.ingestPipelines.form.unknownError": "不明なエラーが発生しました。",
     "xpack.ingestPipelines.form.versionFieldLabel": "バージョン (任意) ",
     "xpack.ingestPipelines.form.versionToggleDescription": "バージョン番号を追加",
-    "xpack.ingestPipelines.licenseCheckErrorMessage": "ライセンス確認失敗",
     "xpack.ingestPipelines.list.listTitle": "Ingestノードパイプライン",
     "xpack.ingestPipelines.list.loadErrorReloadLinkLabel": "再試行してください。",
     "xpack.ingestPipelines.list.loadErrorTitle": "パイプラインを読み込めません。{reloadLink}",
