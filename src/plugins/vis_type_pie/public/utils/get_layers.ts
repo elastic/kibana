@@ -48,9 +48,11 @@ export const computeColor = (
         {
           name: dataName,
           rankAtDepth: isSplitParentLayer
-          ? parentSeries.findIndex((name) => name === dataName) : index > -1 ? index : 0,
-          totalSeriesAtDepth: isSplitParentLayer
-          ? parentSeries.length : allSeries.length || 1,
+            ? parentSeries.findIndex((name) => name === dataName)
+            : index > -1
+            ? index
+            : 0,
+          totalSeriesAtDepth: isSplitParentLayer ? parentSeries.length : allSeries.length || 1,
         },
       ],
       {
