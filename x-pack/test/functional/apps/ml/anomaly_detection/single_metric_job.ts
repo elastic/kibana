@@ -262,7 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
 
       await ml.testExecution.logTestStep('job cloning persists custom urls');
-      await ml.customUrls.assertCustomUrlItem(0, 'check-kibana-dashboard');
+      await ml.customUrls.assertCustomUrlLabel(0, 'check-kibana-dashboard');
 
       await ml.testExecution.logTestStep('job cloning persists assigned calendars');
       await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);
