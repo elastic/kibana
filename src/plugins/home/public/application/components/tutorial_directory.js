@@ -199,7 +199,7 @@ class TutorialDirectoryUi extends React.Component {
 
   renderTabContent = () => {
     const tab = this.tabs.find(({ id }) => id === this.state.selectedTabId);
-    if (tab !== undefined && tab.content !== undefined) {
+    if (tab?.content !== undefined) {
       return tab.content;
     }
 
