@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState, useMemo } from 'react';
+import { usePrevious } from 'react-use';
 import { i18n } from '@kbn/i18n';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { useKibana } from '../../../common/lib/kibana';
@@ -14,6 +15,7 @@ import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 import { useMatrixHistogram } from '../../../common/containers/matrix_histogram';
 import { EVENT_DATASET } from '../../../../common/cti/constants';
+import { TimeRange } from '../../../resolver/types';
 
 export const ID = 'ctiEventCountQuery';
 
@@ -33,16 +35,19 @@ const ctiEventsFilter: Filter = {
   },
 };
 
-export const useCTIEventCounts = ({
-  deleteQuery,
-  filters,
-  from,
-  indexNames,
-  indexPattern,
-  query,
-  setQuery,
-  to,
-}: ThreatIntelLinkPanelProps) => {
+export const useCTIEventCounts = (
+  {
+    deleteQuery,
+    filters,
+    from,
+    indexNames,
+    indexPattern,
+    query,
+    setQuery,
+    to,
+  }: ThreatIntelLinkPanelProps,
+  timeRange: TimeRange
+) => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { uiSettings } = useKibana().services;
 
@@ -89,6 +94,13 @@ export const useCTIEventCounts = ({
       setIsInitialLoading(false);
     }
   }, [isInitialLoading, data]);
+
+  const prevTimeRangeString = usePrevious(JSON.stringify(timeRange));
+  useEffect(() => {
+    if (prevTimeRangeString !== JSON.stringify(timeRange)) {
+      refetch();
+    }
+  }, [timeRange, prevTimeRangeString, refetch]);
 
   const returnVal = {
     eventCounts: data.reduce((acc, item) => {

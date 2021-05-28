@@ -46,7 +46,7 @@ export const useThreatIntelDashboardLinks = (props: ThreatIntelLinkPanelProps) =
     urlState,
   ]);
   const createUrl = useKibana().services.dashboard.dashboardUrlGenerator?.createUrl;
-  const { eventCounts, total } = useCTIEventCounts(props);
+  const { eventCounts, total } = useCTIEventCounts(props, timeRange);
 
   const [buttonLink, setButtonLink] = useState<Partial<ButtonLink> | null>(null);
   const [dashboardLinks, setDashboardLinks] = useState<DashboardLink[]>([]);
