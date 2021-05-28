@@ -1865,6 +1865,7 @@
     "discover.noResults.searchExamples.queryStringSyntaxLinkText": "查询字符串语法",
     "discover.noResults.searchExamples.refineYourQueryTitle": "优化您的查询",
     "discover.noResults.searchExamples.statusField200StatusCodeExampleTitle": "在状态字段中查找 200",
+    "discover.noResultsFound": "找不到结果",
     "discover.notifications.invalidTimeRangeText": "提供的时间范围无效。 (自：“{from}”，至：“{to}”) ",
     "discover.notifications.invalidTimeRangeTitle": "时间范围无效",
     "discover.notifications.notSavedSearchTitle": "搜索“{savedSearchTitle}”未保存。",

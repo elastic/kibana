@@ -66,7 +66,8 @@
   text-align: right;
 }
 
-.euiDataGrid__loading {
+.euiDataGrid__loading,
+.euiDataGrid__noResults {
   display: flex;
   flex-direction: column;
   justify-content: center;

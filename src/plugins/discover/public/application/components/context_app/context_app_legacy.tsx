@@ -79,10 +79,10 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   const [expandedDoc, setExpandedDoc] = useState<EsHitRecord | undefined>(undefined);
   const isAnchorLoaded = anchorStatus === LoadingStatus.LOADED;
   const isFailed = anchorStatus === LoadingStatus.FAILED;
-  const allRowsLoaded =
-    anchorStatus === LoadingStatus.LOADED &&
-    predecessorStatus === LoadingStatus.LOADED &&
-    successorStatus === LoadingStatus.LOADED;
+  const areAnyDocsLoading =
+    anchorStatus === LoadingStatus.LOADING ||
+    predecessorStatus === LoadingStatus.LOADING ||
+    successorStatus === LoadingStatus.LOADING;
   const isLegacy = config.get(DOC_TABLE_LEGACY);
   const anchorId = rows?.find(({ isAnchor }) => isAnchor)?._id;
 
@@ -122,10 +122,10 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     return {
       ariaLabelledBy: 'surDocumentsAriaLabel',
       columns,
-      rows: allRowsLoaded && rows,
+      rows,
       indexPattern,
       expandedDoc,
-      isLoading: !allRowsLoaded,
+      isLoading: areAnyDocsLoading,
       sampleSize: 0,
       sort: sorting,
       isSortEnabled: false,

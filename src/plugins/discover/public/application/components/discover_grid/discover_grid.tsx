@@ -19,6 +19,7 @@ import {
   EuiText,
   htmlIdGenerator,
   EuiLoadingSpinner,
+  EuiIcon,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -318,13 +319,25 @@ export const DiscoverGrid = ({
     [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
   );
 
-  if (!rowCount) {
+  if (isLoading) {
     return (
       <div className="euiDataGrid__loading">
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
           <EuiSpacer size="s" />
           <FormattedMessage id="discover.loadingResults" defaultMessage="Loading results" />
+        </EuiText>
+      </div>
+    );
+  }
+
+  if (!rowCount) {
+    return (
+      <div className="euiDataGrid__noResults">
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="discoverApp" size="m" color="subdued" />
+          <EuiSpacer size="s" />
+          <FormattedMessage id="discover.noResultsFound" defaultMessage="No results found" />
         </EuiText>
       </div>
     );

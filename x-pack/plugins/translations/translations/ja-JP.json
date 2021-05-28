@@ -1855,6 +1855,7 @@
     "discover.noResults.searchExamples.queryStringSyntaxLinkText": "クエリ文字列の構文",
     "discover.noResults.searchExamples.refineYourQueryTitle": "クエリの調整",
     "discover.noResults.searchExamples.statusField200StatusCodeExampleTitle": "ステータスフィールドの200を検索",
+    "discover.noResultsFound": "結果が見つかりませんでした",
     "discover.notifications.invalidTimeRangeText": "指定された時間範囲が無効です。 (開始：'{from}'、終了：'{to}') ",
     "discover.notifications.invalidTimeRangeTitle": "無効な時間範囲",
     "discover.notifications.notSavedSearchTitle": "検索「{savedSearchTitle}」は保存されませんでした。",
