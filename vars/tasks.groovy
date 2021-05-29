@@ -55,8 +55,8 @@ def xpackCiGroupDocker() {
       kibanaPipeline.downloadDefaultBuildArtifacts()
       kibanaPipeline.bash("""
         cd '${env.WORKSPACE}'
-        mkdir -p kibana-build
-        tar -xzf kibana-default.tar.gz -C kibana-build --strip=1
+        mkdir -p kibana-build-xpack
+        tar -xzf kibana-default.tar.gz -C kibana-build-xpack --strip=1
         tar -xzf kibana-default-plugins.tar.gz -C kibana
       """, "Extract Default Build artifacts")
       kibanaPipeline.xpackCiGroupProcess('Docker', true)()
@@ -75,6 +75,8 @@ def functionalOss(Map params = [:]) {
   ]
 
   task {
+    kibanaPipeline.buildOss(6)
+
     if (config.ciGroups) {
       ossCiGroups()
     }
@@ -113,6 +115,8 @@ def functionalXpack(Map params = [:]) {
   ]
 
   task {
+    kibanaPipeline.buildXpack(10, true)
+
     if (config.ciGroups) {
       xpackCiGroups()
       xpackCiGroupDocker()

@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'common']);
@@ -19,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('full screen mode', () => {
     before(async () => {
-      await kibanaServer.importExport.load('dashboard/current/kibana');
+      await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -27,8 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
-
-    after(() => kibanaServer.importExport.unload('dashboard/current/kibana'));
 
     it('option not available in edit mode', async () => {
       await PageObjects.dashboard.switchToEditMode();

@@ -21,6 +21,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const pieChart = getService('pieChart');
   const security = getService('security');
@@ -93,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
-      await kibanaServer.importExport.load('dashboard/current/kibana');
+      await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -112,7 +113,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newUrl = currentUrl.replace(/\?.*$/, '');
       await browser.get(newUrl, false);
       await security.testUser.restoreDefaults();
-      await kibanaServer.importExport.unload('dashboard/current/kibana');
     });
 
     it('adding visualizations', async () => {

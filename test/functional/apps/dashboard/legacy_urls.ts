@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const listingTable = getService('listingTable');
-  const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
   const security = getService('security');
 
   let kibanaLegacyBaseUrl: string;
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('legacy urls', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'animals']);
-      await kibanaServer.importExport.load('dashboard/current/kibana');
+      await esArchiver.load('dashboard/current/kibana');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
@@ -53,7 +53,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await listingTable.deleteItem('legacyTest', testDashboardId);
       await security.testUser.restoreDefaults();
-      await kibanaServer.importExport.unload('dashboard/current/kibana');
     });
 
     describe('kibana link redirect', () => {

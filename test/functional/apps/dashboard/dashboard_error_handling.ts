@@ -9,7 +9,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
@@ -19,15 +19,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
    */
   describe('dashboard error handling', () => {
     before(async () => {
-      await kibanaServer.importExport.load('dashboard/current/kibana');
+      await esArchiver.loadIfNeeded('dashboard/current/kibana');
       await PageObjects.common.navigateToApp('dashboard');
-      await kibanaServer.savedObjects.delete({
-        type: 'index-pattern',
-        id: 'to-be-removed',
-      });
     });
-
-    after(() => kibanaServer.importExport.unload('dashboard/current/kibana'));
 
     // wrapping into own describe to make sure new tab is cleaned up even if test failed
     // see: https://github.com/elastic/kibana/pull/67280#discussion_r430528122

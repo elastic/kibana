@@ -44,10 +44,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     apps: functionalConfig.get('apps'),
     esArchiver: {
-      directory: path.resolve(__dirname, '../functional/fixtures/es_archiver'),
-    },
-    kbnArchiver: {
-      directory: path.resolve(__dirname, '../functional/fixtures/kbn_archiver'),
+      directory: path.resolve(__dirname, '../es_archives'),
     },
     screenshots: functionalConfig.get('screenshots'),
     junit: {
