@@ -439,6 +439,8 @@ export class EndpointDocGenerator extends BaseDataGenerator {
 
   private createHostData(): HostInfo {
     const hostName = this.randomHostname();
+    const isIsolated = this.randomBoolean();
+
     return {
       agent: {
         version: this.randomVersion(),
@@ -465,10 +467,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           applied: this.randomChoice(APPLIED_POLICIES),
         },
         configuration: {
-          isolation: false,
+          isolation: isIsolated,
         },
         state: {
-          isolation: false,
+          isolation: isIsolated,
         },
       },
     };

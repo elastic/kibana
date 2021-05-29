@@ -29,8 +29,8 @@ async function runBazelCommandWithRunner(
     stdio: 'pipe',
   };
 
-  if (offline || !offline) {
-    bazelArgs = [...bazelArgs, '--config=offline'];
+  if (offline) {
+    bazelArgs.push('--config=offline');
   }
 
   const bazelProc = spawn(bazelCommandRunner, bazelArgs, bazelOpts);
