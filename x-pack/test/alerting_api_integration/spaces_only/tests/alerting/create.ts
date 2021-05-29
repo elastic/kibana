@@ -112,6 +112,53 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
     });
 
+    // see: https://github.com/elastic/kibana/issues/100607
+    // note this fails when the mappings for `params` does not have ignore_above
+    it('should handle alerts with immense params', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      const lotsOfSpaces = ''.padEnd(100 * 1000); // 100K space chars
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            params: {
+              ignoredButPersisted: lotsOfSpaces,
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+            ],
+          })
+        );
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+      expect(response.body.params.ignoredButPersisted).to.eql(lotsOfSpaces);
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: response.body.id,
+      });
+    });
+
     it('should allow providing custom saved object ids (uuid v1)', async () => {
       const customId = '09570bb0-6299-11eb-8fde-9fe5ce6ea450';
       const response = await supertest

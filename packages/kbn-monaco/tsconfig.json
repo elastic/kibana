@@ -1,10 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": false,
-    "outDir": "./target",
+    "incremental": true,
+    "declarationDir": "./target_types",
+    "outDir": "./target_node",
     "declaration": true,
     "declarationMap": true,
+    "rootDir": ".",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-monaco/src",
     "types": [
@@ -13,6 +15,6 @@
     ]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
   ]
 }
