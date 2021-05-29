@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
-
 export const getMockJobSummaryResponse = () => [
   {
     id: 'linux_anomalous_network_activity_ecs',
@@ -162,20 +160,6 @@ export const getMockListModulesResponse = () => [
   },
 ];
 
-export const getMockRulesResponse = () => ({
-  hits: {
-    hits: [
-      { _source: { alert: { enabled: true, tags: [`${INTERNAL_IMMUTABLE_KEY}:true`] } } },
-      { _source: { alert: { enabled: true, tags: [`${INTERNAL_IMMUTABLE_KEY}:false`] } } },
-      { _source: { alert: { enabled: false, tags: [`${INTERNAL_IMMUTABLE_KEY}:true`] } } },
-      { _source: { alert: { enabled: true, tags: [`${INTERNAL_IMMUTABLE_KEY}:true`] } } },
-      { _source: { alert: { enabled: false, tags: [`${INTERNAL_IMMUTABLE_KEY}:false`] } } },
-      { _source: { alert: { enabled: false, tags: [`${INTERNAL_IMMUTABLE_KEY}:true`] } } },
-      { _source: { alert: { enabled: false, tags: [`${INTERNAL_IMMUTABLE_KEY}:true`] } } },
-    ],
-  },
-});
-
 export const getMockMlJobDetailsResponse = () => ({
   count: 20,
   jobs: [
@@ -299,6 +283,182 @@ export const getMockMlDatafeedStatsResponse = () => ({
         average_search_time_per_bucket_ms: 360.7927310729215,
         exponential_average_search_time_per_hour_ms: 86145.39799630083,
       },
+    },
+  ],
+});
+
+export const getMockRuleSearchResponse = (immutableTag: string = '__internal_immutable:true') => ({
+  took: 2,
+  timed_out: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    total: {
+      value: 1093,
+      relation: 'eq',
+    },
+    max_score: 0,
+    hits: [
+      {
+        _index: '.kibanaindex',
+        _id: 'alert:6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
+        _score: 0,
+        _source: {
+          alert: {
+            name: 'Azure Diagnostic Settings Deletion',
+            tags: [
+              'Elastic',
+              'Cloud',
+              'Azure',
+              'Continuous Monitoring',
+              'SecOps',
+              'Monitoring',
+              '__internal_rule_id:5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
+              `${immutableTag}`,
+            ],
+            alertTypeId: 'siem.signals',
+            consumer: 'siem',
+            params: {
+              author: ['Elastic'],
+              description:
+                'Identifies the deletion of diagnostic settings in Azure, which send platform logs and metrics to different destinations. An adversary may delete diagnostic settings in an attempt to evade defenses.',
+              ruleId: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
+              index: ['filebeat-*', 'logs-azure*'],
+              falsePositives: [
+                'Deletion of diagnostic settings may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Diagnostic settings deletion from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.',
+              ],
+              from: 'now-25m',
+              immutable: true,
+              query:
+                'event.dataset:azure.activitylogs and azure.activitylogs.operation_name:"MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE" and event.outcome:(Success or success)',
+              language: 'kuery',
+              license: 'Elastic License v2',
+              outputIndex: '.siem-signals',
+              maxSignals: 100,
+              riskScore: 47,
+              timestampOverride: 'event.ingested',
+              to: 'now',
+              type: 'query',
+              references: [
+                'https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostic-settings',
+              ],
+              note: 'The Azure Filebeat module must be enabled to use this rule.',
+              version: 4,
+              exceptionsList: [],
+            },
+            schedule: {
+              interval: '5m',
+            },
+            enabled: false,
+            actions: [],
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+            apiKeyOwner: null,
+            apiKey: null,
+            createdBy: 'user',
+            updatedBy: 'user',
+            createdAt: '2021-03-23T17:15:59.634Z',
+            updatedAt: '2021-03-23T17:15:59.634Z',
+            muteAll: false,
+            mutedInstanceIds: [],
+            executionStatus: {
+              status: 'pending',
+              lastExecutionDate: '2021-03-23T17:15:59.634Z',
+              error: null,
+            },
+            meta: {
+              versionApiKeyLastmodified: '8.0.0',
+            },
+          },
+          type: 'alert',
+          references: [],
+          migrationVersion: {
+            alert: '7.13.0',
+          },
+          coreMigrationVersion: '8.0.0',
+          updated_at: '2021-03-23T17:15:59.634Z',
+        },
+      },
+    ],
+  },
+});
+
+export const getMockRuleAlertsResponse = (docCount: number) => ({
+  took: 7,
+  timed_out: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    total: {
+      value: 7322,
+      relation: 'eq',
+    },
+    max_score: null,
+    hits: [],
+  },
+  aggregations: {
+    detectionAlerts: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
+          doc_count: docCount,
+        },
+      ],
+    },
+  },
+});
+
+export const getMockAlertCasesResponse = () => ({
+  page: 1,
+  per_page: 10000,
+  total: 4,
+  saved_objects: [
+    {
+      type: 'cases-comments',
+      id: '3bb5cc10-9249-11eb-85b7-254c8af1a983',
+      attributes: {
+        associationType: 'case',
+        type: 'alert',
+        alertId: '54802763917f521249c9f68d0d4be0c26cc538404c26dfed1ae7dcfa94ea2226',
+        index: '.siem-signals-default-000001',
+        rule: {
+          id: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
+          name: 'Azure Diagnostic Settings Deletion',
+        },
+        created_at: '2021-03-31T17:47:59.449Z',
+        created_by: {
+          email: '',
+          full_name: '',
+          username: '',
+        },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      },
+      references: [
+        {
+          type: 'cases',
+          name: 'associated-cases',
+          id: '3a3a4fa0-9249-11eb-85b7-254c8af1a983',
+        },
+      ],
+      migrationVersion: {},
+      coreMigrationVersion: '8.0.0',
+      updated_at: '2021-03-31T17:47:59.818Z',
+      version: 'WzI3MDIyODMsNF0=',
+      namespaces: ['default'],
+      score: 0,
     },
   ],
 });

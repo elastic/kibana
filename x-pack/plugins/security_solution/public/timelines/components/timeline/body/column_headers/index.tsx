@@ -4,19 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  EuiButtonIcon,
-  EuiCheckbox,
-  EuiDataGridSorting,
-  EuiToolTip,
-  useDataGridColumnSorting,
-} from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
-import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
 
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
@@ -26,46 +16,19 @@ import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/components/drag_and_drop/helpers';
-import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../../common/constants';
-import {
-  useGlobalFullScreen,
-  useTimelineFullScreen,
-} from '../../../../../common/containers/use_full_screen';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { OnSelectAll } from '../../events';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
-import { StatefulFieldsBrowser } from '../../../fields_browser';
-import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 import {
   EventsTh,
-  EventsThContent,
   EventsThead,
-  EventsThGroupActions,
   EventsThGroupData,
   EventsTrHeader,
+  EventsThGroupActions,
 } from '../../styles';
-import { Sort, SortDirection } from '../sort';
-import { EventsSelect } from './events_select';
+import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
-
-import * as i18n from './translations';
-import { timelineActions } from '../../../../store/timeline';
-
-const SortingColumnsContainer = styled.div`
-  button {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-
-  .euiPopover .euiButtonEmpty .euiButtonContent {
-    padding: 0;
-
-    .euiButtonEmpty__text {
-      display: none;
-    }
-  }
-`;
+import { ControlColumnProps } from '../control_columns';
+import { HeaderActionProps } from '../actions/header_actions';
 
 interface Props {
   actionsColumnWidth: number;
@@ -79,6 +42,8 @@ interface Props {
   sort: Sort[];
   tabType: TimelineTabs;
   timelineId: string;
+  leadingControlColumns: ControlColumnProps[];
+  trailingControlColumns: ControlColumnProps[];
 }
 
 interface DraggableContainerProps {
@@ -126,32 +91,10 @@ export const ColumnHeadersComponent = ({
   sort,
   tabType,
   timelineId,
+  leadingControlColumns,
+  trailingControlColumns,
 }: Props) => {
-  const dispatch = useDispatch();
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
-  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
-
-  const toggleFullScreen = useCallback(() => {
-    if (timelineId === TimelineId.active) {
-      setTimelineFullScreen(!timelineFullScreen);
-    } else {
-      setGlobalFullScreen(!globalFullScreen);
-    }
-  }, [
-    timelineId,
-    setTimelineFullScreen,
-    timelineFullScreen,
-    setGlobalFullScreen,
-    globalFullScreen,
-  ]);
-
-  const handleSelectAllChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onSelectAll({ isSelected: event.currentTarget.checked });
-    },
-    [onSelectAll]
-  );
 
   const renderClone: DraggableChildrenFn = useCallback(
     (dragProvided, _dragSnapshot, rubric) => {
@@ -170,7 +113,7 @@ export const ColumnHeadersComponent = ({
         >
           <DraggableContainer onMount={onMount} onUnmount={onUnmount}>
             <DragEffects>
-              <DraggableFieldBadge fieldId={header.id} fieldWidth={header.width} />
+              <DraggableFieldBadge fieldId={header.id} fieldWidth={header.initialWidth} />
             </DragEffects>
           </DraggableContainer>
         </EventsTh>
@@ -195,11 +138,6 @@ export const ColumnHeadersComponent = ({
     [columnHeaders, timelineId, draggingIndex, sort, tabType]
   );
 
-  const fullScreen = useMemo(
-    () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
-    [globalFullScreen, timelineId, timelineFullScreen]
-  );
-
   const DroppableContent = useCallback(
     (dropProvided, snapshot) => (
       <>
@@ -216,129 +154,115 @@ export const ColumnHeadersComponent = ({
     [ColumnHeaderList]
   );
 
-  const myColumns = useMemo(
+  const leadingHeaderCells = useMemo(
     () =>
-      columnHeaders.map(({ aggregatable, label, id, type }) => ({
-        id,
-        isSortable: aggregatable,
-        displayAsText: label,
-        schema: type,
-      })),
-    [columnHeaders]
+      leadingControlColumns ? leadingControlColumns.map((column) => column.headerCellRender) : [],
+    [leadingControlColumns]
   );
 
-  const onSortColumns = useCallback(
-    (cols: EuiDataGridSorting['columns']) =>
-      dispatch(
-        timelineActions.updateSort({
-          id: timelineId,
-          sort: cols.map(({ id, direction }) => ({
-            columnId: id,
-            columnType: columnHeaders.find((ch) => ch.id === id)?.type ?? 'text',
-            sortDirection: direction as SortDirection,
-          })),
-        })
-      ),
-    [columnHeaders, dispatch, timelineId]
+  const trailingHeaderCells = useMemo(
+    () =>
+      trailingControlColumns ? trailingControlColumns.map((column) => column.headerCellRender) : [],
+    [trailingControlColumns]
   );
-  const sortedColumns = useMemo(
-    () => ({
-      onSort: onSortColumns,
-      columns: sort.map<{ id: string; direction: 'asc' | 'desc' }>(
-        ({ columnId, sortDirection }) => ({
-          id: columnId,
-          direction: sortDirection as 'asc' | 'desc',
-        })
-      ),
-    }),
-    [onSortColumns, sort]
-  );
-  const displayValues = useMemo(
-    () => columnHeaders.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.label ?? ch.id }), {}),
-    [columnHeaders]
-  );
-  const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
 
+  const LeadingHeaderActions = useMemo(() => {
+    return leadingHeaderCells.map(
+      (Header: React.ComponentType<HeaderActionProps> | React.ComponentType | undefined, index) => {
+        const passedWidth = leadingControlColumns[index] && leadingControlColumns[index].width;
+        const width = passedWidth ? passedWidth : actionsColumnWidth;
+        return (
+          <EventsThGroupActions
+            actionsColumnWidth={width}
+            data-test-subj="actions-container"
+            isEventViewer={isEventViewer}
+            key={index}
+          >
+            {Header && (
+              <Header
+                width={width}
+                browserFields={browserFields}
+                columnHeaders={columnHeaders}
+                isEventViewer={isEventViewer}
+                isSelectAllChecked={isSelectAllChecked}
+                onSelectAll={onSelectAll}
+                showEventsSelect={showEventsSelect}
+                showSelectAllCheckbox={showSelectAllCheckbox}
+                sort={sort}
+                tabType={tabType}
+                timelineId={timelineId}
+              />
+            )}
+          </EventsThGroupActions>
+        );
+      }
+    );
+  }, [
+    leadingHeaderCells,
+    leadingControlColumns,
+    actionsColumnWidth,
+    browserFields,
+    columnHeaders,
+    isEventViewer,
+    isSelectAllChecked,
+    onSelectAll,
+    showEventsSelect,
+    showSelectAllCheckbox,
+    sort,
+    tabType,
+    timelineId,
+  ]);
+
+  const TrailingHeaderActions = useMemo(() => {
+    return trailingHeaderCells.map(
+      (Header: React.ComponentType<HeaderActionProps> | React.ComponentType | undefined, index) => {
+        const passedWidth = trailingControlColumns[index] && trailingControlColumns[index].width;
+        const width = passedWidth ? passedWidth : actionsColumnWidth;
+        return (
+          <EventsThGroupActions
+            actionsColumnWidth={width}
+            data-test-subj="actions-container"
+            isEventViewer={isEventViewer}
+            key={index}
+          >
+            {Header && (
+              <Header
+                width={width}
+                browserFields={browserFields}
+                columnHeaders={columnHeaders}
+                isEventViewer={isEventViewer}
+                isSelectAllChecked={isSelectAllChecked}
+                onSelectAll={onSelectAll}
+                showEventsSelect={showEventsSelect}
+                showSelectAllCheckbox={showSelectAllCheckbox}
+                sort={sort}
+                tabType={tabType}
+                timelineId={timelineId}
+              />
+            )}
+          </EventsThGroupActions>
+        );
+      }
+    );
+  }, [
+    trailingHeaderCells,
+    trailingControlColumns,
+    actionsColumnWidth,
+    browserFields,
+    columnHeaders,
+    isEventViewer,
+    isSelectAllChecked,
+    onSelectAll,
+    showEventsSelect,
+    showSelectAllCheckbox,
+    sort,
+    tabType,
+    timelineId,
+  ]);
   return (
     <EventsThead data-test-subj="column-headers">
       <EventsTrHeader>
-        <EventsThGroupActions
-          actionsColumnWidth={actionsColumnWidth}
-          data-test-subj="actions-container"
-          isEventViewer={isEventViewer}
-        >
-          {showSelectAllCheckbox && (
-            <EventsTh role="checkbox">
-              <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-                <EuiCheckbox
-                  data-test-subj="select-all-events"
-                  id={'select-all-events'}
-                  checked={isSelectAllChecked}
-                  onChange={handleSelectAllChange}
-                />
-              </EventsThContent>
-            </EventsTh>
-          )}
-
-          <EventsTh role="button">
-            <StatefulFieldsBrowser
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              data-test-subj="field-browser"
-              height={FIELD_BROWSER_HEIGHT}
-              timelineId={timelineId}
-              width={FIELD_BROWSER_WIDTH}
-            />
-          </EventsTh>
-
-          <EventsTh role="button">
-            <StatefulRowRenderersBrowser
-              data-test-subj="row-renderers-browser"
-              timelineId={timelineId}
-            />
-          </EventsTh>
-
-          <EventsTh role="button">
-            <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-              <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
-                <EuiButtonIcon
-                  aria-label={
-                    isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
-                      ? EXIT_FULL_SCREEN
-                      : i18n.FULL_SCREEN
-                  }
-                  className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
-                  color={fullScreen ? 'ghost' : 'primary'}
-                  data-test-subj={
-                    // a full screen button gets created for timeline and for the host page
-                    // this sets the data-test-subj for each case so that tests can differentiate between them
-                    timelineId === TimelineId.active ? 'full-screen-active' : 'full-screen'
-                  }
-                  iconType="fullScreen"
-                  onClick={toggleFullScreen}
-                />
-              </EuiToolTip>
-            </EventsThContent>
-          </EventsTh>
-          {tabType !== TimelineTabs.eql && (
-            <EventsTh role="button" data-test-subj="timeline-sorting-fields">
-              <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-                <EuiToolTip content={i18n.SORT_FIELDS}>
-                  <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
-                </EuiToolTip>
-              </EventsThContent>
-            </EventsTh>
-          )}
-
-          {showEventsSelect && (
-            <EventsTh role="button">
-              <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-                <EventsSelect checkState="unchecked" timelineId={timelineId} />
-              </EventsThContent>
-            </EventsTh>
-          )}
-        </EventsThGroupActions>
-
+        {LeadingHeaderActions}
         <Droppable
           direction={'horizontal'}
           droppableId={`${droppableTimelineColumnsPrefix}-${tabType}.${timelineId}`}
@@ -348,6 +272,7 @@ export const ColumnHeadersComponent = ({
         >
           {DroppableContent}
         </Droppable>
+        {TrailingHeaderActions}
       </EventsTrHeader>
     </EventsThead>
   );

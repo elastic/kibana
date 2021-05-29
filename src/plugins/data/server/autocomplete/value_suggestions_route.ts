@@ -36,6 +36,7 @@ export function registerValueSuggestionsRoute(
             field: schema.string(),
             query: schema.string(),
             filters: schema.maybe(schema.any()),
+            fieldMeta: schema.maybe(schema.any()),
           },
           { unknowns: 'allow' }
         ),
@@ -43,7 +44,7 @@ export function registerValueSuggestionsRoute(
     },
     async (context, request, response) => {
       const config = await config$.pipe(first()).toPromise();
-      const { field: fieldName, query, filters } = request.body;
+      const { field: fieldName, query, filters, fieldMeta } = request.body;
       const { index } = request.params;
       const { client } = context.core.elasticsearch.legacy;
       const signal = getRequestAbortedSignal(request.events.aborted$);
@@ -53,9 +54,14 @@ export function registerValueSuggestionsRoute(
         terminate_after: config.kibana.autocompleteTerminateAfter.asMilliseconds(),
       };
 
-      const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
+      let field: IFieldType | undefined = fieldMeta;
 
-      const field = indexPattern && getFieldByName(fieldName, indexPattern);
+      if (!field?.name && !field?.type) {
+        const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
+
+        field = indexPattern && getFieldByName(fieldName, indexPattern);
+      }
+
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, filters);
 
       const result = await client.callAsCurrentUser('search', { index, body }, { signal });

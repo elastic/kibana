@@ -100,7 +100,7 @@ export const AttributeSelector: React.FC<Props> = ({
   handleAuthProviderChange = () => null,
 }) => {
   return (
-    <EuiPanel data-test-subj="AttributeSelector" hasBorder paddingSize="l">
+    <EuiPanel data-test-subj="AttributeSelector" hasShadow={false} color="subdued" paddingSize="l">
       <EuiTitle size="s">
         <h3>{ATTRIBUTE_SELECTOR_TITLE}</h3>
       </EuiTitle>

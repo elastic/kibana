@@ -10,13 +10,12 @@ import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import './result.scss';
 
-import { EuiButtonIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiPanel, EuiIcon } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
-
-import { Schema } from '../../../shared/types';
+import { KibanaLogic } from '../../../shared/kibana';
+import { Schema } from '../../../shared/schema/types';
 
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';
@@ -56,48 +55,27 @@ export const Result: React.FC<Props> = ({
     [result]
   );
   const numResults = resultFields.length;
-  const documentLink = generateEncodedPath(ENGINE_DOCUMENT_DETAIL_PATH, {
-    engineName: resultMeta.engine,
-    documentId: resultMeta.id,
-  });
 
   const typeForField = (fieldName: string) => {
     if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
   };
 
-  const ResultActions = () => {
-    if (!shouldLinkToDetailPage && !actions.length) return null;
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s">
-          {shouldLinkToDetailPage && (
-            <ReactRouterHelper to={documentLink}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="eye"
-                  data-test-subj="DocumentDetailLink"
-                  aria-label={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.result.documentDetailLink',
-                    { defaultMessage: 'Visit document details' }
-                  )}
-                />
-              </EuiFlexItem>
-            </ReactRouterHelper>
-          )}
-          {actions.map(({ onClick, title, iconType, iconColor }) => (
-            <EuiFlexItem key={title}>
-              <EuiButtonIcon
-                iconType={iconType}
-                onClick={onClick}
-                color={iconColor ? iconColor : 'primary'}
-                aria-label={title}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    );
-  };
+  const documentLink = shouldLinkToDetailPage
+    ? generateEncodedPath(ENGINE_DOCUMENT_DETAIL_PATH, {
+        engineName: resultMeta.engine,
+        documentId: resultMeta.id,
+      })
+    : undefined;
+  if (shouldLinkToDetailPage && documentLink) {
+    const linkAction = {
+      onClick: () => KibanaLogic.values.navigateToUrl(documentLink),
+      title: i18n.translate('xpack.enterpriseSearch.appSearch.result.documentDetailLink', {
+        defaultMessage: 'Visit document details',
+      }),
+      iconType: 'eye',
+    };
+    actions = [linkAction, ...actions];
+  }
 
   return (
     <EuiPanel
@@ -120,8 +98,8 @@ export const Result: React.FC<Props> = ({
           resultMeta={resultMeta}
           showScore={!!showScore}
           isMetaEngine={isMetaEngine}
-          shouldLinkToDetailPage={shouldLinkToDetailPage}
-          actions={<ResultActions />}
+          documentLink={documentLink}
+          actions={actions}
         />
         {resultFields
           .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)

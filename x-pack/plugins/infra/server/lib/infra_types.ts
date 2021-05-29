@@ -13,6 +13,7 @@ import { InfraSourceStatus } from './source_status';
 import { InfraConfig } from '../plugin';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 import { GetLogQueryFields } from '../services/log_queries/get_log_query_fields';
+import { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
@@ -26,4 +27,5 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   sources: InfraSources;
   sourceStatus: InfraSourceStatus;
   getLogQueryFields: GetLogQueryFields;
+  handleEsError: typeof handleEsError;
 }

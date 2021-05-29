@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { EuiDataGridColumn } from '@elastic/eui';
+
 import { Filter, IFieldSubType } from '../../../../../../../src/plugins/data/public';
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Sort } from '../../components/timeline/body/sort';
-import { PinnedEvent } from '../../../graphql/types';
 import {
   EqlOptionsSelected,
   TimelineNonEcsData,
@@ -23,6 +24,7 @@ import type {
   RowRendererId,
   TimelineTabs,
 } from '../../../../common/types/timeline';
+import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
@@ -32,21 +34,21 @@ export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 export type ColumnId = string;
 
 /** The specification of a column header */
-export interface ColumnHeaderOptions {
+export type ColumnHeaderOptions = Pick<
+  EuiDataGridColumn,
+  'display' | 'displayAsText' | 'id' | 'initialWidth'
+> & {
   aggregatable?: boolean;
   category?: string;
   columnHeaderType: ColumnHeaderType;
   description?: string;
   example?: string;
   format?: string;
-  id: ColumnId;
-  label?: string;
   linkField?: string;
   placeholder?: string;
   subType?: IFieldSubType;
   type?: string;
-  width: number;
-}
+};
 
 export interface TimelineModel {
   /** The selected tab to displayed in the timeline */

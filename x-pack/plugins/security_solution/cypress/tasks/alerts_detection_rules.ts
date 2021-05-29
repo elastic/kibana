@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { duplicatedRuleName } from '../objects/rule';
 import {
   BULK_ACTIONS_BTN,
   COLLAPSED_ACTION_BTN,
@@ -33,6 +34,8 @@ import {
   pageSelector,
   DUPLICATE_RULE_ACTION_BTN,
   DUPLICATE_RULE_MENU_PANEL_BTN,
+  DUPLICATE_RULE_BULK_BTN,
+  RULES_ROW,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
@@ -54,6 +57,11 @@ export const duplicateFirstRule = () => {
   cy.get(DUPLICATE_RULE_ACTION_BTN).click();
 };
 
+export const duplicateSelectedRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(DUPLICATE_RULE_BULK_BTN).click();
+};
+
 /**
  * Duplicates the rule from the menu and does additional
  * pipes and checking that the elements are present on the
@@ -69,9 +77,18 @@ export const duplicateRuleFromMenu = () => {
     })
     .should(($el) => expect($el).to.be.visible);
   // Because of a fade effect and fast clicking this can produce more than one click
-  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN)
-    .pipe(($el) => $el.trigger('click'))
-    .should('not.be.visible');
+  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).pipe(($el) => $el.trigger('click'));
+};
+
+/**
+ * Check that the duplicated rule is on the table
+ * and it is deactivated (default)
+ */
+export const checkDuplicatedRule = () => {
+  cy.contains(RULE_NAME, duplicatedRuleName)
+    .parents(RULES_ROW)
+    .find(RULE_SWITCH)
+    .should('have.attr', 'aria-checked', 'false');
 };
 
 export const deleteFirstRule = () => {

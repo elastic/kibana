@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AppFrontendLibs } from './common/lib/lib';
 import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -23,6 +22,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
+import { CasesUiStart } from '../../cases/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
@@ -48,6 +48,7 @@ export interface SetupPlugins {
 }
 
 export interface StartPlugins {
+  cases: CasesUiStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
@@ -73,7 +74,7 @@ export interface PluginSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
-export interface AppObservableLibs extends AppFrontendLibs {
+export interface AppObservableLibs {
   kibana: CoreStart;
 }
 

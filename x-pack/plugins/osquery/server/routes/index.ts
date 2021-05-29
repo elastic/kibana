@@ -6,15 +6,21 @@
  */
 
 import { IRouter } from '../../../../../src/core/server';
-import { initSavedQueryRoutes } from './saved_query';
-import { initScheduledQueryRoutes } from './scheduled_query';
 import { initActionRoutes } from './action';
 import { OsqueryAppContext } from '../lib/osquery_app_context_services';
+import { initSavedQueryRoutes } from './saved_query';
 import { initPackRoutes } from './pack';
 
 export const defineRoutes = (router: IRouter, context: OsqueryAppContext) => {
+  const config = context.config();
+
   initActionRoutes(router, context);
-  initPackRoutes(router);
-  initSavedQueryRoutes(router);
-  initScheduledQueryRoutes(router, context);
+
+  if (config.packs) {
+    initPackRoutes(router);
+  }
+
+  if (config.savedQueries) {
+    initSavedQueryRoutes(router);
+  }
 };

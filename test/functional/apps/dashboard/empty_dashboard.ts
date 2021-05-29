@@ -41,21 +41,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open add panel when add button is clicked', async () => {
-      await testSubjects.click('dashboardAddPanelButton');
+      await dashboardAddPanel.clickOpenAddPanel();
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
       await testSubjects.click('euiFlyoutCloseButton');
     });
 
     it('should add new visualization from dashboard', async () => {
-      await testSubjects.exists('dashboardAddNewPanelButton');
-      await testSubjects.click('dashboardAddNewPanelButton');
       await dashboardVisualizations.createAndAddMarkdown({
         name: 'Dashboard Test Markdown',
         markdown: 'Markdown text',
       });
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardExpect.markdownWithValuesExists(['Markdown text']);
+    });
+
+    it('should open editor menu when editor button is clicked', async () => {
+      await dashboardAddPanel.clickEditorMenuButton();
+      await testSubjects.existOrFail('dashboardEditorContextMenu');
     });
   });
 }

@@ -24,7 +24,7 @@ const configSecretDeprecation: ConfigDeprecation = (settings, fromPath, addDepre
     addDeprecation({
       documentationUrl: 'config-secret-doc-url',
       message:
-        'Kibana plugin funcitonal tests will no longer allow corePluginDeprecations.secret ' +
+        'Kibana plugin functional tests will no longer allow corePluginDeprecations.secret ' +
         'config to be set to anything except 42.',
     });
   }

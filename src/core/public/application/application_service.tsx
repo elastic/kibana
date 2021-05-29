@@ -19,6 +19,7 @@ import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
   App,
+  AppDeepLink,
   AppLeaveHandler,
   AppMount,
   AppNavLinkStatus,
@@ -92,6 +93,7 @@ export class ApplicationService {
   private registrationClosed = false;
   private history?: History<any>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
+  private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
 
@@ -115,6 +117,11 @@ export class ApplicationService {
     this.navigate = (url, state, replace) => {
       // basePath not needed here because `history` is configured with basename
       return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
+    };
+
+    this.openInNewTab = (url) => {
+      // window.open shares session information if base url is same
+      return window.open(appendAppPath(basename, url), '_blank');
     };
 
     this.redirectTo = redirectTo;
@@ -160,6 +167,7 @@ export class ApplicationService {
           ...appProps,
           status: app.status ?? AppStatus.accessible,
           navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
+          deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
@@ -218,7 +226,7 @@ export class ApplicationService {
 
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
-      { path, state, replace = false }: NavigateToAppOptions = {}
+      { path, state, replace = false, openInNewTab = false }: NavigateToAppOptions = {}
     ) => {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
@@ -233,7 +241,12 @@ export class ApplicationService {
         if (!navigatingToSameApp) {
           this.appInternalStates.delete(this.currentAppId$.value!);
         }
-        this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
+        if (openInNewTab) {
+          this.openInNewTab!(getAppUrl(availableMounters, appId, path));
+        } else {
+          this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
+        }
+
         this.currentAppId$.next(appId);
       }
     };
@@ -380,4 +393,13 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
     ...app,
     ...changes,
   };
+};
+
+const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
+  if (!deepLinks) return [];
+  return deepLinks.map((deepLink) => ({
+    ...deepLink,
+    navLinkStatus: deepLink.navLinkStatus ?? AppNavLinkStatus.default,
+    deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
+  }));
 };

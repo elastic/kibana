@@ -7,7 +7,7 @@
 
 import { Index as IndexInterface } from '../../../index_management/common/types';
 
-export type PhaseWithAllocation = 'warm' | 'cold' | 'frozen';
+export type PhaseWithAllocation = 'warm' | 'cold';
 
 export interface SerializedPolicy {
   name: string;
@@ -70,9 +70,13 @@ export interface SearchableSnapshotAction {
 }
 
 export interface RolloverAction {
-  max_size?: string;
   max_age?: string;
   max_docs?: number;
+  max_primary_shard_size?: string;
+  /**
+   * @deprecated This will be removed in versions 8+ of the stack
+   */
+  max_size?: string;
 }
 
 export interface SerializedHotPhase extends SerializedPhase {

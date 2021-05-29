@@ -6,23 +6,17 @@
  */
 
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as t from 'io-ts';
 
+import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import {
   FullResponseSchema,
   fullResponseSchema,
 } from '../../../../../common/detection_engine/schemas/request';
-import { validate } from '../../../../../common/validate';
-import { findRulesSchema } from '../../../../../common/detection_engine/schemas/response/find_rules_schema';
 import {
   RulesSchema,
   rulesSchema,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { formatErrors } from '../../../../../common/format_errors';
-import { exactCheck } from '../../../../../common/exact_check';
-import { PartialAlert, FindResult } from '../../../../../../alerting/server';
+import { PartialAlert } from '../../../../../../alerting/server';
 import {
   isAlertType,
   IRuleSavedAttributesSavedObjectAttributes,
@@ -30,42 +24,12 @@ import {
   IRuleStatusSOAttributes,
 } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
-import { transformFindAlerts, transform, transformAlertToRule } from './utils';
+import { transform, transformAlertToRule } from './utils';
 import { RuleActions } from '../../rule_actions/types';
-import { RuleTypeParams } from '../../types';
-
-export const transformValidateFindAlerts = (
-  findResults: FindResult<RuleTypeParams>,
-  ruleActions: Array<RuleActions | null>,
-  ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
-): [
-  {
-    page: number;
-    perPage: number;
-    total: number;
-    data: Array<Partial<RulesSchema>>;
-  } | null,
-  string | null
-] => {
-  const transformed = transformFindAlerts(findResults, ruleActions, ruleStatuses);
-  if (transformed == null) {
-    return [null, 'Internal error transforming'];
-  } else {
-    const decoded = findRulesSchema.decode(transformed);
-    const checked = exactCheck(transformed, decoded);
-    const left = (errors: t.Errors): string[] => formatErrors(errors);
-    const right = (): string[] => [];
-    const piped = pipe(checked, fold(left, right));
-    if (piped.length === 0) {
-      return [transformed, null];
-    } else {
-      return [null, piped.join(',')];
-    }
-  }
-};
+import { RuleParams } from '../../schemas/rule_schemas';
 
 export const transformValidate = (
-  alert: PartialAlert<RuleTypeParams>,
+  alert: PartialAlert<RuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): [RulesSchema | null, string | null] => {
@@ -73,12 +37,12 @@ export const transformValidate = (
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
-    return validate(transformed, rulesSchema);
+    return validateNonExact(transformed, rulesSchema);
   }
 };
 
 export const newTransformValidate = (
-  alert: PartialAlert<RuleTypeParams>,
+  alert: PartialAlert<RuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): [FullResponseSchema | null, string | null] => {
@@ -86,13 +50,13 @@ export const newTransformValidate = (
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
-    return validate(transformed, fullResponseSchema);
+    return validateNonExact(transformed, fullResponseSchema);
   }
 };
 
 export const transformValidateBulkError = (
   ruleId: string,
-  alert: PartialAlert<RuleTypeParams>,
+  alert: PartialAlert<RuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObjectsFindResponse<IRuleStatusSOAttributes>
 ): RulesSchema | BulkError => {
@@ -103,7 +67,7 @@ export const transformValidateBulkError = (
         ruleActions,
         ruleStatus?.saved_objects[0] ?? ruleStatus
       );
-      const [validated, errors] = validate(transformed, rulesSchema);
+      const [validated, errors] = validateNonExact(transformed, rulesSchema);
       if (errors != null || validated == null) {
         return createBulkErrorObject({
           ruleId,
@@ -115,7 +79,7 @@ export const transformValidateBulkError = (
       }
     } else {
       const transformed = transformAlertToRule(alert);
-      const [validated, errors] = validate(transformed, rulesSchema);
+      const [validated, errors] = validateNonExact(transformed, rulesSchema);
       if (errors != null || validated == null) {
         return createBulkErrorObject({
           ruleId,

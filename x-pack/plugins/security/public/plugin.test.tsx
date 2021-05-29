@@ -103,6 +103,10 @@ describe('Security Plugin', () => {
           features: {} as FeaturesPluginStart,
         })
       ).toEqual({
+        authc: {
+          getCurrentUser: expect.any(Function),
+          areAPIKeysEnabled: expect.any(Function),
+        },
         navControlService: {
           getUserMenuLinks$: expect.any(Function),
           addUserMenuLinks: expect.any(Function),

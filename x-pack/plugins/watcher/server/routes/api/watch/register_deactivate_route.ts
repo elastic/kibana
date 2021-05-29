@@ -6,11 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
-import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { WatchStatus } from '../../../models/watch_status/index';
 
@@ -18,25 +16,31 @@ const paramsSchema = schema.object({
   watchId: schema.string(),
 });
 
-function deactivateWatch(dataClient: ILegacyScopedClusterClient, watchId: string) {
-  return dataClient.callAsCurrentUser('watcher.deactivateWatch', {
-    id: watchId,
-  });
+function deactivateWatch(dataClient: IScopedClusterClient, watchId: string) {
+  return dataClient.asCurrentUser.watcher
+    .deactivateWatch({
+      watch_id: watchId,
+    })
+    .then(({ body }) => body);
 }
 
-export function registerDeactivateRoute(deps: RouteDependencies) {
-  deps.router.put(
+export function registerDeactivateRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
+  router.put(
     {
       path: '/api/watcher/watch/{watchId}/deactivate',
       validate: {
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { watchId } = request.params;
 
       try {
-        const hit = await deactivateWatch(ctx.watcher!.client, watchId);
+        const hit = await deactivateWatch(ctx.core.elasticsearch.client, watchId);
         const watchStatusJson = get(hit, 'status');
         const json = {
           id: watchId,
@@ -50,14 +54,10 @@ export function registerDeactivateRoute(deps: RouteDependencies) {
           },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          const body = e.statusCode === 404 ? `Watch with id = ${watchId} not found` : e;
-          return response.customError({ statusCode: e.statusCode, body });
+        if (e?.statusCode === 404 && e.meta?.body?.error) {
+          e.meta.body.error.reason = `Watch with id = ${watchId} not found`;
         }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

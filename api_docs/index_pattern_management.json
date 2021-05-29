@@ -3,200 +3,229 @@
   "client": {
     "classes": [
       {
+        "parentPluginId": "indexPatternManagement",
         "id": "def-public.IndexPatternCreationConfig",
         "type": "Class",
         "tags": [],
         "label": "IndexPatternCreationConfig",
         "description": [],
+        "source": {
+          "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
+          "lineNumber": 37
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.key",
             "type": "string",
+            "tags": [],
             "label": "key",
             "description": [],
+            "signature": [
+              "\"default\""
+            ],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 38
             },
-            "signature": [
-              "\"default\""
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.type",
             "type": "string",
+            "tags": [],
             "label": "type",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 40
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.name",
             "type": "string",
+            "tags": [],
             "label": "name",
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 41
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.showSystemIndices",
             "type": "boolean",
+            "tags": [],
             "label": "showSystemIndices",
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 42
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.httpClient",
             "type": "CompoundType",
+            "tags": [],
             "label": "httpClient",
             "description": [],
+            "signature": [
+              "object | null"
+            ],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 43
             },
-            "signature": [
-              "object | null"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.isBeta",
             "type": "boolean",
+            "tags": [],
             "label": "isBeta",
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 44
-            }
+            },
+            "deprecated": false
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "source": {
+              "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
+              "lineNumber": 46
+            },
+            "deprecated": false,
             "children": [
               {
-                "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }",
+                "parentPluginId": "indexPatternManagement",
+                "id": "def-public.IndexPatternCreationConfig.Unnamed.$1.typeundefinednameindexPatternTypeNameshowSystemIndicestruehttpClientnullisBetafalse",
                 "type": "Object",
-                "label": "{\n    type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }",
                 "tags": [],
+                "label": "{\n    type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }",
                 "description": [],
+                "source": {
+                  "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
+                  "lineNumber": 52
+                },
+                "deprecated": false,
                 "children": [
                   {
-                    "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.type",
+                    "parentPluginId": "indexPatternManagement",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.$1.typeundefinednameindexPatternTypeNameshowSystemIndicestruehttpClientnullisBetafalse.type",
                     "type": "string",
+                    "tags": [],
                     "label": "type",
                     "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "source": {
                       "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                       "lineNumber": 53
                     },
-                    "signature": [
-                      "string | undefined"
-                    ]
+                    "deprecated": false
                   },
                   {
-                    "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.name",
+                    "parentPluginId": "indexPatternManagement",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.$1.typeundefinednameindexPatternTypeNameshowSystemIndicestruehttpClientnullisBetafalse.name",
                     "type": "string",
+                    "tags": [],
                     "label": "name",
                     "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "source": {
                       "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                       "lineNumber": 54
                     },
-                    "signature": [
-                      "string | undefined"
-                    ]
+                    "deprecated": false
                   },
                   {
-                    "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.showSystemIndices",
+                    "parentPluginId": "indexPatternManagement",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.$1.typeundefinednameindexPatternTypeNameshowSystemIndicestruehttpClientnullisBetafalse.showSystemIndices",
                     "type": "CompoundType",
+                    "tags": [],
                     "label": "showSystemIndices",
                     "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "source": {
                       "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                       "lineNumber": 55
                     },
-                    "signature": [
-                      "boolean | undefined"
-                    ]
+                    "deprecated": false
                   },
                   {
-                    "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.httpClient",
+                    "parentPluginId": "indexPatternManagement",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.$1.typeundefinednameindexPatternTypeNameshowSystemIndicestruehttpClientnullisBetafalse.httpClient",
                     "type": "CompoundType",
+                    "tags": [],
                     "label": "httpClient",
                     "description": [],
+                    "signature": [
+                      "object | null | undefined"
+                    ],
                     "source": {
                       "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                       "lineNumber": 56
                     },
-                    "signature": [
-                      "object | null | undefined"
-                    ]
+                    "deprecated": false
                   },
                   {
-                    "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.isBeta",
+                    "parentPluginId": "indexPatternManagement",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.$1.typeundefinednameindexPatternTypeNameshowSystemIndicestruehttpClientnullisBetafalse.isBeta",
                     "type": "CompoundType",
+                    "tags": [],
                     "label": "isBeta",
                     "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "source": {
                       "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
                       "lineNumber": 57
                     },
-                    "signature": [
-                      "boolean | undefined"
-                    ]
+                    "deprecated": false
                   }
-                ],
-                "source": {
-                  "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
-                  "lineNumber": 52
-                }
+                ]
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
-              "lineNumber": 46
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.getIndexPatternCreationOption",
             "type": "Function",
+            "tags": [],
             "label": "getIndexPatternCreationOption",
+            "description": [],
             "signature": [
               "(urlHandler: ",
-              {
-                "pluginId": "indexPatternManagement",
-                "scope": "public",
-                "docId": "kibIndexPatternManagementPluginApi",
-                "section": "def-public.UrlHandler",
-                "text": "UrlHandler"
-              },
+              "UrlHandler",
               ") => ",
               {
                 "pluginId": "indexPatternManagement",
@@ -206,254 +235,272 @@
                 "text": "IndexPatternCreationOption"
               }
             ],
-            "description": [],
-            "children": [
-              {
-                "type": "Function",
-                "label": "urlHandler",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "indexPatternManagement",
-                    "scope": "public",
-                    "docId": "kibIndexPatternManagementPluginApi",
-                    "section": "def-public.UrlHandler",
-                    "text": "UrlHandler"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
-                  "lineNumber": 66
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 66
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "indexPatternManagement",
+                "id": "def-public.IndexPatternCreationConfig.getIndexPatternCreationOption.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "urlHandler",
+                "description": [],
+                "signature": [
+                  "UrlHandler"
+                ],
+                "source": {
+                  "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
+                  "lineNumber": 66
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.getIndexPatternType",
             "type": "Function",
+            "tags": [],
             "label": "getIndexPatternType",
+            "description": [],
             "signature": [
               "() => string | undefined"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 77
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.getIndexPatternName",
             "type": "Function",
+            "tags": [],
             "label": "getIndexPatternName",
+            "description": [],
             "signature": [
               "() => string"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 81
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.getIsBeta",
             "type": "Function",
+            "tags": [],
             "label": "getIsBeta",
+            "description": [],
             "signature": [
               "() => boolean"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 85
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.getShowSystemIndices",
             "type": "Function",
+            "tags": [],
             "label": "getShowSystemIndices",
+            "description": [],
             "signature": [
               "() => boolean"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 89
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.getIndexTags",
             "type": "Function",
+            "tags": [],
             "label": "getIndexTags",
+            "description": [],
             "signature": [
               "(indexName: string) => never[]"
             ],
-            "description": [],
-            "children": [
-              {
-                "type": "string",
-                "label": "indexName",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
-                  "lineNumber": 93
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 93
-            }
-          },
-          {
-            "id": "def-public.IndexPatternCreationConfig.checkIndicesForErrors",
-            "type": "Function",
-            "label": "checkIndicesForErrors",
-            "signature": [
-              "(indices: ",
-              {
-                "pluginId": "indexPatternManagement",
-                "scope": "public",
-                "docId": "kibIndexPatternManagementPluginApi",
-                "section": "def-public.MatchedItem",
-                "text": "MatchedItem"
-              },
-              "[]) => undefined"
-            ],
-            "description": [],
+            },
+            "deprecated": false,
             "children": [
               {
-                "type": "Array",
-                "label": "indices",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "indexPatternManagement",
-                    "scope": "public",
-                    "docId": "kibIndexPatternManagementPluginApi",
-                    "section": "def-public.MatchedItem",
-                    "text": "MatchedItem"
-                  },
-                  "[]"
-                ],
+                "parentPluginId": "indexPatternManagement",
+                "id": "def-public.IndexPatternCreationConfig.getIndexTags.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
-                  "lineNumber": 97
-                }
+                  "lineNumber": 93
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "indexPatternManagement",
+            "id": "def-public.IndexPatternCreationConfig.checkIndicesForErrors",
+            "type": "Function",
             "tags": [],
-            "returnComment": [],
+            "label": "checkIndicesForErrors",
+            "description": [],
+            "signature": [
+              "(indices: ",
+              "MatchedItem",
+              "[]) => undefined"
+            ],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 97
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "indexPatternManagement",
+                "id": "def-public.IndexPatternCreationConfig.checkIndicesForErrors.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [],
+                "signature": [
+                  "MatchedItem",
+                  "[]"
+                ],
+                "source": {
+                  "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
+                  "lineNumber": 97
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.getIndexPatternMappings",
             "type": "Function",
+            "tags": [],
             "label": "getIndexPatternMappings",
+            "description": [],
             "signature": [
               "() => {}"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 101
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.renderPrompt",
             "type": "Function",
+            "tags": [],
             "label": "renderPrompt",
+            "description": [],
             "signature": [
               "() => null"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 105
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationConfig.getFetchForWildcardOptions",
             "type": "Function",
+            "tags": [],
             "label": "getFetchForWildcardOptions",
+            "description": [],
             "signature": [
               "() => {}"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 109
-            }
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
-          "lineNumber": 37
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "indexPatternManagement",
         "id": "def-public.IndexPatternListConfig",
         "type": "Class",
         "tags": [],
         "label": "IndexPatternListConfig",
         "description": [],
+        "source": {
+          "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
+          "lineNumber": 25
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternListConfig.key",
             "type": "string",
+            "tags": [],
             "label": "key",
             "description": [],
+            "signature": [
+              "\"default\""
+            ],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
               "lineNumber": 26
             },
-            "signature": [
-              "\"default\""
-            ]
+            "deprecated": false
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternListConfig.getIndexPatternTags",
             "type": "Function",
+            "tags": [],
             "label": "getIndexPatternTags",
+            "description": [],
             "signature": [
               "(indexPattern: ",
               {
@@ -480,21 +527,22 @@
                 "text": "IIndexPattern"
               },
               ">, isDefault: boolean) => ",
-              {
-                "pluginId": "indexPatternManagement",
-                "scope": "public",
-                "docId": "kibIndexPatternManagementPluginApi",
-                "section": "def-public.IndexPatternTag",
-                "text": "IndexPatternTag"
-              },
+              "IndexPatternTag",
               "[]"
             ],
-            "description": [],
+            "source": {
+              "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "indexPatternManagement",
+                "id": "def-public.IndexPatternListConfig.getIndexPatternTags.$1",
                 "type": "CompoundType",
+                "tags": [],
                 "label": "indexPattern",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -521,37 +569,40 @@
                   },
                   ">"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
                   "lineNumber": 29
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "indexPatternManagement",
+                "id": "def-public.IndexPatternListConfig.getIndexPatternTags.$2",
                 "type": "boolean",
+                "tags": [],
                 "label": "isDefault",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
                   "lineNumber": 30
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
-              "lineNumber": 28
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternListConfig.getFieldInfo",
             "type": "Function",
+            "tags": [],
             "label": "getFieldInfo",
+            "description": [],
             "signature": [
               "(indexPattern: ",
               {
@@ -571,12 +622,19 @@
               },
               ") => string[]"
             ],
-            "description": [],
+            "source": {
+              "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
+              "lineNumber": 42
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "indexPatternManagement",
+                "id": "def-public.IndexPatternListConfig.getFieldInfo.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "indexPattern",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -586,16 +644,20 @@
                     "text": "IIndexPattern"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
                   "lineNumber": 42
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "indexPatternManagement",
+                "id": "def-public.IndexPatternListConfig.getFieldInfo.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "field",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -605,24 +667,23 @@
                     "text": "IFieldType"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
                   "lineNumber": 42
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
-              "lineNumber": 42
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternListConfig.areScriptedFieldsEnabled",
             "type": "Function",
+            "tags": [],
             "label": "areScriptedFieldsEnabled",
+            "description": [],
             "signature": [
               "(indexPattern: ",
               {
@@ -634,12 +695,19 @@
               },
               ") => boolean"
             ],
-            "description": [],
+            "source": {
+              "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
+              "lineNumber": 46
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "indexPatternManagement",
+                "id": "def-public.IndexPatternListConfig.areScriptedFieldsEnabled.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "indexPattern",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -649,132 +717,137 @@
                     "text": "IIndexPattern"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
                   "lineNumber": 46
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
-              "lineNumber": 46
-            }
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "src/plugins/index_pattern_management/public/service/list/config.ts",
-          "lineNumber": 25
-        },
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "indexPatternManagement",
         "id": "def-public.IndexPatternCreationOption",
         "type": "Interface",
+        "tags": [],
         "label": "IndexPatternCreationOption",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
+          "lineNumber": 29
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationOption.text",
             "type": "string",
+            "tags": [],
             "label": "text",
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 30
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationOption.description",
             "type": "string",
+            "tags": [],
             "label": "description",
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 31
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationOption.testSubj",
             "type": "string",
+            "tags": [],
             "label": "testSubj",
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 32
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationOption.onClick",
             "type": "Function",
+            "tags": [],
             "label": "onClick",
             "description": [],
+            "signature": [
+              "() => void"
+            ],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 33
             },
-            "signature": [
-              "() => void"
-            ]
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
-            "tags": [],
+            "parentPluginId": "indexPatternManagement",
             "id": "def-public.IndexPatternCreationOption.isBeta",
             "type": "CompoundType",
+            "tags": [],
             "label": "isBeta",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "source": {
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 34
             },
-            "signature": [
-              "boolean | undefined"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
-          "lineNumber": 29
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [
       {
+        "parentPluginId": "indexPatternManagement",
         "id": "def-public.MlCardState",
         "type": "Enum",
-        "label": "MlCardState",
         "tags": [],
+        "label": "MlCardState",
         "description": [],
         "source": {
           "path": "src/plugins/index_pattern_management/public/types.ts",
           "lineNumber": 42
         },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "indexPatternManagement",
       "id": "def-public.IndexPatternManagementSetup",
       "type": "Type",
-      "label": "IndexPatternManagementSetup",
       "tags": [],
+      "label": "IndexPatternManagementSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/index_pattern_management/public/plugin.ts",
-        "lineNumber": 32
-      },
       "signature": [
         "{ creation: { addCreationConfig: (Config: typeof ",
         {
@@ -796,19 +869,21 @@
         "Environment",
         ">) => void; }; }"
       ],
+      "source": {
+        "path": "src/plugins/index_pattern_management/public/plugin.ts",
+        "lineNumber": 32
+      },
+      "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "indexPatternManagement",
       "id": "def-public.IndexPatternManagementStart",
       "type": "Type",
-      "label": "IndexPatternManagementStart",
       "tags": [],
+      "label": "IndexPatternManagementStart",
       "description": [],
-      "source": {
-        "path": "src/plugins/index_pattern_management/public/plugin.ts",
-        "lineNumber": 34
-      },
       "signature": [
         "{ creation: { getType: (key: string | undefined) => ",
         {
@@ -831,20 +906,60 @@
         "[]>; }; list: { getIndexPatternTags: (indexPattern: ",
         {
           "pluginId": "data",
-          "scope": "public",
-          "docId": "kibDataPluginApi",
-          "section": "def-public.IIndexPattern",
+          "scope": "common",
+          "docId": "kibDataIndexPatternsPluginApi",
+          "section": "def-common.IIndexPattern",
           "text": "IIndexPattern"
         },
         " | ",
         {
           "pluginId": "core",
           "scope": "public",
-          "docId": "kibCorePluginApi",
+          "docId": "kibCoreSavedObjectsPluginApi",
           "section": "def-public.SimpleSavedObject",
           "text": "SimpleSavedObject"
-        }
+        },
+        "<",
+        {
+          "pluginId": "data",
+          "scope": "common",
+          "docId": "kibDataIndexPatternsPluginApi",
+          "section": "def-common.IIndexPattern",
+          "text": "IIndexPattern"
+        },
+        ">, isDefault: boolean) => ",
+        "IndexPatternTag",
+        "[]; getFieldInfo: (indexPattern: ",
+        {
+          "pluginId": "data",
+          "scope": "common",
+          "docId": "kibDataIndexPatternsPluginApi",
+          "section": "def-common.IIndexPattern",
+          "text": "IIndexPattern"
+        },
+        ", field: ",
+        {
+          "pluginId": "data",
+          "scope": "common",
+          "docId": "kibDataIndexPatternsPluginApi",
+          "section": "def-common.IFieldType",
+          "text": "IFieldType"
+        },
+        ") => string[]; areScriptedFieldsEnabled: (indexPattern: ",
+        {
+          "pluginId": "data",
+          "scope": "common",
+          "docId": "kibDataIndexPatternsPluginApi",
+          "section": "def-common.IIndexPattern",
+          "text": "IIndexPattern"
+        },
+        ") => boolean; }; }"
       ],
+      "source": {
+        "path": "src/plugins/index_pattern_management/public/plugin.ts",
+        "lineNumber": 34
+      },
+      "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }

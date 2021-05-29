@@ -5,68 +5,91 @@
  * 2.0.
  */
 
+import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 import { AlertsPage } from '.';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { HttpSetup } from '../../../../../../src/core/public';
+import {
+  KibanaContextProvider,
+  KibanaPageTemplate,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
-import { AlertsFlyout } from './alerts_flyout';
-import { AlertItem } from './alerts_table';
-import { eventLogPocData, wireframeData } from './example_data';
+import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import { createCallObservabilityApi } from '../../services/call_observability_api';
+import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
+import { apmAlertResponseExample, dynamicIndexPattern } from './example_data';
+
+interface PageArgs {
+  items: ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>;
+}
 
 export default {
   title: 'app/Alerts',
   component: AlertsPage,
   decorators: [
-    (Story: ComponentType) => {
+    (Story: ComponentType, { args: { items = [] } }: StoryContext) => {
+      createCallObservabilityApi(({
+        get: async (endpoint: string) => {
+          if (endpoint === '/api/observability/rules/alerts/top') {
+            return items;
+          } else if (endpoint === '/api/observability/rules/alerts/dynamic_index_pattern') {
+            return dynamicIndexPattern;
+          }
+        },
+      } as unknown) as HttpSetup);
+
       return (
-        <IntlProvider locale="en">
-          <KibanaContextProvider
-            services={{
-              data: { query: {} },
-              docLinks: { links: { query: {} } },
-              storage: { get: () => {} },
-              uiSettings: {
-                get: (setting: string) => {
-                  if (setting === 'dateFormat') {
-                    return '';
-                  } else {
-                    return [];
-                  }
-                },
-              },
-            }}
-          >
-            <PluginContext.Provider
-              value={
-                ({
-                  core: {
-                    http: { basePath: { prepend: (_: string) => '' } },
+        <MemoryRouter>
+          <IntlProvider locale="en">
+            <KibanaContextProvider
+              services={{
+                data: { autocomplete: { hasQuerySuggestions: () => false }, query: {} },
+                docLinks: { links: { query: {} } },
+                storage: { get: () => {} },
+                uiSettings: {
+                  get: (setting: string) => {
+                    if (setting === 'dateFormat') {
+                      return '';
+                    } else {
+                      return [];
+                    }
                   },
-                } as unknown) as PluginContextValue
-              }
+                },
+              }}
             >
-              <Story />
-            </PluginContext.Provider>
-          </KibanaContextProvider>
-        </IntlProvider>
+              <PluginContext.Provider
+                value={
+                  ({
+                    core: {
+                      http: { basePath: { prepend: (_: string) => '' } },
+                    },
+                    observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+                    ObservabilityPageTemplate: KibanaPageTemplate,
+                  } as unknown) as PluginContextValue
+                }
+              >
+                <Story />
+              </PluginContext.Provider>
+            </KibanaContextProvider>
+          </IntlProvider>
+        </MemoryRouter>
       );
     },
   ],
 };
 
-export function Example() {
-  return <AlertsPage items={wireframeData} routeParams={{ query: {} }} />;
+export function Example(_args: PageArgs) {
+  return (
+    <AlertsPage routeParams={{ query: { rangeFrom: 'now-15m', rangeTo: 'now', kuery: '' } }} />
+  );
 }
+Example.args = {
+  items: apmAlertResponseExample,
+} as PageArgs;
 
-export function EventLog() {
-  return <AlertsPage items={eventLogPocData as AlertItem[]} routeParams={{ query: {} }} />;
+export function EmptyState(_args: PageArgs) {
+  return <AlertsPage routeParams={{ query: {} }} />;
 }
-
-export function EmptyState() {
-  return <AlertsPage items={[]} routeParams={{ query: {} }} />;
-}
-
-export function Flyout() {
-  return <AlertsFlyout {...wireframeData[0]} onClose={() => {}} />;
-}
+EmptyState.args = { items: [] } as PageArgs;

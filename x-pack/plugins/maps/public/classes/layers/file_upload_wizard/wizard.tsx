@@ -5,49 +5,47 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { FeatureCollection } from 'geojson';
 import { EuiPanel } from '@elastic/eui';
-import { IndexPattern, IFieldType } from 'src/plugins/data/public';
-import {
-  ES_GEO_FIELD_TYPE,
-  DEFAULT_MAX_RESULT_WINDOW,
-  SCALING_TYPES,
-} from '../../../../common/constants';
-import { getFileUpload } from '../../../kibana_services';
+import { DEFAULT_MAX_RESULT_WINDOW, SCALING_TYPES } from '../../../../common/constants';
 import { GeoJsonFileSource } from '../../sources/geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer';
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { FileUploadComponentProps, ImportResults } from '../../../../../file_upload/public';
+import { FileUploadGeoResults } from '../../../../../file_upload/public';
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { getFileUploadComponent } from '../../../kibana_services';
 
-export const INDEX_SETUP_STEP_ID = 'INDEX_SETUP_STEP_ID';
-export const INDEXING_STEP_ID = 'INDEXING_STEP_ID';
+export enum UPLOAD_STEPS {
+  CONFIGURE_UPLOAD = 'CONFIGURE_UPLOAD',
+  UPLOAD = 'UPLOAD',
+  ADD_DOCUMENT_LAYER = 'ADD_DOCUMENT_LAYER',
+}
 
 enum INDEXING_STAGE {
-  READY = 'READY',
+  CONFIGURE = 'CONFIGURE',
   TRIGGERED = 'TRIGGERED',
   SUCCESS = 'SUCCESS',
   ERROR = 'ERROR',
 }
 
 interface State {
-  indexingStage: INDEXING_STAGE | null;
-  fileUploadComponent: React.ComponentType<FileUploadComponentProps> | null;
+  indexingStage: INDEXING_STAGE;
+  results?: FileUploadGeoResults;
 }
 
 export class ClientFileCreateSourceEditor extends Component<RenderWizardArguments, State> {
   private _isMounted: boolean = false;
 
   state: State = {
-    indexingStage: null,
-    fileUploadComponent: null,
+    indexingStage: INDEXING_STAGE.CONFIGURE,
   };
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadFileUploadComponent();
   }
 
   componentWillUnmount() {
@@ -56,22 +54,41 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
 
   componentDidUpdate() {
     if (
-      this.props.currentStepId === INDEXING_STEP_ID &&
-      this.state.indexingStage === INDEXING_STAGE.READY
+      this.props.currentStepId === UPLOAD_STEPS.UPLOAD &&
+      this.state.indexingStage === INDEXING_STAGE.CONFIGURE
     ) {
       this.setState({ indexingStage: INDEXING_STAGE.TRIGGERED });
       this.props.startStepLoading();
+      return;
+    }
+
+    if (
+      this.props.isOnFinalStep &&
+      this.state.indexingStage === INDEXING_STAGE.SUCCESS &&
+      this.state.results
+    ) {
+      this._addDocumentLayer(this.state.results);
     }
   }
 
-  async _loadFileUploadComponent() {
-    const fileUploadComponent = await getFileUpload().getFileUploadComponent();
-    if (this._isMounted) {
-      this.setState({ fileUploadComponent });
-    }
-  }
+  _addDocumentLayer = _.once((results: FileUploadGeoResults) => {
+    const esSearchSourceConfig = {
+      indexPatternId: results.indexPatternId,
+      geoField: results.geoFieldName,
+      // Only turn on bounds filter for large doc counts
+      filterByMapBounds: results.docCount > DEFAULT_MAX_RESULT_WINDOW,
+      scalingType:
+        results.geoFieldType === ES_FIELD_TYPES.GEO_POINT
+          ? SCALING_TYPES.CLUSTERS
+          : SCALING_TYPES.LIMIT,
+    };
+    this.props.previewLayers([
+      createDefaultLayerDescriptor(esSearchSourceConfig, this.props.mapColors),
+    ]);
+    this.props.advanceToNextStep();
+  });
 
-  _onFileUpload = (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => {
+  _onFileSelect = (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => {
     if (!this._isMounted) {
       return;
     }
@@ -103,41 +120,22 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     this.props.previewLayers([layerDescriptor]);
   };
 
-  _onIndexingComplete = (results: { indexDataResp: ImportResults; indexPattern: IndexPattern }) => {
+  _onFileClear = () => {
+    this.props.previewLayers([]);
+  };
+
+  _onUploadComplete = (results: FileUploadGeoResults) => {
     if (!this._isMounted) {
       return;
     }
 
+    this.setState({ results });
+    this.setState({ indexingStage: INDEXING_STAGE.SUCCESS });
     this.props.advanceToNextStep();
-
-    const geoField = results.indexPattern.fields.find((field: IFieldType) =>
-      [ES_GEO_FIELD_TYPE.GEO_POINT as string, ES_GEO_FIELD_TYPE.GEO_SHAPE as string].includes(
-        field.type
-      )
-    );
-    if (!results.indexPattern.id || !geoField) {
-      this.setState({ indexingStage: INDEXING_STAGE.ERROR });
-      this.props.previewLayers([]);
-    } else {
-      const esSearchSourceConfig = {
-        indexPatternId: results.indexPattern.id,
-        geoField: geoField.name,
-        // Only turn on bounds filter for large doc counts
-        // @ts-ignore
-        filterByMapBounds: results.indexDataResp.docCount > DEFAULT_MAX_RESULT_WINDOW,
-        scalingType:
-          geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT
-            ? SCALING_TYPES.CLUSTERS
-            : SCALING_TYPES.LIMIT,
-      };
-      this.setState({ indexingStage: INDEXING_STAGE.SUCCESS });
-      this.props.previewLayers([
-        createDefaultLayerDescriptor(esSearchSourceConfig, this.props.mapColors),
-      ]);
-    }
+    this.props.enableNextBtn();
   };
 
-  _onIndexingError = () => {
+  _onUploadError = () => {
     if (!this._isMounted) {
       return;
     }
@@ -148,39 +146,19 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     this.setState({ indexingStage: INDEXING_STAGE.ERROR });
   };
 
-  // Called on file upload screen when UI state changes
-  _onIndexReady = (indexReady: boolean) => {
-    if (!this._isMounted) {
-      return;
-    }
-    this.setState({ indexingStage: indexReady ? INDEXING_STAGE.READY : null });
-    if (indexReady) {
-      this.props.enableNextBtn();
-    } else {
-      this.props.disableNextBtn();
-    }
-  };
-
-  // Called on file upload screen when upload file is changed or removed
-  _onFileRemove = () => {
-    this.props.previewLayers([]);
-  };
-
   render() {
-    if (!this.state.fileUploadComponent) {
-      return null;
-    }
+    const FileUpload = getFileUploadComponent();
 
-    const FileUpload = this.state.fileUploadComponent;
     return (
       <EuiPanel>
         <FileUpload
           isIndexingTriggered={this.state.indexingStage === INDEXING_STAGE.TRIGGERED}
-          onFileUpload={this._onFileUpload}
-          onFileRemove={this._onFileRemove}
-          onIndexReady={this._onIndexReady}
-          onIndexingComplete={this._onIndexingComplete}
-          onIndexingError={this._onIndexingError}
+          onFileSelect={this._onFileSelect}
+          onFileClear={this._onFileClear}
+          enableImportBtn={this.props.enableNextBtn}
+          disableImportBtn={this.props.disableNextBtn}
+          onUploadComplete={this._onUploadComplete}
+          onUploadError={this._onUploadError}
         />
       </EuiPanel>
     );

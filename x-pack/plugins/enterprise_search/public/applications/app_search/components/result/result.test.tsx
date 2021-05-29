@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { mockKibanaValues } from '../../../__mocks__';
+
 import React from 'react';
 import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiButtonIcon, EuiPanel, EuiButtonIconColor } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 
-import { SchemaTypes } from '../../../shared/types';
+import { SchemaType } from '../../../shared/schema/types';
 
 import { Result } from './result';
 import { ResultField } from './result_field';
@@ -43,9 +45,9 @@ describe('Result', () => {
   };
 
   const schema = {
-    title: 'text' as SchemaTypes,
-    description: 'text' as SchemaTypes,
-    length: 'number' as SchemaTypes,
+    title: SchemaType.Text,
+    description: SchemaType.Text,
+    length: SchemaType.Number,
   };
 
   it('renders', () => {
@@ -63,18 +65,28 @@ describe('Result', () => {
     ]);
   });
 
-  it('renders a header', () => {
-    const wrapper = shallow(<Result {...props} showScore isMetaEngine />);
-    const header = wrapper.find(ResultHeader);
-    expect(header.exists()).toBe(true);
-    expect(header.prop('isMetaEngine')).toBe(true); // passed through from props
-    expect(header.prop('showScore')).toBe(true); // passed through from props
-    expect(header.prop('shouldLinkToDetailPage')).toBe(false); // passed through from props
-    expect(header.prop('resultMeta')).toEqual({
-      id: '1',
-      score: 100,
-      engine: 'my-engine',
-    }); // passed through from meta in result prop
+  describe('header', () => {
+    it('renders a header', () => {
+      const wrapper = shallow(<Result {...props} showScore isMetaEngine />);
+      const header = wrapper.find(ResultHeader);
+
+      expect(header.exists()).toBe(true);
+      expect(header.prop('isMetaEngine')).toBe(true); // passed through from props
+      expect(header.prop('showScore')).toBe(true); // passed through from props
+      expect(header.prop('resultMeta')).toEqual({
+        id: '1',
+        score: 100,
+        engine: 'my-engine',
+      }); // passed through from meta in result prop
+      expect(header.prop('documentLink')).toBe(undefined); // based on shouldLinkToDetailPage prop
+    });
+
+    it('passes documentLink when shouldLinkToDetailPage is true', () => {
+      const wrapper = shallow(<Result {...props} shouldLinkToDetailPage />);
+      const header = wrapper.find(ResultHeader);
+
+      expect(header.prop('documentLink')).toBe('/engines/my-engine/documents/1');
+    });
   });
 
   describe('actions', () => {
@@ -83,53 +95,30 @@ describe('Result', () => {
         title: 'Hide',
         onClick: jest.fn(),
         iconType: 'eyeClosed',
-        iconColor: 'danger' as EuiButtonIconColor,
       },
       {
         title: 'Bookmark',
         onClick: jest.fn(),
         iconType: 'starFilled',
-        iconColor: undefined,
       },
     ];
 
-    it('will render an action button in the header for each action passed', () => {
+    it('passes actions to the header', () => {
       const wrapper = shallow(<Result {...props} actions={actions} />);
-      const header = wrapper.find(ResultHeader);
-      const renderedActions = shallow(header.prop('actions') as any);
-      const buttons = renderedActions.find(EuiButtonIcon);
-      expect(buttons).toHaveLength(2);
-
-      expect(buttons.first().prop('iconType')).toEqual('eyeClosed');
-      expect(buttons.first().prop('color')).toEqual('danger');
-      buttons.first().simulate('click');
-      expect(actions[0].onClick).toHaveBeenCalled();
-
-      expect(buttons.last().prop('iconType')).toEqual('starFilled');
-      // Note that no iconColor was passed so it was defaulted to primary
-      expect(buttons.last().prop('color')).toEqual('primary');
-      buttons.last().simulate('click');
-      expect(actions[1].onClick).toHaveBeenCalled();
+      expect(wrapper.find(ResultHeader).prop('actions')).toEqual(actions);
     });
 
-    it('will render a document detail link as the first action if shouldLinkToDetailPage is passed', () => {
+    it('adds a link action to the start of the actions array if shouldLinkToDetailPage is passed', () => {
       const wrapper = shallow(<Result {...props} actions={actions} shouldLinkToDetailPage />);
-      const header = wrapper.find(ResultHeader);
-      const renderedActions = shallow(header.prop('actions') as any);
-      const buttons = renderedActions.find(EuiButtonIcon);
 
-      // In addition to the 2 actions passed, we also have a link action
-      expect(buttons).toHaveLength(3);
+      const passedActions = wrapper.find(ResultHeader).prop('actions');
+      expect(passedActions.length).toEqual(3); // In addition to the 2 actions passed, we also have a link action
 
-      expect(buttons.first().prop('data-test-subj')).toEqual('DocumentDetailLink');
-    });
+      const linkAction = passedActions[0];
+      expect(linkAction.title).toEqual('Visit document details');
 
-    it('will not render anything if no actions are passed and shouldLinkToDetailPage is false', () => {
-      const wrapper = shallow(<Result {...props} actions={undefined} />);
-      const header = wrapper.find(ResultHeader);
-      const renderedActions = shallow(header.prop('actions') as any);
-      const buttons = renderedActions.find(EuiButtonIcon);
-      expect(buttons).toHaveLength(0);
+      linkAction.onClick();
+      expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/engines/my-engine/documents/1');
     });
   });
 
@@ -148,9 +137,7 @@ describe('Result', () => {
   });
 
   it('will render field details with type highlights if schemaForTypeHighlights has been provided', () => {
-    const wrapper = shallow(
-      <Result {...props} shouldLinkToDetailPage schemaForTypeHighlights={schema} />
-    );
+    const wrapper = shallow(<Result {...props} schemaForTypeHighlights={schema} />);
     expect(wrapper.find(ResultField).map((rf) => rf.prop('type'))).toEqual([
       'text',
       'text',

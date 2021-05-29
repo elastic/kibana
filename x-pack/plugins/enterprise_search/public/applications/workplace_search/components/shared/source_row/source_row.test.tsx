@@ -39,7 +39,7 @@ describe('SourceRow', () => {
     const source = {
       ...contentSources[0],
       status: 'error',
-      errorReason: 'credentials_invalid',
+      errorReason: 'OAuth access token could not be refreshed',
     };
     const wrapper = shallow(<SourceRow isOrganization source={source} />);
 

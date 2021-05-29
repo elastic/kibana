@@ -15,11 +15,8 @@
     "../../../typings/**/*"
   ],
   "references": [
-    {
-      "path": "../../core/tsconfig.json"
-    },
-    {
-      "path": "../saved_objects/tsconfig.json"
-    },
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../saved_objects/tsconfig.json" },
+    { "path": "../kibana_react/tsconfig.json" },
   ]
 }

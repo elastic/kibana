@@ -38,7 +38,6 @@ import {
   FileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
 } from './types/field_vis_config';
-import { FileBasedNumberContentPreview } from '../file_based/components/field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
 
 const FIELD_NAME = 'fieldName';
@@ -224,8 +223,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           if (item.type === ML_JOB_FIELD_TYPES.NUMBER) {
             if (isIndexBasedFieldVisConfig(item) && item.stats?.distribution !== undefined) {
               return <IndexBasedNumberContentPreview config={item} />;
-            } else {
-              return <FileBasedNumberContentPreview config={item} />;
             }
           }
 

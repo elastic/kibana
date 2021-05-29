@@ -37,7 +37,7 @@ export function applyTransformConfigToDefineState(
   transformConfig?: TransformBaseConfig,
   indexPattern?: StepDefineFormProps['searchItems']['indexPattern']
 ): StepDefineExposedState {
-  // apply runtime mappings from both the index pattern and inline configurations
+  // apply runtime fields from both the index pattern and inline configurations
   state.runtimeMappings = getCombinedRuntimeMappings(
     indexPattern,
     transformConfig?.source?.runtime_mappings

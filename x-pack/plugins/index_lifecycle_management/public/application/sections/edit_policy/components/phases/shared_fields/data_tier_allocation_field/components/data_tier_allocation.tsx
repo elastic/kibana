@@ -161,7 +161,20 @@ const getSelectOptions = (phase: PhaseWithAllocation, disableDataTierOption: boo
   ].filter(Boolean) as SelectOptions[];
 
 export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
-  const { phase, hasNodeAttributes, disableDataTierOption, isLoading } = props;
+  const {
+    phase,
+    hasNodeAttributes,
+    isCloudEnabled,
+    isUsingDeprecatedDataRoleConfig,
+    isLoading,
+  } = props;
+
+  /**
+   * On Cloud we want to disable the data tier allocation option when we detect that we are not
+   * using node roles in our Node config yet. See {@link ListNodesRouteResponse} for information about how this is
+   * detected.
+   */
+  const disableDataTierOption = Boolean(isCloudEnabled && isUsingDeprecatedDataRoleConfig);
 
   const dataTierAllocationTypePath = `_meta.${phase}.dataTierAllocationType`;
 
@@ -185,6 +198,7 @@ export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
           if (disableDataTierOption && field.value === 'node_roles') {
             field.setValue('node_attrs');
           }
+
           return (
             <SuperSelectField
               field={field}

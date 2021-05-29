@@ -77,8 +77,10 @@ describe('<EditPolicy /> searchable snapshots', () => {
     const repository = 'myRepo';
     await actions.hot.setSearchableSnapshot(repository);
     await actions.cold.enable(true);
+    await actions.cold.setMinAgeValue('10');
     await actions.cold.toggleSearchableSnapshot(true);
     await actions.frozen.enable(true);
+    await actions.frozen.setMinAgeValue('15');
 
     await actions.savePolicy();
     const latestRequest = server.requests[server.requests.length - 1];
@@ -96,8 +98,10 @@ describe('<EditPolicy /> searchable snapshots', () => {
 
     await actions.hot.setSearchableSnapshot('myRepo');
     await actions.cold.enable(true);
+    await actions.cold.setMinAgeValue('10');
     await actions.cold.toggleSearchableSnapshot(true);
     await actions.frozen.enable(true);
+    await actions.frozen.setMinAgeValue('15');
 
     // We update the repository in one phase
     await actions.frozen.setSearchableSnapshot('changed');
@@ -161,6 +165,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
       test('correctly sets snapshot repository default to "found-snapshots"', async () => {
         const { actions } = testBed;
         await actions.cold.enable(true);
+        await actions.cold.setMinAgeValue('10');
         await actions.cold.toggleSearchableSnapshot(true);
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];

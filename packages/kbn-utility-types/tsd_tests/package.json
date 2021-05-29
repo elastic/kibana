@@ -1,0 +1,9 @@
+{
+  "types": "empty.d.ts",
+  "tsd": {
+    "directory": "test_d",
+    "compilerOptions": {
+      "rootDir": "../"
+    }
+  }
+}

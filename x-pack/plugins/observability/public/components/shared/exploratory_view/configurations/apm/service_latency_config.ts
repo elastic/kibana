@@ -8,7 +8,7 @@
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels } from '../constants';
 import { buildPhraseFilter } from '../utils';
-import { OperationType } from '../../../../../../../lens/public';
+import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
 
 export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -19,12 +19,14 @@ export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigPr
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      operationType: 'average' as OperationType,
-      sourceField: 'transaction.duration.us',
-      label: 'Latency',
-    },
-    hasMetricType: true,
+    yAxisColumns: [
+      {
+        operationType: 'average',
+        sourceField: 'transaction.duration.us',
+        label: 'Latency',
+      },
+    ],
+    hasOperationType: true,
     defaultFilters: [
       'user_agent.name',
       'user_agent.os.name',
@@ -37,8 +39,8 @@ export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigPr
       'client.geo.country_name',
       'user_agent.device.name',
     ],
-    filters: [buildPhraseFilter('transaction.type', 'request', indexPattern)],
-    labels: { ...FieldLabels },
+    filters: buildPhraseFilter('transaction.type', 'request', indexPattern),
+    labels: { ...FieldLabels, [TRANSACTION_DURATION]: 'Latency' },
     reportDefinitions: [
       {
         field: 'service.name',

@@ -79,9 +79,7 @@ export class EnterpriseSearchRequestHandler {
         // Set up API options
         const { method } = request.route;
         const headers = { Authorization: request.headers.authorization as string, ...JSON_HEADER };
-        const body = !this.isEmptyObj(request.body as object)
-          ? JSON.stringify(request.body)
-          : undefined;
+        const body = this.getBodyAsString(request.body as object | Buffer);
 
         // Call the Enterprise Search API
         const apiResponse = await fetch(url, { method, headers, body });
@@ -145,6 +143,18 @@ export class EnterpriseSearchRequestHandler {
         return this.handleConnectionError(response, e);
       }
     };
+  }
+
+  /**
+   * There are a number of different expected incoming bodies that we handle & pass on to Enterprise Search for ingestion:
+   * - Standard object data (should be JSON stringified)
+   * - Empty (should be passed as undefined and not as an empty obj)
+   * - Raw buffers (passed on as a string, occurs when using the `skipBodyValidation` lib helper)
+   */
+  getBodyAsString(body: object | Buffer): string | undefined {
+    if (Buffer.isBuffer(body)) return body.toString();
+    if (this.isEmptyObj(body)) return undefined;
+    return JSON.stringify(body);
   }
 
   /**

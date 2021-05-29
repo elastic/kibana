@@ -37,8 +37,4 @@ describe('getLastValue(data)', () => {
       ])
     ).toBe('-');
   });
-
-  test('should allows to override the default value', () => {
-    expect(getLastValue(null, 'default')).toBe('default');
-  });
 });

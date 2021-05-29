@@ -7,12 +7,19 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiPortal,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { Section } from '../sections';
 import { AlphaMessaging, SettingFlyout } from '../components';
-import { useLink, useConfig } from '../hooks';
+import { useLink, useConfig, useUrlModal } from '../hooks';
 
 interface Props {
   showSettings?: boolean;
@@ -53,17 +60,20 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
 }) => {
   const { getHref } = useLink();
   const { agents } = useConfig();
-  const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
+  const { modal, setModal, getModalHref } = useUrlModal();
 
   return (
     <>
-      {isSettingsFlyoutOpen && (
-        <SettingFlyout
-          onClose={() => {
-            setIsSettingsFlyoutOpen(false);
-          }}
-        />
+      {modal === 'settings' && (
+        <EuiPortal>
+          <SettingFlyout
+            onClose={() => {
+              setModal(null);
+            }}
+          />
+        </EuiPortal>
       )}
+
       <Container>
         <Wrapper>
           <Nav>
@@ -122,7 +132,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                   </EuiFlexItem>
                   {showSettings ? (
                     <EuiFlexItem>
-                      <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
+                      <EuiButtonEmpty iconType="gear" href={getModalHref('settings')}>
                         <FormattedMessage
                           id="xpack.fleet.appNavigation.settingsButton"
                           defaultMessage="Fleet settings"

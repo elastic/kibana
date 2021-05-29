@@ -358,13 +358,6 @@ export const COLUMN_GAP = i18n.translate(
   }
 );
 
-export const COLUMN_LAST_LOOKBACK_DATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.lastLookBackDate',
-  {
-    defaultMessage: 'Last Look-Back Date',
-  }
-);
-
 export const RULES_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.tabs.rules',
   {

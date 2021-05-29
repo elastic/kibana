@@ -185,16 +185,15 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                     Template name
                   </span>
                   <span
-                    aria-label="Sorted in ascending order"
                     className="euiTableSortIcon"
                     data-euiicon-type="sortUp"
                     size="m"
                   />
-                  <span
-                    className="euiScreenReaderOnly"
-                  >
-                    Click to sort in descending order
-                  </span>
+                </span>
+                <span
+                  className="euiScreenReaderOnly"
+                >
+                  Click to sort in descending order
                 </span>
               </button>
             </th>
@@ -527,7 +526,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
             <button
               aria-current={true}
               aria-label="Page 1 of 1"
-              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
               data-test-subj="pagination-button-0"
               disabled={true}
               onClick={[Function]}

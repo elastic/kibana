@@ -33,24 +33,32 @@ import { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
 import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
 
-const filters = {
-  options: [
-    {
-      id: 'training',
-      label: i18n.translate('xpack.ml.dataframe.analytics.explorationResults.trainingSubsetLabel', {
-        defaultMessage: 'Training',
-      }),
-    },
-    {
-      id: 'testing',
-      label: i18n.translate('xpack.ml.dataframe.analytics.explorationResults.testingSubsetLabel', {
-        defaultMessage: 'Testing',
-      }),
-    },
-  ],
-  columnId: 'ml.is_training',
-  key: { training: true, testing: false },
-};
+function getFilters(resultsField: string) {
+  return {
+    options: [
+      {
+        id: 'training',
+        label: i18n.translate(
+          'xpack.ml.dataframe.analytics.explorationResults.trainingSubsetLabel',
+          {
+            defaultMessage: 'Training',
+          }
+        ),
+      },
+      {
+        id: 'testing',
+        label: i18n.translate(
+          'xpack.ml.dataframe.analytics.explorationResults.testingSubsetLabel',
+          {
+            defaultMessage: 'Testing',
+          }
+        ),
+      },
+    ],
+    columnId: `${resultsField}.is_training`,
+    key: { training: true, testing: false },
+  };
+}
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;
@@ -151,7 +159,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
         </>
       )}
 
-      {indexPattern !== undefined && (
+      {indexPattern !== undefined && jobConfig && (
         <>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
@@ -162,7 +170,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
                     indexPattern={indexPattern}
                     setSearchQuery={searchQueryUpdateHandler}
                     query={query}
-                    filters={filters}
+                    filters={getFilters(jobConfig.dest.results_field)}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

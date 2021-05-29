@@ -7,23 +7,33 @@
 
 import * as t from 'io-ts';
 
-import { listArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
 import {
+  actionsCamel,
+  from,
+  machine_learning_job_id_normalized,
+  risk_score,
+  risk_score_mapping,
   threat_mapping,
   threat_index,
   threat_query,
   concurrentSearchesOrUndefined,
   itemsPerSearchOrUndefined,
   threatIndicatorPathOrUndefined,
-} from '../../../../common/detection_engine/schemas/types/threat_mapping';
+  threats,
+  severity,
+  severity_mapping,
+  throttleOrNull,
+  max_signals,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { listArray } from '@kbn/securitysolution-io-ts-list-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
 import {
-  authorOrUndefined,
+  author,
   buildingBlockTypeOrUndefined,
   description,
   enabled,
   noteOrUndefined,
   false_positives,
-  from,
   rule_id,
   immutable,
   indexOrUndefined,
@@ -36,37 +46,28 @@ import {
   query,
   queryOrUndefined,
   filtersOrUndefined,
-  machine_learning_job_id,
-  max_signals,
-  risk_score,
-  riskScoreMappingOrUndefined,
   ruleNameOverrideOrUndefined,
-  severity,
-  severityMappingOrUndefined,
   tags,
   timestampOverrideOrUndefined,
-  threats,
   to,
   references,
-  version,
   eventCategoryOverrideOrUndefined,
   savedIdOrUndefined,
   saved_id,
-  threshold,
+  thresholdNormalized,
   anomaly_threshold,
-  actionsCamel,
-  throttleOrNull,
   createdByOrNull,
   updatedByOrNull,
   created_at,
   updated_at,
 } from '../../../../common/detection_engine/schemas/common/schemas';
+
 import { SIGNALS_ID, SERVER_APP_ID } from '../../../../common/constants';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 export const baseRuleParams = t.exact(
   t.type({
-    author: authorOrUndefined,
+    author,
     buildingBlockType: buildingBlockTypeOrUndefined,
     description,
     note: noteOrUndefined,
@@ -82,16 +83,16 @@ export const baseRuleParams = t.exact(
     // maxSignals not used in ML rules but probably should be used
     maxSignals: max_signals,
     riskScore: risk_score,
-    riskScoreMapping: riskScoreMappingOrUndefined,
+    riskScoreMapping: risk_score_mapping,
     ruleNameOverride: ruleNameOverrideOrUndefined,
     severity,
-    severityMapping: severityMappingOrUndefined,
+    severityMapping: severity_mapping,
     timestampOverride: timestampOverrideOrUndefined,
     threat: threats,
     to,
     references,
     version,
-    exceptionsList: listArrayOrUndefined,
+    exceptionsList: listArray,
   })
 );
 export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;
@@ -159,7 +160,7 @@ const thresholdSpecificRuleParams = t.type({
   query,
   filters: filtersOrUndefined,
   savedId: savedIdOrUndefined,
-  threshold,
+  threshold: thresholdNormalized,
 });
 export const thresholdRuleParams = t.intersection([baseRuleParams, thresholdSpecificRuleParams]);
 export type ThresholdRuleParams = t.TypeOf<typeof thresholdRuleParams>;
@@ -167,7 +168,7 @@ export type ThresholdRuleParams = t.TypeOf<typeof thresholdRuleParams>;
 const machineLearningSpecificRuleParams = t.type({
   type: t.literal('machine_learning'),
   anomalyThreshold: anomaly_threshold,
-  machineLearningJobId: machine_learning_job_id,
+  machineLearningJobId: machine_learning_job_id_normalized,
 });
 export const machineLearningRuleParams = t.intersection([
   baseRuleParams,

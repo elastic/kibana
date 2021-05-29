@@ -13,27 +13,26 @@ import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
 import { HttpService } from '../application/services/http_service';
-import { SeverityControl } from './severity_control';
+import { SeverityControl } from '../application/components/severity_control';
 import { ResultTypeSelector } from './result_type_selector';
 import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
 import { PreviewAlertCondition } from './preview_alert_condition';
 import { ANOMALY_THRESHOLD } from '../../common';
-import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
+import {
+  MlAnomalyDetectionAlertAdvancedSettings,
+  MlAnomalyDetectionAlertParams,
+} from '../../common/types/alerts';
 import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
 import { InterimResultsControl } from './interim_results_control';
 import { ConfigValidator } from './config_validator';
 import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';
+import { AdvancedSettings } from './advanced_settings';
+import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
+import { isDefined } from '../../common/types/guards';
+import { AlertTypeParamsExpressionProps } from '../../../triggers_actions_ui/public';
+import { parseInterval } from '../../common/util/parse_interval';
 
-interface MlAnomalyAlertTriggerProps {
-  alertParams: MlAnomalyDetectionAlertParams;
-  setAlertParams: <T extends keyof MlAnomalyDetectionAlertParams>(
-    key: T,
-    value: MlAnomalyDetectionAlertParams[T]
-  ) => void;
-  setAlertProperty: (prop: string, update: Partial<MlAnomalyDetectionAlertParams>) => void;
-  errors: Record<keyof MlAnomalyDetectionAlertParams, string[]>;
-  alertInterval: string;
-}
+export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
 
 const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   alertParams,
@@ -41,6 +40,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   setAlertProperty,
   errors,
   alertInterval,
+  alertNotifyWhen,
 }) => {
   const {
     services: { http },
@@ -110,9 +110,47 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         includeInterim: false,
         // Preserve job selection
         jobSelection,
+        lookbackInterval: undefined,
+        topNBuckets: undefined,
       });
     }
   });
+
+  const advancedSettings = useMemo(() => {
+    let { lookbackInterval, topNBuckets } = alertParams;
+
+    if (!isDefined(lookbackInterval) && jobConfigs.length > 0) {
+      lookbackInterval = getLookbackInterval(jobConfigs);
+    }
+    if (!isDefined(topNBuckets) && jobConfigs.length > 0) {
+      topNBuckets = getTopNBuckets(jobConfigs[0]);
+    }
+    return {
+      lookbackInterval,
+      topNBuckets,
+    };
+  }, [alertParams.lookbackInterval, alertParams.topNBuckets, jobConfigs]);
+
+  const resultParams = useMemo(() => {
+    return {
+      ...alertParams,
+      ...advancedSettings,
+    };
+  }, [alertParams, advancedSettings]);
+
+  const maxNumberOfBuckets = useMemo(() => {
+    if (jobConfigs.length === 0) return;
+
+    const bucketDuration = parseInterval(jobConfigs[0].analysis_config.bucket_span);
+
+    const lookbackIntervalDuration = advancedSettings.lookbackInterval
+      ? parseInterval(advancedSettings.lookbackInterval)
+      : null;
+
+    if (lookbackIntervalDuration && bucketDuration) {
+      return Math.ceil(lookbackIntervalDuration.asSeconds() / bucketDuration.asSeconds());
+    }
+  }, [jobConfigs, advancedSettings]);
 
   return (
     <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
@@ -136,10 +174,16 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         jobsAndGroupIds={jobsAndGroupIds}
         adJobsApiService={adJobsApiService}
         onChange={useCallback(onAlertParamChange('jobSelection'), [])}
-        errors={errors.jobSelection}
+        errors={Array.isArray(errors.jobSelection) ? errors.jobSelection : []}
       />
 
-      <ConfigValidator jobConfigs={jobConfigs} alertInterval={alertInterval} />
+      <ConfigValidator
+        jobConfigs={jobConfigs}
+        alertInterval={alertInterval}
+        alertNotifyWhen={alertNotifyWhen}
+        alertParams={resultParams}
+        maxNumberOfBuckets={maxNumberOfBuckets}
+      />
 
       <ResultTypeSelector
         value={alertParams.resultType}
@@ -155,6 +199,17 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         value={alertParams.includeInterim}
         onChange={useCallback(onAlertParamChange('includeInterim'), [])}
       />
+      <EuiSpacer size="m" />
+
+      <AdvancedSettings
+        value={advancedSettings}
+        onChange={useCallback((update) => {
+          Object.keys(update).forEach((k) => {
+            setAlertParams(k, update[k as keyof MlAnomalyDetectionAlertAdvancedSettings]);
+          });
+        }, [])}
+      />
+
       <EuiSpacer size="m" />
 
       <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={alertParams} />

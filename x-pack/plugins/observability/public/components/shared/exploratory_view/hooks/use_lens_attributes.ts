@@ -6,17 +6,17 @@
  */
 
 import { useMemo } from 'react';
+import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { LensAttributes } from '../configurations/lens_attributes';
 import { useUrlStorage } from './use_url_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { DataSeries, SeriesUrl, UrlFilter } from '../types';
+import { useAppIndexPatternContext } from './use_app_index_pattern';
 
 interface Props {
   seriesId: string;
-  indexPattern?: IndexPattern | null;
 }
 
 export const getFiltersFromDefs = (
@@ -26,7 +26,7 @@ export const getFiltersFromDefs = (
   const rdfFilters = Object.entries(reportDefinitions ?? {}).map(([field, value]) => {
     return {
       field,
-      values: [value],
+      values: value,
     };
   }) as UrlFilter[];
 
@@ -39,15 +39,15 @@ export const getFiltersFromDefs = (
 
 export const useLensAttributes = ({
   seriesId,
-  indexPattern,
 }: Props): TypedLensByValueInput['attributes'] | null => {
   const { series } = useUrlStorage(seriesId);
 
-  const { breakdown, seriesType, metric: metricType, reportType, reportDefinitions = {} } =
-    series ?? {};
+  const { breakdown, seriesType, operationType, reportType, reportDefinitions = {} } = series ?? {};
+
+  const { indexPattern } = useAppIndexPatternContext();
 
   return useMemo(() => {
-    if (!indexPattern || !reportType) {
+    if (!indexPattern || !reportType || isEmpty(reportDefinitions)) {
       return null;
     }
 
@@ -66,7 +66,7 @@ export const useLensAttributes = ({
       dataViewConfig,
       seriesType,
       filters,
-      metricType,
+      operationType,
       reportDefinitions
     );
 
@@ -79,7 +79,7 @@ export const useLensAttributes = ({
     indexPattern,
     breakdown,
     seriesType,
-    metricType,
+    operationType,
     reportType,
     reportDefinitions,
     seriesId,

@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { DocLinksStart, HttpSetup, NotificationsStart } from 'src/core/public';
+import {
+  CoreStart,
+  DeprecationsServiceStart,
+  DocLinksStart,
+  HttpSetup,
+  NotificationsStart,
+} from 'src/core/public';
 import React, { createContext, useContext } from 'react';
 import { ApiService } from './lib/api';
+import { BreadcrumbService } from './lib/breadcrumbs';
 
 export interface KibanaVersionContext {
   currentMajor: number;
@@ -23,6 +30,9 @@ export interface ContextValue {
   notifications: NotificationsStart;
   isReadOnlyMode: boolean;
   api: ApiService;
+  breadcrumbs: BreadcrumbService;
+  getUrlForApp: CoreStart['application']['getUrlForApp'];
+  deprecations: DeprecationsServiceStart;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

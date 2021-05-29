@@ -9,6 +9,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
+import { MutableRefObject } from 'react';
 import { RowClickContext } from '../../../../src/plugins/ui_actions/public';
 import {
   ExpressionAstExpression,
@@ -18,9 +19,8 @@ import {
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
-import { Document } from './persistence';
 import { DateRange } from '../common';
-import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
+import { Query, Filter, IFieldFormat } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
 import {
@@ -33,6 +33,7 @@ import type {
   LensResizeActionData,
   LensToggleActionData,
 } from './datatable_visualization/components/types';
+import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -45,27 +46,11 @@ export interface PublicAPIProps<T> {
 
 export interface EditorFrameProps {
   onError: ErrorCallback;
-  doc?: Document;
-  dateRange: DateRange;
-  query: Query;
-  filters: Filter[];
-  savedQuery?: SavedQuery;
-  searchSessionId: string;
   initialContext?: VisualizeFieldContext;
-
-  // Frame loader (app or embeddable) is expected to call this when it loads and updates
-  // This should be replaced with a top-down state
-  onChange: (newState: {
-    filterableIndexPatterns: string[];
-    doc: Document;
-    isSaveable: boolean;
-    activeData?: Record<string, Datatable>;
-  }) => void;
   showNoDataPopover: () => void;
 }
 export interface EditorFrameInstance {
-  mount: (element: Element, props: EditorFrameProps) => Promise<void>;
-  unmount: () => void;
+  EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
 }
 
 export interface EditorFrameSetup {
@@ -213,6 +198,10 @@ export interface Datasource<T = unknown, P = unknown> {
     }
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
+  getCustomWorkspaceRenderer?: (
+    state: T,
+    dragging: DraggingIdentifier
+  ) => undefined | (() => JSX.Element);
   updateStateOnCloseDimension?: (props: {
     layerId: string;
     columnId: string;
@@ -267,6 +256,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   filters: Filter[];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
   hasSuggestionForField: (field: DragDropIdentifier) => boolean;
+  uiActions: UiActionsStart;
 }
 
 interface SharedDimensionProps {
@@ -343,7 +333,7 @@ export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProp
   dropType: DropType;
 };
 
-export type FieldOnlyDataType = 'document' | 'ip' | 'histogram';
+export type FieldOnlyDataType = 'document' | 'ip' | 'histogram' | 'geo_point' | 'geo_shape';
 export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
 // An operation represents a column in a table, not any information
@@ -402,13 +392,14 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   groupId: string;
   accessor: string;
   setState: (newState: T) => void;
+  panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
 export interface AccessorConfig {
   columnId: string;
   triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
   color?: string;
-  palette?: string[];
+  palette?: string[] | Array<{ color: string; stop: number }>;
 }
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
@@ -550,6 +541,11 @@ export interface VisualizationType {
    * The group the visualization belongs to
    */
   groupLabel: string;
+  /**
+   * The priority of the visualization in the list (global priority)
+   * Higher number means higher priority. When omitted defaults to 0
+   */
+  sortPriority?: number;
 }
 
 export interface Visualization<T = unknown> {

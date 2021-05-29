@@ -65,8 +65,6 @@ export function updateSearchSource({
       volatileSearchSource.setField('fields', [fields]);
     } else {
       volatileSearchSource.removeField('fields');
-      const fieldNames = indexPattern.fields.map((field) => field.name);
-      volatileSearchSource.setField('fieldsFromSource', fieldNames);
     }
   }
 }

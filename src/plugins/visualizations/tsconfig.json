@@ -15,7 +15,6 @@
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
-    { "path": "../dashboard/tsconfig.json" },
     { "path": "../expressions/tsconfig.json" },
     { "path": "../ui_actions/tsconfig.json" },
     { "path": "../embeddable/tsconfig.json" },

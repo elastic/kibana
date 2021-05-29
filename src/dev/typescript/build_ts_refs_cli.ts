@@ -21,7 +21,7 @@ const CACHE_WORKING_DIR = Path.resolve(REPO_ROOT, 'data/ts_refs_output_cache');
 const TS_ERROR_REF = /\sTS\d{1,6}:\s/;
 
 const isTypeFailure = (error: any) =>
-  error.exitCode === 1 &&
+  error.exitCode > 0 &&
   error.stderr === '' &&
   typeof error.stdout === 'string' &&
   TS_ERROR_REF.test(error.stdout);

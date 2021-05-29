@@ -10,8 +10,10 @@ jest.mock('./get_stats', () => ({
   getStats: jest.fn().mockResolvedValue({ somestat: 1 }),
 }));
 
-import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+import {
+  createUsageCollectionSetupMock,
+  createCollectorFetchContextMock,
+} from 'src/plugins/usage_collection/server/mocks';
 
 import { registerVisTypeTableUsageCollector } from './register_usage_collector';
 import { getStats } from './get_stats';

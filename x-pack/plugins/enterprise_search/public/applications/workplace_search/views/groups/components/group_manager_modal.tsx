@@ -135,7 +135,7 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="none">
+            <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty data-test-subj="CloseGroupsModal" onClick={handleClose}>
                   {CANCEL_BUTTON}

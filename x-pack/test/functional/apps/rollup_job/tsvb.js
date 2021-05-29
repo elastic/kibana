@@ -83,6 +83,7 @@ export default function ({ getService, getPageObjects }) {
       );
       await PageObjects.visualBuilder.clickPanelOptions('metric');
       await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName, false);
+      await PageObjects.visualBuilder.selectIndexPatternTimeField('@timestamp');
       await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
       await PageObjects.visualBuilder.setIntervalValue('1d');
       await PageObjects.visualBuilder.setDropLastBucket(false);

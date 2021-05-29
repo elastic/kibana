@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from './object_utils';
+import { getFirstKeyInObject, isPopulatedObject } from './object_utils';
 
 describe('object_utils', () => {
   describe('isPopulatedObject()', () => {
@@ -45,6 +45,20 @@ describe('object_utils', () => {
           'otherAttribute',
         ])
       ).toBe(false);
+    });
+  });
+
+  describe('getFirstKeyInObject()', () => {
+    it('gets the first key in object', () => {
+      expect(getFirstKeyInObject({ attribute1: 'value', attribute2: 'value2' })).toBe('attribute1');
+    });
+
+    it('returns undefined with invalid argument', () => {
+      expect(getFirstKeyInObject(undefined)).toBe(undefined);
+      expect(getFirstKeyInObject(null)).toBe(undefined);
+      expect(getFirstKeyInObject({})).toBe(undefined);
+      expect(getFirstKeyInObject('value')).toBe(undefined);
+      expect(getFirstKeyInObject(5)).toBe(undefined);
     });
   });
 });

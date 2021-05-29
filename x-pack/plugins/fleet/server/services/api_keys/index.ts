@@ -6,52 +6,9 @@
  */
 
 import type { KibanaRequest } from 'src/core/server';
-import type { SavedObjectsClientContract } from 'src/core/server';
-
-import type { FullAgentPolicyOutputPermissions } from '../../../common';
-
-import { createAPIKey } from './security';
 
 export { invalidateAPIKeys } from './security';
 export * from './enrollment_api_key';
-
-export async function generateOutputApiKey(
-  soClient: SavedObjectsClientContract,
-  outputId: string,
-  agentId: string,
-  permissions: FullAgentPolicyOutputPermissions
-): Promise<{ key: string; id: string }> {
-  const name = `${agentId}:${outputId}`;
-  const key = await createAPIKey(soClient, name, permissions);
-
-  if (!key) {
-    throw new Error('Unable to create an output api key');
-  }
-
-  return { key: `${key.id}:${key.api_key}`, id: key.id };
-}
-
-export async function generateAccessApiKey(soClient: SavedObjectsClientContract, agentId: string) {
-  const key = await createAPIKey(soClient, agentId, {
-    // Useless role to avoid to have the privilege of the user that created the key
-    'fleet-apikey-access': {
-      cluster: [],
-      applications: [
-        {
-          application: '.fleet',
-          privileges: ['no-privileges'],
-          resources: ['*'],
-        },
-      ],
-    },
-  });
-
-  if (!key) {
-    throw new Error('Unable to create an access api key');
-  }
-
-  return { id: key.id, key: Buffer.from(`${key.id}:${key.api_key}`).toString('base64') };
-}
 
 export function parseApiKeyFromHeaders(headers: KibanaRequest['headers']) {
   const authorizationHeader = headers.authorization;

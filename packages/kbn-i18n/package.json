@@ -1,18 +1,9 @@
 {
   "name": "@kbn/i18n",
-  "browser": "./target/web/browser.js",
-  "main": "./target/node/index.js",
-  "types": "./target/types/index.d.ts",
+  "browser": "./target_web/browser.js",
+  "main": "./target_node/index.js",
+  "types": "./target_types/index.d.ts",
   "version": "1.0.0",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "private": true,
-  "scripts": {
-    "build": "node scripts/build",
-    "kbn:bootstrap": "node scripts/build --source-maps",
-    "kbn:watch": "node scripts/build --watch --source-maps"
-  },
-  "devDependencies": {
-    "@kbn/babel-preset": "link:../kbn-babel-preset",
-    "@kbn/dev-utils": "link:../kbn-dev-utils"
-  }
+  "private": true
 }

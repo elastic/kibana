@@ -9,7 +9,7 @@ import React from 'react';
 
 import './result_header_item.scss';
 
-import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
+import { EuiLinkTo } from '../../../shared/react_router_helpers/eui_components';
 
 import { TruncatedContent } from '../../../shared/truncate';
 
@@ -48,11 +48,9 @@ export const ResultHeaderItem: React.FC<Props> = ({ field, type, value, href }) 
       <TruncatedContent content={`${field}:`} length={MAX_CHARACTER_LENGTH} tooltipType="title" />
       &nbsp;
       {href ? (
-        <ReactRouterHelper to={href}>
-          <a>
-            <HeaderItemContent />
-          </a>
-        </ReactRouterHelper>
+        <EuiLinkTo to={href}>
+          <HeaderItemContent />
+        </EuiLinkTo>
       ) : (
         <HeaderItemContent />
       )}

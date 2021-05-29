@@ -6,19 +6,38 @@
  */
 
 import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels } from '../constants';
+import { FieldLabels, RECORDS_FIELD } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
+  CLS_FIELD,
+  FCP_FIELD,
+  FID_FIELD,
+  LCP_FIELD,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  TBT_FIELD,
+  TRANSACTION_DURATION,
   TRANSACTION_TYPE,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
   USER_AGENT_VERSION,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
+  TRANSACTION_URL,
 } from '../constants/elasticsearch_fieldnames';
+import {
+  BACKEND_TIME_LABEL,
+  CLS_LABEL,
+  FCP_LABEL,
+  FID_LABEL,
+  LCP_LABEL,
+  PAGE_LOAD_TIME_LABEL,
+  PAGE_VIEWS_LABEL,
+  TBT_LABEL,
+  WEB_APPLICATION_LABEL,
+} from '../constants/labels';
 
 export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -29,12 +48,18 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      operationType: 'count',
-      label: 'Page views',
-    },
-    hasMetricType: false,
+    yAxisColumns: [
+      {
+        sourceField: 'business.kpi',
+        operationType: 'median',
+      },
+    ],
+    hasOperationType: false,
     defaultFilters: [
+      {
+        field: TRANSACTION_URL,
+        isNegated: false,
+      },
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,
       USER_AGENT_DEVICE,
@@ -45,10 +70,10 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
     ],
     breakdowns: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
     filters: [
-      buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],
-    labels: { ...FieldLabels, SERVICE_NAME: 'Web Application' },
+    labels: { ...FieldLabels, [SERVICE_NAME]: WEB_APPLICATION_LABEL },
     reportDefinitions: [
       {
         field: SERVICE_NAME,
@@ -58,14 +83,22 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
         field: SERVICE_ENVIRONMENT,
       },
       {
-        field: 'Business.KPI',
+        field: 'business.kpi',
         custom: true,
-        defaultValue: 'Records',
+        defaultValue: RECORDS_FIELD,
         options: [
+          { field: RECORDS_FIELD, label: PAGE_VIEWS_LABEL },
+          { label: PAGE_LOAD_TIME_LABEL, field: TRANSACTION_DURATION, columnType: 'operation' },
           {
-            field: 'Records',
-            label: 'Page views',
+            label: BACKEND_TIME_LABEL,
+            field: TRANSACTION_TIME_TO_FIRST_BYTE,
+            columnType: 'operation',
           },
+          { label: FCP_LABEL, field: FCP_FIELD, columnType: 'operation' },
+          { label: TBT_LABEL, field: TBT_FIELD, columnType: 'operation' },
+          { label: LCP_LABEL, field: LCP_FIELD, columnType: 'operation' },
+          { label: FID_LABEL, field: FID_FIELD, columnType: 'operation' },
+          { label: CLS_LABEL, field: CLS_FIELD, columnType: 'operation' },
         ],
       },
     ],

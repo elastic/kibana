@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -39,7 +39,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     ),
     'data-test-subj': 'onActionGroupChange',
     dropdownDisplay: (
-      <Fragment>
+      <>
         <strong>
           <FormattedMessage
             defaultMessage="Only on status change"
@@ -49,12 +49,12 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run when the rule status changes."
+              defaultMessage="Actions run when the alert status changes."
               id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActionGroupChange.description"
             />
           </p>
         </EuiText>
-      </Fragment>
+      </>
     ),
   },
   {
@@ -62,27 +62,27 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.display',
       {
-        defaultMessage: 'Every time rule is active',
+        defaultMessage: 'Every time alert is active',
       }
     ),
     'data-test-subj': 'onActiveAlert',
     dropdownDisplay: (
-      <Fragment>
+      <>
         <strong>
           <FormattedMessage
-            defaultMessage="Every time rule is active"
+            defaultMessage="Every time alert is active"
             id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run with every active rule interval."
+              defaultMessage="Actions repeat at the rule interval when the alert is active."
               id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.description"
             />
           </p>
         </EuiText>
-      </Fragment>
+      </>
     ),
   },
   {
@@ -95,7 +95,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     ),
     'data-test-subj': 'onThrottleInterval',
     dropdownDisplay: (
-      <Fragment>
+      <>
         <strong>
           <FormattedMessage
             defaultMessage="On a custom action interval"
@@ -110,7 +110,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
             />
           </p>
         </EuiText>
-      </Fragment>
+      </>
     ),
   },
 ];
@@ -173,7 +173,7 @@ export const AlertNotifyWhen = ({
   );
 
   return (
-    <Fragment>
+    <>
       <EuiFormRow fullWidth label={labelForAlertRenotify}>
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
@@ -184,7 +184,7 @@ export const AlertNotifyWhen = ({
               onChange={onNotifyWhenValueChange}
             />
             {showCustomThrottleOpts && (
-              <Fragment>
+              <>
                 <EuiSpacer />
                 <EuiFormRow fullWidth>
                   <EuiFlexGroup gutterSize="s">
@@ -227,11 +227,11 @@ export const AlertNotifyWhen = ({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFormRow>
-              </Fragment>
+              </>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-    </Fragment>
+    </>
   );
 };

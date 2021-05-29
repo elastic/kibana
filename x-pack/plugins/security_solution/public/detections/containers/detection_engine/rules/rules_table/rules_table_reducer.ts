@@ -50,7 +50,7 @@ export type RulesTableAction =
   | { type: 'failure' };
 
 export const createRulesTableReducer = (
-  tableRef: React.MutableRefObject<EuiBasicTable<unknown> | undefined>
+  tableRef: React.MutableRefObject<EuiBasicTable<unknown> | null>
 ) => {
   const rulesTableReducer = (state: RulesTableState, action: RulesTableAction): RulesTableState => {
     switch (action.type) {

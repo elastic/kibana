@@ -455,10 +455,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       await this.props.indexPatterns.clearCache();
     }
 
-    const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
-    const deletes = objects.savedObjects.map((object) =>
-      savedObjectsClient.delete(object.type, object.id, { force: true })
-    );
+    const deletes = selectedSavedObjects
+      .filter((object) => !object.meta.hiddenType)
+      .map((object) => savedObjectsClient.delete(object.type, object.id, { force: true }));
     await Promise.all(deletes);
 
     // Unset this

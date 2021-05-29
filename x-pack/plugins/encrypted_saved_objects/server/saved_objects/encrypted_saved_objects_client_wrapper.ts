@@ -8,7 +8,6 @@
 import type {
   ISavedObjectTypeRegistry,
   SavedObject,
-  SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -18,15 +17,19 @@ import type {
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from 'src/core/server';
@@ -162,9 +165,9 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     return await this.options.baseClient.delete(type, id, options);
   }
 
-  public async find<T>(options: SavedObjectsFindOptions) {
+  public async find<T, A>(options: SavedObjectsFindOptions) {
     return await this.handleEncryptedAttributesInBulkResponse(
-      await this.options.baseClient.find<T>(options),
+      await this.options.baseClient.find<T, A>(options),
       undefined
     );
   }
@@ -228,24 +231,6 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
   }
 
-  public async addToNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options?: SavedObjectsAddToNamespacesOptions
-  ) {
-    return await this.options.baseClient.addToNamespaces(type, id, namespaces, options);
-  }
-
-  public async deleteFromNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options?: SavedObjectsDeleteFromNamespacesOptions
-  ) {
-    return await this.options.baseClient.deleteFromNamespaces(type, id, namespaces, options);
-  }
-
   public async removeReferencesTo(
     type: string,
     id: string,
@@ -265,15 +250,36 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     return await this.options.baseClient.closePointInTime(id, options);
   }
 
-  public createPointInTimeFinder(
+  public createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
   ) {
-    return this.options.baseClient.createPointInTimeFinder(findOptions, {
+    return this.options.baseClient.createPointInTimeFinder<T, A>(findOptions, {
       client: this,
       // Include dependencies last so that subsequent SO client wrappers have their settings applied.
       ...dependencies,
     });
+  }
+
+  public async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options?: SavedObjectsCollectMultiNamespaceReferencesOptions
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    return await this.options.baseClient.collectMultiNamespaceReferences(objects, options);
+  }
+
+  public async updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options?: SavedObjectsUpdateObjectsSpacesOptions
+  ) {
+    return await this.options.baseClient.updateObjectsSpaces(
+      objects,
+      spacesToAdd,
+      spacesToRemove,
+      options
+    );
   }
 
   /**

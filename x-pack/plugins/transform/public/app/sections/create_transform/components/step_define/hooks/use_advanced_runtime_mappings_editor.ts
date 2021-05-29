@@ -62,11 +62,8 @@ export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedStat
   const toggleRuntimeMappingsEditor = (reset = false) => {
     if (reset === true) {
       setRuntimeMappingsUpdated(false);
+      setAdvancedRuntimeMappingsConfig(advancedEditorRuntimeMappingsLastApplied);
     }
-    if (isRuntimeMappingsEditorEnabled === false) {
-      setAdvancedEditorRuntimeMappingsLastApplied(advancedRuntimeMappingsConfig);
-    }
-
     setRuntimeMappingsEditorEnabled(!isRuntimeMappingsEditorEnabled);
     setRuntimeMappingsEditorApplyButtonEnabled(false);
   };

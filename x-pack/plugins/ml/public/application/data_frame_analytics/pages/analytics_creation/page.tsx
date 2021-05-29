@@ -61,7 +61,7 @@ export const Page: FC<Props> = ({ jobId }) => {
 
   const createAnalyticsForm = useCreateAnalyticsForm();
   const { state } = createAnalyticsForm;
-  const { isAdvancedEditorEnabled, disableSwitchToForm } = state;
+  const { isAdvancedEditorEnabled, disableSwitchToForm, isJobCreated } = state;
   const { jobType } = state.form;
   const {
     initiateWizard,
@@ -217,7 +217,7 @@ export const Page: FC<Props> = ({ jobId }) => {
                 }
               >
                 <EuiSwitch
-                  disabled={jobType === undefined || disableSwitchToForm}
+                  disabled={jobType === undefined || disableSwitchToForm || isJobCreated}
                   label={i18n.translate(
                     'xpack.ml.dataframe.analytics.create.switchToJsonEditorSwitch',
                     {

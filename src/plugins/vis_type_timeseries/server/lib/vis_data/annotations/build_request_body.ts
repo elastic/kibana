@@ -7,8 +7,8 @@
  */
 
 import { IUiSettingsClient } from 'kibana/server';
-import { EsQueryConfig, IndexPattern } from 'src/plugins/data/server';
-import { AnnotationItemsSchema, PanelSchema } from '../../../../common/types';
+import { EsQueryConfig } from 'src/plugins/data/server';
+import type { Annotation, FetchedIndexPattern, Panel } from '../../../../common/types';
 import { VisTypeTimeseriesVisDataRequest } from '../../../types';
 import { DefaultSearchCapabilities } from '../../search_strategies';
 import { buildProcessorFunction } from '../build_processor_function';
@@ -17,24 +17,14 @@ import { processors } from '../request_processors/annotations';
 
 /**
  * Builds annotation request body
- *
- * @param {...args}: [
- *   req: {Object} - a request object,
- *   panel: {Object} - a panel object,
- *   annotation: {Object} - an annotation object,
- *   esQueryConfig: {Object} - es query config object,
- *   indexPatternObject: {Object} - an index pattern object,
- *   capabilities: {Object} - a search capabilities object
- * ]
- * @returns {Object} doc - processed body
  */
 export async function buildAnnotationRequest(
   ...args: [
     VisTypeTimeseriesVisDataRequest,
-    PanelSchema,
-    AnnotationItemsSchema,
+    Panel,
+    Annotation,
     EsQueryConfig,
-    IndexPattern | null | undefined,
+    FetchedIndexPattern,
     DefaultSearchCapabilities,
     IUiSettingsClient
   ]

@@ -7,7 +7,13 @@
 
 import React, { createContext, useContext, Context } from 'react';
 import { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
-import type { AppDataType, ReportViewTypeId, SeriesUrl, UrlFilter } from '../types';
+import type {
+  AppDataType,
+  ReportViewTypeId,
+  SeriesUrl,
+  UrlFilter,
+  URLReportDefinition,
+} from '../types';
 import { convertToShortUrl } from '../configurations/utils';
 import { OperationType, SeriesType } from '../../../../../../lens/public';
 import { URL_KEYS } from '../configurations/constants/url_constants';
@@ -26,37 +32,38 @@ export function UrlStorageContextProvider({
 }
 
 function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
-  const { mt, st, rt, bd, ft, time, rdf, ...restSeries } = newValue;
+  const { dt, op, st, rt, bd, ft, time, rdf, ...restSeries } = newValue;
   return {
-    metric: mt,
+    operationType: op,
     reportType: rt!,
     seriesType: st,
     breakdown: bd,
     filters: ft!,
     time: time!,
     reportDefinitions: rdf,
+    dataType: dt!,
     ...restSeries,
   };
 }
 
 interface ShortUrlSeries {
-  [URL_KEYS.METRIC_TYPE]?: OperationType;
+  [URL_KEYS.OPERATION_TYPE]?: OperationType;
   [URL_KEYS.REPORT_TYPE]?: ReportViewTypeId;
+  [URL_KEYS.DATA_TYPE]?: AppDataType;
   [URL_KEYS.SERIES_TYPE]?: SeriesType;
   [URL_KEYS.BREAK_DOWN]?: string;
   [URL_KEYS.FILTERS]?: UrlFilter[];
-  [URL_KEYS.REPORT_DEFINITIONS]?: Record<string, string>;
+  [URL_KEYS.REPORT_DEFINITIONS]?: URLReportDefinition;
   time?: {
     to: string;
     from: string;
   };
-  dataType?: AppDataType;
 }
 
 export type AllShortSeries = Record<string, ShortUrlSeries>;
 export type AllSeries = Record<string, SeriesUrl>;
 
-export const NEW_SERIES_KEY = 'newSeriesKey';
+export const NEW_SERIES_KEY = 'new-series-key';
 
 export function useUrlStorage(seriesId?: string) {
   const allSeriesKey = 'sr';

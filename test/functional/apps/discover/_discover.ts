@@ -11,7 +11,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const savedObjectInfo = getService('savedObjectInfo');
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
@@ -30,11 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
-      await kibanaServer.savedObjects.clean({ types: ['search'] });
       await kibanaServer.importExport.load('discover');
-      log.info(
-        `\n### SAVED OBJECT TYPES IN index: [.kibana]: \n\t${await savedObjectInfo.types()}`
-      );
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -52,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(time.end).to.be(PageObjects.timePicker.defaultEndTime);
         const rowData = await PageObjects.discover.getDocTableIndex(1);
         log.debug('check the newest doc timestamp in UTC (check diff timezone in last test)');
-        expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253')).to.be.ok();
+        expect(rowData).to.contain('Sep 22, 2015 @ 23:50:13.253');
       });
 
       it('save query should show toast message and display query name', async function () {
@@ -99,11 +94,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
         expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
-        await retry.waitFor('doc table to contain the right search result', async () => {
-          const rowData = await PageObjects.discover.getDocTableField(1);
-          log.debug(`The first timestamp value in doc table: ${rowData}`);
-          return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
-        });
+        await retry.waitForWithTimeout(
+          'doc table to contain the right search result',
+          1000,
+          async () => {
+            const rowData = await PageObjects.discover.getDocTableField(1);
+            log.debug(`The first timestamp value in doc table: ${rowData}`);
+            return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
+          }
+        );
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
@@ -132,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return actualCount === expectedCount;
         });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(27);
+        expect(Math.round(newDurationHours)).to.be(26);
 
         await retry.waitFor('doc table to contain the right search result', async () => {
           const rowData = await PageObjects.discover.getDocTableField(1);
@@ -182,7 +181,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('query #2, which has an empty time range', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/89550
+    describe.skip('query #2, which has an empty time range', () => {
       const fromTime = 'Jun 11, 1999 @ 09:22:11.000';
       const toTime = 'Jun 12, 1999 @ 11:21:04.000';
 
@@ -303,7 +303,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.clickFieldListItemAdd('_score');
-        await PageObjects.discover.clickFieldSort('_score');
+        await PageObjects.discover.clickFieldSort('_score', 'Sort Low-High');
         const currentUrlWithScore = await browser.getCurrentUrl();
         expect(currentUrlWithScore).to.contain('_score');
         await PageObjects.discover.clickFieldListItemAdd('_score');
@@ -314,7 +314,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.clickFieldListItemAdd('referer');
-        await PageObjects.discover.clickFieldSort('referer');
+        await PageObjects.discover.clickFieldSort('referer', 'Sort A-Z');
         expect(await PageObjects.discover.getDocHeader()).to.have.string('Referer custom');
         expect(await PageObjects.discover.getAllFieldNames()).to.contain('Referer custom');
         const url = await browser.getCurrentUrl();

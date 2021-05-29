@@ -3,10 +3,19 @@
   "license": {},
   "elasticsearch": {
     "cluster_stats": {
-      "indices": {},
+      "indices": {
+        "docs": {},
+        "shards": {},
+        "store": {}
+      },
       "nodes": {
-        "count": {},
-        "jvm": {}
+        "count": {
+          "total": {}
+        },
+        "fs": {},
+        "jvm": {
+          "mem": {}
+        }
       }
     },
     "logs": {
@@ -40,13 +49,13 @@
   "apm": {
     "totalEvents": 0,
     "memRss": 0,
-    "memTotal": 0,
     "apms": {
       "total": 0
     },
     "config": {
       "container": false
-    }
+    },
+    "versions": []
   },
   "isPrimary": false
 }]

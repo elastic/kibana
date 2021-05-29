@@ -6,13 +6,14 @@
  */
 
 import moment from 'moment';
+import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type {
   AppClient,
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
 
-import { validate } from '../../../../../common/validate';
 import {
   PrePackagedRulesAndTimelinesSchema,
   prePackagedRulesAndTimelinesSchema,
@@ -24,15 +25,15 @@ import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 
-import { getIndexExists } from '../../index/get_index_exists';
-import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
+import { getLatestPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { installPrepackagedRules } from '../../rules/install_prepacked_rules';
 import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
+import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset_saved_objects_client';
 
-import { transformError, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { AlertsClient } from '../../../../../../alerting/server';
 import { FrameworkRequest } from '../../../framework';
 
@@ -110,7 +111,7 @@ export const createPrepackagedRules = async (
   const savedObjectsClient = context.core.savedObjects.client;
   const exceptionsListClient =
     context.lists != null ? context.lists.getExceptionListClient() : exceptionsClient;
-
+  const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
   if (!siemClient || !alertsClient) {
     throw new PrepackagedRulesError('', 404);
   }
@@ -120,10 +121,10 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const rulesFromFileSystem = getPrepackagedRules();
+  const latestPrepackagedRules = await getLatestPrepackagedRules(ruleAssetsClient);
   const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
-  const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
-  const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
+  const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
+  const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
   const signalsIndex = siemClient.getSignalsIndex();
   if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
     const signalsIndexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);

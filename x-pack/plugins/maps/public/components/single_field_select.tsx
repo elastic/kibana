@@ -114,7 +114,7 @@ export function SingleFieldSelect({
       options={fieldsToOptions(fields, isFieldDisabled)}
       selectedOptions={selectedOptions}
       onChange={onSelection}
-      isDisabled={!fields}
+      isDisabled={!fields || fields.length === 0}
       renderOption={renderOption}
       {...rest}
     />

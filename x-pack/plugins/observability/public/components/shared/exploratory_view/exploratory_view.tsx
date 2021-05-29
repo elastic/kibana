@@ -5,65 +5,102 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { EuiPanel, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { EuiLoadingSpinner, EuiPanel, EuiTitle } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
-import { SeriesEditor } from './series_editor/series_editor';
 import { useUrlStorage } from './hooks/use_url_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
 import { EmptyView } from './components/empty_view';
-import { useIndexPatternContext } from './hooks/use_default_index_pattern';
 import { TypedLensByValueInput } from '../../../../../lens/public';
+import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
+import { ReportToDataTypeMap } from './configurations/constants';
+import { SeriesBuilder } from './series_builder/series_builder';
 
 export function ExploratoryView() {
   const {
-    services: { lens },
+    services: { lens, notifications },
   } = useKibana<ObservabilityPublicPluginsStart>();
+
+  const seriesBuilderRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const [height, setHeight] = useState<string>('100vh');
 
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null
   );
 
-  const { indexPattern } = useIndexPatternContext();
+  const { loadIndexPattern, loading } = useAppIndexPatternContext();
 
   const LensComponent = lens?.EmbeddableComponent;
 
-  const { firstSeriesId: seriesId, firstSeries: series } = useUrlStorage();
+  const { firstSeriesId: seriesId, firstSeries: series, setSeries } = useUrlStorage();
 
   const lensAttributesT = useLensAttributes({
     seriesId,
-    indexPattern,
   });
+
+  const setHeightOffset = () => {
+    if (seriesBuilderRef?.current && wrapperRef.current) {
+      const headerOffset = wrapperRef.current.getBoundingClientRect().top;
+      const seriesOffset = seriesBuilderRef.current.getBoundingClientRect().height;
+      setHeight(`calc(100vh - ${seriesOffset + headerOffset + 40}px)`);
+    }
+  };
+
+  useEffect(() => {
+    if (series?.reportType || series?.dataType) {
+      loadIndexPattern({ dataType: series?.dataType ?? ReportToDataTypeMap[series?.reportType] });
+    }
+  }, [series?.reportType, series?.dataType, loadIndexPattern]);
 
   useEffect(() => {
     setLensAttributes(lensAttributesT);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(lensAttributesT ?? {}), series?.reportType, series?.time?.from]);
 
+  useEffect(() => {
+    setHeightOffset();
+  });
+
   return (
-    <EuiPanel style={{ maxWidth: 1800, minWidth: 1200, margin: '0 auto' }}>
+    <Wrapper>
       {lens ? (
         <>
           <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
-          {!indexPattern && (
-            <SpinnerWrap>
-              <EuiLoadingSpinner size="xl" />
-            </SpinnerWrap>
-          )}
-          {lensAttributes && seriesId && series?.reportType && series?.time ? (
-            <LensComponent
-              id="exploratoryView"
-              style={{ height: 550 }}
-              timeRange={series?.time}
-              attributes={lensAttributes}
-            />
-          ) : (
-            <EmptyView />
-          )}
-          <SeriesEditor />
+          <LensWrapper ref={wrapperRef} height={height}>
+            {lensAttributes && seriesId && series?.reportType && series?.time ? (
+              <LensComponent
+                id="exploratoryView"
+                timeRange={series?.time}
+                attributes={lensAttributes}
+                onBrushEnd={({ range }) => {
+                  if (series?.reportType !== 'pld') {
+                    setSeries(seriesId, {
+                      ...series,
+                      time: {
+                        from: new Date(range[0]).toISOString(),
+                        to: new Date(range[1]).toISOString(),
+                      },
+                    });
+                  } else {
+                    notifications?.toasts.add(
+                      i18n.translate('xpack.observability.exploratoryView.noBrusing', {
+                        defaultMessage:
+                          'Zoom by brush selection is only available on time series charts.',
+                      })
+                    );
+                  }
+                }}
+              />
+            ) : (
+              <EmptyView series={series} loading={loading} height={height} />
+            )}
+          </LensWrapper>
+          <SeriesBuilder seriesId={seriesId} seriesBuilderRef={seriesBuilderRef} />
         </>
       ) : (
         <EuiTitle>
@@ -75,13 +112,21 @@ export function ExploratoryView() {
           </h2>
         </EuiTitle>
       )}
-    </EuiPanel>
+    </Wrapper>
   );
 }
+const LensWrapper = styled.div<{ height: string }>`
+  min-height: 400px;
+  height: ${(props) => props.height};
 
-const SpinnerWrap = styled.div`
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  &&& > div {
+    height: 100%;
+  }
+`;
+const Wrapper = styled(EuiPanel)`
+  max-width: 1800px;
+  min-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  overflow-x: auto;
 `;

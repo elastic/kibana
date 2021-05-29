@@ -7,7 +7,7 @@
 
 import './dimension_editor.scss';
 import _ from 'lodash';
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
@@ -27,7 +27,6 @@ import {
   getOperationDisplay,
   insertOrReplaceColumn,
   replaceColumn,
-  deleteColumn,
   updateColumnParam,
   resetIncomplete,
   FieldBasedIndexPatternColumn,
@@ -45,6 +44,7 @@ import { ReferenceEditor } from './reference_editor';
 import { setTimeScaling, TimeScaling } from './time_scaling';
 import { defaultFilter, Filtering, setFilter } from './filtering';
 import { AdvancedOptions } from './advanced_options';
+import { useDebouncedValue } from '../../shared_components';
 
 const operationPanels = getOperationDisplay();
 
@@ -54,39 +54,8 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   currentIndexPattern: IndexPattern;
 }
 
-/**
- * This component shows a debounced input for the label of a dimension. It will update on root state changes
- * if no debounced changes are in flight because the user is currently typing into the input.
- */
 const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
-  const [inputValue, setInputValue] = useState(value);
-  const unflushedChanges = useRef(false);
-
-  // Save the initial value
-  const initialValue = useRef(value);
-
-  const onChangeDebounced = useMemo(() => {
-    const callback = _.debounce((val: string) => {
-      onChange(val);
-      unflushedChanges.current = false;
-    }, 256);
-    return (val: string) => {
-      unflushedChanges.current = true;
-      callback(val);
-    };
-  }, [onChange]);
-
-  useEffect(() => {
-    if (!unflushedChanges.current && value !== inputValue) {
-      setInputValue(value);
-    }
-  }, [value, inputValue]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = String(e.target.value);
-    setInputValue(val);
-    onChangeDebounced(val || initialValue.current);
-  };
+  const { inputValue, handleInputChange, initialValue } = useDebouncedValue({ onChange, value });
 
   return (
     <EuiFormRow
@@ -101,8 +70,10 @@ const LabelInput = ({ value, onChange }: { value: string; onChange: (value: stri
         compressed
         data-test-subj="indexPattern-label-edit"
         value={inputValue}
-        onChange={handleInputChange}
-        placeholder={initialValue.current}
+        onChange={(e) => {
+          handleInputChange(e.target.value);
+        }}
+        placeholder={initialValue}
       />
     </EuiFormRow>
   );
@@ -152,6 +123,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
+      .filter(({ hidden }) => !hidden)
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
@@ -243,6 +215,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         onClick() {
           if (
             operationDefinitionMap[operationType].input === 'none' ||
+            operationDefinitionMap[operationType].input === 'managedReference' ||
             operationDefinitionMap[operationType].input === 'fullReference'
           ) {
             // Clear invalid state because we are reseting to a valid column
@@ -320,7 +293,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   // Need to workout early on the error to decide whether to show this or an help text
   const fieldErrorMessage =
-    (selectedOperationDefinition?.input !== 'fullReference' ||
+    ((selectedOperationDefinition?.input !== 'fullReference' &&
+      selectedOperationDefinition?.input !== 'managedReference') ||
       (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field')) &&
     getErrorMessage(
       selectedColumn,
@@ -422,15 +396,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   : (selectedColumn as FieldBasedIndexPatternColumn)?.sourceField
               }
               incompleteOperation={incompleteOperation}
-              onDeleteColumn={() => {
-                setStateWrapper(
-                  deleteColumn({
-                    layer: state.layers[layerId],
-                    columnId,
-                    indexPattern: currentIndexPattern,
-                  })
-                );
-              }}
               onChoose={(choice) => {
                 setStateWrapper(
                   insertOrReplaceColumn({
@@ -457,6 +422,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               currentColumn={state.layers[layerId].columns[columnId]}
               dateRange={dateRange}
               indexPattern={currentIndexPattern}
+              operationDefinitionMap={operationDefinitionMap}
               {...services}
             />
           </>
@@ -542,7 +508,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         [columnId]: {
                           ...selectedColumn,
                           label: value,
-                          customLabel: true,
+                          customLabel:
+                            operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
+                              selectedColumn,
+                              state.indexPatterns[state.layers[layerId].indexPatternId],
+                              state.layers[layerId].columns
+                            ) !== value,
                         },
                       },
                     },
@@ -591,7 +562,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 function getErrorMessage(
   selectedColumn: IndexPatternColumn | undefined,
   incompleteOperation: boolean,
-  input: 'none' | 'field' | 'fullReference' | undefined,
+  input: 'none' | 'field' | 'fullReference' | 'managedReference' | undefined,
   fieldInvalid: boolean
 ) {
   if (selectedColumn && incompleteOperation) {

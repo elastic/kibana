@@ -46,7 +46,7 @@ export const appsSection: ISection[] = [
     href: 'https://www.elastic.co',
   },
   {
-    id: 'uptime',
+    id: 'synthetics',
     title: i18n.translate('xpack.observability.section.apps.uptime.title', {
       defaultMessage: 'Uptime',
     }),

@@ -7,9 +7,9 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
+  CoreStart,
   ILegacyCustomClusterClient,
   Plugin,
   Logger,
@@ -19,12 +19,11 @@ import {
 
 import { Index } from '../../index_management/server';
 import { PLUGIN } from '../common/constants';
-import type { Dependencies, CcrRequestHandlerContext } from './types';
+import { SetupDependencies, StartDependencies, CcrRequestHandlerContext } from './types';
 import { registerApiRoutes } from './routes';
-import { License } from './services';
 import { elasticsearchJsPlugin } from './client/elasticsearch_ccr';
 import { CrossClusterReplicationConfig } from './config';
-import { isEsError } from './shared_imports';
+import { License, isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
@@ -77,7 +76,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
 
   setup(
     { http, getStartServices }: CoreSetup,
-    { features, licensing, indexManagement, remoteClusters }: Dependencies
+    { features, licensing, indexManagement, remoteClusters }: SetupDependencies
   ) {
     this.config$
       .pipe(first())
@@ -97,22 +96,10 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
         }
       });
 
-    this.license.setup(
-      {
-        pluginId: PLUGIN.ID,
-        minimumLicenseType: PLUGIN.minimumLicenseType,
-        defaultErrorMessage: i18n.translate(
-          'xpack.crossClusterReplication.licenseCheckErrorMessage',
-          {
-            defaultMessage: 'License check failed',
-          }
-        ),
-      },
-      {
-        licensing,
-        logger: this.logger,
-      }
-    );
+    this.license.setup({
+      pluginName: PLUGIN.TITLE,
+      logger: this.logger,
+    });
 
     features.registerElasticsearchFeature({
       id: 'cross_cluster_replication',
@@ -147,7 +134,13 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
     });
   }
 
-  start() {}
+  start(core: CoreStart, { licensing }: StartDependencies) {
+    this.license.start({
+      pluginId: PLUGIN.ID,
+      minimumLicenseType: PLUGIN.minimumLicenseType,
+      licensing,
+    });
+  }
 
   stop() {
     if (this.ccrEsClient) {

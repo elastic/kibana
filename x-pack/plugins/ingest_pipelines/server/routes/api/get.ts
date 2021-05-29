@@ -15,39 +15,25 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export const registerGetRoutes = ({
-  router,
-  license,
-  lib: { isEsError },
-}: RouteDependencies): void => {
+export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDependencies): void => {
   // Get all pipelines
-  router.get(
-    { path: API_BASE_PATH, validate: false },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+  router.get({ path: API_BASE_PATH, validate: false }, async (ctx, req, res) => {
+    const { client: clusterClient } = ctx.core.elasticsearch;
 
-      try {
-        const pipelines = await callAsCurrentUser('ingest.getPipeline');
+    try {
+      const { body: pipelines } = await clusterClient.asCurrentUser.ingest.getPipeline();
 
-        return res.ok({ body: deserializePipelines(pipelines) });
-      } catch (error) {
-        if (isEsError(error)) {
-          // ES returns 404 when there are no pipelines
-          // Instead, we return an empty array and 200 status back to the client
-          if (error.status === 404) {
-            return res.ok({ body: [] });
-          }
-
-          return res.customError({
-            statusCode: error.statusCode,
-            body: error,
-          });
-        }
-
-        throw error;
+      return res.ok({ body: deserializePipelines(pipelines) });
+    } catch (error) {
+      const esErrorResponse = handleEsError({ error, response: res });
+      if (esErrorResponse.status === 404) {
+        // ES returns 404 when there are no pipelines
+        // Instead, we return an empty array and 200 status back to the client
+        return res.ok({ body: [] });
       }
-    })
-  );
+      return esErrorResponse;
+    }
+  });
 
   // Get single pipeline
   router.get(
@@ -57,29 +43,24 @@ export const registerGetRoutes = ({
         params: paramsSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+    async (ctx, req, res) => {
+      const { client: clusterClient } = ctx.core.elasticsearch;
       const { name } = req.params;
 
       try {
-        const pipeline = await callAsCurrentUser('ingest.getPipeline', { id: name });
+        const { body: pipelines } = await clusterClient.asCurrentUser.ingest.getPipeline({
+          id: name,
+        });
 
         return res.ok({
           body: {
-            ...pipeline[name],
+            ...pipelines[name],
             name,
           },
         });
       } catch (error) {
-        if (isEsError(error)) {
-          return res.customError({
-            statusCode: error.statusCode,
-            body: error,
-          });
-        }
-
-        throw error;
+        return handleEsError({ error, response: res });
       }
-    })
+    }
   );
 };

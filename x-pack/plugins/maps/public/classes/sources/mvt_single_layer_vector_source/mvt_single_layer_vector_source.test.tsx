@@ -30,10 +30,10 @@ describe('getUrlTemplateWithMeta', () => {
   });
 });
 
-describe('canFormatFeatureProperties', () => {
+describe('hasTooltipProperties', () => {
   it('false if no tooltips', async () => {
     const source = new MVTSingleLayerVectorSource(descriptor);
-    expect(source.canFormatFeatureProperties()).toEqual(false);
+    expect(source.hasTooltipProperties()).toEqual(false);
   });
   it('true if tooltip', async () => {
     const descriptorWithTooltips = {
@@ -42,7 +42,7 @@ describe('canFormatFeatureProperties', () => {
       tooltipProperties: ['foobar'],
     };
     const source = new MVTSingleLayerVectorSource(descriptorWithTooltips);
-    expect(source.canFormatFeatureProperties()).toEqual(true);
+    expect(source.hasTooltipProperties()).toEqual(true);
   });
 });
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EventOutcome } from '../../../security/server/audit';
 import { AlertAuditAction, alertAuditEvent } from './audit_events';
 
 describe('#alertAuditEvent', () => {
@@ -13,7 +12,7 @@ describe('#alertAuditEvent', () => {
     expect(
       alertAuditEvent({
         action: AlertAuditAction.CREATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'alert', id: 'ALERT_ID' },
       })
     ).toMatchInlineSnapshot(`
@@ -21,9 +20,13 @@ describe('#alertAuditEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "alert_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "unknown",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "saved_object": Object {
@@ -47,9 +50,13 @@ describe('#alertAuditEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "alert_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "success",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "saved_object": Object {
@@ -77,9 +84,13 @@ describe('#alertAuditEvent', () => {
         },
         "event": Object {
           "action": "alert_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "failure",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "saved_object": Object {

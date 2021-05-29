@@ -12,6 +12,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
 import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
@@ -30,6 +31,7 @@ import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { px, units } from '../style/variables';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
+import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
 
 const CsmMainContainer = euiStyled.div`
   padding: ${px(units.plus)};
@@ -72,12 +74,14 @@ export function CsmAppRoot({
   deps,
   config,
   corePlugins: { embeddable, maps },
+  observabilityRuleTypeRegistry,
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   config: ConfigSchema;
   corePlugins: ApmPluginStartDeps;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) {
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
@@ -87,7 +91,9 @@ export function CsmAppRoot({
     config,
     core,
     plugins,
+    observabilityRuleTypeRegistry,
   };
+
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
@@ -96,6 +102,7 @@ export function CsmAppRoot({
             <Router history={history}>
               <UrlParamsProvider>
                 <CsmApp />
+                <UXActionMenu appMountParameters={appMountParameters} />
               </UrlParamsProvider>
             </Router>
           </i18nCore.Context>
@@ -109,13 +116,21 @@ export function CsmAppRoot({
  * This module is rendered asynchronously in the Kibana platform.
  */
 
-export const renderApp = (
-  core: CoreStart,
-  deps: ApmPluginSetupDeps,
-  appMountParameters: AppMountParameters,
-  config: ConfigSchema,
-  corePlugins: ApmPluginStartDeps
-) => {
+export const renderApp = ({
+  core,
+  deps,
+  appMountParameters,
+  config,
+  corePlugins,
+  observabilityRuleTypeRegistry,
+}: {
+  core: CoreStart;
+  deps: ApmPluginSetupDeps;
+  appMountParameters: AppMountParameters;
+  config: ConfigSchema;
+  corePlugins: ApmPluginStartDeps;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+}) => {
   const { element } = appMountParameters;
 
   createCallApmApi(core);
@@ -133,6 +148,7 @@ export const renderApp = (
       deps={deps}
       config={config}
       corePlugins={corePlugins}
+      observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
     />,
     element
   );

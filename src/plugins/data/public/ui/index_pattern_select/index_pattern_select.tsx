@@ -23,7 +23,6 @@ export type IndexPatternSelectProps = Required<
 > & {
   onChange: (indexPatternId?: string) => void;
   indexPatternId: string;
-  fieldTypes?: string[];
   onNoIndexPatterns?: () => void;
 };
 
@@ -102,49 +101,18 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
   };
 
   debouncedFetch = _.debounce(async (searchValue: string) => {
-    const isCurrentSearch = () => {
-      return this.isMounted && searchValue === this.state.searchValue;
-    };
-
     const idsAndTitles = await this.props.indexPatternService.getIdsWithTitle();
-    if (!isCurrentSearch()) {
+    if (!this.isMounted || searchValue !== this.state.searchValue) {
       return;
     }
 
     const options = [];
     for (let i = 0; i < idsAndTitles.length; i++) {
-      if (!idsAndTitles[i].title.toLowerCase().includes(searchValue.toLowerCase())) {
-        // index pattern excluded due to title not matching search
-        continue;
-      }
-
-      if (this.props.fieldTypes) {
-        try {
-          const indexPattern = await this.props.indexPatternService.get(idsAndTitles[i].id);
-          if (!isCurrentSearch()) {
-            return;
-          }
-          const hasRequiredFieldTypes = indexPattern.fields.some((field) => {
-            return this.props.fieldTypes!.includes(field.type);
-          });
-          if (!hasRequiredFieldTypes) {
-            continue;
-          }
-        } catch (err) {
-          // could not load index pattern, exclude it from list.
-          continue;
-        }
-      }
-
-      options.push({
-        label: idsAndTitles[i].title,
-        value: idsAndTitles[i].id,
-      });
-
-      // Loading each index pattern object requires a network call so just find small number of matching index patterns
-      // Users can use 'searchValue' to further refine the list and locate their index pattern.
-      if (options.length > 15) {
-        break;
+      if (idsAndTitles[i].title.toLowerCase().includes(searchValue.toLowerCase())) {
+        options.push({
+          label: idsAndTitles[i].title,
+          value: idsAndTitles[i].id,
+        });
       }
     }
 
@@ -174,7 +142,6 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
 
   render() {
     const {
-      fieldTypes,
       onChange,
       indexPatternId,
       placeholder,

@@ -349,18 +349,49 @@ export function makeESBbox({ maxLat, maxLon, minLat, minLon }: MapExtent): ESBBo
   return esBbox;
 }
 
-export function createExtentFilter(mapExtent: MapExtent, geoFieldName: string): GeoFilter {
-  return {
-    geo_bounding_box: {
-      [geoFieldName]: makeESBbox(mapExtent),
-    },
-    meta: {
-      alias: null,
-      disabled: false,
-      negate: false,
-      key: geoFieldName,
-    },
-  };
+export function createExtentFilter(mapExtent: MapExtent, geoFieldNames: string[]): GeoFilter {
+  const esBbox = makeESBbox(mapExtent);
+  return geoFieldNames.length === 1
+    ? {
+        geo_bounding_box: {
+          [geoFieldNames[0]]: esBbox,
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+          key: geoFieldNames[0],
+        },
+      }
+    : {
+        query: {
+          bool: {
+            should: geoFieldNames.map((geoFieldName) => {
+              return {
+                bool: {
+                  must: [
+                    {
+                      exists: {
+                        field: geoFieldName,
+                      },
+                    },
+                    {
+                      geo_bounding_box: {
+                        [geoFieldName]: esBbox,
+                      },
+                    },
+                  ],
+                },
+              };
+            }),
+          },
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+      };
 }
 
 export function createSpatialFilterWithGeometry({
@@ -369,40 +400,27 @@ export function createSpatialFilterWithGeometry({
   geometryLabel,
   indexPatternId,
   geoFieldName,
-  geoFieldType,
   relation = ES_SPATIAL_RELATIONS.INTERSECTS,
 }: {
-  preIndexedShape?: PreIndexedShape;
+  preIndexedShape?: PreIndexedShape | null;
   geometry: Polygon;
   geometryLabel: string;
   indexPatternId: string;
   geoFieldName: string;
-  geoFieldType: ES_GEO_FIELD_TYPE;
   relation: ES_SPATIAL_RELATIONS;
 }): GeoFilter {
-  ensureGeoField(geoFieldType);
-
-  const isGeoPoint = geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
-
-  const relationLabel = isGeoPoint
-    ? i18n.translate('xpack.maps.es_geo_utils.shapeFilter.geoPointRelationLabel', {
-        defaultMessage: 'in',
-      })
-    : getEsSpatialRelationLabel(relation);
   const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
     negate: false,
     index: indexPatternId,
     key: geoFieldName,
-    alias: `${geoFieldName} ${relationLabel} ${geometryLabel}`,
+    alias: `${geoFieldName} ${getEsSpatialRelationLabel(relation)} ${geometryLabel}`,
     disabled: false,
   };
 
   const shapeQuery: GeoShapeQueryBody = {
-    // geo_shape query with geo_point field only supports intersects relation
-    relation: isGeoPoint ? ES_SPATIAL_RELATIONS.INTERSECTS : relation,
+    relation,
   };
-
   if (preIndexedShape) {
     shapeQuery.indexed_shape = preIndexedShape;
   } else {

@@ -15,6 +15,8 @@ const filesToIgnore = [
   path.resolve(kibanaRoot, 'tsconfig.json'),
   path.resolve(kibanaRoot, 'tsconfig.base.json'),
   path.resolve(kibanaRoot, 'x-pack/plugins/apm', 'tsconfig.json'),
+  path.resolve(kibanaRoot, 'x-pack/plugins/observability', 'tsconfig.json'),
+  path.resolve(kibanaRoot, 'x-pack/plugins/rule_registry', 'tsconfig.json'),
   path.resolve(kibanaRoot, 'x-pack/test', 'tsconfig.json'),
 ];
 

@@ -9,22 +9,27 @@
 import { ConfigService } from '@kbn/config';
 import { CriticalError } from '../errors';
 
-export async function ensureValidConfiguration(configService: ConfigService) {
-  await configService.validate();
+const ignoredPaths = ['dev.', 'elastic.apm.'];
 
-  const unusedConfigKeys = await configService.getUnusedPaths();
+const invalidConfigExitCode = 78;
+const legacyInvalidConfigExitCode = 64;
+
+export async function ensureValidConfiguration(configService: ConfigService) {
+  try {
+    await configService.validate();
+  } catch (e) {
+    throw new CriticalError(e.message, 'InvalidConfig', invalidConfigExitCode, e);
+  }
+
+  const unusedPaths = await configService.getUnusedPaths();
+  const unusedConfigKeys = unusedPaths.filter((unusedPath) => {
+    return !ignoredPaths.some((ignoredPath) => unusedPath.startsWith(ignoredPath));
+  });
 
   if (unusedConfigKeys.length > 0) {
     const message = `Unknown configuration key(s): ${unusedConfigKeys
       .map((key) => `"${key}"`)
       .join(', ')}. Check for spelling errors and ensure that expected plugins are installed.`;
-    throw new InvalidConfigurationError(message);
-  }
-}
-
-class InvalidConfigurationError extends CriticalError {
-  constructor(message: string) {
-    super(message, 'InvalidConfig', 64);
-    Object.setPrototypeOf(this, InvalidConfigurationError.prototype);
+    throw new CriticalError(message, 'InvalidConfig', legacyInvalidConfigExitCode);
   }
 }

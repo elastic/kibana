@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels } from '../constants';
+import { FieldLabels, RECORDS_FIELD } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -19,12 +19,25 @@ import {
   SERVICE_NAME,
   TBT_FIELD,
   TRANSACTION_DURATION,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_TYPE,
+  TRANSACTION_URL,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
   USER_AGENT_VERSION,
 } from '../constants/elasticsearch_fieldnames';
+import {
+  BACKEND_TIME_LABEL,
+  CLS_LABEL,
+  FCP_LABEL,
+  FID_LABEL,
+  LCP_LABEL,
+  PAGE_LOAD_TIME_LABEL,
+  PAGES_LOADED_LABEL,
+  TBT_LABEL,
+  WEB_APPLICATION_LABEL,
+} from '../constants/labels';
 
 export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -35,12 +48,18 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
     xAxisColumn: {
       sourceField: 'performance.metric',
     },
-    yAxisColumn: {
-      operationType: 'count',
-      label: 'Pages loaded',
-    },
-    hasMetricType: false,
+    yAxisColumns: [
+      {
+        sourceField: RECORDS_FIELD,
+        label: PAGES_LOADED_LABEL,
+      },
+    ],
+    hasOperationType: false,
     defaultFilters: [
+      {
+        field: TRANSACTION_URL,
+        isNegated: false,
+      },
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,
       USER_AGENT_DEVICE,
@@ -63,24 +82,24 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
         custom: true,
         defaultValue: TRANSACTION_DURATION,
         options: [
-          { label: 'Page load time', field: TRANSACTION_DURATION },
-          { label: 'First contentful paint', field: FCP_FIELD },
-          { label: 'Total blocking time', field: TBT_FIELD },
-          // FIXME, review if we need these descriptions
-          { label: 'Largest contentful paint', field: LCP_FIELD, description: 'Core web vital' },
-          { label: 'First input delay', field: FID_FIELD, description: 'Core web vital' },
-          { label: 'Cumulative layout shift', field: CLS_FIELD, description: 'Core web vital' },
+          { label: PAGE_LOAD_TIME_LABEL, field: TRANSACTION_DURATION },
+          { label: BACKEND_TIME_LABEL, field: TRANSACTION_TIME_TO_FIRST_BYTE },
+          { label: FCP_LABEL, field: FCP_FIELD },
+          { label: TBT_LABEL, field: TBT_FIELD },
+          { label: LCP_LABEL, field: LCP_FIELD },
+          { label: FID_LABEL, field: FID_FIELD },
+          { label: CLS_LABEL, field: CLS_FIELD },
         ],
       },
     ],
     filters: [
-      buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],
     labels: {
       ...FieldLabels,
-      [SERVICE_NAME]: 'Web Application',
-      [TRANSACTION_DURATION]: 'Page load time (Seconds)',
+      [SERVICE_NAME]: WEB_APPLICATION_LABEL,
+      [TRANSACTION_DURATION]: PAGE_LOAD_TIME_LABEL,
     },
   };
 }

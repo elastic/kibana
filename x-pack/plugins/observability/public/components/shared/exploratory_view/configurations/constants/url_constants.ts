@@ -6,7 +6,8 @@
  */
 
 export enum URL_KEYS {
-  METRIC_TYPE = 'mt',
+  DATA_TYPE = 'dt',
+  OPERATION_TYPE = 'op',
   REPORT_TYPE = 'rt',
   SERIES_TYPE = 'st',
   BREAK_DOWN = 'bd',

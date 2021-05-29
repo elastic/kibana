@@ -5,10 +5,19 @@
  * 2.0.
  */
 
+import { getEntitiesParser } from '../helpers';
 import { buildAuthenticationsHistogramQuery } from './query.authentications_histogram.dsl';
+import { buildAuthenticationsHistogramQueryEntities } from './query.authentications_histogram_entities.dsl';
 
 export const authenticationsMatrixHistogramConfig = {
   buildDsl: buildAuthenticationsHistogramQuery,
   aggName: 'aggregations.eventActionGroup.buckets',
   parseKey: 'events.buckets',
+};
+
+export const authenticationsMatrixHistogramEntitiesConfig = {
+  buildDsl: buildAuthenticationsHistogramQueryEntities,
+  aggName: 'aggregations.events.buckets',
+  parseKey: 'events.buckets',
+  parser: getEntitiesParser,
 };

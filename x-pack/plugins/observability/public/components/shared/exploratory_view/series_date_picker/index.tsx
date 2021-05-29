@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useUrlStorage } from '../hooks/use_url_storage';
 import { useQuickTimeRanges } from '../../../../hooks/use_quick_time_ranges';
+import { DEFAULT_TIME } from '../configurations/constants';
 
 export interface TimePickerTime {
   from: string;
@@ -38,7 +39,7 @@ export function SeriesDatePicker({ seriesId }: Props) {
 
   useEffect(() => {
     if (!series || !series.time) {
-      setSeries(seriesId, { ...series, time: { from: 'now-5h', to: 'now' } });
+      setSeries(seriesId, { ...series, time: DEFAULT_TIME });
     }
   }, [seriesId, series, setSeries]);
 

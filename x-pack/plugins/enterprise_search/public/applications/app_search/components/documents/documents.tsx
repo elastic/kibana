@@ -16,23 +16,19 @@ import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 
 import { AppLogic } from '../../app_logic';
-import { EngineLogic } from '../engine';
+import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 
+import { DocumentCreationButton } from './components';
 import { DOCUMENTS_TITLE } from './constants';
-import { DocumentCreationButton } from './document_creation_button';
 import { SearchExperience } from './search_experience';
 
-interface Props {
-  engineBreadcrumb: string[];
-}
-
-export const Documents: React.FC<Props> = ({ engineBreadcrumb }) => {
+export const Documents: React.FC = () => {
   const { isMetaEngine } = useValues(EngineLogic);
   const { myRole } = useValues(AppLogic);
 
   return (
     <>
-      <SetPageChrome trail={[...engineBreadcrumb, DOCUMENTS_TITLE]} />
+      <SetPageChrome trail={getEngineBreadcrumbs([DOCUMENTS_TITLE])} />
       <EuiPageHeader
         pageTitle={DOCUMENTS_TITLE}
         rightSideItems={

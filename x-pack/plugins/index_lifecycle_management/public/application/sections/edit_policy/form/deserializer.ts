@@ -46,20 +46,24 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
       bestCompression: warm?.actions?.forcemerge?.index_codec === 'best_compression',
       dataTierAllocationType: determineDataTierAllocationType(warm?.actions),
       readonlyEnabled: Boolean(warm?.actions?.readonly),
+      minAgeToMilliSeconds: -1,
     },
     cold: {
       enabled: Boolean(cold),
       dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
       freezeEnabled: Boolean(cold?.actions?.freeze),
       readonlyEnabled: Boolean(cold?.actions?.readonly),
+      minAgeToMilliSeconds: -1,
     },
     frozen: {
       enabled: Boolean(frozen),
       dataTierAllocationType: determineDataTierAllocationType(frozen?.actions),
       freezeEnabled: Boolean(frozen?.actions?.freeze),
+      minAgeToMilliSeconds: -1,
     },
     delete: {
       enabled: Boolean(deletePhase),
+      minAgeToMilliSeconds: -1,
     },
     searchableSnapshot: {
       repository: defaultRepository,
@@ -77,6 +81,14 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
           const maxSize = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_size);
           draft.phases.hot.actions.rollover.max_size = maxSize.size;
           draft._meta.hot.customRollover.maxStorageSizeUnit = maxSize.units;
+        }
+
+        if (draft.phases.hot.actions.rollover.max_primary_shard_size) {
+          const maxPrimaryShardSize = splitSizeAndUnits(
+            draft.phases.hot.actions.rollover.max_primary_shard_size
+          );
+          draft.phases.hot.actions.rollover.max_primary_shard_size = maxPrimaryShardSize.size;
+          draft._meta.hot.customRollover.maxPrimaryShardSizeUnit = maxPrimaryShardSize.units;
         }
 
         if (draft.phases.hot.actions.rollover.max_age) {

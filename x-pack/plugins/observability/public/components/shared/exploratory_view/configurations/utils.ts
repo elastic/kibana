@@ -13,22 +13,24 @@ import { URL_KEYS } from './constants/url_constants';
 
 export function convertToShortUrl(series: SeriesUrl) {
   const {
-    metric,
+    operationType,
     seriesType,
     reportType,
     breakdown,
     filters,
     reportDefinitions,
+    dataType,
     ...restSeries
   } = series;
 
   return {
-    [URL_KEYS.METRIC_TYPE]: metric,
+    [URL_KEYS.OPERATION_TYPE]: operationType,
     [URL_KEYS.REPORT_TYPE]: reportType,
     [URL_KEYS.SERIES_TYPE]: seriesType,
     [URL_KEYS.BREAK_DOWN]: breakdown,
     [URL_KEYS.FILTERS]: filters,
     [URL_KEYS.REPORT_DEFINITIONS]: reportDefinitions,
+    [URL_KEYS.DATA_TYPE]: dataType,
     ...restSeries,
   };
 }
@@ -48,7 +50,26 @@ export function createExploratoryViewUrl(allSeries: AllSeries, baseHref = '') {
   );
 }
 
-export function buildPhraseFilter(field: string, value: any, indexPattern: IIndexPattern) {
-  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field)!;
-  return esFilters.buildPhraseFilter(fieldMeta, value, indexPattern);
+export function buildPhraseFilter(field: string, value: string, indexPattern: IIndexPattern) {
+  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
+  if (fieldMeta) {
+    return [esFilters.buildPhraseFilter(fieldMeta, value, indexPattern)];
+  }
+  return [];
+}
+
+export function buildPhrasesFilter(field: string, value: string[], indexPattern: IIndexPattern) {
+  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
+  if (fieldMeta) {
+    return [esFilters.buildPhrasesFilter(fieldMeta, value, indexPattern)];
+  }
+  return [];
+}
+
+export function buildExistsFilter(field: string, indexPattern: IIndexPattern) {
+  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
+  if (fieldMeta) {
+    return [esFilters.buildExistsFilter(fieldMeta, indexPattern)];
+  }
+  return [];
 }

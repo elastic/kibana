@@ -41,6 +41,7 @@ export const DocumentCountContent: FC<Props> = ({ config, totalCount }) => {
         chartPoints={chartPoints}
         timeRangeEarliest={timeRangeEarliest}
         timeRangeLatest={timeRangeLatest}
+        interval={documentCounts.interval}
       />
     </>
   );

@@ -18,6 +18,7 @@ export interface ReportingSetup {
   };
   getDefaultLayoutSelectors: typeof getDefaultLayoutSelectors;
   ReportingAPIClient: typeof ReportingAPIClient;
+  usesUiCapabilities: () => boolean;
 }
 
 export type ReportingStart = ReportingSetup;

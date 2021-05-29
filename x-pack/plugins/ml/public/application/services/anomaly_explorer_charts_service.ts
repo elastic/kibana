@@ -8,7 +8,7 @@
 import { each, find, get, map, reduce, sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Observable, of } from 'rxjs';
-import { map as mapObservable } from 'rxjs/operators';
+import { catchError, map as mapObservable } from 'rxjs/operators';
 import { RecordForInfluencer } from './results_service/results_service';
 import {
   isMappableJob,
@@ -29,7 +29,11 @@ import { CriteriaField, MlResultsService } from './results_service';
 import { TimefilterContract, TimeRange } from '../../../../../../src/plugins/data/public';
 import { CHART_TYPE, ChartType } from '../explorer/explorer_constants';
 import type { ChartRecord } from '../explorer/explorer_utils';
-import { RecordsForCriteria, ScheduledEventsByBucket } from './results_service/result_service_rx';
+import {
+  RecordsForCriteria,
+  ResultResponse,
+  ScheduledEventsByBucket,
+} from './results_service/result_service_rx';
 import { isPopulatedObject } from '../../../common/util/object_utils';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 import {
@@ -40,6 +44,7 @@ import { TimeRangeBounds } from '../util/time_buckets';
 import { isDefined } from '../../../common/types/guards';
 import { AppStateSelectedCells } from '../explorer/explorer_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
+import { ExplorerService } from '../explorer/explorer_dashboard_service';
 const CHART_MAX_POINTS = 500;
 const ANOMALIES_MAX_RESULTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -59,9 +64,8 @@ interface ChartPoint {
   numberOfCauses?: number;
   scheduledEvents?: any[];
 }
-interface MetricData {
+interface MetricData extends ResultResponse {
   results: Record<string, number>;
-  success: boolean;
 }
 interface SeriesConfig {
   jobId: JobId;
@@ -90,6 +94,8 @@ export interface SeriesConfigWithMetadata extends SeriesConfig {
   loading?: boolean;
   chartData?: ChartPoint[] | null;
   mapData?: Array<ChartRecord | undefined>;
+  plotEarliest?: number;
+  plotLatest?: number;
 }
 
 export const isSeriesConfigWithMetadata = (arg: unknown): arg is SeriesConfigWithMetadata => {
@@ -159,12 +165,13 @@ export class AnomalyExplorerChartsService {
     const halfPoints = Math.ceil(plotPoints / 2);
     const bounds = timeFilter.getActiveBounds();
     const boundsMin = bounds?.min ? bounds.min.valueOf() : undefined;
+    const boundsMax = bounds?.max ? bounds.max.valueOf() : undefined;
     let chartRange: ChartRange = {
       min: boundsMin
         ? Math.max(midpointMs - halfPoints * minBucketSpanMs, boundsMin)
         : midpointMs - halfPoints * minBucketSpanMs,
-      max: bounds?.max
-        ? Math.min(midpointMs + halfPoints * minBucketSpanMs, bounds.max.valueOf())
+      max: boundsMax
+        ? Math.min(midpointMs + halfPoints * minBucketSpanMs, boundsMax)
         : midpointMs + halfPoints * minBucketSpanMs,
     };
 
@@ -210,15 +217,21 @@ export class AnomalyExplorerChartsService {
     }
 
     // Elasticsearch aggregation returns points at start of bucket,
-    // so align the min to the length of the longest bucket.
+    // so align the min to the length of the longest bucket,
+    // and use the start of the latest selected bucket in the check
+    // for too many selected buckets, respecting the max bounds set in the view.
     chartRange.min = Math.floor(chartRange.min / maxBucketSpanMs) * maxBucketSpanMs;
     if (boundsMin !== undefined && chartRange.min < boundsMin) {
       chartRange.min = chartRange.min + maxBucketSpanMs;
     }
 
+    const selectedLatestBucketStart = boundsMax
+      ? Math.floor(Math.min(selectedLatestMs, boundsMax) / maxBucketSpanMs) * maxBucketSpanMs
+      : Math.floor(selectedLatestMs / maxBucketSpanMs) * maxBucketSpanMs;
+
     if (
-      (chartRange.min > selectedEarliestMs || chartRange.max < selectedLatestMs) &&
-      chartRange.max - chartRange.min < selectedLatestMs - selectedEarliestMs
+      (chartRange.min > selectedEarliestMs || chartRange.max < selectedLatestBucketStart) &&
+      chartRange.max - chartRange.min < selectedLatestBucketStart - selectedEarliestMs
     ) {
       tooManyBuckets = true;
     }
@@ -420,6 +433,7 @@ export class AnomalyExplorerChartsService {
   }
 
   public async getAnomalyData(
+    explorerService: ExplorerService | undefined,
     combinedJobRecords: Record<string, CombinedJob>,
     chartsContainerWidth: number,
     anomalyRecords: ChartRecord[] | undefined,
@@ -527,8 +541,26 @@ export class AnomalyExplorerChartsService {
       data.errorMessages = errorMessages;
     }
 
+    // TODO: replace this temporary fix for flickering issue
+    // https://github.com/elastic/kibana/issues/97266
+    if (explorerService) {
+      explorerService.setCharts({ ...data });
+    }
     if (seriesConfigs.length === 0) {
       return data;
+    }
+
+    function handleError(errorMsg: string, jobId: string): void {
+      // Group the jobIds by the type of error message
+      if (!data.errorMessages) {
+        data.errorMessages = {};
+      }
+
+      if (data.errorMessages[errorMsg]) {
+        data.errorMessages[errorMsg].add(jobId);
+      } else {
+        data.errorMessages[errorMsg] = new Set([jobId]);
+      }
     }
 
     // Query 1 - load the raw metric data.
@@ -562,6 +594,17 @@ export class AnomalyExplorerChartsService {
             range.max,
             bucketSpanSeconds * 1000,
             config.datafeedConfig
+          )
+          .pipe(
+            catchError((error) => {
+              handleError(
+                i18n.translate('xpack.ml.timeSeriesJob.metricDataErrorMessage', {
+                  defaultMessage: 'an error occurred while retrieving metric data',
+                }),
+                job.job_id
+              );
+              return of({ success: false, results: {}, error });
+            })
           )
           .toPromise();
       } else {
@@ -624,8 +667,15 @@ export class AnomalyExplorerChartsService {
               });
               resolve(obj);
             })
-            .catch((resp) => {
-              reject(resp);
+            .catch((error) => {
+              handleError(
+                i18n.translate('xpack.ml.timeSeriesJob.modelPlotDataErrorMessage', {
+                  defaultMessage: 'an error occurred while retrieving model plot data',
+                }),
+                job.job_id
+              );
+
+              reject(error);
             });
         });
       }
@@ -651,6 +701,17 @@ export class AnomalyExplorerChartsService {
           range.max,
           ANOMALIES_MAX_RESULTS
         )
+        .pipe(
+          catchError((error) => {
+            handleError(
+              i18n.translate('xpack.ml.timeSeriesJob.recordsForCriteriaErrorMessage', {
+                defaultMessage: 'an error occurred while retrieving anomaly records',
+              }),
+              config.jobId
+            );
+            return of({ success: false, records: [], error });
+          })
+        )
         .toPromise();
     }
 
@@ -668,6 +729,17 @@ export class AnomalyExplorerChartsService {
           config.bucketSpanSeconds * 1000,
           1,
           MAX_SCHEDULED_EVENTS
+        )
+        .pipe(
+          catchError((error) => {
+            handleError(
+              i18n.translate('xpack.ml.timeSeriesJob.scheduledEventsByBucketErrorMessage', {
+                defaultMessage: 'an error occurred while retrieving scheduled events',
+              }),
+              config.jobId
+            );
+            return of({ success: false, events: {}, error });
+          })
         )
         .toPromise();
     }
@@ -693,20 +765,30 @@ export class AnomalyExplorerChartsService {
       }
 
       const datafeedQuery = get(config, 'datafeedConfig.query', null);
-      return mlResultsService.getEventDistributionData(
-        Array.isArray(config.datafeedConfig.indices)
-          ? config.datafeedConfig.indices[0]
-          : config.datafeedConfig.indices,
-        splitField,
-        filterField,
-        datafeedQuery,
-        config.metricFunction,
-        config.metricFieldName,
-        config.timeField,
-        range.min,
-        range.max,
-        config.bucketSpanSeconds * 1000
-      );
+
+      return mlResultsService
+        .getEventDistributionData(
+          Array.isArray(config.datafeedConfig.indices)
+            ? config.datafeedConfig.indices[0]
+            : config.datafeedConfig.indices,
+          splitField,
+          filterField,
+          datafeedQuery,
+          config.metricFunction,
+          config.metricFieldName,
+          config.timeField,
+          range.min,
+          range.max,
+          config.bucketSpanSeconds * 1000
+        )
+        .catch((err) => {
+          handleError(
+            i18n.translate('xpack.ml.timeSeriesJob.eventDistributionDataErrorMessage', {
+              defaultMessage: 'an error occurred while retrieving data',
+            }),
+            config.jobId
+          );
+        });
     }
 
     // first load and wait for required data,
@@ -749,9 +831,11 @@ export class AnomalyExplorerChartsService {
       //    plus anomalyScore for points with anomaly markers.
       let chartData: ChartPoint[] = [];
       if (metricData !== undefined) {
-        if (eventDistribution.length > 0 && records.length > 0) {
+        if (records.length > 0) {
           const filterField = records[0].by_field_value || records[0].over_field_value;
-          chartData = eventDistribution.filter((d: { entity: any }) => d.entity !== filterField);
+          if (eventDistribution.length > 0) {
+            chartData = eventDistribution.filter((d: { entity: any }) => d.entity !== filterField);
+          }
           map(metricData, (value, time) => {
             // The filtering for rare/event_distribution charts needs to be handled
             // differently because of how the source data is structured.
@@ -867,25 +951,34 @@ export class AnomalyExplorerChartsService {
         );
         const overallChartLimits = chartLimits(allDataPoints);
 
-        data.seriesToPlot = response.map((d, i) => {
-          return {
-            ...seriesConfigsForPromises[i],
-            loading: false,
-            chartData: processedData[i],
-            plotEarliest: chartRange.min,
-            plotLatest: chartRange.max,
-            selectedEarliest: selectedEarliestMs,
-            selectedLatest: selectedLatestMs,
-            chartLimits: USE_OVERALL_CHART_LIMITS
-              ? overallChartLimits
-              : chartLimits(processedData[i]),
-          };
-        });
+        data.seriesToPlot = response
+          // Don't show the charts if there was an issue retrieving metric or anomaly data
+          .filter((r) => r[0]?.success === true && r[1]?.success === true)
+          .map((d, i) => {
+            return {
+              ...seriesConfigsForPromises[i],
+              loading: false,
+              chartData: processedData[i],
+              plotEarliest: chartRange.min,
+              plotLatest: chartRange.max,
+              selectedEarliest: selectedEarliestMs,
+              selectedLatest: selectedLatestMs,
+              chartLimits: USE_OVERALL_CHART_LIMITS
+                ? overallChartLimits
+                : chartLimits(processedData[i]),
+            };
+          });
 
         if (mapData.length) {
           // push map data in if it's available
           data.seriesToPlot.push(...mapData);
         }
+
+        // TODO: replace this temporary fix for flickering issue
+        if (explorerService) {
+          explorerService.setCharts({ ...data });
+        }
+
         return Promise.resolve(data);
       })
       .catch((error) => {

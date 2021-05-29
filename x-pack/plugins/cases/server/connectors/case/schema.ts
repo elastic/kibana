@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CommentType } from '../../../common/api';
+import { CommentType } from '../../../common';
 import { validateConnector } from './validators';
 
 // Reserved for future implementation

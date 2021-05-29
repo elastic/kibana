@@ -179,7 +179,7 @@ describe('registerDataHandler', () => {
   });
   describe('Uptime', () => {
     registerDataHandler({
-      appName: 'uptime',
+      appName: 'synthetics',
       fetchData: async () => {
         return {
           title: 'uptime',
@@ -213,17 +213,17 @@ describe('registerDataHandler', () => {
           },
         };
       },
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
 
     it('registered data handler', () => {
-      const dataHandler = getDataHandler('uptime');
+      const dataHandler = getDataHandler('synthetics');
       expect(dataHandler?.fetchData).toBeDefined();
       expect(dataHandler?.hasData).toBeDefined();
     });
 
     it('returns data when fetchData is called', async () => {
-      const dataHandler = getDataHandler('uptime');
+      const dataHandler = getDataHandler('synthetics');
       const response = await dataHandler?.fetchData(params);
       expect(response).toEqual({
         title: 'uptime',
@@ -284,7 +284,11 @@ describe('registerDataHandler', () => {
           },
         };
       },
-      hasData: async () => ({ hasData: true, serviceName: 'elastic-co-frontend' }),
+      hasData: async () => ({
+        hasData: true,
+        serviceName: 'elastic-co-frontend',
+        indices: 'apm-*',
+      }),
     });
 
     it('registered data handler', () => {

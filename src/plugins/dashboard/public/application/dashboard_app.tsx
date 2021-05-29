@@ -303,7 +303,7 @@ export function DashboardApp({
   }, [data.search.session]);
 
   return (
-    <div className="app-container dshAppContainer">
+    <>
       {savedDashboard && dashboardStateManager && dashboardContainer && viewMode && (
         <>
           <DashboardTopNav
@@ -334,6 +334,6 @@ export function DashboardApp({
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }

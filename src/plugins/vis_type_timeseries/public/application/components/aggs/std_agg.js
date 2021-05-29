@@ -13,14 +13,7 @@ import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import {
-  htmlIdGenerator,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiFormLabel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
 
@@ -67,24 +60,19 @@ export function StandardAgg(props) {
 
         {model.type !== 'count' ? (
           <EuiFlexItem>
-            <EuiFormRow
-              id={htmlId('field')}
+            <FieldSelect
               label={
                 <FormattedMessage id="visTypeTimeseries.stdAgg.fieldLabel" defaultMessage="Field" />
               }
+              fields={fields}
+              type={model.type}
+              restrict={restrictFields}
+              indexPattern={indexPattern}
+              value={model.field}
+              onChange={handleSelectChange('field')}
+              uiRestrictions={uiRestrictions}
               fullWidth
-            >
-              <FieldSelect
-                fields={fields}
-                type={model.type}
-                restrict={restrictFields}
-                indexPattern={indexPattern}
-                value={model.field}
-                onChange={handleSelectChange('field')}
-                uiRestrictions={uiRestrictions}
-                fullWidth
-              />
-            </EuiFormRow>
+            />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

@@ -11,9 +11,12 @@ import moment from 'moment';
 import { chain, sumBy } from 'lodash';
 import { ReportSchemaType } from './schema';
 import { storeApplicationUsage } from './store_application_usage';
+import { UsageCounter } from '../usage_counters';
+import { serializeUiCounterName } from '../../common/ui_counters';
 
 export async function storeReport(
   internalRepository: ISavedObjectsRepository,
+  uiCountersUsageCounter: UsageCounter,
   report: ReportSchemaType
 ) {
   const uiCounters = report.uiCounter ? Object.entries(report.uiCounter) : [];
@@ -21,7 +24,6 @@ export async function storeReport(
   const appUsages = report.application_usage ? Object.values(report.application_usage) : [];
 
   const momentTimestamp = moment();
-  const date = momentTimestamp.format('DDMMYYYY');
   const timestamp = momentTimestamp.toDate();
 
   return Promise.allSettled([
@@ -55,14 +57,14 @@ export async function storeReport(
       })
       .value(),
     // UI Counters
-    ...uiCounters.map(async ([key, metric]) => {
+    ...uiCounters.map(async ([, metric]) => {
       const { appName, eventName, total, type } = metric;
-      const savedObjectId = `${appName}:${date}:${type}:${eventName}`;
-      return [
-        await internalRepository.incrementCounter('ui-counter', savedObjectId, [
-          { fieldName: 'count', incrementBy: total },
-        ]),
-      ];
+      const counterName = serializeUiCounterName({ appName, eventName });
+      uiCountersUsageCounter.incrementCounter({
+        counterName,
+        counterType: type,
+        incrementBy: total,
+      });
     }),
     // Application Usage
     storeApplicationUsage(internalRepository, appUsages, timestamp),

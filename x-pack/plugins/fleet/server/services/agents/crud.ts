@@ -255,9 +255,10 @@ export async function getAgentByAccessAPIKeyId(
     q: `access_api_key_id:${escapeSearchQueryPhrase(accessAPIKeyId)}`,
   });
 
-  const agent = searchHitToAgent(res.body.hits.hits[0]);
+  const searchHit = res.body.hits.hits[0];
+  const agent = searchHit && searchHitToAgent(searchHit);
 
-  if (!agent) {
+  if (!searchHit || !agent) {
     throw new AgentNotFoundError('Agent not found');
   }
   if (agent.access_api_key_id !== accessAPIKeyId) {

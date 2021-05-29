@@ -7,16 +7,14 @@
 
 import { Logger } from 'src/core/server';
 import { SavedObject } from 'src/core/types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import {
-  hasLargeValueItem,
-  normalizeThresholdField,
-} from '../../../../../common/detection_engine/utils';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
+import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
+import { ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { RefreshTypes } from '../../types';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
@@ -28,11 +26,7 @@ import {
   getThresholdBucketFilters,
   getThresholdSignalHistory,
 } from '../threshold';
-import {
-  RuleRangeTuple,
-  SearchAfterAndBulkCreateReturnType,
-  ThresholdRuleAttributes,
-} from '../types';
+import { AlertAttributes, RuleRangeTuple, SearchAfterAndBulkCreateReturnType } from '../types';
 import {
   createSearchAfterReturnType,
   createSearchAfterReturnTypeFromResponse,
@@ -51,7 +45,7 @@ export const thresholdExecutor = async ({
   buildRuleMessage,
   startedAt,
 }: {
-  rule: SavedObject<ThresholdRuleAttributes>;
+  rule: SavedObject<AlertAttributes<ThresholdRuleParams>>;
   tuples: RuleRangeTuple[];
   exceptionItems: ExceptionListItemSchema[];
   ruleStatusService: RuleStatusService;
@@ -83,7 +77,7 @@ export const thresholdExecutor = async ({
       services,
       logger,
       ruleId: ruleParams.ruleId,
-      bucketByFields: normalizeThresholdField(ruleParams.threshold.field),
+      bucketByFields: ruleParams.threshold.field,
       timestampOverride: ruleParams.timestampOverride,
       buildRuleMessage,
     });
@@ -127,28 +121,17 @@ export const thresholdExecutor = async ({
       createdItems,
       errors,
     } = await bulkCreateThresholdSignals({
-      actions: rule.attributes.actions,
-      throttle: rule.attributes.throttle,
       someResult: thresholdResults,
-      ruleParams,
+      ruleSO: rule,
       filter: esFilter,
       services,
       logger,
       id: rule.id,
       inputIndexPattern: inputIndex,
       signalsIndex: ruleParams.outputIndex,
-      timestampOverride: ruleParams.timestampOverride,
       startedAt,
       from: tuple.from.toDate(),
-      name: rule.attributes.name,
-      createdBy: rule.attributes.createdBy,
-      createdAt: rule.attributes.createdAt,
-      updatedBy: rule.attributes.updatedBy,
-      updatedAt: rule.updated_at ?? '',
-      interval: rule.attributes.schedule.interval,
-      enabled: rule.attributes.enabled,
       refresh,
-      tags: rule.attributes.tags,
       thresholdSignalHistory,
       buildRuleMessage,
     });

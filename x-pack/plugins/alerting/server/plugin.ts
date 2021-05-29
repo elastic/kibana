@@ -36,7 +36,6 @@ import {
   SavedObjectsBulkGetObject,
 } from '../../../../src/core/server';
 import type { AlertingRequestHandlerContext } from './types';
-
 import { defineRoutes } from './routes';
 import { LICENSE_TYPE, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import {
@@ -68,6 +67,8 @@ import {
 } from './health';
 import { AlertsConfig } from './config';
 import { getHealth } from './health/get_health';
+import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import { AlertingAuthorization } from './authorization';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -104,6 +105,9 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
   getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
+  getAlertingAuthorizationWithRequest(
+    request: KibanaRequest
+  ): PublicMethodsOf<AlertingAuthorization>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
 }
 
@@ -137,6 +141,7 @@ export class AlertingPlugin {
   private isESOCanEncrypt?: boolean;
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
+  private readonly alertingAuthorizationClientFactory: AlertingAuthorizationClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
@@ -149,6 +154,7 @@ export class AlertingPlugin {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
+    this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaIndexConfig = initializerContext.config.legacy.globalConfig$;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
@@ -184,7 +190,7 @@ export class AlertingPlugin {
       event: { provider: EVENT_LOG_PROVIDER },
     });
 
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
+    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, this.config);
 
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
@@ -220,11 +226,16 @@ export class AlertingPlugin {
       this.config
     );
 
-    core.getStartServices().then(async ([, startPlugins]) => {
+    core.getStartServices().then(async ([coreStart, startPlugins]) => {
       core.status.set(
         combineLatest([
           core.status.derivedStatus$,
-          getHealthStatusStream(startPlugins.taskManager),
+          getHealthStatusStream(
+            startPlugins.taskManager,
+            this.logger,
+            coreStart.savedObjects,
+            this.config
+          ),
         ]).pipe(
           map(([derivedStatus, healthStatus]) => {
             if (healthStatus.level > derivedStatus.level) {
@@ -283,6 +294,7 @@ export class AlertingPlugin {
       taskRunnerFactory,
       alertTypeRegistry,
       alertsClientFactory,
+      alertingAuthorizationClientFactory,
       security,
       licenseState,
     } = this;
@@ -299,6 +311,16 @@ export class AlertingPlugin {
         : undefined;
     };
 
+    alertingAuthorizationClientFactory.initialize({
+      alertTypeRegistry: alertTypeRegistry!,
+      securityPluginSetup: security,
+      securityPluginStart: plugins.security,
+      async getSpace(request: KibanaRequest) {
+        return plugins.spaces?.spacesService.getActiveSpace(request);
+      },
+      features: plugins.features,
+    });
+
     alertsClientFactory.initialize({
       alertTypeRegistry: alertTypeRegistry!,
       logger,
@@ -310,13 +332,10 @@ export class AlertingPlugin {
       getSpaceId(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getSpaceId(request);
       },
-      async getSpace(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getActiveSpace(request);
-      },
       actions: plugins.actions,
-      features: plugins.features,
       eventLog: plugins.eventLog,
       kibanaVersion: this.kibanaVersion,
+      authorization: alertingAuthorizationClientFactory,
     });
 
     const getAlertsClientWithRequest = (request: KibanaRequest) => {
@@ -326,6 +345,10 @@ export class AlertingPlugin {
         );
       }
       return alertsClientFactory!.create(request, core.savedObjects);
+    };
+
+    const getAlertingAuthorizationWithRequest = (request: KibanaRequest) => {
+      return alertingAuthorizationClientFactory!.create(request);
     };
 
     taskRunnerFactory.initialize({
@@ -357,6 +380,7 @@ export class AlertingPlugin {
 
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
+      getAlertingAuthorizationWithRequest,
       getAlertsClientWithRequest,
       getFrameworkHealth: async () =>
         await getHealth(core.savedObjects.createInternalRepository(['alert'])),
@@ -364,7 +388,7 @@ export class AlertingPlugin {
   }
 
   private createRouteHandlerContext = (
-    core: CoreSetup
+    core: CoreSetup<AlertingPluginsStart, unknown>
   ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
@@ -376,6 +400,10 @@ export class AlertingPlugin {
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
         getFrameworkHealth: async () =>
           await getHealth(savedObjects.createInternalRepository(['alert'])),
+        areApiKeysEnabled: async () => {
+          const [, { security }] = await core.getStartServices();
+          return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
+        },
       };
     };
   };

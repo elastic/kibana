@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { CoreUsageDataSetup, CoreUsageDataStart } from './types';
+export type { CoreUsageDataSetup, ConfigUsageData, CoreUsageDataStart } from './types';
 export { CoreUsageDataService } from './core_usage_data_service';
 export { CoreUsageStatsClient } from './core_usage_stats_client';
 
