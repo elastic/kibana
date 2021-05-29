@@ -22,7 +22,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('expressionResult');
         expect(text).to.be(
-          '{\n "type": "render",\n "as": "markdown",\n "value": {\n  "content": "## expressions explorer",\n  "font": {\n   "type": "style",\n   "spec": {\n    "fontFamily": "\'Open Sans\', Helvetica, Arial, sans-serif",\n    "fontWeight": "normal",\n    "fontStyle": "normal",\n    "textDecoration": "none",\n    "textAlign": "left",\n    "fontSize": "14px",\n    "lineHeight": "1"\n   },\n   "css": "font-family:\'Open Sans\', Helvetica, Arial, sans-serif;font-weight:normal;font-style:normal;text-decoration:none;text-align:left;font-size:14px;line-height:1"\n  },\n  "openLinksInNewTab": false\n }\n}'
+          '{\n "type": "error",\n "error": {\n  "message": "Function markdown could not be found.",\n  "name": "fn not found"\n }\n}'
         );
       });
     });
@@ -30,7 +30,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('renders expression', async () => {
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('expressionRender');
-        expect(text).to.be('expressions explorer rendering');
+        expect(text).to.be('Function markdown could not be found.');
       });
     });
 

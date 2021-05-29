@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
+  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -22,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/91191
   describe.skip('dashboard unsaved panels', () => {
     before(async () => {
-      await kibanaServer.importExport.load('dashboard/current/kibana');
+      await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -32,8 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       originalPanelCount = await PageObjects.dashboard.getPanelCount();
     });
-
-    after(() => kibanaServer.importExport.unload('dashboard/current/kibana'));
 
     it('does not show unsaved changes badge when there are no unsaved changes', async () => {
       await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');

@@ -16,7 +16,7 @@ kibanaPipeline(timeoutMinutes: 180) {
         def job = 'xpack-securityCypress'
 
         workers.ci(name: job, size: 'l', ramDisk: true) {
-          kibanaPipeline.bash('test/scripts/jenkins_build_kibana.sh', 'Build Distributable')
+          kibanaPipeline.bash('test/scripts/jenkins_xpack_build_kibana.sh', 'Build Default Distributable')
           kibanaPipeline.functionalTestProcess(job, 'test/scripts/jenkins_security_solution_cypress_chrome.sh')()
           // Temporarily disabled to figure out test flake
           // kibanaPipeline.functionalTestProcess(job, 'test/scripts/jenkins_security_solution_cypress_firefox.sh')()

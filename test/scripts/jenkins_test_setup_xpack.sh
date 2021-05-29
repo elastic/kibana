@@ -3,11 +3,11 @@
 source test/scripts/jenkins_test_setup.sh
 
 if [[ -z "$CODE_COVERAGE" ]]; then
-  destDir="$WORKSPACE/kibana-build-${TASK_QUEUE_PROCESS_ID:-$CI_PARALLEL_PROCESS_NUMBER}"
+  destDir="$WORKSPACE/kibana-build-xpack-${TASK_QUEUE_PROCESS_ID:-$CI_PARALLEL_PROCESS_NUMBER}"
 
   if [[ ! -d $destDir ]]; then
     mkdir -p $destDir
-    cp -pR "$WORKSPACE/kibana-build/." $destDir/
+    cp -pR "$WORKSPACE/kibana-build-xpack/." $destDir/
   fi
 
   export KIBANA_INSTALL_DIR="$(realpath $destDir)"

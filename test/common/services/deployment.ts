@@ -29,6 +29,14 @@ export class DeploymentService extends FtrService {
     return getUrl.baseUrl(this.config.get('servers.elasticsearch'));
   }
 
+  /**
+   * Helper to detect an OSS licensed Kibana
+   * Useful for functional testing in cloud environment
+   */
+  async isOss() {
+    return this.config.get('kbnTestServer.serverArgs').indexOf('--oss') > -1;
+  }
+
   async isCloud(): Promise<boolean> {
     const baseUrl = this.getHostPort();
     const username = this.config.get('servers.kibana.username');

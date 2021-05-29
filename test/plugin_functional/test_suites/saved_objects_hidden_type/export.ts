@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
-import path from 'path';
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
@@ -17,33 +15,20 @@ function ndjsonToObject(input: string): string[] {
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('export', () => {
     before(() =>
-      es.bulk({
-        refresh: 'wait_for',
-        body: fs
-          .readFileSync(
-            path.resolve(__dirname, '../saved_objects_management/bulk/hidden_saved_objects.ndjson')
-          )
-          .toString()
-          .split('\n'),
-      })
+      esArchiver.load(
+        '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+      )
+    );
+    after(() =>
+      esArchiver.unload(
+        '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+      )
     );
 
-    after(() =>
-      es.deleteByQuery({
-        index: '.kibana',
-        body: {
-          query: {
-            terms: {
-              type: ['test-hidden-importable-exportable', 'test-hidden-non-importable-exportable'],
-            },
-          },
-        },
-      })
-    );
     it('exports objects with importableAndExportable types', async () =>
       await supertest
         .post('/api/saved_objects/_export')

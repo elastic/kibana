@@ -14,7 +14,6 @@ export default async function ({ readConfigFile }) {
 
   return {
     testFiles: [
-      require.resolve('./apps/status_page'),
       require.resolve('./apps/bundles'),
       require.resolve('./apps/console'),
       require.resolve('./apps/context'),
@@ -24,6 +23,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),
+      require.resolve('./apps/status_page'),
       require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
     ],
@@ -36,15 +36,13 @@ export default async function ({ readConfigFile }) {
       ...commonConfig.get('esTestCluster'),
       serverArgs: ['xpack.security.enabled=false'],
     },
-
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
+        '--oss',
         '--telemetry.optIn=false',
-        '--xpack.security.enabled=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
-        '--xpack.maps.showMapVisualizationTypes=true',
       ],
     },
 

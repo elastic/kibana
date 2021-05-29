@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'dashboard',
@@ -26,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('includeFirefox');
 
     before(async () => {
-      await kibanaServer.importExport.load('dashboard/current/kibana');
+      await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -43,7 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
-      await kibanaServer.importExport.unload('dashboard/current/kibana');
     });
 
     it('Exported dashboard adjusts EST time to UTC', async () => {

@@ -286,23 +286,33 @@ def doSetup() {
   }
 }
 
+def buildOss(maxWorkers = '') {
+  notifyOnError {
+    withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+      runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+    }
+  }
+}
+
 def getBuildArtifactBucket() {
   def dir = env.ghprbPullId ? "pr-${env.ghprbPullId}" : buildState.get('checkoutInfo').branch.replace("/", "__")
   return "gs://ci-artifacts.kibana.dev/default-build/${dir}/${buildState.get('checkoutInfo').commit}"
 }
 
-def buildKibana(maxWorkers = '') {
+def buildXpack(maxWorkers = '', uploadArtifacts = false) {
   notifyOnError {
     withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
-      runbld("./test/scripts/jenkins_build_kibana.sh", "Build Kibana")
+      runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
     }
 
-    withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
-      bash("""
-        cd "${env.WORKSPACE}"
-        gsutil -q -m cp 'kibana-default.tar.gz' '${getBuildArtifactBucket()}/'
-        gsutil -q -m cp 'kibana-default-plugins.tar.gz' '${getBuildArtifactBucket()}/'
-      """, "Upload Default Build artifacts to GCS")
+    if (uploadArtifacts) {
+      withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
+        bash("""
+          cd "${env.WORKSPACE}"
+          gsutil -q -m cp 'kibana-default.tar.gz' '${getBuildArtifactBucket()}/'
+          gsutil -q -m cp 'kibana-default-plugins.tar.gz' '${getBuildArtifactBucket()}/'
+        """, "Upload Default Build artifacts to GCS")
+      }
     }
   }
 }
@@ -416,8 +426,12 @@ def withDocker(Closure closure) {
     )
 }
 
-def buildPlugins() {
+def buildOssPlugins() {
   runbld('./test/scripts/jenkins_build_plugins.sh', 'Build OSS Plugins')
+}
+
+def buildXpackPlugins() {
+  runbld('./test/scripts/jenkins_xpack_build_plugins.sh', 'Build X-Pack Plugins')
 }
 
 def withTasks(Map params = [:], Closure closure) {
@@ -435,7 +449,8 @@ def withTasks(Map params = [:], Closure closure) {
           },
 
           // There are integration tests etc that require the plugins to be built first, so let's go ahead and build them before set up the parallel workspaces
-          plugins: { buildPlugins() },
+          ossPlugins: { buildOssPlugins() },
+          xpackPlugins: { buildXpackPlugins() },
         ])
 
         config.setupWork()
@@ -455,11 +470,8 @@ def allCiTasks() {
         tasks.check()
         tasks.lint()
         tasks.test()
-        task {
-          buildKibana(16)
-          tasks.functionalOss()
-          tasks.functionalXpack()
-        }
+        tasks.functionalOss()
+        tasks.functionalXpack()
         tasks.storybooksCi()
       }
     },

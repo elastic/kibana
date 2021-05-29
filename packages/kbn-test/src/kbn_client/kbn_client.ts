@@ -8,14 +8,13 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 
-import { KbnClientImportExport } from './kbn_client_import_export';
-import { KbnClientPlugins } from './kbn_client_plugins';
 import { KbnClientRequester, ReqOptions } from './kbn_client_requester';
-import { KbnClientSavedObjects } from './kbn_client_saved_objects';
-import { KbnClientSpaces } from './kbn_client_spaces';
 import { KbnClientStatus } from './kbn_client_status';
-import { KbnClientUiSettings, UiSettingValues } from './kbn_client_ui_settings';
+import { KbnClientPlugins } from './kbn_client_plugins';
 import { KbnClientVersion } from './kbn_client_version';
+import { KbnClientSavedObjects } from './kbn_client_saved_objects';
+import { KbnClientUiSettings, UiSettingValues } from './kbn_client_ui_settings';
+import { KbnClientImportExport } from './kbn_client_import_export';
 
 export interface KbnClientOptions {
   url: string;
@@ -30,7 +29,6 @@ export class KbnClient {
   readonly plugins: KbnClientPlugins;
   readonly version: KbnClientVersion;
   readonly savedObjects: KbnClientSavedObjects;
-  readonly spaces: KbnClientSpaces;
   readonly uiSettings: KbnClientUiSettings;
   readonly importExport: KbnClientImportExport;
 
@@ -61,13 +59,11 @@ export class KbnClient {
     this.plugins = new KbnClientPlugins(this.status);
     this.version = new KbnClientVersion(this.status);
     this.savedObjects = new KbnClientSavedObjects(this.log, this.requester);
-    this.spaces = new KbnClientSpaces(this.requester);
     this.uiSettings = new KbnClientUiSettings(this.log, this.requester, this.uiSettingDefaults);
     this.importExport = new KbnClientImportExport(
       this.log,
       this.requester,
       this.savedObjects,
-      this.spaces,
       options.importExportDir
     );
   }

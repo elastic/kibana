@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
@@ -20,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('empty dashboard', () => {
     before(async () => {
-      await kibanaServer.importExport.load('dashboard/current/kibana');
+      await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -32,7 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.dashboard.gotoDashboardLandingPage();
-      await kibanaServer.importExport.unload('dashboard/current/kibana');
     });
 
     it('should display empty widget', async () => {

@@ -66,8 +66,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   ];
 
   describe('deprecations service', () => {
-    before(() => esArchiver.load('deprecations_service'));
-    after(() => esArchiver.unload('deprecations_service'));
+    before(() => esArchiver.load('../functional/fixtures/es_archiver/deprecations_service'));
+    after(() => esArchiver.unload('../functional/fixtures/es_archiver/deprecations_service'));
 
     describe('GET /api/deprecations/', async () => {
       it('returns registered config deprecations and feature deprecations', async () => {

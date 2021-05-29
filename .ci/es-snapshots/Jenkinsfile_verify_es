@@ -37,8 +37,12 @@ kibanaPipeline(timeoutMinutes: 210) {
           ])
 
           task {
-            kibanaPipeline.buildKibana(16)
+            kibanaPipeline.buildOss(6)
             tasks.ossCiGroups()
+          }
+
+          task {
+            kibanaPipeline.buildXpack(10, true)
             tasks.xpackCiGroups()
             tasks.xpackCiGroupDocker()
           }
