@@ -42,18 +42,17 @@ export const validateRuleActionsField = (actionTypeRegistry: ActionTypeRegistryC
 ): Promise<ValidationError<ERROR_CODE> | void | undefined> => {
   const [{ value, path }] = data as [{ value: AlertAction[]; path: string }];
 
-  const errors = await value.reduce(async (acc, actionItem) => {
+  const errors = [];
+  for (const actionItem of value) {
     const errorsArray = await validateSingleAction(actionItem, actionTypeRegistry);
 
     if (errorsArray.length) {
       const actionTypeName = getActionTypeName(actionItem.actionTypeId);
       const errorsListItems = errorsArray.map((error) => `*   ${error}\n`);
 
-      return [...(await acc), `\n**${actionTypeName}:**\n${errorsListItems.join('')}`];
+      errors.push(`\n**${actionTypeName}:**\n${errorsListItems.join('')}`);
     }
-
-    return acc;
-  }, Promise.resolve([] as string[]));
+  }
 
   if (errors.length) {
     return {
