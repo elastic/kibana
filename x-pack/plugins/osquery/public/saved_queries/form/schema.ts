@@ -22,6 +22,11 @@ export const formSchema: FormSchema = {
     label: 'Platform',
     defaultValue: 'all',
   },
+  version: {
+    label: 'Version',
+    type: FIELD_TYPES.TEXT,
+    validations: [],
+  },
   query: {
     label: 'Query',
     type: FIELD_TYPES.TEXTAREA,

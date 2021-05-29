@@ -23,7 +23,7 @@ export const updateSavedQueryRoute = (router: IRouter) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
       // @ts-expect-error update types
-      const { name, description, platform, query } = request.body;
+      const { name, description, platform, query, version } = request.body;
 
       const savedQuerySO = await savedObjectsClient.update(
         savedQuerySavedObjectType,
@@ -34,6 +34,7 @@ export const updateSavedQueryRoute = (router: IRouter) => {
           description,
           platform,
           query,
+          version,
         }
       );
 

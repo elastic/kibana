@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { PackagePolicyInputStream } from '../../../../fleet/common';
-import { CodeEditorField } from '../../queries/form/code_editor_field';
+import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 import { idFieldValidations, intervalFieldValidation, queryFieldValidation } from './validations';
 

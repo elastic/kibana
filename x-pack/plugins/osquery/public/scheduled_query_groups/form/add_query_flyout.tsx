@@ -18,11 +18,12 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { CodeEditorField } from '../../queries/form/code_editor_field';
+import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
+import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { idFieldValidations, intervalFieldValidation, queryFieldValidation } from './validations';
 import { Form, useForm, FormData, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 
@@ -73,7 +74,15 @@ const AddQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ onSave, onClos
     },
   });
 
-  const { submit } = form;
+  const { submit, setFieldValue } = form;
+
+  const handleSetQueryValue = useCallback(
+    (savedQuery) => {
+      setFieldValue('id', savedQuery.name);
+      setFieldValue('query', savedQuery.query);
+    },
+    [setFieldValue]
+  );
 
   return (
     <EuiPortal>
@@ -90,6 +99,8 @@ const AddQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ onSave, onClos
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <Form form={form}>
+            <SavedQueriesDropdown onChange={handleSetQueryValue} />
+            <EuiSpacer />
             <CommonUseField path="id" />
             <EuiSpacer />
             <CommonUseField path="query" component={CodeEditorField} />

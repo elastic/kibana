@@ -18,6 +18,7 @@ export const agentSelection = t.type({
   platformsSelected: t.array(t.string),
   policiesSelected: t.array(t.string),
 });
+
 export type AgentSelection = t.TypeOf<typeof agentSelection>;
 export const agentSelectionOrUndefined = t.union([agentSelection, t.undefined]);
 export type AgentSelectionOrUndefined = t.TypeOf<typeof agentSelectionOrUndefined>;
@@ -36,3 +37,8 @@ export const query = t.string;
 export type Query = t.TypeOf<typeof query>;
 export const queryOrUndefined = t.union([query, t.undefined]);
 export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
+
+export const version = t.string;
+export type Version = t.TypeOf<typeof query>;
+export const versionOrUndefined = t.union([version, t.undefined]);
+export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;

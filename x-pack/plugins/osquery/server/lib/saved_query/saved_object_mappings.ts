@@ -14,6 +14,7 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     description: {
       type: 'text',
     },
+    // change to keyword?
     name: {
       type: 'text',
     },
@@ -29,6 +30,9 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     platform: {
       type: 'keyword',
     },
+    version: {
+      type: 'keyword',
+    },
     updated: {
       type: 'date',
     },
@@ -41,7 +45,7 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
 export const savedQueryType: SavedObjectsType = {
   name: savedQuerySavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   mappings: savedQuerySavedObjectMappings,
 };
 
@@ -81,6 +85,6 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const packType: SavedObjectsType = {
   name: packSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   mappings: packSavedObjectMappings,
 };
