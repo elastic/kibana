@@ -17,10 +17,10 @@ import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_template
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-export function registerGetAllRoute({ router, license }: RouteDependencies) {
+export function registerGetAllRoute({ router }: RouteDependencies) {
   router.get(
     { path: addBasePath('/index_templates'), validate: false },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
       const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
 
@@ -43,7 +43,7 @@ export function registerGetAllRoute({ router, license }: RouteDependencies) {
       };
 
       return res.ok({ body });
-    })
+    }
   );
 }
 
@@ -56,13 +56,13 @@ const querySchema = schema.object({
   legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
-export function registerGetOneRoute({ router, license, lib }: RouteDependencies) {
+export function registerGetOneRoute({ router, lib }: RouteDependencies) {
   router.get(
     {
       path: addBasePath('/index_templates/{name}'),
       validate: { params: paramsSchema, query: querySchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { name } = req.params as TypeOf<typeof paramsSchema>;
       const { callAsCurrentUser } = ctx.dataManagement!.client;
 
@@ -111,6 +111,6 @@ export function registerGetOneRoute({ router, license, lib }: RouteDependencies)
         // Case: default
         throw e;
       }
-    })
+    }
   );
 }
