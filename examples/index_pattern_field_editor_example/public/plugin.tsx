@@ -8,7 +8,6 @@
 
 import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
-// import { ExpressionsSetup, ExpressionsStart } from '../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';
 import { IndexPatternFieldEditorStart } from '../../../src/plugins/index_pattern_field_editor/public';
 
@@ -23,20 +22,6 @@ interface SetupDeps {
 
 export class IndexPatternFieldEditorPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
-    /*
-    // register custom inspector adapter & view
-    deps.inspector.registerView(getExpressionsInspectorViewDescription());
-
-    // register custom actions
-    deps.uiActions.registerTrigger(navigateTrigger);
-    deps.uiActions.registerAction(createNavigateAction());
-    deps.uiActions.attachAction(NAVIGATE_TRIGGER_ID, ACTION_NAVIGATE);
-
-    // register custom functions and renderers
-    deps.expressions.registerRenderer(buttonRenderer);
-    deps.expressions.registerFunction(buttonFn);
-    */
-
     core.application.register({
       id: 'indexPatternFieldEditorExample',
       title: 'Index pattern field editor example',

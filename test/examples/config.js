@@ -28,6 +28,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./state_sync'),
       require.resolve('./routing'),
       require.resolve('./expressions_explorer'),
+      require.resolve('./index_pattern_field_editor_example'),
     ],
     services: {
       ...functionalConfig.get('services'),
@@ -48,7 +49,7 @@ export default async function ({ readConfigFile }) {
     },
     apps: functionalConfig.get('apps'),
     esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives'),
+      directory: path.resolve(__dirname, '../functional/fixtures/es_archiver'),
     },
     screenshots: functionalConfig.get('screenshots'),
     junit: {

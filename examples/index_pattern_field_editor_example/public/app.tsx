@@ -46,10 +46,11 @@ const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor 
       name: 'Actions',
       actions: [
         {
-          name: 'Clone',
-          description: 'Clone this person',
-          icon: 'copy',
+          name: 'Edit',
+          description: 'Edit this field',
+          icon: 'pencil',
           type: 'icon',
+          'data-test-subj': 'editField',
           onClick: (fld: IndexPatternField) =>
             indexPatternFieldEditor.openEditor({
               ctx: { indexPattern: indexPattern! },
@@ -59,10 +60,10 @@ const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor 
         },
         {
           name: 'Delete',
-          description: 'Delete this person',
+          description: 'Delete this field',
           icon: 'trash',
           type: 'icon',
-          color: 'danger',
+          'data-test-subj': 'deleteField',
           available: (fld) => !!fld.runtimeField,
           onClick: (fld: IndexPatternField) =>
             indexPatternFieldEditor.openDeleteModal({
@@ -79,7 +80,7 @@ const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor 
 
   const content = indexPattern ? (
     <>
-      <EuiText>Index pattern: {indexPattern?.title}</EuiText>
+      <EuiText data-test-subj="indexPatternTitle">Index pattern: {indexPattern?.title}</EuiText>
       <div>
         <EuiButton
           onClick={() =>
@@ -88,6 +89,7 @@ const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor 
               onSave: refreshFields,
             })
           }
+          data-test-subj="addField"
         >
           Add field
         </EuiButton>
