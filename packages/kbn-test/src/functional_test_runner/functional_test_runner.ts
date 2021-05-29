@@ -121,7 +121,7 @@ export class FunctionalTestRunner {
       }
 
       // eslint-disable-next-line
-      console.log(`--- Running ${this.configFile.replace(process.cwd() + '/', '')}`);
+      console.log(`--- Running ${Path.relative(process.cwd(), this.configFile)}`);
 
       const dockerServers = new DockerServersService(
         config.get('dockerServers'),
