@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
-
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
