@@ -205,7 +205,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof proposed.avg_recurring_required_throughput_per_minute_per_kibana).to.eql(
         'number'
       );
-      expect(typeof proposed.avg_required_throughput_per_minute).to.eql('number');
       expect(typeof proposed.avg_required_throughput_per_minute_per_kibana).to.eql('number');
     });
 
