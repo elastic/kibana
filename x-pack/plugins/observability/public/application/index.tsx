@@ -10,7 +10,7 @@ import React, { MouseEvent, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
+import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -18,11 +18,13 @@ import {
 import { PluginContext } from '../context/plugin_context';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
-import { ObservabilityPublicPluginsStart, ObservabilityRuleRegistry } from '../plugin';
+import { ObservabilityPublicPluginsStart } from '../plugin';
+import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { Breadcrumbs, routes } from '../routes';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { ConfigSchema } from '..';
+import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 
 function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumbs) {
   return breadcrumbs.map(({ text }) => text).reverse();
@@ -72,13 +74,15 @@ export const renderApp = ({
   core,
   plugins,
   appMountParameters,
-  observabilityRuleRegistry,
+  observabilityRuleTypeRegistry,
+  ObservabilityPageTemplate,
 }: {
   config: ConfigSchema;
   core: CoreStart;
   plugins: ObservabilityPublicPluginsStart;
-  observabilityRuleRegistry: ObservabilityRuleRegistry;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   appMountParameters: AppMountParameters;
+  ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
 }) => {
   const { element, history } = appMountParameters;
   const i18nCore = core.i18n;
@@ -91,15 +95,25 @@ export const renderApp = ({
     links: [{ linkType: 'discuss', href: 'https://ela.st/observability-discuss' }],
   });
 
+  // ensure all divs are .kbnAppWrappers
+  element.classList.add(APP_WRAPPER_CLASS);
+
   ReactDOM.render(
     <KibanaContextProvider services={{ ...core, ...plugins, storage: new Storage(localStorage) }}>
       <PluginContext.Provider
-        value={{ appMountParameters, config, core, plugins, observabilityRuleRegistry }}
+        value={{
+          appMountParameters,
+          config,
+          core,
+          plugins,
+          observabilityRuleTypeRegistry,
+          ObservabilityPageTemplate,
+        }}
       >
         <Router history={history}>
           <EuiThemeProvider darkMode={isDarkMode}>
             <i18nCore.Context>
-              <RedirectAppLinks application={core.application}>
+              <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
                 <HasDataContextProvider>
                   <App />
                 </HasDataContextProvider>

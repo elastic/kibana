@@ -24,10 +24,7 @@ describe('editor_frame state management', () => {
         onError: jest.fn(),
         datasourceMap: { testDatasource: ({} as unknown) as Datasource },
         visualizationMap: { testVis: ({ initialize: jest.fn() } as unknown) as Visualization },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
         ExpressionRenderer: createExpressionRendererMock(),
-        onChange: jest.fn(),
         core: coreMock.createStart(),
         plugins: {
           uiActions: uiActionsPluginMock.createStartContract(),
@@ -36,11 +33,7 @@ describe('editor_frame state management', () => {
           charts: chartPluginMock.createStartContract(),
         },
         palettes: chartPluginMock.createPaletteRegistry(),
-        dateRange: { fromDate: 'now-7d', toDate: 'now' },
-        query: { query: '', language: 'lucene' },
-        filters: [],
         showNoDataPopover: jest.fn(),
-        searchSessionId: 'sessionId',
       };
     });
 
@@ -101,8 +94,8 @@ describe('editor_frame state management', () => {
       `);
     });
 
-    it('should not set active id if no initial visualization is passed in', () => {
-      const initialState = getInitialState({ ...props, initialVisualizationId: null });
+    it('should not set active id if initiated with empty document and visualizationMap is empty', () => {
+      const initialState = getInitialState({ ...props, visualizationMap: {} });
 
       expect(initialState.visualization.state).toEqual(null);
       expect(initialState.visualization.activeId).toEqual(null);

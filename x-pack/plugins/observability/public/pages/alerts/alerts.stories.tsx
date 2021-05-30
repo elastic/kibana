@@ -11,9 +11,12 @@ import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 import { AlertsPage } from '.';
 import { HttpSetup } from '../../../../../../src/core/public';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaPageTemplate,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
-import { createObservabilityRuleRegistryMock } from '../../rules/observability_rule_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { createCallObservabilityApi } from '../../services/call_observability_api';
 import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
 import { apmAlertResponseExample, dynamicIndexPattern } from './example_data';
@@ -62,7 +65,8 @@ export default {
                     core: {
                       http: { basePath: { prepend: (_: string) => '' } },
                     },
-                    observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+                    observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+                    ObservabilityPageTemplate: KibanaPageTemplate,
                   } as unknown) as PluginContextValue
                 }
               >

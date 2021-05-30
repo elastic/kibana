@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { useDebounceWithOptions } from '../../../../shared_components';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 import {
@@ -19,7 +20,7 @@ import {
   hasDateField,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
-import { getFormatFromPreviousColumn, isValidNumber, useDebounceWithOptions } from '../helpers';
+import { getFormatFromPreviousColumn, isValidNumber, getFilter } from '../helpers';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 import type { OperationDefinition, ParamEditorProps } from '..';
@@ -36,6 +37,8 @@ const ofName = buildLabelFunction((name?: string) => {
     },
   });
 });
+
+const WINDOW_DEFAULT_VALUE = 5;
 
 export type MovingAverageIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -58,10 +61,11 @@ export const movingAverageOperation: OperationDefinition<
   selectionStyle: 'full',
   requiredReferences: [
     {
-      input: ['field'],
+      input: ['field', 'managedReference'],
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
+  operationParams: [{ name: 'window', type: 'number', required: true }],
   getPossibleOperation: (indexPattern) => {
     if (hasDateField(indexPattern)) {
       return {
@@ -79,8 +83,12 @@ export const movingAverageOperation: OperationDefinition<
       window: [(layer.columns[columnId] as MovingAverageIndexPatternColumn).params.window],
     });
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }) => {
+  buildColumn: (
+    { referenceIds, previousColumn, layer },
+    columnParams = { window: WINDOW_DEFAULT_VALUE }
+  ) => {
     const metric = layer.columns[referenceIds[0]];
+    const { window = WINDOW_DEFAULT_VALUE } = columnParams;
     return {
       label: ofName(metric?.label, previousColumn?.timeScale),
       dataType: 'number',
@@ -89,9 +97,9 @@ export const movingAverageOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
-      filter: previousColumn?.filter,
+      filter: getFilter(previousColumn, columnParams),
       params: {
-        window: 5,
+        window,
         ...getFormatFromPreviousColumn(previousColumn),
       },
     };

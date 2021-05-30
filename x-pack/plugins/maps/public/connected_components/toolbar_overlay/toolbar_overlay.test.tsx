@@ -19,12 +19,14 @@ jest.mock('../../kibana_services', () => {
 
 import { ToolbarOverlay } from './toolbar_overlay';
 
-test('Must render zoom tools', async () => {
-  const component = shallow(<ToolbarOverlay geoFields={[]} />);
+test('Should only show set view control', async () => {
+  const component = shallow(
+    <ToolbarOverlay geoFields={[]} showFitToBoundsButton={false} showTimesliderButton={false} />
+  );
   expect(component).toMatchSnapshot();
 });
 
-test('Must zoom tools and draw filter tools', async () => {
+test('Should show all controls', async () => {
   const geoFieldWithIndex = {
     geoFieldName: 'myGeoFieldName',
     geoFieldType: 'geo_point',
@@ -35,6 +37,8 @@ test('Must zoom tools and draw filter tools', async () => {
     <ToolbarOverlay
       addFilters={async (filters: Filter[], actionId: string) => {}}
       geoFields={[geoFieldWithIndex]}
+      showFitToBoundsButton={true}
+      showTimesliderButton={true}
     />
   );
   expect(component).toMatchSnapshot();

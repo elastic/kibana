@@ -11,12 +11,11 @@ import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import {
-  ActionTypeRegistryContract,
   Alert,
-  AlertTypeRegistryContract,
   AlertTypeParams,
   AlertUpdates,
   AlertFlyoutCloseReason,
+  AlertAddProps,
 } from '../../../types';
 import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
@@ -30,20 +29,6 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasAlertChanged, haveAlertParamsChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
-
-export interface AlertAddProps<MetaData = Record<string, any>> {
-  consumer: string;
-  alertTypeRegistry: AlertTypeRegistryContract;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: AlertFlyoutCloseReason) => void;
-  alertTypeId?: string;
-  canChangeTrigger?: boolean;
-  initialValues?: Partial<Alert>;
-  /** @deprecated use `onSave` as a callback after an alert is saved*/
-  reloadAlerts?: () => Promise<void>;
-  onSave?: () => Promise<void>;
-  metadata?: MetaData;
-}
 
 const AlertAdd = ({
   consumer,
