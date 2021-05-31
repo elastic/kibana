@@ -112,15 +112,25 @@ function TimelionVisComponent({
   }, [seriesList.list]);
 
   const getLegendPosition = useCallback(() => {
-    const chartGlobal = chart[0]._global;
+    let chartLegendGlobal: Record<any, any> = {};
+    chart.forEach((series) => {
+      if (series._global?.legend) {
+        chartLegendGlobal = {
+          ...chartLegendGlobal,
+          ...series._global.legend,
+        };
+      }
+    });
+
     const legendPositionConf: LegendPositionConfig = {
       floating: true,
+      floatingColumns: chartLegendGlobal?.noColumns ?? 1,
       vAlign: Position.Top,
       hAlign: Position.Right,
       direction: LayoutDirection.Vertical,
     };
 
-    switch (chartGlobal?.legend?.position) {
+    switch (chartLegendGlobal?.position) {
       case 'ne':
         legendPositionConf.vAlign = Position.Top;
         legendPositionConf.hAlign = Position.Right;
