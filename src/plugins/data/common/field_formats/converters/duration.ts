@@ -90,18 +90,18 @@ const inputFormats = [
   },
 ];
 const DEFAULT_OUTPUT_FORMAT = {
-  text: i18n.translate('data.fieldFormats.duration.outputFormats.humanize.precise', {
-    defaultMessage: 'Human Readable precise',
+  text: i18n.translate('data.fieldFormats.duration.outputFormats.humanize.approximate', {
+    defaultMessage: 'Human-readable (approximate)',
   }),
-  method: 'humanizePrecise',
+  method: 'humanize',
 };
 const outputFormats = [
   { ...DEFAULT_OUTPUT_FORMAT },
   {
-    text: i18n.translate('data.fieldFormats.duration.outputFormats.humanize.approximate', {
-      defaultMessage: 'Human Readable approximate',
+    text: i18n.translate('data.fieldFormats.duration.outputFormats.humanize.precise', {
+      defaultMessage: 'Human-readable (precise)',
     }),
-    method: 'humanize',
+    method: 'humanizePrecise',
   },
   {
     text: i18n.translate('data.fieldFormats.duration.outputFormats.asMilliseconds', {
