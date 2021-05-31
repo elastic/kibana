@@ -7,6 +7,7 @@
  */
 
 import { schema as s, ObjectType } from '@kbn/config-schema';
+import { sortSchema } from './common_schemas';
 
 /**
  * Schemas for the metrics Aggregations
@@ -68,7 +69,7 @@ export const metricsAggsSchemas: Record<string, ObjectType> = {
     stored_fields: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
     from: s.maybe(s.number()),
     size: s.maybe(s.number()),
-    sort: s.maybe(s.oneOf([s.literal('asc'), s.literal('desc')])),
+    sort: s.maybe(sortSchema),
     seq_no_primary_term: s.maybe(s.boolean()),
     version: s.maybe(s.boolean()),
     track_scores: s.maybe(s.boolean()),

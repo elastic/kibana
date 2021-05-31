@@ -166,7 +166,12 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'should load the stack management with the ML menu item being absent'
           );
-          await ml.navigation.navigateToStackManagement({ expectMlLink: false });
+          await ml.navigation.navigateToStackManagement();
+
+          await ml.testExecution.logTestStep(
+            'should load the stack management with insufficient license warning'
+          );
+          await ml.navigation.navigateToStackManagementInsuficientLicensePage();
         });
       });
     }
