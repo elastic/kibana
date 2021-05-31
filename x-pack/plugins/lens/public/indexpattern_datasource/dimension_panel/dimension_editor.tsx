@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiTabs,
   EuiTab,
+  EuiCallOut,
 } from '@elastic/eui';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { OperationSupportMatrix } from './operation_support';
@@ -105,10 +106,22 @@ export function DimensionEditor(props: DimensionEditorProps) {
   };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
+  const selectedOperationDefinition =
+    selectedColumn && operationDefinitionMap[selectedColumn.operationType];
+
+  const [changedFormula, setChangedFormula] = useState(
+    Boolean(selectedOperationDefinition?.type === 'formula')
+  );
+
   const setStateWrapper = (
     setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
     shouldClose?: boolean
   ) => {
+    if (selectedOperationDefinition?.type === 'formula' && !temporaryQuickFunction) {
+      setChangedFormula(true);
+    } else {
+      setChangedFormula(false);
+    }
     const hypotheticalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
     const hasIncompleteColumns = Boolean(hypotheticalLayer.incompleteColumns?.[columnId]);
     const prevOperationType =
@@ -132,9 +145,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const setIsCloseable = (isCloseable: boolean) => {
     setState((prevState) => ({ ...prevState, isDimensionClosePrevented: !isCloseable }));
   };
-
-  const selectedOperationDefinition =
-    selectedColumn && operationDefinitionMap[selectedColumn.operationType];
 
   const incompleteInfo = (state.layers[layerId].incompleteColumns ?? {})[columnId];
   const incompleteOperation = incompleteInfo?.operationType;
@@ -339,6 +349,24 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const quickFunctions = (
     <>
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
+        {temporaryQuickFunction && changedFormula && (
+          <>
+            <EuiCallOut
+              size="s"
+              title={i18n.translate('xpack.lens.indexPattern.formulaWarning', {
+                defaultMessage: 'Staged formula',
+              })}
+              color="warning"
+            >
+              <p>
+                {i18n.translate('xpack.lens.indexPattern.formulaWarningText', {
+                  defaultMessage: 'Picking a quick function will erase your formula.',
+                })}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <EuiFormLabel>
           {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
             defaultMessage: 'Select a function',
