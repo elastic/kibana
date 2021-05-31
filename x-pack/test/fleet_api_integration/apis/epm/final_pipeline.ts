@@ -19,6 +19,10 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 
 const TEST_INDEX = 'logs-log.log-test';
 
+const FINAL_PIPELINE_ID = '.fleet_final_pipeline';
+
+let pkgKey: string;
+
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -52,18 +56,20 @@ export default function (providerContext: FtrProviderContext) {
         throw new Error('No log package');
       }
 
-      const res = await supertest
-        .post(`/api/fleet/epm/packages/log-${logPackage.version}`)
+      pkgKey = `log-${logPackage.version}`;
+
+      await supertest
+        .post(`/api/fleet/epm/packages/${pkgKey}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
-    before(async () => {
-      // TODO uninstall
-      // await supertest
-      //   .delete(`/api/fleet/epm/packages/log?force=true`)
-      //   .set('kbn-xsrf', 'xxxx')
-      //   .expect(200);
+    after(async () => {
+      await supertest
+        .delete(`/api/fleet/epm/packages/${pkgKey}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
     });
 
     after(async () => {
@@ -84,14 +90,14 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {
-      const pipelineRes = await es.ingest.getPipeline({ id: 'fleet_final_pipeline' });
-      expect(pipelineRes.body).to.have.property('fleet_final_pipeline');
+      const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
+      expect(pipelineRes.body).to.have.property(FINAL_PIPELINE_ID);
 
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
       expect(res.body.index_templates.length).to.be(1);
       expect(
         res.body.index_templates[0]?.index_template?.template?.settings?.index?.final_pipeline
-      ).to.be('fleet_final_pipeline');
+      ).to.be(FINAL_PIPELINE_ID);
     });
 
     it('For a doc written without api key should write the correct api key status', async () => {
@@ -117,105 +123,72 @@ export default function (providerContext: FtrProviderContext) {
       expect(event).to.have.property('ingested');
     });
 
-    it('For a doc written without an api key without metadata it should write the correct api key status', async () => {
-      const { body: apiKeyRes } = await es.security.createApiKey({
-        body: {
-          name: `test api key`,
-        },
-      });
-
-      const res = await indexUsingApiKey(
-        {
-          message: 'message-test-1',
-          '@timestamp': '2020-01-01T09:09:00',
-          agent: {
-            id: 'agent1',
-          },
-        },
-        Buffer.from(`${apiKeyRes.id}:${apiKeyRes.api_key}`).toString('base64')
-      );
-
-      const { body: doc } = await es.get({
-        id: res.body._id,
-        index: res.body._index,
-      });
-      // @ts-expect-error
-      const event = doc._source.event;
-
-      expect(event.agent_id_status).to.be('missing_metadata');
-      expect(event).to.have.property('ingested');
-    });
-
-    it('For a doc written with an api key with correct metadata it should write the correct api key status', async () => {
-      const { body: apiKeyRes } = await es.security.createApiKey({
-        body: {
-          name: `test api key ` + Date.now(),
-          // @ts-expect-error
+    const scenarios = [
+      {
+        name: 'API key without metadata',
+        expectedStatus: 'missing_metadata',
+        event: { agent: { id: 'agent1' } },
+      },
+      {
+        name: 'API key with agent id metadata',
+        expectedStatus: 'verified',
+        apiKey: {
           metadata: {
             agent_id: 'agent1',
           },
         },
-      });
-      const { body: test } = await es.security.getApiKey({
-        id: apiKeyRes.id,
-      });
-
-      const res = await indexUsingApiKey(
-        {
-          message: 'message-test-1',
-          '@timestamp': '2020-01-01T09:09:00',
-          agent: {
-            id: 'agent1',
-          },
-        },
-        Buffer.from(`${apiKeyRes.id}:${apiKeyRes.api_key}`).toString('base64')
-      );
-
-      const { body: doc } = await es.get({
-        id: res.body._id,
-        index: res.body._index,
-      });
-      // @ts-expect-error
-      const event = doc._source.event;
-
-      expect(event.agent_id_status).to.be('verified');
-      expect(event).to.have.property('ingested');
-    });
-
-    it('For a doc written with an api key with tampered agent id metadata it should write the correct api key status', async () => {
-      const { body: apiKeyRes } = await es.security.createApiKey({
-        body: {
-          name: `test api key ` + Date.now(),
-          // @ts-expect-error
+        event: { agent: { id: 'agent1' } },
+      },
+      {
+        name: 'API key with agent id metadata and no agent id in event',
+        expectedStatus: 'missing_metadata',
+        apiKey: {
           metadata: {
             agent_id: 'agent1',
           },
         },
-      });
-      const { body: test } = await es.security.getApiKey({
-        id: apiKeyRes.id,
-      });
-
-      const res = await indexUsingApiKey(
-        {
-          message: 'message-test-1',
-          '@timestamp': '2020-01-01T09:09:00',
-          agent: {
-            id: 'agent1',
+      },
+      {
+        name: 'API key with agent id metadata and tampered agent id in event',
+        expectedStatus: 'agent_id_mismatch',
+        apiKey: {
+          metadata: {
+            agent_id: 'agent2',
           },
         },
-        Buffer.from(`${apiKeyRes.id}:${apiKeyRes.api_key}`).toString('base64')
-      );
+        event: { agent: { id: 'agent1' } },
+      },
+    ];
 
-      const { body: doc } = await es.get({
-        id: res.body._id,
-        index: res.body._index,
+    for (const scenario of scenarios) {
+      it(`Should write the correct event.agent_id_status for ${scenario.name}`, async () => {
+        // Create an API key
+        const { body: apiKeyRes } = await es.security.createApiKey({
+          body: {
+            name: `test api key`,
+            ...(scenario.apiKey || {}),
+          },
+        });
+
+        const res = await indexUsingApiKey(
+          {
+            message: 'message-test-1',
+            '@timestamp': '2020-01-01T09:09:00',
+            ...(scenario.event || {}),
+          },
+          Buffer.from(`${apiKeyRes.id}:${apiKeyRes.api_key}`).toString('base64')
+        );
+
+        const { body: doc } = await es.get({
+          id: res.body._id as string,
+          index: res.body._index as string,
+        });
+        // @ts-expect-error
+        const event = doc._source.event;
+
+        expect(event.agent_id_status).to.be(scenario.expectedStatus);
+        expect(event).to.have.property('ingested');
       });
-      // @ts-expect-error
-      const event = doc._source.event;
-
-      expect(event.agent_id_status).to.be('verified');
-      expect(event).to.have.property('ingested');
-    });
+    }
   });
 }

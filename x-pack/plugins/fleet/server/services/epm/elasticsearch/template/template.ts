@@ -86,7 +86,8 @@ export function getTemplate({
     template.template.settings.index.default_pipeline = pipelineName;
   }
   if (template.template.settings.index.final_pipeline) {
-    // log there is already a final_pipeline that will be overrided
+    const logger = appContextService.getLogger();
+    logger.error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
   template.template.settings.index.final_pipeline = FINAL_PIPELINE_ID;
 

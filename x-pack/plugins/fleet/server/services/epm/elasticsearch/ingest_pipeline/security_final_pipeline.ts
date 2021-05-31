@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const FINAL_PIPELINE_ID = 'fleet_final_pipeline';
+export const FINAL_PIPELINE_ID = '.fleet_final_pipeline';
 
 export const FINAL_PIPELINE = `---
 description: >

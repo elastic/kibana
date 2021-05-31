@@ -193,7 +193,7 @@ export async function ensureFleetFinalPipelineIsInstalled(esClient: Elasticsearc
   const res = await esClient.ingest.getPipeline({ id: FINAL_PIPELINE_ID }, esClientRequestOptions);
 
   if (res.statusCode === 404) {
-    const resCreated = await esClient.ingest.putPipeline(
+    await esClient.ingest.putPipeline(
       // @ts-ignore pipeline is define in yaml
       { id: FINAL_PIPELINE_ID, body: FINAL_PIPELINE },
       {
