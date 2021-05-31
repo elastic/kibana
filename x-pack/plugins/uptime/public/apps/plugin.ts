@@ -115,6 +115,8 @@ export class UptimePlugin
               }),
               app: 'uptime',
               path: '/',
+              matchFullPath: true,
+              ignoreTrailingSlash: true,
             },
             {
               label: i18n.translate('xpack.uptime.certificatesPage.heading', {
@@ -122,6 +124,7 @@ export class UptimePlugin
               }),
               app: 'uptime',
               path: '/certificates',
+              matchFullPath: true,
             },
           ],
         },
