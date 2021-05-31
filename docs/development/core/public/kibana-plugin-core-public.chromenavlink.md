@@ -17,7 +17,6 @@ export interface ChromeNavLink
 |  --- | --- | --- |
 |  [baseUrl](./kibana-plugin-core-public.chromenavlink.baseurl.md) | <code>string</code> | The base route used to open the root of an application. |
 |  [category](./kibana-plugin-core-public.chromenavlink.category.md) | <code>AppCategory</code> | The category the app lives in |
-|  [deepLinkPath](./kibana-plugin-core-public.chromenavlink.deeplinkpath.md) | <code>string</code> | Path used by deepLinks to navigate, composed by the main app's <code>baseUrl</code> and the deepLink <code>path</code>. |
 |  [disabled](./kibana-plugin-core-public.chromenavlink.disabled.md) | <code>boolean</code> | Disables a link from being clickable. |
 |  [euiIconType](./kibana-plugin-core-public.chromenavlink.euiicontype.md) | <code>string</code> | A EUI iconType that will be used for the app's icon. This icon takes precedence over the <code>icon</code> property. |
 |  [hidden](./kibana-plugin-core-public.chromenavlink.hidden.md) | <code>boolean</code> | Hides a link from the navigation. |
@@ -27,5 +26,5 @@ export interface ChromeNavLink
 |  [order](./kibana-plugin-core-public.chromenavlink.order.md) | <code>number</code> | An ordinal used to sort nav links relative to one another for display. |
 |  [title](./kibana-plugin-core-public.chromenavlink.title.md) | <code>string</code> | The title of the application. |
 |  [tooltip](./kibana-plugin-core-public.chromenavlink.tooltip.md) | <code>string</code> | A tooltip shown when hovering over an app link. |
-|  [url](./kibana-plugin-core-public.chromenavlink.url.md) | <code>string</code> | The route used to open the  of an application. If unset, <code>baseUrl</code> will be used instead. |
+|  [url](./kibana-plugin-core-public.chromenavlink.url.md) | <code>string</code> | The route used to open the default path and the deep links of an application. |
 

@@ -29,6 +29,7 @@ function mockLink({ title = 'discover', category }: Partial<ChromeNavLink>) {
     id: title,
     href: title,
     baseUrl: '/',
+    url: '/',
     isActive: true,
     'data-test-subj': title,
   };
@@ -50,6 +51,7 @@ function mockProps() {
     isLocked: false,
     isNavOpen: false,
     homeHref: '/',
+    url: '/',
     navLinks$: new BehaviorSubject([]),
     recentlyAccessed$: new BehaviorSubject([]),
     storage: new StubBrowserStorage(),

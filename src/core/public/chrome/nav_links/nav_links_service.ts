@@ -13,7 +13,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import { InternalApplicationStart, PublicAppDeepLinkInfo, PublicAppInfo } from '../../application';
 import { HttpStart } from '../../http';
 import { ChromeNavLink, NavLinkWrapper } from './nav_link';
-import { toNavDeepLink, toNavLink } from './to_nav_link';
+import { toNavLink } from './to_nav_link';
 
 interface StartDeps {
   application: InternalApplicationStart;
@@ -178,7 +178,7 @@ function toNavDeepLinks(
   if (!deepLinks) return [];
   return deepLinks.reduce((navDeepLinks: Array<[string, NavLinkWrapper]>, deepLink) => {
     if (deepLink.path) {
-      navDeepLinks.push([deepLink.id, toNavDeepLink(app, deepLink, http.basePath)]);
+      navDeepLinks.push([deepLink.id, toNavLink(app, http.basePath, deepLink)]);
     }
     navDeepLinks.push(...toNavDeepLinks(app, deepLink.deepLinks, http));
     return navDeepLinks;

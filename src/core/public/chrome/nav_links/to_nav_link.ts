@@ -16,44 +16,38 @@ import { IBasePath } from '../../http';
 import { NavLinkWrapper } from './nav_link';
 import { appendAppPath } from '../../application/utils';
 
-export function toNavLink(app: PublicAppInfo, basePath: IBasePath): NavLinkWrapper {
-  const useAppStatus = app.navLinkStatus === AppNavLinkStatus.default;
+export function toNavLink(
+  app: PublicAppInfo,
+  basePath: IBasePath,
+  deepLink?: PublicAppDeepLinkInfo
+): NavLinkWrapper {
   const relativeBaseUrl = basePath.prepend(app.appRoute!);
-  const url = relativeToAbsolute(appendAppPath(relativeBaseUrl, app.defaultPath));
+  const url = appendAppPath(relativeBaseUrl, deepLink?.path || app.defaultPath);
+  const href = relativeToAbsolute(url);
   const baseUrl = relativeToAbsolute(relativeBaseUrl);
 
   return new NavLinkWrapper({
-    ...app,
-    hidden: useAppStatus
-      ? app.status === AppStatus.inaccessible
-      : app.navLinkStatus === AppNavLinkStatus.hidden,
-    disabled: useAppStatus ? false : app.navLinkStatus === AppNavLinkStatus.disabled,
+    ...(deepLink || app),
+    ...(app.category ? { category: app.category } : {}), // deepLinks use the main app category
+    hidden: deepLink ? isDeepNavLinkHidden(deepLink) : isAppNavLinkHidden(app),
+    disabled: (deepLink?.navLinkStatus ?? app.navLinkStatus) === AppNavLinkStatus.disabled,
     baseUrl,
-    href: url,
+    href,
     url,
   });
 }
 
-export function toNavDeepLink(
-  app: PublicAppInfo,
-  deepLink: PublicAppDeepLinkInfo,
-  basePath: IBasePath
-): NavLinkWrapper {
-  const defaultNavStatus = deepLink.navLinkStatus === AppNavLinkStatus.default;
-  const relativeBaseUrl = basePath.prepend(`${app.appRoute!}${deepLink.path!}`);
-  const url = relativeToAbsolute(appendAppPath(relativeBaseUrl, app.defaultPath));
-  const baseUrl = relativeToAbsolute(relativeBaseUrl);
+function isAppNavLinkHidden(app: PublicAppInfo) {
+  return app.navLinkStatus === AppNavLinkStatus.default
+    ? app.status === AppStatus.inaccessible
+    : app.navLinkStatus === AppNavLinkStatus.hidden;
+}
 
-  return new NavLinkWrapper({
-    ...deepLink,
-    ...(app.category ? { category: app.category } : {}),
-    deepLinkPath: relativeBaseUrl,
-    hidden: defaultNavStatus || deepLink.navLinkStatus === AppNavLinkStatus.hidden,
-    disabled: deepLink.navLinkStatus === AppNavLinkStatus.disabled,
-    baseUrl,
-    href: url,
-    url,
-  });
+function isDeepNavLinkHidden(deepLink: PublicAppDeepLinkInfo) {
+  return (
+    deepLink.navLinkStatus === AppNavLinkStatus.default ||
+    deepLink.navLinkStatus === AppNavLinkStatus.hidden
+  );
 }
 
 /**

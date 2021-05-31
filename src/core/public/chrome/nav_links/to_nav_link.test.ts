@@ -64,7 +64,7 @@ describe('toNavLink', () => {
       }),
       basePath
     );
-    expect(link.properties.url).toEqual('http://localhost/base-path/my-route/my-path');
+    expect(link.properties.url).toEqual('/base-path/my-route/my-path');
 
     link = toNavLink(
       app({
@@ -73,9 +73,7 @@ describe('toNavLink', () => {
       }),
       basePath
     );
-    expect(link.properties.url).toEqual(
-      'http://localhost/base-path/my-route/my-path/some/default/path'
-    );
+    expect(link.properties.url).toEqual('/base-path/my-route/my-path/some/default/path');
   });
 
   it('uses the application status when the navLinkStatus is set to default', () => {

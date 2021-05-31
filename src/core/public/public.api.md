@@ -310,7 +310,6 @@ export interface ChromeNavControls {
 export interface ChromeNavLink {
     readonly baseUrl: string;
     readonly category?: AppCategory;
-    readonly deepLinkPath?: string;
     readonly disabled?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
@@ -320,8 +319,7 @@ export interface ChromeNavLink {
     readonly order?: number;
     readonly title: string;
     readonly tooltip?: string;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
-    readonly url?: string;
+    readonly url: string;
 }
 
 // @public

@@ -392,8 +392,10 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
           changes.navLinkStatus ?? AppNavLinkStatus.default,
           fields.navLinkStatus ?? AppNavLinkStatus.default
         ),
-        // deepLinks takes last update
-        deepLinks: populateDeepLinkDefaults(fields.deepLinks),
+        // deepLinks take the last defined update
+        deepLinks: fields.deepLinks
+          ? populateDeepLinkDefaults(fields.deepLinks)
+          : changes.deepLinks,
       };
     }
   });
