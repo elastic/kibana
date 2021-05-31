@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -22,6 +22,8 @@ import {
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
+import { debounce } from 'lodash';
+import type { AutocompleteStart } from '../../../../../../../../../src/plugins/data/public';
 import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type { CodeEditorProps } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { useDebounceWithOptions } from '../../../../../shared_components';
@@ -73,7 +75,9 @@ export function FormulaEditor({
   const disposables = React.useRef<monaco.IDisposable[]>([]);
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
 
-  const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
+  const visibleOperationsMap = useMemo(() => filterByVisibleOperation(operationDefinitionMap), [
+    operationDefinitionMap,
+  ]);
 
   // The Monaco editor needs to have the overflowDiv in the first render. Using an effect
   // requires a second render to work, so we are using an if statement to guarantee it happens
@@ -85,6 +89,14 @@ export function FormulaEditor({
     node1.classList.add('lnsFormulaOverflow', 'monaco-editor');
     document.body.appendChild(node1);
   }
+
+  const autocompleteServiceDebounced: AutocompleteStart = useMemo(
+    () => ({
+      ...data.autocomplete,
+      getQuerySuggestion: debounce((args) => data.autocomplete.getQuerySuggestions(args), 256),
+    }),
+    [data.autocomplete]
+  );
 
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
@@ -320,7 +332,7 @@ export function FormulaEditor({
             context,
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
-            data,
+            autocomplete: autocompleteServiceDebounced,
           });
         }
       } else {
@@ -330,17 +342,23 @@ export function FormulaEditor({
           context,
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
-          data,
+          autocomplete: autocompleteServiceDebounced,
         });
       }
 
       return {
         suggestions: aSuggestions.list.map((s) =>
-          getSuggestion(s, aSuggestions.type, wordRange, visibleOperationsMap)
+          getSuggestion(
+            s,
+            aSuggestions.type,
+            wordRange,
+            visibleOperationsMap,
+            context.triggerCharacter
+          )
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, data]
+    [indexPattern, visibleOperationsMap, autocompleteServiceDebounced]
   );
 
   const provideSignatureHelp = useCallback(
