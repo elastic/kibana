@@ -53,6 +53,7 @@ import {
 } from '../../triggers_actions_ui/public';
 import { FileDataVisualizerPluginStart } from '../../file_data_visualizer/public';
 import { PluginSetupContract as AlertingSetup } from '../../alerting/public';
+import { registerManagementSection } from './application/management';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -133,6 +134,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
     }
 
+    if (pluginsSetup.management) {
+      registerManagementSection(pluginsSetup.management, core).enable();
+    }
+
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
       const [coreStart] = await core.getStartServices();
@@ -160,7 +165,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       // note including registerFeature in register_helper would cause the page bundle size to increase significantly
       const {
         registerEmbeddables,
-        registerManagementSection,
         registerMlUiActions,
         registerSearchLinks,
         registerMlAlerts,
@@ -172,11 +176,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerSearchLinks(this.appUpdater$, fullLicense);
 
         if (fullLicense) {
-          const canManageMLJobs =
-            capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
-          if (canManageMLJobs && pluginsSetup.management !== undefined) {
-            registerManagementSection(pluginsSetup.management, core).enable();
-          }
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
 

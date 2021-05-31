@@ -21,7 +21,7 @@ describe('plot', () => {
   const fn = functionWrapper(
     plotFunctionFactory({
       get: () => ({
-        getColors: () => ['red', 'black'],
+        getCategoricalColors: () => ['red', 'black'],
       }),
     })
   );
@@ -121,7 +121,7 @@ describe('plot', () => {
         const mockedFn = functionWrapper(
           plotFunctionFactory({
             get: () => ({
-              getColors: mockedColors,
+              getCategoricalColors: mockedColors,
             }),
           })
         );
