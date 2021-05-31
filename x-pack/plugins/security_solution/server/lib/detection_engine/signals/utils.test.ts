@@ -39,6 +39,7 @@ import {
   createTotalHitsFromSearchResult,
   lastValidDate,
   calculateThresholdSignalUuid,
+  buildChunkedOrFilter,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -1471,6 +1472,28 @@ describe('utils', () => {
       const startedAt = new Date('2019-11-18T13:32:00Z');
       const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, ['host.ip'], '1.2.3.4');
       expect(signalUuid).toEqual('ee8870dc-45ff-5e6c-a2f9-80886651ce03');
+    });
+  });
+
+  describe('buildChunkedOrFilter', () => {
+    test('should return undefined if no values are provided', () => {
+      const filter = buildChunkedOrFilter('field.name', []);
+      expect(filter).toEqual(undefined);
+    });
+
+    test('should return a filter with a single value', () => {
+      const filter = buildChunkedOrFilter('field.name', ['id-1']);
+      expect(filter).toEqual('field.name: ("id-1")');
+    });
+
+    test('should return a filter with a multiple values', () => {
+      const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2']);
+      expect(filter).toEqual('field.name: ("id-1" OR "id-2")');
+    });
+
+    test('should return a filter with a multiple values chunked', () => {
+      const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2', 'id-3'], 2);
+      expect(filter).toEqual('field.name: ("id-1" OR "id-2") OR field.name: ("id-3")');
     });
   });
 });
