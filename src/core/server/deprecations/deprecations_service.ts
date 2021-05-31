@@ -154,7 +154,7 @@ export class DeprecationsService implements CoreService<InternalDeprecationsServ
               level: 'critical',
               deprecationType: 'config',
               message,
-              correctiveActions: correctiveActions ?? {},
+              correctiveActions,
               documentationUrl,
             };
           });
