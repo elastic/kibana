@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup } from 'kibana/public';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
 
@@ -13,6 +14,7 @@ export interface GaugeVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: Promise<FormatFactory>;
   editorFrame: EditorFrameSetup;
+  charts: ChartsPluginSetup;
 }
 
 export class GaugeVisualization {
@@ -20,17 +22,18 @@ export class GaugeVisualization {
 
   setup(
     _core: CoreSetup | null,
-    { expressions, formatFactory, editorFrame }: GaugeVisualizationPluginSetupPlugins
+    { expressions, formatFactory, editorFrame, charts }: GaugeVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { gaugeVisualization, gaugeChart, getGaugeChartRenderer } = await import(
+      const { getGaugeVisualization, gaugeChart, getGaugeChartRenderer } = await import(
         '../async_services'
       );
+      const palettes = await charts.palettes.getPalettes();
 
       expressions.registerFunction(() => gaugeChart);
 
       expressions.registerRenderer(() => getGaugeChartRenderer(formatFactory));
-      return gaugeVisualization;
+      return getGaugeVisualization(palettes);
     });
   }
 }

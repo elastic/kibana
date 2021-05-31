@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PaletteOutput } from 'src/plugins/charts/public';
+
 export interface GaugeState {
   layerId: string;
   accessor?: string;
@@ -13,6 +15,7 @@ export interface GaugeState {
   max?: number;
   subTitle?: string;
   type: 'goal' | 'horizontalBullet' | 'verticalBullet';
+  palette?: PaletteOutput;
 }
 
 export interface GaugeConfig extends GaugeState {

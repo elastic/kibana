@@ -20,6 +20,51 @@ import { GaugeConfig } from './types';
 import { FormatFactory, LensMultiTable } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
+import { CustomPaletteState } from '../../../../../src/plugins/charts/public';
+
+function getStops(
+  { colors, stops, range }: CustomPaletteState,
+  { min, max }: { min: number; max: number }
+) {
+  if (stops.length) {
+    return stops;
+  }
+  const step = (max - min) / colors.length;
+  return colors.map((_, i) => min + i * step);
+}
+
+/**
+ * Heatmaps use a different convention than palettes (same convention as EuiColorStops)
+ * so stops need to be left shifted.
+ * Values normalization provides a percent => absolute array of values
+ */
+function shiftAndNormalizeStops(
+  params: CustomPaletteState,
+  { min, max }: { min: number; max: number }
+) {
+  const baseStops = [
+    ...getStops(params, { min, max }).map((value) => {
+      let result = value;
+      if (params.range === 'percent' && params.stops.length) {
+        result = min + value * ((max - min) / 100);
+      }
+      // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
+      if (Number.isNaN(result)) {
+        return 1;
+      }
+      return result;
+    }),
+    max,
+  ];
+  if (params.stops.length) {
+    if (params.range === 'percent') {
+      baseStops.unshift(min + params.rangeMin * ((max - min) / 100));
+    } else {
+      baseStops.unshift(params.rangeMin);
+    }
+  }
+  return baseStops;
+}
 
 export interface GaugeChartProps {
   data: LensMultiTable;
@@ -76,6 +121,10 @@ export const gaugeChart: ExpressionFunctionDefinition<
     },
     subTitle: {
       types: ['string'],
+      help: '',
+    },
+    palette: {
+      types: ['palette'],
       help: '',
     },
     mode: {
@@ -181,6 +230,11 @@ export function GaugeChart({
   const min = Math.min(numberValue, minConfig ?? 0);
   const max = Math.max(maxConfig ?? Math.round(Math.abs(numberValue) * 1.5), numberValue);
 
+  const colors = (args.palette?.params as CustomPaletteState)?.colors ?? undefined;
+  const ranges = (args.palette?.params as CustomPaletteState)
+    ? shiftAndNormalizeStops(args.palette?.params as CustomPaletteState, { min, max })
+    : undefined;
+
   const ticks = scaleLinear().domain([min, max]).nice().ticks(5);
 
   return (
@@ -196,7 +250,11 @@ export function GaugeChart({
           base={min}
           target={target ?? numberValue}
           actual={numberValue}
-          bands={[]}
+          bands={ranges || []}
+          bandFillColor={(val) => {
+            const index = ranges && ranges.indexOf(val.value) - 1;
+            return index !== undefined && colors && index >= 0 ? colors[index] : 'rgb(255,255,255)';
+          }}
           ticks={ticks}
           tickValueFormatter={({ value: tickValue }) =>
             formatter ? formatter.convert(tickValue) : String(tickValue)
