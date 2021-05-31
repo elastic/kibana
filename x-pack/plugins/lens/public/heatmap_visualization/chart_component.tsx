@@ -49,7 +49,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
 
   const table = Object.values(data.tables)[0];
 
-  const chartData = table.rows;
+  let chartData = table.rows;
 
   const xAxisColumnIndex = table.columns.findIndex((v) => v.id === args.xAccessor);
   const yAxisColumnIndex = table.columns.findIndex((v) => v.id === args.yAccessor);
@@ -65,8 +65,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
 
   if (!yAxisColumn) {
     // required for tooltip
-    chartData.forEach((row) => {
-      row.unifiedY = '';
+    chartData = chartData.map((row) => {
+      return {
+        ...row,
+        unifiedY: '',
+      };
     });
   }
 
