@@ -21,7 +21,7 @@ import type {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-
+import { TestProviders } from '../../mock';
 import {
   useAddOrUpdateException,
   UseAddOrUpdateExceptionProps,
@@ -134,12 +134,16 @@ describe('useAddOrUpdateException', () => {
 
     addOrUpdateItemsArgs = [ruleId, itemsToAddOrUpdate];
     render = () =>
-      renderHook<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>(() =>
-        useAddOrUpdateException({
-          http: mockKibanaHttpService,
-          onError,
-          onSuccess,
-        })
+      renderHook<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>(
+        () =>
+          useAddOrUpdateException({
+            http: mockKibanaHttpService,
+            onError,
+            onSuccess,
+          }),
+        {
+          wrapper: TestProviders,
+        }
       );
   });
 
