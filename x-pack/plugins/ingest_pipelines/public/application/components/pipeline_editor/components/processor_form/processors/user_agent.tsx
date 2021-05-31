@@ -52,29 +52,13 @@ const fieldsConfig: FieldsConfig = {
     defaultValue: false,
     deserializer: to.booleanOrUndef,
     serializer: from.undefinedIfValue(false),
-    label: (
-      <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceNameFieldText"
-            defaultMessage="Extract Device Type"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ marginBottom: -4 }}>
-          <EuiBetaBadge
-            label="Beta"
-            tooltipContent={i18n.translate(
-              'xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceNameTooltipText',
-              { defaultMessage: 'This functionality is in beta and is subject to change.' }
-            )}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    helpText: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceTypeFieldHelpText',
+      {
+        defaultMessage: 'Extracts device type from the user agent string.',
+      }
     ),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceTypeFieldHelpText', {
-      defaultMessage: 'Extracts device type from the user agent string.',
-    }),
-  }
+  },
 };
 
 export const UserAgent: FunctionComponent = () => {
@@ -123,6 +107,27 @@ export const UserAgent: FunctionComponent = () => {
         component={ToggleField}
         path="fields.extract_device_type"
         data-test-subj="extractDeviceTypeSwitch"
+        euiFieldProps={{
+          label: (
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <FormattedMessage
+                  id="xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceNameFieldText"
+                  defaultMessage="Extract Device Type"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem style={{ marginBottom: -4 }}>
+                <EuiBetaBadge
+                  label="Beta"
+                  tooltipContent={i18n.translate(
+                    'xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceNameTooltipText',
+                    { defaultMessage: 'This functionality is in beta and is subject to change.' }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        }}
       />
 
       <IgnoreMissingField />
