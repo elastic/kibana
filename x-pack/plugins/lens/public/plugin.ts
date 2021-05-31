@@ -16,7 +16,6 @@ import {
   VisualizationsStart,
 } from '../../../../src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
@@ -55,7 +54,6 @@ import {
   EmbeddableComponentProps,
   getEmbeddableComponent,
 } from './editor_frame_service/embeddable/embeddable_component';
-import { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -110,6 +108,12 @@ export interface LensPublicStart {
    * Method which returns xy VisualizationTypes array keeping this async as to not impact page load bundle
    */
   getXyVisTypes: () => Promise<VisualizationType[]>;
+
+  /**
+   * It will return lens attribute service, it will be mainly used for passing to SaveModalContainer
+   * When it's embedded outside Lens app
+   */
+  attributeService: (() => Promise<LensAttributeService>) | null;
 }
 
 export class LensPlugin {
@@ -274,11 +278,6 @@ export class LensPlugin {
       getXyVisTypes: async () => {
         const { visualizationTypes } = await import('./xy_visualization/types');
         return visualizationTypes;
-      },
-      openLensSaveModal: async () => {
-        const { mountSaveModal } = await import('./async_services');
-
-        return mountSaveModal();
       },
     };
   }

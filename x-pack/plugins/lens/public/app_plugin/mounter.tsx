@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
 import { Provider } from 'react-redux';
-import { uniq, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
@@ -25,7 +25,7 @@ import { App } from './app';
 import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID, getFullPath } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
 import {
   LensEmbeddableInput,
   LensByReferenceInput,
@@ -43,8 +43,8 @@ import {
   LensRootStore,
   setState,
 } from '../state_management';
-import { getAllIndexPatterns, getResolvedDateRange } from '../utils';
-import { injectFilterReferences } from '../persistence';
+import { getResolvedDateRange } from '../utils';
+import { getLastKnownDoc } from './save_modal_container';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
@@ -85,6 +85,8 @@ export async function mountApp(
     application: coreStart.application,
     notifications: coreStart.notifications,
     savedObjectsClient: coreStart.savedObjects.client,
+    presentationUtil: startDependencies.presentationUtil,
+    dashboard: startDependencies.dashboard,
     getOriginatingAppName: () => {
       return embeddableEditorIncomingState?.originatingApp
         ? stateTransfer?.getAppNameFromId(embeddableEditorIncomingState.originatingApp)
@@ -289,65 +291,36 @@ export function loadDocument(
   }
   lensStore.dispatch(setState({ isAppLoading: true }));
 
-  attributeService
-    .unwrapAttributes(initialInput)
-    .then((attributes) => {
-      if (!initialInput) {
-        return;
-      }
-      const doc = {
-        ...initialInput,
-        ...attributes,
-        type: LENS_EMBEDDABLE_TYPE,
-      };
-
-      if (attributeService.inputIsRefType(initialInput)) {
-        chrome.recentlyAccessed.add(
-          getFullPath(initialInput.savedObjectId),
-          attributes.title,
-          initialInput.savedObjectId
+  getLastKnownDoc({
+    initialInput,
+    attributeService,
+    data,
+    chrome,
+    notifications,
+    persistedDoc,
+  }).then(
+    (newState) => {
+      if (newState) {
+        const { doc, indexPatterns } = newState;
+        lensStore.dispatch(
+          setState({
+            query: doc.state.query,
+            isAppLoading: false,
+            indexPatternsForTopNav: indexPatterns,
+            lastKnownDoc: doc,
+            ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
+          })
         );
       }
-      const indexPatternIds = uniq(
-        doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
-      );
-      getAllIndexPatterns(indexPatternIds, data.indexPatterns)
-        .then(({ indexPatterns }) => {
-          // Don't overwrite any pinned filters
-          data.query.filterManager.setAppFilters(
-            injectFilterReferences(doc.state.filters, doc.references)
-          );
-          lensStore.dispatch(
-            setState({
-              query: doc.state.query,
-              isAppLoading: false,
-              indexPatternsForTopNav: indexPatterns,
-              lastKnownDoc: doc,
-              ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
-            })
-          );
-        })
-        .catch((e) => {
-          lensStore.dispatch(
-            setState({
-              isAppLoading: false,
-            })
-          );
-          redirectCallback();
-        });
-    })
-    .catch((e) => {
+    },
+    () => {
       lensStore.dispatch(
         setState({
           isAppLoading: false,
         })
       );
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.lens.app.docLoadingError', {
-          defaultMessage: 'Error loading saved document',
-        })
-      );
 
       redirectCallback();
-    });
+    }
+  );
 }

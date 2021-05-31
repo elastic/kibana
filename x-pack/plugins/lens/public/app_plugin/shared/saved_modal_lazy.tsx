@@ -11,7 +11,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import type { SaveModalContainerProps } from '../save_modal_container';
 const SaveModal = React.lazy(() => import('../save_modal_container'));
 
-export const SavedModalLazy = (props: SaveModalContainerProps) => {
+export const LensSavedModalLazy = (props: SaveModalContainerProps) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <SaveModal {...props} />

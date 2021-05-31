@@ -18,7 +18,8 @@
     "alerting",
     "ruleRegistry",
     "triggersActionsUi",
-    "presentationUtil"
+    "presentationUtil",
+    "dashboard"
   ],
   "ui": true,
   "server": true,

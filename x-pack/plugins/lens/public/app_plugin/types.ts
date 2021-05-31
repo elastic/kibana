@@ -18,6 +18,7 @@ import {
   SavedObjectsStart,
 } from '../../../../../src/core/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import { LensAttributeService } from '../lens_attribute_service';
@@ -33,6 +34,7 @@ import {
   EmbeddableStateTransfer,
 } from '../../../../../src/plugins/embeddable/public';
 import { EditorFrameInstance } from '../types';
+import { PresentationUtilPluginStart } from '../../../../../src/plugins/presentation_util/public';
 export interface RedirectToOriginProps {
   input?: LensEmbeddableInput;
   isCopied?: boolean;
@@ -91,6 +93,7 @@ export interface LensAppServices {
   chrome: ChromeStart;
   overlays: OverlayStart;
   storage: IStorageWrapper;
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   uiSettings: IUiSettingsClient;
   application: ApplicationStart;
@@ -101,6 +104,7 @@ export interface LensAppServices {
   savedObjectsClient: SavedObjectsStart['client'];
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
+  presentationUtil: PresentationUtilPluginStart;
 
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;

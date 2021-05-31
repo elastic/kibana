@@ -9,6 +9,7 @@ import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, AppMountParameters } from 'kibana/public';
 import { StartDependencies } from './plugin';
+import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 
 export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
   element,
@@ -23,7 +24,16 @@ export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
 
   const defaultIndexPattern = await plugins.data.indexPatterns.getDefault();
 
-  const reactElement = <App {...deps} defaultIndexPattern={defaultIndexPattern} />;
+  const reactElement = (
+    <KibanaContextProvider
+      services={{
+        ...core,
+        ...plugins,
+      }}
+    >
+      <App {...deps} defaultIndexPattern={defaultIndexPattern} />
+    </KibanaContextProvider>
+  );
   render(reactElement, element);
   return () => unmountComponentAtNode(element);
 };

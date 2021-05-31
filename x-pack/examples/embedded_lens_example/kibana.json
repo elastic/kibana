@@ -8,7 +8,9 @@
   "requiredPlugins": [
     "lens",
     "data",
-    "developerExamples"
+    "dashboard",
+    "developerExamples",
+    "presentationUtil"
   ],
   "optionalPlugins": [],
   "requiredBundles": []

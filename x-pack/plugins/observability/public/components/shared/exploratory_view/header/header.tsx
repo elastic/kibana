@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import {
-  getLastKnownDoc,
-  SavedModalLazy,
-  runSaveLensVisualization,
+  LensSavedModalLazy,
   TypedLensByValueInput,
+  LensEmbeddableInput,
 } from '../../../../../../lens/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { DataViewLabels } from '../configurations/constants';
@@ -27,35 +26,11 @@ interface Props {
 export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
   const kServices = useKibana<ObservabilityAppServices>().services;
 
-  const { chrome, lens, data, notifications, presentationUtil } = kServices;
+  const { lens } = kServices;
 
   const { series } = useUrlStorage(seriesId);
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
-  const [lastKnownDoc, setLastKnownDoc] = useState();
-  const [attributeService, setAttributeService] = useState();
-
-  const { ContextProvider: PresentationUtilContext } = presentationUtil;
-
-  useEffect(() => {
-    if (isSaveOpen && lensAttributes !== null) {
-      async function loadLastKnownDoc() {
-        const attributeServiceT = await lens.attributeService();
-        setAttributeService(attributeServiceT);
-        getLastKnownDoc({
-          data,
-          chrome: chrome!,
-          notifications: notifications!,
-          attributeService: attributeServiceT,
-          initialInput: lensAttributes,
-        }).then((result) => {
-          setLastKnownDoc(result.lastKnownDoc);
-        });
-      }
-
-      loadLastKnownDoc();
-    }
-  }, [chrome, data, isSaveOpen, lens, lensAttributes, notifications]);
 
   return (
     <>
@@ -108,7 +83,7 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
             isDisabled={!lens.canUseEditor() || lensAttributes === null}
             onClick={() => {
               if (lensAttributes) {
-                lens.openLensSaveModal();
+                setIsSaveOpen(true);
               }
             }}
           >
@@ -118,36 +93,14 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {lastKnownDoc && (
-        <PresentationUtilContext>
-          <SavedModalLazy
-            isVisible={isSaveOpen}
-            lastKnownDoc={lastKnownDoc}
-            onClose={() => {
-              setIsSaveOpen(false);
-            }}
-            onSave={(saveProps, options) => {
-              runSaveLensVisualization(
-                {
-                  lastKnownDoc,
-                  setIsSaveModalVisible: () => {
-                    setIsSaveOpen(false);
-                  },
-                  initialInput: lensAttributes,
-                  attributeService,
-                  getIsByValueMode: () => false,
-                  ...kServices,
-                },
-                saveProps,
-                options
-              );
-            }}
-            persistedDoc={undefined}
-            savingToLibraryPermitted={true}
-            returnToOriginSwitchLabel={true}
-            originatingApp={undefined}
-          />
-        </PresentationUtilContext>
+
+      {isSaveOpen && lensAttributes && (
+        <LensSavedModalLazy
+          isVisible={isSaveOpen}
+          initialInput={(lensAttributes as unknown) as LensEmbeddableInput}
+          onClose={() => setIsSaveOpen(false)}
+          onSave={() => {}}
+        />
       )}
     </>
   );
