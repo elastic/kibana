@@ -23,9 +23,6 @@ export const mockConfig = {
   host: 'http://localhost:3002',
   accessCheckTimeout: 5000,
   accessCheckTimeoutWarning: 300,
-  ssl: {
-    rejectUnauthorized: false,
-  },
 } as ConfigType;
 
 /**
