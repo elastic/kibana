@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../types';
+import { GaugeState } from './types';
+
+/**
+ * Generate suggestions for the gauge chart.
+ *
+ * @param opts
+ */
+export function getSuggestions({
+  table,
+  state,
+  keptLayerIds,
+}: SuggestionRequest<GaugeState>): Array<VisualizationSuggestion<GaugeState>> {
+  // We only render metric charts for single-row queries. We require a single, numeric column.
+  if (
+    table.isMultiRow ||
+    keptLayerIds.length > 1 ||
+    (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
+    table.columns.length !== 1 ||
+    table.columns[0].operation.dataType !== 'number'
+  ) {
+    return [];
+  }
+
+  // don't suggest current table if visualization is active
+  if (state && table.changeType === 'unchanged') {
+    return [];
+  }
+
+  return getSuggestion(table);
+}
+
+function getSuggestion(table: TableSuggestion): Array<VisualizationSuggestion<GaugeState>> {
+  const col = table.columns[0];
+  const title = table.label || col.operation.label;
+
+  return [
+    {
+      title,
+      score: 0.1,
+      previewIcon: 'visGauge',
+      state: {
+        layerId: table.layerId,
+        accessor: col.columnId,
+        type: 'goal',
+      },
+    },
+    {
+      title,
+      score: 0.1,
+      previewIcon: 'visGauge',
+      state: {
+        layerId: table.layerId,
+        accessor: col.columnId,
+        type: 'verticalBullet',
+      },
+    },
+    {
+      title,
+      score: 0.1,
+      previewIcon: 'visGauge',
+      state: {
+        layerId: table.layerId,
+        accessor: col.columnId,
+        type: 'horizontalBullet',
+      },
+    },
+  ];
+}

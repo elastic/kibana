@@ -54,6 +54,7 @@ import {
   EmbeddableComponentProps,
   getEmbeddableComponent,
 } from './editor_frame_service/embeddable/embeddable_component';
+import { GaugeVisualization } from './gauge_visualization';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -118,6 +119,7 @@ export class LensPlugin {
   private indexpatternDatasource: IndexPatternDatasource;
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
+  private gaugeVisualization: GaugeVisualization;
   private pieVisualization: PieVisualization;
 
   private stopReportManager?: () => void;
@@ -128,6 +130,7 @@ export class LensPlugin {
     this.indexpatternDatasource = new IndexPatternDatasource();
     this.xyVisualization = new XyVisualization();
     this.metricVisualization = new MetricVisualization();
+    this.gaugeVisualization = new GaugeVisualization();
     this.pieVisualization = new PieVisualization();
   }
 
@@ -177,6 +180,7 @@ export class LensPlugin {
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
+    this.gaugeVisualization.setup(core, dependencies);
     this.pieVisualization.setup(core, dependencies);
 
     visualizations.registerAlias(getLensAliasConfig());

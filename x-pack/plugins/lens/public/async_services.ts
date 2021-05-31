@@ -16,6 +16,7 @@
 
 export * from './datatable_visualization/datatable_visualization';
 export * from './metric_visualization/metric_visualization';
+export * from './gauge_visualization/gauge_visualization';
 export * from './pie_visualization/pie_visualization';
 export * from './xy_visualization/xy_visualization';
 
