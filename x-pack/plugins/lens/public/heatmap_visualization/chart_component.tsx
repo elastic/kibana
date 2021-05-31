@@ -262,6 +262,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         xScaleType={xScaleType}
         ySortPredicate="dataIndex"
         config={config}
+        xSortPredicate="dataIndex"
       />
     </Chart>
   );
