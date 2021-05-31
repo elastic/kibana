@@ -114,6 +114,10 @@ export function ShowShareModal({
     objectType: 'dashboard',
     sharingData: {
       title: savedDashboard.title,
+      body: {
+        version: '1',
+        value: dashboardStateManager.appState,
+      },
     },
     isDirty: dashboardStateManager.getIsDirty(),
     embedUrlParamExtensions: [

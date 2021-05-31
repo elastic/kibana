@@ -13,6 +13,7 @@ import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '../';
 import { ReportingCore } from '../../..';
 import { KBN_SCREENSHOT_MODE_HEADER } from '../../../../../../../src/plugins/screenshot_mode/server';
+import { REPORT_BODY_STORE_KEY } from '../../../../common/constants';
 import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
 import { LevelLogger } from '../../../lib';
 import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
@@ -94,10 +95,12 @@ export class HeadlessChromiumDriver {
       conditionalHeaders,
       waitForSelector: pageLoadSelector,
       timeout,
+      body,
     }: {
       conditionalHeaders: ConditionalHeaders;
       waitForSelector: string;
       timeout: number;
+      body?: object;
     },
     logger: LevelLogger
   ): Promise<void> {
@@ -106,8 +109,29 @@ export class HeadlessChromiumDriver {
     // Reset intercepted request count
     this.interceptedCount = 0;
 
-    const enableScreenshotMode = this.core.getEnableScreenshotMode();
-    await this.page.evaluateOnNewDocument(enableScreenshotMode);
+    /**
+     * Integrate with the screenshot mode plugin contract by calling this function before any other
+     * scripts have run on the browser page.
+     */
+    await this.page.evaluateOnNewDocument(this.core.getEnableScreenshotMode());
+
+    /**
+     * Create the "body" store in the page's context. This value is provided by the client and
+     * should be considered fully opaque to us.
+     */
+    await this.page.evaluateOnNewDocument(
+      (storeName: string, value?: object) => {
+        Object.defineProperty(window, storeName, {
+          enumerable: true,
+          writable: false,
+          configurable: false,
+          value,
+        });
+      },
+      REPORT_BODY_STORE_KEY,
+      body
+    );
+
     await this.page.setRequestInterception(true);
 
     this.registerListeners(conditionalHeaders, logger);

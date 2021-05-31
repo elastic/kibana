@@ -45,7 +45,8 @@ export const runTaskFnFactory: RunTaskFnFactory<
       mergeMap(({ logo, conditionalHeaders }) => {
         const urls = getFullUrls(config, job);
 
-        const { browserTimezone, layout, title } = job;
+        const { browserTimezone, layout, title, body } = job;
+
         if (apmGetAssets) apmGetAssets.end();
 
         apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
@@ -56,7 +57,8 @@ export const runTaskFnFactory: RunTaskFnFactory<
           browserTimezone,
           conditionalHeaders,
           layout,
-          logo
+          logo,
+          body
         );
       }),
       map(({ buffer, warnings }) => {

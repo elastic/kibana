@@ -26,6 +26,7 @@ import { ManagementSetup, ManagementStart } from '../../../../src/plugins/manage
 import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { constants, getDefaultLayoutSelectors } from '../common';
+import { REPORT_BODY_STORE_KEY } from '../common/constants';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from './';

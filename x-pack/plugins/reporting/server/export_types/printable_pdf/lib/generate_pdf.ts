@@ -38,7 +38,8 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
-    logo?: string
+    logo?: string,
+    body?: object
   ): Rx.Observable<{ buffer: Buffer | null; warnings: string[] }> {
     const tracker = getTracker();
     tracker.startLayout();
@@ -51,6 +52,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     const screenshots$ = getScreenshots({
       logger,
       urls,
+      body,
       conditionalHeaders,
       layout,
       browserTimezone,

@@ -26,6 +26,10 @@ interface JobParamsProviderOptions {
   objectType: string;
   browserTimezone: string;
   sharingData: Record<string, unknown>;
+  body?: {
+    version?: string;
+    value: object;
+  };
 }
 
 const jobParamsProvider = ({
@@ -38,6 +42,7 @@ const jobParamsProvider = ({
     browserTimezone,
     layout: sharingData.layout as LayoutParams,
     title: sharingData.title as string,
+    body: sharingData.body as { version?: string; value: object },
   };
 };
 

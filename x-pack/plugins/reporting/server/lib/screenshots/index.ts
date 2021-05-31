@@ -17,6 +17,7 @@ export interface ScreenshotObservableOpts {
   urls: string[];
   conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;
+  body?: object;
   browserTimezone?: string;
 }
 

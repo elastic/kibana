@@ -18,14 +18,15 @@ export const openUrl = async (
   url: string,
   pageLoadSelector: string,
   conditionalHeaders: ConditionalHeaders,
-  logger: LevelLogger
+  logger: LevelLogger,
+  body?: object
 ): Promise<void> => {
   const endTrace = startTrace('open_url', 'wait');
   try {
     const timeout = durationToNumber(captureConfig.timeouts.openUrl);
     await browser.open(
       url,
-      { conditionalHeaders, waitForSelector: pageLoadSelector, timeout },
+      { conditionalHeaders, waitForSelector: pageLoadSelector, timeout, body },
       logger
     );
   } catch (err) {
