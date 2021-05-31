@@ -94,9 +94,6 @@
 /x-pack/plugins/apm/server/projections/rum_page_load_transactions.ts @elastic/uptime
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
-# Beats
-/x-pack/plugins/beats_management/  @elastic/beats
-#CC# /x-pack/plugins/beats_management/ @elastic/beats
 
 # Presentation
 /src/plugins/dashboard/ @elastic/kibana-presentation
@@ -150,6 +147,7 @@
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 /src/plugins/tile_map/ @elastic/kibana-gis
 /src/plugins/region_map/ @elastic/kibana-gis
+/packages/kbn-mapbox-gl @elastic/kibana-gis
 
 # Operations
 /src/dev/ @elastic/kibana-operations
