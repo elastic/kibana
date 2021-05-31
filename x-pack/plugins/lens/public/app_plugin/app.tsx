@@ -235,6 +235,7 @@ export function App({
     ).then(
       (newState) => {
         dispatchSetState(newState);
+        setIsSaveModalVisible(false);
       },
       () => {}
     );

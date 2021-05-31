@@ -61,9 +61,10 @@ export function SaveModalContainer({
   redirectToOrigin,
   getAppNameFromId = () => undefined,
   isSaveable = true,
+  lastKnownDoc: initLastKnowDoc,
   attributeService: initAttributeService,
 }: SaveModalContainerProps) {
-  const [lastKnownDoc, setLastKnownDoc] = useState<Document>();
+  const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(initLastKnowDoc);
   const [attributeService, setAttributeService] = useState(initAttributeService);
 
   // Lens Public Start will be used when SaveModalContainer is used outside lens app to fetch
@@ -102,7 +103,7 @@ export function SaveModalContainer({
   const { ContextProvider: PresentationUtilContext } = presentationUtil;
 
   useEffect(() => {
-    if (initialInput !== null) {
+    if (initialInput) {
       async function loadLastKnownDoc() {
         let attributeServiceT: LensAttributeService;
         if (!initAttributeService && lens?.attributeService) {
