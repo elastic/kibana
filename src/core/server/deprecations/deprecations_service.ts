@@ -156,6 +156,7 @@ export class DeprecationsService implements CoreService<InternalDeprecationsServ
           return deprecationsContexts.map(({ message, correctiveActions, documentationUrl }) => {
             return {
               level: 'critical',
+              deprecationType: 'config',
               message,
               correctiveActions: correctiveActions ?? {},
               documentationUrl,
