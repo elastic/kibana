@@ -59,6 +59,5 @@ export type { LensEmbeddableInput } from './editor_frame_service/embeddable';
 export { LensPublicStart } from './plugin';
 
 export { LensSavedModalLazy } from './app_plugin/shared/saved_modal_lazy';
-export { SaveModalContainer } from './async_services';
 
 export const plugin = () => new LensPlugin();
