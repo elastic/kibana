@@ -1978,6 +1978,143 @@ describe('migration visualization', () => {
     });
   });
 
+  describe('7.13.0 and 7.13.1 tsvb migrations can run twice', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.13.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const migrateAgain = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.13.1'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const createTestDocWithType = (type: string) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{"type":"metrics","params":{"type":"${type}","default_index_pattern":"test", "default_timefield":"test", "index_pattern":"testme"}}`,
+      },
+    });
+
+    it('the migrations can be applied twice without breaking anything', () => {
+      const migratedTestDoc = migrate(createTestDocWithType('markdown'));
+      const { params } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(params.hide_last_value_indicator).toBeTruthy();
+      expect(params).not.toHaveProperty('default_index_pattern');
+      expect(params).not.toHaveProperty('default_timefield');
+      expect(params.use_kibana_indexes).toBeFalsy();
+
+      const migratedTestDocNew = migrateAgain(migratedTestDoc);
+      const visState = JSON.parse(migratedTestDocNew.attributes.visState);
+
+      expect(visState.params.hide_last_value_indicator).toBeTruthy();
+      expect(visState.params).not.toHaveProperty('default_index_pattern');
+      expect(visState.params).not.toHaveProperty('default_timefield');
+      expect(params.use_kibana_indexes).toBeFalsy();
+    });
+  });
+
+  describe('7.14.0 tsvb - add empty value rule to savedObjects with less and greater then zero rules', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.14.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const rule1 = { value: 0, operator: 'lte', color: 'rgb(145, 112, 184)' };
+    const rule2 = { value: 0, operator: 'gte', color: 'rgb(96, 146, 192)' };
+    const rule3 = { value: 0, operator: 'gt', color: 'rgb(84, 179, 153)' };
+    const rule4 = { value: 0, operator: 'lt', color: 'rgb(84, 179, 153)' };
+
+    const createTestDocWithType = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{
+          "type":"metrics",
+          "params": ${JSON.stringify(params)}
+        }`,
+      },
+    });
+
+    const checkEmptyRuleIsAddedToArray = (
+      rulesArrayProperty: string,
+      prevParams: any,
+      migratedParams: any,
+      rule: any
+    ) => {
+      expect(migratedParams).toHaveProperty(rulesArrayProperty);
+      expect(Array.isArray(migratedParams[rulesArrayProperty])).toBeTruthy();
+      expect(migratedParams[rulesArrayProperty].length).toBe(
+        prevParams[rulesArrayProperty].length + 1
+      );
+
+      const lastElementIndex = migratedParams[rulesArrayProperty].length - 1;
+      expect(migratedParams[rulesArrayProperty][lastElementIndex]).toHaveProperty('operator');
+      expect(migratedParams[rulesArrayProperty][lastElementIndex].operator).toEqual('empty');
+      expect(migratedParams[rulesArrayProperty][lastElementIndex].color).toEqual(rule.color);
+    };
+
+    const checkRuleIsNotAddedToArray = (
+      rulesArrayProperty: string,
+      prevParams: any,
+      migratedParams: any,
+      rule: any
+    ) => {
+      expect(migratedParams).toHaveProperty(rulesArrayProperty);
+      expect(Array.isArray(migratedParams[rulesArrayProperty])).toBeTruthy();
+      expect(migratedParams[rulesArrayProperty].length).toBe(prevParams[rulesArrayProperty].length);
+      // expects, that array contains one element...
+      expect(migratedParams[rulesArrayProperty][0].operator).toBe(rule.operator);
+    };
+
+    it('should add empty rule if operator = lte and value = 0', () => {
+      const params = {
+        bar_color_rules: [rule1],
+        background_color_rules: [rule1],
+        gauge_color_rules: [rule1],
+      };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      checkEmptyRuleIsAddedToArray('bar_color_rules', params, migratedParams, rule1);
+      checkEmptyRuleIsAddedToArray('background_color_rules', params, migratedParams, rule1);
+      checkEmptyRuleIsAddedToArray('gauge_color_rules', params, migratedParams, rule1);
+    });
+
+    it('should add empty rule if operator = gte and value = 0', () => {
+      const params = {
+        bar_color_rules: [rule2],
+        background_color_rules: [rule2],
+        gauge_color_rules: [rule2],
+      };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      checkEmptyRuleIsAddedToArray('bar_color_rules', params, migratedParams, rule2);
+      checkEmptyRuleIsAddedToArray('background_color_rules', params, migratedParams, rule2);
+      checkEmptyRuleIsAddedToArray('gauge_color_rules', params, migratedParams, rule2);
+    });
+
+    it('should not add empty rule if operator = gt or lt and value = any', () => {
+      const params = {
+        bar_color_rules: [rule3],
+        background_color_rules: [rule3],
+        gauge_color_rules: [rule4],
+      };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      checkRuleIsNotAddedToArray('bar_color_rules', params, migratedParams, rule3);
+      checkRuleIsNotAddedToArray('background_color_rules', params, migratedParams, rule3);
+      checkRuleIsNotAddedToArray('gauge_color_rules', params, migratedParams, rule4);
+    });
+  });
+
   describe('7.14.0 update pie visualization defaults', () => {
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.14.0'](
@@ -2023,46 +2160,6 @@ describe('migration visualization', () => {
       const { distinctColors } = JSON.parse(migratedTestDoc.attributes.visState).params;
 
       expect(distinctColors).toBe(true);
-    });
-  });
-
-  describe('7.13.0 and 7.13.1 tsvb migrations can run twice', () => {
-    const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.13.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
-
-    const migrateAgain = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.13.1'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
-
-    const createTestDocWithType = (type: string) => ({
-      attributes: {
-        title: 'My Vis',
-        description: 'This is my super cool vis.',
-        visState: `{"type":"metrics","params":{"type":"${type}","default_index_pattern":"test", "default_timefield":"test", "index_pattern":"testme"}}`,
-      },
-    });
-
-    it('the migrations can be applied twice without breaking anything', () => {
-      const migratedTestDoc = migrate(createTestDocWithType('markdown'));
-      const { params } = JSON.parse(migratedTestDoc.attributes.visState);
-
-      expect(params.hide_last_value_indicator).toBeTruthy();
-      expect(params).not.toHaveProperty('default_index_pattern');
-      expect(params).not.toHaveProperty('default_timefield');
-      expect(params.use_kibana_indexes).toBeFalsy();
-
-      const migratedTestDocNew = migrateAgain(migratedTestDoc);
-      const visState = JSON.parse(migratedTestDocNew.attributes.visState);
-
-      expect(visState.params.hide_last_value_indicator).toBeTruthy();
-      expect(visState.params).not.toHaveProperty('default_index_pattern');
-      expect(visState.params).not.toHaveProperty('default_timefield');
-      expect(params.use_kibana_indexes).toBeFalsy();
     });
   });
 });

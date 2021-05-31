@@ -14,6 +14,7 @@ import {
   commonHideTSVBLastValueIndicator,
   commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
   commonMigrateVislibPie,
+  commonAddEmptyValueColorRule,
 } from '../migrations/visualization_common_migrations';
 
 const byValueAddSupportOfDualIndexSelectionModeInTSVB = (state: SerializableState) => {
@@ -37,6 +38,13 @@ const byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel = (state: Serial
   };
 };
 
+const byValueAddEmptyValueColorRule = (state: SerializableState) => {
+  return {
+    ...state,
+    savedVis: commonAddEmptyValueColorRule(state.savedVis),
+  };
+};
+
 const byValueMigrateVislibPie = (state: SerializableState) => {
   return {
     ...state,
@@ -55,7 +63,7 @@ export const visualizeEmbeddableFactory = (): EmbeddableRegistryDefinition => {
           byValueHideTSVBLastValueIndicator,
           byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel
         )(state),
-      '7.14.0': (state) => flow(byValueMigrateVislibPie)(state),
+      '7.14.0': (state) => flow(byValueAddEmptyValueColorRule, byValueMigrateVislibPie)(state),
     },
   };
 };
