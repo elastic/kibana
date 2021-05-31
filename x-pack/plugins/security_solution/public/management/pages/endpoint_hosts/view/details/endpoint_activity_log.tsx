@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 
 import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
-import { TimelineEntry } from './components/timeline_entry';
+import { LogEntry } from './components/log_entry';
 import * as i18 from '../translations';
 import { SearchBar } from '../../../../components/search_bar';
 import { Immutable, EndpointAction } from '../../../../../../common/endpoint/types';
@@ -33,7 +33,7 @@ export const EndpointActivityLog = memo(
             <SearchBar onSearch={onSearch} placeholder={i18.SEARCH_ACTIVITY_LOG} />
             <EuiSpacer size="l" />
             {endpointActions.data.map((endpointAction) => (
-              <TimelineEntry key={endpointAction.action_id} endpointAction={endpointAction} />
+              <LogEntry key={endpointAction.action_id} endpointAction={endpointAction} />
             ))}
           </>
         )}

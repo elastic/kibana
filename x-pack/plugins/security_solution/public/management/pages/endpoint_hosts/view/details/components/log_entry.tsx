@@ -6,12 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import moment from 'moment';
 
 import { EuiAvatar, EuiComment, EuiText } from '@elastic/eui';
 import { Immutable, EndpointAction } from '../../../../../../../common/endpoint/types';
+import { FormattedDateAndTime } from '../../../../../../common/components/endpoint/formatted_date_time';
 
-export const TimelineEntry = memo(
+export const LogEntry = memo(
   ({ endpointAction }: { endpointAction: Immutable<EndpointAction> }) => {
     const isIsolated = endpointAction?.data.command === 'isolate';
 
@@ -34,7 +34,10 @@ export const TimelineEntry = memo(
       <EuiComment
         type={commentType}
         username={endpointAction.user_id}
-        timestamp={moment(endpointAction['@timestamp']).fromNow().toString()}
+        timestamp={FormattedDateAndTime({
+          date: new Date(endpointAction['@timestamp']),
+          showRelativeTime: true,
+        })}
         event={event}
         timelineIcon={timelineIcon}
         data-test-subj="timelineEntry"
@@ -49,4 +52,4 @@ export const TimelineEntry = memo(
   }
 );
 
-TimelineEntry.displayName = 'TimelineEntry';
+LogEntry.displayName = 'LogEntry';

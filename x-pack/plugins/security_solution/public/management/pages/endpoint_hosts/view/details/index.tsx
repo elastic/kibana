@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, memo } from 'react';
+import React, { useCallback, useEffect, useMemo, memo } from 'react';
 import styled from 'styled-components';
 import {
   EuiFlyout,
@@ -60,12 +60,6 @@ import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpo
 import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
 import { getEndpointListPath } from '../../../../common/routing';
 
-const contentLoadingMarkup = (
-  <>
-    <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
-  </>
-);
-
 const DetailsFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
   flex: 1;
@@ -101,13 +95,24 @@ export const EndpointDetailsFlyout = memo(() => {
   const hostStatus = useEndpointSelector(hostStatusInfo);
   const show = useEndpointSelector(showView);
 
+  const ContentLoadingMarkup = useMemo(
+    () => (
+      <>
+        <EuiLoadingContent lines={3} />
+        <EuiSpacer size="l" />
+        <EuiLoadingContent lines={3} />
+      </>
+    ),
+    []
+  );
+
   const tabs = [
     {
       id: EndpointDetailsTabsTypes.overview,
       name: i18.OVERVIEW,
       content:
         hostDetails === undefined ? (
-          contentLoadingMarkup
+          ContentLoadingMarkup
         ) : (
           <EndpointDetails details={hostDetails} policyInfo={policyInfo} hostStatus={hostStatus} />
         ),
@@ -116,7 +121,7 @@ export const EndpointDetailsFlyout = memo(() => {
       id: EndpointDetailsTabsTypes.activityLog,
       name: i18.ACTIVITY_LOG,
       content: activityLoading ? (
-        contentLoadingMarkup
+        ContentLoadingMarkup
       ) : (
         <EndpointActivityLog endpointActions={activityLog} />
       ),
