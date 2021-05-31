@@ -25,11 +25,18 @@ import { useFieldEditorContext } from '../field_editor_context';
 
 type From = 'cluster' | 'custom';
 
+type EsDocument = Record<string, any>;
+
 interface Context {
   fields: Array<{ key: string; value: unknown }>;
   error: Record<string, any> | null;
   updateParams: (updated: Partial<Params>) => void;
-  currentDocument?: Record<string, any>;
+  currentDocument: {
+    value?: EsDocument;
+    loadSingle: (id: string) => Promise<void>;
+    loadFromCluster: () => Promise<void>;
+    isCustomID: boolean;
+  };
   panel: {
     isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;
@@ -51,7 +58,7 @@ interface Params {
   index: string | null;
   type: RuntimeType | null;
   script: Required<RuntimeField>['script'] | null;
-  document: Record<string, any> | null;
+  document: EsDocument | null;
 }
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
@@ -69,15 +76,26 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     },
   } = useFieldEditorContext();
 
+  /** Response from the Painless _execute API */
   const [previewResponse, setPreviewResponse] = useState<{
     fields: Context['fields'];
     error: Context['error'];
   }>({ fields: [], error: null });
+  /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
-  const [documents, setDocuments] = useState<Array<Record<string, any>>>([]);
+  /** The sample documents fetched from the cluster */
+  const [documents, setDocuments] = useState<EsDocument[]>([]);
+  /** The current Array index of the document we are previewing (when previewing from the cluster) */
   const [navDocsIndex, setNavDocsIndex] = useState(0);
+  /** Flag to show/hide the preview panel */
   const [isPanelVisible, setIsPanelVisible] = useState(false);
+  /** Define if we provide the document to preview from the cluster or from a custom JSON */
   const [from, setFrom] = useState<From>('cluster');
+  /**
+   * Flag to indicate if the current document comes from a custom ID provided by the user
+   * If it does we won't display the "Previous" and "Next" button to navigate between documents
+   */
+  const [isCustomID, setIsCustomID] = useState(false);
 
   const areAllParamsDefined =
     Object.values(params).filter(Boolean).length === Object.keys(defaultParams).length;
@@ -107,8 +125,43 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         })
         .toPromise();
 
+      setIsCustomID(false);
+
       if (response) {
+        setNavDocsIndex(0);
         setDocuments(response.rawResponse.hits.hits);
+      }
+    },
+    [indexPattern, search]
+  );
+
+  const loadDocument = useCallback(
+    async (id: string) => {
+      setIsCustomID(true);
+
+      const response = await search
+        .search({
+          params: {
+            index: indexPattern.title,
+            body: {
+              size: 1,
+              query: {
+                ids: {
+                  values: [id],
+                },
+              },
+            },
+          },
+        })
+        .toPromise();
+
+      if (response) {
+        if (response.rawResponse.hits.total > 0) {
+          setNavDocsIndex(0);
+          setDocuments(response.rawResponse.hits.hits);
+        } else {
+          // TODO: Not found
+        }
       }
     },
     [indexPattern, search]
@@ -153,24 +206,29 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   const goToNextDoc = useCallback(() => {
     if (navDocsIndex >= totalDocs - 1) {
-      return;
+      setNavDocsIndex(0);
     }
     setNavDocsIndex((prev) => prev + 1);
   }, [navDocsIndex, totalDocs]);
 
   const goToPrevDoc = useCallback(() => {
     if (navDocsIndex === 0) {
-      return;
+      setNavDocsIndex(totalDocs - 1);
     }
     setNavDocsIndex((prev) => prev - 1);
-  }, [navDocsIndex]);
+  }, [navDocsIndex, totalDocs]);
 
   const ctx = useMemo<Context>(
     () => ({
       fields: previewResponse.fields,
       error: previewResponse.error,
       updateParams,
-      currentDocument,
+      currentDocument: {
+        value: currentDocument,
+        loadSingle: loadDocument,
+        loadFromCluster: fetchSampleDocuments,
+        isCustomID,
+      },
       navigation: {
         isFirstDoc: navDocsIndex === 0,
         isLastDoc: navDocsIndex >= totalDocs - 1,
@@ -190,6 +248,9 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       previewResponse,
       updateParams,
       currentDocument,
+      loadDocument,
+      fetchSampleDocuments,
+      isCustomID,
       navDocsIndex,
       totalDocs,
       goToNextDoc,
@@ -213,19 +274,27 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     [areAllParamsDefined, updatePreview]
   );
 
+  /**
+   * When the component mounts, if we are creating/editing a runtime field
+   * we fetch sample documents from the cluster to be able to preview the runtime
+   * field along with other document fields
+   */
   useEffect(() => {
     if (fieldTypeToProcess === 'runtime') {
       fetchSampleDocuments();
     }
   }, [fetchSampleDocuments, fieldTypeToProcess]);
 
+  /**
+   * Each time the current document changes we update the parameters
+   * for the Painless _execute API call.
+   */
   useEffect(() => {
-    updateParams({ document: currentDocument?._source });
+    updateParams({
+      document: currentDocument?._source,
+      index: currentDocument?._index,
+    });
   }, [currentDocument, updateParams]);
-
-  useEffect(() => {
-    updateParams({ index: currentDocIndex });
-  }, [currentDocIndex, updateParams]);
 
   return <fieldPreviewContext.Provider value={ctx}>{children}</fieldPreviewContext.Provider>;
 };

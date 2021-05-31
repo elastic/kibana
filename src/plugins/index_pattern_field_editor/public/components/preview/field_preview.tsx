@@ -8,21 +8,26 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
+import { useFieldPreviewContext } from './field_preview_context';
 import { FieldPreviewHeader } from './field_preview_header';
 import { FieldPreviewEmptyPrompt } from './field_preview_empty_prompt';
+import { PreviewDocumentsNav } from './preview_documents_nav';
 
 export const FieldPreview = () => {
-  const isHeaderVisible = false;
+  const { fields, error } = useFieldPreviewContext();
+  const isEmptyPromptVisible = fields.length === 0 && error === null;
 
   return (
     <>
-      {isHeaderVisible && (
+      {isEmptyPromptVisible ? (
+        <FieldPreviewEmptyPrompt />
+      ) : (
         <>
           <FieldPreviewHeader />
           <EuiSpacer />
+          <PreviewDocumentsNav />
         </>
       )}
-      <FieldPreviewEmptyPrompt />
     </>
   );
 };
