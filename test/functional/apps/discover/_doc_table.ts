@@ -63,8 +63,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('classic table in window 900x700', async function () {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
-        await PageObjects.common.navigateToApp('discover');
         await browser.setWindowSize(900, 700);
+        await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
@@ -83,8 +83,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('classic table in window 600x700', async function () {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
-        await PageObjects.common.navigateToApp('discover');
         await browser.setWindowSize(600, 700);
+        await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
