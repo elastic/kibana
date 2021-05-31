@@ -60,6 +60,13 @@ export async function storedPackagePoliciesToAgentPermissions(
       let dataStreamsForPermissions: DataStreamMeta[];
 
       switch (pkg.name) {
+        case 'endpoint':
+          // - Endpoint doesn't store the `data_stream` metadata in
+          // `packagePolicy.inputs`, so we will use _all_ data_streams from the
+          // package.
+          dataStreamsForPermissions = pkg.data_streams;
+          break;
+
         case 'apm':
           // - APM doesn't store the `data_stream` metadata in
           //   `packagePolicy.inputs`, so we will use _all_ data_streams from
