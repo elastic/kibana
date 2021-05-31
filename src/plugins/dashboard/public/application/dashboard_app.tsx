@@ -295,13 +295,6 @@ export function DashboardApp({
     };
   }, [dashboardStateManager, dashboardContainer, onAppLeave, embeddable]);
 
-  // clear search session when leaving dashboard route
-  useEffect(() => {
-    return () => {
-      data.search.session.clear();
-    };
-  }, [data.search.session]);
-
   return (
     <>
       {savedDashboard && dashboardStateManager && dashboardContainer && viewMode && (
