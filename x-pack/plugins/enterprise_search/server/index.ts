@@ -6,9 +6,13 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
 
 import { EnterpriseSearchPlugin } from './plugin';
+
+export const plugin = (initializerContext: PluginInitializerContext) => {
+  return new EnterpriseSearchPlugin(initializerContext);
+};
 
 export const configSchema = schema.object({
   host: schema.maybe(schema.string()),
@@ -30,8 +34,4 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
     host: true,
   },
-};
-
-export const plugin = (initializerContext: PluginInitializerContext) => {
-  return new EnterpriseSearchPlugin(initializerContext);
 };

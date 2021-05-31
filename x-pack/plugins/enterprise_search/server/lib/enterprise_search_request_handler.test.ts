@@ -29,12 +29,12 @@ const mockExpectedResponseHeaders = {
   [READ_ONLY_MODE_HEADER]: 'false',
 };
 
-describe('EnterpriseSearchRequestHandler', () => {
-  const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({
-    config: mockConfig,
-    log: mockLogger,
-  }) as any;
+const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({
+  config: mockConfig,
+  log: mockLogger,
+}) as any;
 
+describe('EnterpriseSearchRequestHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     fetchMock.mockReset();
@@ -476,7 +476,7 @@ const EnterpriseSearchAPI = {
       headers: { Authorization: 'Basic 123', ...JSON_HEADER },
       method: 'GET',
       body: undefined,
-      agent: mockConfig.httpAgent,
+      agent: enterpriseSearchRequestHandler.httpAgent,
       ...expectedParams,
     });
   },

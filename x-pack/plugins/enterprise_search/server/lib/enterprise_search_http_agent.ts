@@ -10,7 +10,7 @@ import { readFileSync } from 'fs';
 import http from 'http';
 import https from 'https';
 
-import { ConfigType } from '../index';
+import { ConfigType } from '../';
 
 // Returns an HTTP agent to be used for requests to Enterprise Search APIs
 export const entSearchHttpAgent = (config: ConfigType): http.Agent | https.Agent => {

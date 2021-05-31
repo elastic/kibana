@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 
-import { ConfigType } from '../index';
+import { ConfigType } from '../';
 
 export const mockLogger = loggingSystemMock.createLogger().get();
 

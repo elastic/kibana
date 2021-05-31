@@ -10,7 +10,6 @@ import { KibanaRequest, Logger } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { SpacesPluginStart } from '../../../spaces/server';
 import { ProductAccess } from '../../common/types';
-
 import { ConfigType } from '../index';
 
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';

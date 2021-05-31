@@ -62,7 +62,7 @@ export class EnterpriseSearchRequestHandler {
   constructor({ config, log }: ConstructorDependencies) {
     this.log = log;
     this.enterpriseSearchUrl = config.host as string;
-    this.httpAgent = getHttpAgent(config);
+    this.httpAgent = entSearchHttpAgent(config);
   }
 
   createRequest({ path, params = {}, hasValidData = () => true }: RequestParams) {

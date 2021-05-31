@@ -11,7 +11,7 @@
 import http from 'http';
 import https from 'https';
 
-import { config } from '../index';
+import { config } from '../';
 
 import { entSearchHttpAgent, loadCertificateAuthorities } from './enterprise_search_http_agent';
 

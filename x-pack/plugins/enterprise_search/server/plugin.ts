@@ -45,7 +45,7 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
-import { ConfigType } from './index';
+import { ConfigType } from './';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
