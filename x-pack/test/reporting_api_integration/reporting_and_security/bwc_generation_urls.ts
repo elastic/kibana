@@ -10,9 +10,9 @@ import pathNode from 'path';
 import { FtrProviderContext } from '../ftr_provider_context';
 import * as GenerationUrls from '../services/generation_urls';
 
-const KIBANA_ARCHIVE_PATH = pathNode.resolve(
+const OSS_KIBANA_ARCHIVE_PATH = pathNode.resolve(
   REPO_ROOT,
-  'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+  'test/functional/fixtures/es_archiver/dashboard/current/kibana'
 );
 const OSS_DATA_ARCHIVE_PATH = pathNode.resolve(
   REPO_ROOT,
@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('BWC report generation urls', () => {
     before(async () => {
-      await kibanaServer.importExport.load(KIBANA_ARCHIVE_PATH);
+      await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
 
       await kibanaServer.uiSettings.update({
@@ -35,8 +35,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await reportingAPI.deleteAllReports();
     });
-
-    after(() => kibanaServer.importExport.unload(KIBANA_ARCHIVE_PATH));
 
     describe('Pre 6_2', () => {
       // The URL being tested was captured from release 6.4 and then the layout section was removed to test structure before

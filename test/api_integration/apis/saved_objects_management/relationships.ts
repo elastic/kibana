@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
 
   const relationSchema = schema.object({
     id: schema.string(),
@@ -43,8 +43,12 @@ export default function ({ getService }: FtrProviderContext) {
   });
 
   describe('relationships', () => {
-    before(() => kibanaServer.importExport.load('management/saved_objects/relationships'));
-    after(() => kibanaServer.importExport.unload('management/saved_objects/relationships'));
+    before(async () => {
+      await esArchiver.load('management/saved_objects/relationships');
+    });
+    after(async () => {
+      await esArchiver.unload('management/saved_objects/relationships');
+    });
 
     const baseApiUrl = `/api/kibana/management/saved_objects/relationships`;
     const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];

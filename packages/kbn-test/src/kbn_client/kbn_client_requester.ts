@@ -121,8 +121,6 @@ export class KbnClientRequester {
           responseType: options.responseType,
           // work around https://github.com/axios/axios/issues/2791
           transformResponse: options.responseType === 'text' ? [(x) => x] : undefined,
-          maxContentLength: 30000000,
-          maxBodyLength: 30000000,
           paramsSerializer: (params) => Qs.stringify(params),
         });
 

@@ -6,6 +6,17 @@
  * Side Public License, v 1.
  */
 
+import path from 'path';
+
+export const KIBANA_ARCHIVE_PATH = path.resolve(
+  __dirname,
+  '../../../functional/fixtures/es_archiver/dashboard/current/kibana'
+);
+export const DATA_ARCHIVE_PATH = path.resolve(
+  __dirname,
+  '../../../functional/fixtures/es_archiver/dashboard/current/data'
+);
+
 export default function ({ getService, getPageObjects, loadTestFile }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
@@ -15,8 +26,8 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   describe('pluggable panel actions', function () {
     before(async () => {
       await browser.setWindowSize(1300, 900);
-      await kibanaServer.importExport.load('dashboard/current/kibana');
-      await esArchiver.loadIfNeeded('dashboard/current/data');
+      await esArchiver.load(KIBANA_ARCHIVE_PATH);
+      await esArchiver.loadIfNeeded(DATA_ARCHIVE_PATH);
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
@@ -26,8 +37,8 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
 
     after(async function () {
       await PageObjects.dashboard.clearSavedObjectsFromAppLinks();
-      await kibanaServer.importExport.unload('dashboard/current/kibana');
-      await esArchiver.unload('dashboard/current/data');
+      await esArchiver.unload(KIBANA_ARCHIVE_PATH);
+      await esArchiver.unload(DATA_ARCHIVE_PATH);
     });
 
     loadTestFile(require.resolve('./panel_actions'));

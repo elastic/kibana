@@ -18,7 +18,9 @@ export default function ({
 
   describe('data plugin', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('getting_started/shakespeare');
+      await esArchiver.loadIfNeeded(
+        '../functional/fixtures/es_archiver/getting_started/shakespeare'
+      );
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('shakespeare', '');
     });

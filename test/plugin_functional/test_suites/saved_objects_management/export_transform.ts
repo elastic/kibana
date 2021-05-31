@@ -16,11 +16,20 @@ function parseNdJson(input: string): Array<SavedObject<any>> {
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
 
   describe('export transforms', () => {
-    before(() => kibanaServer.importExport.load('saved_objects_management/export_transform'));
-    after(() => kibanaServer.importExport.unload('saved_objects_management/export_transform'));
+    before(async () => {
+      await esArchiver.load(
+        '../functional/fixtures/es_archiver/saved_objects_management/export_transform'
+      );
+    });
+
+    after(async () => {
+      await esArchiver.unload(
+        '../functional/fixtures/es_archiver/saved_objects_management/export_transform'
+      );
+    });
 
     it('allows to mutate the objects during an export', async () => {
       await supertest

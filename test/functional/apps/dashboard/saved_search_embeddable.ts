@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('dashboard/current/data');
-      await kibanaServer.importExport.load('dashboard/current/kibana');
+      await esArchiver.loadIfNeeded('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -34,8 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 23, 2015 @ 00:00:00.000'
       );
     });
-
-    after(() => kibanaServer.importExport.unload('dashboard/current/kibana'));
 
     it('highlighting on filtering works', async function () {
       await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');

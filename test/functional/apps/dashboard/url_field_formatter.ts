@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'visChart',
   ]);
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -38,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/79463
   describe.skip('Changing field formatter to Url', () => {
     before(async function () {
-      await kibanaServer.importExport.load('dashboard/current/kibana');
+      await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -50,8 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await settings.setFieldFormat('url');
       await settings.controlChangeSave();
     });
-
-    after(() => kibanaServer.importExport.unload('dashboard/current/kibana'));
 
     it('applied on dashboard', async () => {
       await common.navigateToApp('dashboard');

@@ -10,8 +10,12 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const supertestNoAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('telemetry API', () => {
+    before(() => esArchiver.load('empty_kibana'));
+    after(() => esArchiver.unload('empty_kibana'));
+
     describe('no auth', () => {
       it('should return 401', async () => {
         return supertestNoAuth

@@ -13,7 +13,7 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
 
   describe('doc views', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('discover');
+      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/discover');
     });
 
     loadTestFile(require.resolve('./doc_views'));

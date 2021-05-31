@@ -1,65 +1,71 @@
 {
-    "attributes": {
-        "timeFieldName": "@timestamp",
-        "title": "logstash-*"
-    },
-    "coreMigrationVersion": "7.14.0",
-    "id": "logstash-*",
-    "migrationVersion": {
-        "index-pattern": "7.11.0"
-    },
-    "references": [],
-    "type": "index-pattern",
-    "updated_at": "2017-09-21T18:49:16.270Z",
-    "version": "WzgsMl0="
-}
-
-{
-    "id": "obj_1",
-    "attributes": {
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "test-actions-export-hidden:obj_1",
+    "source": {
+      "test-actions-export-hidden": {
         "title": "hidden object 1"
-    },
-    "references": [],
-    "type": "test-actions-export-hidden",
-    "updated_at": "2018-12-21T00:43:07.096Z"
+      },
+      "type": "test-actions-export-hidden",
+      "migrationVersion": {},
+      "updated_at": "2018-12-21T00:43:07.096Z"
+    }
+  }
 }
 
 {
-    "id": "obj_2",
-    "attributes": {
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "test-actions-export-hidden:obj_2",
+    "source": {
+      "test-actions-export-hidden": {
         "title": "hidden object 2"
-    },
-    "references": [],
-    "type": "test-actions-export-hidden",
-    "updated_at": "2018-12-21T00:43:07.096Z"
+      },
+      "type": "test-actions-export-hidden",
+      "migrationVersion": {},
+      "updated_at": "2018-12-21T00:43:07.096Z"
+    }
+  }
 }
 
 {
-    "id": "75c3e060-1e7c-11e9-8488-65449e65d0ed",
-    "attributes": {
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
+    "source": {
+      "visualization": {
         "title": "A Pie",
         "visState": "{\"title\":\"A Pie\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":0,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"geo.src\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-            "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         }
+      },
+      "type": "visualization",
+      "updated_at": "2019-01-22T19:32:31.206Z"
     },
-    "references": [
-        {
-            "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-            "type": "index-pattern",
-            "id": "logstash-*"
-        }
-    ],
-    "type": "visualization",
-    "updated_at": "2019-01-22T19:32:31.206Z"
+    "references" : [
+      {
+        "name" : "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "type" : "index-pattern",
+        "id" : "logstash-*"
+      }
+    ]
+  }
 }
 
 {
-    "id": "i-exist",
-    "attributes": {
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "dashboard:i-exist",
+    "source": {
+      "dashboard": {
         "title": "A Dashboard",
         "hits": 0,
         "description": "",
@@ -68,10 +74,11 @@
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
-            "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         }
-    },
-    "references": [],
-    "type": "dashboard",
-    "updated_at": "2019-01-22T19:32:47.232Z"
+      },
+      "type": "dashboard",
+      "updated_at": "2019-01-22T19:32:47.232Z"
+    }
+  }
 }

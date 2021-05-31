@@ -6,39 +6,23 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
-import path from 'path';
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('delete', () => {
     before(() =>
-      es.bulk({
-        refresh: 'wait_for',
-        body: fs
-          .readFileSync(
-            path.resolve(__dirname, '../saved_objects_management/bulk/hidden_saved_objects.ndjson')
-          )
-          .toString()
-          .split('\n'),
-      })
+      esArchiver.load(
+        '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+      )
     );
-
     after(() =>
-      es.deleteByQuery({
-        index: '.kibana',
-        body: {
-          query: {
-            terms: {
-              type: ['test-hidden-importable-exportable', 'test-hidden-non-importable-exportable'],
-            },
-          },
-        },
-      })
+      esArchiver.unload(
+        '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+      )
     );
 
     it('should return generic 404 when trying to delete a doc with importableAndExportable types', async () =>

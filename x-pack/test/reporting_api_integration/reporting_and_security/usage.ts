@@ -12,9 +12,9 @@ import { FtrProviderContext } from '../ftr_provider_context';
 import * as GenerationUrls from '../services/generation_urls';
 import { ReportingUsageStats } from '../services/usage';
 
-const KIBANA_ARCHIVE_PATH = path.resolve(
+const OSS_KIBANA_ARCHIVE_PATH = path.resolve(
   REPO_ROOT,
-  'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+  'test/functional/fixtures/es_archiver/dashboard/current/kibana'
 );
 const OSS_DATA_ARCHIVE_PATH = path.resolve(
   REPO_ROOT,
@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Usage', () => {
     before(async () => {
-      await kibanaServer.importExport.load(KIBANA_ARCHIVE_PATH);
+      await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
 
       await kibanaServer.uiSettings.update({
@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload(KIBANA_ARCHIVE_PATH);
+      await esArchiver.unload(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.unload(OSS_DATA_ARCHIVE_PATH);
     });
 

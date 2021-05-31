@@ -50,9 +50,6 @@ export default async function ({ readConfigFile }) {
     esArchiver: {
       directory: path.resolve(__dirname, '../es_archives'),
     },
-    kbnArchiver: {
-      directory: path.resolve(__dirname, '../functional/fixtures/kbn_archiver'),
-    },
     screenshots: functionalConfig.get('screenshots'),
     junit: {
       reportName: 'Example plugin functional tests',

@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('dashboard/current/data');
-      await kibanaServer.importExport.load('dashboard/current/kibana');
+      await esArchiver.loadIfNeeded('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
         'doc_table:legacy': false,
@@ -35,8 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultDataRange();
       await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
     });
-
-    after(() => kibanaServer.importExport.unload('dashboard/current/kibana'));
 
     it('should expand the detail row when the toggle arrow is clicked', async function () {
       await retry.try(async function () {

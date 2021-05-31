@@ -8,17 +8,16 @@
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('Suggestions API', function () {
     before(async () => {
       await esArchiver.load('index_patterns/basic_index');
-      await kibanaServer.importExport.load('index_patterns/basic_kibana');
+      await esArchiver.load('index_patterns/basic_kibana');
     });
     after(async () => {
       await esArchiver.unload('index_patterns/basic_index');
-      await kibanaServer.importExport.unload('index_patterns/basic_kibana');
+      await esArchiver.unload('index_patterns/basic_kibana');
     });
 
     it('should return 200 with special characters', () =>
