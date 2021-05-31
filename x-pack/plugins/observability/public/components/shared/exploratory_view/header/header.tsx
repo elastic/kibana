@@ -87,7 +87,7 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
               }
             }}
           >
-            {i18n.translate('xpack.observability.expView.heading.openInLens', {
+            {i18n.translate('xpack.observability.expView.heading.saveLensVisualization', {
               defaultMessage: 'Save',
             })}
           </EuiButton>
