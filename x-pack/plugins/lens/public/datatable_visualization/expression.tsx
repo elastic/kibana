@@ -17,6 +17,9 @@ import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
 } from 'src/plugins/expressions';
+import { CustomPaletteState, PaletteOutput } from 'src/plugins/charts/common';
+import { PaletteRegistry } from 'src/plugins/charts/public';
+import { IUiSettingsClient } from 'kibana/public';
 import { getSortingCriteria } from './sorting';
 
 import { DatatableComponent } from './components/table_basic';
@@ -26,10 +29,15 @@ import type { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } fr
 import type { DatatableRender } from './components/types';
 import { transposeTable } from './transpose_helpers';
 
+export type ColumnConfigArg = Omit<ColumnState, 'palette'> & {
+  type: 'lens_datatable_column';
+  palette?: PaletteOutput<CustomPaletteState>;
+};
+
 export interface Args {
   title: string;
   description?: string;
-  columns: Array<ColumnState & { type: 'lens_datatable_column' }>;
+  columns: ColumnConfigArg[];
   sortingColumnId: string | undefined;
   sortingDirection: 'asc' | 'desc' | 'none';
 }
@@ -160,6 +168,11 @@ export const datatableColumn: ExpressionFunctionDefinition<
     width: { types: ['number'], help: '' },
     isTransposed: { types: ['boolean'], help: '' },
     transposable: { types: ['boolean'], help: '' },
+    colorMode: { types: ['string'], help: '' },
+    palette: {
+      types: ['palette'],
+      help: '',
+    },
   },
   fn: function fn(input: unknown, args: ColumnState) {
     return {
@@ -172,6 +185,8 @@ export const datatableColumn: ExpressionFunctionDefinition<
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;
   getType: Promise<(name: string) => IAggType>;
+  paletteService: PaletteRegistry;
+  uiSettings: IUiSettingsClient;
 }): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
@@ -222,8 +237,10 @@ export const getDatatableRenderer = (dependencies: {
           formatFactory={dependencies.formatFactory}
           dispatchEvent={handlers.event}
           renderMode={handlers.getRenderMode()}
+          paletteService={dependencies.paletteService}
           getType={resolvedGetType}
           rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
+          uiSettings={dependencies.uiSettings}
         />
       </I18nProvider>,
       domNode,

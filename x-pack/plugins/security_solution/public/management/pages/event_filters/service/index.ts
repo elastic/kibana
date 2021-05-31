@@ -11,8 +11,9 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
+  ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../../../../shared_imports';
+import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 import { Immutable } from '../../../../../common/endpoint/types';
 
@@ -101,5 +102,17 @@ export class EventFiltersHttpService implements EventFiltersService {
         namespace_type: 'agnostic',
       },
     });
+  }
+
+  async getSummary(): Promise<ExceptionListSummarySchema> {
+    return (await this.httpWrapper()).get<ExceptionListSummarySchema>(
+      `${EXCEPTION_LIST_URL}/summary`,
+      {
+        query: {
+          list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          namespace_type: 'agnostic',
+        },
+      }
+    );
   }
 }

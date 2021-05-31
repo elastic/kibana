@@ -19,6 +19,7 @@ import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
 import { getCreateExceptionListDetectionSchemaMock } from '../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import {
@@ -27,7 +28,6 @@ import {
   FullResponseSchema,
   QueryCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../plugins/lists/common/constants';
 import { Signal } from '../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
 import {
