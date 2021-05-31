@@ -10,9 +10,11 @@ import moment from 'moment';
 import { stringify } from 'query-string';
 import React, { useCallback, useMemo } from 'react';
 import { encode, RisonValue } from 'rison-node';
+import type { Query } from '../../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../../../../../observability/public';
+import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { TimeKey } from '../../../../common/time';
 import {
   CategoryJobNoticesSection,
@@ -27,10 +29,9 @@ import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analy
 import { useLogEntryFlyoutContext } from '../../../containers/logs/log_flyout';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { AnomaliesResults } from './sections/anomalies';
-import { useLogEntryAnomaliesResults } from './use_log_entry_anomalies_results';
 import { useDatasetFiltering } from './use_dataset_filtering';
+import { useLogEntryAnomaliesResults } from './use_log_entry_anomalies_results';
 import { useLogAnalysisResultsUrlState } from './use_log_entry_rate_results_url_state';
-import { isJobStatusWithResults } from '../../../../common/log_analysis';
 
 export const SORT_DEFAULTS = {
   direction: 'desc' as const,
@@ -102,7 +103,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   } = useLogEntryFlyoutContext();
 
   const linkToLogStream = useCallback(
-    (filter: string, id: string, timeKey?: TimeKey) => {
+    (filterQuery: Query, id: string, timeKey?: TimeKey) => {
       const params = {
         logPosition: encode({
           end: moment(timeRange.value.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
@@ -113,10 +114,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
         flyoutOptions: encode({
           surroundingLogsId: id,
         }),
-        logFilter: encode({
-          expression: filter,
-          kind: 'kuery',
-        }),
+        logFilter: encode(filterQuery),
       };
 
       navigateToApp?.('logs', { path: `/stream?${stringify(params)}` });
