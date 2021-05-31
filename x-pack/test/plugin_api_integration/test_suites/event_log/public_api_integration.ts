@@ -7,7 +7,7 @@
 
 import { merge, omit, chunk, isEmpty } from 'lodash';
 import uuid from 'uuid';
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect/expect';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { IEvent } from '../../../../plugins/event_log/server';

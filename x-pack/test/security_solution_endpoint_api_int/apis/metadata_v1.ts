@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { deleteMetadataStream } from './data_stream_helper';
 import { METADATA_REQUEST_V1_ROUTE } from '../../../plugins/security_solution/server/endpoint/routes/metadata';

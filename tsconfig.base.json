@@ -14,6 +14,13 @@
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"]
     },
+    // Setup rootDirs for Bazel compilations
+    "rootDirs": [
+      ".",
+      "bazel-out/darwin-fastbuild/bin",
+      "bazel-out/k8-fastbuild/bin",
+      "bazel-out/x64_windows-fastbuild/bin",
+    ],
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
     // Enables all strict type checking options.
