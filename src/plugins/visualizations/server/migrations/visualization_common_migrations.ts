@@ -46,7 +46,9 @@ export const commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel = (visStat
   return visState;
 };
 
-export const commonAddEmptyValueColorRule = (visState: any) => {
+export const commonAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules = (
+  visState: any
+) => {
   if (visState && visState.type === 'metrics') {
     const params: any = get(visState, 'params') || {};
 

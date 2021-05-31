@@ -13,7 +13,7 @@ import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
   commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
-  commonAddEmptyValueColorRule,
+  commonAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules,
 } from '../migrations/visualization_common_migrations';
 
 const byValueAddSupportOfDualIndexSelectionModeInTSVB = (state: SerializableState) => {
@@ -42,7 +42,7 @@ const byValueAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRule = (
 ) => {
   return {
     ...state,
-    savedVis: commonAddEmptyValueColorRule(state.savedVis),
+    savedVis: commonAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules(state.savedVis),
   };
 };
 
