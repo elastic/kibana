@@ -5,6 +5,14 @@
   }
 }
 
+.lnsChartSwitch__options {
+  .euiSelectableListItem__append {
+    flex-grow: 1;
+    display: flex;
+    align-items: baseline;
+  }
+}
+
 .lnsChartSwitch__summaryIcon {
   margin-right: $euiSizeS;
   transform: translateY(-1px);

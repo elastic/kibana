@@ -393,6 +393,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           </EuiFlexGroup>
         </EuiPopoverTitle>
         <EuiSelectable
+          className="lnsChartSwitch__options"
           height={computeListHeight(visualizationTypes, MAX_LIST_HEIGHT)}
           searchable
           singleSelection
