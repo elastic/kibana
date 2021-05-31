@@ -16,7 +16,7 @@ export async function mountManagementSection(
   { http, getStartServices, notifications }: CoreSetup<StartDependencies>,
   params: ManagementAppMountParams
 ) {
-  const { element, setBreadcrumbs, history } = params;
+  const { element, setBreadcrumbs, history, managementPageLayout } = params;
   const [coreStart, depsStart] = await getStartServices();
   const {
     docLinks,
@@ -35,6 +35,7 @@ export async function mountManagementSection(
     history,
     uiSettings: coreStart.uiSettings,
     urlGenerators: depsStart.share.urlGenerators,
+    managementPageLayout,
   };
 
   return renderApp(element, I18nContext, services, { http });

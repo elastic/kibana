@@ -29,6 +29,7 @@ export interface AppServices {
   history: ManagementAppMountParams['history'];
   uiSettings: IUiSettingsClient;
   urlGenerators: SharePluginStart['urlGenerators'];
+  managementPageLayout: ManagementAppMountParams['managementPageLayout'],
 }
 
 export interface CoreServices {

@@ -24,7 +24,7 @@ export interface ParamProps {
  */
 export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> = (props) => {
   const { sourceName } = props.match.params;
-  const { services } = useKibana();
+  const { services: { managementPageLayout: ManagementPageLayout, ...services } } = useKibana();
 
   const decodedSourceName = attemptToURIDecode(sourceName)!;
   const { error, data: pipeline, isLoading, isInitialRequest } = services.api.useLoadPipeline(
@@ -45,12 +45,14 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
 
   if (isLoading && isInitialRequest) {
     return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.ingestPipelines.clone.loadingPipelinesDescription"
-          defaultMessage="Loading pipeline…"
-        />
-      </SectionLoading>
+      <ManagementPageLayout isEmptyState={true}>
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.ingestPipelines.clone.loadingPipelinesDescription"
+            defaultMessage="Loading pipeline…"
+          />
+        </SectionLoading>
+      </ManagementPageLayout>
     );
   } else {
     // We still show the create form even if we were not able to load the
