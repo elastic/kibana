@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from 'kibana/server';
 import type { FullAgentPolicyOutputPermissions } from '../../common';
 import { getPackageInfo } from '../../server/services/epm/packages';
 
-import type { PackagePolicy, RegistryDataStream } from '../types';
+import type { PackagePolicy } from '../types';
 
 export const DEFAULT_PERMISSIONS = {
   cluster: ['monitor'],
@@ -52,47 +52,73 @@ export async function storedPackagePoliciesToAgentPermissions(
         pkgVersion: packagePolicy.package.version,
       });
 
+      // FIXME is this true?
       if (!pkg.data_streams) {
         return [packagePolicy.name, DEFAULT_PERMISSIONS];
       }
 
-      const inputs = packagePolicy.inputs.filter((i) => i.enabled);
+      let dataStreamsForPermissions: DataStreamMeta[];
 
-      // The input has a `type`, which corresponds with pkg.data_streams[].streams.type.
-      // We want to get the corresponding data_stream for each input
-      // const dataStreams = inputs.flatMap((input) =>
-      //   pkg.data_streams!.filter((ds) => ds.streams?.some((s) => s.input === input.type))
-      // );
+      switch (pkg.name) {
+        case 'apm':
+          // - APM doesn't store the `data_stream` metadata in
+          //   `packagePolicy.inputs`, so we will use _all_ data_streams from
+          //   the package.
+          dataStreamsForPermissions = pkg.data_streams;
+          break;
 
-      const dataStreams = inputs.flatMap((input) => {
-        const dataStreams_: DataStreamMeta[] = [];
+        default:
+          // - Normal packages store some of the `data_stream` metadata in
+          //   `packagePolicy.inputs[].streams[].data_stream`
+          // - The rest of the metadata needs to be fetched from the
+          //   `data_stream` object in the package. The link is
+          //   `packagePolicy.inputs[].type == pkg.data_streams.streams[].input`
+          // - Some packages (custom logs) have a compiled dataset, stored in
+          //   `input.streams.compiled_stream.data_stream.dataset`
+          dataStreamsForPermissions = packagePolicy.inputs
+            .filter((i) => i.enabled)
+            .flatMap((input) => {
+              const dataStreams_: DataStreamMeta[] = [];
 
-        // Build data streams from inputs
-        input.streams
-          .filter((s) => s.enabled)
-          .forEach((stream) => {
-            if (!('data_stream' in stream)) {
-              return;
-            }
+              if (input.streams) {
+                // Probably a normal package
 
-            const ds = {
-              type: stream.data_stream.type,
-              dataset: stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
-            };
+                input.streams
+                  .filter((s) => s.enabled)
+                  .forEach((stream) => {
+                    if (!('data_stream' in stream)) {
+                      return;
+                    }
 
-            dataStreams_.push(ds);
-          });
+                    const ds = {
+                      type: stream.data_stream.type,
+                      dataset:
+                        stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
+                    };
 
-        // const oldDS = pkg.data_streams!.filter((ds) =>
-        //   ds.streams?.some((s) => s.input === input.type)
-        // );
+                    dataStreams_.push(ds);
+                  });
+              } else if (input.type === 'apm') {
+                // Probably APM
+              }
 
-        return dataStreams_;
-      });
+              // const packageDS = pkg.data_streams!.filter();
+
+              // const oldDS = pkg.data_streams!.filter((ds) =>
+              //   ds.streams?.some((s) => s.input === input.type)
+              // );
+
+              return dataStreams_;
+            });
+      }
 
       return [
         packagePolicy.name,
-        { indices: dataStreams.map((ds) => getDataStreamPermissions(ds, packagePolicy.namespace)) },
+        {
+          indices: dataStreamsForPermissions.map((ds) =>
+            getDataStreamPermissions(ds, packagePolicy.namespace)
+          ),
+        },
       ];
     }
   );
@@ -109,15 +135,17 @@ interface DataStreamMeta {
 }
 
 export function getDataStreamPermissions(dataStream: DataStreamMeta, namespace: string = '*') {
-  let index = `${dataStream.type}-${dataStream.dataset}-${namespace}`;
+  let index = `${dataStream.type}-${dataStream.dataset}`;
 
   if (dataStream.dataset_is_prefix) {
-    index = `${index}-*`;
+    index = `${index}.*`;
   }
 
   if (dataStream.hidden) {
     index = `.${index}`;
   }
+
+  index += `-${namespace}`;
 
   return {
     names: [index],

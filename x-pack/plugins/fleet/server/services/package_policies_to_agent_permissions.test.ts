@@ -306,7 +306,7 @@ describe('getDataStreamPermissions()', () => {
     const permissions = getDataStreamPermissions(dataStream, 'namespace');
 
     expect(permissions).toMatchObject({
-      names: ['logs-test-namespace-*'],
+      names: ['logs-test.*-namespace'],
       privileges: ['auto_configure', 'create_doc'],
     });
   });
