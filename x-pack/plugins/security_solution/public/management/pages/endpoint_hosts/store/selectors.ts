@@ -217,7 +217,7 @@ export const uiQueryParams: (
             if (
               value === 'policy_response' ||
               value === 'details' ||
-              value === 'activity-log' ||
+              value === 'activity_log' ||
               value === 'isolate'
             ) {
               data[key] = value;

@@ -186,7 +186,7 @@ export const EndpointDetailsFlyout = memo(() => {
         </EuiFlyoutBody>
       ) : (
         <>
-          {(show === 'details' || show === 'activity-log') && (
+          {(show === 'details' || show === 'activity_log') && (
             <DetailsFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
               <EuiFlexGroup>
                 <EuiFlexItem>

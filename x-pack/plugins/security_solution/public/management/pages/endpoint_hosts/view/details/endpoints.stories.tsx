@@ -98,7 +98,7 @@ export const Tabs = () => (
         content: <>{'Endpoint Details'}</>,
       },
       {
-        id: 'activity-log',
+        id: 'activity_log',
         name: 'Activity Log',
         content: ActivityLog(),
       },

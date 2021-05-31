@@ -11,7 +11,7 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { EndpointIndexUIQueryParams } from '../../../types';
 export enum EndpointDetailsTabsTypes {
   overview = 'overview',
-  activityLog = 'activity-log',
+  activityLog = 'activity_log',
 }
 
 export type EndpointDetailsTabsId =
