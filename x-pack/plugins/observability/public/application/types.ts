@@ -22,7 +22,7 @@ import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public'
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { LensPublicStart } from '../../../lens/public';
 import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
-import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
+import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
 
 export interface ObservabilityAppServices {
   http: HttpStart;
