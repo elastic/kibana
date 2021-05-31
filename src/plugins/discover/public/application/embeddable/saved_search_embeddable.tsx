@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { Container, Embeddable } from '../../../../embeddable/public';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../../saved_searches';
@@ -310,9 +310,9 @@ export class SavedSearchEmbeddable
   ) {
     const isFetchRequired =
       !esFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
-      !_.isEqual(this.prevQuery, this.input.query) ||
-      !_.isEqual(this.prevTimeRange, this.input.timeRange) ||
-      !_.isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort) ||
+      !isEqual(this.prevQuery, this.input.query) ||
+      !isEqual(this.prevTimeRange, this.input.timeRange) ||
+      !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort) ||
       this.prevSearchSessionId !== this.input.searchSessionId;
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
