@@ -681,20 +681,6 @@
         "deprecated": true,
         "references": [
           {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
-              "lineNumber": 35
-            }
-          },
-          {
             "plugin": "discover",
             "link": {
               "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
@@ -720,6 +706,20 @@
             "link": {
               "path": "src/plugins/discover/public/plugin.tsx",
               "lineNumber": 88
+            }
+          },
+          {
+            "plugin": "visualizations",
+            "link": {
+              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
+              "lineNumber": 16
+            }
+          },
+          {
+            "plugin": "visualizations",
+            "link": {
+              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
+              "lineNumber": 35
             }
           },
           {
@@ -2569,20 +2569,6 @@
             }
           },
           {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 41
-            }
-          },
-          {
             "plugin": "discover",
             "link": {
               "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
@@ -2594,6 +2580,20 @@
             "link": {
               "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
               "lineNumber": 61
+            }
+          },
+          {
+            "plugin": "visualizations",
+            "link": {
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 9
+            }
+          },
+          {
+            "plugin": "visualizations",
+            "link": {
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 41
             }
           },
           {

@@ -4,8 +4,19 @@
 To create visualizations with *Lens*, you drag and drop data fields onto the visualization builder, 
 then *Lens* uses heuristics to apply each field. 
 
-[role="screenshot"]
-image:dashboard/images/lens.png[Lens]
+++++
+<script type="text/javascript" async 
+src="https://play.vidyard.com/embed/v4.js"></script>
+<img
+style="width: 100%; margin: auto; display: block;"
+class="vidyard-player-embed"
+src="https://play.vidyard.com/G6RNjq6U9odYRCYUxY2vfq.jpg"
+data-uuid="G6RNjq6U9odYRCYUxY2vfq"
+data-v="4"
+data-type="inline"
+/>
+</br>
+++++
 
 [float]
 [[lens-required-choices]]
