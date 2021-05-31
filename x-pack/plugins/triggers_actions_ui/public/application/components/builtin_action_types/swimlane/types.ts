@@ -17,6 +17,7 @@ export type SwimlaneActionConnector = UserConfiguredActionConnector<
 export interface SwimlaneConfig {
   apiUrl: string;
   appId: string;
+  connectorType: SwimlaneConnectorType;
   mappings: SwimlaneMappingConfig;
 }
 
@@ -28,6 +29,7 @@ export interface SwimlaneMappingConfig {
   alertNameConfig: SwimlaneFieldMappingConfig;
   commentsConfig: SwimlaneFieldMappingConfig;
   descriptionConfig: SwimlaneFieldMappingConfig;
+  [key: string]: SwimlaneFieldMappingConfig;
 }
 
 export interface SwimlaneFieldMappingConfig {
@@ -49,4 +51,10 @@ export interface SwimlaneActionParams {
 export interface SwimlaneFieldMap {
   key: string;
   name: string;
+}
+
+export enum SwimlaneConnectorType {
+  All = 'all',
+  Alerts = 'alerts',
+  Cases = 'cases',
 }

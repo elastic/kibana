@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { lazy } from 'react';
 import {
   ActionTypeModel,
@@ -19,6 +20,7 @@ import {
 } from './types';
 import * as i18n from './translations';
 import { isValidUrl } from '../../../lib/value_validators';
+import { validateMappingForConnector } from './helpers';
 
 export function getActionType(): ActionTypeModel<
   SwimlaneConfig,
@@ -36,7 +38,8 @@ export function getActionType(): ActionTypeModel<
       const configErrors = {
         apiUrl: new Array<string>(),
         appId: new Array<string>(),
-        mappings: new Array<string>(),
+        connectorType: new Array<string>(),
+        mappings: new Array<Record<string, string>>(),
       };
       const secretsErrors = {
         apiToken: new Array<string>(),
@@ -58,12 +61,20 @@ export function getActionType(): ActionTypeModel<
       if (!action.secrets.apiToken) {
         secretsErrors.apiToken = [...secretsErrors.apiToken, i18n.SW_REQUIRED_API_TOKEN_TEXT];
       }
+
       if (!action.config.appId) {
         configErrors.appId = [...configErrors.appId, i18n.SW_REQUIRED_APP_ID_TEXT];
       }
-      if (!action.config.mappings) {
-        configErrors.mappings = [...configErrors.mappings, i18n.SW_REQUIRED_FIELD_MAPPINGS_TEXT];
+
+      const mappingErrors = validateMappingForConnector(
+        action.config.connectorType,
+        action.config.mappings
+      );
+
+      if (!isEmpty(mappingErrors)) {
+        configErrors.mappings = [...configErrors.mappings, mappingErrors];
       }
+
       return validationResult;
     },
     validateParams: (actionParams: SwimlaneActionParams): GenericValidationResult<unknown> => {

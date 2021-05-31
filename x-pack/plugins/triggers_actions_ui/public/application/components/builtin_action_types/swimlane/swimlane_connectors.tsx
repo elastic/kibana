@@ -88,6 +88,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
             editActionConfig={editActionConfigCb}
             updateCurrentStep={updateCurrentStep}
             fields={fields}
+            errors={errors}
           />
         )}
       </EuiForm>

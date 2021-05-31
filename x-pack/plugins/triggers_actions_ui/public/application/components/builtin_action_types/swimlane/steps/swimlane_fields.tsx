@@ -6,13 +6,22 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { EuiButton, EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFormRow,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiRadioGroup,
+} from '@elastic/eui';
 import * as i18n from '../translations';
 import {
   SwimlaneActionConnector,
+  SwimlaneConnectorType,
   SwimlaneFieldMappingConfig,
   SwimlaneMappingConfig,
 } from '../types';
+import { IErrorObject } from '../../../../../types';
+import { isValidFieldForConnector } from '../helpers';
 
 const SINGLE_SELECTION = { asPlainText: true };
 const EMPTY_COMBO_BOX_ARRAY: Array<EuiComboBoxOptionOption<string>> | undefined = [];
@@ -30,15 +39,23 @@ interface Props {
   editActionConfig: (property: string, value: any) => void;
   updateCurrentStep: (step: number) => void;
   fields: SwimlaneFieldMappingConfig[];
+  errors: IErrorObject;
 }
+
+const radios = [
+  { id: 'alerts', label: 'Alerts' },
+  { id: 'cases', label: 'Cases' },
+  { id: 'all', label: 'All' },
+];
 
 const SwimlaneFieldsComponent: React.FC<Props> = ({
   action,
   editActionConfig,
   updateCurrentStep,
   fields,
+  errors,
 }) => {
-  const { mappings } = action.config;
+  const { mappings, connectorType = SwimlaneConnectorType.All } = action.config;
   const [fieldTypeMap, fieldIdMap] = useMemo(
     () =>
       fields.reduce(
@@ -77,6 +94,8 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
     [mappings]
   );
 
+  const mappingErrors = useMemo(() => errors?.mappings[0] ?? {}, [errors]);
+
   const resetConnection = useCallback(() => {
     updateCurrentStep(1);
   }, [updateCurrentStep]);
@@ -106,78 +125,167 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
     },
     [editActionConfig, fieldIdMap, mappings]
   );
+
   return (
     <>
-      <EuiFormRow id="alertSourceConfig" fullWidth label={i18n.SW_ALERT_SOURCE_FIELD_LABEL}>
-        <EuiComboBox
-          fullWidth
-          selectedOptions={state.alertSourceConfig}
-          options={textOptions}
-          singleSelection={SINGLE_SELECTION}
-          data-test-subj="swimlaneAlertSourceInput"
-          onChange={(e) => editMappings('alertSourceConfig', e)}
+      <EuiFormRow id="connectorType" fullWidth label={i18n.SW_CONNECTOR_TYPE_LABEL}>
+        <EuiRadioGroup
+          options={radios}
+          idSelected={connectorType}
+          onChange={(type) => editActionConfig('connectorType', type)}
+          name="connectorType"
         />
       </EuiFormRow>
-      <EuiFormRow id="severityConfig" fullWidth label={i18n.SW_SEVERITY_FIELD_LABEL}>
-        <EuiComboBox
-          fullWidth
-          selectedOptions={state.severityConfig}
-          options={textOptions}
-          singleSelection={SINGLE_SELECTION}
-          data-test-subj="swimlaneSeverityInput"
-          onChange={(e) => editMappings('severityConfig', e)}
-        />
-      </EuiFormRow>
-      <EuiFormRow id="alertNameConfig" fullWidth label={i18n.SW_ALERT_NAME_FIELD_LABEL}>
-        <EuiComboBox
-          fullWidth
-          selectedOptions={state.alertNameConfig}
-          options={textOptions}
-          singleSelection={SINGLE_SELECTION}
-          data-test-subj="swimlaneAlertNameInput"
-          onChange={(e) => editMappings('alertNameConfig', e)}
-        />
-      </EuiFormRow>
-      <EuiFormRow id="caseIdConfig" fullWidth label={i18n.SW_CASE_ID_FIELD_LABEL}>
-        <EuiComboBox
-          fullWidth
-          selectedOptions={state.caseIdConfig}
-          options={textOptions}
-          singleSelection={SINGLE_SELECTION}
-          data-test-subj="swimlaneCaseIdConfig"
-          onChange={(e) => editMappings('caseIdConfig', e)}
-        />
-      </EuiFormRow>
-      <EuiFormRow id="caseNameConfig" fullWidth label={i18n.SW_CASE_NAME_FIELD_LABEL}>
-        <EuiComboBox
-          fullWidth
-          selectedOptions={state.caseNameConfig}
-          options={textOptions}
-          singleSelection={SINGLE_SELECTION}
-          data-test-subj="swimlaneCaseNameConfig"
-          onChange={(e) => editMappings('caseNameConfig', e)}
-        />
-      </EuiFormRow>
-      <EuiFormRow id="commentsConfig" fullWidth label={i18n.SW_COMMENTS_FIELD_LABEL}>
-        <EuiComboBox
-          fullWidth
-          selectedOptions={state.commentsConfig}
-          options={commentsOptions}
-          singleSelection={SINGLE_SELECTION}
-          data-test-subj="swimlaneCommentsConfig"
-          onChange={(e) => editMappings('commentsConfig', e)}
-        />
-      </EuiFormRow>
-      <EuiFormRow id="descriptionConfig" fullWidth label={i18n.SW_DESCRIPTION_FIELD_LABEL}>
-        <EuiComboBox
-          fullWidth
-          selectedOptions={state.descriptionConfig}
-          options={textOptions}
-          singleSelection={SINGLE_SELECTION}
-          data-test-subj="swimlaneDescriptionConfig"
-          onChange={(e) => editMappings('descriptionConfig', e)}
-        />
-      </EuiFormRow>
+      {isValidFieldForConnector(
+        connectorType as SwimlaneConnectorType.All,
+        'alertSourceConfig'
+      ) && (
+        <>
+          <EuiFormRow
+            id="alertSourceConfig"
+            fullWidth
+            label={i18n.SW_ALERT_SOURCE_FIELD_LABEL}
+            error={mappingErrors?.alertSourceConfig}
+            isInvalid={mappingErrors?.alertSourceConfig != null}
+          >
+            <EuiComboBox
+              fullWidth
+              selectedOptions={state.alertSourceConfig}
+              options={textOptions}
+              singleSelection={SINGLE_SELECTION}
+              data-test-subj="swimlaneAlertSourceInput"
+              onChange={(e) => editMappings('alertSourceConfig', e)}
+              isInvalid={mappingErrors?.alertSourceConfig != null}
+            />
+          </EuiFormRow>
+        </>
+      )}
+      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'severityConfig') && (
+        <>
+          <EuiFormRow
+            id="severityConfig"
+            fullWidth
+            label={i18n.SW_SEVERITY_FIELD_LABEL}
+            error={mappingErrors?.severityConfig}
+            isInvalid={mappingErrors?.severityConfig != null}
+          >
+            <EuiComboBox
+              fullWidth
+              selectedOptions={state.severityConfig}
+              options={textOptions}
+              singleSelection={SINGLE_SELECTION}
+              data-test-subj="swimlaneSeverityInput"
+              onChange={(e) => editMappings('severityConfig', e)}
+              isInvalid={mappingErrors?.severityConfig != null}
+            />
+          </EuiFormRow>
+        </>
+      )}
+      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'alertNameConfig') && (
+        <>
+          <EuiFormRow
+            id="alertNameConfig"
+            fullWidth
+            label={i18n.SW_ALERT_NAME_FIELD_LABEL}
+            error={mappingErrors?.alertNameConfig}
+            isInvalid={mappingErrors?.alertNameConfig != null}
+          >
+            <EuiComboBox
+              fullWidth
+              selectedOptions={state.alertNameConfig}
+              options={textOptions}
+              singleSelection={SINGLE_SELECTION}
+              data-test-subj="swimlaneAlertNameInput"
+              onChange={(e) => editMappings('alertNameConfig', e)}
+              isInvalid={mappingErrors?.alertNameConfig != null}
+            />
+          </EuiFormRow>
+        </>
+      )}
+      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'caseIdConfig') && (
+        <>
+          <EuiFormRow
+            id="caseIdConfig"
+            fullWidth
+            label={i18n.SW_CASE_ID_FIELD_LABEL}
+            error={mappingErrors?.caseIdConfig}
+            isInvalid={mappingErrors?.caseIdConfig != null}
+          >
+            <EuiComboBox
+              fullWidth
+              selectedOptions={state.caseIdConfig}
+              options={textOptions}
+              singleSelection={SINGLE_SELECTION}
+              data-test-subj="swimlaneCaseIdConfig"
+              onChange={(e) => editMappings('caseIdConfig', e)}
+              isInvalid={mappingErrors?.caseIdConfig != null}
+            />
+          </EuiFormRow>
+        </>
+      )}
+      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'caseNameConfig') && (
+        <>
+          <EuiFormRow
+            id="caseNameConfig"
+            fullWidth
+            label={i18n.SW_CASE_NAME_FIELD_LABEL}
+            error={mappingErrors?.caseNameConfig}
+            isInvalid={mappingErrors?.caseNameConfig != null}
+          >
+            <EuiComboBox
+              fullWidth
+              selectedOptions={state.caseNameConfig}
+              options={textOptions}
+              singleSelection={SINGLE_SELECTION}
+              data-test-subj="swimlaneCaseNameConfig"
+              onChange={(e) => editMappings('caseNameConfig', e)}
+              isInvalid={mappingErrors?.caseNameConfig != null}
+            />
+          </EuiFormRow>
+        </>
+      )}
+      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'commentsConfig') && (
+        <>
+          <EuiFormRow
+            id="commentsConfig"
+            fullWidth
+            label={i18n.SW_COMMENTS_FIELD_LABEL}
+            error={mappingErrors?.commentsConfig}
+            isInvalid={mappingErrors?.commentsConfig != null}
+          >
+            <EuiComboBox
+              fullWidth
+              selectedOptions={state.commentsConfig}
+              options={commentsOptions}
+              singleSelection={SINGLE_SELECTION}
+              data-test-subj="swimlaneCommentsConfig"
+              onChange={(e) => editMappings('commentsConfig', e)}
+              isInvalid={mappingErrors?.commentsConfig != null}
+            />
+          </EuiFormRow>
+        </>
+      )}
+      {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'descriptionConfig') && (
+        <>
+          <EuiFormRow
+            id="descriptionConfig"
+            fullWidth
+            label={i18n.SW_DESCRIPTION_FIELD_LABEL}
+            error={mappingErrors?.descriptionConfig}
+            isInvalid={mappingErrors?.descriptionConfig != null}
+          >
+            <EuiComboBox
+              fullWidth
+              selectedOptions={state.descriptionConfig}
+              options={textOptions}
+              singleSelection={SINGLE_SELECTION}
+              data-test-subj="swimlaneDescriptionConfig"
+              onChange={(e) => editMappings('descriptionConfig', e)}
+              isInvalid={mappingErrors?.descriptionConfig != null}
+            />
+          </EuiFormRow>
+        </>
+      )}
       <EuiButton onClick={resetConnection}>{i18n.SW_CONFIGURE_API_LABEL}</EuiButton>
     </>
   );

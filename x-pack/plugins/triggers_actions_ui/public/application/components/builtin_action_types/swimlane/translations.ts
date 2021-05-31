@@ -187,3 +187,17 @@ export const SW_CONFIGURE_API_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.configureAPILabel',
   { defaultMessage: 'Configure API' }
 );
+
+export const SW_CONNECTOR_TYPE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.connectorType',
+  {
+    defaultMessage: 'Connector Type',
+  }
+);
+
+export const SW_FIELD_MAPPING_IS_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.mappingFieldRequired',
+  {
+    defaultMessage: 'Field mapping is required.',
+  }
+);
