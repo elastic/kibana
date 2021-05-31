@@ -23,6 +23,7 @@ import type { RegistryVarsEntry } from '../../../../types';
 
 import 'brace/mode/yaml';
 import 'brace/theme/textmate';
+import { MultiTextInput } from './multi_text_input';
 
 export const PackagePolicyInputVarField: React.FunctionComponent<{
   varDef: RegistryVarsEntry;
@@ -41,6 +42,14 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   const field = useMemo(() => {
     if (multi) {
       return (
+        <MultiTextInput
+          value={value}
+          onChange={onChange}
+          // onBlur={() => setIsDirty(true)}
+          isDisabled={frozen}
+        />
+      );
+      return (
         <EuiComboBox
           noSuggestions
           isInvalid={isInvalid}
@@ -52,7 +61,6 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             onChange(newVals.map((val) => val.label));
           }}
           onBlur={() => setIsDirty(true)}
-          isDisabled={frozen}
         />
       );
     }
