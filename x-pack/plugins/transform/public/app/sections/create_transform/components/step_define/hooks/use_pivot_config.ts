@@ -97,7 +97,7 @@ export const usePivotConfig = (
 ) => {
   const toastNotifications = useToastNotifications();
 
-  const { aggOptions, aggOptionsData, groupByOptions, groupByOptionsData } = useMemo(
+  const { aggOptions, aggOptionsData, groupByOptions, groupByOptionsData, fields } = useMemo(
     () => getPivotDropdownOptions(indexPattern, defaults.runtimeMappings),
     [defaults.runtimeMappings, indexPattern]
   );
@@ -347,6 +347,7 @@ export const usePivotConfig = (
         pivotGroupByArr,
         validationStatus,
         requestPayload,
+        fields,
       },
     };
   }, [
@@ -361,6 +362,7 @@ export const usePivotConfig = (
     pivotGroupByArr,
     validationStatus,
     requestPayload,
+    fields,
   ]);
 };
 

@@ -68,6 +68,12 @@ export const pivotAggsFieldSupport = {
   [KBN_FIELD_TYPES.CONFLICT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
 };
 
+export const TOP_METRICS_SORT_FIELD_TYPES = [
+  KBN_FIELD_TYPES.NUMBER,
+  KBN_FIELD_TYPES.DATE,
+  KBN_FIELD_TYPES.GEO_POINT,
+];
+
 /**
  * The maximum level of sub-aggregations
  */
@@ -78,6 +84,10 @@ export interface PivotAggsConfigBase {
   agg: PivotSupportedAggs;
   aggName: AggName;
   dropDownName: string;
+  /**
+   * Indicates if aggregation supports multiple fields
+   */
+  isMultiField?: boolean;
   /** Indicates if aggregation supports sub-aggregations */
   isSubAggsSupported?: boolean;
   /** Dictionary of the sub-aggregations */
@@ -133,7 +143,7 @@ export function getAggConfigFromEsAgg(
 }
 
 export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
-  field: EsFieldName;
+  field: EsFieldName | EsFieldName[];
 }
 
 export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {

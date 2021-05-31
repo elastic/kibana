@@ -8,10 +8,8 @@
 import { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
 
 export interface TopMetricsAggConfig {
-  sort: {
-    [field: string]: 'asc' | 'desc';
-  };
-  metrics: { field: string } | Array<{ field: string }>;
+  sortField: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
 export type PivotAggsConfigTopMetrics = PivotAggsConfigWithExtra<TopMetricsAggConfig>;

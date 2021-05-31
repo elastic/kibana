@@ -22,13 +22,36 @@ export function getTopMetricsAggConfig(
   return {
     ...commonConfig,
     isSubAggsSupported: false,
+    isMultiField: true,
     field: isPivotAggsConfigWithUiSupport(commonConfig) ? commonConfig.field : '',
     AggFormComponent: TopMetricsAggForm,
     aggConfig: {},
-    getEsAggConfig() {},
-    setUiConfigFromEs(esAggDefinition) {},
+    getEsAggConfig() {
+      // ensure the configuration has been completed
+      if (!this.isValid()) {
+        return null;
+      }
+
+      return {
+        metrics: (Array.isArray(this.field) ? this.field : [this.field]).map((f) => ({ field: f })),
+        sort: { [this.aggConfig.sortField!]: this.aggConfig.sortDirection },
+      };
+    },
+    setUiConfigFromEs(esAggDefinition) {
+      const { metrics, sort } = esAggDefinition;
+
+      this.field = (Array.isArray(metrics) ? metrics : [metrics]).map((v) => v.field);
+
+      if (sort === '_score' || esAggDefinition.sort === '_doc') {
+        // special field names
+        this.field = esAggDefinition.sort;
+        return;
+      }
+
+      this.aggConfig = {};
+    },
     isValid() {
-      return true;
+      return this.aggConfig.sortField !== undefined && this.aggConfig.sortDirection !== undefined;
     },
   };
 }
