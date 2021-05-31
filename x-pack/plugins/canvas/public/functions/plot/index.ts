@@ -144,7 +144,7 @@ export function plotFunctionFactory(
               canvas: false,
               colors: paletteService
                 .get(args.palette.name || 'custom')
-                .getColors(data.length, args.palette.params),
+                .getCategoricalColors(data.length, args.palette.params),
               legend: getLegendConfig(args.legend, data.length),
               grid: gridConfig,
               xaxis: getFlotAxisConfig('x', args.xaxis, {
