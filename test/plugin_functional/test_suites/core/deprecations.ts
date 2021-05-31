@@ -46,7 +46,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       message:
         'Kibana plugin functional tests will no longer allow corePluginDeprecations.secret config to be set to anything except 42.',
       correctiveActions: {
-        manualSteps: ['Step a', 'Step b'],
+        manualSteps: [
+          'This is an intentional deprecation for testing with no intention for having it fixed!',
+        ],
       },
       documentationUrl: 'config-secret-doc-url',
       deprecationType: 'config',

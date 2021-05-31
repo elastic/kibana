@@ -58,6 +58,52 @@ export const deprecations = ({
       }
       return config;
     },
+    (config, fromPath, addDeprecation) => {
+      const es: Record<string, any> = get(config, 'elasticsearch');
+      if (es) {
+        if (es.username === 'elastic') {
+          addDeprecation({
+            message: `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`,
+            correctiveActions: {
+              manualSteps: [`Replace [${fromPath}.username] from "elastic" to "kibana_system".`],
+            },
+          });
+        } else if (es.username === 'kibana') {
+          addDeprecation({
+            message: `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`,
+            correctiveActions: {
+              manualSteps: [`Replace [${fromPath}.username] from "kibana" to "kibana_system".`],
+            },
+          });
+        }
+      }
+      return config;
+    },
+    (config, fromPath, addDeprecation) => {
+      const ssl: Record<string, any> = get(config, 'elasticsearch.ssl');
+      if (ssl) {
+        if (ssl.key !== undefined && ssl.certificate === undefined) {
+          addDeprecation({
+            message: `Setting [${fromPath}.key] without [${fromPath}.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+            correctiveActions: {
+              manualSteps: [
+                `Set [${fromPath}.ssl.certificate] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
+              ],
+            },
+          });
+        } else if (ssl.certificate !== undefined && ssl.key === undefined) {
+          addDeprecation({
+            message: `Setting [${fromPath}.certificate] without [${fromPath}.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+            correctiveActions: {
+              manualSteps: [
+                `Set [${fromPath}.ssl.key] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
+              ],
+            },
+          });
+        }
+      }
+      return config;
+    },
     rename('xpack_api_polling_frequency_millis', 'licensing.api_polling_frequency'),
   ];
 };
