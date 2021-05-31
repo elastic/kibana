@@ -52,46 +52,22 @@ const fieldsConfig: FieldsConfig = {
     defaultValue: false,
     deserializer: to.booleanOrUndef,
     serializer: from.undefinedIfValue(false),
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceTypeFieldLabel', {
-      defaultMessage: 'Extract Device Type',
-    }),
-    // label: (
-      // <EuiFlexGroup gutterSize="xs">
-        // <EuiFlexItem grow={false}>
-          // Extract Device Type
-        // </EuiFlexItem>
-        // <EuiFlexItem>
-          // <EuiBetaBadge
-            // label="Beta"
-            // tooltipContent="This module is not GA. Please help us by reporting any bugs."
-          // />
-        // </EuiFlexItem>
-      // </EuiFlexGroup>
-    // ) as unknown,
-    // helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceTypeFieldHelpText', {
-      // defaultMessage: 'Extracts device type from the user agent string.',
-    // }),
-    helpText: (
-      <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.fingerprint.saltHelpText"
-        defaultMessage="{label}"
-        values={{
-          label: (
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                Salt value for the hash function.
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiBetaBadge
-                  label="Beta"
-                  tooltipContent="This module is not GA. Please help us by reporting any bugs."
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )
-        }}
-      />
+    label: (
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          Extract Device Type
+        </EuiFlexItem>
+        <EuiFlexItem style={{ marginBottom: -4 }}>
+          <EuiBetaBadge
+            label="Beta"
+            tooltipContent="This module is not GA. Please help us by reporting any bugs."
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ),
+    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceTypeFieldHelpText', {
+      defaultMessage: 'Extracts device type from the user agent string.',
+    }),
   }
 };
 
