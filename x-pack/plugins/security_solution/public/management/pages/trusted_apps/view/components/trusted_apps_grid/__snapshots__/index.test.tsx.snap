@@ -496,6 +496,26 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -761,6 +781,26 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -1034,6 +1074,26 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -1299,6 +1359,26 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -1572,6 +1652,26 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -1837,6 +1937,26 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -2110,6 +2230,26 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -2375,6 +2515,26 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -2648,6 +2808,26 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -2913,6 +3093,26 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -3360,22 +3560,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the first time 
       >
         <div
           class="body-content undefined"
-        >
-          <div
-            class="euiEmptyPrompt"
-          >
-            <span
-              class="euiTextColor euiTextColor--subdued"
-            >
-              <span>
-                No items found
-              </span>
-              <div
-                class="euiSpacer euiSpacer--m"
-              />
-            </span>
-          </div>
-        </div>
+        />
       </div>
     </div>
   </div>
@@ -3502,6 +3687,26 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -3775,6 +3980,26 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -4040,6 +4265,26 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -4313,6 +4558,26 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -4578,6 +4843,26 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -4851,6 +5136,26 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -5116,6 +5421,26 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -5389,6 +5714,26 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -5658,6 +6003,26 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -5923,6 +6288,26 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -6458,6 +6843,26 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -6723,6 +7128,26 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -6996,6 +7421,26 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -7261,6 +7706,26 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -7534,6 +7999,26 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -7799,6 +8284,26 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -8072,6 +8577,26 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -8337,6 +8862,26 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -8610,6 +9155,26 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dt
                     class="euiDescriptionList__title c3"
                   >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
                     Description
                   </dt>
                   <dd
@@ -8875,6 +9440,26 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                         someone
                       </span>
                     </span>
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Date Modified
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    1 minute ago
+                  </dd>
+                  <dt
+                    class="euiDescriptionList__title c3"
+                  >
+                    Modified By
+                  </dt>
+                  <dd
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
+                  >
+                    someone
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"

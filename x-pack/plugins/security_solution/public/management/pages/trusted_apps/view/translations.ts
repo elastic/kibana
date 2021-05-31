@@ -77,10 +77,10 @@ export const PROPERTY_TITLES: Readonly<
     defaultMessage: 'Created By',
   }),
   updated_at: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedAt', {
-    defaultMessage: 'Date Updated',
+    defaultMessage: 'Date Modified',
   }),
   updated_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedBy', {
-    defaultMessage: 'Updated By',
+    defaultMessage: 'Modified By',
   }),
   description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
     defaultMessage: 'Description',
@@ -185,3 +185,10 @@ export const CREATE_TRUSTED_APP_ERROR: { [K in string]: string } = {
     { defaultMessage: 'An invalid Signature was entered. Please enter in a valid Signature.' }
   ),
 };
+
+export const SEARCH_TRUSTED_APP_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.trustedapps.list.search.placeholder',
+  {
+    defaultMessage: 'Search on the fields below: name, description, value',
+  }
+);

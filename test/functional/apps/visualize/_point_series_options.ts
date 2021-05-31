@@ -61,7 +61,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   describe('vlad point series', function describeIndexTests() {
-    before(initChart);
+    before(async () => {
+      await PageObjects.visualize.initTests();
+      await initChart();
+    });
 
     describe('secondary value axis', function () {
       it('should show correct chart', async function () {

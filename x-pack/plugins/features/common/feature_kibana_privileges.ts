@@ -82,27 +82,50 @@ export interface FeatureKibanaPrivileges {
    * Alert Types and Alert Types provided by other features to which you wish to grant access.
    */
   alerting?: {
-    /**
-     * List of alert types which users should have full read/write access to when granted this privilege.
-     * @example
-     * ```ts
-     *  {
-     *    all: ['my-alert-type-within-my-feature']
-     *  }
-     * ```
-     */
-    all?: readonly string[];
-
-    /**
-     * List of alert types which users should have read-only access to when granted this privilege.
-     * @example
-     * ```ts
-     *  {
-     *    read: ['my-alert-type']
-     *  }
-     * ```
-     */
-    read?: readonly string[];
+    rule?: {
+      /**
+       * List of rule types which users should have full read/write access to when granted this privilege.
+       * @example
+       * ```ts
+       *  {
+       *    all: ['my-alert-type-within-my-feature']
+       *  }
+       * ```
+       */
+      all?: readonly string[];
+      /**
+       * List of rule types which users should have read-only access to when granted this privilege.
+       * @example
+       * ```ts
+       *  {
+       *    read: ['my-alert-type']
+       *  }
+       * ```
+       */
+      read?: readonly string[];
+    };
+    alert?: {
+      /**
+       * List of rule types for which users should have full read/write access their alert data to when granted this privilege.
+       * @example
+       * ```ts
+       *  {
+       *    all: ['my-alert-type-within-my-feature']
+       *  }
+       * ```
+       */
+      all?: readonly string[];
+      /**
+       * List of rule types for which users should have read-only access to their alert data when granted this privilege.
+       * @example
+       * ```ts
+       *  {
+       *    read: ['my-alert-type']
+       *  }
+       * ```
+       */
+      read?: readonly string[];
+    };
   };
   /**
    * If your feature requires access to specific saved objects, then specify your access needs here.

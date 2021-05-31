@@ -12,7 +12,6 @@ import { UptimeDatePicker } from '../uptime_date_picker';
 import { SyntheticsCallout } from '../../overview/synthetics_callout';
 import { PageTabs } from './page_tabs';
 import { CertRefreshBtn } from '../../certificates/cert_refresh_btn';
-import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
 import { MonitorPageTitle } from '../../monitor/monitor_title';
 
 export interface Props {
@@ -51,9 +50,6 @@ export const PageHeader = ({
         <EuiFlexItem>
           {showMonitorTitle && <MonitorPageTitle />}
           {showTabs && <PageTabs />}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ToggleAlertFlyoutButton />
         </EuiFlexItem>
         {showCertificateRefreshBtn && <CertRefreshBtn />}
         {showDatePicker && (

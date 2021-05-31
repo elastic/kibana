@@ -43,7 +43,7 @@ describe('ExploratoryView', () => {
 
     await waitFor(() => {
       screen.getByText(/open in lens/i);
-      screen.getByRole('heading', { name: /exploratory view/i });
+      screen.getByRole('heading', { name: /analyze data/i });
     });
   });
 
