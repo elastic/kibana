@@ -32,7 +32,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   public setup(core: CoreSetup) {
     this.url = new UrlService({
       navigate: async () => {
-        throw new Error('Locator .navigate() works only in browser.');
+        throw new Error('Locator .navigate() does not work on server.');
       },
     });
 

@@ -43,7 +43,7 @@ export interface LocatorDefinition<P extends SerializableState>
    *
    * @param params Parameters from which to generate a Kibana location.
    */
-  getLocation(params: P): KibanaLocation;
+  getLocation(params: P): Promise<KibanaLocation>;
 }
 
 /**
@@ -54,7 +54,7 @@ export interface LocatorPublic<P> {
    * Returns a relative URL to the client-side redirect endpoint using this
    * locator. (This method is necessary for compatibility with URL generators.)
    */
-  getLocation(params: P): KibanaLocation;
+  getLocation(params: P): Promise<KibanaLocation>;
 
   /**
    * Navigate using the `core.application.navigateToApp()` method to a Kibana

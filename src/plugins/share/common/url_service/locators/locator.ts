@@ -53,15 +53,15 @@ export class Locator<P extends SerializableState> implements PersistableState<P>
 
   // LocatorPublic<P> ----------------------------------------------------------
 
-  public getLocation(params: P): KibanaLocation {
-    return this.definition.getLocation(params);
+  public async getLocation(params: P): Promise<KibanaLocation> {
+    return await this.definition.getLocation(params);
   }
 
   public async navigate(
     params: P,
     { replace = false }: LocatorNavigationParams = {}
   ): Promise<void> {
-    const location = this.getLocation(params);
+    const location = await this.getLocation(params);
     await this.deps.navigate(location, {
       replace,
     });
