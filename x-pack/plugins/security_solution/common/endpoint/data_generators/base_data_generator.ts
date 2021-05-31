@@ -18,6 +18,7 @@ const DAY_OFFSETS = Array.from({ length: 14 }, (_, i) => 8.64e7 * (i + 1));
  * public method named `generate()` which should be implemented by sub-classes.
  */
 export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
+  /** A javascript seeded random number (float between 0 and 1). Don't use `Math.random()` */
   protected random: seedrandom.prng;
 
   constructor(seed: string | seedrandom.prng = Math.random().toString()) {
@@ -49,7 +50,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
 
   /** Generate either `true` or `false` */
   protected randomBoolean(): boolean {
-    return Math.random() < 0.5;
+    return this.random() < 0.5;
   }
 
   /** generate random OS family value */

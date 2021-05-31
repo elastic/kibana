@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from 'kibana/server';
 import {
   ArtifactsSchema,
   TutorialsCategory,
@@ -29,7 +28,6 @@ export const tutorialProvider = ({
   indexPatternTitle,
   indices,
   cloud,
-  basePath,
 }: {
   isEnabled: boolean;
   indexPatternTitle: string;
@@ -41,7 +39,6 @@ export const tutorialProvider = ({
     sourcemapIndices: string;
     onboardingIndices: string;
   };
-  basePath: IBasePath;
 }) => () => {
   const savedObjects = [
     {
