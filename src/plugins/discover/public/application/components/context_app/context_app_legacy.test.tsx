@@ -65,6 +65,7 @@ describe('ContextAppLegacy test', () => {
     indexPattern,
     appState: ({} as unknown) as AppState,
     stateContainer: ({} as unknown) as GetStateReturn,
+    anchorId: 'test_anchor_id',
     anchorStatus: 'loaded',
     anchorReason: 'no reason',
     defaultStepSize: 5,
