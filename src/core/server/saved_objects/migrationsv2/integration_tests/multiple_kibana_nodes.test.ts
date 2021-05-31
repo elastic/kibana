@@ -68,45 +68,40 @@ interface CreateRootConfig {
 }
 
 function createRoot({ logFileName }: CreateRootConfig) {
-  return kbnTestServer.createRoot(
-    {
-      elasticsearch: {
-        hosts: [esTestConfig.getUrl()],
-        username: kibanaServerTestUser.username,
-        password: kibanaServerTestUser.password,
-      },
-      migrations: {
-        skip: false,
-        enableV2: true,
-        batchSize: 100, // fixture contains 5000 docs
-      },
-      logging: {
-        appenders: {
-          file: {
-            type: 'file',
-            fileName: logFileName,
-            layout: {
-              type: 'pattern',
-            },
+  return kbnTestServer.createRoot({
+    elasticsearch: {
+      hosts: [esTestConfig.getUrl()],
+      username: kibanaServerTestUser.username,
+      password: kibanaServerTestUser.password,
+    },
+    migrations: {
+      skip: false,
+      enableV2: true,
+      batchSize: 100, // fixture contains 5000 docs
+    },
+    logging: {
+      appenders: {
+        file: {
+          type: 'file',
+          fileName: logFileName,
+          layout: {
+            type: 'pattern',
           },
         },
-        loggers: [
-          {
-            name: 'root',
-            appenders: ['file'],
-          },
-          {
-            name: 'savedobjects-service',
-            appenders: ['file'],
-            level: 'debug',
-          },
-        ],
       },
+      loggers: [
+        {
+          name: 'root',
+          appenders: ['file'],
+        },
+        {
+          name: 'savedobjects-service',
+          appenders: ['file'],
+          level: 'debug',
+        },
+      ],
     },
-    {
-      oss: true,
-    }
-  );
+  });
 }
 
 describe('migration v2', () => {
@@ -181,9 +176,9 @@ describe('migration v2', () => {
 
     setupContracts.forEach((setup) => setup.savedObjects.registerType(fooType));
 
-    const startContracts = await Promise.all([rootA.start(), rootB.start(), rootC.start()]);
+    await Promise.all([rootA.start(), rootB.start(), rootC.start()]);
 
-    const esClient = startContracts[0].elasticsearch.client.asInternalUser;
+    const esClient = esServer.es.getClient();
     const migratedDocs = await fetchDocs(esClient, migratedIndex);
 
     expect(migratedDocs.length).toBe(5000);
@@ -204,9 +199,9 @@ describe('migration v2', () => {
     // TODO: Fails if rootA.start promise isn't resolved first.
     // Make sure this isn't an issue with the algorithm.
     await rootA.start();
-    const startContracts = await Promise.all([rootB.start(), rootC.start()]);
+    await Promise.all([rootB.start(), rootC.start()]);
 
-    const esClient = startContracts[0].elasticsearch.client.asInternalUser;
+    const esClient = esServer.es.getClient();
     const migratedDocs = await fetchDocs(esClient, migratedIndex);
 
     expect(migratedDocs.length).toBe(5000);
