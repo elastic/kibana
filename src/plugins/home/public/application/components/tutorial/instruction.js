@@ -21,7 +21,16 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function Instruction({ commands, paramValues, textPost, textPre, replaceTemplateStrings }) {
+import { APMFleet } from '../apm_fleet';
+
+export function Instruction({
+  commands,
+  paramValues,
+  textPost,
+  textPre,
+  replaceTemplateStrings,
+  customComponent,
+}) {
   let pre;
   if (textPre) {
     pre = <Content text={replaceTemplateStrings(textPre)} />;
@@ -35,6 +44,10 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
         <Content text={replaceTemplateStrings(textPost)} />
       </div>
     );
+  }
+  let custom;
+  if (customComponent === 'apm_fleet') {
+    custom = <APMFleet />;
   }
 
   let copyButton;
@@ -79,6 +92,8 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
 
       {post}
 
+      {custom}
+
       <EuiSpacer />
     </div>
   );
@@ -90,4 +105,5 @@ Instruction.propTypes = {
   textPost: PropTypes.string,
   textPre: PropTypes.string,
   replaceTemplateStrings: PropTypes.func.isRequired,
+  customComponent: PropTypes.string,
 };

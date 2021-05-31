@@ -29,6 +29,7 @@ import { customLinkRouteRepository } from './settings/custom_link';
 import { traceRouteRepository } from './traces';
 import { transactionRouteRepository } from './transactions';
 import { APMRouteHandlerResources } from './typings';
+import { ApmFleetRouteRepository } from './fleet';
 
 const getTypedGlobalApmServerRouteRepository = () => {
   const repository = createApmServerRouteRepository()
@@ -48,7 +49,8 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(agentConfigurationRouteRepository)
     .merge(anomalyDetectionRouteRepository)
     .merge(apmIndicesRouteRepository)
-    .merge(customLinkRouteRepository);
+    .merge(customLinkRouteRepository)
+    .merge(ApmFleetRouteRepository);
 
   return repository;
 };

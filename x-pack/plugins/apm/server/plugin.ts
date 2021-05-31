@@ -101,23 +101,37 @@ export class APMPlugin
         kibanaVersion: this.initContext.env.packageInfo.version,
       });
     }
+
+    const resourcePlugins = mapValues(plugins, (value, key) => {
+      return {
+        setup: value,
+        start: () =>
+          core.getStartServices().then((services) => {
+            const [, pluginsStartContracts] = services;
+            return pluginsStartContracts[
+              key as keyof APMPluginStartDependencies
+            ];
+          }),
+      };
+    }) as APMRouteHandlerResources['plugins'];
+
+    plugins.features.registerKibanaFeature(APM_FEATURE);
+
     plugins.home?.tutorials.registerTutorial(
       tutorialProvider({
-        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
-        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
+        isEnabled: currentConfig['xpack.apm.ui.enabled'],
+        indexPatternTitle: currentConfig['apm_oss.indexPattern'],
         cloud: plugins.cloud,
         indices: {
-          errorIndices: this.currentConfig['apm_oss.errorIndices'],
-          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
-          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
-          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
-          transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
+          errorIndices: currentConfig['apm_oss.errorIndices'],
+          metricsIndices: currentConfig['apm_oss.metricsIndices'],
+          onboardingIndices: currentConfig['apm_oss.onboardingIndices'],
+          sourcemapIndices: currentConfig['apm_oss.sourcemapIndices'],
+          transactionIndices: currentConfig['apm_oss.transactionIndices'],
         },
         basePath: core.http.basePath,
       })
     );
-
-    plugins.features.registerKibanaFeature(APM_FEATURE);
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
@@ -195,18 +209,7 @@ export class APMPlugin
       config: currentConfig,
       repository: getGlobalApmServerRouteRepository(),
       ruleDataClient,
-      plugins: mapValues(plugins, (value, key) => {
-        return {
-          setup: value,
-          start: () =>
-            core.getStartServices().then((services) => {
-              const [, pluginsStartContracts] = services;
-              return pluginsStartContracts[
-                key as keyof APMPluginStartDependencies
-              ];
-            }),
-        };
-      }) as APMRouteHandlerResources['plugins'],
+      plugins: resourcePlugins,
     });
 
     const boundGetApmIndices = async () =>

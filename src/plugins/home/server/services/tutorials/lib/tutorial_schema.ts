@@ -56,6 +56,7 @@ const instructionSchema = schema.object({
   textPre: schema.maybe(schema.string()),
   commands: schema.maybe(schema.arrayOf(schema.string())),
   textPost: schema.maybe(schema.string()),
+  customComponent: schema.maybe(schema.string()),
 });
 export type Instruction = TypeOf<typeof instructionSchema>;
 

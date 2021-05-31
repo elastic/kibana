@@ -32,9 +32,9 @@ export function createElasticCloudInstructions(
   const apmServerUrl = cloudSetup?.apm.url;
   const instructionSets = [];
 
-  if (!apmServerUrl) {
-    instructionSets.push(getApmServerInstructionSet(cloudSetup));
-  }
+  instructionSets.push(
+    getApmServerInstructionSet({ cloudSetup, hasApmServerUrl: !!apmServerUrl })
+  );
 
   instructionSets.push(getApmAgentInstructionSet(cloudSetup));
 
@@ -43,29 +43,41 @@ export function createElasticCloudInstructions(
   };
 }
 
-function getApmServerInstructionSet(
-  cloudSetup?: CloudSetup
-): InstructionSetSchema {
-  const cloudId = cloudSetup?.cloudId;
+function getApmServerInstructionSet({
+  cloudSetup,
+  hasApmServerUrl,
+}: {
+  cloudSetup?: CloudSetup;
+  hasApmServerUrl: boolean;
+}): InstructionSetSchema {
+  const instructionVariants: InstructionSetSchema['instructionVariants'] = [
+    {
+      id: INSTRUCTION_VARIANT.FLEET,
+      instructions: [{ customComponent: 'apm_fleet' }],
+    },
+  ];
+
+  if (!hasApmServerUrl) {
+    instructionVariants.push({
+      id: INSTRUCTION_VARIANT.ESC,
+      instructions: [
+        {
+          title: 'Enable the APM Server in the ESS console',
+          textPre: i18n.translate('xpack.apm.tutorial.elasticCloud.textPre', {
+            defaultMessage:
+              'To enable the APM Server go to [the Elastic Cloud console](https://cloud.elastic.co/deployments?q={cloudId}) and enable APM in the deployment settings. Once enabled, refresh this page.',
+            values: { cloudId: cloudSetup?.cloudId },
+          }),
+        },
+      ],
+    });
+  }
+
   return {
     title: i18n.translate('xpack.apm.tutorial.apmServer.title', {
       defaultMessage: 'APM Server',
     }),
-    instructionVariants: [
-      {
-        id: INSTRUCTION_VARIANT.ESC,
-        instructions: [
-          {
-            title: 'Enable the APM Server in the ESS console',
-            textPre: i18n.translate('xpack.apm.tutorial.elasticCloud.textPre', {
-              defaultMessage:
-                'To enable the APM Server go to [the Elastic Cloud console](https://cloud.elastic.co/deployments?q={cloudId}) and enable APM in the deployment settings. Once enabled, refresh this page.',
-              values: { cloudId },
-            }),
-          },
-        ],
-      },
-    ],
+    instructionVariants,
   };
 }
 

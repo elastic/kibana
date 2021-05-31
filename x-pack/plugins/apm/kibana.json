@@ -11,7 +11,8 @@
     "embeddable",
     "infra",
     "observability",
-    "ruleRegistry"
+    "ruleRegistry",
+    "fleet"
   ],
   "optionalPlugins": [
     "spaces",
