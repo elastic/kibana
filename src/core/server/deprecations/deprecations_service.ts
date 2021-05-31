@@ -112,15 +112,13 @@ export interface InternalDeprecationsServiceSetup {
 /** @internal */
 export interface DeprecationsSetupDeps {
   http: InternalHttpServiceSetup;
-  elasticsearch: InternalElasticsearchServiceSetup;
-  coreUsageData: CoreUsageDataSetup;
 }
 
 /** @internal */
 export class DeprecationsService implements CoreService<InternalDeprecationsServiceSetup> {
   private readonly logger: Logger;
 
-  constructor(private readonly coreContext: CoreContext) {
+  constructor(private readonly coreContext: Pick<CoreContext, 'logger' | 'configService'>) {
     this.logger = coreContext.logger.get('deprecations-service');
   }
 

@@ -26,13 +26,13 @@ export interface DeprecationsDetails {
    */
   level: 'warning' | 'critical' | 'fetch_error';
   /**
-   * (optiional) Used to identify between different deprecation types.
+   * (optional) Used to identify between different deprecation types.
    * Example use case: in Upgrade Assistant, we may want to allow the user to sort by
    * deprecation type or show each type in a separate tab.
    *
    * Feel free to add new types if necessary.
-   * Predefined types are necessary to reduce similar definitions with different keywords
-   * across all kibana deprecations.
+   * Predefined types are necessary to reduce having similar definitions with different keywords
+   * across kibana deprecations.
    */
   deprecationType?: 'config' | 'feature';
   /* (optional) link to the documentation for more details on the deprecation. */
