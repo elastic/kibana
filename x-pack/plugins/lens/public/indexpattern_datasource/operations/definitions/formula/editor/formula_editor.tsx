@@ -22,8 +22,6 @@ import {
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
-import { debounce } from 'lodash';
-import type { AutocompleteStart } from '../../../../../../../../../src/plugins/data/public';
 import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type { CodeEditorProps } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { useDebounceWithOptions } from '../../../../../shared_components';
@@ -89,14 +87,6 @@ export function FormulaEditor({
     node1.classList.add('lnsFormulaOverflow', 'monaco-editor');
     document.body.appendChild(node1);
   }
-
-  const autocompleteServiceDebounced: AutocompleteStart = useMemo(
-    () => ({
-      ...data.autocomplete,
-      getQuerySuggestion: debounce((args) => data.autocomplete.getQuerySuggestions(args), 256),
-    }),
-    [data.autocomplete]
-  );
 
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
@@ -332,7 +322,7 @@ export function FormulaEditor({
             context,
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
-            autocomplete: autocompleteServiceDebounced,
+            data,
           });
         }
       } else {
@@ -342,7 +332,7 @@ export function FormulaEditor({
           context,
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
-          autocomplete: autocompleteServiceDebounced,
+          data,
         });
       }
 
@@ -358,7 +348,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, autocompleteServiceDebounced]
+    [indexPattern, visibleOperationsMap, data]
   );
 
   const provideSignatureHelp = useCallback(
@@ -415,16 +405,34 @@ export function FormulaEditor({
       if (e.isFlush || e.isRedoing || e.isUndoing) {
         return;
       }
-      if (e.changes.length === 1 && e.changes[0].text === '=') {
+      if (e.changes.length === 1 && (e.changes[0].text === '=' || e.changes[0].text === "'")) {
         const currentPosition = e.changes[0].range;
         if (currentPosition) {
-          const tokenInfo = getTokenInfo(
+          let tokenInfo = getTokenInfo(
             editor.getValue(),
             monacoPositionToOffset(
               editor.getValue(),
               new monaco.Position(currentPosition.startLineNumber, currentPosition.startColumn)
             )
           );
+
+          if (!tokenInfo && e.changes[0].text === "'") {
+            // try again this time replacing the current quote with an escaped quote
+            const line = editor.getValue();
+            const lineEscaped =
+              line.substring(0, currentPosition.startColumn - 1) +
+              "\\'" +
+              line.substring(currentPosition.endColumn);
+            tokenInfo = getTokenInfo(
+              lineEscaped,
+              monacoPositionToOffset(
+                line,
+                new monaco.Position(currentPosition.startLineNumber, currentPosition.startColumn)
+              ) + 1
+            );
+          }
+
+          const isSingleQuoteCase = /'LENS_MATH_MARKER/;
           // Make sure that we are only adding kql='' or lucene='', and also
           // check that the = sign isn't inside the KQL expression like kql='='
           if (
@@ -432,28 +440,44 @@ export function FormulaEditor({
             typeof tokenInfo.ast === 'number' ||
             tokenInfo.ast.type !== 'namedArgument' ||
             (tokenInfo.ast.name !== 'kql' && tokenInfo.ast.name !== 'lucene') ||
-            tokenInfo.ast.value !== 'LENS_MATH_MARKER'
+            (tokenInfo.ast.value !== 'LENS_MATH_MARKER' &&
+              !isSingleQuoteCase.test(tokenInfo.ast.value))
           ) {
             return;
           }
 
-          // Timeout is required because otherwise the cursor position is not updated.
-          setTimeout(() => {
+          let editOperation = null;
+          if (e.changes[0].text === '=') {
+            editOperation = {
+              range: {
+                ...currentPosition,
+                // Insert after the current char
+                startColumn: currentPosition.startColumn + 1,
+                endColumn: currentPosition.startColumn + 1,
+              },
+              text: `''`,
+            };
+          }
+          if (e.changes[0].text === "'") {
+            editOperation = {
+              range: {
+                ...currentPosition,
+                // Insert after the current char
+                startColumn: currentPosition.startColumn,
+                endColumn: currentPosition.startColumn + 1,
+              },
+              text: `\\'`,
+            };
+          }
+
+          // Need to move these sync to prevent race conditions between a fast user typing a single quote
+          // after an = char
+          if (editOperation) {
             editor.executeEdits(
               'LENS',
+              [editOperation],
               [
-                {
-                  range: {
-                    ...currentPosition,
-                    // Insert after the current char
-                    startColumn: currentPosition.startColumn + 1,
-                    endColumn: currentPosition.startColumn + 1,
-                  },
-                  text: `''`,
-                },
-              ],
-              [
-                // After inserting, move the cursor in between the single quotes
+                // After inserting, move the cursor in between the single quotes or after the escaped quote
                 new monaco.Selection(
                   currentPosition.startLineNumber,
                   currentPosition.startColumn + 2,
@@ -462,8 +486,16 @@ export function FormulaEditor({
                 ),
               ]
             );
-            editor.trigger('lens', 'editor.action.triggerSuggest', {});
-          }, 0);
+
+            // Timeout is required because otherwise the cursor position is not updated.
+            setTimeout(() => {
+              editor.setPosition({
+                column: currentPosition.startColumn + 2,
+                lineNumber: currentPosition.startLineNumber,
+              });
+              editor.trigger('lens', 'editor.action.triggerSuggest', {});
+            }, 0);
+          }
         }
       }
     },

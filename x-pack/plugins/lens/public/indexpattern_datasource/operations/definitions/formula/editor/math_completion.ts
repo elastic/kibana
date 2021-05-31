@@ -16,7 +16,7 @@ import {
   TinymathNamedArgument,
 } from '@kbn/tinymath';
 import type {
-  AutocompleteStart,
+  DataPublicPluginStart,
   QuerySuggestion,
 } from '../../../../../../../../../src/plugins/data/public';
 import { IndexPattern } from '../../../../types';
@@ -107,14 +107,14 @@ export async function suggest({
   context,
   indexPattern,
   operationDefinitionMap,
-  autocomplete,
+  data,
 }: {
   expression: string;
   position: number;
   context: monaco.languages.CompletionContext;
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
-  autocomplete: AutocompleteStart;
+  data: DataPublicPluginStart;
 }): Promise<{ list: LensMathSuggestion[]; type: SUGGESTION_TYPE }> {
   const text = expression.substr(0, position) + MARKER + expression.substr(position);
   try {
@@ -132,7 +132,7 @@ export async function suggest({
     if (tokenInfo?.parent && (context.triggerCharacter === '=' || isNamedArgument)) {
       return await getNamedArgumentSuggestions({
         ast: tokenAst as TinymathNamedArgument,
-        autocomplete,
+        data,
         indexPattern,
       });
     } else if (tokenInfo?.parent) {
@@ -300,24 +300,24 @@ function getArgumentSuggestions(
 
 export async function getNamedArgumentSuggestions({
   ast,
-  autocomplete,
+  data,
   indexPattern,
 }: {
   ast: TinymathNamedArgument;
   indexPattern: IndexPattern;
-  autocomplete: AutocompleteStart;
+  data: DataPublicPluginStart;
 }) {
   if (ast.name !== 'kql' && ast.name !== 'lucene') {
     return { list: [], type: SUGGESTION_TYPE.KQL };
   }
-  if (!autocomplete.hasQuerySuggestions(ast.name === 'kql' ? 'kuery' : 'lucene')) {
+  if (!data.autocomplete.hasQuerySuggestions(ast.name === 'kql' ? 'kuery' : 'lucene')) {
     return { list: [], type: SUGGESTION_TYPE.KQL };
   }
 
   const query = ast.value.split(MARKER)[0];
   const position = ast.value.indexOf(MARKER) + 1;
 
-  const suggestions = await autocomplete.getQuerySuggestions({
+  const suggestions = await data.autocomplete.getQuerySuggestions({
     language: ast.name === 'kql' ? 'kuery' : 'lucene',
     query,
     selectionStart: position,
