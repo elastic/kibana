@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useContext, useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { LogEntry } from '../../../../common/log_entry';
+import type { Query } from '../../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { LogEntry } from '../../../../common/log_entry';
+import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
 import { LogMinimap } from '../../../components/logging/log_minimap';
@@ -23,14 +25,14 @@ import {
 import { LogHighlightsState } from '../../../containers/logs/log_highlights';
 import { LogPositionState } from '../../../containers/logs/log_position';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { useLogStreamContext } from '../../../containers/logs/log_stream';
 import { WithSummary } from '../../../containers/logs/log_summary';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
+import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 import { LogsToolbar } from './page_toolbar';
 import { PageViewLogInContext } from './page_view_log_in_context';
-import { useLogStreamContext } from '../../../containers/logs/log_stream';
-import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 
 const PAGE_THRESHOLD = 2;
 
@@ -190,7 +192,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   );
 
   const setFilter = useCallback(
-    (filter, flyoutItemId, timeKey) => {
+    (filter: Query, flyoutItemId: string, timeKey: TimeKey | undefined | null) => {
       applyLogFilterQuery(filter);
       if (timeKey) {
         jumpToTargetPosition(timeKey);
