@@ -60,9 +60,35 @@ export async function storedPackagePoliciesToAgentPermissions(
 
       // The input has a `type`, which corresponds with pkg.data_streams[].streams.type.
       // We want to get the corresponding data_stream for each input
-      const dataStreams = inputs.flatMap((input) =>
-        pkg.data_streams!.filter((ds) => ds.streams?.some((s) => s.input === input.type))
-      );
+      // const dataStreams = inputs.flatMap((input) =>
+      //   pkg.data_streams!.filter((ds) => ds.streams?.some((s) => s.input === input.type))
+      // );
+
+      const dataStreams = inputs.flatMap((input) => {
+        const dataStreams_: DataStreamMeta[] = [];
+
+        // Build data streams from inputs
+        input.streams
+          .filter((s) => s.enabled)
+          .forEach((stream) => {
+            if (!('data_stream' in stream)) {
+              return;
+            }
+
+            const ds = {
+              type: stream.data_stream.type,
+              dataset: stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
+            };
+
+            dataStreams_.push(ds);
+          });
+
+        // const oldDS = pkg.data_streams!.filter((ds) =>
+        //   ds.streams?.some((s) => s.input === input.type)
+        // );
+
+        return dataStreams_;
+      });
 
       return [
         packagePolicy.name,
@@ -74,7 +100,15 @@ export async function storedPackagePoliciesToAgentPermissions(
   return Object.fromEntries(await Promise.all(permissionEntries));
 }
 
-export function getDataStreamPermissions(dataStream: RegistryDataStream, namespace: string = '*') {
+interface DataStreamMeta {
+  type: string;
+  dataset: string;
+  dataset_is_prefix?: boolean;
+  hidden?: boolean;
+  permissions?: any; // FIX
+}
+
+export function getDataStreamPermissions(dataStream: DataStreamMeta, namespace: string = '*') {
   let index = `${dataStream.type}-${dataStream.dataset}-${namespace}`;
 
   if (dataStream.dataset_is_prefix) {

@@ -139,8 +139,28 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         enabled: true,
         package: { name: 'test-package', version: '0.0.0', title: 'Test Package' },
         inputs: [
-          { type: 'test-logs', enabled: true, streams: [] },
-          { type: 'test-metrics', enabled: false, streams: [] },
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+              },
+            ],
+          },
+          {
+            type: 'test-metrics',
+            enabled: false,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: false,
+                data_stream: { type: 'metrics', dataset: 'some-metrics' },
+              },
+            ],
+          },
         ],
         created_at: '',
         updated_at: '',
@@ -158,6 +178,96 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         indices: [
           {
             names: ['logs-some-logs-test'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+        ],
+      },
+    });
+  });
+
+  it('Returns the dataset for the compiled data_streams', async () => {
+    getPackageInfoMock.mockResolvedValueOnce({
+      name: 'test-package',
+      version: '0.0.0',
+      latestVersion: '0.0.0',
+      release: 'experimental',
+      format_version: '1.0.0',
+      title: 'Test Package',
+      description: '',
+      icons: [],
+      owner: { github: '' },
+      status: 'not_installed',
+      assets: {
+        kibana: {
+          dashboard: [],
+          visualization: [],
+          search: [],
+          index_pattern: [],
+          map: [],
+          lens: [],
+          security_rule: [],
+          ml_module: [],
+        },
+        elasticsearch: {
+          component_template: [],
+          ingest_pipeline: [],
+          ilm_policy: [],
+          transform: [],
+          index_template: [],
+          data_stream_ilm_policy: [],
+        },
+      },
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'some-logs',
+          title: '',
+          release: '',
+          package: 'test-package',
+          path: '',
+          ingest_pipeline: '',
+          streams: [{ input: 'test-logs', title: 'Test Logs', template_path: '' }],
+        },
+      ],
+    });
+
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: '12345',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test-package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+                compiled_stream: { data_stream: { dataset: 'compiled' } },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        output_id: '',
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
+    expect(permissions).toMatchObject({
+      'test-policy': {
+        indices: [
+          {
+            names: ['logs-compiled-test'],
             privileges: ['auto_configure', 'create_doc'],
           },
         ],
