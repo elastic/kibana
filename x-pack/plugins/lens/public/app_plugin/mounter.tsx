@@ -17,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
 import { Provider } from 'react-redux';
 import { isEqual } from 'lodash';
-import { uniq, isEqual } from 'lodash';
 import { EmbeddableEditorState } from 'src/plugins/embeddable/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 

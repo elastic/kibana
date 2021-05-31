@@ -269,7 +269,7 @@ export function App({
             appState.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined
           }
           isSaveable={appState.isSaveable}
-          onSave={runSave}
+          runSave={runSave}
           onClose={() => {
             setIsSaveModalVisible(false);
           }}

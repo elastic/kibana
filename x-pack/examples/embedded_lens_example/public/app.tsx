@@ -25,6 +25,7 @@ import {
   PersistedIndexPatternLayer,
   XYState,
   LensSavedModalLazy,
+  LensEmbeddableInput,
 } from '../../../plugins/lens/public';
 import { StartDependencies } from './plugin';
 
@@ -213,6 +214,12 @@ export const App = (props: {
                 />
                 {isSaveModalVisible && (
                   <LensSavedModalLazy
+                    initialInput={
+                      (getLensAttributes(
+                        props.defaultIndexPattern,
+                        color
+                      ) as unknown) as LensEmbeddableInput
+                    }
                     isVisible={isSaveModalVisible}
                     onSave={() => {}}
                     onClose={() => setIsSaveModalVisible(false)}

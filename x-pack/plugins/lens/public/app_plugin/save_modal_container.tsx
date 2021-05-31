@@ -39,8 +39,9 @@ export type SaveModalContainerProps = {
   persistedDoc?: Document;
   lastKnownDoc?: Document;
   returnToOriginSwitchLabel?: string;
-  onSave: (saveProps: SaveProps, options: { saveToLibrary: boolean }) => void;
   onClose: () => void;
+  onSave?: () => void;
+  runSave?: (saveProps: SaveProps, options: { saveToLibrary: boolean }) => void;
   attributeService?: LensAttributeService;
   isSaveable?: boolean;
   getAppNameFromId?: () => string | undefined;
@@ -50,6 +51,7 @@ export function SaveModalContainer({
   returnToOriginSwitchLabel,
   onClose,
   onSave,
+  runSave,
   isVisible,
   persistedDoc,
   originatingApp,
@@ -76,10 +78,25 @@ export function SaveModalContainer({
     dashboard,
     savedObjectsTagging,
     presentationUtil,
+    savedObjectsClient,
   } = kServices;
 
   if (!presentationUtil) {
     throw Error('presentationUtil is required as plugin dependency to use LensSavedModalLazy');
+  }
+
+  if (!savedObjectsTagging) {
+    throw Error('savedObjectsTagging is required as plugin dependency to use LensSavedModalLazy');
+  }
+
+  if (!dashboard) {
+    throw Error('dashboard is required as plugin dependency to use LensSavedModalLazy');
+  }
+
+  if (!savedObjectsClient) {
+    throw Error(
+      'savedObjectsClient is required from kibana context services to use LensSavedModalLazy'
+    );
   }
 
   const { ContextProvider: PresentationUtilContext } = presentationUtil;
@@ -123,9 +140,10 @@ export function SaveModalContainer({
       ? savedObjectsTagging.ui.getTagIdsFromReferences(persistedDoc.references)
       : [];
 
-  const runSave = (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
-    if (onSave) {
-      onSave(saveProps, options);
+  const runLensSave = (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
+    if (runSave) {
+      // inside lens, we use the function that's passed to it
+      runSave(saveProps, options);
     } else {
       if (attributeService) {
         runSaveLensVisualization(
@@ -146,6 +164,7 @@ export function SaveModalContainer({
           saveProps,
           options
         ).then(() => {
+          onSave?.();
           onClose();
         });
       }
@@ -164,7 +183,7 @@ export function SaveModalContainer({
         savedObjectsTagging={savedObjectsTagging}
         tagsIds={tagsIds}
         onSave={(saveProps, options) => {
-          runSave(saveProps, options);
+          runLensSave(saveProps, options);
         }}
         onClose={onClose}
         getAppNameFromId={getAppNameFromId}
@@ -311,7 +330,7 @@ export const runSaveLensVisualization = async (
 
         setIsSaveModalVisible();
         // remove editor state so the connection is still broken after reload
-        stateTransfer.clearEditorState(APP_ID);
+        stateTransfer.clearEditorState?.(APP_ID);
 
         redirectTo?.(newInput.savedObjectId);
         resolve({ isLinkedToOriginatingApp: false });
@@ -392,14 +411,14 @@ export const getLastKnownDoc = async ({
         );
         getAllIndexPatterns(indexPatternIds, data.indexPatterns)
           .then(({ indexPatterns }) => {
-            // Don't overwrite any pinned filters
-            data.query.filterManager.setAppFilters(
-              injectFilterReferences(doc.state.filters, doc.references)
-            );
             resolve({
               doc,
               indexPatterns,
             });
+            // Don't overwrite any pinned filters
+            data.query.filterManager.setAppFilters(
+              injectFilterReferences(doc.state.filters, doc.references)
+            );
           })
           .catch((e) => {
             reject();

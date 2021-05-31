@@ -10,8 +10,9 @@
     "data",
     "dashboard",
     "developerExamples",
-    "presentationUtil"
+    "presentationUtil",
+    "savedObjectsTagging"
   ],
   "optionalPlugins": [],
-  "requiredBundles": []
+  "requiredBundles": ["kibanaReact"]
 }

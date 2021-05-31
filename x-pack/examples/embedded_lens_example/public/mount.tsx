@@ -24,14 +24,19 @@ export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
 
   const defaultIndexPattern = await plugins.data.indexPatterns.getDefault();
 
+  const i18nCore = core.i18n;
+
   const reactElement = (
     <KibanaContextProvider
       services={{
         ...core,
         ...plugins,
+        savedObjectsClient: core.savedObjects.client,
       }}
     >
-      <App {...deps} defaultIndexPattern={defaultIndexPattern} />
+      <i18nCore.Context>
+        <App {...deps} defaultIndexPattern={defaultIndexPattern} />
+      </i18nCore.Context>
     </KibanaContextProvider>
   );
   render(reactElement, element);
