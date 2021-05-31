@@ -29,7 +29,7 @@ interface KibanaLogicProps {
   charts: ChartsPluginStart;
   navigateToUrl: ApplicationStart['navigateToUrl'];
   notifications: NotificationsStart;
-  security: SecurityPluginStart;
+  security: Partial<SecurityPluginStart>;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;

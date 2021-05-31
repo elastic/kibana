@@ -61,7 +61,7 @@ export class SecurityPlugin
   private readonly securityCheckupService = new SecurityCheckupService();
   private authc!: AuthenticationServiceSetup;
   private readonly config: ConfigType;
-  private uiApi: any;
+  private uiApi!: ReturnType<typeof getUiApi>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
