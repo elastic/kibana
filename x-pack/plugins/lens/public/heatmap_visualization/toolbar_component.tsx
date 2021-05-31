@@ -15,13 +15,6 @@ import { HeatmapVisualizationState } from './types';
 
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
   {
-    id: `xy_legend_auto`,
-    value: 'auto',
-    label: i18n.translate('xpack.lens.xyChart.legendVisibility.auto', {
-      defaultMessage: 'Auto',
-    }),
-  },
-  {
     id: `heatmap_legend_show`,
     value: 'show',
     label: i18n.translate('xpack.lens.heatmapChart.legendVisibility.show', {
@@ -41,7 +34,7 @@ export const HeatmapToolbar = memo(
   (props: VisualizationToolbarProps<HeatmapVisualizationState>) => {
     const { state, setState } = props;
 
-    const legendMode = state.legend.isVisible ? 'auto' : !state.legend.isVisible ? 'hide' : 'show';
+    const legendMode = state.legend.isVisible ? 'show' : 'hide';
 
     return (
       <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
@@ -53,12 +46,7 @@ export const HeatmapToolbar = memo(
               mode={legendMode}
               onDisplayChange={(optionId) => {
                 const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
-                if (newMode === 'auto') {
-                  setState({
-                    ...state,
-                    legend: { ...state.legend, isVisible: true },
-                  });
-                } else if (newMode === 'show') {
+                if (newMode === 'show') {
                   setState({
                     ...state,
                     legend: { ...state.legend, isVisible: true },
