@@ -60,7 +60,7 @@ export function APMFleet() {
   if (data?.hasData) {
     return (
       <EuiButton iconType="gear" fill href={`${basePath}/app/fleet#/policies`}>
-        {i18n.translate('xpack.apm.tutorial.apmServer.fleet.manageApmIntegration.button', {
+        {i18n.translate('home.apm.tutorial.apmServer.fleet.manageApmIntegration.button', {
           defaultMessage: 'Manage APM integration in Fleet',
         })}
       </EuiButton>
@@ -74,10 +74,10 @@ export function APMFleet() {
           <EuiCard
             display="plain"
             textAlign="left"
-            title={i18n.translate('xpack.apm.tutorial.apmServer.fleet.title', {
+            title={i18n.translate('home.apm.tutorial.apmServer.fleet.title', {
               defaultMessage: 'Elastic APM (beta) now available in Fleet!',
             })}
-            description={i18n.translate('xpack.apm.tutorial.apmServer.fleet.message', {
+            description={i18n.translate('home.apm.tutorial.apmServer.fleet.message', {
               defaultMessage:
                 'The APM integration installs Elasticsearch templates and Ingest Node pipelines for APM data.',
             })}
@@ -87,7 +87,7 @@ export function APMFleet() {
                 color="secondary"
                 href={`${basePath}/app/fleet#/integrations/detail/apm-0.2.0/overview`}
               >
-                {i18n.translate('xpack.apm.tutorial.apmServer.fleet.apmIntegration.button', {
+                {i18n.translate('home.apm.tutorial.apmServer.fleet.apmIntegration.button', {
                   defaultMessage: 'APM integration',
                 })}
               </EuiButton>
