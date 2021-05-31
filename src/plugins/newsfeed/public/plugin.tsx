@@ -42,7 +42,7 @@ export class NewsfeedPublicPlugin
   }
 
   public start(core: CoreStart) {
-    const api = this.createNewsfeedApi(core, this.config, NewsfeedApiEndpoint.KIBANA);
+    const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA);
     core.chrome.navControls.registerRight({
       order: 1000,
       mount: (target) => this.mount(api, target),
@@ -56,7 +56,7 @@ export class NewsfeedPublicPlugin
             pathTemplate: `/${endpoint}/v{VERSION}.json`,
           },
         });
-        const { fetchResults$ } = this.createNewsfeedApi(core, config, endpoint);
+        const { fetchResults$ } = this.createNewsfeedApi(config, endpoint);
         return fetchResults$;
       },
     };
@@ -67,12 +67,10 @@ export class NewsfeedPublicPlugin
   }
 
   private createNewsfeedApi(
-    core: CoreStart,
     config: NewsfeedPluginBrowserConfig,
     newsfeedId: NewsfeedApiEndpoint
   ): NewsfeedApi {
-    const { http } = core;
-    const api = getApi(http, config, this.kibanaVersion, newsfeedId);
+    const api = getApi(config, this.kibanaVersion, newsfeedId);
     return {
       markAsRead: api.markAsRead,
       fetchResults$: api.fetchResults$.pipe(

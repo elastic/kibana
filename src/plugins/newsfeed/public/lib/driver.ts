@@ -7,7 +7,6 @@
  */
 
 import moment from 'moment';
-import { HttpSetup } from 'kibana/public';
 import * as Rx from 'rxjs';
 import { NEWSFEED_DEFAULT_SERVICE_BASE_URL } from '../../common/constants';
 import { ApiItem, FetchResult, NewsfeedPluginBrowserConfig } from '../types';
@@ -15,6 +14,10 @@ import { convertItems } from './convert_items';
 import type { NewsfeedStorage } from './storage';
 
 type ApiConfig = NewsfeedPluginBrowserConfig['service'];
+
+interface NewsfeedResponse {
+  items: ApiItem[];
+}
 
 export class NewsfeedApiDriver {
   private readonly kibanaVersion: string;
@@ -47,18 +50,18 @@ export class NewsfeedApiDriver {
     return duration.asMilliseconds() > this.fetchInterval;
   }
 
-  fetchNewsfeedItems(http: HttpSetup, config: ApiConfig): Rx.Observable<FetchResult> {
+  fetchNewsfeedItems(config: ApiConfig): Rx.Observable<FetchResult> {
     const urlPath = config.pathTemplate.replace('{VERSION}', this.kibanaVersion);
     const fullUrl = (config.urlRoot || NEWSFEED_DEFAULT_SERVICE_BASE_URL) + urlPath;
+    const request = new Request(fullUrl, {
+      method: 'GET',
+    });
 
     return Rx.from(
-      http
-        .fetch(fullUrl, {
-          method: 'GET',
-        })
-        .then(({ items }: { items: ApiItem[] }) => {
-          return this.convertResponse(items);
-        })
+      window.fetch(request).then(async (response) => {
+        const { items } = (await response.json()) as NewsfeedResponse;
+        return this.convertResponse(items);
+      })
     );
   }
 

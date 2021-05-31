@@ -8,7 +8,6 @@
 
 import { driverInstanceMock, storageInstanceMock } from './api.test.mocks';
 import moment from 'moment';
-import { httpServiceMock } from '../../../../core/public/mocks';
 import { getApi } from './api';
 import { TestScheduler } from 'rxjs/testing';
 import { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
@@ -40,10 +39,7 @@ const createFetchResult = (parts: Partial<FetchResult>): FetchResult => ({
 });
 
 describe('getApi', () => {
-  let http: ReturnType<typeof httpServiceMock.createSetupContract>;
-
   beforeEach(() => {
-    http = httpServiceMock.createSetupContract();
     driverInstanceMock.shouldFetch.mockReturnValue(true);
   });
 
@@ -64,7 +60,7 @@ describe('getApi', () => {
           a: createFetchResult({ feedItems: ['item' as any] }),
         })
       );
-      const api = getApi(http, createConfig(1000), kibanaVersion, newsfeedId);
+      const api = getApi(createConfig(1000), kibanaVersion, newsfeedId);
 
       expectObservable(api.fetchResults$.pipe(take(1))).toBe('(a|)', {
         a: createFetchResult({
@@ -87,7 +83,7 @@ describe('getApi', () => {
           a: createFetchResult({ feedItems: ['item' as any] }),
         })
       );
-      const api = getApi(http, createConfig(2), kibanaVersion, newsfeedId);
+      const api = getApi(createConfig(2), kibanaVersion, newsfeedId);
 
       expectObservable(api.fetchResults$.pipe(take(2))).toBe('a-(b|)', {
         a: createFetchResult({
@@ -115,7 +111,7 @@ describe('getApi', () => {
           a: createFetchResult({}),
         })
       );
-      const api = getApi(http, createConfig(10), kibanaVersion, newsfeedId);
+      const api = getApi(createConfig(10), kibanaVersion, newsfeedId);
 
       expectObservable(api.fetchResults$.pipe(take(2))).toBe('a--(b|)', {
         a: createFetchResult({

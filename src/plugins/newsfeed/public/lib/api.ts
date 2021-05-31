@@ -9,7 +9,6 @@
 import { combineLatest, Observable, timer, of } from 'rxjs';
 import { map, catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup } from 'src/core/public';
 import { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
 import { NewsfeedApiDriver } from './driver';
 import { NewsfeedStorage } from './storage';
@@ -39,7 +38,6 @@ export interface NewsfeedApi {
  * Computes hasNew value from new item hashes saved in localStorage
  */
 export function getApi(
-  http: HttpSetup,
   config: NewsfeedPluginBrowserConfig,
   kibanaVersion: string,
   newsfeedId: string
@@ -53,7 +51,7 @@ export function getApi(
   const results$ = timer(0, mainInterval).pipe(
     filter(() => driver.shouldFetch()),
     mergeMap(() =>
-      driver.fetchNewsfeedItems(http, config.service).pipe(
+      driver.fetchNewsfeedItems(config.service).pipe(
         catchError((err) => {
           window.console.error(err);
           return of({

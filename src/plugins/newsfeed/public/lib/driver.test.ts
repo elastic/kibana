@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { convertItemsMock } from './driver.test.mocks';
+// @ts-expect-error
+import fetchMock from 'fetch-mock/es5/client';
+import { take } from 'rxjs/operators';
 import { NewsfeedApiDriver } from './driver';
 import { storageMock } from './storage.mock';
 
@@ -20,6 +24,16 @@ describe('NewsfeedApiDriver', () => {
   beforeEach(() => {
     storage = storageMock.create();
     driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval, storage);
+    convertItemsMock.mockReturnValue([]);
+  });
+
+  afterEach(() => {
+    fetchMock.reset();
+    convertItemsMock.mockReset();
+  });
+
+  afterAll(() => {
+    fetchMock.restore();
   });
 
   describe('shouldFetch', () => {
@@ -37,6 +51,83 @@ describe('NewsfeedApiDriver', () => {
     it('returns false if last fetch time is recent enough', () => {
       storage.getLastFetchTime.mockReturnValue(new Date(Date.now() + 745678));
       expect(driver.shouldFetch()).toBe(false);
+    });
+  });
+
+  describe('fetchNewsfeedItems', () => {
+    it('calls `window.fetch` with the correct parameters', async () => {
+      fetchMock.get('*', { items: [] });
+      await driver
+        .fetchNewsfeedItems({
+          urlRoot: 'http://newsfeed.com',
+          pathTemplate: '/{VERSION}/news',
+        })
+        .pipe(take(1))
+        .toPromise();
+
+      expect(fetchMock.lastUrl()).toEqual('http://newsfeed.com/8.0.0/news');
+      expect(fetchMock.lastOptions()).toEqual({
+        method: 'GET',
+      });
+    });
+
+    it('calls `convertItems` with the correct parameters', async () => {
+      fetchMock.get('*', { items: ['foo', 'bar'] });
+
+      await driver
+        .fetchNewsfeedItems({
+          urlRoot: 'http://newsfeed.com',
+          pathTemplate: '/{VERSION}/news',
+        })
+        .pipe(take(1))
+        .toPromise();
+
+      expect(convertItemsMock).toHaveBeenCalledTimes(1);
+      expect(convertItemsMock).toHaveBeenCalledWith(['foo', 'bar'], userLanguage);
+    });
+
+    it('calls `storage.setFetchedItems` with the correct parameters', async () => {
+      fetchMock.get('*', { items: [] });
+      convertItemsMock.mockReturnValue([
+        { id: '1', hash: 'hash1' },
+        { id: '2', hash: 'hash2' },
+      ]);
+
+      await driver
+        .fetchNewsfeedItems({
+          urlRoot: 'http://newsfeed.com',
+          pathTemplate: '/{VERSION}/news',
+        })
+        .pipe(take(1))
+        .toPromise();
+
+      expect(storage.setFetchedItems).toHaveBeenCalledTimes(1);
+      expect(storage.setFetchedItems).toHaveBeenCalledWith(['hash1', 'hash2']);
+    });
+
+    it('returns the expected values', async () => {
+      fetchMock.get('*', { items: [] });
+      const feedItems = [
+        { id: '1', hash: 'hash1' },
+        { id: '2', hash: 'hash2' },
+      ];
+      convertItemsMock.mockReturnValue(feedItems);
+      storage.setFetchedItems.mockReturnValue(true);
+
+      const result = await driver
+        .fetchNewsfeedItems({
+          urlRoot: 'http://newsfeed.com',
+          pathTemplate: '/{VERSION}/news',
+        })
+        .pipe(take(1))
+        .toPromise();
+
+      expect(result).toEqual({
+        error: null,
+        kibanaVersion,
+        hasNew: true,
+        feedItems,
+      });
     });
   });
 });
