@@ -14,8 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/100697
-  describe.skip('Resolver tests for the entity route', () => {
+  describe('Resolver tests for the entity route', () => {
     describe('winlogbeat tests', () => {
       before(async () => {
         await esArchiver.load('endpoint/resolver/winlogbeat');
