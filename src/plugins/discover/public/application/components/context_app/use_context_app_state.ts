@@ -11,29 +11,21 @@ import { cloneDeep } from 'lodash';
 import { IndexPattern } from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
 import { AppState, getState } from '../../angular/context_state';
-import { getContextQueryDefaults } from '../../angular/context_query_state';
-import {
-  CONTEXT_DEFAULT_SIZE_SETTING,
-  CONTEXT_TIE_BREAKER_FIELDS_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-} from '../../../../common';
+import { CONTEXT_TIE_BREAKER_FIELDS_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 import { getFirstSortableField } from '../../angular/context/api/utils/sorting';
 
 export function useContextAppState({
   indexPattern,
-  indexPatternId,
-  anchorId,
+  defaultStepSize,
   services,
 }: {
   indexPattern: IndexPattern;
-  indexPatternId: string;
-  anchorId: string;
+  defaultStepSize: number;
   services: DiscoverServices;
 }) {
   const { uiSettings: config, history, core, filterManager } = services;
 
   const stateContainer = useMemo(() => {
-    const defaultStepSize = parseInt(config.get(CONTEXT_DEFAULT_SIZE_SETTING), 10);
     return getState({
       defaultStepSize,
       timeFieldName: indexPattern.timeFieldName as string,
@@ -41,16 +33,16 @@ export function useContextAppState({
       history: history(),
       toasts: core.notifications.toasts,
       uiSettings: config,
-      getContextQueryDefaults: () =>
-        getContextQueryDefaults(
-          indexPatternId,
-          anchorId,
-          defaultStepSize,
-          getFirstSortableField(indexPattern, config.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)),
-          !config.get(SEARCH_FIELDS_FROM_SOURCE)
+      getContextQueryDefaults: () => ({
+        defaultStepSize,
+        tieBreakerField: getFirstSortableField(
+          indexPattern,
+          config.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)
         ),
+        useNewFieldsApi: !config.get(SEARCH_FIELDS_FROM_SOURCE),
+      }),
     });
-  }, [config, history, indexPattern, anchorId, indexPatternId, core.notifications.toasts]);
+  }, [defaultStepSize, config, history, indexPattern, core.notifications.toasts]);
 
   const [state, setState] = useState<AppState>(stateContainer.appState.getState());
 
@@ -58,7 +50,6 @@ export function useContextAppState({
    * Sync app state
    */
   useEffect(() => {
-    // take care of context state updates
     const unsubscribeAppState = stateContainer.appState.subscribe(async (newState) => {
       setState(newState);
     });
@@ -70,7 +61,6 @@ export function useContextAppState({
    * Take care of filters
    */
   useEffect(() => {
-    // sync initial app filters from state to filterManager
     const filters = stateContainer.appState.getState().filters;
     if (filters) {
       filterManager.setAppFilters(cloneDeep(filters));

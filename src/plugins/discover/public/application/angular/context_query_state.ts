@@ -29,6 +29,12 @@ export interface ContextQueryState {
   useNewFieldsApi: boolean;
 }
 
+export interface ContextQueryParams {
+  defaultStepSize: number;
+  tieBreakerField: string;
+  useNewFieldsApi: boolean;
+}
+
 export enum LoadingStatus {
   FAILED = 'failed',
   LOADED = 'loaded',
@@ -46,12 +52,12 @@ export type LoadingStatusEntry = Partial<{
 }>;
 
 export interface LoadingStatusState {
-  anchor: LoadingStatusEntry | LoadingStatus;
-  predecessors: LoadingStatusEntry | LoadingStatus;
-  successors: LoadingStatusEntry | LoadingStatus;
+  anchor: LoadingState;
+  predecessors: LoadingState;
+  successors: LoadingState;
 }
 
-export type LoadingState = LoadingStatusEntry | LoadingStatus;
+export type LoadingState = LoadingStatus | LoadingStatusEntry;
 
 export interface QueryParameters {
   anchorId: string;

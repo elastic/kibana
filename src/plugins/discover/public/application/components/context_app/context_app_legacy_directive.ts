@@ -11,28 +11,8 @@ import { ContextAppLegacy } from './context_app_legacy';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createContextAppLegacy(reactDirective: any) {
   return reactDirective(ContextAppLegacy, [
-    ['filter', { watchDepth: 'reference' }],
-    ['hits', { watchDepth: 'reference' }],
     ['indexPattern', { watchDepth: 'reference' }],
     ['indexPatternId', { watchDepth: 'reference' }],
-    ['appState', { watchDepth: 'reference' }],
-    ['stateContainer', { watchDepth: 'reference' }],
-    ['sorting', { watchDepth: 'reference' }],
-    ['columns', { watchDepth: 'collection' }],
-    ['minimumVisibleRows', { watchDepth: 'reference' }],
     ['anchorId', { watchDepth: 'reference' }],
-    ['anchorStatus', { watchDepth: 'reference' }],
-    ['anchorReason', { watchDepth: 'reference' }],
-    ['defaultStepSize', { watchDepth: 'reference' }],
-    ['predecessorCount', { watchDepth: 'reference' }],
-    ['predecessorAvailable', { watchDepth: 'reference' }],
-    ['predecessorStatus', { watchDepth: 'reference' }],
-    ['onChangePredecessorCount', { watchDepth: 'reference' }],
-    ['successorCount', { watchDepth: 'reference' }],
-    ['successorAvailable', { watchDepth: 'reference' }],
-    ['successorStatus', { watchDepth: 'reference' }],
-    ['onChangeSuccessorCount', { watchDepth: 'reference' }],
-    ['useNewFieldsApi', { watchDepth: 'reference' }],
-    ['topNavMenu', { watchDepth: 'reference' }],
   ]);
 }

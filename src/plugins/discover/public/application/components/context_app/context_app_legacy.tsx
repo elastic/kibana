@@ -6,59 +6,39 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, Fragment, useEffect, useRef, useCallback } from 'react';
+import React, { useState, Fragment, useEffect, useRef, useMemo } from 'react';
 import classNames from 'classnames';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import './context_app_legacy.scss';
 import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
-import { cloneDeep, isEqual } from 'lodash';
-import { FilterManager } from 'src/plugins/data/public';
-import { map } from 'rxjs/operators';
-import { DOC_HIDE_TIME_COLUMN_SETTING, DOC_TABLE_LEGACY } from '../../../../common';
+import { cloneDeep } from 'lodash';
+import {
+  CONTEXT_DEFAULT_SIZE_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  DOC_TABLE_LEGACY,
+  SEARCH_FIELDS_FROM_SOURCE,
+} from '../../../../common';
 import { ContextErrorMessage } from '../context_error_message';
 import {
   DocTableLegacy,
   DocTableLegacyProps,
 } from '../../angular/doc_table/create_doc_table_react';
 import { IndexPattern } from '../../../../../data/common/index_patterns';
-import { LoadingState, LoadingStatus } from '../../angular/context_query_state';
+import { LoadingState, LoadingStatus, LoadingStatusEntry } from '../../angular/context_query_state';
 import { ActionBar, ActionBarProps } from '../../angular/context/components/action_bar/action_bar';
-import { TopNavMenuProps } from '../../../../../navigation/public';
 import { DiscoverGrid, DiscoverGridProps } from '../discover_grid/discover_grid';
-import { DocViewFilterFn } from '../../doc_views/doc_views_types';
-import { getServices, SortDirection } from '../../../kibana_services';
-import { GetStateReturn, AppState } from '../../angular/context_state';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { getServices } from '../../../kibana_services';
+import { AppState, isEqualFilters } from '../../angular/context_state';
 import { useDataGridColumns } from '../../helpers/use_data_grid_columns';
-import { EsHitRecord, EsHitRecordList } from '../../angular/context/api/context';
+import { EsHitRecord } from '../../angular/context/api/context';
 import { useContextAppState } from './use_context_app_state';
-import { useContextAppQuery } from './use_context_app_query';
-import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../angular/context/query_parameters';
-// import { fetchAnchorRow } from './context_app_actions';
+import { useContextAppActions } from './use_context_app_actions';
 
 export interface ContextAppProps {
-  topNavMenu: React.ComponentType<TopNavMenuProps>;
-  columns: string[];
-  hits: EsHitRecordList;
   indexPattern: IndexPattern;
   indexPatternId: string;
-  appState: AppState;
-  stateContainer: GetStateReturn;
-  filter: DocViewFilterFn;
-  minimumVisibleRows: number;
-  sorting: Array<[string, SortDirection]>;
   anchorId: string;
-  anchorStatus: string;
-  anchorReason: string;
-  predecessorStatus: string;
-  successorStatus: string;
-  defaultStepSize: number;
-  predecessorCount: number;
-  successorCount: number;
-  predecessorAvailable: number;
-  successorAvailable: number;
-  onChangePredecessorCount: (count: number) => void;
-  onChangeSuccessorCount: (count: number) => void;
-  useNewFieldsApi?: boolean;
 }
 
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -69,40 +49,20 @@ function isLoading(status: LoadingState) {
   return status !== LoadingStatus.LOADED && status !== LoadingStatus.FAILED;
 }
 
-function clamp(minimum: number, maximum: number, value: number) {
-  return Math.max(Math.min(maximum, value), minimum);
-}
-
 export function ContextAppLegacy(renderProps: ContextAppProps) {
   const services = getServices();
-  const { uiSettings: config, capabilities, indexPatterns } = services;
-  const {
-    indexPattern,
-    indexPatternId,
-    // anchorStatus,
-    // predecessorStatus,
-    // successorStatus,
-    // hits: rows,
-    sorting,
-    anchorId,
-    filter,
-    minimumVisibleRows,
-    useNewFieldsApi,
-  } = renderProps;
+  const { uiSettings: config, capabilities, indexPatterns, navigation } = services;
+  const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
+  const defaultStepSize = useMemo(() => parseInt(config.get(CONTEXT_DEFAULT_SIZE_SETTING), 10), [
+    config,
+  ]);
+  const { indexPattern, indexPatternId, anchorId } = renderProps;
   const [expandedDoc, setExpandedDoc] = useState<EsHitRecord | undefined>(undefined);
-  // const isAnchorLoaded = anchor === LoadingStatus.LOADED;
-  // const isFailed = anchorStatus === LoadingStatus.FAILED;
-  // const allRowsLoaded =
-  //   anchorStatus === LoadingStatus.LOADED &&
-  //   predecessorStatus === LoadingStatus.LOADED &&
-  //   successorStatus === LoadingStatus.LOADED;
   const isLegacy = config.get(DOC_TABLE_LEGACY);
-  // const anchorId = rows?.find(({ isAnchor }) => isAnchor)?._id;
 
   const { state, setAppState } = useContextAppState({
     indexPattern,
-    indexPatternId,
-    anchorId,
+    defaultStepSize,
     services,
   });
   const prevState = useRef<AppState>();
@@ -114,60 +74,32 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     state.predecessorsStatus === LoadingStatus.LOADED &&
     state.successorsStatus === LoadingStatus.LOADED;
 
-  // useEffect(() => {
-  //   stateContainer.startSync();
-
-  //   return () => stateContainer.stopSync();
-  // }, [stateContainer]);
-
-  const { context$, fetchContextRows, fetchAllRows } = useContextAppQuery({
+  const { fetchSurroundingRows, fetchContextRows, fetchAllRows, addFilter } = useContextAppActions({
+    anchorId,
+    indexPatternId,
+    state,
+    useNewFieldsApi,
     services,
-    useNewFieldsApi: !!useNewFieldsApi,
+    setAppState,
   });
 
   /**
-   * Fetch docs
+   * Fetch docs on ui changes
    */
   useEffect(() => {
     if (!prevState.current) {
-      fetchAllRows(state.predecessorCount, state.successorCount, {
-        indexPatternId,
-        anchorId,
-        tieBreakerField: state.queryParameters.tieBreakerField,
-        sort: state.sort,
-      });
-    } else if (
-      prevState.current.predecessorCount !== state.predecessorCount ||
-      prevState.current.successorCount !== state.successorCount ||
-      !isEqual(prevState.current.filters, state.filters)
-    ) {
-      fetchContextRows(state.predecessorCount, state.successorCount, {
-        indexPatternId,
-        anchor: state.anchor,
-        tieBreakerField: state.queryParameters.tieBreakerField,
-        sort: state.sort,
-      });
+      fetchAllRows();
+    } else if (prevState.current.predecessorCount !== state.predecessorCount) {
+      fetchSurroundingRows('predecessors');
+    } else if (prevState.current.successorCount !== state.successorCount) {
+      fetchSurroundingRows('successors');
+    } else if (!isEqualFilters(prevState.current.filters, state.filters)) {
+      fetchContextRows(state.anchor);
     }
 
     prevState.current = cloneDeep(state);
-  }, [state, indexPatternId, anchorId, fetchContextRows, fetchAllRows]);
+  }, [state, indexPatternId, anchorId, fetchContextRows, fetchAllRows, fetchSurroundingRows]);
 
-  /**
-   * Sync app state with context$
-   */
-  useEffect(() => {
-    context$.subscribe((value) => {
-      setAppState(value);
-    });
-
-    return () => context$.unsubscribe();
-  }, [context$, setAppState]);
-
-  const rows = [
-    ...(state.predecessors || []),
-    ...(state.anchor ? [state.anchor] : []),
-    ...(state.successors || []),
-  ];
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDataGridColumns({
     capabilities,
     config,
@@ -177,23 +109,22 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     state,
     useNewFieldsApi: !!useNewFieldsApi,
   });
+  const rows = [
+    ...(state.predecessors || []),
+    ...(state.anchor ? [state.anchor] : []),
+    ...(state.successors || []),
+  ];
 
   const actionBarProps = (type: string) => {
-    const {
-      defaultStepSize,
-      successorCount,
-      predecessorCount,
-      predecessorAvailable,
-      successorAvailable,
-      onChangePredecessorCount,
-      onChangeSuccessorCount,
-    } = renderProps;
     const isPredecessorType = type === PREDECESSOR_TYPE;
     return {
       defaultStepSize,
-      docCount: isPredecessorType ? predecessorCount : successorCount,
-      docCountAvailable: isPredecessorType ? predecessorAvailable : successorAvailable,
-      onChangeCount: isPredecessorType ? onChangePredecessorCount : onChangeSuccessorCount,
+      docCount: isPredecessorType ? state.predecessorCount : state.successorCount,
+      docCountAvailable: isPredecessorType ? state.predecessors.length : state.successors.length,
+      onChangeCount: (count) => {
+        const countKey = type === PREDECESSOR_TYPE ? 'predecessorCount' : 'successorCount';
+        setAppState({ [countKey]: count });
+      },
       isLoading: isPredecessorType
         ? isLoading(state.predecessorsStatus)
         : isLoading(state.successorsStatus),
@@ -206,19 +137,19 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     return {
       ariaLabelledBy: 'surDocumentsAriaLabel',
       columns,
-      rows: rows.length !== 0 && rows,
+      rows: rows as ElasticSearchHit[],
       indexPattern,
       expandedDoc,
       isLoading: !allRowsLoaded,
       sampleSize: 0,
-      sort: sorting,
+      sort: state.sort,
       isSortEnabled: false,
       showTimeCol: !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
       services,
       useNewFieldsApi,
       isPaginationEnabled: false,
       setExpandedDoc,
-      onFilter: filter,
+      onFilter: addFilter,
       onAddColumn,
       onRemoveColumn,
       onSetColumns,
@@ -230,17 +161,17 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     return {
       columns,
       indexPattern,
-      minimumVisibleRows,
+      minimumVisibleRows: rows.length,
       rows,
-      onFilter: filter,
+      onFilter: addFilter,
       onAddColumn,
       onRemoveColumn,
-      sort: sorting.map((el) => [el]),
+      sort: state.sort.map((el) => [el]),
       useNewFieldsApi,
     } as DocTableLegacyProps;
   };
 
-  const TopNavMenu = renderProps.topNavMenu;
+  const TopNavMenu = navigation.ui.TopNavMenu;
   const getNavBarProps = () => {
     return {
       appName: 'context',
@@ -273,7 +204,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       {isFailed ? (
         <ContextErrorMessage
           status={state.anchorStatus as string}
-          reason={renderProps.anchorReason}
+          reason={(state.anchorStatus as LoadingStatusEntry).reason}
         />
       ) : (
         <Fragment>
