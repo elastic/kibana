@@ -11,8 +11,6 @@ import { RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
 
 import { CoreContext } from '../core_context';
-import { CoreUsageDataSetup } from '../core_usage_data';
-import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { CoreService } from '../../types';
 import { InternalHttpServiceSetup } from '../http';
 import { Logger } from '../logging';
