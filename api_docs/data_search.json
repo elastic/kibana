@@ -10230,7 +10230,7 @@
                 "plugin": "maps",
                 "link": {
                   "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts",
-                  "lineNumber": 266
+                  "lineNumber": 273
                 }
               },
               {
@@ -10506,7 +10506,7 @@
                 "section": "def-common.IndexPatternsService",
                 "text": "IndexPatternsService"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, dependencies: ",
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, dependencies: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -10562,7 +10562,7 @@
                     "section": "def-common.IndexPatternsService",
                     "text": "IndexPatternsService"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source_service.ts",
@@ -11620,7 +11620,7 @@
             "section": "def-common.IndexPatternsService",
             "text": "IndexPatternsService"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, searchSourceDependencies: ",
+          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, searchSourceDependencies: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -11658,7 +11658,9 @@
             "type": "Object",
             "tags": [],
             "label": "indexPatterns",
-            "description": [],
+            "description": [
+              "The index patterns contract of the data plugin"
+            ],
             "signature": [
               "Pick<",
               {
@@ -11668,7 +11670,7 @@
                 "section": "def-common.IndexPatternsService",
                 "text": "IndexPatternsService"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/create_search_source.ts",

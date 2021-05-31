@@ -309,7 +309,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 270
+              "lineNumber": 269
             },
             "deprecated": false,
             "children": [
@@ -331,7 +331,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 270
+                  "lineNumber": 269
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -351,7 +351,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 289
+              "lineNumber": 288
             },
             "deprecated": false,
             "children": [],
@@ -653,7 +653,13 @@
               "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
               "DeleteResponse",
               ">; } | undefined>; }; start: () => Promise<undefined>; }; ruleRegistry: { setup: ",
-              "RuleDataPluginService",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.RuleRegistryPluginSetupContract",
+                "text": "RuleRegistryPluginSetupContract"
+              },
               "; start: () => Promise<void>; }; security?: { setup: ",
               {
                 "pluginId": "security",
