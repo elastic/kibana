@@ -4,6 +4,6 @@
     "incremental": false,
   },
   "include": [
-    "expect.js.d.ts"
+    "expect.d.ts"
   ]
 }
