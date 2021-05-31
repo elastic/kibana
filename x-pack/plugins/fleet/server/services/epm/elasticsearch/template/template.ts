@@ -16,6 +16,7 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
+import { FINAL_PIPELINE_ID } from '../ingest_pipeline/security_final_pipeline';
 
 interface Properties {
   [key: string]: any;
@@ -84,6 +85,11 @@ export function getTemplate({
   if (pipelineName) {
     template.template.settings.index.default_pipeline = pipelineName;
   }
+  if (template.template.settings.index.final_pipeline) {
+    // log there is already a final_pipeline that will be overrided
+  }
+  template.template.settings.index.final_pipeline = FINAL_PIPELINE_ID;
+
   return template;
 }
 
