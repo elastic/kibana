@@ -37,9 +37,9 @@ import { TrustedAppDeletionDialog } from './trusted_app_deletion_dialog';
 import { TrustedAppsNotifications } from './trusted_apps_notifications';
 import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/types';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { ABOUT_TRUSTED_APPS } from './translations';
+import { ABOUT_TRUSTED_APPS, SEARCH_TRUSTED_APP_PLACEHOLDER } from './translations';
 import { EmptyState } from './components/empty_state';
-import { SearchBar } from './components/search_bar';
+import { SearchBar } from '../../../components/search_bar';
 
 export const TrustedAppsPage = memo(() => {
   const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
@@ -96,30 +96,36 @@ export const TrustedAppsPage = memo(() => {
         />
       )}
 
-      <SearchBar defaultValue={location.filter} onSearch={handleOnSearch} />
       {doEntriesExist ? (
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-          data-test-subj="trustedAppsListPageContent"
-        >
-          <EuiSpacer size="m" />
-          <EuiFlexItem grow={false}>
-            <ControlPanel
-              totalItemCount={totalItemsCount}
-              currentViewType={location.view_type}
-              onViewTypeChange={handleViewTypeChange}
-            />
-
+        <>
+          <SearchBar
+            defaultValue={location.filter}
+            onSearch={handleOnSearch}
+            placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
+          />
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            data-test-subj="trustedAppsListPageContent"
+          >
             <EuiSpacer size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiHorizontalRule margin="none" />
+            <EuiFlexItem grow={false}>
+              <ControlPanel
+                totalItemCount={totalItemsCount}
+                currentViewType={location.view_type}
+                onViewTypeChange={handleViewTypeChange}
+              />
 
-            {location.view_type === 'grid' && <TrustedAppsGrid />}
-            {location.view_type === 'list' && <TrustedAppsList />}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              <EuiSpacer size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiHorizontalRule margin="none" />
+
+              {location.view_type === 'grid' && <TrustedAppsGrid />}
+              {location.view_type === 'list' && <TrustedAppsList />}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       ) : (
         <EmptyState onAdd={handleAddButtonClick} isAddDisabled={showCreateFlyout} />
       )}

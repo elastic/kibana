@@ -14,6 +14,16 @@ import {
 } from './get_state';
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { HealthStatus } from '../types';
+import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+
+jest.mock('./get_health', () => ({
+  getAlertingHealthStatus: jest.fn().mockReturnValue({
+    state: {
+      runs: 0,
+      health_status: 'warn',
+    },
+  }),
+}));
 
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -38,6 +48,9 @@ const getHealthCheckTask = (overrides = {}): ConcreteTaskInstance => ({
   ...overrides,
 });
 
+const logger = loggingSystemMock.create().get();
+const savedObjects = savedObjectsServiceMock.createStartContract();
+
 describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
   beforeEach(() => jest.useFakeTimers());
 
@@ -47,7 +60,22 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
-    getHealthStatusStream(mockTaskManager, pollInterval).subscribe();
+    getHealthStatusStream(
+      mockTaskManager,
+      logger,
+      savedObjects,
+      Promise.resolve({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        enableImportExport: false,
+      }),
+      pollInterval
+    ).subscribe();
 
     // shouldn't fire before poll interval passes
     // should fire once each poll interval
@@ -68,7 +96,23 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
-    getHealthStatusStream(mockTaskManager, pollInterval, retryDelay).subscribe();
+    getHealthStatusStream(
+      mockTaskManager,
+      logger,
+      savedObjects,
+      Promise.resolve({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        enableImportExport: false,
+      }),
+      pollInterval,
+      retryDelay
+    ).subscribe();
 
     jest.advanceTimersByTime(halfInterval);
     expect(mockTaskManager.get).toHaveBeenCalledTimes(0);
@@ -99,7 +143,19 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
     mockTaskManager.get.mockResolvedValue(getHealthCheckTask());
 
     const status = await getHealthServiceStatusWithRetryAndErrorHandling(
-      mockTaskManager
+      mockTaskManager,
+      logger,
+      savedObjects,
+      Promise.resolve({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        enableImportExport: false,
+      })
     ).toPromise();
 
     expect(status.level).toEqual(ServiceStatusLevels.available);
@@ -118,7 +174,19 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
     );
 
     const status = await getHealthServiceStatusWithRetryAndErrorHandling(
-      mockTaskManager
+      mockTaskManager,
+      logger,
+      savedObjects,
+      Promise.resolve({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        enableImportExport: false,
+      })
     ).toPromise();
 
     expect(status.level).toEqual(ServiceStatusLevels.degraded);
@@ -137,7 +205,19 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
     );
 
     const status = await getHealthServiceStatusWithRetryAndErrorHandling(
-      mockTaskManager
+      mockTaskManager,
+      logger,
+      savedObjects,
+      Promise.resolve({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        enableImportExport: false,
+      })
     ).toPromise();
 
     expect(status.level).toEqual(ServiceStatusLevels.unavailable);
@@ -152,12 +232,26 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
       .mockRejectedValueOnce(new Error('Failure'))
       .mockResolvedValue(getHealthCheckTask());
 
-    getHealthServiceStatusWithRetryAndErrorHandling(mockTaskManager, retryDelay).subscribe(
-      (status) => {
-        expect(status.level).toEqual(ServiceStatusLevels.available);
-        expect(status.summary).toEqual('Alerting framework is available');
-      }
-    );
+    getHealthServiceStatusWithRetryAndErrorHandling(
+      mockTaskManager,
+      logger,
+      savedObjects,
+      Promise.resolve({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        enableImportExport: false,
+      }),
+      retryDelay
+    ).subscribe((status) => {
+      expect(status.level).toEqual(ServiceStatusLevels.available);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(status.summary).toEqual('Alerting framework is available');
+    });
 
     await tick();
     jest.advanceTimersByTime(retryDelay * 2);
@@ -169,18 +263,62 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
     const mockTaskManager = taskManagerMock.createStart();
     mockTaskManager.get.mockRejectedValue(err);
 
-    getHealthServiceStatusWithRetryAndErrorHandling(mockTaskManager, retryDelay).subscribe(
-      (status) => {
-        expect(status.level).toEqual(ServiceStatusLevels.unavailable);
-        expect(status.summary).toEqual('Alerting framework is unavailable');
-        expect(status.meta).toEqual({ error: err });
-      }
-    );
+    getHealthServiceStatusWithRetryAndErrorHandling(
+      mockTaskManager,
+      logger,
+      savedObjects,
+      Promise.resolve({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        enableImportExport: false,
+      }),
+      retryDelay
+    ).subscribe((status) => {
+      expect(status.level).toEqual(ServiceStatusLevels.unavailable);
+      expect(status.summary).toEqual('Alerting framework is unavailable');
+      expect(status.meta).toEqual({ error: err });
+    });
 
     for (let i = 0; i < MAX_RETRY_ATTEMPTS + 1; i++) {
       await tick();
       jest.advanceTimersByTime(retryDelay);
     }
     expect(mockTaskManager.get).toHaveBeenCalledTimes(MAX_RETRY_ATTEMPTS + 1);
+  });
+
+  it('should schedule a new health check task if it does not exist without throwing an error', async () => {
+    const mockTaskManager = taskManagerMock.createStart();
+    mockTaskManager.get.mockRejectedValue({
+      output: {
+        statusCode: 404,
+        message: 'Not Found',
+      },
+    });
+
+    const status = await getHealthServiceStatusWithRetryAndErrorHandling(
+      mockTaskManager,
+      logger,
+      savedObjects,
+      Promise.resolve({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        enableImportExport: false,
+      })
+    ).toPromise();
+
+    expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
+    expect(status.level).toEqual(ServiceStatusLevels.degraded);
+    expect(status.summary).toEqual('Alerting framework is degraded');
+    expect(status.meta).toBeUndefined();
   });
 });

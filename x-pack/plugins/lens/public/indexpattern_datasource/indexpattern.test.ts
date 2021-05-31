@@ -15,8 +15,9 @@ import { Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
 import { operationDefinitionMap, getErrorMessages } from './operations';
-import { createMockedReferenceOperation } from './operations/mocks';
+import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -172,6 +173,7 @@ describe('IndexPattern Data Source', () => {
       data: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
+      uiActions: uiActionsPluginMock.createStartContract(),
     });
 
     baseState = {
@@ -287,6 +289,30 @@ describe('IndexPattern Data Source', () => {
       expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
     });
 
+    it('should generate an empty expression when there is a formula without aggs', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'Formula',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'formula',
+                references: [],
+                params: {},
+              },
+            },
+          },
+        },
+      };
+      const state = enrichBaseState(queryBaseState);
+      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
+    });
+
     it('should generate an expression for an aggregated query', async () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
@@ -333,7 +359,7 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "id": Array [
-                            "col1",
+                            "0",
                           ],
                           "schema": Array [
                             "metric",
@@ -362,7 +388,7 @@ describe('IndexPattern Data Source', () => {
                             "timestamp",
                           ],
                           "id": Array [
-                            "col2",
+                            "1",
                           ],
                           "interval": Array [
                             "1d",
@@ -416,7 +442,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"col-0-col1\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"Records\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-col2\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}",
+                  "{\\"col-0-0\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"Records\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-1\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}",
                 ],
               },
               "function": "lens_rename_columns",
@@ -537,7 +563,7 @@ describe('IndexPattern Data Source', () => {
                             "{\\"language\\":\\"kuery\\",\\"query\\":\\"bytes > 5\\"}",
                           ],
                           "id": Array [
-                            "col1-filter",
+                            "0-filter",
                           ],
                           "schema": Array [
                             "bucket",
@@ -559,7 +585,7 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "id": Array [
-                            "col1-metric",
+                            "0-metric",
                           ],
                           "schema": Array [
                             "metric",
@@ -576,7 +602,7 @@ describe('IndexPattern Data Source', () => {
                   true,
                 ],
                 "id": Array [
-                  "col1",
+                  "0",
                 ],
                 "schema": Array [
                   "metric",
@@ -769,9 +795,9 @@ describe('IndexPattern Data Source', () => {
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
       expect(ast.chain[0].arguments.metricsAtAllLevels).toEqual([false]);
       expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
-        'col-0-bucket1': expect.any(Object),
-        'col-1-bucket2': expect.any(Object),
-        'col-2-metric': expect.any(Object),
+        'col-0-0': expect.objectContaining({ id: 'bucket1' }),
+        'col-1-1': expect.objectContaining({ id: 'bucket2' }),
+        'col-2-2': expect.objectContaining({ id: 'metric' }),
       });
     });
 
@@ -815,7 +841,7 @@ describe('IndexPattern Data Source', () => {
     describe('references', () => {
       beforeEach(() => {
         // @ts-expect-error we are inserting an invalid type
-        operationDefinitionMap.testReference = createMockedReferenceOperation();
+        operationDefinitionMap.testReference = createMockedFullReference();
 
         // @ts-expect-error we are inserting an invalid type
         operationDefinitionMap.testReference.toExpression.mockReturnValue(['mock']);
@@ -893,10 +919,95 @@ describe('IndexPattern Data Source', () => {
 
         const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
         expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
-          'col-0-col1': expect.objectContaining({
+          'col-0-0': expect.objectContaining({
             id: 'col1',
           }),
         });
+      });
+
+      it('should topologically sort references', () => {
+        // This is a real example of count() + count()
+        const queryBaseState: IndexPatternBaseState = {
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['date', 'count', 'formula', 'countX0', 'math'],
+              columns: {
+                count: {
+                  label: 'count',
+                  dataType: 'number',
+                  operationType: 'count',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  sourceField: 'Records',
+                  customLabel: true,
+                },
+                date: {
+                  label: 'timestamp',
+                  dataType: 'date',
+                  operationType: 'date_histogram',
+                  sourceField: 'timestamp',
+                  isBucketed: true,
+                  scale: 'interval',
+                  params: {
+                    interval: 'auto',
+                  },
+                },
+                formula: {
+                  label: 'Formula',
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    formula: 'count() + count()',
+                    isFormulaBroken: false,
+                  },
+                  references: ['math'],
+                },
+                countX0: {
+                  label: 'countX0',
+                  dataType: 'number',
+                  operationType: 'count',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  sourceField: 'Records',
+                  customLabel: true,
+                },
+                math: {
+                  label: 'math',
+                  dataType: 'number',
+                  operationType: 'math',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    tinymathAst: {
+                      type: 'function',
+                      name: 'add',
+                      // @ts-expect-error String args are not valid tinymath, but signals something unique to Lens
+                      args: ['countX0', 'count'],
+                      location: {
+                        min: 0,
+                        max: 17,
+                      },
+                      text: 'count() + count()',
+                    },
+                  },
+                  references: ['countX0', 'count'],
+                  customLabel: true,
+                },
+              },
+            },
+          },
+        };
+
+        const state = enrichBaseState(queryBaseState);
+
+        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        const chainLength = ast.chain.length;
+        expect(ast.chain[chainLength - 2].arguments.name).toEqual(['math']);
+        expect(ast.chain[chainLength - 1].arguments.id).toEqual(['formula']);
       });
     });
   });
