@@ -31,7 +31,6 @@ import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } 
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
 
 import { checkAccess } from './lib/check_access';
-import { EnterpriseSearchConfig } from './lib/enterprise_search_config';
 import {
   EnterpriseSearchRequestHandler,
   IEnterpriseSearchRequestHandler,
@@ -60,19 +59,18 @@ interface PluginsStart {
 
 export interface RouteDependencies {
   router: IRouter;
-  config: EnterpriseSearchConfig;
+  config: ConfigType;
   log: Logger;
   enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
   getSavedObjectsService?(): SavedObjectsServiceStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
-  private readonly config: EnterpriseSearchConfig;
+  private readonly config: ConfigType;
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
-    const rawConfig = initializerContext.config.get<ConfigType>();
-    this.config = new EnterpriseSearchConfig(rawConfig);
+    this.config = initializerContext.config.get<ConfigType>();
     this.logger = initializerContext.logger.get();
   }
 

@@ -15,11 +15,13 @@ import { KibanaRequest, Logger } from 'src/core/server';
 import { stripTrailingSlash } from '../../common/strip_slashes';
 import { InitialAppData } from '../../common/types';
 
-import { EnterpriseSearchConfig } from './enterprise_search_config';
+import { ConfigType } from '../index';
+
+import { entSearchHttpAgent } from './enterprise_search_http_agent';
 
 interface Params {
   request: KibanaRequest;
-  config: EnterpriseSearchConfig;
+  config: ConfigType;
   log: Logger;
 }
 
@@ -56,10 +58,11 @@ export const callEnterpriseSearchConfigAPI = async ({
 
   try {
     const enterpriseSearchUrl = encodeURI(`${config.host}${ENDPOINT}`);
+    const httpAgent = entSearchHttpAgent(config);
     const options = {
       headers: { Authorization: request.headers.authorization as string },
       signal: controller.signal,
-      agent: config.httpAgent,
+      agent: httpAgent,
     };
 
     const response = await fetch(enterpriseSearchUrl, options);

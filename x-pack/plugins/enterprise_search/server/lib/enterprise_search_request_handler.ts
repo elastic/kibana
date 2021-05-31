@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import http from 'http';
+import https from 'https';
+
 import fetch, { Response } from 'node-fetch';
 import querystring from 'querystring';
 
@@ -22,10 +25,9 @@ import {
   READ_ONLY_MODE_HEADER,
 } from '../../common/constants';
 
-import { EnterpriseSearchConfig } from './enterprise_search_config';
+import { entSearchHttpAgent } from './enterprise_search_http_agent';
 
 interface ConstructorDependencies {
-  config: EnterpriseSearchConfig;
   log: Logger;
 }
 interface RequestParams {
@@ -53,14 +55,14 @@ export interface IEnterpriseSearchRequestHandler {
  */
 export class EnterpriseSearchRequestHandler {
   private enterpriseSearchUrl: string;
-  private httpAgent;
+  private httpAgent: http.Agent | https.Agent;
   private log: Logger;
   private headers: Record<string, string> = {};
 
   constructor({ config, log }: ConstructorDependencies) {
     this.log = log;
     this.enterpriseSearchUrl = config.host as string;
-    this.httpAgent = config.httpAgent;
+    this.httpAgent = getHttpAgent(config);
   }
 
   createRequest({ path, params = {}, hasValidData = () => true }: RequestParams) {

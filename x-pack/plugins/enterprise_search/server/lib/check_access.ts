@@ -11,7 +11,7 @@ import { SecurityPluginSetup } from '../../../security/server';
 import { SpacesPluginStart } from '../../../spaces/server';
 import { ProductAccess } from '../../common/types';
 
-import { EnterpriseSearchConfig } from './enterprise_search_config';
+import { ConfigType } from '../index';
 
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
@@ -19,7 +19,7 @@ interface CheckAccess {
   request: KibanaRequest;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginStart;
-  config: EnterpriseSearchConfig;
+  config: ConfigType;
   log: Logger;
 }
 

@@ -8,7 +8,6 @@
 import { loggingSystemMock } from 'src/core/server/mocks';
 
 import { ConfigType } from '../index';
-import { EnterpriseSearchConfig } from '../lib/enterprise_search_config';
 
 export const mockLogger = loggingSystemMock.createLogger().get();
 
@@ -19,7 +18,7 @@ export const mockRequestHandler = {
   },
 };
 
-export const mockRawConfig = {
+export const mockConfig = {
   enabled: true,
   host: 'http://localhost:3002',
   accessCheckTimeout: 5000,
@@ -28,8 +27,6 @@ export const mockRawConfig = {
     rejectUnauthorized: false,
   },
 } as ConfigType;
-
-export const mockConfig = new EnterpriseSearchConfig(mockRawConfig);
 
 /**
  * This is useful for tests that don't use either config or log,
