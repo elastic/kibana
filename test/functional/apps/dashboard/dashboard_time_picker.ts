@@ -76,8 +76,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Jan 1, 2000 @ 00:00:00.000',
           'Jan 1, 2000 @ 01:00:00.000'
         );
-        const isLoading = await dataGrid.isLoading();
-        expect(isLoading).to.be(true);
+        const noResults = await dataGrid.hasNoResults();
+        expect(noResults).to.be.ok();
       }
     });
 

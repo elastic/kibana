@@ -38,6 +38,7 @@ export interface ContextAppProps {
   filter: DocViewFilterFn;
   minimumVisibleRows: number;
   sorting: Array<[string, SortDirection]>;
+  anchorId: string;
   anchorStatus: string;
   anchorReason: string;
   predecessorStatus: string;
@@ -65,6 +66,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   const { uiSettings: config, capabilities, indexPatterns } = services;
   const {
     indexPattern,
+    anchorId,
     anchorStatus,
     predecessorStatus,
     successorStatus,
@@ -79,12 +81,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   const [expandedDoc, setExpandedDoc] = useState<EsHitRecord | undefined>(undefined);
   const isAnchorLoaded = anchorStatus === LoadingStatus.LOADED;
   const isFailed = anchorStatus === LoadingStatus.FAILED;
-  const areAnyDocsLoading =
-    anchorStatus === LoadingStatus.LOADING ||
-    predecessorStatus === LoadingStatus.LOADING ||
-    successorStatus === LoadingStatus.LOADING;
   const isLegacy = config.get(DOC_TABLE_LEGACY);
-  const anchorId = rows?.find(({ isAnchor }) => isAnchor)?._id;
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDataGridColumns({
     capabilities,
@@ -125,7 +122,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       rows,
       indexPattern,
       expandedDoc,
-      isLoading: areAnyDocsLoading,
+      isLoading: isLoading(anchorStatus),
       sampleSize: 0,
       sort: sorting,
       isSortEnabled: false,

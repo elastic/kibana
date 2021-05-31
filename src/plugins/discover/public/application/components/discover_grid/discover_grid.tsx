@@ -141,7 +141,7 @@ export interface DiscoverGridProps {
    */
   isPaginationEnabled?: boolean;
   /**
-   * List of used control columns
+   * List of used control columns (available: 'openDetails', 'select')
    */
   controlColumnIds?: string[];
 }
@@ -319,7 +319,7 @@ export const DiscoverGrid = ({
     [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
   );
 
-  if (isLoading) {
+  if (!rowCount && isLoading) {
     return (
       <div className="euiDataGrid__loading">
         <EuiText size="xs" color="subdued">

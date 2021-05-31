@@ -19,6 +19,7 @@ export function createContextAppLegacy(reactDirective: any) {
     ['sorting', { watchDepth: 'reference' }],
     ['columns', { watchDepth: 'collection' }],
     ['minimumVisibleRows', { watchDepth: 'reference' }],
+    ['anchorId', { watchDepth: 'reference' }],
     ['anchorStatus', { watchDepth: 'reference' }],
     ['anchorReason', { watchDepth: 'reference' }],
     ['defaultStepSize', { watchDepth: 'reference' }],

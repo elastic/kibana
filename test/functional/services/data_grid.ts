@@ -266,10 +266,6 @@ export class DataGridService extends FtrService {
     await this.PageObjects.header.awaitGlobalLoadingIndicatorHidden();
   }
 
-  public async isLoading() {
-    return await this.find.existsByCssSelector('.euiDataGrid__loading');
-  }
-
   public async hasNoResults() {
     return await this.find.existsByCssSelector('.euiDataGrid__noResults');
   }
