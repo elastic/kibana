@@ -37,7 +37,7 @@ describe('actions', () => {
 
   describe('fetchIndices', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.fetchIndices({ client, indicesToFetch: ['my_index'] });
+      const task = Actions.fetchIndices({ client, indices: ['my_index'] });
       try {
         await task();
       } catch (e) {

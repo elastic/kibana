@@ -116,7 +116,7 @@ describe('migration actions', () => {
   describe('fetchIndices', () => {
     it('resolves right empty record if no indices were found', async () => {
       expect.assertions(1);
-      const task = fetchIndices({ client, indicesToFetch: ['no_such_index'] });
+      const task = fetchIndices({ client, indices: ['no_such_index'] });
       await expect(task()).resolves.toMatchInlineSnapshot(`
                 Object {
                   "_tag": "Right",
@@ -128,7 +128,7 @@ describe('migration actions', () => {
       expect.assertions(1);
       const res = (await fetchIndices({
         client,
-        indicesToFetch: ['no_such_index', 'existing_index_with_docs'],
+        indices: ['no_such_index', 'existing_index_with_docs'],
       })()) as Either.Right<unknown>;
 
       expect(res.right).toEqual(

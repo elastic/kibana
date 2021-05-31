@@ -58,7 +58,7 @@ export type ResponseType<ControlState extends AllActionStates> = UnwrapPromise<
 export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
   return {
     INIT: (state: InitState) =>
-      Actions.fetchIndices({ client, indicesToFetch: [state.currentAlias, state.versionAlias] }),
+      Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatusYellow({ client, index: state.sourceIndex.value }),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
@@ -154,12 +154,11 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
          * before we reach out to the MARK_VERSION_INDEX_READY step.
          * Right now, it's performed during OUTDATED_DOCUMENTS_REFRESH step.
          */
-        refresh: false,
       }),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),
     MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>
-      Actions.fetchIndices({ client, indicesToFetch: [state.currentAlias, state.versionAlias] }),
+      Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
       Actions.setWriteBlock({ client, index: state.legacyIndex }),
     LEGACY_CREATE_REINDEX_TARGET: (state: LegacyCreateReindexTargetState) =>

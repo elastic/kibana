@@ -71,7 +71,7 @@ export type FetchIndexResponse = Record<
 /** @internal */
 export interface FetchIndicesParams {
   client: ElasticsearchClient;
-  indicesToFetch: string[];
+  indices: string[];
 }
 
 /**
@@ -80,14 +80,14 @@ export interface FetchIndicesParams {
  */
 export const fetchIndices = ({
   client,
-  indicesToFetch,
+  indices,
 }: FetchIndicesParams): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> =>
   // @ts-expect-error @elastic/elasticsearch IndexState.alias and IndexState.mappings should be required
   () => {
     return client.indices
       .get(
         {
-          index: indicesToFetch,
+          index: indices,
           ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
         },
         { ignore: [404], maxRetries: 0 }
@@ -1174,7 +1174,7 @@ export interface BulkOverwriteTransformedDocumentsParams {
   client: ElasticsearchClient;
   index: string;
   transformedDocs: SavedObjectsRawDoc[];
-  refresh: estypes.Refresh;
+  refresh?: estypes.Refresh;
 }
 /**
  * Write the up-to-date transformed documents to the index, overwriting any
@@ -1184,7 +1184,7 @@ export const bulkOverwriteTransformedDocuments = ({
   client,
   index,
   transformedDocs,
-  refresh,
+  refresh = false,
 }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
   RetryableEsClientError,
   'bulk_index_succeeded'
