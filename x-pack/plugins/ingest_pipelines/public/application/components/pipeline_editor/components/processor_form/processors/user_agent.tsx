@@ -55,12 +55,18 @@ const fieldsConfig: FieldsConfig = {
     label: (
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
-          Extract Device Type
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceNameFieldText"
+            defaultMessage="Extract Device Type"
+          />
         </EuiFlexItem>
         <EuiFlexItem style={{ marginBottom: -4 }}>
           <EuiBetaBadge
             label="Beta"
-            tooltipContent="This module is not GA. Please help us by reporting any bugs."
+            tooltipContent={i18n.translate(
+              'xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceNameTooltipText',
+              { defaultMessage: 'This functionality is in beta and is subject to change.' }
+            )}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
