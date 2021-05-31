@@ -10,7 +10,9 @@ import { mockReadFileSync } from '../__mocks__/fs.mock';
 import http from 'http';
 import https from 'https';
 
-import { EnterpriseSearchConfig, config } from './enterprise_search_config';
+import { config } from '../index';
+
+import { EnterpriseSearchConfig } from './enterprise_search_config';
 
 test('set correct defaults', () => {
   const configValue = new EnterpriseSearchConfig(config.schema.validate({}));

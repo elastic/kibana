@@ -10,30 +10,7 @@ import { readFileSync } from 'fs';
 import http from 'http';
 import https from 'https';
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'src/core/server';
-
-export const configSchema = schema.object({
-  host: schema.maybe(schema.string()),
-  enabled: schema.boolean({ defaultValue: true }),
-  accessCheckTimeout: schema.number({ defaultValue: 5000 }),
-  accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
-  ssl: schema.object({
-    certificateAuthorities: schema.maybe(
-      schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
-    ),
-    rejectUnauthorized: schema.boolean({ defaultValue: false }),
-  }),
-});
-
-export type EnterpriseSearchConfigType = TypeOf<typeof configSchema>;
-
-export const config: PluginConfigDescriptor<EnterpriseSearchConfigType> = {
-  schema: configSchema,
-  exposeToBrowser: {
-    host: true,
-  },
-};
+import { ConfigType } from '../index';
 
 /**
  * Wrapper of config schema.
@@ -82,7 +59,7 @@ export class EnterpriseSearchConfig {
   /**
    * @internal
    */
-  constructor(rawConfig: EnterpriseSearchConfigType) {
+  constructor(rawConfig: ConfigType) {
     this.host = rawConfig.host;
     this.enabled = rawConfig.enabled;
     this.accessCheckTimeout = rawConfig.accessCheckTimeout;

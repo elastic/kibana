@@ -5,11 +5,32 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 
 import { EnterpriseSearchPlugin } from './plugin';
 
-export { config, configSchema } from './lib/enterprise_search_config';
+export const configSchema = schema.object({
+  host: schema.maybe(schema.string()),
+  enabled: schema.boolean({ defaultValue: true }),
+  accessCheckTimeout: schema.number({ defaultValue: 5000 }),
+  accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
+  ssl: schema.object({
+    certificateAuthorities: schema.maybe(
+      schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
+    ),
+    rejectUnauthorized: schema.boolean({ defaultValue: false }),
+  }),
+});
+
+export type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    host: true,
+  },
+};
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new EnterpriseSearchPlugin(initializerContext);
