@@ -29,7 +29,6 @@ export const apmOSSPluginSetupMock = {
     return {
       config: { ...defaultConfig, ...config },
       config$: of({ ...defaultConfig, ...config }),
-      getRegisteredTutorialProvider: jest.fn(),
     };
   },
 };
