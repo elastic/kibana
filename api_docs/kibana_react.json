@@ -1055,7 +1055,7 @@
         "label": "KibanaPageTemplate",
         "description": [],
         "signature": [
-          "({ template, pageHeader, children, isEmptyState, restrictWidth, bottomBar, bottomBarProps, ...rest }: React.PropsWithChildren<",
+          "({ template, pageHeader, children, isEmptyState, restrictWidth, bottomBar, bottomBarProps, pageSideBar, solutionNav, ...rest }: React.PropsWithChildren<",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -1067,7 +1067,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-          "lineNumber": 22
+          "lineNumber": 37
         },
         "deprecated": false,
         "children": [
@@ -1076,7 +1076,7 @@
             "id": "def-public.KibanaPageTemplate.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  template,\n  pageHeader,\n  children,\n  isEmptyState,\n  restrictWidth = true,\n  bottomBar,\n  bottomBarProps,\n  ...rest\n}",
+            "label": "{\n  template,\n  pageHeader,\n  children,\n  isEmptyState,\n  restrictWidth = true,\n  bottomBar,\n  bottomBarProps,\n  pageSideBar,\n  solutionNav,\n  ...rest\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -1091,7 +1091,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-              "lineNumber": 22
+              "lineNumber": 37
             },
             "deprecated": false,
             "isRequired": true
@@ -1581,7 +1581,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "ReactComp",
-            "description": [],
+            "description": [
+              "A React component."
+            ],
             "signature": [
               "React.ComponentType<Props>"
             ],
@@ -1667,7 +1669,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "node",
-            "description": [],
+            "description": [
+              "to get a mount point for"
+            ],
             "signature": [
               "React.ReactNode"
             ],
@@ -3936,7 +3940,9 @@
         "type": "Type",
         "tags": [],
         "label": "KibanaPageTemplateProps",
-        "description": [],
+        "description": [
+          "\nA thin wrapper around EuiPageTemplate with a few Kibana specific additions"
+        ],
         "signature": [
           "(Pick<",
           "EuiPageProps",
@@ -3960,7 +3966,9 @@
           "EuiPageContentProps",
           " | undefined; pageContentBodyProps?: ",
           "EuiPageContentBodyProps",
-          " | undefined; } & { isEmptyState?: boolean | undefined; }) | (Pick<",
+          " | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
+          "KibanaPageTemplateSolutionNavProps",
+          " | undefined; }) | (Pick<",
           "EuiPageProps",
           ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"grow\" | \"direction\" | \"restrictWidth\"> & ",
           "DisambiguateSet",
@@ -3990,11 +3998,13 @@
           "EuiPageContentProps",
           " | undefined; pageContentBodyProps?: ",
           "EuiPageContentBodyProps",
-          " | undefined; } & { isEmptyState?: boolean | undefined; })"
+          " | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
+          "KibanaPageTemplateSolutionNavProps",
+          " | undefined; })"
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-          "lineNumber": 12
+          "lineNumber": 23
         },
         "deprecated": false,
         "initialIsOpen": false
