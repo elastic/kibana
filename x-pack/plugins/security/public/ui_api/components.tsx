@@ -10,8 +10,8 @@ import React from 'react';
 
 import type { StartServicesAccessor } from 'src/core/public';
 
-import { getChangePasswordComponent } from '../account_management/change_password';
-import { getPersonalInfoComponent } from '../account_management/personal_info';
+import { getChangePasswordComponent } from '../account_management/change_password/change_password_async';
+import { getPersonalInfoComponent } from '../account_management/personal_info/personal_info_async';
 import type { PluginStartDependencies } from '../plugin';
 import { LazyWrapper } from './lazy_wrapper';
 
