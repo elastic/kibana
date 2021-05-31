@@ -280,7 +280,7 @@ function formatDuration(
   includeSpace: string
 ) {
   // return nothing when the duration is falsy or not correctly parsed (P0D)
-  if (!duration || duration.toISOString() === 'P0D') return;
+  if (!duration || !duration.isValid()) return;
   const units = [
     { unit: duration.years(), nextUnitRate: 12, method: 'asYears' },
     { unit: duration.months(), nextUnitRate: 4, method: 'asMonths' },

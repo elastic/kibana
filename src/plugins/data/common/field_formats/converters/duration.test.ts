@@ -192,6 +192,10 @@ describe('Duration Format', () => {
         output: '2.0 Milliseconds',
       },
       {
+        input: 0,
+        output: '0.0 Milliseconds',
+      },
+      {
         input: 658,
         output: '0.7 Milliseconds',
       },
