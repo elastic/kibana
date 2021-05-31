@@ -14,7 +14,7 @@ const paramsSchema = schema.object({
   names: schema.string(),
 });
 
-export const registerDeleteRoute = ({ router, license }: RouteDependencies): void => {
+export const registerDeleteRoute = ({ router }: RouteDependencies): void => {
   router.delete(
     {
       path: addBasePath('/component_templates/{names}'),
@@ -22,7 +22,7 @@ export const registerDeleteRoute = ({ router, license }: RouteDependencies): voi
         params: paramsSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
       const { names } = req.params;
       const componentNames = names.split(',');
@@ -48,6 +48,6 @@ export const registerDeleteRoute = ({ router, license }: RouteDependencies): voi
       );
 
       return res.ok({ body: response });
-    })
+    }
   );
 };
