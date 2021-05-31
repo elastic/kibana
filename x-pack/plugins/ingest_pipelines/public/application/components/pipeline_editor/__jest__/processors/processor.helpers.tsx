@@ -157,4 +157,7 @@ type TestSubject =
   | 'extractDeviceTypeSwitch.input'
   | 'propertiesValueField'
   | 'regexFileField.input'
+  | 'fieldsValueField.input'
+  | 'saltValueField.input'
+  | 'methodsValueField'
   | 'trimSwitch.input';
