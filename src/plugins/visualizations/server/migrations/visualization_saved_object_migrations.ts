@@ -15,7 +15,7 @@ import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
   commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
-  commonAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules,
+  commonAddEmptyValueColorRule,
 } from './visualization_common_migrations';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -967,10 +967,7 @@ const removeDefaultIndexPatternAndTimeFieldFromTSVBModel: SavedObjectMigrationFn
   };
 };
 
-const addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules: SavedObjectMigrationFn<
-  any,
-  any
-> = (doc) => {
+const addEmptyValueColorRule: SavedObjectMigrationFn<any, any> = (doc) => {
   const visStateJSON = get(doc, 'attributes.visState');
   let visState;
 
@@ -980,9 +977,7 @@ const addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules: SavedObje
     } catch (e) {
       // Let it go, the data is invalid and we'll leave it as is
     }
-    const newVisState = commonAddEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules(
-      visState
-    );
+    const newVisState = commonAddEmptyValueColorRule(visState);
 
     return {
       ...doc,
@@ -1041,5 +1036,5 @@ export const visualizationSavedObjectTypeMigrations = {
     hideTSVBLastValueIndicator,
     removeDefaultIndexPatternAndTimeFieldFromTSVBModel
   ),
-  '7.14.0': flow(addEmptyValueRuleForSavedObjectsWithLessAndGreaterThenZeroRules),
+  '7.14.0': flow(addEmptyValueColorRule),
 };
