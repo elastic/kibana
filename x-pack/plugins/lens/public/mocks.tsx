@@ -21,6 +21,8 @@ import { navigationPluginMock } from '../../../../src/plugins/navigation/public/
 import { LensAppServices } from './app_plugin/types';
 import { DOC_TYPE } from '../common';
 import { DataPublicPluginStart, esFilters, UI_SETTINGS } from '../../../../src/plugins/data/public';
+import { dashboardPluginMock } from '../../../../src/plugins/dashboard/public/mocks';
+import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import {
   LensByValueInput,
   LensSavedObjectAttributes,
@@ -226,6 +228,8 @@ export function makeDefaultServices(
     navigation: navigationStartMock,
     notifications: core.notifications,
     attributeService: makeAttributeService(),
+    dashboard: dashboardPluginMock.createStartContract(),
+    presentationUtil: {} as PresentationUtilPluginStart,
     savedObjectsClient: core.savedObjects.client,
     dashboardFeatureFlag: { allowByValueEmbeddables: false },
     stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
