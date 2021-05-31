@@ -6,14 +6,10 @@
  */
 
 import React from 'react';
-import { EuiFlexItem } from '@elastic/eui';
-import { EnvironmentFilter } from '../../../shared/EnvironmentFilter';
 import { ServiceNameFilter } from '../URLFilter/ServiceNameFilter';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { RUM_AGENT_NAMES } from '../../../../../common/agent_name';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { UserPercentile } from '../UserPercentile';
-import { useBreakPoints } from '../../../../hooks/use_break_points';
 
 export function MainFilters() {
   const {
@@ -39,25 +35,11 @@ export function MainFilters() {
   );
 
   const rumServiceNames = data?.rumServices ?? [];
-  const { isSmall } = useBreakPoints();
-
-  // on mobile we want it to take full width
-  const envStyle = isSmall ? {} : { maxWidth: 200 };
 
   return (
-    <>
-      <EuiFlexItem grow={false}>
-        <ServiceNameFilter
-          loading={status !== 'success'}
-          serviceNames={rumServiceNames}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={envStyle}>
-        <EnvironmentFilter />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <UserPercentile />
-      </EuiFlexItem>
-    </>
+    <ServiceNameFilter
+      loading={status !== 'success'}
+      serviceNames={rumServiceNames}
+    />
   );
 }

@@ -38,7 +38,7 @@ const CsmMainContainer = euiStyled.div`
   height: 100%;
 `;
 
-export const rumRoutes: APMRouteDefinition[] = [
+export const uxRoutes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/',
@@ -47,10 +47,10 @@ export const rumRoutes: APMRouteDefinition[] = [
   },
 ];
 
-function CsmApp() {
+function UxApp() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
-  useBreadcrumbs(rumRoutes);
+  useBreadcrumbs(uxRoutes);
 
   return (
     <ThemeProvider
@@ -68,12 +68,12 @@ function CsmApp() {
   );
 }
 
-export function CsmAppRoot({
+export function UXAppRoot({
   appMountParameters,
   core,
   deps,
   config,
-  corePlugins: { embeddable, maps },
+  corePlugins: { embeddable, maps, observability },
   observabilityRuleTypeRegistry,
 }: {
   appMountParameters: AppMountParameters;
@@ -91,6 +91,7 @@ export function CsmAppRoot({
     config,
     core,
     plugins,
+    observability,
     observabilityRuleTypeRegistry,
   };
 
@@ -101,7 +102,7 @@ export function CsmAppRoot({
           <i18nCore.Context>
             <Router history={history}>
               <UrlParamsProvider>
-                <CsmApp />
+                <UxApp />
                 <UXActionMenu appMountParameters={appMountParameters} />
               </UrlParamsProvider>
             </Router>
@@ -142,7 +143,7 @@ export const renderApp = ({
   });
 
   ReactDOM.render(
-    <CsmAppRoot
+    <UXAppRoot
       appMountParameters={appMountParameters}
       core={core}
       deps={deps}

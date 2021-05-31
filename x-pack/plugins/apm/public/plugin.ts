@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { of } from 'rxjs';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
@@ -34,6 +35,7 @@ import type {
   FetchDataParams,
   HasDataParams,
   ObservabilityPublicSetup,
+  ObservabilityPublicStart,
 } from '../../observability/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
@@ -66,6 +68,7 @@ export interface ApmPluginStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
+  observability: ObservabilityPublicStart;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -131,6 +134,24 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         return await dataHelper.fetchUxOverviewDate(params);
       },
     });
+
+    plugins.observability.navigation.registerSections(
+      of([
+        {
+          label: 'User Experience',
+          sortKey: 201,
+          entries: [
+            {
+              label: i18n.translate('xpack.uptime.overview.heading', {
+                defaultMessage: 'Overview',
+              }),
+              app: 'ux',
+              path: '/',
+            },
+          ],
+        },
+      ])
+    );
 
     core.application.register({
       id: 'apm',
@@ -213,7 +234,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-          import('./application/csmApp'),
+          import('./application/uxApp'),
           core.getStartServices(),
         ]);
 
