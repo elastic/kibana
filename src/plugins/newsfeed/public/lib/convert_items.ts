@@ -13,7 +13,7 @@ import { NEWSFEED_FALLBACK_LANGUAGE } from '../../common/constants';
 export const convertItems = (items: ApiItem[], userLanguage: string): NewsfeedItem[] => {
   return items
     .filter(validatePublishedDate)
-    .map((item) => convertItem(item, userLanguage))
+    .map((item) => localizeItem(item, userLanguage))
     .filter(validateIntegrity);
 };
 
@@ -28,7 +28,7 @@ export const validatePublishedDate = (item: ApiItem): boolean => {
   return true;
 };
 
-export const convertItem = (rawItem: ApiItem, userLanguage: string): NewsfeedItem => {
+export const localizeItem = (rawItem: ApiItem, userLanguage: string): NewsfeedItem => {
   const {
     expire_on: expireOnUtc,
     publish_on: publishOnUtc,

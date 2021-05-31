@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import { omit } from 'lodash';
-import { validateIntegrity, validatePublishedDate, convertItem } from './convert_items';
+import { validateIntegrity, validatePublishedDate, localizeItem } from './convert_items';
 import type { ApiItem, NewsfeedItem } from '../types';
 
 const createApiItem = (parts: Partial<ApiItem> = {}): ApiItem => ({
@@ -33,7 +33,7 @@ const createNewsfeedItem = (parts: Partial<NewsfeedItem> = {}): NewsfeedItem => 
   ...parts,
 });
 
-describe('convertItem', () => {
+describe('localizeItem', () => {
   const item = createApiItem({
     languages: ['en', 'fr'],
     title: {
@@ -62,7 +62,7 @@ describe('convertItem', () => {
   });
 
   it('converts api items to newsfeed items using the specified language', () => {
-    expect(convertItem(item, 'fr')).toMatchObject({
+    expect(localizeItem(item, 'fr')).toMatchObject({
       title: 'fr title',
       description: 'fr desc',
       linkText: 'fr link text',
@@ -73,7 +73,7 @@ describe('convertItem', () => {
   });
 
   it('fallbacks to `en` is the language is not present', () => {
-    expect(convertItem(item, 'de')).toMatchObject({
+    expect(localizeItem(item, 'de')).toMatchObject({
       title: 'en title',
       description: 'en desc',
       linkText: 'en link text',
