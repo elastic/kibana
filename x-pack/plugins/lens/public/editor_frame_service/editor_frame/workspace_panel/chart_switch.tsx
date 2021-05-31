@@ -16,6 +16,7 @@ import {
   EuiSelectable,
   EuiIconTip,
   EuiSelectableOption,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -294,24 +295,53 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                     prepend: (
                       <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
                     ),
-                    append:
-                      v.selection.dataLoss !== 'nothing' ? (
-                        <EuiIconTip
-                          aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                            defaultMessage: 'Warning',
-                          })}
-                          type="alert"
-                          color="warning"
-                          content={i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
-                            defaultMessage:
-                              'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
-                          })}
-                          iconProps={{
-                            className: 'lnsChartSwitch__chartIcon',
-                            'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
-                          }}
-                        />
-                      ) : null,
+                    append: (
+                      <EuiFlexGroup gutterSize="xs">
+                        {v.showBetaBadge ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiBetaBadge
+                              label={
+                                <FormattedMessage
+                                  id="xpack.lens.chartSwitch.betaLabel"
+                                  defaultMessage="Beta"
+                                />
+                              }
+                              title={i18n.translate('xpack.lens.chartSwitch.betaLabel', {
+                                defaultMessage: 'Beta',
+                              })}
+                              tooltipContent={
+                                <FormattedMessage
+                                  id="xpack.lens.chartSwitch.betaTooltipContent"
+                                  defaultMessage="This chart type is not GA."
+                                />
+                              }
+                            />
+                          </EuiFlexItem>
+                        ) : null}
+                        {v.selection.dataLoss !== 'nothing' ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiIconTip
+                              aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
+                                defaultMessage: 'Warning',
+                              })}
+                              type="alert"
+                              color="warning"
+                              content={i18n.translate(
+                                'xpack.lens.chartSwitch.dataLossDescription',
+                                {
+                                  defaultMessage:
+                                    'Selecting this chart type will result in a partial loss of currently applied configuration selections.',
+                                }
+                              )}
+                              iconProps={{
+                                className: 'lnsChartSwitch__chartIcon',
+                                'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
+                              }}
+                            />
+                          </EuiFlexItem>
+                        ) : null}
+                      </EuiFlexGroup>
+                    ),
                     // Apparently checked: null is not valid for TS
                     ...(subVisualizationId === v.id && { checked: 'on' }),
                   })

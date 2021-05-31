@@ -88,6 +88,7 @@ export const getHeatmapVisualization = ({
         defaultMessage: 'Heatmap',
       }),
       groupLabel: groupLabelForBar,
+      showBetaBadge: true,
     },
   ],
 
