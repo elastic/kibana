@@ -69,6 +69,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
+    it('lens datatable with dynamic cell colouring', async () => {
+      await PageObjects.lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
+      await PageObjects.lens.setTableDynamicColoring('cell');
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens datatable with dynamic text colouring', async () => {
+      await PageObjects.lens.setTableDynamicColoring('text');
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens datatable with palette panel open', async () => {
+      await PageObjects.lens.openTablePalettePanel();
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens datatable with custom palette stops', async () => {
+      await PageObjects.lens.changePaletteTo('custom');
+      await a11y.testAppSnapshot();
+      await PageObjects.lens.closePaletteEditor();
+      await PageObjects.lens.closeDimensionEditor();
+    });
+
     it('lens metric chart', async () => {
       await PageObjects.lens.switchToVisualization('lnsMetric');
       await a11y.testAppSnapshot();
