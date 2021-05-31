@@ -43,7 +43,7 @@ export const computeColor = (
 
     const index = allSeries.findIndex((name) => isEqual(name, dataName));
     const isSplitParentLayer = isSplitChart && parentSeries.includes(dataName);
-    return palettes?.get(visParams.palette.name).getColor(
+    return palettes?.get(visParams.palette.name).getCategoricalColor(
       [
         {
           name: dataName,
@@ -90,7 +90,7 @@ export const computeColor = (
   if (overwriteColor) {
     return lightenColor(overwriteColor, seriesLayers.length, columns.length);
   }
-  return palettes?.get(visParams.palette.name).getColor(seriesLayers, {
+  return palettes?.get(visParams.palette.name).getCategoricalColor(seriesLayers, {
     behindText: visParams.labels.show,
     maxDepth: columns.length,
     totalSeries: rows.length,
