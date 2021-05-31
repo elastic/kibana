@@ -12,12 +12,13 @@ import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddab
 const defaultSavedObjectId = '1234';
 
 describe('Mounter', () => {
+  const byValueFlag = { allowByValueEmbeddables: true };
   describe('loadDocument', () => {
     it('does not load a document if there is no initial input', async () => {
       const services = makeDefaultServices();
       const redirectCallback = jest.fn();
       const lensStore = mockLensStore({ data: services.data });
-      await loadDocument(redirectCallback, undefined, services, lensStore);
+      await loadDocument(redirectCallback, undefined, services, lensStore, undefined, byValueFlag);
       expect(services.attributeService.unwrapAttributes).not.toHaveBeenCalled();
     });
 
@@ -39,7 +40,9 @@ describe('Mounter', () => {
           redirectCallback,
           { savedObjectId: defaultSavedObjectId } as LensEmbeddableInput,
           services,
-          lensStore
+          lensStore,
+          undefined,
+          byValueFlag
         );
       });
 
@@ -76,7 +79,9 @@ describe('Mounter', () => {
           redirectCallback,
           { savedObjectId: defaultSavedObjectId } as LensEmbeddableInput,
           services,
-          lensStore
+          lensStore,
+          undefined,
+          byValueFlag
         );
       });
 
@@ -85,7 +90,9 @@ describe('Mounter', () => {
           redirectCallback,
           { savedObjectId: defaultSavedObjectId } as LensEmbeddableInput,
           services,
-          lensStore
+          lensStore,
+          undefined,
+          byValueFlag
         );
       });
 
@@ -96,7 +103,9 @@ describe('Mounter', () => {
           redirectCallback,
           { savedObjectId: '5678' } as LensEmbeddableInput,
           services,
-          lensStore
+          lensStore,
+          undefined,
+          byValueFlag
         );
       });
 
@@ -116,7 +125,9 @@ describe('Mounter', () => {
           redirectCallback,
           { savedObjectId: defaultSavedObjectId } as LensEmbeddableInput,
           services,
-          lensStore
+          lensStore,
+          undefined,
+          byValueFlag
         );
       });
       expect(services.attributeService.unwrapAttributes).toHaveBeenCalledWith({
@@ -136,7 +147,9 @@ describe('Mounter', () => {
           redirectCallback,
           ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput,
           services,
-          lensStore
+          lensStore,
+          undefined,
+          byValueFlag
         );
       });
 

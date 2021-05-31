@@ -6,16 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { isArray, last } from 'lodash';
+import { isArray, last, isEqual } from 'lodash';
 
-export const DEFAULT_VALUE = '-';
+export const EMPTY_VALUE = null;
+export const DISPLAY_EMPTY_VALUE = '-';
 
-const extractValue = (data) => (data && data[1]) ?? null;
+const extractValue = (data: unknown[] | void) => (data && data[1]) ?? EMPTY_VALUE;
 
-export const getLastValue = (data) => {
+export const getLastValue = (data: unknown) => {
   if (!isArray(data)) {
-    return data ?? DEFAULT_VALUE;
+    return data;
   }
 
-  return extractValue(last(data)) ?? DEFAULT_VALUE;
+  return extractValue(last(data));
 };
+
+export const isEmptyValue = (value: unknown) => isEqual(value, EMPTY_VALUE);
