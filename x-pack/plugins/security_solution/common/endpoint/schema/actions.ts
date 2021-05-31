@@ -22,6 +22,7 @@ export const HostIsolationRequestSchema = {
 };
 
 export const EndpointActionLogRequestSchema = {
+  // TODO improve when using pagination with query params
   query: schema.object({}),
   params: schema.object({
     agent_id: schema.string(),
