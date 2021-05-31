@@ -97,7 +97,8 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
       title: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
         defaultMessage: 'Heatmap',
       }),
-      hide,
+      // Temp hide all suggestions while heatmap is in beta
+      hide: true || hide,
       previewIcon: 'empty',
       score: Number(score.toFixed(1)),
     },
