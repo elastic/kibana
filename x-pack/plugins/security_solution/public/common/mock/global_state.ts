@@ -43,6 +43,7 @@ export const mockGlobalState: State = {
       trustedAppsByPolicyEnabled: false,
       metricsEntitiesEnabled: false,
       hostIsolationEnabled: false,
+      ruleRegistryEnabled: false,
     },
   },
   hosts: {
