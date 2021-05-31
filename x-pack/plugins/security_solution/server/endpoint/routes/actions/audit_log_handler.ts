@@ -14,13 +14,14 @@ import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EndpointAppContext } from '../../types';
 
 export const actionsLogRequestHandler = (
-  _endpointContext: EndpointAppContext
+  endpointContext: EndpointAppContext
 ): RequestHandler<
   TypeOf<typeof EndpointActionLogRequestSchema.params>,
   unknown,
   unknown,
   SecuritySolutionRequestHandlerContext
 > => {
+  const logger = endpointContext.logFactory.get('audit_log');
   return async (context, req, res) => {
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     let result;
@@ -43,20 +44,12 @@ export const actionsLogRequestHandler = (
         },
       });
     } catch (error) {
-      return res.customError({
-        statusCode: 500,
-        body: {
-          message: error,
-        },
-      });
+      logger.error(error);
+      throw error;
     }
     if (result?.statusCode !== 200) {
-      return res.customError({
-        statusCode: 500,
-        body: {
-          message: `Error fetching actions log for agent_id ${req.params.agent_id}`,
-        },
-      });
+      logger.error(`Error fetching actions log for agent_id ${req.params.agent_id}`);
+      throw new Error(`Error fetching actions log for agent_id ${req.params.agent_id}`);
     }
 
     return res.ok({
