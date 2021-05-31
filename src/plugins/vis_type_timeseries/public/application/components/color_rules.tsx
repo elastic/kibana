@@ -49,7 +49,7 @@ export interface ColorRulesOperator {
   label: string;
   method: Operator;
   value?: unknown;
-  isValueConstant?: boolean;
+  hideValueSelector?: boolean;
 }
 
 const defaultSecondaryName = i18n.translate(
@@ -92,7 +92,7 @@ export const colorRulesOperatorsList: ColorRulesOperator[] = [
       defaultMessage: 'empty',
     }),
     method: Operator.Empty,
-    isValueConstant: true,
+    hideValueSelector: true,
   },
 ];
 
@@ -148,7 +148,7 @@ export class ColorRules extends Component<ColorRulesProps> {
       (operator) => model.operator === operator.method
     );
 
-    const hideValueSelectorField = selectedOperator?.isValueConstant ?? false;
+    const hideValueSelectorField = selectedOperator?.hideValueSelector ?? false;
     const labelStyle = { marginBottom: 0 };
 
     let secondary;
