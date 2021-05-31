@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200);
 
     // wait for SO to index data into ES
-    await new Promise((res) => setTimeout(res, 5 * 1000));
+    await new Promise((res) => setTimeout(res, 8 * 1000));
   };
 
   const getCounterById = (
