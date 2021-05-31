@@ -198,8 +198,14 @@ export async function mountApp({
     return <DashboardNoMatch history={routeProps.history} />;
   };
 
-  // make sure the index pattern list is up to date
-  await dataStart.indexPatterns.clearCache();
+  const hasEmbeddableIncoming = Boolean(
+    dashboardServices.embeddable
+      .getStateTransfer()
+      .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, false)
+  );
+  if (!hasEmbeddableIncoming) {
+    dataStart.indexPatterns.clearCache();
+  }
 
   // dispatch synthetic hash change event to update hash history objects
   // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
@@ -242,7 +248,6 @@ export async function mountApp({
   }
   render(app, element);
   return () => {
-    dataStart.search.session.clear();
     unlistenParentHistory();
     unmountComponentAtNode(element);
     appUnMounted();
