@@ -16,6 +16,7 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
+import { euiPaletteForTemperature } from '@elastic/eui';
 import { VisualizationContainer } from '../visualization_container';
 import { HeatmapRenderProps } from './types';
 import './index.scss';
@@ -242,6 +243,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     return <EmptyPlaceholder icon={LensIconChartHeatmap} />;
   }
 
+  const colorPalette = euiPaletteForTemperature(5);
+
   return (
     <Chart>
       <Settings
@@ -253,7 +256,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       <Heatmap
         id={'heatmap'}
         name={valueColumn.name}
-        colorScale={ScaleType.Linear}
+        colorScale={ScaleType.Quantize}
+        colors={colorPalette}
         data={chartData}
         xAccessor={args.xAccessor}
         yAccessor={args.yAccessor || 'unifiedY'}
