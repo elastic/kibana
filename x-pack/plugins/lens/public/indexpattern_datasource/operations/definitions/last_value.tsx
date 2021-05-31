@@ -194,6 +194,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       size: 1,
       sortOrder: 'desc',
       sortField: column.params.sortField,
+      // time shift is added to wrapping aggFilteredMetric if filter is set
       timeShift: column.filter ? undefined : column.timeShift,
     }).toAst();
   },

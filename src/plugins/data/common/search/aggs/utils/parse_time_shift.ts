@@ -16,10 +16,11 @@ type AllowedUnit = typeof allowedUnits[number];
  * Allowed values are the string 'previous' and an integer followed by the units s,m,h,d,w,M,y
  *  */
 export const parseTimeShift = (val: string): moment.Duration | 'previous' | 'invalid' => {
-  if (val === 'previous') {
+  const trimmedVal = val.trim();
+  if (trimmedVal === 'previous') {
     return 'previous';
   }
-  const [, amount, unit] = val.match(/^(\d+)(\w)$/) || [];
+  const [, amount, unit] = trimmedVal.match(/^(\d+)(\w)$/) || [];
   const parsedAmount = Number(amount);
   if (Number.isNaN(parsedAmount) || !allowedUnits.includes(unit as AllowedUnit)) {
     return 'invalid';

@@ -84,10 +84,6 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
   },
   filterable: true,
   shiftable: true,
-  operationParams: [
-    { name: 'kql', type: 'string', required: false },
-    { name: 'lucene', type: 'string', required: false },
-  ],
   getDefaultLabel: (column, indexPattern) =>
     ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
   buildColumn({ field, previousColumn }, columnParams) {
@@ -109,6 +105,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       enabled: true,
       schema: 'metric',
       field: column.sourceField,
+      // time shift is added to wrapping aggFilteredMetric if filter is set
       timeShift: column.filter ? undefined : column.timeShift,
     }).toAst();
   },

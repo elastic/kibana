@@ -19,6 +19,7 @@ import {
   EuiLink,
   EuiPageContentBody,
   EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
 import { CoreStart, ApplicationStart } from 'kibana/public';
 import {
@@ -452,6 +453,41 @@ export const VisualizationWrapper = ({
     [dispatchLens]
   );
 
+  function renderFixAction(
+    validationError:
+      | {
+          shortMessage: string;
+          longMessage: string;
+          fixAction?:
+            | { label: string; newState: (framePublicAPI: FramePublicAPI) => Promise<unknown> }
+            | undefined;
+        }
+      | undefined
+  ) {
+    return (
+      validationError &&
+      validationError.fixAction &&
+      activeDatasourceId && (
+        <>
+          <EuiButton
+            data-test-subj="errorFixAction"
+            onClick={async () => {
+              const newState = await validationError.fixAction?.newState(framePublicAPI);
+              dispatch({
+                type: 'UPDATE_DATASOURCE_STATE',
+                datasourceId: activeDatasourceId,
+                updater: newState,
+              });
+            }}
+          >
+            {validationError.fixAction.label}
+          </EuiButton>
+          <EuiSpacer />
+        </>
+      )
+    );
+  }
+
   if (localState.configurationValidationError?.length) {
     let showExtraErrors = null;
     let showExtraErrorsAction = null;
@@ -460,14 +496,17 @@ export const VisualizationWrapper = ({
       if (localState.expandError) {
         showExtraErrors = localState.configurationValidationError
           .slice(1)
-          .map(({ longMessage }) => (
-            <p
-              key={longMessage}
-              className="eui-textBreakWord"
-              data-test-subj="configuration-failure-error"
-            >
-              {longMessage}
-            </p>
+          .map((validationError) => (
+            <>
+              <p
+                key={validationError.longMessage}
+                className="eui-textBreakWord"
+                data-test-subj="configuration-failure-error"
+              >
+                {validationError.longMessage}
+              </p>
+              {renderFixAction(validationError)}
+            </>
           ));
       } else {
         showExtraErrorsAction = (
@@ -499,23 +538,7 @@ export const VisualizationWrapper = ({
                 <p className="eui-textBreakWord" data-test-subj="configuration-failure-error">
                   {localState.configurationValidationError[0].longMessage}
                 </p>
-                {localState.configurationValidationError[0].fixAction && activeDatasourceId && (
-                  <EuiButton
-                    data-test-subj="errorFixAction"
-                    onClick={async () => {
-                      const newState = await localState.configurationValidationError?.[0].fixAction?.newState(
-                        framePublicAPI
-                      );
-                      dispatch({
-                        type: 'UPDATE_DATASOURCE_STATE',
-                        datasourceId: activeDatasourceId,
-                        updater: newState,
-                      });
-                    }}
-                  >
-                    {localState.configurationValidationError[0].fixAction.label}
-                  </EuiButton>
-                )}
+                {renderFixAction(localState.configurationValidationError?.[0])}
 
                 {showExtraErrors}
               </>

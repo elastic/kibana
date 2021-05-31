@@ -130,6 +130,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
         schema: 'metric',
         field: column.sourceField,
         percentile: column.params.percentile,
+        // time shift is added to wrapping aggFilteredMetric if filter is set
         timeShift: column.filter ? undefined : column.timeShift,
       }
     ).toAst();

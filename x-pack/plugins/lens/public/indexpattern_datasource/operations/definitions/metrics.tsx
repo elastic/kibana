@@ -124,6 +124,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         enabled: true,
         schema: 'metric',
         field: column.sourceField,
+        // time shift is added to wrapping aggFilteredMetric if filter is set
         timeShift: column.filter ? undefined : column.timeShift,
       }).toAst();
     },

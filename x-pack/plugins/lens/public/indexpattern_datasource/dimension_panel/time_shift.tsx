@@ -35,6 +35,7 @@ export function setTimeShift(
   layer: IndexPatternLayer,
   timeShift: string | undefined
 ) {
+  const trimmedTimeShift = timeShift?.trim();
   const currentColumn = layer.columns[columnId];
   const label = currentColumn.customLabel
     ? currentColumn.label
@@ -43,7 +44,7 @@ export function setTimeShift(
         currentColumn.timeScale,
         currentColumn.timeScale,
         currentColumn.timeShift,
-        timeShift
+        trimmedTimeShift
       );
   return {
     ...layer,
@@ -52,7 +53,7 @@ export function setTimeShift(
       [columnId]: {
         ...layer.columns[columnId],
         label,
-        timeShift,
+        timeShift: trimmedTimeShift,
       },
     },
   };
@@ -272,6 +273,7 @@ export function TimeShift({
               onChange={(choices) => {
                 if (choices.length === 0) {
                   updateLayer(setTimeShift(columnId, layer, ''));
+                  setLocalValue('');
                   return;
                 }
 
