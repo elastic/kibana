@@ -375,13 +375,11 @@ export const getLastKnownDoc = async ({
   initialInput,
   attributeService,
   data,
-  persistedDoc,
   notifications,
   chrome,
 }: {
   initialInput?: LensEmbeddableInput;
   attributeService: LensAttributeService;
-  persistedDoc?: Document;
   data: DataPublicPluginStart;
   notifications: NotificationsStart;
   chrome: ChromeStart;

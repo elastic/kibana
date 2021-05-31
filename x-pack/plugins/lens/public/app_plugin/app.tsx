@@ -31,7 +31,8 @@ import {
   LensAppState,
   DispatchSetState,
 } from '../state_management';
-import SaveModalContainer, {
+import {
+  SaveModalContainer,
   getLastKnownDocWithoutPinnedFilters,
   runSaveLensVisualization,
 } from './save_modal_container';

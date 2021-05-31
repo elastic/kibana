@@ -22,7 +22,6 @@ import { LensAppServices } from './app_plugin/types';
 import { DOC_TYPE } from '../common';
 import { DataPublicPluginStart, esFilters, UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { dashboardPluginMock } from '../../../../src/plugins/dashboard/public/mocks';
-import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import {
   LensByValueInput,
   LensSavedObjectAttributes,
@@ -34,9 +33,11 @@ import {
 } from '../../../../src/plugins/embeddable/public/mocks';
 import { LensAttributeService } from './lens_attribute_service';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
+import { taggingApiMock } from '../../saved_objects_tagging/public/mocks';
 
 import { makeConfigureStore, getPreloadedState, LensAppState } from './state_management/index';
 import { getResolvedDateRange } from './utils';
+import { presentationUtilPluginMock } from '../../../../src/plugins/presentation_util/public/mocks';
 
 export type Start = jest.Mocked<LensPublicStart>;
 
@@ -229,8 +230,9 @@ export function makeDefaultServices(
     notifications: core.notifications,
     attributeService: makeAttributeService(),
     dashboard: dashboardPluginMock.createStartContract(),
-    presentationUtil: {} as PresentationUtilPluginStart,
+    presentationUtil: presentationUtilPluginMock.createStartContract(core),
     savedObjectsClient: core.savedObjects.client,
+    savedObjectsTagging: taggingApiMock.create(),
     dashboardFeatureFlag: { allowByValueEmbeddables: false },
     stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
     getOriginatingAppName: jest.fn(() => 'defaultOriginatingApp'),

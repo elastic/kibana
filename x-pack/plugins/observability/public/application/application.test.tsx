@@ -45,6 +45,7 @@ describe('renderApp', () => {
       i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
       uiSettings: { get: () => false },
       http: { basePath: { prepend: (path: string) => path } },
+      savedObjects: {},
     } as unknown) as CoreStart;
     const config = { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } };
     const params = ({

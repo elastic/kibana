@@ -502,7 +502,7 @@ describe('Lens App', () => {
         });
       });
 
-      it('saves new docs', async () => {
+      it.only('saves new docs', async () => {
         const { props, services } = await save({
           initialSavedObjectId: undefined,
           newCopyOnSave: false,
