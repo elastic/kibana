@@ -6,7 +6,7 @@
  */
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import _ from 'lodash';
+import { debounce } from 'lodash';
 
 /**
  * Debounces value changes and updates inputValue on root state changes if no debounced changes
@@ -27,7 +27,7 @@ export const useDebouncedValue = <T>({
   const initialValue = useRef(value);
 
   const onChangeDebounced = useMemo(() => {
-    const callback = _.debounce((val: T) => {
+    const callback = debounce((val: T) => {
       onChange(val);
       unflushedChanges.current = false;
     }, 256);
