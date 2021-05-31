@@ -8,6 +8,8 @@
 import AbortController from 'abort-controller';
 import fetch from 'node-fetch';
 
+import { kibanaPackageJson } from '@kbn/utils';
+
 import { KibanaRequest, Logger } from 'src/core/server';
 
 import { stripTrailingSlash } from '../../common/strip_slashes';
@@ -57,6 +59,8 @@ export const callEnterpriseSearchConfigAPI = async ({
       signal: controller.signal,
     });
     const data = await response.json();
+
+    warnMismatchedVersions(data?.version?.number, log);
 
     return {
       access: {
@@ -133,5 +137,15 @@ export const callEnterpriseSearchConfigAPI = async ({
   } finally {
     clearTimeout(warningTimeout);
     clearTimeout(timeout);
+  }
+};
+
+export const warnMismatchedVersions = (enterpriseSearchVersion: string, log: Logger) => {
+  const kibanaVersion = kibanaPackageJson.version;
+
+  if (enterpriseSearchVersion !== kibanaVersion) {
+    log.warn(
+      `Your Kibana instance (v${kibanaVersion}) is not the same version as your Enterprise Search instance (v${enterpriseSearchVersion}), which may cause unexpected behavior. Use matching versions for the best experience.`
+    );
   }
 };

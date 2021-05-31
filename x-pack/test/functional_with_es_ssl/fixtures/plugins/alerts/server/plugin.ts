@@ -95,7 +95,9 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
       privileges: {
         all: {
           alerting: {
-            all: ['test.always-firing', 'test.noop', 'test.failing'],
+            rule: {
+              all: ['test.always-firing', 'test.noop', 'test.failing'],
+            },
           },
           savedObject: {
             all: [],
@@ -105,7 +107,9 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
         },
         read: {
           alerting: {
-            all: ['test.always-firing', 'test.noop', 'test.failing'],
+            rule: {
+              all: ['test.always-firing', 'test.noop', 'test.failing'],
+            },
           },
           savedObject: {
             all: [],

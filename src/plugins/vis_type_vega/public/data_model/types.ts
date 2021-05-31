@@ -147,7 +147,7 @@ export interface Bool {
   bool?: Bool;
   must?: DslQuery[];
   filter?: Filter[];
-  should?: never[];
+  should?: Filter[];
   must_not?: Filter[];
 }
 
