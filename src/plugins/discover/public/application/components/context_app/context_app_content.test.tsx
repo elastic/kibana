@@ -10,7 +10,6 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { uiSettingsMock as mockUiSettings } from '../../../__mocks__/ui_settings';
 import { IndexPattern } from '../../../../../data/common/index_patterns';
-import { ContextAppLegacy } from './context_app_legacy';
 import { DocTableLegacy } from '../../angular/doc_table/create_doc_table_react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from '../../angular/context/components/action_bar/action_bar';

@@ -11,8 +11,6 @@ import { cloneDeep } from 'lodash';
 import { IndexPattern } from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
 import { AppState, getState } from '../../angular/context_state';
-import { CONTEXT_TIE_BREAKER_FIELDS_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
-import { getFirstSortableField } from '../../angular/context/api/utils/sorting';
 
 export function useContextAppState({
   indexPattern,
@@ -33,22 +31,20 @@ export function useContextAppState({
       history: history(),
       toasts: core.notifications.toasts,
       uiSettings: config,
-      getContextQueryDefaults: () => ({
-        defaultStepSize,
-        tieBreakerField: getFirstSortableField(
-          indexPattern,
-          config.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)
-        ),
-        useNewFieldsApi: !config.get(SEARCH_FIELDS_FROM_SOURCE),
-      }),
     });
   }, [defaultStepSize, config, history, indexPattern, core.notifications.toasts]);
 
-  const [state, setState] = useState<AppState>(stateContainer.appState.getState());
+  const [appState, setState] = useState<AppState>(stateContainer.appState.getState());
 
   /**
-   * Sync app state
+   * Sync with app state container
    */
+  useEffect(() => {
+    stateContainer.startSync();
+
+    return () => stateContainer.stopSync();
+  }, [stateContainer]);
+
   useEffect(() => {
     const unsubscribeAppState = stateContainer.appState.subscribe(async (newState) => {
       setState(newState);
@@ -75,7 +71,7 @@ export function useContextAppState({
   }, [filterManager, stateContainer]);
 
   return {
-    state,
+    appState,
     stateContainer,
     setAppState: stateContainer.setAppState,
   };

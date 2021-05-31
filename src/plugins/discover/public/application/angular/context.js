@@ -30,10 +30,15 @@ const k7Breadcrumbs = ($route) => {
 };
 
 getAngularModule().config(($routeProvider) => {
-  $routeProvider.when('/context/:indexPatternId/:id*', {
-    controller: ContextAppRouteController,
+  $routeProvider.when('/context/:indexPatternId/:id', {
+    controller: function ($routeParams, $scope, $route) {
+      this.indexPattern = $route.current.locals.indexPattern.ip;
+      this.anchorId = $routeParams.id;
+      this.indexPatternId = $route.current.params.indexPatternId;
+    },
     k7Breadcrumbs,
     controllerAs: 'contextAppRoute',
+    reloadOnSearch: false,
     resolve: {
       indexPattern: ($route, Promise) => {
         const indexPattern = getServices().indexPatterns.get($route.current.params.indexPatternId);
@@ -43,9 +48,3 @@ getAngularModule().config(($routeProvider) => {
     template: contextAppRouteTemplate,
   });
 });
-
-function ContextAppRouteController($routeParams, $scope, $route) {
-  this.indexPattern = $route.current.locals.indexPattern.ip;
-  this.anchorId = $routeParams.id;
-  this.indexPatternId = $route.current.params.indexPatternId;
-}

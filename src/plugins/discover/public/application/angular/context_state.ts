@@ -18,10 +18,8 @@ import {
 } from '../../../../kibana_utils/public';
 import { esFilters, FilterManager, Filter, SortDirection } from '../../../../data/public';
 import { handleSourceColumnState } from './helpers';
-import { ContextQueryParams, LoadingState, LoadingStatus } from './context_query_state';
-import { EsHitRecord, EsHitRecordList } from './context/api/context';
 
-export interface AppState extends ContextQueryParams {
+export interface AppState {
   /**
    * Columns displayed in the table, cannot be changed by UI, just in discover's main app
    */
@@ -42,15 +40,6 @@ export interface AppState extends ContextQueryParams {
    * Number of records to be fetched after the anchor records (older records)
    */
   successorCount: number;
-
-  hits: EsHitRecordList;
-  predecessors: EsHitRecordList;
-  successors: EsHitRecordList;
-  anchor: EsHitRecord;
-
-  anchorStatus: LoadingState;
-  predecessorsStatus: LoadingState;
-  successorsStatus: LoadingState;
 }
 
 interface GlobalState {
@@ -89,11 +78,6 @@ export interface GetStateParams {
    * core ui settings service
    */
   uiSettings: IUiSettingsClient;
-
-  /**
-   * Default state used for data querying
-   */
-  getContextQueryDefaults: () => ContextQueryParams;
 }
 
 export interface GetStateReturn {
@@ -145,7 +129,6 @@ export function getState({
   history,
   toasts,
   uiSettings,
-  getContextQueryDefaults,
 }: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
@@ -161,8 +144,7 @@ export function getState({
     defaultStepSize,
     timeFieldName,
     appStateFromUrl,
-    uiSettings,
-    getContextQueryDefaults
+    uiSettings
   );
   const appStateContainer = createStateContainer<AppState>(appStateInitial);
 
@@ -287,27 +269,14 @@ function createInitialAppState(
   defaultSize: number,
   timeFieldName: string,
   urlState: AppState,
-  uiSettings: IUiSettingsClient,
-  getContextQueryDefaults: () => ContextQueryParams
+  uiSettings: IUiSettingsClient
 ): AppState {
   const defaultState: AppState = {
     columns: ['_source'],
     filters: [],
     predecessorCount: defaultSize,
-    sort: [[timeFieldName, SortDirection.desc]],
     successorCount: defaultSize,
-    hits: [],
-    predecessors: [],
-    successors: [],
-    anchor: {
-      _id: '',
-      fields: [],
-      sort: [],
-    },
-    anchorStatus: LoadingStatus.UNINITIALIZED,
-    predecessorsStatus: LoadingStatus.UNINITIALIZED,
-    successorsStatus: LoadingStatus.UNINITIALIZED,
-    ...getContextQueryDefaults(),
+    sort: [[timeFieldName, SortDirection.desc]],
   };
   if (typeof urlState !== 'object') {
     return defaultState;

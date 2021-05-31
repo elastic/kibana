@@ -6,33 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '../../../../data/public';
 import { EsHitRecord } from './context/api/context';
 import { EsHitRecordList } from './context/api/context';
-import { SortDirection } from './context/api/utils/sorting';
-import { createInitialLoadingStatusState } from './context/query';
-import { createInitialQueryParametersState } from './context/query_parameters';
 
-export interface ContextQueryState {
-  loadingStatus: LoadingStatusState;
-  queryParameters: QueryParameters;
-  rows: ContextRows;
-  hits: EsHitRecordList;
+export interface ContextFetchState {
+  /**
+   * Documents listed before anchor
+   */
   predecessors: EsHitRecordList;
+  /**
+   * Documents after anchor
+   */
   successors: EsHitRecordList;
+  /**
+   * Anchor document
+   */
   anchor: EsHitRecord;
+  /**
+   * Anchor fetch status
+   */
   anchorStatus: LoadingState;
+  /**
+   * Predecessors fetch status
+   */
   predecessorsStatus: LoadingState;
+  /**
+   * Successors fetch status
+   */
   successorsStatus: LoadingState;
-  predecessorCount: number;
-  successorCount: number;
-  useNewFieldsApi: boolean;
-}
-
-export interface ContextQueryParams {
-  defaultStepSize: number;
-  tieBreakerField: string;
-  useNewFieldsApi: boolean;
 }
 
 export enum LoadingStatus {
@@ -41,81 +42,25 @@ export enum LoadingStatus {
   LOADING = 'loading',
   UNINITIALIZED = 'uninitialized',
 }
+
 export enum FailureReason {
   UNKNOWN = 'unknown',
   INVALID_TIEBREAKER = 'invalid_tiebreaker',
 }
+
 export type LoadingStatusEntry = Partial<{
   status: LoadingStatus;
   reason: FailureReason;
   error: Error;
 }>;
 
-export interface LoadingStatusState {
-  anchor: LoadingState;
-  predecessors: LoadingState;
-  successors: LoadingState;
-}
-
 export type LoadingState = LoadingStatus | LoadingStatusEntry;
 
-export interface QueryParameters {
-  anchorId: string;
-  columns: string[];
-  defaultStepSize: number;
-  filters: Filter[];
-  indexPatternId: string;
-  predecessorCount: number;
-  successorCount: number;
-  sort: Array<[string, SortDirection]>;
-  tieBreakerField: string;
-}
-
-export interface ContextRows {
-  all: EsHitRecordList;
-  anchor: EsHitRecord;
-  predecessors: EsHitRecordList;
-  successors: EsHitRecordList;
-}
-
-export function getContextQueryDefaults(
-  indexPatternId: string,
-  anchorId: string,
-  defaultStepSize: number,
-  tieBreakerField: string,
-  useNewFieldsApi: boolean
-): ContextQueryState {
-  return {
-    queryParameters: createInitialQueryParametersState(
-      indexPatternId,
-      anchorId,
-      defaultStepSize,
-      tieBreakerField
-    ),
-    hits: [],
-    predecessors: [],
-    successors: [],
-    anchor: {
-      fields: [],
-      sort: [],
-      _id: '',
-    },
-    rows: {
-      all: [],
-      anchor: {
-        fields: [],
-        sort: [],
-        _id: '',
-      },
-      predecessors: [],
-      successors: [],
-    },
-    loadingStatus: createInitialLoadingStatusState(),
-    anchorStatus: LoadingStatus.UNINITIALIZED,
-    predecessorsStatus: LoadingStatus.UNINITIALIZED,
-    successorsStatus: LoadingStatus.UNINITIALIZED,
-    predecessorCount: 5,
-    successorCount: 5,
-    useNewFieldsApi,
-  };
-}
+export const getInitialContextQueryState = (): ContextFetchState => ({
+  anchor: {} as EsHitRecord,
+  predecessors: [],
+  successors: [],
+  anchorStatus: LoadingStatus.UNINITIALIZED,
+  predecessorsStatus: LoadingStatus.UNINITIALIZED,
+  successorsStatus: LoadingStatus.UNINITIALIZED,
+});
