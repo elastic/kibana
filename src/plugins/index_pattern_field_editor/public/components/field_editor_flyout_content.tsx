@@ -105,7 +105,9 @@ const FieldEditorFlyoutContentComponent = ({
   const isEditingExistingField = !!field;
   const i18nTexts = geti18nTexts(field);
   const { indexPattern } = useFieldEditorContext();
-  const { isPanelVisible } = useFieldPreviewContext();
+  const {
+    panel: { isVisible: isPanelVisible },
+  } = useFieldPreviewContext();
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,

@@ -23,13 +23,21 @@ import { parseEsError } from '../../lib/runtime_field_validation';
 import { RuntimeType, RuntimeField } from '../../shared_imports';
 import { useFieldEditorContext } from '../field_editor_context';
 
+type From = 'cluster' | 'custom';
+
 interface Context {
   fields: Array<{ key: string; value: unknown }>;
   error: Record<string, any> | null;
   updateParams: (updated: Partial<Params>) => void;
   currentDocument?: Record<string, any>;
-  isPanelVisible: boolean;
-  setIsPanelVisible: (isVisible: boolean) => void;
+  panel: {
+    isVisible: boolean;
+    setIsVisible: (isVisible: boolean) => void;
+  };
+  from: {
+    value: From;
+    set: (value: From) => void;
+  };
   navigation: {
     isFirstDoc: boolean;
     isLastDoc: boolean;
@@ -69,6 +77,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const [documents, setDocuments] = useState<Array<Record<string, any>>>([]);
   const [navDocsIndex, setNavDocsIndex] = useState(0);
   const [isPanelVisible, setIsPanelVisible] = useState(false);
+  const [from, setFrom] = useState<From>('cluster');
 
   const areAllParamsDefined =
     Object.values(params).filter(Boolean).length === Object.keys(defaultParams).length;
@@ -168,8 +177,14 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         next: goToNextDoc,
         prev: goToPrevDoc,
       },
-      isPanelVisible,
-      setIsPanelVisible,
+      panel: {
+        isVisible: isPanelVisible,
+        setIsVisible: setIsPanelVisible,
+      },
+      from: {
+        value: from,
+        set: setFrom,
+      },
     }),
     [
       previewResponse,
@@ -180,7 +195,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       goToNextDoc,
       goToPrevDoc,
       isPanelVisible,
-      setIsPanelVisible,
+      from,
     ]
   );
 

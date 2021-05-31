@@ -6,77 +6,23 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+
+import { FieldPreviewHeader } from './field_preview_header';
+import { FieldPreviewEmptyPrompt } from './field_preview_empty_prompt';
 
 export const FieldPreview = () => {
+  const isHeaderVisible = false;
+
   return (
     <>
-      <EuiTitle size="l">
-        <h1>Preview ....</h1>
-      </EuiTitle>
-
-      <EuiSpacer />
-
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi perferendis
-        alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse ipsa, repudiandae
-        eveniet distinctio? Modi doloribus assumenda eum!
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi perferendis
-        alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse ipsa, repudiandae
-        eveniet distinctio? Modi doloribus assumenda eum!
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi perferendis
-        alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse ipsa, repudiandae
-        eveniet distinctio? Modi doloribus assumenda eum!
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi perferendis
-        alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse ipsa, repudiandae
-        eveniet distinctio? Modi doloribus assumenda eum!
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi perferendis
-        alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse ipsa, repudiandae
-        eveniet distinctio? Modi doloribus assumenda eum!
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi perferendis
-        alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse ipsa, repudiandae
-        eveniet distinctio? Modi doloribus assumenda eum!
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi perferendis
-        alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse ipsa, repudiandae
-        eveniet distinctio? Modi doloribus assumenda eum!
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi perferendis
-        alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse ipsa, repudiandae
-        eveniet distinctio? Modi doloribus assumenda eum!
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi perferendis
-        alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse ipsa, repudiandae
-        eveniet distinctio? Modi doloribus assumenda eum!
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi perferendis
-        alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse ipsa, repudiandae
-        eveniet distinctio? Modi doloribus assumenda eum!
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi perferendis
-        alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse ipsa, repudiandae
-        eveniet distinctio? Modi doloribus assumenda eum!
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam minus eligendi perferendis
-        alias inventore voluptatum quidem nulla ducimus rem tenetur numquam esse ipsa, repudiandae
-        eveniet distinctio? Modi doloribus assumenda eum!
-      </p>
+      {isHeaderVisible && (
+        <>
+          <FieldPreviewHeader />
+          <EuiSpacer />
+        </>
+      )}
+      <FieldPreviewEmptyPrompt />
     </>
   );
 };

@@ -158,7 +158,7 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
     fields,
     error,
     updateParams: updatePreviewParams,
-    setIsPanelVisible,
+    panel: { setIsVisible: setIsPanelVisible },
   } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
