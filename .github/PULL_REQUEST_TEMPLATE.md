@@ -32,7 +32,7 @@ they may potentially impact the change:
 | Multiple Spaces&mdash;unexpected behavior in non-default Kibana Space. | Low | High | Integration tests will verify that all features are still supported in non-default Kibana Space and when user switches between spaces. |
 | Multiple nodes&mdash;Elasticsearch polling might have race conditions when multiple Kibana nodes are polling for the same tasks. | High | Low | Tasks are idempotent, so executing them multiple times will not result in logical error, but will degrade performance. To test for this case we add plenty of unit tests around this logic and document manual testing procedure. |
 | Code should gracefully handle cases when feature X or plugin Y are disabled. | Medium | High | Unit tests will verify that any feature flag or plugin combination still results in our service operational. |
-| [See more potential risk examples](../RISK_MATRIX.md) |
+| [See more potential risk examples](../RISK_MATRIX.mdx) |
 
 
 ### For maintainers
