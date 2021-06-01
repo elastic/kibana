@@ -21,7 +21,7 @@ export const configSchema = schema.object({
   accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
   ssl: schema.object({
     certificateAuthorities: schema.maybe(
-      schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
+      schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])
     ),
     rejectUnauthorized: schema.boolean({ defaultValue: false }),
   }),
