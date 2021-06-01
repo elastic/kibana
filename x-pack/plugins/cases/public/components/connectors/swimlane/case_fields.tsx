@@ -9,8 +9,9 @@ import React, { useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import * as i18n from './translations';
 
-import { SwimlaneFieldsType } from '../../../../common';
+import { ConnectorTypes, SwimlaneFieldsType } from '../../../../common';
 import { ConnectorFieldsProps } from '../types';
+import { ConnectorCard } from '../card';
 
 const casesRequiredFields = ['caseNameConfig', 'descriptionConfig', 'commentsConfig'];
 const isMappingEmpty = (mapping: Record<string, unknown> | undefined) =>
@@ -18,6 +19,7 @@ const isMappingEmpty = (mapping: Record<string, unknown> | undefined) =>
 
 const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFieldsType>> = ({
   connector,
+  isEdit = true,
 }) => {
   const {
     config: { mappings },
@@ -25,6 +27,14 @@ const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFi
   const showMappingWarning = useMemo(() => isMappingEmpty(mappings), [mappings]);
   return (
     <>
+      {!isEdit && (
+        <ConnectorCard
+          connectorType={ConnectorTypes.swimlane}
+          isLoading={false}
+          listItems={[]}
+          title={connector.name}
+        />
+      )}
       {showMappingWarning && (
         <EuiCallOut title={i18n.EMPTY_MAPPING_WARNING_TITLE} color="warning" iconType="help">
           {i18n.EMPTY_MAPPING_WARNING_DESC}
