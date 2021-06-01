@@ -25,6 +25,16 @@ export interface DeprecationsDetails {
    * - fetch_error: Deprecations service failed to grab the deprecation details for the domain.
    */
   level: 'warning' | 'critical' | 'fetch_error';
+  /**
+   * (optional) Used to identify between different deprecation types.
+   * Example use case: in Upgrade Assistant, we may want to allow the user to sort by
+   * deprecation type or show each type in a separate tab.
+   *
+   * Feel free to add new types if necessary.
+   * Predefined types are necessary to reduce having similar definitions with different keywords
+   * across kibana deprecations.
+   */
+  deprecationType?: 'config' | 'feature';
   /* (optional) link to the documentation for more details on the deprecation. */
   documentationUrl?: string;
   /* corrective action needed to fix this deprecation. */
