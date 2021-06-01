@@ -71,7 +71,7 @@ Fleet::
 Lens & Visualizations::
 * Fixes an issue where upgrading from 7.12.1 to 7.13.0 breaks *TSVB* vizualizations with no timefield defined {kibana-pull}100864[#100864]
 Machine Learning::
-* Fixes field used in RDP ML job to event.type {kibana-pull}100000[#100000]
+* Fixes field used in remote desktop protocol (RDP) anomaly detection job to event.type {kibana-pull}100000[#100000]
 Querying & Filtering::
 * Fixes bug with scripted number range filters {kibana-pull}99554[#99554]
 Security::
