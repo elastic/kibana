@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -73,7 +73,9 @@ export function FormulaEditor({
   const disposables = React.useRef<monaco.IDisposable[]>([]);
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
 
-  const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
+  const visibleOperationsMap = useMemo(() => filterByVisibleOperation(operationDefinitionMap), [
+    operationDefinitionMap,
+  ]);
 
   // The Monaco editor needs to have the overflowDiv in the first render. Using an effect
   // requires a second render to work, so we are using an if statement to guarantee it happens
@@ -336,7 +338,13 @@ export function FormulaEditor({
 
       return {
         suggestions: aSuggestions.list.map((s) =>
-          getSuggestion(s, aSuggestions.type, wordRange, visibleOperationsMap)
+          getSuggestion(
+            s,
+            aSuggestions.type,
+            wordRange,
+            visibleOperationsMap,
+            context.triggerCharacter
+          )
         ),
       };
     },
@@ -397,16 +405,34 @@ export function FormulaEditor({
       if (e.isFlush || e.isRedoing || e.isUndoing) {
         return;
       }
-      if (e.changes.length === 1 && e.changes[0].text === '=') {
+      if (e.changes.length === 1 && (e.changes[0].text === '=' || e.changes[0].text === "'")) {
         const currentPosition = e.changes[0].range;
         if (currentPosition) {
-          const tokenInfo = getTokenInfo(
+          let tokenInfo = getTokenInfo(
             editor.getValue(),
             monacoPositionToOffset(
               editor.getValue(),
               new monaco.Position(currentPosition.startLineNumber, currentPosition.startColumn)
             )
           );
+
+          if (!tokenInfo && e.changes[0].text === "'") {
+            // try again this time replacing the current quote with an escaped quote
+            const line = editor.getValue();
+            const lineEscaped =
+              line.substring(0, currentPosition.startColumn - 1) +
+              "\\'" +
+              line.substring(currentPosition.endColumn);
+            tokenInfo = getTokenInfo(
+              lineEscaped,
+              monacoPositionToOffset(
+                line,
+                new monaco.Position(currentPosition.startLineNumber, currentPosition.startColumn)
+              ) + 1
+            );
+          }
+
+          const isSingleQuoteCase = /'LENS_MATH_MARKER/;
           // Make sure that we are only adding kql='' or lucene='', and also
           // check that the = sign isn't inside the KQL expression like kql='='
           if (
@@ -414,28 +440,44 @@ export function FormulaEditor({
             typeof tokenInfo.ast === 'number' ||
             tokenInfo.ast.type !== 'namedArgument' ||
             (tokenInfo.ast.name !== 'kql' && tokenInfo.ast.name !== 'lucene') ||
-            tokenInfo.ast.value !== 'LENS_MATH_MARKER'
+            (tokenInfo.ast.value !== 'LENS_MATH_MARKER' &&
+              !isSingleQuoteCase.test(tokenInfo.ast.value))
           ) {
             return;
           }
 
-          // Timeout is required because otherwise the cursor position is not updated.
-          setTimeout(() => {
+          let editOperation = null;
+          if (e.changes[0].text === '=') {
+            editOperation = {
+              range: {
+                ...currentPosition,
+                // Insert after the current char
+                startColumn: currentPosition.startColumn + 1,
+                endColumn: currentPosition.startColumn + 1,
+              },
+              text: `''`,
+            };
+          }
+          if (e.changes[0].text === "'") {
+            editOperation = {
+              range: {
+                ...currentPosition,
+                // Insert after the current char
+                startColumn: currentPosition.startColumn,
+                endColumn: currentPosition.startColumn + 1,
+              },
+              text: `\\'`,
+            };
+          }
+
+          // Need to move these sync to prevent race conditions between a fast user typing a single quote
+          // after an = char
+          if (editOperation) {
             editor.executeEdits(
               'LENS',
+              [editOperation],
               [
-                {
-                  range: {
-                    ...currentPosition,
-                    // Insert after the current char
-                    startColumn: currentPosition.startColumn + 1,
-                    endColumn: currentPosition.startColumn + 1,
-                  },
-                  text: `''`,
-                },
-              ],
-              [
-                // After inserting, move the cursor in between the single quotes
+                // After inserting, move the cursor in between the single quotes or after the escaped quote
                 new monaco.Selection(
                   currentPosition.startLineNumber,
                   currentPosition.startColumn + 2,
@@ -444,8 +486,16 @@ export function FormulaEditor({
                 ),
               ]
             );
-            editor.trigger('lens', 'editor.action.triggerSuggest', {});
-          }, 0);
+
+            // Timeout is required because otherwise the cursor position is not updated.
+            setTimeout(() => {
+              editor.setPosition({
+                column: currentPosition.startColumn + 2,
+                lineNumber: currentPosition.startLineNumber,
+              });
+              editor.trigger('lens', 'editor.action.triggerSuggest', {});
+            }, 0);
+          }
         }
       }
     },

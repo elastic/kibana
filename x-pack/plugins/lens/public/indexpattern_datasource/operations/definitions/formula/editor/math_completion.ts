@@ -15,7 +15,10 @@ import {
   TinymathFunction,
   TinymathNamedArgument,
 } from '@kbn/tinymath';
-import { DataPublicPluginStart, QuerySuggestion } from 'src/plugins/data/public';
+import type {
+  DataPublicPluginStart,
+  QuerySuggestion,
+} from '../../../../../../../../../src/plugins/data/public';
 import { IndexPattern } from '../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
 import { tinymathFunctions, groupArgsByType } from '../util';
@@ -311,24 +314,34 @@ export async function getNamedArgumentSuggestions({
     return { list: [], type: SUGGESTION_TYPE.KQL };
   }
 
-  const before = ast.value.split(MARKER)[0];
+  const query = ast.value.split(MARKER)[0];
+  const position = ast.value.indexOf(MARKER) + 1;
 
   const suggestions = await data.autocomplete.getQuerySuggestions({
     language: ast.name === 'kql' ? 'kuery' : 'lucene',
-    query: ast.value.split(MARKER)[0],
-    selectionStart: before.length,
-    selectionEnd: before.length,
+    query,
+    selectionStart: position,
+    selectionEnd: position,
     indexPatterns: [indexPattern],
     boolFilter: [],
   });
-  return { list: suggestions ?? [], type: SUGGESTION_TYPE.KQL };
+  return {
+    list: suggestions ?? [],
+    type: SUGGESTION_TYPE.KQL,
+  };
 }
+
+const TRIGGER_SUGGESTION_COMMAND = {
+  title: 'Trigger Suggestion Dialog',
+  id: 'editor.action.triggerSuggest',
+};
 
 export function getSuggestion(
   suggestion: LensMathSuggestion,
   type: SUGGESTION_TYPE,
   range: monaco.Range,
-  operationDefinitionMap: Record<string, GenericOperationDefinition>
+  operationDefinitionMap: Record<string, GenericOperationDefinition>,
+  triggerChar: string | undefined
 ): monaco.languages.CompletionItem {
   let kind: monaco.languages.CompletionItemKind = monaco.languages.CompletionItemKind.Method;
   let label: string =
@@ -363,20 +376,14 @@ export function getSuggestion(
           detail = 'Elasticsearch';
           // Always put ES functions first
           sortText = `0${label}`;
-          command = {
-            title: 'Trigger Suggestion Dialog',
-            id: 'editor.action.triggerSuggest',
-          };
+          command = TRIGGER_SUGGESTION_COMMAND;
         }
       }
       break;
     case SUGGESTION_TYPE.NAMED_ARGUMENT:
       kind = monaco.languages.CompletionItemKind.Keyword;
       if (label === 'kql' || label === 'lucene') {
-        command = {
-          title: 'Trigger Suggestion Dialog',
-          id: 'editor.action.triggerSuggest',
-        };
+        command = TRIGGER_SUGGESTION_COMMAND;
         insertText = `${label}='$0'`;
         insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
         sortText = `zzz${label}`;
@@ -385,8 +392,14 @@ export function getSuggestion(
       detail = '';
       break;
     case SUGGESTION_TYPE.KQL:
+      if (triggerChar === ':') {
+        insertText = `${triggerChar} ${label}`;
+      } else {
+        // concatenate KQL suggestion for faster query composition
+        command = TRIGGER_SUGGESTION_COMMAND;
+      }
       if (label.includes(`'`)) {
-        insertText = label.replaceAll(`'`, "\\'");
+        insertText = (insertText || label).replaceAll(`'`, "\\'");
       }
       break;
   }
