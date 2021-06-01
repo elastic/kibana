@@ -24,6 +24,9 @@ https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_C
 rules] to ensure that user input is not inserted into unsafe locations and to make sure that it is escaped properly.
 * Use EUI components to build your UI whenever possible, particularly when rendering `href` links. Otherwise, sanitize user input before
 rendering links to ensure that they do not use the `javascript:` protocol.
+* Ensure no usages of `eval`, `Function`, and `_.template` functions -- these are restricted by ESLint rules.
+* Be careful of when using `setTimeout` and `setInterval` in client-side code. If an attacker can manipulate the arguments and pass a string
+to one of these, it is evaluated dynamically, which is equivalent to the dangerous `eval` function.
 
 === Cross-Site Request Forgery (CSRF/XSRF) ===
 
