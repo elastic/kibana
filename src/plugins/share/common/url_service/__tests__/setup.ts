@@ -18,7 +18,7 @@ export interface TestLocatorState extends SerializableState {
 
 export const testLocator: LocatorDefinition<TestLocatorState> = {
   id: 'TEST_LOCATOR',
-  getLocation: ({ savedObjectId, pageNumber, showFlyout }) => {
+  getLocation: async ({ savedObjectId, pageNumber, showFlyout }) => {
     return {
       app: 'test_app',
       route: `/my-object/${savedObjectId}?page=${pageNumber}`,
