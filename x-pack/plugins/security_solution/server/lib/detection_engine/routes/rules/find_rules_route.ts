@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RuleDataClient } from '../../../../../../rule_registry/server';
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
 import {
   findRulesSchema,
@@ -20,7 +21,10 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { transformFindAlerts } from './utils';
 import { getBulkRuleActionsSavedObject } from '../../rule_actions/get_bulk_rule_actions_saved_object';
 
-export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
+export const findRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  ruleDataClient?: RuleDataClient | null
+) => {
   router.get(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_find`,

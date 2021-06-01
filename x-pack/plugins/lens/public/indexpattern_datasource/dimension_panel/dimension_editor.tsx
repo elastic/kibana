@@ -6,7 +6,6 @@
  */
 
 import './dimension_editor.scss';
-import _ from 'lodash';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {

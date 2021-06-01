@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { flatten, minBy, pick, mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../id_generator';
 import { DatasourceSuggestion, TableChangeType } from '../types';
@@ -59,9 +59,9 @@ function buildSuggestion({
   // It's fairly easy to accidentally introduce a mismatch between
   // columnOrder and columns, so this is a safeguard to ensure the
   // two match up.
-  const layers = _.mapValues(updatedState.layers, (layer) => ({
+  const layers = mapValues(updatedState.layers, (layer) => ({
     ...layer,
-    columns: _.pick(layer.columns, layer.columnOrder) as Record<string, IndexPatternColumn>,
+    columns: pick(layer.columns, layer.columnOrder) as Record<string, IndexPatternColumn>,
   }));
 
   const columnOrder = layers[layerId].columnOrder;
@@ -112,7 +112,7 @@ export function getDatasourceSuggestionsForField(
     // The field we're suggesting on matches an existing layer. In this case we find the layer with
     // the fewest configured columns and try to add the field to this table. If this layer does not
     // contain any layers yet, behave as if there is no layer.
-    const mostEmptyLayerId = _.minBy(
+    const mostEmptyLayerId = minBy(
       layerIds,
       (layerId) => state.layers[layerId].columnOrder.length
     ) as string;
@@ -389,7 +389,7 @@ export function getDatasourceSuggestionsFromCurrentState(
       ]);
   }
 
-  return _.flatten(
+  return flatten(
     Object.entries(state.layers || {})
       .filter(([_id, layer]) => layer.columnOrder.length && layer.indexPatternId)
       .map(([layerId, layer]) => {
@@ -591,7 +591,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
     (columnId) => !isReferenced(layer, columnId)
   );
 
-  return _.flatten(
+  return flatten(
     availableBucketedColumns.map((_col, index) => {
       // build suggestions with fewer buckets
       const bucketedColumns = availableBucketedColumns.slice(0, index + 1);
