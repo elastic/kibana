@@ -9,7 +9,7 @@ import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
 const hasFleetDataRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/fleet/hasData',
+  endpoint: 'GET /api/apm/fleet/has_data',
   options: { tags: [] },
   handler: async (resources) => {
     const { core } = resources.context;

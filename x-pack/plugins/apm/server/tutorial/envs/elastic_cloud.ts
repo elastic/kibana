@@ -33,7 +33,10 @@ export function createElasticCloudInstructions(
   const instructionSets = [];
 
   instructionSets.push(
-    getApmServerInstructionSet({ cloudSetup, hasApmServerUrl: !!apmServerUrl })
+    getApmServerInstructionSet({
+      cloudSetup,
+      isApmServerEnabled: !!apmServerUrl,
+    })
   );
 
   instructionSets.push(getApmAgentInstructionSet(cloudSetup));
@@ -45,10 +48,10 @@ export function createElasticCloudInstructions(
 
 function getApmServerInstructionSet({
   cloudSetup,
-  hasApmServerUrl,
+  isApmServerEnabled,
 }: {
   cloudSetup?: CloudSetup;
-  hasApmServerUrl: boolean;
+  isApmServerEnabled: boolean;
 }): InstructionSetSchema {
   const instructionVariants: InstructionSetSchema['instructionVariants'] = [
     {
@@ -57,7 +60,7 @@ function getApmServerInstructionSet({
     },
   ];
 
-  if (!hasApmServerUrl) {
+  if (!isApmServerEnabled) {
     instructionVariants.push({
       id: INSTRUCTION_VARIANT.ESC,
       instructions: [

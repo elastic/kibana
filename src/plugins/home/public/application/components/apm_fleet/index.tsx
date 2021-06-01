@@ -10,6 +10,7 @@ import {
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
 } from '@elastic/eui';
@@ -29,7 +30,8 @@ interface APIResponse {
 }
 
 export function APMFleet() {
-  const { getBasePath } = getServices();
+  const { http, getBasePath, uiSettings } = getServices();
+  const isDarkTheme = uiSettings.get('theme:darkMode');
   const basePath = getBasePath();
   const [data, setData] = useState<APIResponse | undefined>();
   const [isLoading, setIsLoading] = useState(false);
@@ -38,8 +40,8 @@ export function APMFleet() {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const response = await fetch(`${basePath}/api/apm/fleet/hasData`);
-        setData((await response.json()) as APIResponse);
+        const response = await http.get('/api/apm/fleet/has_data');
+        setData(response as APIResponse);
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error('Error while fetching fleet details.', e);
@@ -47,7 +49,7 @@ export function APMFleet() {
       setIsLoading(false);
     }
     fetchData();
-  }, [basePath]);
+  }, [http]);
 
   if (isLoading) {
     return (
@@ -94,7 +96,16 @@ export function APMFleet() {
             }
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={3} style={{ background: 'red' }} />
+        <EuiFlexItem grow={3}>
+          <EuiImage
+            src={`${basePath}/plugins/apm/assets/${
+              isDarkTheme
+                ? 'illustration_integrations_darkmode.svg'
+                : 'illustration_integrations_lightmode.svg'
+            }`}
+            alt="Illustration"
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
