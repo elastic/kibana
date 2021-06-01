@@ -90,6 +90,15 @@ a| Runtime
 
 | This section tracks excution performance of Task Manager, tracking task _drift_, worker _load_, and execution stats broken down by type, including duration and execution results.
 
+a| Capacity Estimation
+
+| This section provides a rough estimate about the sufficiency of its capacity. As the name suggests, these are estimates based on historical data and should not be used as predictions. We recommend using these estimations when following the Task Manager <<task-manager-scaling-guidance>>.
++
+[NOTE]
+============================================================================
+The `status` indicates the sufficiency of the observed capacity. An `OK` status means capacity is sufficient. A `Warning` status means that capacity is sufficient for the scheduled recurring tasks, but non-recurring tasks often cause the cluster to exceed capacity. An `Error` status means that there is insufficient capacity across all tasks, no matter their schedule.
+============================================================================
+
 |===
 
 Each section has a `timestamp` and a `status` that indicates when the last update to this section took place and whether the health of this section was evaluated as `OK`, `Warning` or `Error`.

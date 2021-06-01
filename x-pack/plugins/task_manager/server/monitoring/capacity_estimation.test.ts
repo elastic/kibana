@@ -26,6 +26,119 @@ describe('estimateCapacity', () => {
           {
             execution: {
               duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                non_recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+              },
+              // no non-recurring executions in the system in recent history
+              persistence: {
+                ephemeral: 0,
+                non_recurring: 0,
+                recurring: 100,
+              },
+              result_frequency_percent_as_number: {},
+            },
+          }
+        )
+      ).value.observed
+    ).toMatchObject({
+      observed_kibana_instances: 1,
+      minutes_to_drain_overdue: 0,
+      max_throughput_per_minute: 200,
+    });
+  });
+
+  test('reduces the available capacity per kibana when average task duration exceeds the poll interval', async () => {
+    expect(
+      estimateCapacity(
+        mockStats(
+          { max_workers: 10, poll_interval: 3000 },
+          {
+            owner_ids: 1,
+            overdue_non_recurring: 0,
+            capacity_requirments: {
+              per_minute: 60,
+              per_hour: 0,
+              per_day: 0,
+            },
+          },
+          {
+            execution: {
+              duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 2400,
+                  p90: 2500,
+                  p95: 3200,
+                  p99: 3500,
+                },
+                non_recurring: {
+                  p50: 1400,
+                  p90: 1500,
+                  p95: 2200,
+                  p99: 3500,
+                },
+                recurring: {
+                  p50: 8345,
+                  p90: 140651.5,
+                  p95: 249199,
+                  p99: 253150,
+                },
+              },
+              // no non-recurring executions in the system in recent history
+              persistence: {
+                ephemeral: 0,
+                non_recurring: 0,
+                recurring: 100,
+              },
+              result_frequency_percent_as_number: {},
+            },
+          }
+        )
+      ).value.observed
+    ).toMatchObject({
+      observed_kibana_instances: 1,
+      minutes_to_drain_overdue: 0,
+      // on average it takes at least 50% of tasks 2 polling cycles before they complete
+      // this reduces the overall throughput of task manager
+      max_throughput_per_minute: 100,
+    });
+  });
+
+  test('estimates the max throughput per minute when duration by persistence is empty', async () => {
+    expect(
+      estimateCapacity(
+        mockStats(
+          { max_workers: 10, poll_interval: 3000 },
+          {
+            owner_ids: 1,
+            overdue_non_recurring: 0,
+            capacity_requirments: {
+              per_minute: 60,
+              per_hour: 0,
+              per_day: 0,
+            },
+          },
+          {
+            execution: {
+              duration: {},
+              duration_by_persistence: {},
               // no non-recurring executions in the system in recent history
               persistence: {
                 ephemeral: 0,
@@ -61,6 +174,26 @@ describe('estimateCapacity', () => {
           {
             execution: {
               duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                non_recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+              },
               // no non-recurring executions in the system in recent history
               persistence: {
                 ephemeral: 0,
@@ -97,6 +230,26 @@ describe('estimateCapacity', () => {
           {
             execution: {
               duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                non_recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+              },
               // no non-recurring executions in the system in recent history
               persistence: {
                 ephemeral: 0,
@@ -132,6 +285,26 @@ describe('estimateCapacity', () => {
           {
             execution: {
               duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                non_recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+              },
               // no non-recurring executions in the system in recent history
               persistence: {
                 ephemeral: 0,
@@ -180,6 +353,26 @@ describe('estimateCapacity', () => {
             },
             execution: {
               duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                non_recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+              },
               persistence: {
                 // 50% of tasks are non-recurring/ephemeral executions in the system in recent history
                 ephemeral: 25,
@@ -240,6 +433,26 @@ describe('estimateCapacity', () => {
             },
             execution: {
               duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                non_recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+              },
               persistence: {
                 // 50% of tasks are non-recurring/ephemeral executions in the system in recent history
                 ephemeral: 25,
@@ -303,6 +516,26 @@ describe('estimateCapacity', () => {
             },
             execution: {
               duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                non_recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+              },
               // 20% average of non-recurring executions in the system in recent history
               persistence: {
                 ephemeral: 0,
@@ -344,6 +577,26 @@ describe('estimateCapacity', () => {
             },
             execution: {
               duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                non_recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+              },
               // no non-recurring executions in the system in recent history
               persistence: {
                 ephemeral: 0,
@@ -385,6 +638,26 @@ describe('estimateCapacity', () => {
             },
             execution: {
               duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                non_recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+              },
               // 20% average of non-recurring executions in the system in recent history
               persistence: {
                 ephemeral: 0,
@@ -426,6 +699,26 @@ describe('estimateCapacity', () => {
             },
             execution: {
               duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                non_recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+              },
               persistence: {
                 recurring: 0,
                 non_recurring: 70,
@@ -481,6 +774,26 @@ describe('estimateCapacity', () => {
             },
             execution: {
               duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                non_recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+              },
               persistence: {
                 recurring: 0,
                 non_recurring: 70,
@@ -585,6 +898,26 @@ function mockStats(
         },
         execution: {
           duration: {},
+          duration_by_persistence: {
+            ephemeral: {
+              p50: 400,
+              p90: 500,
+              p95: 1200,
+              p99: 1500,
+            },
+            non_recurring: {
+              p50: 400,
+              p90: 500,
+              p95: 1200,
+              p99: 1500,
+            },
+            recurring: {
+              p50: 400,
+              p90: 500,
+              p95: 1200,
+              p99: 1500,
+            },
+          },
           persistence: {
             ephemeral: 0,
             non_recurring: 30,

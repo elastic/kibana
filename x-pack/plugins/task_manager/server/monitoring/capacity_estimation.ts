@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { mapValues } from 'lodash';
+import { isFinite, mapValues } from 'lodash';
+import stats from 'stats-lite';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
+import { AveragedStat } from './task_run_calcultors';
+import { TaskPersistence, TaskPersistenceTypes } from './task_run_statistics';
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {
@@ -34,32 +37,50 @@ export type CapacityEstimationParams = Omit<
 >;
 
 function isCapacityEstimationParams(
-  stats: RawMonitoringStats['stats']
-): stats is CapacityEstimationParams {
-  return !!(stats.configuration && stats.runtime && stats.workload);
+  capacityStats: RawMonitoringStats['stats']
+): capacityStats is CapacityEstimationParams {
+  return !!(capacityStats.configuration && capacityStats.runtime && capacityStats.workload);
 }
 
 export function estimateCapacity(
-  stats: CapacityEstimationParams
+  capacityStats: CapacityEstimationParams
 ): RawMonitoredStat<CapacityEstimationStat> {
-  const workload = stats.workload.value;
+  const workload = capacityStats.workload.value;
   // if there are no active owners right now, assume there's at least 1
   const assumedKibanaInstances = Math.max(workload.owner_ids, 1);
 
   const {
     load: { p90: averageLoadPercentage },
-  } = stats.runtime.value;
+    execution: { duration_by_persistence: durationByPersistence },
+  } = capacityStats.runtime.value;
   const {
     recurring: percentageOfExecutionsUsedByRecurringTasks,
     non_recurring: percentageOfExecutionsUsedByNonRecurringTasks,
-  } = stats.runtime.value.execution.persistence;
+  } = capacityStats.runtime.value.execution.persistence;
   const { overdue, capacity_requirments: capacityRequirments } = workload;
-  const { poll_interval: pollInterval, max_workers: maxWorkers } = stats.configuration.value;
+  const {
+    poll_interval: pollInterval,
+    max_workers: maxWorkers,
+  } = capacityStats.configuration.value;
+
+  const averageDuration = getAverageDuration(durationByPersistence);
 
   /**
-   * Give nth ecurrent configuration how much task capacity do we have?
+   * On average, how many polling cycles does it take to execute a task?
+   * If this is higher than the polling cycle, then a whole cycle is wasted as
+   * we won't use the worker until the next cycle.
    */
-  const capacityPerMinutePerKibana = Math.round(((60 * 1000) / pollInterval) * maxWorkers);
+  const averagePollIntervalsPerExecution = Math.ceil(
+    (isFinite(averageDuration) ? Math.max(averageDuration, pollInterval) : pollInterval) /
+      pollInterval
+  );
+
+  /**
+   * Given the current configuration how much task capacity do we have?
+   */
+  const capacityPerMinutePerKibana = Math.round(
+    ((60 * 1000) / (averagePollIntervalsPerExecution * pollInterval)) * maxWorkers
+  );
 
   /**
    * If our assumption about the number of Kibana is correct - how much capacity do we have available?
@@ -198,17 +219,27 @@ export function estimateCapacity(
 }
 
 export function withCapacityEstimate(
-  stats: RawMonitoringStats['stats']
+  monitoredStats: RawMonitoringStats['stats']
 ): RawMonitoringStats['stats'] {
-  if (isCapacityEstimationParams(stats)) {
+  if (isCapacityEstimationParams(monitoredStats)) {
     return {
-      ...stats,
-      capacity_estimation: estimateCapacity(stats),
+      ...monitoredStats,
+      capacity_estimation: estimateCapacity(monitoredStats),
     };
   }
-  return stats;
+  return monitoredStats;
 }
 
 function percentageOf(val: number, percentage: number) {
   return Math.round((percentage * val) / 100);
+}
+
+function getAverageDuration(durations: Partial<TaskPersistenceTypes<AveragedStat>>): number {
+  return stats.mean(
+    [
+      durations.ephemeral?.p50 ?? 0,
+      durations.non_recurring?.p50 ?? 0,
+      durations.recurring?.p50 ?? 0,
+    ].filter((val) => val > 0)
+  );
 }

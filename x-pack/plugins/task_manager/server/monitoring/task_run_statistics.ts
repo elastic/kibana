@@ -7,7 +7,7 @@
 
 import { combineLatest, Observable } from 'rxjs';
 import { filter, startWith, map } from 'rxjs/operators';
-import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { JsonObject, JsonValue } from 'src/plugins/kibana_utils/common';
 import { isNumber, mapValues } from 'lodash';
 import { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
@@ -58,6 +58,7 @@ interface FillPoolStat extends JsonObject {
 
 interface ExecutionStat extends JsonObject {
   duration: Record<string, number[]>;
+  duration_by_persistence: Record<string, number[]>;
   result_frequency_percent_as_number: Record<string, TaskRunResult[]>;
   persistence: TaskPersistence[];
 }
@@ -90,6 +91,11 @@ interface ResultFrequency extends JsonObject {
   [TaskRunResult.RetryScheduled]: number;
   [TaskRunResult.Failed]: number;
 }
+export interface TaskPersistenceTypes<T extends JsonValue = number> extends JsonObject {
+  [TaskPersistence.Recurring]: T;
+  [TaskPersistence.NonRecurring]: T;
+  [TaskPersistence.Ephemeral]: T;
+}
 
 type ResultFrequencySummary = ResultFrequency & {
   status: HealthStatus;
@@ -100,12 +106,9 @@ export interface SummarizedTaskRunStat extends JsonObject {
   load: AveragedStat;
   execution: {
     duration: Record<string, AveragedStat>;
+    duration_by_persistence: Record<string, AveragedStat>;
     result_frequency_percent_as_number: Record<string, ResultFrequencySummary>;
-    persistence: {
-      [TaskPersistence.Recurring]: number;
-      [TaskPersistence.NonRecurring]: number;
-      [TaskPersistence.Ephemeral]: number;
-    };
+    persistence: TaskPersistenceTypes;
   };
   polling: FillPoolRawStat | Omit<FillPoolRawStat, 'last_successful_poll'>;
 }
@@ -220,6 +223,11 @@ export function createTaskRunAggregator(
         drift_by_type: {},
         execution: {
           duration: {},
+          duration_by_persistence: {
+            [TaskPersistence.Recurring]: [],
+            [TaskPersistence.NonRecurring]: [],
+            [TaskPersistence.Ephemeral]: [],
+          },
           result_frequency_percent_as_number: {},
           persistence: [],
         },
@@ -266,6 +274,9 @@ function createTaskRunEventToStat(runningAverageWindowSize: number) {
   const taskPersistenceQueue = createRunningAveragedStat<TaskPersistence>(runningAverageWindowSize);
   const driftByTaskQueue = createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
   const taskRunDurationQueue = createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
+  const taskRunDurationByPersistenceQueue = createMapOfRunningAveragedStats<number>(
+    runningAverageWindowSize
+  );
   const resultFrequencyQueue = createMapOfRunningAveragedStats<TaskRunResult>(
     runningAverageWindowSize
   );
@@ -275,12 +286,15 @@ function createTaskRunEventToStat(runningAverageWindowSize: number) {
     result: TaskRunResult
   ): Pick<TaskRunStat, 'drift' | 'drift_by_type' | 'execution'> => {
     const drift = timing!.start - task.runAt.getTime();
+    const duration = timing!.stop - timing!.start;
+    const persistence = persistenceOf(task);
     return {
       drift: driftQueue(drift),
       drift_by_type: driftByTaskQueue(task.taskType, drift),
       execution: {
-        persistence: taskPersistenceQueue(persistenceOf(task)),
-        duration: taskRunDurationQueue(task.taskType, timing!.stop - timing!.start),
+        persistence: taskPersistenceQueue(persistence),
+        duration: taskRunDurationQueue(task.taskType, duration),
+        duration_by_persistence: taskRunDurationByPersistenceQueue(persistence as string, duration),
         result_frequency_percent_as_number: resultFrequencyQueue(task.taskType, result),
       },
     };
@@ -327,6 +341,7 @@ export function summarizeTaskRunStat(
     load,
     execution: {
       duration,
+      duration_by_persistence: durationByPersistence,
       persistence,
       result_frequency_percent_as_number: executionResultFrequency,
     },
@@ -354,6 +369,9 @@ export function summarizeTaskRunStat(
       load: calculateRunningAverage(load),
       execution: {
         duration: mapValues(duration, (typedDurations) => calculateRunningAverage(typedDurations)),
+        duration_by_persistence: mapValues(durationByPersistence, (typedDurations) =>
+          calculateRunningAverage(typedDurations)
+        ),
         persistence: {
           ...DEFAULT_PERSISTENCE_FREQUENCIES,
           ...calculateFrequency<TaskPersistence>(persistence),
