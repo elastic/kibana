@@ -23,6 +23,7 @@ import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
 import { useWaterfallContext, WaterfallData } from '..';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
+import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
 
 const getChartHeight = (data: WaterfallData): number => {
   // We get the last item x(number of bars) and adds 1 to cater for 0 index
@@ -44,7 +45,7 @@ const Tooltip = (tooltipInfo: TooltipInfo) => {
       <WaterfallChartTooltip>
         {sidebarItem && (
           <WaterfallTooltipContent
-            text={`${sidebarItem.index + 1}. ${sidebarItem.url}`}
+            text={formatTooltipHeading(sidebarItem.index + 1, sidebarItem.url)}
             url={sidebarItem.url}
           />
         )}

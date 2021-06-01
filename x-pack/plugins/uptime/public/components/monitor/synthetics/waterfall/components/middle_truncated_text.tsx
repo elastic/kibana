@@ -20,6 +20,7 @@ import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 import { WaterfallTooltipResponsiveMaxWidth } from './styles';
 import { FIXED_AXIS_HEIGHT } from './constants';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
 
 interface Props {
   index: number;
@@ -117,7 +118,9 @@ export const MiddleTruncatedText = ({
       </EuiScreenReaderOnly>
       <WaterfallTooltipResponsiveMaxWidth
         as={EuiToolTip}
-        content={<WaterfallTooltipContent {...{ text: `${index}. ${fullText}`, url }} />}
+        content={
+          <WaterfallTooltipContent {...{ text: formatTooltipHeading(index, fullText), url }} />
+        }
         data-test-subj="middleTruncatedTextToolTip"
         delay="long"
         position="top"
