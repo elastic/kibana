@@ -118,12 +118,12 @@ export const SetProcessor: FunctionComponent = () => {
       <UseField
         config={fieldsConfig.value}
         component={Field}
-        path="fields.value"
         componentProps={{
           euiFieldProps: {
             'data-test-subj': 'valueFieldInput',
           },
         }}
+        path="fields.value"
       />
 
       {isTemplateSnippet(fields?.value) && (
