@@ -13,7 +13,7 @@ import {
   StyleDictionary,
   TDocumentDefinitions,
 } from 'pdfmake/interfaces';
-import { LayoutInstance } from '../../../../lib/layouts';
+import { LayoutInstance } from '../../../../../lib/layouts';
 import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
 

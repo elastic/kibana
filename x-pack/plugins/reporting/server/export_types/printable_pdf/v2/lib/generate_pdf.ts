@@ -8,11 +8,11 @@
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { ReportingCore } from '../../../';
-import { LevelLogger } from '../../../lib';
-import { createLayout, LayoutParams } from '../../../lib/layouts';
-import { ScreenshotResults } from '../../../lib/screenshots';
-import { ConditionalHeaders } from '../../common';
+import { ReportingCore } from '../../../../';
+import { LevelLogger } from '../../../../lib';
+import { createLayout, LayoutParams } from '../../../../lib/layouts';
+import { ScreenshotResults } from '../../../../lib/screenshots';
+import { ConditionalHeaders } from '../../../common';
 import { PdfMaker } from './pdf';
 import { getTracker } from './tracker';
 
