@@ -31,6 +31,7 @@ export function pointSeriesTooltipFormatter() {
 
     const details = [];
     const isGauge = config.get('gauge', false);
+    const chartType = config.get('type', undefined);
     const isPercentageMode = config.get(isGauge ? 'gauge.percentageMode' : 'percentageMode', false);
     const isSetColorRange = config.get('setColorRange', false);
 
@@ -44,7 +45,8 @@ export function pointSeriesTooltipFormatter() {
       });
     }
 
-    if (datum.x !== null && datum.x !== undefined) {
+    // For goal and gauge we have only one value for x - '_all'. It doesn't have sense to show it
+    if (datum.x !== null && datum.x !== undefined && !['goal', 'gauge'].includes(chartType)) {
       addDetail(data.xAxisLabel, data.xAxisFormatter(datum.x));
     }
 
