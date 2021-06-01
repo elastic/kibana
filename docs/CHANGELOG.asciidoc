@@ -67,7 +67,7 @@ The 7.13.1 release includes the following bug fixes.
 Design::
 * Adds appropriate table caption for table listing generated reports {kibana-pull}100118[#100118]
 Fleet::
-* Adds back install button for integrations that aren't installed yet {kibana-pull}100370[#100370]
+* Adds missing install button for integrations that aren't installed yet {kibana-pull}100370[#100370]
 Lens & Visualizations::
 * Fixes an issue where upgrading from 7.12.1 to 7.13.0 breaks *TSVB* vizualizations with no timefield defined {kibana-pull}100864[#100864]
 Machine Learning::
