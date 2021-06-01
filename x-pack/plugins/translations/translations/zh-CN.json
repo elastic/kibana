@@ -824,7 +824,6 @@
     "data.fieldFormats.duration.outputFormats.asSeconds": "秒",
     "data.fieldFormats.duration.outputFormats.asWeeks": "周",
     "data.fieldFormats.duration.outputFormats.asYears": "年",
-    "data.fieldFormats.duration.outputFormats.humanize": "可人工读取",
     "data.fieldFormats.duration.title": "持续时间",
     "data.fieldFormats.histogram.title": "直方图",
     "data.fieldFormats.ip.title": "IP 地址",
