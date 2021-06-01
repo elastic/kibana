@@ -43,9 +43,9 @@ interface Props {
 }
 
 const radios = [
+  { id: 'all', label: 'All' },
   { id: 'alerts', label: 'Alerts' },
   { id: 'cases', label: 'Cases' },
-  { id: 'all', label: 'All' },
 ];
 
 const SwimlaneFieldsComponent: React.FC<Props> = ({
