@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { httpHandlerMockFactory } from '../../../common/mock/endpoint/http_handler_mock_factory';
+import {
+  composeHttpHandlerMocks,
+  httpHandlerMockFactory,
+  ResponseProvidersInterface,
+} from '../../../common/mock/endpoint/http_handler_mock_factory';
 import {
   HostInfo,
   HostPolicyResponse,
@@ -21,58 +25,71 @@ import {
 } from '../../../../common/endpoint/constants';
 import { AGENT_POLICY_API_ROUTES, GetAgentPoliciesResponse } from '../../../../../fleet/common';
 
-export const endpointMetadataHttpMocks = httpHandlerMockFactory<{
+type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
   metadataList: () => HostResultList;
   metadataDetails: () => HostInfo;
-}>([
-  {
-    id: 'metadataList',
-    path: HOST_METADATA_LIST_API,
-    method: 'post',
-    handler: () => {
-      const generator = new EndpointDocGenerator('seed');
+}>;
+export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadataHttpMocksInterface>(
+  [
+    {
+      id: 'metadataList',
+      path: HOST_METADATA_LIST_API,
+      method: 'post',
+      handler: () => {
+        const generator = new EndpointDocGenerator('seed');
 
-      return {
-        hosts: Array.from({ length: 10 }, () => generator.generateHostMetadata()),
-        total: 10,
-        request_page_size: 10,
-        request_page_index: 0,
-        query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
-      };
+        return {
+          hosts: Array.from({ length: 10 }, () => {
+            return {
+              metadata: generator.generateHostMetadata(),
+              host_status: HostStatus.UNHEALTHY,
+              query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
+            };
+          }),
+          total: 10,
+          request_page_size: 10,
+          request_page_index: 0,
+          query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
+        };
+      },
     },
-  },
-  {
-    id: 'metadataDetails',
-    path: HOST_METADATA_GET_API,
-    method: 'get',
-    handler: () => {
-      const generator = new EndpointDocGenerator('seed');
+    {
+      id: 'metadataDetails',
+      path: HOST_METADATA_GET_API,
+      method: 'get',
+      handler: () => {
+        const generator = new EndpointDocGenerator('seed');
 
-      return {
-        metadata: generator.generateHostMetadata(),
-        host_status: HostStatus.UNHEALTHY,
-        query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
-      };
+        return {
+          metadata: generator.generateHostMetadata(),
+          host_status: HostStatus.UNHEALTHY,
+          query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
+        };
+      },
     },
-  },
-]);
+  ]
+);
 
-export const endpointPolicyResponseHttpMock = httpHandlerMockFactory<{
+type EndpointPolicyResponseHttpMockInterface = ResponseProvidersInterface<{
   policyResponse: () => HostPolicyResponse;
-}>([
-  {
-    id: 'policyResponse',
-    path: BASE_POLICY_RESPONSE_ROUTE,
-    method: 'get',
-    handler: () => {
-      return new EndpointDocGenerator('seed').generatePolicyResponse();
+}>;
+export const endpointPolicyResponseHttpMock = httpHandlerMockFactory<EndpointPolicyResponseHttpMockInterface>(
+  [
+    {
+      id: 'policyResponse',
+      path: BASE_POLICY_RESPONSE_ROUTE,
+      method: 'get',
+      handler: () => {
+        return new EndpointDocGenerator('seed').generatePolicyResponse();
+      },
     },
-  },
-]);
+  ]
+);
 
-export const fleetApis = httpHandlerMockFactory<{
+type FleetApisHttpMockInterface = ResponseProvidersInterface<{
   agentPolicy: () => GetAgentPoliciesResponse;
-}>([
+}>;
+export const fleetApisHttpMock = httpHandlerMockFactory<FleetApisHttpMockInterface>([
   {
     id: 'agentPolicy',
     path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
@@ -88,4 +105,16 @@ export const fleetApis = httpHandlerMockFactory<{
       };
     },
   },
+]);
+
+type EndpointPageHttpMockInterface = EndpointMetadataHttpMocksInterface &
+  EndpointPolicyResponseHttpMockInterface &
+  FleetApisHttpMockInterface;
+/**
+ * HTTP Mocks that support the Endpoint List and Details page
+ */
+export const endpointPageHttpMock = composeHttpHandlerMocks<EndpointPageHttpMockInterface>([
+  endpointMetadataHttpMocks,
+  endpointPolicyResponseHttpMock,
+  fleetApisHttpMock,
 ]);
