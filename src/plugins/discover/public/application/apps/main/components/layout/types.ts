@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
 import {
   IndexPattern,
   IndexPatternAttributes,
@@ -15,18 +14,18 @@ import {
 import { ISearchSource } from '../../../../../../../data/public';
 import { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { SavedSearchSubject } from '../../services/use_saved_search';
+import { SavedSearchRefetchSubject, SavedSearchSubject } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { SavedSearch } from '../../../../../saved_searches';
 
 export interface DiscoverLayoutProps {
   indexPattern: IndexPattern;
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-  refetch$: Subject<unknown>;
   resetQuery: () => void;
   navigateTo: (url: string) => void;
-  savedSearch$: SavedSearchSubject;
   savedSearch: SavedSearch;
+  savedSearchData$: SavedSearchSubject;
+  savedSearchRefetch$: SavedSearchRefetchSubject;
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: ISearchSource;
   services: DiscoverServices;

@@ -57,4 +57,7 @@ export const discoverServiceMock = ({
   navigation: {
     ui: { TopNavMenu },
   },
+  metadata: {
+    branch: 'test',
+  },
 } as unknown) as DiscoverServices;

@@ -107,23 +107,26 @@ export function useDiscoverState({
   ]);
 
   useEffect(() => {
-    const unsubscribe = stateContainer.appStateContainer.subscribe(async (newState) => {
+    const unsubscribe = stateContainer.appStateContainer.subscribe(async (nextState) => {
       // NOTE: this is also called when navigating from discover app to context app
-      if (newState.index && state.index !== newState.index) {
-        // in case of index pattern switch the route has currently to be reloaded, legacy
-        const ip = await loadIndexPattern(newState.index, services.indexPatterns, config);
+      if (nextState.index && state.index !== nextState.index) {
+        const nextIndexPattern = await loadIndexPattern(
+          nextState.index,
+          services.indexPatterns,
+          config
+        );
 
-        if (ip) {
-          setIndexPattern(ip.loaded);
+        if (nextIndexPattern) {
+          setIndexPattern(nextIndexPattern.loaded);
         }
       }
-      setState(newState);
+      setState(nextState);
     });
     return () => unsubscribe();
   }, [config, services.indexPatterns, state.index, stateContainer.appStateContainer, setState]);
 
   const resetSavedSearch = useCallback(
-    async (id: string) => {
+    async (id?: string) => {
       const newSavedSearch = await services.getSavedSearchById(id);
       newSavedSearch.searchSource.setField('index', indexPattern);
       const newAppState = getStateDefaults({

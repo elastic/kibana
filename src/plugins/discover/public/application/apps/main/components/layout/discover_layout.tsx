@@ -56,9 +56,9 @@ export function DiscoverLayout({
   indexPattern,
   indexPatternList,
   navigateTo,
-  refetch$,
+  savedSearchRefetch$,
   resetQuery,
-  savedSearch$,
+  savedSearchData$,
   savedSearch,
   searchSessionManager,
   searchSource,
@@ -82,7 +82,7 @@ export function DiscoverLayout({
   const collapseIcon = useRef<HTMLButtonElement>(null);
 
   const [fetchState, setFetchState] = useState<SavedSearchSubjectMessage>({
-    state: savedSearch$.getValue().state,
+    state: savedSearchData$.getValue().state,
     fetchCounter: 0,
     fieldCounts: {},
     rows: [],
@@ -90,7 +90,7 @@ export function DiscoverLayout({
   const { state: fetchStatus, fetchCounter, inspectorAdapters, rows } = fetchState;
 
   useEffect(() => {
-    const subscription = savedSearch$.subscribe((next) => {
+    const subscription = savedSearchData$.subscribe((next) => {
       if (
         (next.state && next.state !== fetchState.state) ||
         (next.fetchCounter && next.fetchCounter !== fetchState.fetchCounter) ||
@@ -103,7 +103,7 @@ export function DiscoverLayout({
     return () => {
       subscription.unsubscribe();
     };
-  }, [savedSearch$, fetchState]);
+  }, [savedSearchData$, fetchState]);
 
   const isMobile = () => {
     // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
@@ -132,10 +132,10 @@ export function DiscoverLayout({
     (_payload, isUpdate?: boolean) => {
       if (isUpdate === false) {
         searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-        refetch$.next();
+        savedSearchRefetch$.next();
       }
     },
-    [refetch$, searchSessionManager]
+    [savedSearchRefetch$, searchSessionManager]
   );
 
   const { onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useMemo(
@@ -226,8 +226,8 @@ export function DiscoverLayout({
   );
 
   const onEditRuntimeField = useCallback(() => {
-    refetch$.next('reset');
-  }, [refetch$]);
+    savedSearchRefetch$.next('reset');
+  }, [savedSearchRefetch$]);
 
   const columns = useMemo(() => {
     if (!state.columns) {
@@ -324,7 +324,7 @@ export function DiscoverLayout({
                   />
                 )}
                 {resultState === 'uninitialized' && (
-                  <DiscoverUninitialized onRefresh={() => refetch$.next()} />
+                  <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next()} />
                 )}
                 {resultState === 'loading' && <LoadingSpinner />}
                 {resultState === 'ready' && (

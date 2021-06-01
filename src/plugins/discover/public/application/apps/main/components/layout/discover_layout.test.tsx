@@ -13,56 +13,26 @@ import { setHeaderActionMenuMounter } from '../../../../../kibana_services';
 import { DiscoverLayout } from './discover_layout';
 import { esHits } from '../../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../../__mocks__/index_pattern';
-import { DiscoverServices } from '../../../../../build_services';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../../../../data/common/search/search_source/mocks';
-import { uiSettingsMock as mockUiSettings } from '../../../../../__mocks__/ui_settings';
 import { IndexPattern, IndexPatternAttributes } from '../../../../../../../data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import { indexPatternWithTimefieldMock } from '../../../../../__mocks__/index_pattern_with_timefield';
 import { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import { GetStateReturn } from '../../services/discover_state';
-import { DataPublicPluginStart } from '../../../../../../../data/public';
-import { TopNavMenu } from '../../../../../../../navigation/public';
 import { fetchStatuses } from '../../../../components/constants';
 import { DiscoverLayoutProps } from './types';
 import { SavedSearchSubject } from '../../services/use_saved_search';
+import { discoverServiceMock } from '../../../../../__mocks__/services';
 
 setHeaderActionMenuMounter(jest.fn());
 
 function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
   const searchSourceMock = createSearchSourceMock({});
-  const services = ({
-    data: {
-      query: {
-        timefilter: {
-          timefilter: {
-            getTime: () => {
-              return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-            },
-          },
-        },
-      },
-    } as DataPublicPluginStart,
-    metadata: {
-      branch: 'test',
-    },
-    timefilter: {
-      createFilter: jest.fn(),
-    },
-    capabilities: {
-      discover: {
-        save: true,
-      },
-      advancedSettings: {
-        save: true,
-      },
-    },
-    uiSettings: mockUiSettings,
-    navigation: {
-      ui: { TopNavMenu },
-    },
-  } as unknown) as DiscoverServices;
+  const services = discoverServiceMock;
+  services.data.query.timefilter.timefilter.getTime = () => {
+    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+  };
 
   const indexPatternList = ([indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
@@ -80,10 +50,10 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
     indexPattern,
     indexPatternList,
     navigateTo: jest.fn(),
-    refetch$: new Subject(),
     resetQuery: jest.fn(),
-    savedSearch$,
     savedSearch: savedSearchMock,
+    savedSearchData$: savedSearch$,
+    savedSearchRefetch$: new Subject(),
     searchSessionManager: {} as DiscoverSearchSessionManager,
     searchSource: searchSourceMock,
     services,

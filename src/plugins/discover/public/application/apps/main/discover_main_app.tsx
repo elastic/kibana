@@ -87,7 +87,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * Data fetching logic
    */
-  const { shouldSearchOnPageLoad, savedSearch$, refetch$ } = useSavedSearchData({
+  const { shouldSearchOnPageLoad, data$, refetch$ } = useSavedSearchData({
     indexPattern,
     savedSearch,
     searchSessionManager,
@@ -144,10 +144,10 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       indexPattern={indexPattern}
       indexPatternList={indexPatternList}
       resetQuery={resetQuery}
-      refetch$={refetch$}
       navigateTo={navigateTo}
       savedSearch={savedSearch}
-      savedSearch$={savedSearch$}
+      savedSearchData$={data$}
+      savedSearchRefetch$={refetch$}
       searchSessionManager={searchSessionManager}
       searchSource={searchSource}
       services={services}

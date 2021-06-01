@@ -39,7 +39,7 @@ describe('test useSavedSearch', () => {
     });
 
     expect(result.current.refetch$).toBeInstanceOf(Subject);
-    expect(result.current.savedSearch$.value).toMatchInlineSnapshot(`
+    expect(result.current.data$.value).toMatchInlineSnapshot(`
       Object {
         "state": "loading",
       }
@@ -83,10 +83,10 @@ describe('test useSavedSearch', () => {
     result.current.refetch$.next();
 
     await waitForValueToChange(() => {
-      return result.current.savedSearch$.value.state === 'complete';
+      return result.current.data$.value.state === 'complete';
     });
 
-    expect(result.current.savedSearch$.value.hits).toBe(0);
-    expect(result.current.savedSearch$.value.rows).toEqual([]);
+    expect(result.current.data$.value.hits).toBe(0);
+    expect(result.current.data$.value.rows).toEqual([]);
   });
 });

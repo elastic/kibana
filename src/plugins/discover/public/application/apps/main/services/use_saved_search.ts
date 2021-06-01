@@ -33,9 +33,12 @@ import { getDimensions, getChartAggConfigs } from '../utils';
 import { buildPointSeriesData, Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
 
+export type SavedSearchSubject = BehaviorSubject<SavedSearchSubjectMessage>;
+export type SavedSearchRefetchSubject = Subject<'reset' | undefined>;
+
 export interface UseSavedSearch {
-  refetch$: Subject<unknown>;
-  savedSearch$: SavedSearchSubject;
+  refetch$: SavedSearchRefetchSubject;
+  data$: SavedSearchSubject;
   shouldSearchOnPageLoad: () => boolean;
 }
 
@@ -50,8 +53,6 @@ export interface SavedSearchSubjectMessage {
   rows?: ElasticSearchHit[];
   state: string;
 }
-
-export type SavedSearchSubject = BehaviorSubject<SavedSearchSubjectMessage>;
 
 export const useSavedSearch = ({
   indexPattern,
@@ -79,7 +80,7 @@ export const useSavedSearch = ({
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
-      uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
+      uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch.id !== undefined ||
       timefilter.getRefreshInterval().pause === false ||
       searchSessionManager.hasSearchSessionIdInURL()
@@ -102,7 +103,7 @@ export const useSavedSearch = ({
    * By refetch$.next('reset') rows and fieldcounts are reset to allow e.g. editing of runtime fields
    * to be processed correctly
    */
-  const refetch$ = useMemo(() => new Subject(), []);
+  const refetch$ = useMemo(() => new Subject<'reset' | undefined>(), []);
 
   /**
    * Values that shouldn't trigger re-rendering when changed
@@ -113,8 +114,10 @@ export const useSavedSearch = ({
      * used to compare a new state against an old one, to evaluate if data needs to be fetched
      */
     appState: AppState;
-    // handler emitted by `timefilter.getAutoRefreshFetch$()`
-    // to notify when data completed loading and to start a new autorefresh loop
+    /**
+     * handler emitted by `timefilter.getAutoRefreshFetch$()`
+     * to notify when data completed loading and to start a new autorefresh loop
+     */
     autoRefreshDoneCb?: AutoRefreshDoneFn;
     fetchCounter: number;
     /**
@@ -143,6 +146,7 @@ export const useSavedSearch = ({
 
       if (refs.current.abortController) refs.current.abortController.abort();
       refs.current.abortController = new AbortController();
+      const sessionId = searchSessionManager.getNextSearchSessionId();
 
       // Let the UI know, data fetching started
       const loadingMessage: SavedSearchSubjectMessage = {
@@ -179,7 +183,7 @@ export const useSavedSearch = ({
 
       const searchSourceFetch$ = searchSource.fetch$({
         abortSignal: refs.current.abortController.signal,
-        sessionId: searchSessionManager.getNextSearchSessionId(),
+        sessionId,
         inspector: {
           adapter: inspectorAdapters.requests,
           title: i18n.translate('discover.inspectorRequestDataTitle', {
@@ -191,11 +195,8 @@ export const useSavedSearch = ({
         },
       });
 
-      searchSourceFetch$.subscribe(
+      searchSourceFetch$.pipe(filter((res) => isCompleteResponse(res))).subscribe(
         (res) => {
-          if (!isCompleteResponse(res)) {
-            return;
-          }
           const documents = res.rawResponse.hits.hits;
 
           const message: SavedSearchSubjectMessage = {
@@ -275,10 +276,8 @@ export const useSavedSearch = ({
       searchSessionManager.newSearchSessionIdFromURL$
     ).pipe(debounceTime(100));
 
-    const subscription = fetch$.subscribe({
-      next: (val) => {
-        fetchAll(val === 'reset');
-      },
+    const subscription = fetch$.subscribe((val) => {
+      fetchAll(val === 'reset');
     });
 
     return () => {
@@ -297,32 +296,23 @@ export const useSavedSearch = ({
    * Track state changes that should trigger a fetch
    */
   useEffect(() => {
-    let triggerFetch = false;
-    let resetFieldCounts = false;
-    if (state.hideChart !== refs.current.appState.hideChart && !state.hideChart) {
-      // chart was hidden, now it should be displayed, so data is needed
-      triggerFetch = true;
-    } else if (state.interval !== refs.current.appState.interval) {
-      // inverval of chart was changed
-      triggerFetch = true;
-    } else if (!isEqual(state.sort, refs.current.appState.sort)) {
-      // sorting of document table was changed
-      triggerFetch = true;
-    }
-    if (!isEqual(state.index, refs.current.appState.index)) {
-      // different index was selected
-      triggerFetch = true;
-      resetFieldCounts = true;
-    }
+    const prevAppState = refs.current.appState;
+
+    // chart was hidden, now it should be displayed, so data is needed
+    const chartDisplayChanged = state.hideChart !== prevAppState.hideChart && !state.hideChart;
+    const chartIntervalChanged = state.interval !== prevAppState.interval;
+    const docTableSortChanged = !isEqual(state.sort, prevAppState.sort);
+    const indexPatternChanged = !isEqual(state.index, prevAppState.index);
+
     refs.current.appState = state;
-    if (triggerFetch) {
-      refetch$.next(resetFieldCounts ? 'reset' : '');
+    if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged || indexPatternChanged) {
+      refetch$.next(indexPatternChanged ? 'reset' : undefined);
     }
   }, [refetch$, state.interval, state.sort, state]);
 
   return {
     refetch$,
-    savedSearch$,
+    data$: savedSearch$,
     shouldSearchOnPageLoad,
   };
 };

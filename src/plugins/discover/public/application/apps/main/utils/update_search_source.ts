@@ -57,6 +57,7 @@ export function updateSearchSource({
       // document-like response.
       .setPreferredSearchStrategyId('default');
 
+    // this is not the default index pattern, it determines that it's not of type rollup
     if (indexPatternsUtils.isDefault(indexPattern)) {
       volatileSearchSource.setField(
         'filter',

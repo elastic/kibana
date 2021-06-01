@@ -48,8 +48,7 @@ export function DiscoverChart({
   timefield?: string;
 }) {
   const toggleHideChart = useCallback(() => {
-    const newState = { ...state, hideChart: !state.hideChart };
-    stateContainer.setAppState(newState);
+    stateContainer.setAppState({ hideChart: !state.hideChart });
   }, [state, stateContainer]);
 
   const onChangeInterval = useCallback(

@@ -12,7 +12,7 @@ export function useUrl({
   resetSavedSearch,
 }: {
   history: History;
-  resetSavedSearch: (val: string) => void;
+  resetSavedSearch: (val?: string) => void;
 }) {
   /**
    * Url / Routing logic
@@ -23,7 +23,7 @@ export function useUrl({
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
       if (!search && !hash && pathname === '/') {
-        resetSavedSearch('');
+        resetSavedSearch();
       }
     });
     return () => unlistenHistoryBasePath();

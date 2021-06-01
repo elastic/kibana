@@ -29,7 +29,7 @@ import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../../../common';
 import { groupFields } from './lib/group_fields';
-import { IndexPattern, IndexPatternField } from '../../../../../../../data/public';
+import { IndexPatternField } from '../../../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
@@ -92,7 +92,6 @@ export function DiscoverSidebar({
   editField,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(selectedIndexPattern);
 
   const { indexPatternFieldEditor } = services;
   const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
@@ -101,11 +100,6 @@ export function DiscoverSidebar({
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
-  useEffect(() => {
-    if (indexPattern !== selectedIndexPattern) {
-      setIndexPattern(selectedIndexPattern);
-    }
-  }, [selectedIndexPattern, indexPattern]);
 
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
