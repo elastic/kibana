@@ -9,12 +9,14 @@ import type {
   PivotAggsConfigWithExtra,
   SortDirection,
   SortMode,
+  SortNumericFieldType,
 } from '../../../../../../common/pivot_aggs';
 
 export interface TopMetricsAggConfig {
   sortField: string;
   sortDirection?: SortDirection;
   sortMode?: SortMode;
+  numericType?: SortNumericFieldType;
 }
 
 export type PivotAggsConfigTopMetrics = PivotAggsConfigWithExtra<TopMetricsAggConfig>;

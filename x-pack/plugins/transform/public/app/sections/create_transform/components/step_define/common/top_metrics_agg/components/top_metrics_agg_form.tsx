@@ -13,10 +13,13 @@ import { PivotAggsConfigTopMetrics } from '../types';
 import { PivotConfigurationContext } from '../../../../pivot_configuration/pivot_configuration';
 import {
   isSpecialSortField,
+  KbnNumericType,
+  NUMERIC_TYPES_OPTIONS,
   SORT_DIRECTION,
   SORT_MODE,
   SortDirection,
   SortMode,
+  SortNumericFieldType,
   TOP_METRICS_SORT_FIELD_TYPES,
   TOP_METRICS_SPECIAL_SORT_FIELDS,
 } from '../../../../../../../common/pivot_aggs';
@@ -49,6 +52,8 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
     id: v,
     label: v,
   }));
+
+  const sortFieldType = fields.find((f) => f.name === aggConfig.sortField)?.type;
 
   return (
     <>
@@ -104,6 +109,12 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
                 defaultMessage="Sort mode"
               />
             }
+            helpText={
+              <FormattedMessage
+                id="xpack.transform.agg.popoverForm.sortModeTopMetricsHelpText"
+                defaultMessage="Only relevant if the sorting field is an array"
+              />
+            }
           >
             <EuiButtonGroup
               legend={i18n.translate('xpack.transform.agg.popoverForm.sortModeTopMetricsLabel', {
@@ -118,6 +129,29 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
               type="single"
             />
           </EuiFormRow>
+
+          {sortFieldType && NUMERIC_TYPES_OPTIONS.hasOwnProperty(sortFieldType) ? (
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.transform.agg.popoverForm.numericSortFieldTopMetricsLabel"
+                  defaultMessage="Numeric field"
+                />
+              }
+            >
+              <EuiSelect
+                options={NUMERIC_TYPES_OPTIONS[sortFieldType as KbnNumericType].map((v) => ({
+                  text: v,
+                  name: v,
+                }))}
+                value={aggConfig.sortField}
+                onChange={(e) => {
+                  onChange({ ...aggConfig, numericType: e.target.value as SortNumericFieldType });
+                }}
+                data-test-subj="transformSortNumericTypeTopMetricsLabel"
+              />
+            </EuiFormRow>
+          ) : null}
         </>
       )}
     </>

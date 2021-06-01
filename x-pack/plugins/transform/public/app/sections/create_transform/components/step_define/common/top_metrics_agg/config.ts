@@ -10,6 +10,7 @@ import {
   isSpecialSortField,
   isValidSortDirection,
   isValidSortMode,
+  isValidSortNumericType,
   PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,
 } from '../../../../../../common/pivot_aggs';
@@ -35,18 +36,19 @@ export function getTopMetricsAggConfig(
         return null;
       }
 
-      const { sortField, sortDirection, sortMode } = this.aggConfig;
+      const { sortField, sortDirection, sortMode, numericType } = this.aggConfig;
 
       let sort = null;
 
       if (isSpecialSortField(sortField)) {
         sort = sortField;
       } else {
-        if (sortMode) {
+        if (sortMode || numericType) {
           sort = {
             [sortField!]: {
               order: sortDirection,
-              mode: sortMode,
+              ...(sortMode ? { mode: sortMode } : {}),
+              ...(numericType ? { numeric_type: numericType } : {}),
             },
           };
         } else {
@@ -74,6 +76,7 @@ export function getTopMetricsAggConfig(
 
       let sortDirection = null;
       let sortMode = null;
+      let numericType = null;
 
       if (isValidSortDirection(sortDefinition)) {
         sortDirection = sortDefinition;
@@ -86,12 +89,16 @@ export function getTopMetricsAggConfig(
         if (isValidSortMode(sortDefinition.mode)) {
           sortMode = sortDefinition.mode;
         }
+        if (isValidSortNumericType(sortDefinition.numeric_type)) {
+          numericType = sortDefinition.numeric_type;
+        }
       }
 
       this.aggConfig = {
         sortField,
         sortDirection,
         ...(sortMode ? { sortMode } : {}),
+        ...(numericType ? { numericType } : {}),
       };
     },
     isValid() {

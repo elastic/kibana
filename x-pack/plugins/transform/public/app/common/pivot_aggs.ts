@@ -7,7 +7,7 @@
 
 import { FC } from 'react';
 
-import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import type { AggName } from '../../../common/types/aggregations';
 import type { Dictionary } from '../../../common/types/common';
@@ -89,6 +89,22 @@ export const SORT_MODE = {
   MEDIAN: 'median',
 } as const;
 
+export const NUMERIC_TYPES_OPTIONS = {
+  [KBN_FIELD_TYPES.NUMBER]: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
+  [KBN_FIELD_TYPES.DATE]: [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DATE_NANOS],
+};
+
+export type KbnNumericType = typeof KBN_FIELD_TYPES.NUMBER | typeof KBN_FIELD_TYPES.DATE;
+
+const SORT_NUMERIC_FIELD_TYPES = [
+  ES_FIELD_TYPES.DOUBLE,
+  ES_FIELD_TYPES.LONG,
+  ES_FIELD_TYPES.DATE,
+  ES_FIELD_TYPES.DATE_NANOS,
+] as const;
+
+export type SortNumericFieldType = typeof SORT_NUMERIC_FIELD_TYPES[number];
+
 export type SortMode = typeof SORT_MODE[keyof typeof SORT_MODE];
 
 export const TOP_METRICS_SPECIAL_SORT_FIELDS = {
@@ -105,6 +121,10 @@ export const isValidSortDirection = (arg: unknown) => {
 
 export const isValidSortMode = (arg: unknown) => {
   return Object.values(SORT_MODE).some((v) => v === arg);
+};
+
+export const isValidSortNumericType = (arg: unknown) => {
+  return SORT_NUMERIC_FIELD_TYPES.some((v) => v === arg);
 };
 
 /**
