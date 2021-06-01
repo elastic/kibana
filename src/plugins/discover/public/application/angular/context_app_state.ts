@@ -7,7 +7,7 @@
  */
 
 import { Filter } from '../../../../data/public';
-import { AnchorHitRecord } from './context/api/anchor';
+import { EsHitRecord } from './context/api/context';
 import { EsHitRecordList } from './context/api/context';
 import { SortDirection } from './context/api/utils/sorting';
 
@@ -48,13 +48,13 @@ export interface QueryParameters {
   indexPatternId: string;
   predecessorCount: number;
   successorCount: number;
-  sort: [string, SortDirection];
+  sort: Array<[string, SortDirection]>;
   tieBreakerField: string;
 }
 
 interface ContextRows {
   all: EsHitRecordList;
-  anchor: AnchorHitRecord;
+  anchor: EsHitRecord;
   predecessors: EsHitRecordList;
   successors: EsHitRecordList;
 }

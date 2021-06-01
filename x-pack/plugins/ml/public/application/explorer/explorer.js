@@ -19,9 +19,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiHorizontalRule,
-  EuiIcon,
   EuiIconTip,
   EuiPage,
   EuiPageBody,
@@ -29,7 +27,6 @@ import {
   EuiPageHeaderSection,
   EuiSpacer,
   EuiTitle,
-  EuiToolTip,
   EuiLoadingContent,
   EuiPanel,
   EuiAccordion,
@@ -78,6 +75,7 @@ import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
 import { AnomalyContextMenu } from './anomaly_context_menu';
+import { isDefined } from '../../../common/types/guards';
 
 const ExplorerPage = ({
   children,
@@ -263,6 +261,7 @@ export class ExplorerUI extends React.Component {
       selectedCells,
       selectedJobs,
       tableData,
+      swimLaneSeverity,
     } = this.props.explorerState;
     const { annotationsData, aggregations, error: annotationsError } = annotations;
 
@@ -276,6 +275,8 @@ export class ExplorerUI extends React.Component {
       (hasResults && overallSwimlaneData.points.some((v) => v.value > 0)) ||
       tableData.anomalies?.length > 0;
 
+    const hasActiveFilter = isDefined(swimLaneSeverity);
+
     if (noJobsFound && !loading) {
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
@@ -284,7 +285,7 @@ export class ExplorerUI extends React.Component {
       );
     }
 
-    if (hasResultsWithAnomalies === false && !loading) {
+    if (!hasResultsWithAnomalies && !loading && !hasActiveFilter) {
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
           <ExplorerNoResultsFound
@@ -374,7 +375,9 @@ export class ExplorerUI extends React.Component {
               explorerState={this.props.explorerState}
               setSelectedCells={this.props.setSelectedCells}
             />
+
             <EuiSpacer size="m" />
+
             {annotationsError !== undefined && (
               <>
                 <EuiTitle
@@ -402,9 +405,9 @@ export class ExplorerUI extends React.Component {
                 <EuiSpacer size="m" />
               </>
             )}
-            {loading === false && tableData.anomalies?.length && (
+            {loading === false && tableData.anomalies?.length ? (
               <AnomaliesMap anomalies={tableData.anomalies} jobIds={selectedJobIds} />
-            )}
+            ) : null}
             {annotationsData.length > 0 && (
               <>
                 <EuiPanel data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded">
@@ -476,47 +479,16 @@ export class ExplorerUI extends React.Component {
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
-                <EuiFlexGroup
-                  direction="row"
-                  gutterSize="l"
-                  responsive={true}
-                  className="ml-anomalies-controls"
-                >
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
-                        defaultMessage: 'Severity threshold',
-                      })}
-                    >
-                      <SelectSeverity />
-                    </EuiFormRow>
+                <EuiFlexGroup direction="row" gutterSize="l" responsive={true} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <SelectSeverity />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={
-                        <EuiToolTip
-                          content={i18n.translate('xpack.ml.explorer.intervalTooltip', {
-                            defaultMessage:
-                              'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
-                          })}
-                        >
-                          <span>
-                            {i18n.translate('xpack.ml.explorer.intervalLabel', {
-                              defaultMessage: 'Interval',
-                            })}
-                            <EuiIcon type="questionInCircle" color="subdued" />
-                          </span>
-                        </EuiToolTip>
-                      }
-                    >
-                      <SelectInterval />
-                    </EuiFormRow>
+                  <EuiFlexItem grow={false}>
+                    <SelectInterval />
                   </EuiFlexItem>
                   {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
-                    <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-                      <EuiFormRow label="&#8203;">
-                        <CheckboxShowCharts />
-                      </EuiFormRow>
+                    <EuiFlexItem grow={false}>
+                      <CheckboxShowCharts />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
@@ -524,7 +496,7 @@ export class ExplorerUI extends React.Component {
                 <EuiSpacer size="m" />
 
                 <div className="euiText explorer-charts">
-                  {showCharts && (
+                  {showCharts ? (
                     <ExplorerChartsContainer
                       {...{
                         ...chartsData,
@@ -535,7 +507,7 @@ export class ExplorerUI extends React.Component {
                         onSelectEntity: this.applyFilter,
                       }}
                     />
-                  )}
+                  ) : null}
                 </div>
 
                 <AnomaliesTable
