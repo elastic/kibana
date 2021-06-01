@@ -18,6 +18,7 @@ async function getDeprecations({
     message: `CorePluginDeprecationsPlugin is a deprecated feature for testing.`,
     documentationUrl: 'test-url',
     level: 'warning',
+    deprecationType: 'feature',
     correctiveActions: {
       manualSteps: ['Step a', 'Step b'],
     },
