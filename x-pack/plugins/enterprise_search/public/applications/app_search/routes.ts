@@ -16,8 +16,6 @@ export const SETTINGS_PATH = '/settings';
 export const CREDENTIALS_PATH = '/credentials';
 
 export const ROLE_MAPPINGS_PATH = '/role_mappings';
-export const ROLE_MAPPING_PATH = `${ROLE_MAPPINGS_PATH}/:roleId`;
-export const ROLE_MAPPING_NEW_PATH = `${ROLE_MAPPINGS_PATH}/new`;
 
 export const ENGINES_PATH = '/engines';
 export const ENGINE_CREATION_PATH = '/engine_creation';
