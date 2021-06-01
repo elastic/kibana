@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { FileDataVisualizer } from './application/file_datavisualizer';
+import { FileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper';
 
 export function registerHomeAddData(home: HomePublicPluginSetup) {
   home.addData.registerAddDataTab({
@@ -15,6 +15,6 @@ export function registerHomeAddData(home: HomePublicPluginSetup) {
     name: i18n.translate('xpack.fileDataVisualizer.embeddedTabTitle', {
       defaultMessage: 'Upload file',
     }),
-    component: FileDataVisualizer,
+    component: FileDataVisualizerWrapper,
   });
 }
