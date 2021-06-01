@@ -108,7 +108,36 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this.makeSearchSource(searchFilters, 0);
+
+    // Filters out any document that doesn't have geoip data. https://github.com/elastic/kibana/issues/73304
+    const filterGeoData = {
+      query: {
+        bool: {
+          filter: [
+            {
+              exists: {
+                field: this._descriptor.destGeoField,
+              },
+            },
+            {
+              exists: {
+                field: this._descriptor.sourceGeoField,
+              },
+            },
+          ],
+        },
+      },
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+      },
+    };
+
+    const searchSource = await this.makeSearchSource(
+      { ...searchFilters, filters: [...searchFilters.filters, filterGeoData] },
+      0
+    );
     searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destSplit: {
