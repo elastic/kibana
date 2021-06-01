@@ -188,27 +188,4 @@ describe('migration v2', () => {
       expect(doc.migrationVersion.foo).toBe('7.14.0');
     });
   });
-
-  it('migrates saved objects normally when multiple Kibana instances are running with different plugins', async () => {
-    const setupContracts = await Promise.all([rootA.setup(), rootB.setup(), rootC.setup()]);
-
-    // Only register migration from one instance to simulate scenario
-    // where different plugins are enabled on different Kibana instances.
-    setupContracts[0].savedObjects.registerType(fooType);
-
-    // TODO: Fails if rootA.start promise isn't resolved first.
-    // Make sure this isn't an issue with the algorithm.
-    await rootA.start();
-    await Promise.all([rootB.start(), rootC.start()]);
-
-    const esClient = esServer.es.getClient();
-    const migratedDocs = await fetchDocs(esClient, migratedIndex);
-
-    expect(migratedDocs.length).toBe(5000);
-    migratedDocs.forEach((doc, i) => {
-      expect(doc.id).toBe(`foo:${i}`);
-      expect(doc.foo.status).toBe(`migrated_${i}`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
-    });
-  });
 });
