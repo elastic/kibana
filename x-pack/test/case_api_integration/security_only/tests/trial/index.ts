@@ -12,7 +12,7 @@ import { createUsersAndRoles, deleteUsersAndRoles } from '../../../common/lib/au
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
-  describe('cases security and spaces enabled: trial', function () {
+  describe('cases security only enabled: trial', function () {
     // Fastest ciGroup for the moment.
     this.tags('ciGroup5');
 

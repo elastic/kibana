@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('apis', function () {
-    this.tags('ciGroup11');
-
-    loadTestFile(require.resolve('./ml'));
-    loadTestFile(require.resolve('./transform'));
-    loadTestFile(require.resolve('./security_solution'));
+  describe('SecuritySolution Endpoints basic licsense', () => {
+    loadTestFile(require.resolve('./cases_privileges'));
   });
 }
