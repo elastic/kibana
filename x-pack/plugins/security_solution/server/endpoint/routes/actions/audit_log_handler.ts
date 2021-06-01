@@ -23,26 +23,45 @@ export const actionsLogRequestHandler = (
 > => {
   const logger = endpointContext.logFactory.get('audit_log');
   return async (context, req, res) => {
+    const elasticAgentId = req.params.agent_id;
+    const options = {
+      headers: {
+        'X-elastic-product-origin': 'fleet',
+      },
+    };
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     let result;
     try {
-      result = await esClient.search({
-        index: AGENT_ACTIONS_INDEX,
-        body: {
-          query: {
-            match: {
-              agents: req.params.agent_id,
-            },
-          },
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
+      result = await esClient.search(
+        {
+          index: `*${AGENT_ACTIONS_INDEX}*`,
+          size: 20,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      should: [
+                        { terms: { agents: [elasticAgentId] } },
+                        { terms: { agent_id: [elasticAgentId] } },
+                      ],
+                    },
+                  },
+                ],
               },
             },
-          ],
+            sort: [
+              {
+                '@timestamp': {
+                  order: 'desc',
+                },
+              },
+            ],
+          },
         },
-      });
+        options
+      );
     } catch (error) {
       logger.error(error);
       throw error;
@@ -53,7 +72,10 @@ export const actionsLogRequestHandler = (
     }
 
     return res.ok({
-      body: result.body.hits.hits.map((e) => e._source),
+      body: result.body.hits.hits.map((e) => {
+        const type = /^.fleet-actions-\d+$/.test(e._index) ? 'action' : 'response';
+        return { type, item: e._source };
+      }),
     });
   };
 };
