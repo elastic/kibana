@@ -59,7 +59,7 @@ export const FLEET_ROUTING_PATHS = {
 };
 
 export const INTEGRATIONS_ROUTING_PATHS = {
-  integrations: '/:tabId?',
+  integrations: '/:tabId',
   integrations_all: '/browse',
   integrations_installed: '/installed',
   integration_details: '/detail/:pkgkey/:panel?',
