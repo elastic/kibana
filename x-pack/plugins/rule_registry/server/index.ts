@@ -17,6 +17,7 @@ export {
   createLifecycleRuleTypeFactory,
   LifecycleAlertService,
 } from './utils/create_lifecycle_rule_type_factory';
+export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
 export type { AlertTypeWithExecutor } from './types';
 
 export const plugin = (initContext: PluginInitializerContext) =>
