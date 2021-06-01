@@ -53,6 +53,7 @@ export interface ExternalServiceIncidentResponse {
   id: string;
   title: string;
   url: string;
+  pushedDate: string;
 }
 export interface ExternalServiceCommentResponse {
   pushedDate: string;

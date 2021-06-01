@@ -52,7 +52,6 @@ export const createExternalService = (
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'Private-Token': `${secrets.apiToken}`,
-    'kbn-xsrf': 'true',
   };
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
@@ -90,7 +89,12 @@ export const createExternalService = (
         method: 'post',
         url: getPostRecordUrl(appId),
       });
-      return { id: res.data.id, title: res.data.name, url: getRecordIdUrl(appId, res.data.id) };
+      return {
+        id: res.data.id,
+        title: res.data.name,
+        url: getRecordIdUrl(appId, res.data.id),
+        pushedDate: new Date(res.data.createdDate).toISOString(),
+      };
     } catch (error) {
       throw new Error(
         getErrorMessage(
@@ -124,6 +128,7 @@ export const createExternalService = (
         id: res.data.id,
         title: res.data.name,
         url: getRecordIdUrl(appId, params.incidentId),
+        pushedDate: new Date(res.data.modifiedDate).toISOString(),
       };
     } catch (error) {
       throw new Error(
@@ -163,8 +168,12 @@ export const createExternalService = (
         url: getPostCommentUrl(appId, incidentId, fieldId),
       });
 
-      // TODO: Check if commentId and externalCommentId is needed.
+      /**
+       * Swimlane response does not contain any data.
+       * We cannot get an externalCommentId
+       */
       return {
+        commentId: comment.commentId,
         pushedDate: createdDate,
       };
     } catch (error) {
