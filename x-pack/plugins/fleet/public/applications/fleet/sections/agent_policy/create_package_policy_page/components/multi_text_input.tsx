@@ -38,48 +38,55 @@ interface RowProps {
   showDeleteButton?: boolean;
 }
 
-const Row: FunctionComponent<RowProps> = React.memo(
-  ({ index, value, onChange, onDelete, onBlur, autoFocus, isDisabled, showDeleteButton }) => {
-    const onDeleteHandler = useCallback(() => {
-      onDelete(index);
-    }, [onDelete, index]);
+const Row: FunctionComponent<RowProps> = ({
+  index,
+  value,
+  onChange,
+  onDelete,
+  onBlur,
+  autoFocus,
+  isDisabled,
+  showDeleteButton,
+}) => {
+  const onDeleteHandler = useCallback(() => {
+    onDelete(index);
+  }, [onDelete, index]);
 
-    const onChangeHandler = useCallback(
-      (e: ChangeEvent<HTMLInputElement>) => {
-        onChange(index, e.target.value);
-      },
-      [onChange, index]
-    );
+  const onChangeHandler = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      onChange(index, e.target.value);
+    },
+    [onChange, index]
+  );
 
-    return (
-      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-        <EuiFlexItem>
-          <EuiFieldText
-            fullWidth
-            value={value}
-            onChange={onChangeHandler}
-            autoFocus={autoFocus}
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+      <EuiFlexItem>
+        <EuiFieldText
+          fullWidth
+          value={value}
+          onChange={onChangeHandler}
+          autoFocus={autoFocus}
+          disabled={isDisabled}
+          onBlur={onBlur}
+        />
+      </EuiFlexItem>
+      {showDeleteButton && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            color="text"
+            onClick={onDeleteHandler}
+            iconType="cross"
             disabled={isDisabled}
-            onBlur={onBlur}
+            aria-label={i18n.translate('xpack.fleet.multiTextInput.deleteRowButton', {
+              defaultMessage: 'Delete row',
+            })}
           />
         </EuiFlexItem>
-        {showDeleteButton && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              color="text"
-              onClick={onDeleteHandler}
-              iconType="cross"
-              disabled={isDisabled}
-              aria-label={i18n.translate('xpack.fleet.multiTextInput.deleteRowButton', {
-                defaultMessage: 'Delete row',
-              })}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    );
-  }
-);
+      )}
+    </EuiFlexGroup>
+  );
+};
 
 function defaultValue(value: string[]) {
   return value.length > 0 ? value : [''];
