@@ -20,18 +20,6 @@ export interface FixtureStartDeps {
   spaces?: SpacesPluginStart;
 }
 
-/**
- * These are a copy of the values here: x-pack/plugins/cases/common/constants.ts because when the plugin attempts to
- * import them from the constants.ts file it gets an error.
- */
-const casesSavedObjectTypes = [
-  'cases',
-  'cases-connector-mappings',
-  'cases-sub-case',
-  'cases-user-actions',
-  'cases-comments',
-  'cases-configure',
-];
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {
     const { features } = deps;
@@ -48,7 +36,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             all: ['securitySolutionFixture'],
           },
           savedObject: {
-            all: ['alert', ...casesSavedObjectTypes],
+            all: [],
             read: [],
           },
           ui: [],
@@ -60,7 +48,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           savedObject: {
             all: [],
-            read: [...casesSavedObjectTypes],
+            read: [],
           },
           ui: [],
         },
