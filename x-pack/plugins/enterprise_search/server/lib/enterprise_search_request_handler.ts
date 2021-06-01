@@ -19,6 +19,8 @@ import {
   Logger,
 } from 'src/core/server';
 
+import { ConfigType } from '../';
+
 import {
   ENTERPRISE_SEARCH_KIBANA_COOKIE,
   JSON_HEADER,
@@ -28,6 +30,7 @@ import {
 import { entSearchHttpAgent } from './enterprise_search_http_agent';
 
 interface ConstructorDependencies {
+  config: ConfigType;
   log: Logger;
 }
 interface RequestParams {
