@@ -86,6 +86,8 @@ export const WaterfallBarChart = ({
           showLegend={false}
           rotation={90}
           tooltip={{
+            // this is done to prevent the waterfall tooltip from rendering behind Kibana's
+            // stacked header when the user highlights an item at the top of the chart
             boundary: document.getElementById('app-fixed-viewport') ?? undefined,
             customTooltip: Tooltip,
           }}
