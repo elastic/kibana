@@ -11,10 +11,13 @@ import { DeprecationsService } from './deprecations_service';
 import { httpServiceMock } from '../http/http_service.mock';
 import { mockRouter } from '../http/router/router.mock';
 import { mockCoreContext } from '../core_context.mock';
-import { DeprecationsFactory } from './deprecations_factory';
+import { mockDeprecationsFactory } from './deprecations_factory.mock';
+import { mockDeprecationsRegistry } from './deprecations_registry.mock';
 
 describe('DeprecationsService', () => {
   const coreContext = mockCoreContext.create();
+  beforeEach(() => jest.clearAllMocks());
+
   describe('#setup', () => {
     const http = httpServiceMock.createInternalSetupContract();
     const router = mockRouter.create();
@@ -27,8 +30,8 @@ describe('DeprecationsService', () => {
       // Registers correct base api path
       expect(http.createRouter).toBeCalledWith('/api/deprecations');
       // registers get route '/'
-      expect(router.get.mock.calls[0][0]).toEqual({ path: '/', validate: false });
-      expect(router.get.mock.calls[0][1]).toBeInstanceOf(Function);
+      expect(router.get).toHaveBeenCalledTimes(1);
+      expect(router.get).toHaveBeenCalledWith({ path: '/', validate: false }, expect.any(Function));
     });
 
     it('calls registerConfigDeprecationsInfo', () => {
@@ -38,29 +41,16 @@ describe('DeprecationsService', () => {
       deprecationsService.setup(deprecationsCoreSetupDeps);
       expect(mockRegisterConfigDeprecationsInfo).toBeCalledTimes(1);
     });
-
-    it('returns setup contract', () => {
-      const deprecationsService = new DeprecationsService(coreContext);
-      const internalSetupContract = deprecationsService.setup(deprecationsCoreSetupDeps);
-      expect(internalSetupContract).toMatchInlineSnapshot(`
-        Object {
-          "getRegistry": [Function],
-        }
-      `);
-      const externalSetupContract = internalSetupContract.getRegistry('someDomain');
-
-      expect(externalSetupContract).toMatchInlineSnapshot(`
-        Object {
-          "registerDeprecations": [Function],
-        }
-      `);
-    });
   });
 
   describe('#registerConfigDeprecationsInfo', () => {
+    const deprecationsFactory = mockDeprecationsFactory.create();
+    const deprecationsRegistry = mockDeprecationsRegistry.create();
+    const getDeprecationsContext = mockDeprecationsRegistry.createGetDeprecationsContext();
+
     it('registers config deprecations', () => {
       const deprecationsService = new DeprecationsService(coreContext);
-      const mockGetHandledDeprecatedConfigs = jest.fn().mockReturnValue([
+      coreContext.configService.getHandledDeprecatedConfigs.mockReturnValue([
         [
           'testDomain',
           [
@@ -77,33 +67,17 @@ describe('DeprecationsService', () => {
           ],
         ],
       ]);
-      const mockRegisterDeprecations = jest.fn();
-      const mockGetRegistry = jest.fn().mockReturnValue({
-        registerDeprecations: mockRegisterDeprecations,
-      });
 
-      coreContext.configService.getHandledDeprecatedConfigs = mockGetHandledDeprecatedConfigs;
-      const deprecationsFactory = new DeprecationsFactory({
-        logger: deprecationsService['logger'],
-      });
-
-      deprecationsFactory.getRegistry = mockGetRegistry;
+      deprecationsFactory.getRegistry.mockReturnValue(deprecationsRegistry);
       deprecationsService['registerConfigDeprecationsInfo'](deprecationsFactory);
 
-      expect(mockGetHandledDeprecatedConfigs).toBeCalledTimes(1);
-      expect(mockGetRegistry).toBeCalledTimes(1);
-      expect(mockGetRegistry).toBeCalledWith('testDomain');
-      expect(mockRegisterDeprecations).toBeCalledTimes(1);
-
-      expect(mockRegisterDeprecations.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "getDeprecations": [Function],
-          },
-        ]
-      `);
-
-      const configDeprecations = mockRegisterDeprecations.mock.calls[0][0].getDeprecations();
+      expect(coreContext.configService.getHandledDeprecatedConfigs).toBeCalledTimes(1);
+      expect(deprecationsFactory.getRegistry).toBeCalledTimes(1);
+      expect(deprecationsFactory.getRegistry).toBeCalledWith('testDomain');
+      expect(deprecationsRegistry.registerDeprecations).toBeCalledTimes(1);
+      const configDeprecations = deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
+        getDeprecationsContext
+      );
       expect(configDeprecations).toMatchInlineSnapshot(`
         Array [
           Object {
