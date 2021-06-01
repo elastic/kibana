@@ -26,7 +26,7 @@ export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRT>;
 export const ConnectorMappingsAttributesRT = rt.type({
   action_type: ActionTypeRT,
   source: CaseFieldRT,
-  target: rt.union([ThirdPartyFieldRT, rt.undefined]),
+  target: ThirdPartyFieldRT,
 });
 
 export const ConnectorMappingsRt = rt.type({
