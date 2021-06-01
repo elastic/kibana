@@ -27,6 +27,7 @@ import { UptimeDatePicker } from './components/common/uptime_date_picker';
 import { useKibana } from '../../../../src/plugins/kibana_react/public';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
+import { SyntheticsCallout } from './components/overview/synthetics_callout';
 
 interface RouteProps {
   path: string;
@@ -127,6 +128,7 @@ export const PageRouter: FC = () => {
         ({ title, path, component: RouteComponent, dataTestSubj, telemetryId, pageHeader }) => (
           <Route path={path} key={telemetryId} exact={true}>
             <div data-test-subj={dataTestSubj}>
+              <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
               {pageHeader ? (
                 <PageTemplateComponent pageHeader={pageHeader}>
