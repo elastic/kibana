@@ -29,7 +29,11 @@ describe('mapColumn', () => {
     expect(result.type).toBe('datatable');
     expect(result.columns).toEqual([
       ...testTable.columns,
-      { id: 'pricePlusTwo', name: 'pricePlusTwo', meta: { type: 'number' } },
+      {
+        id: 'pricePlusTwo',
+        name: 'pricePlusTwo',
+        meta: { type: 'number', params: { id: 'number' } },
+      },
     ]);
     expect(result.columns[result.columns.length - 1]).toHaveProperty('name', 'pricePlusTwo');
     expect(result.rows[arbitraryRowIndex]).toHaveProperty('pricePlusTwo');
@@ -62,19 +66,6 @@ describe('mapColumn', () => {
     expect(result.columns).toHaveLength(testTable.columns.length + 1);
     expect(result.columns[nameColumnIndex]).toHaveProperty('id', 'new');
     expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name label');
-    expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
-    expect(result.rows[arbitraryRowIndex]).toHaveProperty('new', 202);
-  });
-
-  it('inserts a new column with a duplicate name if an id and name are provided', async () => {
-    const result = await runFn(testTable, { id: 'new', name: 'name', expression: pricePlusTwo });
-    const nameColumnIndex = result.columns.findIndex(({ id }) => id === 'new');
-    const arbitraryRowIndex = 4;
-
-    expect(result.type).toBe('datatable');
-    expect(result.columns).toHaveLength(testTable.columns.length + 1);
-    expect(result.columns[nameColumnIndex]).toHaveProperty('id', 'new');
-    expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name');
     expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
     expect(result.rows[arbitraryRowIndex]).toHaveProperty('new', 202);
   });
