@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, RequestHandlerContext } from 'src/core/server';
+import { IRouter } from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { IndexManagementPluginSetup } from '../../index_management/server';
@@ -24,7 +24,7 @@ export interface StartDependencies {
 }
 
 export interface RouteDependencies {
-  router: IRouter<RequestHandlerContext>;
+  router: IRouter;
   license: License;
   lib: {
     handleEsError: typeof handleEsError;
