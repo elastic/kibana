@@ -113,19 +113,6 @@ export function DiscoverGridDocumentToolbarBtn({
           />
         </EuiContextMenuItem>
       ),
-
-      <EuiContextMenuItem
-        data-test-subj="dscGridClearSelectedDocuments"
-        key="clearSelection"
-        icon="cross"
-        onClick={() => {
-          setIsSelectionPopoverOpen(false);
-          setSelectedDocs([]);
-          setIsFilterActive(false);
-        }}
-      >
-        <FormattedMessage id="discover.clearSelection" defaultMessage="Clear selection" />
-      </EuiContextMenuItem>,
       <EuiCopy
         key="copyJsonWrapper"
         data-test-subj="dscGridCopySelectedDocumentsJSON"
@@ -142,6 +129,18 @@ export function DiscoverGridDocumentToolbarBtn({
           </EuiContextMenuItem>
         )}
       </EuiCopy>,
+      <EuiContextMenuItem
+        data-test-subj="dscGridClearSelectedDocuments"
+        key="clearSelection"
+        icon="cross"
+        onClick={() => {
+          setIsSelectionPopoverOpen(false);
+          setSelectedDocs([]);
+          setIsFilterActive(false);
+        }}
+      >
+        <FormattedMessage id="discover.clearSelection" defaultMessage="Clear selection" />
+      </EuiContextMenuItem>,
     ];
   }, [
     isFilterActive,
