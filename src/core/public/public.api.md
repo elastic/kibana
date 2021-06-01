@@ -52,25 +52,23 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 // @internal (undocumented)
 export function __kbnBootstrap__(): Promise<void>;
 
+// Warning: (ae-forgotten-export) The symbol "AppNavOptions" needs to be exported by the entry point index.d.ts
+//
 // @public (undocumented)
-export interface App<HistoryLocationState = unknown> {
+export interface App<HistoryLocationState = unknown> extends AppNavOptions {
     appRoute?: string;
     capabilities?: Partial<Capabilities>;
     category?: AppCategory;
     chromeless?: boolean;
     deepLinks?: AppDeepLink[];
     defaultPath?: string;
-    euiIconType?: string;
     exactRoute?: boolean;
-    icon?: string;
     id: string;
     keywords?: string[];
     mount: AppMount<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
-    order?: number;
     status?: AppStatus;
     title: string;
-    tooltip?: string;
     updater$?: Observable<AppUpdater>;
 }
 
@@ -92,12 +90,7 @@ export type AppDeepLink = {
     title: string;
     keywords?: string[];
     navLinkStatus?: AppNavLinkStatus;
-    order?: number;
-    tooltip?: string;
-    euiIconType?: string;
-    icon?: string;
-    exactRoute?: boolean;
-} & ({
+} & AppNavOptions & ({
     path: string;
     deepLinks?: AppDeepLink[];
 } | {

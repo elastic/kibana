@@ -16,12 +16,7 @@ export declare type AppDeepLink = {
     title: string;
     keywords?: string[];
     navLinkStatus?: AppNavLinkStatus;
-    order?: number;
-    tooltip?: string;
-    euiIconType?: string;
-    icon?: string;
-    exactRoute?: boolean;
-} & ({
+} & AppNavOptions & ({
     path: string;
     deepLinks?: AppDeepLink[];
 } | {
