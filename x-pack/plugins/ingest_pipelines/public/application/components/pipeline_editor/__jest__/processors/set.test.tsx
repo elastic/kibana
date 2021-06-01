@@ -98,11 +98,11 @@ describe('Processor: Set', () => {
     form.setInputValue('fieldNameField.input', 'field_1');
 
     // Shouldnt be able to set mediaType if value is not a template string
-    form.setInputValue('valueFieldInput.input', 'hello');
+    form.setInputValue('valueFieldInput', 'hello');
     expect(exists('mediaTypeSelectorField')).toBe(false);
 
     // Set value to a template snippet and media_type to a non-default value
-    form.setInputValue('valueFieldInput.input', '{{{hello}}}');
+    form.setInputValue('valueFieldInput', '{{{hello}}}');
     form.setSelectValue('mediaTypeSelectorField', 'text/plain');
 
     // Save the field with new changes
@@ -127,7 +127,7 @@ describe('Processor: Set', () => {
     form.setInputValue('fieldNameField.input', 'field_1');
 
     // Set optional parameteres
-    form.setInputValue('valueFieldInput.input', '{{{hello}}}');
+    form.setInputValue('valueFieldInput', '{{{hello}}}');
     form.toggleEuiSwitch('overrideField.input');
     form.toggleEuiSwitch('ignoreEmptyField.input');
 

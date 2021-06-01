@@ -154,7 +154,7 @@ type TestSubject =
   | 'separatorValueField.input'
   | 'quoteValueField.input'
   | 'emptyValueField.input'
-  | 'valueFieldInput.input'
+  | 'valueFieldInput'
   | 'mediaTypeSelectorField'
   | 'ignoreEmptyField.input'
   | 'overrideField.input'
