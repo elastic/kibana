@@ -22,8 +22,7 @@ export default function spaceSelectorFunctionalTests({
     'spaceSelector',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/99581
-  describe.skip('Spaces', function () {
+  describe('Spaces', function () {
     this.tags('includeFirefox');
     describe('Space Selector', () => {
       before(async () => {

@@ -59,7 +59,6 @@ describe('Session service', () => {
       id,
       attributes: { ...mockSavedObject.attributes, sessionId: id },
     }));
-    sessionsClient.cancel.mockResolvedValue(undefined);
     sessionService = new SessionService(
       initializerContext,
       () =>
@@ -97,15 +96,6 @@ describe('Session service', () => {
       sessionService.clear();
       expect(sessionService.getSessionId()).toBeUndefined();
       expect(nowProvider.reset).toHaveBeenCalled();
-    });
-
-    it('Calling start twice clears the previous session', async () => {
-      sessionService.start();
-      expect(sessionService.getSessionId()).not.toBeUndefined();
-      expect(nowProvider.set).toHaveBeenCalled();
-      sessionService.start();
-      expect(sessionService.getSessionId()).not.toBeUndefined();
-      expect(sessionsClient.cancel).toHaveBeenCalled();
     });
 
     it("Can't clear other apps' session", async () => {

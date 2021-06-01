@@ -10,14 +10,14 @@ import { KbnClient } from '@kbn/test';
 import { AxiosError } from 'axios';
 import bluebird from 'bluebird';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EventFilterGenerator } from '../../../common/endpoint/data_generators/event_filter_generator';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_NAME,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
-} from '../../../../lists/common/constants';
+} from '@kbn/securitysolution-list-constants';
+import { EventFilterGenerator } from '../../../common/endpoint/data_generators/event_filter_generator';
 
 export const cli = () => {
   run(

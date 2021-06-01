@@ -213,10 +213,6 @@ export class SessionService {
    */
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
-
-    // cancel previous session if needed
-    this.cleanupPreviousSession();
-
     this.state.transitions.start({ appName: this.currentApp });
     return this.getSessionId()!;
   }
@@ -245,34 +241,24 @@ export class SessionService {
       );
       return;
     }
-    this.cleanupPreviousSession();
+
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;
-  }
-
-  private async cleanupPreviousSession() {
-    const { pendingSearches, sessionId, isRestore, isStored } = this.state.get();
-    if (sessionId && !isRestore && !isStored) {
-      pendingSearches.forEach((s) => {
-        s.abort();
-      });
-      await this.sessionsClient.cancel(sessionId).catch(() => {});
-    }
   }
 
   /**
    * Request a cancellation of on-going search requests within current session
    */
   public async cancel(): Promise<void> {
-    const { pendingSearches, sessionId } = this.state.get();
-    if (!sessionId) return;
-
-    pendingSearches.forEach((s) => {
+    const isStoredSession = this.state.get().isStored;
+    this.state.get().pendingSearches.forEach((s) => {
       s.abort();
     });
-    await this.sessionsClient.cancel(sessionId).catch(() => {});
     this.state.transitions.cancel();
+    if (isStoredSession) {
+      await this.sessionsClient.delete(this.state.get().sessionId!);
+    }
   }
 
   /**

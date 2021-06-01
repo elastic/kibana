@@ -84,13 +84,19 @@ class MyPlugin {
 import { LicensingPluginSetup } from '../licensing/public'
 class MyPlugin {
   setup(core: CoreSetup, deps: SetupDeps) {
+    const appUpdater$ = new BehaviorSubject<AppUpdater>(() => {});
+    core.application.register({
+      id: 'myApp',
+      updater$: appUpdater$,
+    });
+
     deps.licensing.license$.subscribe(license => {
       const { state, message } = license.check('myPlugin', 'gold')
       const hasRequiredLicense = state === 'valid';
       const showLinks = hasRequiredLicense && license.getFeature('name').isAvailable;
 
-      chrome.navLinks.update('myPlugin', {
-        hidden: !showLinks
+      appUpdater$.next(() => {
+        navLinkStatus: showLinks ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden
       });
     })
   }
