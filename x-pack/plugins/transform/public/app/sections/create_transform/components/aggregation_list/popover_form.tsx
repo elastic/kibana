@@ -226,13 +226,13 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           data-test-subj="transformAggName"
         />
       </EuiFormRow>
-      {availableFields.length > 0 && (
-        <EuiFormRow
-          label={i18n.translate('xpack.transform.agg.popoverForm.fieldLabel', {
-            defaultMessage: 'Field',
-          })}
-        >
-          {aggConfigDef.isMultiField ? (
+      {availableFields.length > 0 ? (
+        aggConfigDef.isMultiField ? (
+          <EuiFormRow
+            label={i18n.translate('xpack.transform.agg.popoverForm.fieldsLabel', {
+              defaultMessage: 'Fields',
+            })}
+          >
             <EuiComboBox
               fullWidth
               options={availableFields.map((v) => {
@@ -250,17 +250,24 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
                 setField(res);
               }}
               isClearable={false}
+              data-test-subj="transformAggFields"
             />
-          ) : (
+          </EuiFormRow>
+        ) : (
+          <EuiFormRow
+            label={i18n.translate('xpack.transform.agg.popoverForm.fieldsLabel', {
+              defaultMessage: 'Fields',
+            })}
+          >
             <EuiSelect
               options={availableFields}
               value={field as string}
               onChange={(e) => setField(e.target.value)}
               data-test-subj="transformAggField"
             />
-          )}
-        </EuiFormRow>
-      )}
+          </EuiFormRow>
+        )
+      ) : null}
       {availableAggs.length > 0 && (
         <EuiFormRow
           label={i18n.translate('xpack.transform.agg.popoverForm.aggLabel', {

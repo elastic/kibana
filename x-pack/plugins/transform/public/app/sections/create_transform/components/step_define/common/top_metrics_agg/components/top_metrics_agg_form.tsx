@@ -75,85 +75,95 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
         />
       </EuiFormRow>
 
-      {isSpecialFieldSelected ? null : (
+      {aggConfig.sortField ? (
         <>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.transform.agg.popoverForm.sortDirectionTopMetricsLabel"
-                defaultMessage="Sort direction"
-              />
-            }
-          >
-            <EuiButtonGroup
-              legend={i18n.translate(
-                'xpack.transform.agg.popoverForm.sortDirectionTopMetricsLabel',
-                {
-                  defaultMessage: 'Sort direction',
+          {isSpecialFieldSelected ? null : (
+            <>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.transform.agg.popoverForm.sortDirectionTopMetricsLabel"
+                    defaultMessage="Sort direction"
+                  />
                 }
-              )}
-              options={sortDirectionOptions}
-              idSelected={aggConfig.sortDirection}
-              onChange={(id: string) =>
-                onChange({ ...aggConfig, sortDirection: id as SortDirection })
-              }
-              color="text"
-              type="single"
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.transform.agg.popoverForm.sortModeTopMetricsLabel"
-                defaultMessage="Sort mode"
-              />
-            }
-            helpText={
-              <FormattedMessage
-                id="xpack.transform.agg.popoverForm.sortModeTopMetricsHelpText"
-                defaultMessage="Only relevant if the sorting field is an array"
-              />
-            }
-          >
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.transform.agg.popoverForm.sortModeTopMetricsLabel', {
-                defaultMessage: 'Sort mode',
-              })}
-              options={sortModeOptions}
-              idSelected={aggConfig.sortMode}
-              onChange={(id: string) => {
-                onChange({ ...aggConfig, sortMode: id as SortMode });
-              }}
-              color="text"
-              type="single"
-            />
-          </EuiFormRow>
-
-          {sortFieldType && NUMERIC_TYPES_OPTIONS.hasOwnProperty(sortFieldType) ? (
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.transform.agg.popoverForm.numericSortFieldTopMetricsLabel"
-                  defaultMessage="Numeric field"
+              >
+                <EuiButtonGroup
+                  legend={i18n.translate(
+                    'xpack.transform.agg.popoverForm.sortDirectionTopMetricsLabel',
+                    {
+                      defaultMessage: 'Sort direction',
+                    }
+                  )}
+                  options={sortDirectionOptions}
+                  idSelected={aggConfig.sortDirection}
+                  onChange={(id: string) =>
+                    onChange({ ...aggConfig, sortDirection: id as SortDirection })
+                  }
+                  color="text"
+                  type="single"
                 />
-              }
-            >
-              <EuiSelect
-                options={NUMERIC_TYPES_OPTIONS[sortFieldType as KbnNumericType].map((v) => ({
-                  text: v,
-                  name: v,
-                }))}
-                value={aggConfig.sortField}
-                onChange={(e) => {
-                  onChange({ ...aggConfig, numericType: e.target.value as SortNumericFieldType });
-                }}
-                data-test-subj="transformSortNumericTypeTopMetricsLabel"
-              />
-            </EuiFormRow>
-          ) : null}
+              </EuiFormRow>
+
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.transform.agg.popoverForm.sortModeTopMetricsLabel"
+                    defaultMessage="Sort mode"
+                  />
+                }
+                helpText={
+                  <FormattedMessage
+                    id="xpack.transform.agg.popoverForm.sortModeTopMetricsHelpText"
+                    defaultMessage="Only relevant if the sorting field is an array"
+                  />
+                }
+              >
+                <EuiButtonGroup
+                  legend={i18n.translate(
+                    'xpack.transform.agg.popoverForm.sortModeTopMetricsLabel',
+                    {
+                      defaultMessage: 'Sort mode',
+                    }
+                  )}
+                  options={sortModeOptions}
+                  idSelected={aggConfig.sortMode}
+                  onChange={(id: string) => {
+                    onChange({ ...aggConfig, sortMode: id as SortMode });
+                  }}
+                  color="text"
+                  type="single"
+                />
+              </EuiFormRow>
+
+              {sortFieldType && NUMERIC_TYPES_OPTIONS.hasOwnProperty(sortFieldType) ? (
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.transform.agg.popoverForm.numericSortFieldTopMetricsLabel"
+                      defaultMessage="Numeric field"
+                    />
+                  }
+                >
+                  <EuiSelect
+                    options={NUMERIC_TYPES_OPTIONS[sortFieldType as KbnNumericType].map((v) => ({
+                      text: v,
+                      name: v,
+                    }))}
+                    value={aggConfig.sortField}
+                    onChange={(e) => {
+                      onChange({
+                        ...aggConfig,
+                        numericType: e.target.value as SortNumericFieldType,
+                      });
+                    }}
+                    data-test-subj="transformSortNumericTypeTopMetricsLabel"
+                  />
+                </EuiFormRow>
+              ) : null}
+            </>
+          )}
         </>
-      )}
+      ) : null}
     </>
   );
 };
