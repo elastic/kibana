@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -16,10 +16,12 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
+  EuiSuperSelect,
+  EuiFieldText,
 } from '@elastic/eui';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { VisualizationDimensionEditorProps } from '../../types';
-import { DatatableVisualizationState } from '../visualization';
+import { ColumnState, DatatableVisualizationState } from '../visualization';
 import { getOriginalId } from '../transpose_helpers';
 import {
   CustomizablePalette,
@@ -27,14 +29,17 @@ import {
   defaultPaletteParams,
   FIXED_PROGRESSION,
   getStopsForFixedMode,
+  useDebouncedValue,
 } from '../../shared_components/';
 import { PalettePanelContainer } from './palette_panel_container';
 import { findMinMaxByColumnId } from './shared_utils';
 import './dimension_editor.scss';
+import { getDefaultSummaryLabel, getSummaryRowOptions } from '../summary';
 
 const idPrefix = htmlIdGenerator()();
 
 type ColumnType = DatatableVisualizationState['columns'][number];
+type SummaryRowType = Extract<ColumnState['summaryRow'], string>;
 
 function updateColumnWith(
   state: DatatableVisualizationState,
@@ -58,6 +63,23 @@ export function TableDimensionEditor(
   const { state, setState, frame, accessor } = props;
   const column = state.columns.find(({ columnId }) => accessor === columnId);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const onSummaryLabelChangeToDebounce = useCallback(
+    (newSummaryLabel: string | undefined) => {
+      setState({
+        ...state,
+        columns: updateColumnWith(state, accessor, { summaryLabel: newSummaryLabel }),
+      });
+    },
+    [accessor, setState, state]
+  );
+  const {
+    inputValue: summaryLabel,
+    handleInputChange: onSummaryLabelChange,
+    initialValue,
+  } = useDebouncedValue<string | undefined>({
+    onChange: onSummaryLabelChangeToDebounce,
+    value: column?.summaryLabel,
+  });
 
   if (!column) return null;
   if (column.isTransposed) return null;
@@ -69,9 +91,18 @@ export function TableDimensionEditor(
     currentData?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor)
       ?.meta.type === 'number';
 
+  // check for array values
+  const hasFieldNumericValues =
+    isNumericField &&
+    currentData?.rows.every(({ [accessor]: value }) => typeof value === 'number' || value == null);
+
   const currentAlignment = column?.alignment || (isNumericField ? 'right' : 'left');
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
+  const summaryRowOptions = getSummaryRowOptions();
+  // when switching from one operation to another, make sure to keep the configuration consistent
+  const summaryRowType = column?.summaryRow || 'none';
+  const fallbackSummaryLabel = getDefaultSummaryLabel(summaryRowType);
 
   const visibleColumnsCount = state.columns.filter((c) => !c.hidden).length;
 
@@ -174,6 +205,49 @@ export function TableDimensionEditor(
             }}
           />
         </EuiFormRow>
+      )}
+      {hasFieldNumericValues && (
+        <>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.lens.table.summaryRow.label', {
+              defaultMessage: 'Summary Row',
+            })}
+            display="columnCompressed"
+          >
+            <EuiSuperSelect<SummaryRowType>
+              data-test-subj="lnsDatatable_summaryrow_function"
+              valueOfSelected={summaryRowType}
+              options={summaryRowOptions}
+              compressed
+              onChange={(newValue) => {
+                setState({
+                  ...state,
+                  columns: updateColumnWith(state, accessor, { summaryRow: newValue }),
+                });
+              }}
+            />
+          </EuiFormRow>
+          {summaryRowType !== 'none' && (
+            <EuiFormRow
+              display="columnCompressed"
+              fullWidth
+              label={i18n.translate('xpack.lens.table.summaryRow.customlabel', {
+                defaultMessage: 'Summary label',
+              })}
+            >
+              <EuiFieldText
+                compressed
+                data-test-subj="lnsDatatable_summaryrow_label"
+                value={summaryLabel || fallbackSummaryLabel}
+                onChange={(e) => {
+                  onSummaryLabelChange(e.target.value);
+                }}
+                placeholder={initialValue || fallbackSummaryLabel}
+              />
+            </EuiFormRow>
+          )}
+        </>
       )}
       {isNumericField && (
         <>

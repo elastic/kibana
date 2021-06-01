@@ -23,6 +23,7 @@ import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { CustomPaletteParams } from '../shared_components/coloring/types';
 import { getStopsForFixedMode } from '../shared_components';
+import { getDefaultSummaryLabel } from './summary';
 
 export interface ColumnState {
   columnId: string;
@@ -38,6 +39,8 @@ export interface ColumnState {
   alignment?: 'left' | 'right' | 'center';
   palette?: PaletteOutput<CustomPaletteParams>;
   colorMode?: 'none' | 'cell' | 'text';
+  summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
+  summaryLabel?: string;
 }
 
 export interface SortingState {
@@ -376,6 +379,14 @@ export const getDatatableVisualization = ({
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                       colorMode: [column.colorMode ?? 'none'],
                       palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
+                      summaryRow:
+                        column.summaryRow == null || column.summaryRow === 'none'
+                          ? []
+                          : [column.summaryRow],
+                      summaryLabel:
+                        column.summaryRow == null || column.summaryRow === 'none'
+                          ? []
+                          : [column.summaryLabel || getDefaultSummaryLabel(column.summaryRow)],
                     },
                   },
                 ],

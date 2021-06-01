@@ -286,6 +286,26 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [onEditAction, sortBy, sortDirection]
   );
 
+  const renderSummaryRow = useMemo(() => {
+    const columnsWithSummary = columnConfig.columns.filter(({ summaryRow }) => summaryRow);
+
+    if (columnsWithSummary.length) {
+      const summaryLookup = Object.fromEntries(
+        columnsWithSummary.map(({ summaryRowValue, summaryLabel, columnId }) => [
+          columnId,
+          `${summaryLabel}: ${summaryRowValue}`,
+        ])
+      );
+      return ({ columnId }: { columnId: string }) => {
+        const currentAlignment = alignments && alignments[columnId];
+        const alignmentClassName = `lnsTableCell--${currentAlignment}`;
+        return summaryLookup[columnId] != null ? (
+          <div className={`lnsTableCell ${alignmentClassName}`}>{summaryLookup[columnId]}</div>
+        ) : null;
+      };
+    }
+  }, [columnConfig.columns, alignments]);
+
   if (isEmpty) {
     return <EmptyPlaceholder icon={LensIconChartDatatable} />;
   }
@@ -323,6 +343,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           sorting={sorting}
           onColumnResize={onColumnResize}
           toolbarVisibility={false}
+          renderFooterCellValue={renderSummaryRow}
         />
       </DataContext.Provider>
     </VisualizationContainer>
