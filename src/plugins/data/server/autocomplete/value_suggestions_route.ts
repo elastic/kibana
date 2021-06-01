@@ -10,12 +10,11 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import type { IFieldType } from '../index';
-import { shimAbortSignal } from '../index';
-import { findIndexPatternById, getFieldByName } from '../index_patterns';
 import { getRequestAbortedSignal } from '../lib';
 import { getKbnServerError } from '../../../kibana_utils/server';
 import type { ConfigSchema } from '../../config';
+import { termsEnumSuggestions } from './terms_enum';
+import { termsAggSuggestions } from './terms_agg';
 
 export function registerValueSuggestionsRoute(router: IRouter, config$: Observable<ConfigSchema>) {
   router.post(
@@ -41,44 +40,27 @@ export function registerValueSuggestionsRoute(router: IRouter, config$: Observab
     },
     async (context, request, response) => {
       const config = await config$.pipe(first()).toPromise();
-      const { tiers } = config.autocomplete.valueSuggestions;
       const { field: fieldName, query, filters, fieldMeta } = request.body;
       const { index } = request.params;
-      const signal = getRequestAbortedSignal(request.events.aborted$);
-
-      let field: IFieldType | undefined = fieldMeta;
-
-      if (!field?.name && !field?.type) {
-        const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
-
-        field = indexPattern && getFieldByName(fieldName, indexPattern);
-      }
+      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
       try {
-        const promise = context.core.elasticsearch.client.asCurrentUser.transport.request({
-          method: 'POST',
-          path: encodeURI(`/${index}/_terms_enum`),
-          body: {
-            field: field?.name ?? field,
-            string: query,
-            index_filter: {
-              bool: {
-                must: [
-                  ...filters,
-                  {
-                    terms: {
-                      _tier: tiers,
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        });
-
-        const result = await shimAbortSignal(promise, signal);
-
-        return response.ok({ body: result.body.terms });
+        const fn =
+          config.autocomplete.valueSuggestions.method === 'terms_enum'
+            ? termsEnumSuggestions
+            : termsAggSuggestions;
+        const body = await fn(
+          config,
+          context.core.savedObjects.client,
+          context.core.elasticsearch.client.asCurrentUser,
+          index,
+          fieldName,
+          query,
+          filters,
+          fieldMeta,
+          abortSignal
+        );
+        return response.ok({ body });
       } catch (e) {
         throw getKbnServerError(e);
       }

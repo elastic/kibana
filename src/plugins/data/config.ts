@@ -15,6 +15,9 @@ export const configSchema = schema.object({
     }),
     valueSuggestions: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      method: schema.oneOf([schema.literal('terms_enum'), schema.literal('terms_agg')], {
+        defaultValue: 'terms_enum',
+      }),
       tiers: schema.arrayOf(
         schema.oneOf([
           schema.literal('data_content'),
