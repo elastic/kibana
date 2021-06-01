@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import type { FunctionComponent, ChangeEvent } from 'react';
 
 import {
@@ -14,7 +14,6 @@ import {
   EuiFieldText,
   EuiButtonIcon,
   EuiSpacer,
-  EuiFormErrorText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,28 +29,25 @@ interface Props {
 interface RowProps {
   index: number;
   value: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange: (index: number, value: string) => void;
   onDelete: (index: number) => void;
-  errors?: string[];
   autoFocus?: boolean;
   isDisabled?: boolean;
-}
-
-function displayErrors(errors?: string[]) {
-  return errors?.length
-    ? errors.map((error, errorIndex) => (
-        <EuiFormErrorText key={errorIndex}>{error}</EuiFormErrorText>
-      ))
-    : null;
+  multi?: boolean;
 }
 
 const Row: FunctionComponent<RowProps> = React.memo(
-  ({ index, value, onChange, onDelete, autoFocus, errors, isDisabled }) => {
+  ({ index, value, onChange, onDelete, autoFocus, isDisabled, multi }) => {
     const onDeleteHandler = useCallback(() => {
       onDelete(index);
     }, [onDelete, index]);
 
-    const isInvalid = (errors?.length ?? 0) > 0;
+    const onChangeHandler = useCallback(
+      (e: ChangeEvent<HTMLInputElement>) => {
+        onChange(index, e.target.value);
+      },
+      [onChange, index]
+    );
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
@@ -59,24 +55,24 @@ const Row: FunctionComponent<RowProps> = React.memo(
           <EuiFieldText
             fullWidth
             value={value}
-            onChange={onChange}
+            onChange={onChangeHandler}
             autoFocus={autoFocus}
-            isInvalid={isInvalid}
             disabled={isDisabled}
           />
-          {displayErrors(errors)}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            color="text"
-            onClick={onDeleteHandler}
-            iconType="cross"
-            disabled={isDisabled}
-            aria-label={i18n.translate('xpack.fleet.multiTextInput.deleteRowButton', {
-              defaultMessage: 'Delete row',
-            })}
-          />
-        </EuiFlexItem>
+        {multi && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              color="text"
+              onClick={onDeleteHandler}
+              iconType="cross"
+              disabled={isDisabled}
+              aria-label={i18n.translate('xpack.fleet.multiTextInput.deleteRowButton', {
+                defaultMessage: 'Delete row',
+              })}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }
@@ -94,83 +90,58 @@ export const MultiTextInput: FunctionComponent<Props> = ({
   errors,
 }) => {
   const [autoFocus, setAutoFocus] = useState(false);
-  const rows = useMemo(() => {
-    return defaultValue(value).map((val, idx) => ({
-      value: val,
-      onChange: (e: ChangeEvent<HTMLInputElement>) => {
-        const newValue = [...value];
-        newValue[idx] = e.target.value;
+  const [rows, setRows] = useState(() => defaultValue(value));
+  const [previousRows, setPreviousRows] = useState(rows);
 
-        onChange(newValue);
-      },
-    }));
-  }, [value, onChange]);
+  useEffect(() => {
+    if (previousRows === rows) {
+      return;
+    }
+    setPreviousRows(rows);
+    if (rows[rows.length - 1] === '') {
+      onChange(rows.slice(0, rows.length - 1));
+    } else {
+      onChange(rows);
+    }
+  }, [onChange, previousRows, rows]);
 
-  const onDelete = useCallback(
+  const onDeleteHandler = useCallback(
     (idx: number) => {
-      onChange([...value.slice(0, idx), ...value.slice(idx + 1)]);
+      setRows([...rows.slice(0, idx), ...rows.slice(idx + 1)]);
     },
-    [value, onChange]
+    [rows]
+  );
+
+  const onChangeHandler = useCallback(
+    (idx: number, newValue: string) => {
+      const newRows = [...rows];
+      newRows[idx] = newValue;
+      setRows(newRows);
+    },
+    [rows]
   );
 
   const addRowHandler = useCallback(() => {
     setAutoFocus(true);
-    onChange([...defaultValue(value), '']);
-  }, [value, onChange]);
-
-  const globalErrors = useMemo(() => {
-    return errors && errors.filter((err) => err.index === undefined).map(({ message }) => message);
-  }, [errors]);
-
-  const indexedErrors = useMemo(() => {
-    if (!errors) {
-      return [];
-    }
-    return errors.reduce((acc, err) => {
-      if (err.index === undefined) {
-        return acc;
-      }
-
-      if (!acc[err.index]) {
-        acc[err.index] = [];
-      }
-
-      acc[err.index].push(err.message);
-
-      return acc;
-    }, [] as string[][]);
-  }, [errors]);
+    setRows([...rows, '']);
+  }, [rows]);
 
   return (
     <>
       <EuiFlexGroup gutterSize="s" direction="column">
         {rows.map((row, idx) => (
           <EuiFlexItem key={idx}>
-            {rows.length > 1 ? (
-              <Row
-                index={idx}
-                onChange={row.onChange}
-                onDelete={onDelete}
-                value={row.value}
-                autoFocus={autoFocus}
-                errors={indexedErrors[idx]}
-                isDisabled={isDisabled}
-              />
-            ) : (
-              <>
-                <EuiFieldText
-                  disabled={isDisabled}
-                  fullWidth
-                  value={row.value}
-                  onChange={row.onChange}
-                  isInvalid={!!indexedErrors[idx]}
-                />
-                {displayErrors(indexedErrors[idx])}
-              </>
-            )}
+            <Row
+              index={idx}
+              onChange={onChangeHandler}
+              onDelete={onDeleteHandler}
+              value={row}
+              autoFocus={autoFocus}
+              isDisabled={isDisabled}
+              multi={rows.length > 1}
+            />
           </EuiFlexItem>
         ))}
-        {displayErrors(globalErrors)}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiButtonEmpty
