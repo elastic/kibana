@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import { useState, useCallback } from 'react';
+import type React from 'react';
 
 export function useInput(defaultValue = '', validate?: (value: string) => string[] | undefined) {
-  const [value, setValue] = React.useState<string>(defaultValue);
-  const [errors, setErrors] = React.useState<string[] | undefined>();
+  const [value, setValue] = useState<string>(defaultValue);
+  const [errors, setErrors] = useState<string[] | undefined>();
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const newValue = e.target.value;
@@ -50,31 +51,31 @@ export function useInput(defaultValue = '', validate?: (value: string) => string
 }
 
 export function useComboInput(
+  id: string,
   defaultValue = [],
-  validate?: (value: string[]) => string[] | undefined
+  validate?: (value: string[]) => Array<{ message: string; index?: number }> | undefined
 ) {
-  const [value, setValue] = React.useState<string[]>(defaultValue);
-  const [errors, setErrors] = React.useState<string[] | undefined>();
+  const [value, setValue] = useState<string[]>(defaultValue);
+  const [errors, setErrors] = useState<Array<{ message: string; index?: number }> | undefined>();
 
   const isInvalid = errors !== undefined;
 
+  const onChange = useCallback(
+    (newValues: string[]) => {
+      setValue(newValues);
+      if (errors && validate && validate(newValues) === undefined) {
+        setErrors(undefined);
+      }
+    },
+    [validate, errors]
+  );
+
   return {
     props: {
-      selectedOptions: value.map((val: string) => ({ label: val })),
-      onCreateOption: (newVal: any) => {
-        setValue([...value, newVal]);
-      },
-      onChange: (newSelectedOptions: any[]) => {
-        const newValues = newSelectedOptions.map((option) => option.label);
-        setValue(newValues);
-        if (errors && validate && validate(newValues) === undefined) {
-          setErrors(undefined);
-        }
-      },
-      isInvalid,
-    },
-    formRowProps: {
-      error: errors,
+      id,
+      value,
+      onChange,
+      errors,
       isInvalid,
     },
     value,
