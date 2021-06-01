@@ -44,7 +44,9 @@ export interface EndpointActionResponse {
   };
 }
 
-export type ActivityLog = EndpointAction[] | EndpointActionResponse[];
+export type ActivityLogEntry = EndpointAction | EndpointActionResponse;
+
+export type ActivityLog = ActivityLogEntry[];
 
 export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
 

@@ -123,7 +123,7 @@ export const EndpointDetailsFlyout = memo(() => {
       content: activityLoading ? (
         ContentLoadingMarkup
       ) : (
-        <EndpointActivityLog endpointActions={activityLog} />
+        <EndpointActivityLog activityLog={activityLog} />
       ),
     },
   ];

@@ -8,14 +8,13 @@
 import React, { memo } from 'react';
 
 import { EuiAvatar, EuiComment, EuiText } from '@elastic/eui';
-import { Immutable, EndpointAction } from '../../../../../../../common/endpoint/types';
+import { Immutable, ActivityLogEntry } from '../../../../../../../common/endpoint/types';
 import { FormattedDateAndTime } from '../../../../../../common/components/endpoint/formatted_date_time';
 import { useEuiTheme } from '../../../../../../common/lib/theme/use_eui_theme';
 
-export const LogEntry = memo(
-  ({ endpointAction }: { endpointAction: Immutable<EndpointAction> }) => {
     const euiTheme = useEuiTheme();
     const isIsolated = endpointAction?.data.command === 'isolate';
+export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEntry> }) => {
 
     // do this better when we can distinguish between endpoint events vs user events
     const iconType = endpointAction.user_id === 'sys' ? 'dot' : isIsolated ? 'lock' : 'lockOpen';

@@ -21,7 +21,7 @@ export const EndpointActivityLog = memo(
     return (
       <>
         <EuiSpacer size="l" />
-        {endpointActions.type !== 'LoadedResourceState' || !endpointActions.data.length ? (
+        {activityLog.type !== 'LoadedResourceState' || !activityLog.data.length ? (
           <EuiEmptyPrompt
             iconType="editorUnorderedList"
             titleSize="s"
@@ -32,9 +32,13 @@ export const EndpointActivityLog = memo(
           <>
             <SearchBar onSearch={onSearch} placeholder={i18.SEARCH_ACTIVITY_LOG} />
             <EuiSpacer size="l" />
-            {endpointActions.data.map((endpointAction) => (
-              <LogEntry key={endpointAction.action_id} endpointAction={endpointAction} />
-            ))}
+
+            {
+              // @ts-ignore
+              activityLog.data.map((logEntry) => (
+                <LogEntry key={logEntry.item.action_id} logEntry={logEntry} />
+              ))
+            }
           </>
         )}
       </>
