@@ -35,7 +35,7 @@ import {
   buildCommentUserActionItem,
 } from '../../services/user_actions/helpers';
 
-import { AttachmentService, CaseService, CaseUserActionService } from '../../services';
+import { AttachmentService, CasesService, CaseUserActionService } from '../../services';
 import {
   CommentableCase,
   createAlertUpdateRequest,
@@ -60,7 +60,7 @@ async function getSubCase({
   userActionService,
   user,
 }: {
-  caseService: CaseService;
+  caseService: CasesService;
   savedObjectsClient: SavedObjectsClientContract;
   caseId: string;
   createdAt: string;
@@ -245,7 +245,7 @@ async function getCombinedCase({
   id,
   logger,
 }: {
-  caseService: CaseService;
+  caseService: CasesService;
   attachmentService: AttachmentService;
   soClient: SavedObjectsClientContract;
   id: string;

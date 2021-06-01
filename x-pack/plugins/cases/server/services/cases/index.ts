@@ -211,7 +211,7 @@ const transformNewSubCase = ({
   };
 };
 
-export class CaseService {
+export class CasesService {
   constructor(
     private readonly log: Logger,
     private readonly authentication?: SecurityPluginSetup['authc']

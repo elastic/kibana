@@ -17,7 +17,7 @@ import { Authorization } from '../authorization/authorization';
 import { GetSpaceFn } from '../authorization/types';
 import {
   CaseConfigureService,
-  CaseService,
+  CasesService,
   CaseUserActionService,
   ConnectorMappingsService,
   AttachmentService,
@@ -88,7 +88,7 @@ export class CasesClientFactory {
       logger: this.logger,
     });
 
-    const caseService = new CaseService(this.logger, this.options?.securityPluginStart?.authc);
+    const caseService = new CasesService(this.logger, this.options?.securityPluginStart?.authc);
     const userInfo = caseService.getUser({ request });
 
     return createCasesClient({

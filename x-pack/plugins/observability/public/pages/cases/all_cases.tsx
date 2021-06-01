@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
 
 import { AllCases } from '../../components/app/cases/all_cases';
 import * as i18n from '../../components/app/cases/translations';
@@ -15,9 +14,11 @@ import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../../components/app/cases/callout';
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 
 export const AllCasesPage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
+  const { ObservabilityPageTemplate } = usePluginContext();
   return userPermissions == null || userPermissions?.read ? (
     <>
       {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
@@ -26,7 +27,7 @@ export const AllCasesPage = React.memo(() => {
           messages={[{ ...savedObjectReadOnlyErrorMessage, title: '' }]}
         />
       )}
-      <EuiPageTemplate
+      <ObservabilityPageTemplate
         pageHeader={{
           pageTitle: (
             <>
@@ -36,7 +37,7 @@ export const AllCasesPage = React.memo(() => {
         }}
       >
         <AllCases userCanCrud={userPermissions?.crud ?? false} />
-      </EuiPageTemplate>
+      </ObservabilityPageTemplate>
     </>
   ) : (
     <CaseFeatureNoPermissions />

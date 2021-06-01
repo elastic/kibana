@@ -35,7 +35,7 @@ import {
   ensureAuthorized,
   getAuthorizationFilter,
 } from '../utils';
-import { CaseService } from '../../services';
+import { CasesService } from '../../services';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -106,7 +106,7 @@ export const getCaseIDsByAlertID = async (
 
     logSuccessfulAuthorization();
 
-    return CaseService.getCaseIDsFromAlertAggs(commentsWithAlert);
+    return CasesService.getCaseIDsFromAlertAggs(commentsWithAlert);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get case IDs using alert ID: ${alertID} options: ${JSON.stringify(

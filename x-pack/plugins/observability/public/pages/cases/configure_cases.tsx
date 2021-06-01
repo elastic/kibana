@@ -8,12 +8,13 @@
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import * as i18n from '../../components/app/cases/translations';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { CASES_APP_ID, CASES_OWNER } from '../../components/app/cases/constants';
 import { useKibana } from '../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;
@@ -24,7 +25,7 @@ function ConfigureCasesPageComponent() {
     application: { navigateToApp },
   } = useKibana().services;
   const userPermissions = useGetUserCasesPermissions();
-
+  const { ObservabilityPageTemplate } = usePluginContext();
   const goTo = useCallback(
     (ev) => {
       ev.preventDefault();
@@ -39,7 +40,7 @@ function ConfigureCasesPageComponent() {
   }
 
   return (
-    <EuiPageTemplate
+    <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: (
           <>
@@ -55,7 +56,7 @@ function ConfigureCasesPageComponent() {
         userCanCrud: userPermissions?.crud ?? false,
         owner: [CASES_OWNER],
       })}
-    </EuiPageTemplate>
+    </ObservabilityPageTemplate>
   );
 }
 

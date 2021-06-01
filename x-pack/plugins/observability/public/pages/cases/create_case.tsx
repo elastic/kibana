@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from '../../components/app/cases/translations';
 import { Create } from '../../components/app/cases/create';
@@ -14,6 +14,7 @@ import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { CASES_APP_ID } from '../../components/app/cases/constants';
 import { useKibana } from '../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;
@@ -21,6 +22,7 @@ const ButtonEmpty = styled(EuiButtonEmpty)`
 ButtonEmpty.displayName = 'ButtonEmpty';
 export const CreateCasePage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const {
     application: { navigateToApp },
   } = useKibana().services;
@@ -39,7 +41,7 @@ export const CreateCasePage = React.memo(() => {
   }
 
   return (
-    <EuiPageTemplate
+    <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: (
           <>
@@ -52,7 +54,7 @@ export const CreateCasePage = React.memo(() => {
       }}
     >
       <Create />
-    </EuiPageTemplate>
+    </ObservabilityPageTemplate>
   );
 });
 
