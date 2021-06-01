@@ -156,6 +156,13 @@ export const ENGINE_ACCESS_TITLE = i18n.translate(
   }
 );
 
+export const ENGINE_REQUIRED_ERROR = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineRequiredError',
+  {
+    defaultMessage: 'At least one assigned engine is required.',
+  }
+);
+
 export const ADVANCED_ROLE_TYPES = [
   {
     id: 'dev',

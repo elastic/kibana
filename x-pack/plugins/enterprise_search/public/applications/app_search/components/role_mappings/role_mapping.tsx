@@ -36,6 +36,7 @@ import {
   LIMITED_ENGINE_ACCESS_TITLE,
   LIMITED_ENGINE_ACCESS_DESCRIPTION,
   ENGINE_ACCESS_TITLE,
+  ENGINE_REQUIRED_ERROR,
 } from './constants';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
@@ -161,7 +162,7 @@ export const RoleMapping: React.FC = () => {
                   }
                 />
               </EuiFormRow>
-              <EuiFormRow>
+              <EuiFormRow isInvalid={!hasEngineAssignment} error={[ENGINE_REQUIRED_ERROR]}>
                 <>
                   <EuiRadio
                     id="selectEngines"
