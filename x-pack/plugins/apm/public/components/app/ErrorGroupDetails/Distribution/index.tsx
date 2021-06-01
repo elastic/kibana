@@ -26,6 +26,7 @@ import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters'
 import { useTheme } from '../../../../hooks/use_theme';
 import { AlertType } from '../../../../../common/alert_types';
 import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_annotations';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 type ErrorDistributionAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/errors/distribution'>;
 
@@ -64,8 +65,9 @@ export function ErrorDistribution({ distribution, title }: Props) {
   const xMax = d3.max(buckets, (d) => d.x0);
 
   const xFormatter = niceTimeFormatter([xMin, xMax]);
-
+  const { observabilityRuleTypeRegistry } = useApmPluginContext();
   const { alerts } = useApmServiceContext();
+  const { getFormatter } = observabilityRuleTypeRegistry;
 
   const tooltipProps: SettingsSpec['tooltip'] = {
     headerFormatter: (tooltip: TooltipValue) => {
@@ -118,6 +120,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
             alerts: alerts?.filter(
               (alert) => alert[RULE_ID]?.[0] === AlertType.ErrorCount
             ),
+            getFormatter,
             theme,
           })}
         </Chart>
