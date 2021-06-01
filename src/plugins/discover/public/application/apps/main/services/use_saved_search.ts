@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { merge, Subject, BehaviorSubject } from 'rxjs';
 import { debounceTime, tap, filter } from 'rxjs/operators';
@@ -32,17 +32,19 @@ import { SortOrder } from '../../../../saved_searches/types';
 import { getDimensions, getChartAggConfigs } from '../utils';
 import { buildPointSeriesData, Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
+import { useSingleton } from '../utils/use_singleton';
 
-export type SavedSearchSubject = BehaviorSubject<SavedSearchSubjectMessage>;
-export type SavedSearchRefetchSubject = Subject<'reset' | undefined>;
+export type SavedSearchDataSubject = BehaviorSubject<SavedSearchDataMessage>;
+export type SavedSearchRefetchSubject = Subject<SavedSearchRefetchMsg>;
 
 export interface UseSavedSearch {
   refetch$: SavedSearchRefetchSubject;
-  data$: SavedSearchSubject;
-  shouldSearchOnPageLoad: () => boolean;
+  data$: SavedSearchDataSubject;
 }
 
-export interface SavedSearchSubjectMessage {
+export type SavedSearchRefetchMsg = 'reset' | undefined;
+
+export interface SavedSearchDataMessage {
   bucketInterval?: TimechartBucketInterval;
   chartData?: Chart;
   fetchCounter?: number;
@@ -54,6 +56,18 @@ export interface SavedSearchSubjectMessage {
   state: string;
 }
 
+/**
+ * This hook return 2 observables, refetch$ allows to trigger data fetching, data$ to subscribe
+ * to the data fetching
+ * @param indexPattern
+ * @param savedSearch
+ * @param searchSessionManager
+ * @param searchSource
+ * @param services
+ * @param state
+ * @param stateContainer
+ * @param useNewFieldsApi
+ */
 export const useSavedSearch = ({
   indexPattern,
   savedSearch,
@@ -76,34 +90,33 @@ export const useSavedSearch = ({
   const { data, filterManager, uiSettings } = services;
   const timefilter = data.query.timefilter.timefilter;
 
-  const shouldSearchOnPageLoad = useCallback(() => {
+  const initFetchState = useMemo(() => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
-    return (
+    const shouldSearchOnPageLoad =
       uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch.id !== undefined ||
       timefilter.getRefreshInterval().pause === false ||
-      searchSessionManager.hasSearchSessionIdInURL()
-    );
+      searchSessionManager.hasSearchSessionIdInURL();
+    return shouldSearchOnPageLoad ? fetchStatuses.LOADING : fetchStatuses.UNINITIALIZED;
   }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
 
   /**
    * The observable the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const savedSearch$: SavedSearchSubject = useMemo(
+  const data$: SavedSearchDataSubject = useSingleton(
     () =>
       new BehaviorSubject({
-        state: shouldSearchOnPageLoad() ? fetchStatuses.LOADING : fetchStatuses.UNINITIALIZED,
-      }),
-    [shouldSearchOnPageLoad]
+        state: initFetchState,
+      })
   );
   /**
    * The observable to trigger data fetching in UI
    * By refetch$.next('reset') rows and fieldcounts are reset to allow e.g. editing of runtime fields
    * to be processed correctly
    */
-  const refetch$ = useMemo(() => new Subject<'reset' | undefined>(), []);
+  const refetch$ = useSingleton(() => new Subject<SavedSearchRefetchMsg>());
 
   /**
    * Values that shouldn't trigger re-rendering when changed
@@ -134,7 +147,7 @@ export const useSavedSearch = ({
     appState: state,
     fetchCounter: 0,
     fieldCounts: {},
-    fetchStatus: shouldSearchOnPageLoad() ? fetchStatuses.LOADING : fetchStatuses.UNINITIALIZED,
+    fetchStatus: initFetchState,
   });
 
   const fetchAll = useCallback(
@@ -149,7 +162,7 @@ export const useSavedSearch = ({
       const sessionId = searchSessionManager.getNextSearchSessionId();
 
       // Let the UI know, data fetching started
-      const loadingMessage: SavedSearchSubjectMessage = {
+      const loadingMessage: SavedSearchDataMessage = {
         state: fetchStatuses.LOADING,
         fetchCounter: ++refs.current.fetchCounter,
       };
@@ -159,7 +172,7 @@ export const useSavedSearch = ({
         loadingMessage.rows = [];
         loadingMessage.fieldCounts = {};
       }
-      savedSearch$.next(loadingMessage);
+      data$.next(loadingMessage);
       refs.current.fetchStatus = loadingMessage.state;
 
       const { sort } = stateContainer.appStateContainer.getState();
@@ -199,7 +212,7 @@ export const useSavedSearch = ({
         (res) => {
           const documents = res.rawResponse.hits.hits;
 
-          const message: SavedSearchSubjectMessage = {
+          const message: SavedSearchDataMessage = {
             state: fetchStatuses.COMPLETE,
             rows: documents,
             inspectorAdapters,
@@ -224,13 +237,13 @@ export const useSavedSearch = ({
           }
           refs.current.fieldCounts = message.fieldCounts!;
           refs.current.fetchStatus = message.state;
-          savedSearch$.next(message);
+          data$.next(message);
         },
         (error) => {
           if (error instanceof Error && error.name === 'AbortError') return;
           data.search.showError(error);
           refs.current.fetchStatus = fetchStatuses.ERROR;
-          savedSearch$.next({
+          data$.next({
             state: fetchStatuses.ERROR,
             inspectorAdapters,
             fetchError: error,
@@ -253,7 +266,7 @@ export const useSavedSearch = ({
       state.interval,
       data,
       searchSessionManager,
-      savedSearch$,
+      data$,
     ]
   );
 
@@ -310,9 +323,14 @@ export const useSavedSearch = ({
     }
   }, [refetch$, state.interval, state.sort, state]);
 
+  useEffect(() => {
+    if (initFetchState === fetchStatuses.LOADING) {
+      refetch$.next();
+    }
+  }, [initFetchState, refetch$]);
+
   return {
     refetch$,
-    data$: savedSearch$,
-    shouldSearchOnPageLoad,
+    data$,
   };
 };

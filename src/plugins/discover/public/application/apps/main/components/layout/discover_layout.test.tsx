@@ -22,7 +22,7 @@ import { DiscoverSearchSessionManager } from '../../services/discover_search_ses
 import { GetStateReturn } from '../../services/discover_state';
 import { fetchStatuses } from '../../../../components/constants';
 import { DiscoverLayoutProps } from './types';
-import { SavedSearchSubject } from '../../services/use_saved_search';
+import { SavedSearchDataSubject } from '../../services/use_saved_search';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
 
 setHeaderActionMenuMounter(jest.fn());
@@ -44,7 +44,7 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
     fetchCounter: 1,
     fieldCounts: {},
     hits: Number(esHits.length),
-  }) as SavedSearchSubject;
+  }) as SavedSearchDataSubject;
 
   return {
     indexPattern,

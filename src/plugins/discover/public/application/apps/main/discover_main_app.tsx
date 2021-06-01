@@ -87,7 +87,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * Data fetching logic
    */
-  const { shouldSearchOnPageLoad, data$, refetch$ } = useSavedSearchData({
+  const { data$, refetch$ } = useSavedSearchData({
     indexPattern,
     savedSearch,
     searchSessionManager,
@@ -105,23 +105,10 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
     setBreadcrumbsTitle(savedSearch, chrome);
-
-    if (shouldSearchOnPageLoad()) {
-      refetch$.next();
-    }
     return () => {
       data.search.session.clear();
     };
-  }, [
-    savedSearch,
-    chrome,
-    docLinks,
-    refetch$,
-    shouldSearchOnPageLoad,
-    stateContainer,
-    data,
-    config,
-  ]);
+  }, [savedSearch, chrome, docLinks, refetch$, stateContainer, data, config]);
 
   /**
    * Initializing syncing with state and help menu

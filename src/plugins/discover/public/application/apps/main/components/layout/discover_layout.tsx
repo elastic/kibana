@@ -47,7 +47,7 @@ import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
 import { InspectorSession } from '../../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { SavedSearchSubjectMessage } from '../../services/use_saved_search';
+import { SavedSearchDataMessage } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
@@ -85,7 +85,7 @@ export function DiscoverLayout({
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
 
-  const [fetchState, setFetchState] = useState<SavedSearchSubjectMessage>({
+  const [fetchState, setFetchState] = useState<SavedSearchDataMessage>({
     state: savedSearchData$.getValue().state,
     fetchCounter: 0,
     fieldCounts: {},

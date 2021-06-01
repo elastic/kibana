@@ -14,7 +14,7 @@ import {
 import { ISearchSource } from '../../../../../../../data/public';
 import { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { SavedSearchRefetchSubject, SavedSearchSubject } from '../../services/use_saved_search';
+import { SavedSearchRefetchSubject, SavedSearchDataSubject } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { SavedSearch } from '../../../../../saved_searches';
 
@@ -24,7 +24,7 @@ export interface DiscoverLayoutProps {
   resetQuery: () => void;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
-  savedSearchData$: SavedSearchSubject;
+  savedSearchData$: SavedSearchDataSubject;
   savedSearchRefetch$: SavedSearchRefetchSubject;
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: ISearchSource;

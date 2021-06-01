@@ -44,7 +44,6 @@ describe('test useSavedSearch', () => {
         "state": "loading",
       }
     `);
-    expect(result.current.shouldSearchOnPageLoad).toBeInstanceOf(Function);
   });
   test('refetch$ triggers a search', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
