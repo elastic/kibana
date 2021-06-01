@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
 import { Loading } from '../../../shared/loading';
 import { RoleMappingsTable } from '../../../shared/role_mapping';
@@ -57,5 +57,13 @@ describe('RoleMappings', () => {
     const wrapper = shallow(<RoleMappings />);
 
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+  });
+
+  it('handles button click', () => {
+    setMockValues({ ...mockValues, roleMappings: [] });
+    const wrapper = shallow(<RoleMappings />);
+    wrapper.find(EuiEmptyPrompt).dive().find(EuiButton).simulate('click');
+
+    expect(initializeRoleMapping).toHaveBeenCalled();
   });
 });

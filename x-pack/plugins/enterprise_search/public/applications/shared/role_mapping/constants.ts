@@ -168,6 +168,13 @@ export const ROLE_MAPPING_FLYOUT_CANCEL_BUTTON = i18n.translate(
   }
 );
 
+export const ROLE_MAPPING_ADD_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingAddButton',
+  {
+    defaultMessage: 'Add mapping',
+  }
+);
+
 export const ROLE_MAPPING_FLYOUT_CREATE_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.roleMappingFlyoutCreateButton',
   {

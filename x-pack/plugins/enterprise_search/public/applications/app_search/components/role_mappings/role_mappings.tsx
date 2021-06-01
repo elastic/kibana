@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiButton,
   EuiEmptyPrompt,
   EuiPageContent,
   EuiPageContentBody,
@@ -20,14 +21,13 @@ import {
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
-import { AddRoleMappingButton, RoleMappingsTable } from '../../../shared/role_mapping';
+import { RoleMappingsTable } from '../../../shared/role_mapping';
 import {
   EMPTY_ROLE_MAPPINGS_TITLE,
+  ROLE_MAPPING_ADD_BUTTON,
   ROLE_MAPPINGS_TITLE,
   ROLE_MAPPINGS_DESCRIPTION,
 } from '../../../shared/role_mapping/constants';
-
-import { ROLE_MAPPING_NEW_PATH } from '../../routes';
 
 import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING, EMPTY_ROLE_MAPPINGS_BODY } from './constants';
 import { RoleMappingsLogic } from './role_mappings_logic';
@@ -48,7 +48,11 @@ export const RoleMappings: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const addMappingButton = <AddRoleMappingButton path={ROLE_MAPPING_NEW_PATH} />;
+  const addMappingButton = (
+    <EuiButton fill onClick={() => initializeRoleMapping()}>
+      {ROLE_MAPPING_ADD_BUTTON}
+    </EuiButton>
+  );
 
   const roleMappingEmptyState = (
     <EuiPanel paddingSize="l" color="subdued" hasBorder={false}>
