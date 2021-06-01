@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { errors as esErrors } from 'elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import {
@@ -20,7 +20,7 @@ import {
 import { getIndexNotFoundError, getDocNotFoundError } from './lib';
 
 export default function ({ getService }) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('index_patterns/* error handler', () => {
@@ -98,8 +98,8 @@ export default function ({ getService }) {
       });
 
       it('wraps other errors in Boom', async () => {
-        const error = new esErrors.AuthenticationException(
-          {
+        const error = new esErrors.ResponseError({
+          body: {
             root_cause: [
               {
                 type: 'security_exception',
@@ -109,10 +109,8 @@ export default function ({ getService }) {
             type: 'security_exception',
             reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]',
           },
-          {
-            statusCode: 403,
-          }
-        );
+          statusCode: 403,
+        });
 
         expect(error).to.not.have.property('isBoom');
         const converted = convertEsError(indices, error);

@@ -845,6 +845,26 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                         <dt
                           class="euiDescriptionList__title c1"
                         >
+                          Date Modified
+                        </dt>
+                        <dd
+                          class="euiDescriptionList__description c2 eui-textBreakWord"
+                        >
+                          1 minute ago
+                        </dd>
+                        <dt
+                          class="euiDescriptionList__title c1"
+                        >
+                          Modified By
+                        </dt>
+                        <dd
+                          class="euiDescriptionList__description c2 eui-textBreakWord"
+                        >
+                          someone
+                        </dd>
+                        <dt
+                          class="euiDescriptionList__title c1"
+                        >
                           Description
                         </dt>
                         <dd
