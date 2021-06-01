@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-export {
-  getScreenshotMode,
-  setScreenshotModeEnabled,
-  setScreenshotModeDisabled,
-  KBN_SCREENSHOT_MODE_ENABLED_KEY,
-} from './get_set_browser_screenshot_mode';
+declare global {
+  interface Window {
+    _checkCanSendTelemetry: () => Promise<boolean>;
+    _resetTelemetry: () => Promise<void>;
+  }
+}
 
-export { KBN_SCREENSHOT_MODE_HEADER } from './constants';
+// Turn this file into a module
+export {};
