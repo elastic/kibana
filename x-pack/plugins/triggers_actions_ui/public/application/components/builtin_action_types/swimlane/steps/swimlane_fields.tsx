@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import {
   EuiButton,
   EuiFormRow,
@@ -94,7 +94,10 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
     [mappings]
   );
 
-  const mappingErrors = useMemo(() => errors?.mappings[0] ?? {}, [errors]);
+  const mappingErrors: Record<string, string> = useMemo(
+    () => (Array.isArray(errors?.mappings) ? errors?.mappings[0] : {}),
+    [errors]
+  );
 
   const resetConnection = useCallback(() => {
     updateCurrentStep(1);
@@ -125,6 +128,14 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({
     },
     [editActionConfig, fieldIdMap, mappings]
   );
+
+  /**
+   * Connector type needs to be updated on mount to All.
+   * Otherwise it is undefined and this will cause an error
+   * if the user saves the connector without any mapping
+   */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => editActionConfig('connectorType', connectorType), []);
 
   return (
     <>
