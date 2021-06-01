@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useStartServices } from '../applications/fleet/hooks';
+import { useStartServices } from './use_core';
 
 export function useCapabilities() {
   const core = useStartServices();
