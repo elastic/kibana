@@ -7,7 +7,7 @@
 
 import {
   EuiFlexGroup,
-  EuiPage,
+  EuiFlexItem,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -74,8 +74,9 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   return (
     <>
       <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
+
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
           <EuiPanel>
             <ErrorDistribution
               distribution={errorDistributionData}
@@ -87,9 +88,9 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
               )}
             />
           </EuiPanel>
+        </EuiFlexItem>
 
-          <EuiSpacer size="s" />
-
+        <EuiFlexItem>
           <EuiPanel>
             <EuiTitle size="xs">
               <h3>Errors</h3>
@@ -101,8 +102,8 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
               serviceName={serviceName}
             />
           </EuiPanel>
-        </EuiFlexGroup>
-      </EuiPage>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }

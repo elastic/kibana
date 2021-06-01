@@ -15,7 +15,7 @@ import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
-import { ServiceMap } from './';
+import { ServiceMap } from '.';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
 import { Router } from 'react-router-dom';
 

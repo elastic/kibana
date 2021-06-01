@@ -11,6 +11,7 @@ import React, { ReactNode } from 'react';
 import { EuiBetaBadge } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
+import { EuiTabs } from '@elastic/eui';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -23,15 +24,15 @@ import { useServiceNodeOverviewHref } from '../../shared/Links/apm/ServiceNodeOv
 import { useServiceOverviewHref } from '../../shared/Links/apm/service_overview_link';
 import { useTransactionsOverviewHref } from '../../shared/Links/apm/transaction_overview_link';
 import { useServiceProfilingHref } from '../../shared/Links/apm/service_profiling_link';
-import { MainTabs } from '../../shared/main_tabs';
 import { ErrorGroupOverview } from '../error_group_overview';
-import { ServiceMap } from '../ServiceMap';
+import { ServiceMap } from '../service_map';
 import { ServiceNodeOverview } from '../service_node_overview';
 import { ServiceMetrics } from '../service_metrics';
 import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../transaction_overview';
 import { ServiceProfiling } from '../service_profiling';
 import { Correlations } from '../correlations';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 interface Tab {
   key: string;
@@ -179,7 +180,7 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
 
   return (
     <>
-      <MainTabs>
+      <StyledTabs display="condensed">
         {tabs
           .filter((t) => !t.hidden)
           .map(({ href, key, text }) => (
@@ -195,8 +196,18 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
         <div style={{ marginLeft: 'auto' }}>
           <Correlations />
         </div>
-      </MainTabs>
+      </StyledTabs>
       {selectedTab ? selectedTab.render() : null}
     </>
   );
 }
+
+// Since our `EuiTab` components have `APMLink`s inside of them and not just
+// `href`s, we need to override the color of the links inside or they will all
+// be the primary color.
+const StyledTabs = euiStyled(EuiTabs)`
+  padding-bottom: ${({ theme }) => `${theme.eui.gutterTypes.gutterMedium}`};
+  margin-bottom: ${({ theme }) => `${theme.eui.gutterTypes.gutterMedium}`};
+  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
+`;

@@ -13,7 +13,7 @@ import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
 import { CytoscapeContext } from '../Cytoscape';
-import { Popover } from './';
+import { Popover } from '.';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
 
 export default {

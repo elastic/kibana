@@ -9,7 +9,6 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
@@ -38,27 +37,24 @@ export function ServiceMetrics({
   return (
     <>
       <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <ChartPointerEventContextProvider>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              {data.charts.map((chart) => (
-                <EuiFlexItem key={chart.key}>
-                  <EuiPanel>
-                    <MetricsChart
-                      start={start}
-                      end={end}
-                      chart={chart}
-                      fetchStatus={status}
-                    />
-                  </EuiPanel>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGrid>
-            <EuiSpacer size="xxl" />
-          </ChartPointerEventContextProvider>
-        </EuiFlexGroup>
-      </EuiPage>
+
+      <ChartPointerEventContextProvider>
+        <EuiFlexGrid columns={2} gutterSize="s">
+          {data.charts.map((chart) => (
+            <EuiFlexItem key={chart.key}>
+              <EuiPanel>
+                <MetricsChart
+                  start={start}
+                  end={end}
+                  chart={chart}
+                  fetchStatus={status}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+        <EuiSpacer size="xxl" />
+      </ChartPointerEventContextProvider>
     </>
   );
 }

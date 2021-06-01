@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiHorizontalRule,
-  EuiPage,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiHorizontalRule, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { flatten, isEmpty } from 'lodash';
 import React from 'react';
 import { RouteComponentProps, useHistory } from 'react-router-dom';
@@ -21,7 +14,6 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTransactionDistributionFetcher } from '../../../hooks/use_transaction_distribution_fetcher';
-import { ApmHeader } from '../../shared/ApmHeader';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
@@ -90,48 +82,48 @@ export function TransactionDetails({
 
   return (
     <>
-      <ApmHeader>
-        <EuiTitle>
-          <h1>{transactionName}</h1>
-        </EuiTitle>
-      </ApmHeader>
       <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <ChartPointerEventContextProvider>
-            <TransactionCharts />
-          </ChartPointerEventContextProvider>
 
-          <EuiHorizontalRule size="full" margin="l" />
+      <EuiSpacer size="s" />
 
-          <EuiPanel>
-            <TransactionDistribution
-              distribution={distributionData}
-              fetchStatus={distributionStatus}
-              urlParams={urlParams}
-              bucketIndex={bucketIndex}
-              onBucketClick={(bucket) => {
-                if (!isEmpty(bucket.samples)) {
-                  selectSampleFromBucketClick(bucket.samples[0]);
-                }
-              }}
-            />
-          </EuiPanel>
+      <EuiTitle>
+        <h2>{transactionName}</h2>
+      </EuiTitle>
 
-          <EuiSpacer size="s" />
+      <EuiSpacer size="s" />
 
-          <HeightRetainer>
-            <WaterfallWithSummmary
-              location={location}
-              urlParams={urlParams}
-              waterfall={waterfall}
-              isLoading={waterfallStatus === FETCH_STATUS.LOADING}
-              exceedsMax={exceedsMax}
-              traceSamples={traceSamples}
-            />
-          </HeightRetainer>
-        </EuiFlexGroup>
-      </EuiPage>
+      <ChartPointerEventContextProvider>
+        <TransactionCharts />
+      </ChartPointerEventContextProvider>
+
+      <EuiHorizontalRule size="full" margin="l" />
+
+      <EuiPanel>
+        <TransactionDistribution
+          distribution={distributionData}
+          fetchStatus={distributionStatus}
+          urlParams={urlParams}
+          bucketIndex={bucketIndex}
+          onBucketClick={(bucket) => {
+            if (!isEmpty(bucket.samples)) {
+              selectSampleFromBucketClick(bucket.samples[0]);
+            }
+          }}
+        />
+      </EuiPanel>
+
+      <EuiSpacer size="s" />
+
+      <HeightRetainer>
+        <WaterfallWithSummmary
+          location={location}
+          urlParams={urlParams}
+          waterfall={waterfall}
+          isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+          exceedsMax={exceedsMax}
+          traceSamples={traceSamples}
+        />
+      </HeightRetainer>
     </>
   );
 }

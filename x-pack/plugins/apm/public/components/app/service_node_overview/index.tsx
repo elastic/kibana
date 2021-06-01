@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiPage, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
@@ -145,25 +145,19 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
   return (
     <>
       <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiPanel>
-            <ManagedTable
-              noItemsMessage={i18n.translate(
-                'xpack.apm.jvmsTable.noJvmsLabel',
-                {
-                  defaultMessage: 'No JVMs were found',
-                }
-              )}
-              items={items}
-              columns={columns}
-              initialPageSize={INITIAL_PAGE_SIZE}
-              initialSortField={INITIAL_SORT_FIELD}
-              initialSortDirection={INITIAL_SORT_DIRECTION}
-            />
-          </EuiPanel>
-        </EuiFlexGroup>
-      </EuiPage>
+
+      <EuiPanel hasShadow={false}>
+        <ManagedTable
+          noItemsMessage={i18n.translate('xpack.apm.jvmsTable.noJvmsLabel', {
+            defaultMessage: 'No JVMs were found',
+          })}
+          items={items}
+          columns={columns}
+          initialPageSize={INITIAL_PAGE_SIZE}
+          initialSortField={INITIAL_SORT_FIELD}
+          initialSortDirection={INITIAL_SORT_DIRECTION}
+        />
+      </EuiPanel>
     </>
   );
 }

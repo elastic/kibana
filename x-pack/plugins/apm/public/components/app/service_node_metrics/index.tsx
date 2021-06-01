@@ -10,11 +10,9 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiStat,
-  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -29,7 +27,6 @@ import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { px, truncate, unit } from '../../../style/variables';
-import { ApmHeader } from '../../shared/ApmHeader';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { SearchBar } from '../../shared/search_bar';
@@ -89,15 +86,6 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
 
   return (
     <>
-      <ApmHeader>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h1>{serviceName}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </ApmHeader>
       {isAggregatedData ? (
         <EuiCallOut
           title={i18n.translate(
@@ -180,27 +168,26 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
         </MetadataFlexGroup>
       )}
       <SearchBar />
-      <EuiPage>
-        {agentName && (
-          <ChartPointerEventContextProvider>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              {data.charts.map((chart) => (
-                <EuiFlexItem key={chart.key}>
-                  <EuiPanel>
-                    <MetricsChart
-                      start={start}
-                      end={end}
-                      chart={chart}
-                      fetchStatus={status}
-                    />
-                  </EuiPanel>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGrid>
-            <EuiSpacer size="xxl" />
-          </ChartPointerEventContextProvider>
-        )}
-      </EuiPage>
+
+      {agentName && (
+        <ChartPointerEventContextProvider>
+          <EuiFlexGrid columns={2} gutterSize="s">
+            {data.charts.map((chart) => (
+              <EuiFlexItem key={chart.key}>
+                <EuiPanel>
+                  <MetricsChart
+                    start={start}
+                    end={end}
+                    chart={chart}
+                    fetchStatus={status}
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+          <EuiSpacer size="xxl" />
+        </ChartPointerEventContextProvider>
+      )}
     </>
   );
 }

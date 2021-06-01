@@ -26,11 +26,6 @@ import { KueryBar } from './KueryBar';
 import { TimeComparison } from './time_comparison';
 import { TransactionTypeSelect } from './transaction_type_select';
 
-const EuiFlexGroupSpaced = euiStyled(EuiFlexGroup)`
-  margin: ${({ theme }) =>
-    `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeS}`};
-`;
-
 interface Props {
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
@@ -49,7 +44,7 @@ function DebugQueryCallout() {
   }
 
   return (
-    <EuiFlexGroupSpaced>
+    <EuiFlexGroup>
       <EuiFlexItem>
         <EuiCallOut
           title={i18n.translate(
@@ -78,7 +73,7 @@ function DebugQueryCallout() {
           />
         </EuiCallOut>
       </EuiFlexItem>
-    </EuiFlexGroupSpaced>
+    </EuiFlexGroup>
   );
 }
 
@@ -90,7 +85,7 @@ export function SearchBar({
   return (
     <>
       <DebugQueryCallout />
-      <EuiFlexGroupSpaced
+      <EuiFlexGroup
         gutterSize="s"
         responsive={false}
         direction={isXXL ? 'row' : 'column'}
@@ -128,7 +123,7 @@ export function SearchBar({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-      </EuiFlexGroupSpaced>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
     </>
   );

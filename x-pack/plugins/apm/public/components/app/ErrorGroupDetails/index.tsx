@@ -9,8 +9,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -25,7 +23,6 @@ import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
-import { ApmHeader } from '../../shared/ApmHeader';
 import { SearchBar } from '../../shared/search_bar';
 import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
@@ -52,7 +49,7 @@ const Culprit = euiStyled.div`
   font-family: ${fontFamilyCode};
 `;
 
-function getShortGroupId(errorGroupId?: string) {
+export function getShortGroupId(errorGroupId?: string) {
   if (!errorGroupId) {
     return NOT_AVAILABLE_LABEL;
   }
@@ -69,32 +66,31 @@ function ErrorGroupHeader({
 }) {
   return (
     <>
-      <ApmHeader>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h1>
-                {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
-                  defaultMessage: 'Error group {errorGroupId}',
-                  values: {
-                    errorGroupId: getShortGroupId(groupId),
-                  },
-                })}
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          {isUnhandled && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="warning">
-                {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
-                  defaultMessage: 'Unhandled',
-                })}
-              </EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </ApmHeader>
       <SearchBar />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h2>
+              {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
+                defaultMessage: 'Error group {errorGroupId}',
+                values: {
+                  errorGroupId: getShortGroupId(groupId),
+                },
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        {isUnhandled && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="warning">
+              {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
+                defaultMessage: 'Unhandled',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     </>
   );
 }
@@ -154,66 +150,60 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
   return (
     <>
       <ErrorGroupHeader groupId={groupId} isUnhandled={isUnhandled} />
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPanel>
-            {showDetails && (
-              <Titles>
-                <EuiText>
-                  {logMessage && (
-                    <Fragment>
-                      <Label>
-                        {i18n.translate(
-                          'xpack.apm.errorGroupDetails.logMessageLabel',
-                          {
-                            defaultMessage: 'Log message',
-                          }
-                        )}
-                      </Label>
-                      <Message>{logMessage}</Message>
-                    </Fragment>
-                  )}
+
+      <EuiPanel>
+        {showDetails && (
+          <Titles>
+            <EuiText>
+              {logMessage && (
+                <Fragment>
                   <Label>
                     {i18n.translate(
-                      'xpack.apm.errorGroupDetails.exceptionMessageLabel',
+                      'xpack.apm.errorGroupDetails.logMessageLabel',
                       {
-                        defaultMessage: 'Exception message',
+                        defaultMessage: 'Log message',
                       }
                     )}
                   </Label>
-                  <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
-                  <Label>
-                    {i18n.translate(
-                      'xpack.apm.errorGroupDetails.culpritLabel',
-                      {
-                        defaultMessage: 'Culprit',
-                      }
-                    )}
-                  </Label>
-                  <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
-                </EuiText>
-              </Titles>
-            )}
-            <ErrorDistribution
-              distribution={errorDistributionData}
-              title={i18n.translate(
-                'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-                {
-                  defaultMessage: 'Occurrences',
-                }
+                  <Message>{logMessage}</Message>
+                </Fragment>
               )}
-            />
-          </EuiPanel>
-          <EuiSpacer size="s" />
-          {showDetails && (
-            <DetailView
-              errorGroup={errorGroupData}
-              urlParams={urlParams}
-              location={location}
-            />
+              <Label>
+                {i18n.translate(
+                  'xpack.apm.errorGroupDetails.exceptionMessageLabel',
+                  {
+                    defaultMessage: 'Exception message',
+                  }
+                )}
+              </Label>
+              <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
+              <Label>
+                {i18n.translate('xpack.apm.errorGroupDetails.culpritLabel', {
+                  defaultMessage: 'Culprit',
+                })}
+              </Label>
+              <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
+            </EuiText>
+          </Titles>
+        )}
+        <ErrorDistribution
+          distribution={errorDistributionData}
+          title={i18n.translate(
+            'xpack.apm.errorGroupDetails.occurrencesChartLabel',
+            {
+              defaultMessage: 'Occurrences',
+            }
           )}
-        </EuiPageBody>
-      </EuiPage>
+        />
+      </EuiPanel>
+      <EuiSpacer size="s" />
+      {showDetails && (
+        <DetailView
+          errorGroup={errorGroupData}
+          urlParams={urlParams}
+          location={location}
+        />
+      )}
     </>
   );
 }

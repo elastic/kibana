@@ -4,14 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import {
   getValueTypeConfig,
@@ -91,53 +84,39 @@ export function ServiceProfiling({
   return (
     <>
       <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h2>
-                {i18n.translate('xpack.apm.profilingOverviewTitle', {
-                  defaultMessage: 'Profiling',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
+
+      <EuiPanel>
+        <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            <EuiPanel>
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem>
-                  <ServiceProfilingTimeline
-                    start={start!}
-                    end={end!}
-                    series={profilingTimeline}
-                    onValueTypeSelect={(type) => {
-                      setValueType(type);
-                    }}
-                    selectedValueType={valueType}
-                  />
-                </EuiFlexItem>
-                {valueType ? (
-                  <EuiFlexItem>
-                    <EuiTitle size="s">
-                      <h3>{getValueTypeConfig(valueType).label}</h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                ) : null}
-                <EuiFlexItem>
-                  <ServiceProfilingFlamegraph
-                    serviceName={serviceName}
-                    environment={environment}
-                    valueType={valueType}
-                    start={start}
-                    end={end}
-                    kuery={kuery}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+            <ServiceProfilingTimeline
+              start={start!}
+              end={end!}
+              series={profilingTimeline}
+              onValueTypeSelect={(type) => {
+                setValueType(type);
+              }}
+              selectedValueType={valueType}
+            />
+          </EuiFlexItem>
+          {valueType ? (
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h3>{getValueTypeConfig(valueType).label}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem>
+            <ServiceProfilingFlamegraph
+              serviceName={serviceName}
+              environment={environment}
+              valueType={valueType}
+              start={start}
+              end={end}
+              kuery={kuery}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPage>
+      </EuiPanel>
     </>
   );
 }

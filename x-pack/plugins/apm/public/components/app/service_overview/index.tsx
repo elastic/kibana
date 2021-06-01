@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName } from '../../../../common/agent_name';
@@ -50,88 +50,85 @@ export function ServiceOverview({
     <AnnotationsContextProvider>
       <ChartPointerEventContextProvider>
         <SearchBar showTransactionTypeSelector showTimeComparison />
-        <EuiPage>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <EuiPanel>
-                <LatencyChart height={200} />
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup
-                direction={rowDirection}
-                gutterSize="s"
-                responsive={false}
-              >
+
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <EuiPanel>
+              <LatencyChart height={200} />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup
+              direction={rowDirection}
+              gutterSize="s"
+              responsive={false}
+            >
+              <EuiFlexItem grow={3}>
+                <ServiceOverviewThroughputChart height={chartHeight} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={7}>
+                <EuiPanel>
+                  <ServiceOverviewTransactionsTable serviceName={serviceName} />
+                </EuiPanel>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup
+              direction={rowDirection}
+              gutterSize="s"
+              responsive={false}
+            >
+              {!isRumAgent && (
                 <EuiFlexItem grow={3}>
-                  <ServiceOverviewThroughputChart height={chartHeight} />
+                  <TransactionErrorRateChart
+                    height={chartHeight}
+                    showAnnotations={false}
+                  />
                 </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={7}>
+                <EuiPanel>
+                  <ServiceOverviewErrorsTable serviceName={serviceName} />
+                </EuiPanel>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup
+              direction={rowDirection}
+              gutterSize="s"
+              responsive={false}
+            >
+              <EuiFlexItem grow={3}>
+                <TransactionBreakdownChart showAnnotations={false} />
+              </EuiFlexItem>
+              {!isRumAgent && (
                 <EuiFlexItem grow={7}>
                   <EuiPanel>
-                    <ServiceOverviewTransactionsTable
+                    <ServiceOverviewDependenciesTable
                       serviceName={serviceName}
                     />
                   </EuiPanel>
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {!isRumAgent && (
             <EuiFlexItem>
               <EuiFlexGroup
-                direction={rowDirection}
+                direction="column"
                 gutterSize="s"
                 responsive={false}
               >
-                {!isRumAgent && (
-                  <EuiFlexItem grow={3}>
-                    <TransactionErrorRateChart
-                      height={chartHeight}
-                      showAnnotations={false}
-                    />
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={7}>
-                  <EuiPanel>
-                    <ServiceOverviewErrorsTable serviceName={serviceName} />
-                  </EuiPanel>
-                </EuiFlexItem>
+                <ServiceOverviewInstancesChartAndTable
+                  chartHeight={chartHeight}
+                  serviceName={serviceName}
+                />
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup
-                direction={rowDirection}
-                gutterSize="s"
-                responsive={false}
-              >
-                <EuiFlexItem grow={3}>
-                  <TransactionBreakdownChart showAnnotations={false} />
-                </EuiFlexItem>
-                {!isRumAgent && (
-                  <EuiFlexItem grow={7}>
-                    <EuiPanel>
-                      <ServiceOverviewDependenciesTable
-                        serviceName={serviceName}
-                      />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {!isRumAgent && (
-              <EuiFlexItem>
-                <EuiFlexGroup
-                  direction="column"
-                  gutterSize="s"
-                  responsive={false}
-                >
-                  <ServiceOverviewInstancesChartAndTable
-                    chartHeight={chartHeight}
-                    serviceName={serviceName}
-                  />
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPage>
+          )}
+        </EuiFlexGroup>
       </ChartPointerEventContextProvider>
     </AnnotationsContextProvider>
   );

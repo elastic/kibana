@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { isFunction } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { getServiceNodeName } from '../../../../../common/service_nodes';
 import { APMRouteDefinition } from '../../../../application/routes';
 import { toQuery } from '../../../shared/Links/url_helpers';
 import { ErrorGroupDetails } from '../../ErrorGroupDetails';
-import { Home } from '../../Home';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ServiceDetails } from '../../service_details';
 import { ServiceNodeMetrics } from '../../service_node_metrics';
 import { Settings } from '../../Settings';
@@ -28,36 +29,12 @@ import {
   EditAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
 import { enableServiceOverview } from '../../../../../common/ui_settings_keys';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-/**
- * Given a path, redirect to that location, preserving the search and maintaining
- * backward-compatibilty with legacy (pre-7.9) hash-based URLs.
- */
-export function renderAsRedirectTo(to: string) {
-  return ({ location }: RouteComponentProps<{}>) => {
-    let resolvedUrl: URL | undefined;
-
-    // Redirect root URLs with a hash to support backward compatibility with URLs
-    // from before we switched to the non-hash platform history.
-    if (location.pathname === '' && location.hash.length > 0) {
-      // We just want the search and pathname so the host doesn't matter
-      resolvedUrl = new URL(location.hash.slice(1), 'http://localhost');
-      to = resolvedUrl.pathname;
-    }
-
-    return (
-      <Redirect
-        to={{
-          ...location,
-          hash: '',
-          pathname: to,
-          search: resolvedUrl ? resolvedUrl.search : location.search,
-        }}
-      />
-    );
-  };
-}
+import { renderAsRedirectTo } from '../../../routing/render_as_redirect';
+import { ApmMainTemplate } from '../../../routing/templates/apm_main_template';
+import { serviceInventoryRoutes } from '../../../routing/views/service_inventory';
+import { traceOverviewRoute } from '../../../routing/views/trace_overview';
+import { serviceMapRoute } from '../../../routing/views/service_map';
 
 // These component function definitions are used below with the `component`
 // property of the route definitions.
@@ -65,17 +42,6 @@ export function renderAsRedirectTo(to: string) {
 // If you provide an inline function to the component prop, you would create a
 // new component every render. This results in the existing component unmounting
 // and the new component mounting instead of just updating the existing component.
-function HomeServices() {
-  return <Home tab="services" />;
-}
-
-function HomeServiceMap() {
-  return <Home tab="service-map" />;
-}
-
-function HomeTraces() {
-  return <Home tab="traces" />;
-}
 
 function ServiceDetailsErrors(
   props: RouteComponentProps<{ serviceName: string }>
@@ -142,6 +108,10 @@ function SettingsApmIndices(props: RouteComponentProps<{}>) {
     </Settings>
   );
 }
+const SettingsApmIndicesTitle = i18n.translate(
+  'xpack.apm.breadcrumb.settings.indicesTitle',
+  { defaultMessage: 'Indices' }
+);
 
 function SettingsCustomizeUI(props: RouteComponentProps<{}>) {
   return (
@@ -162,35 +132,45 @@ function DefaultServicePageRouteHandler(
   return renderAsRedirectTo(`/services/${serviceName}/transactions`)(props);
 }
 
+const SettingsAgentConfigurationTitle = i18n.translate(
+  'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
+  { defaultMessage: 'Agent Configuration' }
+);
+const CreateAgentConfigurationTitle = i18n.translate(
+  'xpack.apm.breadcrumb.settings.createAgentConfigurationTitle',
+  { defaultMessage: 'Create Agent Configuration' }
+);
+const EditAgentConfigurationTitle = i18n.translate(
+  'xpack.apm.breadcrumb.settings.editAgentConfigurationTitle',
+  { defaultMessage: 'Edit Agent Configuration' }
+);
+const SettingsCustomizeUITitle = i18n.translate(
+  'xpack.apm.breadcrumb.settings.customizeUI',
+  {
+    defaultMessage: 'Customize UI',
+  }
+);
+const SettingsAnomalyDetectionTitle = i18n.translate(
+  'xpack.apm.breadcrumb.settings.anomalyDetection',
+  {
+    defaultMessage: 'Anomaly detection',
+  }
+);
 /**
  * The array of route definitions to be used when the application
  * creates the routes.
  */
 export const routes: APMRouteDefinition[] = [
-  {
-    exact: true,
-    path: '/',
-    render: renderAsRedirectTo('/services'),
-    breadcrumb: 'APM',
-  },
-  // !! Need to be kept in sync with the deepLinks in x-pack/plugins/apm/public/plugin.ts
-  {
-    exact: true,
-    path: '/services',
-    component: HomeServices,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
-      defaultMessage: 'Services',
-    }),
-  },
-  // !! Need to be kept in sync with the deepLinks in x-pack/plugins/apm/public/plugin.ts
-  {
-    exact: true,
-    path: '/traces',
-    component: HomeTraces,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
-      defaultMessage: 'Traces',
-    }),
-  },
+  /*
+   * Home routes
+   */
+  ...serviceInventoryRoutes,
+  traceOverviewRoute,
+  serviceMapRoute,
+
+  /*
+   * Settings routes
+   */
   {
     exact: true,
     path: '/settings',
@@ -201,82 +181,107 @@ export const routes: APMRouteDefinition[] = [
   },
   {
     exact: true,
-    path: '/settings/apm-indices',
-    component: SettingsApmIndices,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.settings.indicesTitle', {
-      defaultMessage: 'Indices',
-    }),
-  },
-  {
-    exact: true,
     path: '/settings/agent-configuration',
-    component: SettingsAgentConfiguration,
-    breadcrumb: i18n.translate(
-      'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
-      { defaultMessage: 'Agent Configuration' }
-    ),
+    component: withApmMainTemplate(SettingsAgentConfiguration, {
+      pageTitle: SettingsAgentConfigurationTitle,
+    }),
+    breadcrumb: SettingsAgentConfigurationTitle,
   },
   {
     exact: true,
     path: '/settings/agent-configuration/create',
-    breadcrumb: i18n.translate(
-      'xpack.apm.breadcrumb.settings.createAgentConfigurationTitle',
-      { defaultMessage: 'Create Agent Configuration' }
-    ),
-    component: CreateAgentConfigurationRouteHandler,
+    component: withApmMainTemplate(CreateAgentConfigurationRouteHandler, {
+      pageTitle: CreateAgentConfigurationTitle,
+    }),
+    breadcrumb: CreateAgentConfigurationTitle,
   },
   {
     exact: true,
     path: '/settings/agent-configuration/edit',
-    breadcrumb: i18n.translate(
-      'xpack.apm.breadcrumb.settings.editAgentConfigurationTitle',
-      { defaultMessage: 'Edit Agent Configuration' }
-    ),
-    component: EditAgentConfigurationRouteHandler,
+    breadcrumb: EditAgentConfigurationTitle,
+    component: withApmMainTemplate(EditAgentConfigurationRouteHandler, {
+      pageTitle: EditAgentConfigurationTitle,
+    }),
   },
+  {
+    exact: true,
+    path: '/settings/apm-indices',
+    component: withApmMainTemplate(SettingsApmIndices, {
+      pageTitle: SettingsApmIndicesTitle,
+    }),
+    breadcrumb: SettingsApmIndicesTitle,
+  },
+  {
+    exact: true,
+    path: '/settings/customize-ui',
+    component: withApmMainTemplate(SettingsCustomizeUI, {
+      pageTitle: SettingsCustomizeUITitle,
+    }),
+    breadcrumb: SettingsCustomizeUITitle,
+  },
+  {
+    exact: true,
+    path: '/settings/anomaly-detection',
+    component: withApmMainTemplate(SettingsAnomalyDetection, {
+      pageTitle: SettingsAnomalyDetectionTitle,
+    }),
+    breadcrumb: SettingsAnomalyDetectionTitle,
+  },
+
+  /*
+   * Services routes (with APM Service context)
+   */
   {
     exact: true,
     path: '/services/:serviceName',
     breadcrumb: ({ match }) => match.params.serviceName,
     component: DefaultServicePageRouteHandler,
-  } as APMRouteDefinition<{ serviceName: string }>,
+  },
   {
     exact: true,
     path: '/services/:serviceName/overview',
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.overviewTitle', {
       defaultMessage: 'Overview',
     }),
-    component: withApmServiceContext(ServiceDetailsOverview),
-  } as APMRouteDefinition<{ serviceName: string }>,
+    component: withApmServiceContext(ServiceDetailsOverview, {
+      pageTitle: ({ match }) => match.params.serviceName,
+    }),
+  },
   // errors
   {
     exact: true,
     path: '/services/:serviceName/errors/:groupId',
-    component: withApmServiceContext(ErrorGroupDetails),
+    component: withApmServiceContext(ErrorGroupDetails, {
+      pageTitle: ({ match }) => match.params.serviceName,
+    }),
     breadcrumb: ({ match }) => match.params.groupId,
-  } as APMRouteDefinition<{ groupId: string; serviceName: string }>,
+  },
   {
     exact: true,
     path: '/services/:serviceName/errors',
-    component: withApmServiceContext(ServiceDetailsErrors),
+    component: withApmServiceContext(ServiceDetailsErrors, {
+      pageTitle: ({ match }) => match.params.serviceName,
+    }),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.errorsTitle', {
       defaultMessage: 'Errors',
     }),
   },
-  // transactions
   {
     exact: true,
     path: '/services/:serviceName/transactions',
-    component: withApmServiceContext(ServiceDetailsTransactions),
+    component: withApmServiceContext(ServiceDetailsTransactions, {
+      pageTitle: ({ match }) => match.params.serviceName,
+    }),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.transactionsTitle', {
       defaultMessage: 'Transactions',
     }),
   },
-  // metrics
   {
     exact: true,
     path: '/services/:serviceName/metrics',
-    component: withApmServiceContext(ServiceDetailsMetrics),
+    component: withApmServiceContext(ServiceDetailsMetrics, {
+      pageTitle: ({ match }) => match.params.serviceName,
+    }),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
       defaultMessage: 'Metrics',
     }),
@@ -285,7 +290,9 @@ export const routes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/services/:serviceName/nodes',
-    component: withApmServiceContext(ServiceDetailsNodes),
+    component: withApmServiceContext(ServiceDetailsNodes, {
+      pageTitle: ({ match }) => match.params.serviceName,
+    }),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.nodesTitle', {
       defaultMessage: 'JVMs',
     }),
@@ -294,13 +301,17 @@ export const routes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/services/:serviceName/nodes/:serviceNodeName/metrics',
-    component: withApmServiceContext(ServiceNodeMetrics),
+    component: withApmServiceContext(ServiceNodeMetrics, {
+      pageTitle: ({ match }) => match.params.serviceName,
+    }),
     breadcrumb: ({ match }) => getServiceNodeName(match.params.serviceNodeName),
   },
   {
     exact: true,
     path: '/services/:serviceName/transactions/view',
-    component: withApmServiceContext(TransactionDetails),
+    component: withApmServiceContext(TransactionDetails, {
+      pageTitle: ({ match }) => match.params.serviceName,
+    }),
     breadcrumb: ({ location }) => {
       const query = toQuery(location.search);
       return query.transactionName as string;
@@ -309,7 +320,9 @@ export const routes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/services/:serviceName/profiling',
-    component: withApmServiceContext(ServiceDetailsProfiling),
+    component: withApmServiceContext(ServiceDetailsProfiling, {
+      pageTitle: ({ match }) => match.params.serviceName,
+    }),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceProfilingTitle', {
       defaultMessage: 'Profiling',
     }),
@@ -317,53 +330,72 @@ export const routes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/services/:serviceName/service-map',
-    component: withApmServiceContext(ServiceDetailsServiceMap),
+    component: withApmServiceContext(ServiceDetailsServiceMap, {
+      pageTitle: ({ match }) => match.params.serviceName,
+    }),
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
       defaultMessage: 'Service Map',
     }),
   },
+
+  /*
+   * Utilility routes
+   */
   {
     exact: true,
     path: '/link-to/trace/:traceId',
     component: TraceLink,
     breadcrumb: null,
   },
-  // !! Need to be kept in sync with the deepLinks in x-pack/plugins/apm/public/plugin.ts
-  {
-    exact: true,
-    path: '/service-map',
-    component: HomeServiceMap,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
-      defaultMessage: 'Service Map',
-    }),
-  },
-  {
-    exact: true,
-    path: '/settings/customize-ui',
-    component: SettingsCustomizeUI,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.settings.customizeUI', {
-      defaultMessage: 'Customize UI',
-    }),
-  },
-  {
-    exact: true,
-    path: '/settings/anomaly-detection',
-    component: SettingsAnomalyDetection,
-    breadcrumb: i18n.translate(
-      'xpack.apm.breadcrumb.settings.anomalyDetection',
-      {
-        defaultMessage: 'Anomaly detection',
-      }
-    ),
-  },
 ];
 
-function withApmServiceContext(WrappedComponent: React.ComponentType<any>) {
+interface Options {
+  pageTitle: string | ((props: any) => any);
+  environmentSelector?: boolean;
+}
+
+{
+  /* <ServiceIcons serviceName={serviceName} /> */
+}
+
+function withApmServiceContext(
+  WrappedComponent: React.ComponentType<any>,
+  options: Options
+) {
   return (props: any) => {
+    const pageTitle = isFunction(options.pageTitle)
+      ? options.pageTitle(props)
+      : options.pageTitle;
+
     return (
-      <ApmServiceContextProvider>
+      <ApmMainTemplate
+        pageTitle={pageTitle}
+        environmentSelector={options.environmentSelector}
+      >
+        <ApmServiceContextProvider>
+          <WrappedComponent {...props} />
+        </ApmServiceContextProvider>
+      </ApmMainTemplate>
+    );
+  };
+}
+
+function withApmMainTemplate<T>(
+  WrappedComponent: React.ComponentType<any>,
+  options: Options
+) {
+  return (props: T) => {
+    const pageTitle = isFunction(options.pageTitle)
+      ? options.pageTitle(props)
+      : options.pageTitle;
+
+    return (
+      <ApmMainTemplate
+        pageTitle={pageTitle}
+        environmentSelector={options.environmentSelector}
+      >
         <WrappedComponent {...props} />
-      </ApmServiceContextProvider>
+      </ApmMainTemplate>
     );
   };
 }

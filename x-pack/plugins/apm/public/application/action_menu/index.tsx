@@ -15,7 +15,7 @@ import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_con
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 
-export function ActionMenu() {
+export function ApmHeaderActionMenu() {
   const { core, plugins } = useApmPluginContext();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { search } = window.location;

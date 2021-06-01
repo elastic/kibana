@@ -9,7 +9,6 @@ import {
   EuiCallOut,
   EuiCode,
   EuiFlexGroup,
-  EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -81,61 +80,56 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   return (
     <>
       <SearchBar showTransactionTypeSelector />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <TransactionCharts />
-          <EuiSpacer size="s" />
-          <EuiPanel>
-            <EuiTitle size="xs">
-              <h3>Transactions</h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            {!transactionListData.isAggregationAccurate && (
-              <EuiCallOut
-                title={i18n.translate(
-                  'xpack.apm.transactionCardinalityWarning.title',
-                  {
-                    defaultMessage:
-                      'This view shows a subset of reported transactions.',
-                  }
-                )}
-                color="danger"
-                iconType="alert"
-              >
-                <p>
-                  <FormattedMessage
-                    id="xpack.apm.transactionCardinalityWarning.body"
-                    defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
-                    values={{
-                      bucketSize: transactionListData.bucketSize,
-                      codeBlock: (
-                        <EuiCode>
-                          xpack.apm.ui.transactionGroupBucketSize
-                        </EuiCode>
-                      ),
-                    }}
-                  />
 
-                  <ElasticDocsLink
-                    section="/kibana"
-                    path="/troubleshooting.html#troubleshooting-too-many-transactions"
-                  >
-                    {i18n.translate(
-                      'xpack.apm.transactionCardinalityWarning.docsLink',
-                      { defaultMessage: 'Learn more in the docs' }
-                    )}
-                  </ElasticDocsLink>
-                </p>
-              </EuiCallOut>
+      <TransactionCharts />
+      <EuiSpacer size="s" />
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h3>Transactions</h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        {!transactionListData.isAggregationAccurate && (
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.apm.transactionCardinalityWarning.title',
+              {
+                defaultMessage:
+                  'This view shows a subset of reported transactions.',
+              }
             )}
-            <EuiSpacer size="s" />
-            <TransactionList
-              isLoading={transactionListStatus === 'loading'}
-              items={transactionListData.items || []}
-            />
-          </EuiPanel>
-        </EuiFlexGroup>
-      </EuiPage>
+            color="danger"
+            iconType="alert"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.apm.transactionCardinalityWarning.body"
+                defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
+                values={{
+                  bucketSize: transactionListData.bucketSize,
+                  codeBlock: (
+                    <EuiCode>xpack.apm.ui.transactionGroupBucketSize</EuiCode>
+                  ),
+                }}
+              />
+
+              <ElasticDocsLink
+                section="/kibana"
+                path="/troubleshooting.html#troubleshooting-too-many-transactions"
+              >
+                {i18n.translate(
+                  'xpack.apm.transactionCardinalityWarning.docsLink',
+                  { defaultMessage: 'Learn more in the docs' }
+                )}
+              </ElasticDocsLink>
+            </p>
+          </EuiCallOut>
+        )}
+        <EuiSpacer size="s" />
+        <TransactionList
+          isLoading={transactionListStatus === 'loading'}
+          items={transactionListData.items || []}
+        />
+      </EuiPanel>
     </>
   );
 }
