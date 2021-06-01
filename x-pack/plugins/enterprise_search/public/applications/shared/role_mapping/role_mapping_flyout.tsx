@@ -16,6 +16,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiPortal,
   EuiText,
   EuiTitle,
   EuiSpacer,
@@ -45,39 +46,46 @@ export const RoleMappingFlyout: React.FC<Props> = ({
   closeRoleMappingFlyout,
   handleSaveMapping,
 }) => (
-  <EuiFlyout ownFocus onClose={closeRoleMappingFlyout} size="s" aria-labelledby="flyoutLargeTitle">
-    <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="m">
-        <h2 id="flyoutLargeTitle" data-test-subj="FlyoutTitle">
-          {isNew ? ROLE_MAPPING_FLYOUT_CREATE_TITLE : ROLE_MAPPING_FLYOUT_UPDATE_TITLE}
-        </h2>
-      </EuiTitle>
-      <EuiText size="xs">
-        <p>{ROLE_MAPPING_FLYOUT_DESCRIPTION}</p>
-      </EuiText>
-    </EuiFlyoutHeader>
-    <EuiFlyoutBody>
-      {children}
-      <EuiSpacer />
-    </EuiFlyoutBody>
-    <EuiFlyoutFooter>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={closeRoleMappingFlyout}>
-            {ROLE_MAPPING_FLYOUT_CANCEL_BUTTON}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            disabled={disabled}
-            onClick={handleSaveMapping}
-            fill
-            data-test-subj="FlyoutButton"
-          >
-            {isNew ? ROLE_MAPPING_FLYOUT_CREATE_BUTTON : ROLE_MAPPING_FLYOUT_UPDATE_BUTTON}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlyoutFooter>
-  </EuiFlyout>
+  <EuiPortal>
+    <EuiFlyout
+      ownFocus
+      onClose={closeRoleMappingFlyout}
+      size="s"
+      aria-labelledby="flyoutLargeTitle"
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id="flyoutLargeTitle" data-test-subj="FlyoutTitle">
+            {isNew ? ROLE_MAPPING_FLYOUT_CREATE_TITLE : ROLE_MAPPING_FLYOUT_UPDATE_TITLE}
+          </h2>
+        </EuiTitle>
+        <EuiText size="xs">
+          <p>{ROLE_MAPPING_FLYOUT_DESCRIPTION}</p>
+        </EuiText>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        {children}
+        <EuiSpacer />
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={closeRoleMappingFlyout}>
+              {ROLE_MAPPING_FLYOUT_CANCEL_BUTTON}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              disabled={disabled}
+              onClick={handleSaveMapping}
+              fill
+              data-test-subj="FlyoutButton"
+            >
+              {isNew ? ROLE_MAPPING_FLYOUT_CREATE_BUTTON : ROLE_MAPPING_FLYOUT_UPDATE_BUTTON}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  </EuiPortal>
 );
