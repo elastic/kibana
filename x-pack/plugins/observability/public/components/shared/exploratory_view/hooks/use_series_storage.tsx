@@ -42,7 +42,9 @@ export function UrlStorageContextProvider({
 }: ProviderProps & { children: JSX.Element }) {
   const allSeriesKey = 'sr';
 
-  const [allShortSeries, setAllShortSeries] = useState<AllShortSeries>({});
+  const [allShortSeries, setAllShortSeries] = useState<AllShortSeries>(
+    () => storage.get(allSeriesKey) ?? {}
+  );
   const [allSeries, setAllSeries] = useState<AllSeries>({});
   const [firstSeriesId, setFirstSeriesId] = useState('');
 
