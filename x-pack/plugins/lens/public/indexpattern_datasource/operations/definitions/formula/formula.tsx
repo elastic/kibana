@@ -75,12 +75,8 @@ export const formulaOperation: OperationDefinition<
     const label = !params?.isFormulaBroken
       ? useDisplayLabel
         ? currentColumn.label
-        : params?.formula
-      : '';
-
-    if (!params.formula || params.isFormulaBroken) {
-      return [];
-    }
+        : params?.formula ?? defaultLabel
+      : defaultLabel;
 
     return [
       {
@@ -88,21 +84,23 @@ export const formulaOperation: OperationDefinition<
         function: 'mapColumn',
         arguments: {
           id: [columnId],
-          name: [label || ''],
+          name: [label || defaultLabel],
           exp: [
             {
               type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'math',
-                  arguments: {
-                    expression: [
-                      currentColumn.references.length ? `"${currentColumn.references[0]}"` : ``,
-                    ],
-                  },
-                },
-              ],
+              chain: currentColumn.references.length
+                ? [
+                    {
+                      type: 'function',
+                      function: 'math',
+                      arguments: {
+                        expression: [
+                          currentColumn.references.length ? `"${currentColumn.references[0]}"` : ``,
+                        ],
+                      },
+                    },
+                  ]
+                : [],
             },
           ],
         },

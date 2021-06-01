@@ -523,7 +523,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         });
       }
       const errors = await testSubjects.findAll('configuration-failure-error');
-      return errors?.length ?? 0;
+      const expressionErrors = await testSubjects.findAll('expression-failure');
+      return (errors?.length ?? 0) + (expressionErrors?.length ?? 0);
     },
 
     async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {

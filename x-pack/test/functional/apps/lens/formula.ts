@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const find = getService('find');
   const listingTable = getService('listingTable');
+  const browser = getService('browser');
 
   describe('lens formula', () => {
     it('should transition from count to formula', async () => {
@@ -53,6 +54,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('14,005');
+    });
+
+    it('should insert single quotes when needed to create valid KQL', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'formula',
+        formula: `count(kql=`,
+        keepOpen: true,
+      });
+
+      const input = await find.activeElement();
+      await input.type(' ');
+      await input.pressKeys(browser.keys.ARROW_LEFT);
+      await input.type(`Men's`);
+
+      await PageObjects.common.sleep(100);
+
+      const element = await find.byCssSelector('.monaco-editor');
+      expect(await element.getVisibleText()).to.equal(`count(kql=\'Men\\'s \')`);
     });
 
     it('should persist a broken formula on close', async () => {

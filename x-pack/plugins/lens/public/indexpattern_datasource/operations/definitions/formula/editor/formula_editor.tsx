@@ -446,7 +446,7 @@ export function FormulaEditor({
             return;
           }
 
-          let editOperation = null;
+          let editOperation: monaco.editor.IIdentifiedSingleEditOperation | null = null;
           if (e.changes[0].text === '=') {
             editOperation = {
               range: {
@@ -470,25 +470,25 @@ export function FormulaEditor({
             };
           }
 
-          // Need to move these sync to prevent race conditions between a fast user typing a single quote
-          // after an = char
           if (editOperation) {
-            editor.executeEdits(
-              'LENS',
-              [editOperation],
-              [
-                // After inserting, move the cursor in between the single quotes or after the escaped quote
-                new monaco.Selection(
-                  currentPosition.startLineNumber,
-                  currentPosition.startColumn + 2,
-                  currentPosition.startLineNumber,
-                  currentPosition.startColumn + 2
-                ),
-              ]
-            );
-
-            // Timeout is required because otherwise the cursor position is not updated.
             setTimeout(() => {
+              editor.executeEdits(
+                'LENS',
+                [editOperation!],
+                [
+                  // After inserting, move the cursor in between the single quotes or after the escaped quote
+                  new monaco.Selection(
+                    currentPosition.startLineNumber,
+                    currentPosition.startColumn + 2,
+                    currentPosition.startLineNumber,
+                    currentPosition.startColumn + 2
+                  ),
+                ]
+              );
+
+              // Need to move these sync to prevent race conditions between a fast user typing a single quote
+              // after an = char
+              // Timeout is required because otherwise the cursor position is not updated.
               editor.setPosition({
                 column: currentPosition.startColumn + 2,
                 lineNumber: currentPosition.startLineNumber,
