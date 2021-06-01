@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import * as i18n from './translations';
 
-import { ConnectorTypes, SwimlaneFieldsType } from '../../../../common';
+import { ConnectorTypes, SwimlaneFieldsType, SwimlaneConnectorType } from '../../../../common';
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
 
@@ -22,9 +22,13 @@ const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFi
   isEdit = true,
 }) => {
   const {
-    config: { mappings },
+    config: { mappings, connectorType },
   } = connector;
-  const showMappingWarning = useMemo(() => isMappingEmpty(mappings), [mappings]);
+  const showMappingWarning = useMemo(
+    () => connectorType !== SwimlaneConnectorType.Cases || isMappingEmpty(mappings),
+    [mappings, connectorType]
+  );
+
   return (
     <>
       {!isEdit && (

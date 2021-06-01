@@ -36,6 +36,6 @@ export const EMPTY_MAPPING_WARNING_TITLE = i18n.translate(
 export const EMPTY_MAPPING_WARNING_DESC = i18n.translate(
   'xpack.cases.connectors.swimlane.emptyMappingWarningDesc',
   {
-    defaultMessage: `The mapping of the connector is empty. Create a connector of type cases before pushing to a case.`,
+    defaultMessage: `The mapping of the connector is empty. Create a connector of type Cases before pushing to a case.`,
   }
 );

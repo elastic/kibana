@@ -12,4 +12,10 @@ export const SwimlaneFieldsRT = rt.type({
   caseId: rt.union([rt.string, rt.null]),
 });
 
+export enum SwimlaneConnectorType {
+  All = 'all',
+  Alerts = 'alerts',
+  Cases = 'cases',
+}
+
 export type SwimlaneFieldsType = rt.TypeOf<typeof SwimlaneFieldsRT>;
