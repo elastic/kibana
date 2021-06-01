@@ -67,6 +67,35 @@ export type AppUpdatableFields = Pick<
 >;
 
 /**
+ * App navigation menu options
+ *
+ * @public
+ */
+export interface AppNavOptions {
+  /**
+   * An ordinal used to sort nav links relative to one another for display.
+   */
+  order?: number;
+
+  /**
+   * A tooltip shown when hovering over app link.
+   */
+  tooltip?: string;
+
+  /**
+   * A EUI iconType that will be used for the app's icon. This icon
+   * takes precendence over the `icon` property.
+   */
+  euiIconType?: string;
+
+  /**
+   * A URL to an image file used as an icon. Used as a fallback
+   * if `euiIconType` is not provided.
+   */
+  icon?: string;
+}
+
+/**
  * Updater for applications.
  * see {@link ApplicationSetup}
  * @public
@@ -76,7 +105,7 @@ export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 /**
  * @public
  */
-export interface App<HistoryLocationState = unknown> {
+export interface App<HistoryLocationState = unknown> extends AppNavOptions {
   /**
    * The unique identifier of the application
    */
@@ -147,28 +176,6 @@ export interface App<HistoryLocationState = unknown> {
    * ```
    */
   updater$?: Observable<AppUpdater>;
-
-  /**
-   * An ordinal used to sort nav links relative to one another for display.
-   */
-  order?: number;
-
-  /**
-   * A tooltip shown when hovering over app link.
-   */
-  tooltip?: string;
-
-  /**
-   * A EUI iconType that will be used for the app's icon. This icon
-   * takes precendence over the `icon` property.
-   */
-  euiIconType?: string;
-
-  /**
-   * A URL to an image file used as an icon. Used as a fallback
-   * if `euiIconType` is not provided.
-   */
-  icon?: string;
 
   /**
    * Custom capabilities defined by the app.
@@ -285,30 +292,21 @@ export type AppDeepLink = {
   keywords?: string[];
   /** Optional status of the chrome navigation, defaults to `hidden` */
   navLinkStatus?: AppNavLinkStatus;
-  /** An ordinal used to sort nav links relative to one another for display. */
-  order?: number;
-  /** A tooltip shown when hovering over app link. */
-  tooltip?: string;
-  /** A EUI iconType that will be used for the app's icon. This icon takes precendence over the `icon` property. */
-  euiIconType?: string;
-  /** A URL to an image file used as an icon. Used as a fallback if `euiIconType` is not provided. */
-  icon?: string;
-  /** If set to true, the application's route will only be checked against an {@link App.exactRoute | exact match}. Defaults to `false`. */
-  exactRoute?: boolean;
-} & (
-  | {
-      /** URL path to access this link, relative to the application's appRoute. */
-      path: string;
-      /** Optional array of links that are 'underneath' this section in the hierarchy */
-      deepLinks?: AppDeepLink[];
-    }
-  | {
-      /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
-      path?: string;
-      /** Array links that are 'underneath' this section in this hierarchy. */
-      deepLinks: AppDeepLink[];
-    }
-);
+} & AppNavOptions &
+  (
+    | {
+        /** URL path to access this link, relative to the application's appRoute. */
+        path: string;
+        /** Optional array of links that are 'underneath' this section in the hierarchy */
+        deepLinks?: AppDeepLink[];
+      }
+    | {
+        /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
+        path?: string;
+        /** Array links that are 'underneath' this section in this hierarchy. */
+        deepLinks: AppDeepLink[];
+      }
+  );
 
 /**
  * Public information about a registered {@link App | application}
