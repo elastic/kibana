@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-export {
-  getScreenshotMode,
-  setScreenshotModeEnabled,
-  setScreenshotModeDisabled,
-  KBN_SCREENSHOT_MODE_ENABLED_KEY,
-} from './get_set_browser_screenshot_mode';
+import { TelemetryTestPlugin } from './plugin';
 
-export { KBN_SCREENSHOT_MODE_HEADER } from './constants';
+export const plugin = () => new TelemetryTestPlugin();
