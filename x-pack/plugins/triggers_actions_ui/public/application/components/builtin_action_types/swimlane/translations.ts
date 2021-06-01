@@ -201,3 +201,17 @@ export const SW_FIELD_MAPPING_IS_REQUIRED = i18n.translate(
     defaultMessage: 'Field mapping is required.',
   }
 );
+
+export const EMPTY_MAPPING_WARNING_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.emptyMappingWarningTitle',
+  {
+    defaultMessage: 'Empty mapping',
+  }
+);
+
+export const EMPTY_MAPPING_WARNING_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.emptyMappingWarningDesc',
+  {
+    defaultMessage: `The mapping of the connector is empty. Create a connector of type Alerts before pushing to a case.`,
+  }
+);

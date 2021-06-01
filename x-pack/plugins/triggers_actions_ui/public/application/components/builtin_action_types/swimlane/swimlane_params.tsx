@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import * as i18n from './translations';
 import { ActionParamsProps } from '../../../../types';
-import { SwimlaneActionConnector, SwimlaneActionParams } from './types';
+import { SwimlaneActionConnector, SwimlaneActionParams, SwimlaneConnectorType } from './types';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 
@@ -33,7 +33,10 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
 
-  const { mappings } = ((actionConnector as unknown) as SwimlaneActionConnector).config;
+  const {
+    mappings,
+    connectorType,
+  } = ((actionConnector as unknown) as SwimlaneActionConnector).config;
   const { hasAlertName, hasAlertSource, hasComments, hasSeverity } = useMemo(
     () => ({
       hasAlertName: mappings.alertNameConfig != null,
@@ -48,6 +51,10 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
       mappings.severityConfig,
     ]
   );
+
+  const showMappingWarning =
+    connectorType === SwimlaneConnectorType.Cases ||
+    (!hasAlertName && !hasAlertSource && !hasComments && !hasSeverity);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -109,15 +116,18 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionParams]);
 
-  return (
+  return !showMappingWarning ? (
     <>
       {hasAlertName && (
         <>
           <EuiFormRow
             id="swimlaneAlertName"
             fullWidth
-            error={errors.alertName}
-            isInvalid={errors.alertName.length > 0 && incident.alertName !== undefined}
+            error={errors['subActionParams.incident.alertName'] ?? ''}
+            isInvalid={
+              errors['subActionParams.incident.alertName']?.length > 0 &&
+              incident.alertName !== undefined
+            }
             label={i18n.SW_ALERT_NAME_FIELD_LABEL}
           >
             <TextFieldWithMessageVariables
@@ -126,8 +136,8 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
               editAction={editSubActionProperty}
               messageVariables={messageVariables}
               paramsProperty={'alertName'}
-              inputTargetValue={incident.alertName || ''}
-              errors={errors.alertName as string[]}
+              inputTargetValue={incident.alertName ?? undefined}
+              errors={errors['subActionParams.incident.alertName'] as string[]}
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
@@ -135,21 +145,14 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
       )}
       {hasAlertSource && (
         <>
-          <EuiFormRow
-            id="swimlaneAlertSource"
-            fullWidth
-            error={errors.alertSource}
-            isInvalid={errors.alertSource.length > 0 && incident.alertSource !== undefined}
-            label={i18n.SW_ALERT_SOURCE_FIELD_LABEL}
-          >
+          <EuiFormRow id="swimlaneAlertSource" fullWidth label={i18n.SW_ALERT_SOURCE_FIELD_LABEL}>
             <TextFieldWithMessageVariables
               index={index}
               data-test-subj="alertSource"
               editAction={editSubActionProperty}
               messageVariables={messageVariables}
               paramsProperty={'alertSource'}
-              inputTargetValue={incident.alertSource || ''}
-              errors={errors.alertSource as string[]}
+              inputTargetValue={incident.alertSource ?? undefined}
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
@@ -164,8 +167,7 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
               editAction={editSubActionProperty}
               messageVariables={messageVariables}
               paramsProperty={'severity'}
-              inputTargetValue={incident.severity || ''}
-              errors={errors.severity as string[]}
+              inputTargetValue={incident.severity ?? undefined}
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
@@ -183,6 +185,10 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
         />
       )}
     </>
+  ) : (
+    <EuiCallOut title={i18n.EMPTY_MAPPING_WARNING_TITLE} color="warning" iconType="help">
+      {i18n.EMPTY_MAPPING_WARNING_DESC}
+    </EuiCallOut>
   );
 };
 

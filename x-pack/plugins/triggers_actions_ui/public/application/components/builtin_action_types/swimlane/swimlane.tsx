@@ -78,21 +78,18 @@ export function getActionType(): ActionTypeModel<
       return validationResult;
     },
     validateParams: (actionParams: SwimlaneActionParams): GenericValidationResult<unknown> => {
-      const validationResult = { errors: {} };
       const errors = {
-        alertName: new Array<string>(),
-        caseId: new Array<string>(),
-        severity: new Array<string>(),
-        caseName: new Array<string>(),
-        alertSource: new Array<string>(),
-        comments: new Array<string>(),
+        'subActionParams.incident.alertName': new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = {
+        errors,
+      };
       if (
-        !actionParams.subActionParams ||
+        actionParams.subActionParams &&
+        actionParams.subActionParams.incident &&
         !actionParams.subActionParams.incident.alertName?.length
       ) {
-        errors.alertName.push(i18n.SW_REQUIRED_ALERT_NAME);
+        errors['subActionParams.incident.alertName'].push(i18n.SW_REQUIRED_ALERT_NAME);
       }
       return validationResult;
     },
