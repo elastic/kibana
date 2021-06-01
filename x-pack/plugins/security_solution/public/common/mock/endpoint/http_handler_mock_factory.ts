@@ -195,7 +195,7 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
 
       http[method].mockImplementation(async (...args) => {
         const path = isHttpFetchOptionsWithPath(args[0]) ? args[0].path : args[0];
-        const routeMock = methodMocks.find((handler) => handler.path === path);
+        const routeMock = methodMocks.find((handler) => pathMatchesPattern(handler.path, path));
 
         if (routeMock) {
           markApiCallAsHandled(responseProvider[routeMock.id].mockDelay);
@@ -219,6 +219,29 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
 
     return mockedApiInterface;
   };
+};
+
+const pathMatchesPattern = (pathPattern: string, path: string): boolean => {
+  // No path params - pattern is single path
+  if (pathPattern === path) {
+    return true;
+  }
+
+  // If pathPattern has params (`{value}`), then see if `path` matches it
+  if (/{.*?}/.test(pathPattern)) {
+    const pathParts = path.split(/\//);
+    const patternParts = pathPattern.split(/\//);
+
+    if (pathParts.length !== patternParts.length) {
+      return false;
+    }
+
+    return pathParts.every((part, index) => {
+      return part === patternParts[index] || /{.*?}/.test(patternParts[index]);
+    });
+  }
+
+  return false;
 };
 
 const isHttpFetchOptionsWithPath = (
