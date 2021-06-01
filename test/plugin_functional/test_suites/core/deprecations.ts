@@ -221,6 +221,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
                       path: '/api/core_deprecations_resolve/',
                       body: { keyId },
                     },
+                    manualSteps: ['Step a', 'Step b'],
                   },
                   domainId: 'corePluginDeprecations',
                 })
