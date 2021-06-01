@@ -61,6 +61,7 @@ export type DataRequestContext = {
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
   dataFilters: MapFilters;
+  forceRefresh: boolean;
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -113,7 +114,8 @@ export function updateStyleMeta(layerId: string | null) {
 function getDataRequestContext(
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
   getState: () => MapStoreState,
-  layerId: string
+  layerId: string,
+  forceRefresh: boolean = true
 ): DataRequestContext {
   return {
     dataFilters: getDataFilters(getState()),
@@ -135,18 +137,17 @@ function getDataRequestContext(
     },
     registerCancelCallback: (requestToken: symbol, callback: () => void) =>
       dispatch(registerCancelCallback(requestToken, callback)),
+    forceRefresh,
   };
 }
 
-export function syncDataForAllLayers(
-  { forceRefresh }: { forceRefresh: boolean } = { forceRefresh: false }
-) {
+export function syncDataForAllLayers() {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     const syncPromises = getLayerList(getState()).map((layer) => {
-      return dispatch(syncDataForLayer(layer, forceRefresh));
+      return dispatch(syncDataForLayer(layer));
     });
     await Promise.all(syncPromises);
   };
@@ -168,13 +169,18 @@ function syncDataForAllJoinLayers() {
   };
 }
 
-export function syncDataForLayer(layer: ILayer, forceRefresh: boolean) {
+export function syncDataForLayer(layer: ILayer, forceRefresh: boolean = false) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const dataRequestContext = getDataRequestContext(dispatch, getState, layer.getId());
+    const dataRequestContext = getDataRequestContext(
+      dispatch,
+      getState,
+      layer.getId(),
+      forceRefresh
+    );
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
     }
-    await layer.syncData(dataRequestContext, forceRefresh);
+    await layer.syncData(dataRequestContext);
   };
 }
 

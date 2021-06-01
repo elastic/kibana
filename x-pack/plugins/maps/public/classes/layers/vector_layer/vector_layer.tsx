@@ -668,12 +668,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   // Given 1 above, which source/style to use can not be stored in Layer instance state.
   // Given 2 above, which source/style to use can not be pulled from data request state.
   // Therefore, source and style are provided as arugments and must be used instead of calling getSource or getCurrentStyle.
-  async _syncData(
-    syncContext: DataRequestContext,
-    source: IVectorSource,
-    style: IVectorStyle,
-    forceRefresh: boolean
-  ) {
+  async _syncData(syncContext: DataRequestContext, source: IVectorSource, style: IVectorStyle) {
     if (this.isLoadingBounds()) {
       return;
     }
@@ -688,7 +683,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         requestMeta: this._getSearchFilters(syncContext.dataFilters, source, style),
         syncContext,
         source,
-        forceRefresh,
       });
       if (
         !sourceResult.featureCollection ||

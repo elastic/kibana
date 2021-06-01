@@ -53,7 +53,7 @@ import {
   REMOVE_FEATURES_FROM_INDEX_QUEUE,
   UPDATE_EDIT_LAYER,
 } from './map_action_constants';
-import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
+import { autoFitToBounds, syncDataForAllLayers, syncDataForLayer } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import {
@@ -405,6 +405,6 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
     const layerSource = (await layer.getSource()) as ESSearchSource;
     const indexPattern = await layerSource.getIndexPattern();
     await addFeatureToIndex(indexPattern.title, geometry, layerSource.getGeoFieldName());
-    await dispatch(syncDataForAllLayers({ forceRefresh: true }));
+    await dispatch(syncDataForLayer(layer, true));
   };
 }
