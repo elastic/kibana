@@ -44,9 +44,9 @@ const fieldsConfig: FieldsConfig = {
     ),
   },
   mediaType: {
-    type: FIELD_TYPES.TEXT,
+    type: FIELD_TYPES.SELECT,
     defaultValue: 'application/json',
-    serializer: from.emptyStringToUndefined,
+    serializer: from.undefinedIfValue('application/json'),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.mediaTypeFieldLabel', {
       defaultMessage: 'Media Type',
     }),
@@ -118,19 +118,15 @@ export const SetProcessor: FunctionComponent = () => {
       <UseField
         config={fieldsConfig.value}
         component={Field}
-        componentProps={{
-          euiFieldProps: {
-            'data-test-subj': 'valueFieldInput',
-          },
-        }}
         path="fields.value"
+        data-test-subj="valueFieldInput"
       />
 
       {isTemplateSnippet(fields?.value) && (
         <UseField
           componentProps={{
             euiFieldProps: {
-              'data-test-subj': 'mediaTypeField',
+              'data-test-subj': 'mediaTypeSelectorField',
               options: [
                 {
                   value: 'application/json',
@@ -153,12 +149,18 @@ export const SetProcessor: FunctionComponent = () => {
         />
       )}
 
-      <UseField config={fieldsConfig.override} component={ToggleField} path="fields.override" />
+      <UseField
+        config={fieldsConfig.override}
+        component={ToggleField}
+        path="fields.override"
+        data-test-subj="overrideField"
+      />
 
       <UseField
         config={fieldsConfig.ignore_empty_value}
         component={ToggleField}
         path="fields.ignore_empty_value"
+        data-test-subj="ignoreEmptyField"
       />
     </>
   );

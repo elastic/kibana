@@ -36,7 +36,7 @@ describe('get and set values', () => {
   });
 });
 
-describe('template strings', () => {
+describe('template snippets', () => {
   it('knows when a string contains an invalid template snippet', () => {
     expect(isTemplateSnippet('{}')).toBe(false);
     expect(isTemplateSnippet('{{{}}}')).toBe(false);

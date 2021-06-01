@@ -113,6 +113,5 @@ export const isTemplateSnippet = (str: string = '') => {
   //  * Starts with {{{
   //  * Followed by all strings of length >= 1
   //  * And ends with }}}
-  return (/^{{{.+}}}$/).test(str);
+  return /^{{{.+}}}$/.test(str);
 };
-

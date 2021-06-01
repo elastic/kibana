@@ -154,4 +154,8 @@ type TestSubject =
   | 'separatorValueField.input'
   | 'quoteValueField.input'
   | 'emptyValueField.input'
+  | 'valueFieldInput.input'
+  | 'mediaTypeSelectorField'
+  | 'ignoreEmptyField.input'
+  | 'overrideField.input'
   | 'trimSwitch.input';
