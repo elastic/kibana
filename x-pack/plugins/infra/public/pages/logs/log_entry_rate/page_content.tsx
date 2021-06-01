@@ -113,13 +113,11 @@ export const LogEntryRatePageContent = memo(() => {
     logEntryRateSetupStatus.type === 'initializing'
   ) {
     return (
-      <AnomaliesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
-        <LoadingPage
-          message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
-            defaultMessage: 'Checking status of analysis jobs...',
-          })}
-        />
-      </AnomaliesPageTemplate>
+      <LoadingPage
+        message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
+          defaultMessage: 'Checking status of analysis jobs...',
+        })}
+      />
     );
   } else if (
     logEntryCategoriesSetupStatus.type === 'unknown' ||
@@ -136,10 +134,8 @@ export const LogEntryRatePageContent = memo(() => {
   ) {
     return (
       <>
-        <AnomaliesPageTemplate PageTemplate={PageTemplate}>
-          <LogEntryRateResultsContent />
-          <LogAnalysisSetupFlyout />
-        </AnomaliesPageTemplate>
+        <LogEntryRateResultsContent pageTitle={anomaliesTitle} />
+        <LogAnalysisSetupFlyout />
       </>
     );
   } else if (!hasLogAnalysisSetupCapabilities) {

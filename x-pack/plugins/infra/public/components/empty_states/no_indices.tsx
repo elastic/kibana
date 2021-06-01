@@ -16,6 +16,7 @@ interface NoIndicesProps {
   'data-test-subj'?: string;
 }
 
+// Represents a fully constructed page, including page template.
 export const NoIndices: React.FC<NoIndicesProps> = ({ actions, message, title, ...rest }) => {
   const {
     services: {

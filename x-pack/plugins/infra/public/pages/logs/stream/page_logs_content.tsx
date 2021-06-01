@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import React, { useContext, useCallback, useMemo, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { LogEntry } from '../../../../common/log_entry';
@@ -206,6 +207,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
+      <EuiSpacer size="l" />
       <PageViewLogInContext />
       {isFlyoutOpen ? (
         <LogEntryFlyout

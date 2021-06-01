@@ -10,17 +10,14 @@ import React from 'react';
 
 import { WaffleTimeControls } from './waffle/waffle_time_controls';
 import { SearchBar } from './search_bar';
-import { ToolbarPanel } from '../../../../components/toolbar_panel';
 
 export const FilterBar = () => (
-  <ToolbarPanel>
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
-      <EuiFlexItem>
-        <SearchBar />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <WaffleTimeControls />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </ToolbarPanel>
+  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+    <EuiFlexItem>
+      <SearchBar />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <WaffleTimeControls />
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
@@ -14,6 +14,7 @@ interface LoadingPageProps {
   'data-test-subj'?: string;
 }
 
+// Represents a fully constructed page, including page template.
 export const LoadingPage = ({
   message,
   'data-test-subj': dataTestSubj = 'loadingPage',
@@ -27,12 +28,16 @@ export const LoadingPage = ({
   } = useKibanaContextForPlugin();
 
   return (
-    <PageTemplate isEmptyState={true}>
+    <PageTemplate isEmptyState={true} data-test-subject={dataTestSubj}>
       <EuiEmptyPrompt
         body={
           <>
-            <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
-            {message}
+            <EuiFlexGroup alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
+              </EuiFlexItem>
+              <EuiFlexItem>{message}</EuiFlexItem>
+            </EuiFlexGroup>
           </>
         }
       />

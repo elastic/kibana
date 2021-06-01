@@ -65,12 +65,6 @@ export const AnomaliesResults: React.FunctionComponent<{
 }) => {
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <ManageJobsButton onClick={onViewModuleList} size="s" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <AnomaliesSwimlaneVisualisation

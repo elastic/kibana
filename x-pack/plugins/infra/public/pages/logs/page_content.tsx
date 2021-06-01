@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Route, Switch } from 'react-router-dom';
@@ -24,6 +24,7 @@ import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
+import { useLinkProps } from '../../hooks/use_link_props';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -62,6 +63,11 @@ export const LogsPageContent: React.FunctionComponent = () => {
     pathname: '/settings',
   };
 
+  const settingsLinkProps = useLinkProps({
+    app: 'logs',
+    pathname: 'settings',
+  });
+
   return (
     <>
       <DocumentTitle title={pageTitle} />
@@ -71,6 +77,11 @@ export const LogsPageContent: React.FunctionComponent = () => {
       {setHeaderActionMenu && (
         <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
           <EuiFlexGroup gutterSize={'none'} alignItems={'center'} responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="gear" {...settingsLinkProps}>
+                {settingsTabTitle}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AlertDropdown />
             </EuiFlexItem>

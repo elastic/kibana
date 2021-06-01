@@ -30,6 +30,8 @@ import { useLogEntryAnomaliesResults } from './use_log_entry_anomalies_results';
 import { useDatasetFiltering } from './use_dataset_filtering';
 import { useLogAnalysisResultsUrlState } from './use_log_entry_rate_results_url_state';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { ManageJobsButton } from '../../../components/logging/log_analysis_setup/manage_jobs_button';
 
 export const SORT_DEFAULTS = {
   direction: 'desc' as const,
@@ -40,9 +42,20 @@ export const PAGINATION_DEFAULTS = {
   pageSize: 25,
 };
 
-export const LogEntryRateResultsContent: React.FunctionComponent = () => {
+export const LogEntryRateResultsContent: React.FunctionComponent<{
+  pageTitle: string;
+}> = ({ pageTitle }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
+
+  const {
+    services: {
+      observability: {
+        navigation: { PageTemplate },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
   const navigateToApp = useKibana().services.application?.navigateToApp;
 
   const { sourceId } = useLogSourceContext();
@@ -189,80 +202,87 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   );
 
   return (
-    <>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <DatasetsSelector
-                availableDatasets={datasets}
-                isLoading={isLoadingDatasets}
-                selectedDatasets={selectedDatasets}
-                onChangeDatasetSelection={setSelectedDatasets}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSuperDatePicker
-                start={friendlyTimeRange.startTime}
-                end={friendlyTimeRange.endTime}
-                onTimeChange={handleSelectedTimeRangeChange}
-                isPaused={autoRefresh.isPaused}
-                refreshInterval={autoRefresh.interval}
-                onRefreshChange={handleAutoRefreshChange}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <LogAnalysisJobProblemIndicator
-            hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
-            hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
-            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-            hasStoppedJobs={hasStoppedLogEntryRateJobs}
-            isFirstUse={false /* the first use message is already shown by the section below */}
-            moduleName={logEntryRateModuleDescriptor.moduleName}
-            onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
-            onRecreateMlJobForUpdate={showLogEntryRateSetup}
+    <PageTemplate
+      pageHeader={{
+        pageTitle,
+        rightSideItems: [<ManageJobsButton onClick={showModuleList} size="s" />],
+      }}
+    >
+      <>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <DatasetsSelector
+                  availableDatasets={datasets}
+                  isLoading={isLoadingDatasets}
+                  selectedDatasets={selectedDatasets}
+                  onChangeDatasetSelection={setSelectedDatasets}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSuperDatePicker
+                  start={friendlyTimeRange.startTime}
+                  end={friendlyTimeRange.endTime}
+                  onTimeChange={handleSelectedTimeRangeChange}
+                  isPaused={autoRefresh.isPaused}
+                  refreshInterval={autoRefresh.interval}
+                  onRefreshChange={handleAutoRefreshChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LogAnalysisJobProblemIndicator
+              hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
+              hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
+              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
+              hasStoppedJobs={hasStoppedLogEntryRateJobs}
+              isFirstUse={false /* the first use message is already shown by the section below */}
+              moduleName={logEntryRateModuleDescriptor.moduleName}
+              onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
+              onRecreateMlJobForUpdate={showLogEntryRateSetup}
+            />
+            <CategoryJobNoticesSection
+              hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
+              hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
+              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
+              hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
+              isFirstUse={isFirstUse}
+              moduleName={logEntryCategoriesModuleDescriptor.moduleName}
+              onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}
+              onRecreateMlJobForUpdate={showLogEntryCategoriesSetup}
+              qualityWarnings={categoryQualityWarnings}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AnomaliesResults
+              isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
+              onViewModuleList={showModuleList}
+              anomalies={logEntryAnomalies}
+              timeRange={timeRange.value}
+              page={page}
+              fetchNextPage={fetchNextPage}
+              fetchPreviousPage={fetchPreviousPage}
+              changeSortOptions={changeSortOptions}
+              changePaginationOptions={changePaginationOptions}
+              sortOptions={sortOptions}
+              paginationOptions={paginationOptions}
+              selectedDatasets={selectedDatasets}
+              jobIds={jobIds}
+              autoRefresh={autoRefresh}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {isLogEntryFlyoutOpen ? (
+          <LogEntryFlyout
+            logEntryId={flyoutLogEntryId}
+            onCloseFlyout={closeLogEntryFlyout}
+            onSetFieldFilter={linkToLogStream}
+            sourceId={sourceId}
           />
-          <CategoryJobNoticesSection
-            hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
-            hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
-            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-            hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
-            isFirstUse={isFirstUse}
-            moduleName={logEntryCategoriesModuleDescriptor.moduleName}
-            onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}
-            onRecreateMlJobForUpdate={showLogEntryCategoriesSetup}
-            qualityWarnings={categoryQualityWarnings}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AnomaliesResults
-            isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
-            onViewModuleList={showModuleList}
-            anomalies={logEntryAnomalies}
-            timeRange={timeRange.value}
-            page={page}
-            fetchNextPage={fetchNextPage}
-            fetchPreviousPage={fetchPreviousPage}
-            changeSortOptions={changeSortOptions}
-            changePaginationOptions={changePaginationOptions}
-            sortOptions={sortOptions}
-            paginationOptions={paginationOptions}
-            selectedDatasets={selectedDatasets}
-            jobIds={jobIds}
-            autoRefresh={autoRefresh}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {isLogEntryFlyoutOpen ? (
-        <LogEntryFlyout
-          logEntryId={flyoutLogEntryId}
-          onCloseFlyout={closeLogEntryFlyout}
-          onSetFieldFilter={linkToLogStream}
-          sourceId={sourceId}
-        />
-      ) : null}
-    </>
+        ) : null}
+      </>
+    </PageTemplate>
   );
 };

@@ -54,8 +54,8 @@ export const LogsToolbar = () => {
   } = useContext(LogPositionState.Context);
 
   return (
-    <Toolbar>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+    <div>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="l">
         <EuiFlexItem>
           <QueryStringInput
             disableLanguageSwitcher={true}
@@ -110,6 +110,6 @@ export const LogsToolbar = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Toolbar>
+    </div>
   );
 };

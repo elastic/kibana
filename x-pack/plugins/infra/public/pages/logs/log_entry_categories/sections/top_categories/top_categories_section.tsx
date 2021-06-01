@@ -51,51 +51,8 @@ export const TopCategoriesSection: React.FunctionComponent<{
   sortOptions,
   changeSortOptions,
 }) => {
-  const {
-    services: { ml, http },
-  } = useKibanaContextForPlugin();
-
-  const analyzeInMlLink = useMlHref(ml, http.basePath.get(), {
-    page: ML_PAGES.ANOMALY_EXPLORER,
-    pageState: {
-      jobIds: [jobId],
-      timeRange: {
-        from: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        to: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        mode: 'absolute',
-      },
-    },
-  });
-
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem>
-          <EuiTitle size="m" aria-label={title}>
-            <h1>
-              {title} <BetaBadge />
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <RecreateJobButton
-            hasSetupCapabilities={hasSetupCapabilities}
-            onClick={onRequestRecreateMlJob}
-            size="s"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AnalyzeInMlButton href={analyzeInMlLink} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <DatasetsSelector
-        availableDatasets={availableDatasets}
-        isLoading={isLoadingDatasets}
-        onChangeDatasetSelection={onChangeDatasetSelection}
-        selectedDatasets={selectedDatasets}
-      />
-      <EuiSpacer />
       <LoadingOverlayWrapper
         isLoading={isLoadingTopCategories}
         loadingChildren={<LoadingOverlayContent />}

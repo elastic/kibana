@@ -13,7 +13,6 @@ import { FilterBar } from './components/filter_bar';
 
 import { DocumentTitle } from '../../../components/document_title';
 import { NoIndices } from '../../../components/empty_states/no_indices';
-import { ColumnarPage } from '../../../components/page';
 
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -27,6 +26,10 @@ import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
 import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
 import { useWaffleOptionsContext } from './hooks/use_waffle_options';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+
+const inventoryTitle = i18n.translate('xpack.infra.metrics.inventoryPageTitle', {
+  defaultMessage: 'Inventory',
+});
 
 export const SnapshotPage = () => {
   const {
@@ -67,10 +70,15 @@ export const SnapshotPage = () => {
           })
         }
       />
-      {true || (isLoading && !source) ? (
+      {isLoading && !source ? (
         <SourceLoadingPage />
       ) : metricIndicesExist ? (
         <>
+          {/* <PageTemplate
+            pageHeader={{
+              pageTitle: inventoryTitle
+            }}
+          > */}
           <FilterBar />
           <SavedViewProvider
             shouldLoadDefault={optionsSource === 'default'}
@@ -79,6 +87,7 @@ export const SnapshotPage = () => {
           >
             <LayoutView />
           </SavedViewProvider>
+          {/* </PageTemplate> */}
         </>
       ) : hasFailedLoadingSource ? (
         <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />

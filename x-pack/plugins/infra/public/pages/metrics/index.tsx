@@ -42,6 +42,7 @@ import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabi
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
+import { useLinkProps } from '../../hooks/use_link_props';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -51,7 +52,16 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu } = useContext(HeaderActionMenuContext);
 
+  const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
+    defaultMessage: 'Settings',
+  });
+
   const kibana = useKibana();
+
+  const settingsLinkProps = useLinkProps({
+    app: 'metrics',
+    pathname: 'settings',
+  });
 
   return (
     <EuiErrorBoundary>
@@ -77,6 +87,11 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                   {setHeaderActionMenu && (
                     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
                       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty iconType="gear" {...settingsLinkProps}>
+                            {settingsTabTitle}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
                         </EuiFlexItem>

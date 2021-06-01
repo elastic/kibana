@@ -60,7 +60,7 @@ export const MetricsExplorerToolbar = ({
   const commonlyUsedRanges = mapKibanaQuickRangesToDatePickerRanges(timepickerQuickRanges);
 
   return (
-    <ToolbarPanel>
+    <>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={options.aggregation === 'count' ? 2 : false}>
           <MetricsExplorerAggregationPicker
@@ -135,6 +135,6 @@ export const MetricsExplorerToolbar = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </ToolbarPanel>
+    </>
   );
 };

@@ -72,13 +72,11 @@ export const LogEntryCategoriesPageContent = () => {
     );
   } else if (setupStatus.type === 'initializing') {
     return (
-      <CategoriesPageTemplate PageTemplate={PageTemplate} isEmptyState={true}>
-        <LoadingPage
-          message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
-            defaultMessage: 'Checking status of categorization jobs...',
-          })}
-        />
-      </CategoriesPageTemplate>
+      <LoadingPage
+        message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
+          defaultMessage: 'Checking status of categorization jobs...',
+        })}
+      />
     );
   } else if (setupStatus.type === 'unknown') {
     return (
@@ -88,10 +86,13 @@ export const LogEntryCategoriesPageContent = () => {
     );
   } else if (isJobStatusWithResults(jobStatus['log-entry-categories-count'])) {
     return (
-      <CategoriesPageTemplate PageTemplate={PageTemplate}>
-        <LogEntryCategoriesResultsContent onOpenSetup={showCategoriesModuleSetup} />
+      <>
+        <LogEntryCategoriesResultsContent
+          onOpenSetup={showCategoriesModuleSetup}
+          pageTitle={logCategoriesTabTitle}
+        />
         <LogAnalysisSetupFlyout allowedModules={allowedSetupModules} />
-      </CategoriesPageTemplate>
+      </>
     );
   } else if (!hasLogAnalysisSetupCapabilities) {
     return (
