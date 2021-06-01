@@ -850,7 +850,7 @@ function addBucket(
   visualizationGroups: VisualizationDimensionGroupConfig[],
   targetGroup?: string
 ): IndexPatternLayer {
-  const [buckets, metrics] = _.partition(
+  const [buckets, metrics] = partition(
     layer.columnOrder,
     (colId) => layer.columns[colId].isBucketed
   );

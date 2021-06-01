@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flatten, minBy, pick, mapValues } from 'lodash';
+import { flatten, minBy, pick, mapValues, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../id_generator';
 import { DatasourceSuggestion, TableChangeType } from '../types';
@@ -583,7 +583,7 @@ function createSuggestionWithDefaultDateHistogram(
 function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layerId: string) {
   const layer = state.layers[layerId];
 
-  const [availableBucketedColumns, availableMetricColumns] = _.partition(
+  const [availableBucketedColumns, availableMetricColumns] = partition(
     layer.columnOrder,
     (colId) => layer.columns[colId].isBucketed
   );
