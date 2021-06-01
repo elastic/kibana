@@ -54,11 +54,7 @@ import {
 } from './constants';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
-interface RoleMappingProps {
-  isNew?: boolean;
-}
-
-export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
+export const RoleMapping: React.FC = () => {
   const { roleId } = useParams() as { roleId: string };
   const { myRole } = useValues(AppLogic);
 
@@ -97,6 +93,8 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
   }, []);
 
   if (dataLoading) return <Loading />;
+
+  const isNew = !roleMapping;
 
   const SAVE_ROLE_MAPPING_LABEL = isNew ? SAVE_ROLE_MAPPING : UPDATE_ROLE_MAPPING;
   const TITLE = isNew ? ADD_ROLE_MAPPING_TITLE : MANAGE_ROLE_MAPPING_TITLE;

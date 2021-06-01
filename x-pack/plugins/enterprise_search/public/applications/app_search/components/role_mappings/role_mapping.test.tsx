@@ -72,6 +72,7 @@ describe('RoleMapping', () => {
   });
 
   it('renders for existing role mapping', () => {
+    setMockValues({ ...mockValues, roleMapping: asRoleMapping });
     const wrapper = shallow(<RoleMapping />);
     const header = wrapper.find(EuiPageHeader);
 
@@ -83,7 +84,7 @@ describe('RoleMapping', () => {
   });
 
   it('renders for new role mapping', () => {
-    const wrapper = shallow(<RoleMapping isNew />);
+    const wrapper = shallow(<RoleMapping />);
     const header = wrapper.find(EuiPageHeader);
 
     expect(header.prop('pageTitle')).toEqual(ADD_ROLE_MAPPING_TITLE);

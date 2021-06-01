@@ -63,11 +63,7 @@ const roleOptions = [
   },
 ] as RoleType[];
 
-interface RoleMappingProps {
-  isNew?: boolean;
-}
-
-export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
+export const RoleMapping: React.FC = () => {
   const { roleId } = useParams() as { roleId: string };
   const {
     initializeRoleMappings,
@@ -95,6 +91,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
     availableAuthProviders,
     multipleAuthProvidersConfig,
     selectedAuthProviders,
+    roleMapping,
   } = useValues(RoleMappingsLogic);
 
   useEffect(() => {
@@ -104,6 +101,8 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
   }, [roleId]);
 
   if (dataLoading) return <Loading />;
+
+  const isNew = !roleMapping;
 
   const hasGroupAssignment = selectedGroups.size > 0 || includeInAllGroups;
 

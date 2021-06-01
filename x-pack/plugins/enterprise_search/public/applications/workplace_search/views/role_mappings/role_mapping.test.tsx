@@ -83,6 +83,7 @@ describe('RoleMapping', () => {
   });
 
   it('renders for existing role mapping', () => {
+    setMockValues({ ...mockValues, roleMapping: wsRoleMapping });
     const wrapper = shallow(<RoleMapping />);
     const header = wrapper.find(ViewContentHeader);
 
@@ -93,7 +94,7 @@ describe('RoleMapping', () => {
   });
 
   it('renders for new role mapping', () => {
-    const wrapper = shallow(<RoleMapping isNew />);
+    const wrapper = shallow(<RoleMapping />);
     const header = wrapper.find(ViewContentHeader);
 
     expect(header.prop('title')).toEqual(ADD_ROLE_MAPPING_TITLE);
