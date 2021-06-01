@@ -53,7 +53,8 @@ export function buildEuiGridColumn(
   columnName: string,
   columnWidth: number | undefined = 0,
   indexPattern: IndexPattern,
-  defaultColumns: boolean
+  defaultColumns: boolean,
+  isSortEnabled: boolean
 ) {
   const timeString = i18n.translate('discover.timeLabel', {
     defaultMessage: 'Time',
@@ -62,7 +63,7 @@ export function buildEuiGridColumn(
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(indexPatternField?.type),
-    isSortable: indexPatternField?.sortable === true,
+    isSortable: isSortEnabled && indexPatternField?.sortable === true,
     display:
       columnName === '_source'
         ? i18n.translate('discover.grid.documentHeader', {
@@ -100,7 +101,8 @@ export function getEuiGridColumns(
   settings: DiscoverGridSettings | undefined,
   indexPattern: IndexPattern,
   showTimeCol: boolean,
-  defaultColumns: boolean
+  defaultColumns: boolean,
+  isSortEnabled: boolean
 ) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
@@ -108,12 +110,12 @@ export function getEuiGridColumns(
   if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
     const usedColumns = [indexPattern.timeFieldName, ...columns];
     return usedColumns.map((column) =>
-      buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns)
+      buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns, isSortEnabled)
     );
   }
 
   return columns.map((column) =>
-    buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns)
+    buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns, isSortEnabled)
   );
 }
 
