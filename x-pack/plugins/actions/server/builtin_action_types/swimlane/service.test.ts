@@ -12,7 +12,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { actionsConfigMock } from '../../actions_config.mock';
 import * as utils from '../lib/axios_utils';
 import { createExternalService } from './service';
-import { mappings, applicationFields } from './mocks';
+import { mappings } from './mocks';
 import { ExternalService } from './types';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
@@ -35,6 +35,7 @@ describe('Swimlane Service', () => {
   const config = {
     apiUrl: 'https://test.swimlane.com/',
     appId: 'bcq16kdTbz5jlwM6h',
+    connectorType: 'all',
     mappings,
   };
 
@@ -52,6 +53,7 @@ describe('Swimlane Service', () => {
     comments: 'Comments',
     severity: 'Severity',
     externalId: null,
+    description: 'case desc',
   };
 
   beforeAll(() => {
@@ -128,7 +130,7 @@ describe('Swimlane Service', () => {
       expect(() => {
         return createExternalService(
           {
-            config: { apiUrl: 'test.com', appId: '78978', mappings },
+            config: { apiUrl: 'test.com', appId: '78978', mappings, connectorType: 'all' },
             secrets: {
               // @ts-ignore
               apiToken: null,
@@ -138,53 +140,6 @@ describe('Swimlane Service', () => {
           configurationUtilities
         );
       }).toThrow();
-    });
-  });
-
-  describe('getApplication', () => {
-    test('it returns the fields correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          fields: [
-            ...applicationFields,
-            {
-              id: '__proto__',
-              name: 'unsafe',
-              key: 'unsafe',
-              fieldType: 'unsafe',
-            },
-          ],
-        },
-      }));
-
-      const res = await service.getApplication();
-      expect(res).toEqual({ fields: applicationFields });
-    });
-
-    test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: { fields: [] },
-      }));
-
-      await service.getApplication();
-      expect(requestMock).toHaveBeenCalledWith({
-        axios,
-        logger,
-        headers,
-        url: `${config.apiUrl.slice(0, -1)}/api/app/${config.appId}`,
-        method: 'get',
-        configurationUtilities,
-      });
-    });
-
-    test('it should throw an error', async () => {
-      requestMock.mockImplementation(() => {
-        throw new Error('An error has occurred');
-      });
-
-      await expect(service.getApplication()).rejects.toThrow(
-        `[Action][Swimlane]: Unable to get application with id ${config.appId}. Error: An error has occurred`
-      );
     });
   });
 

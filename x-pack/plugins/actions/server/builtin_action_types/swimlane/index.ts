@@ -16,7 +16,6 @@ import {
   SwimlanePublicConfigurationType,
   SwimlaneSecretConfigurationType,
   ExecutorParams,
-  ExecutorSubActionCreateRecordParams,
   ExecutorSubActionPushParams,
 } from './types';
 import { validate } from './validators';
@@ -99,18 +98,6 @@ async function executor(
     const errorMessage = `[Action][ExternalService] -> [Swimlane] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
-  }
-
-  if (subAction === 'createRecord') {
-    const createRecordParams = subActionParams as ExecutorSubActionCreateRecordParams;
-
-    data = await api.createRecord({
-      externalService,
-      params: createRecordParams,
-      logger,
-    });
-
-    logger.debug(`Swimlane new record id ${data.id}`);
   }
 
   if (subAction === 'pushToService') {

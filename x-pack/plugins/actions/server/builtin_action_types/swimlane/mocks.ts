@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  CreateRecordApiParams,
-  ExecutorSubActionCreateRecordParams,
-  ExternalService,
-} from './types';
+import { ExternalService } from './types';
 
 export const applicationFields = [
   {
@@ -46,6 +42,12 @@ export const applicationFields = [
     id: 'a6fdf',
     name: 'Comments',
     key: 'comments',
+    fieldType: 'notes',
+  },
+  {
+    id: 'a6fde',
+    name: 'Description',
+    key: 'description',
     fieldType: 'text',
   },
 ];
@@ -57,6 +59,7 @@ export const mappings = {
   caseIdConfig: applicationFields[3],
   caseNameConfig: applicationFields[4],
   commentsConfig: applicationFields[5],
+  descriptionConfig: applicationFields[6],
 };
 
 export const getApplicationResponse = { fields: applicationFields };
@@ -79,7 +82,6 @@ export const commentResponse = {
 
 const createMock = (): jest.Mocked<ExternalService> => {
   return {
-    getApplication: jest.fn().mockImplementation(() => Promise.resolve(getApplicationResponse)),
     createComment: jest.fn().mockImplementation(() => Promise.resolve(commentResponse)),
     createRecord: jest.fn().mockImplementation(() => Promise.resolve(recordResponseCreate)),
     updateRecord: jest.fn().mockImplementation(() => Promise.resolve(recordResponseUpdate)),
@@ -90,7 +92,7 @@ const externalServiceMock = {
   create: createMock,
 };
 
-const executorParams: ExecutorSubActionCreateRecordParams = {
+const executorParams = {
   alertName: 'alert-name',
   alertSource: 'alert-source',
   caseId: 'case-id',
@@ -99,7 +101,7 @@ const executorParams: ExecutorSubActionCreateRecordParams = {
   severity: 'severity',
 };
 
-const apiParams: CreateRecordApiParams = {
+const apiParams = {
   ...executorParams,
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getBodyForEventAction, removeUnsafeFields } from './helpers';
+import { getBodyForEventAction } from './helpers';
 import { mappings } from './mocks';
 
 describe('Create Record Mapping', () => {
@@ -19,6 +19,7 @@ describe('Create Record Mapping', () => {
       caseName: 'Case Name',
       caseId: 'es3456789',
       comments: 'This is a comment',
+      description: 'case desc',
       externalId: null,
     };
     const data = getBodyForEventAction(appId, mappings, params);
@@ -28,44 +29,6 @@ describe('Create Record Mapping', () => {
     expect(data?.values?.[mappings.caseIdConfig?.id ?? 0]).toEqual(params.caseId);
     expect(data?.values?.[mappings.commentsConfig?.id ?? 0]).toEqual(params.comments);
     expect(data?.values?.[mappings?.severityConfig?.id ?? 0]).toEqual(params.severity);
-  });
-});
-
-describe('removeUnsafeFields', () => {
-  const fields = [
-    {
-      id: '__proto__',
-      name: 'Alert Source',
-      key: 'alert-source',
-      fieldType: 'text',
-    },
-    {
-      id: 'adnjls',
-      name: '__proto__',
-      key: 'alert-source',
-      fieldType: 'text',
-    },
-    {
-      id: 'adnjls',
-      name: 'Alert Source',
-      key: '__proto__',
-      fieldType: 'text',
-    },
-    {
-      id: 'adnjls',
-      name: 'Alert Source',
-      key: 'alert-source',
-      fieldType: '__proto__',
-    },
-    {
-      id: 'safe',
-      name: 'safe',
-      key: 'safe',
-      fieldType: 'safe',
-    },
-  ];
-  test('it returns only safe fields', () => {
-    const safeFields = removeUnsafeFields(fields);
-    expect(safeFields).toEqual([fields[4]]);
+    expect(data?.values?.[mappings?.descriptionConfig?.id ?? 0]).toEqual(params.description);
   });
 });

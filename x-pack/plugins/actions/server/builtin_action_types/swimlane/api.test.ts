@@ -7,12 +7,7 @@
 
 import { api } from './api';
 import { ExternalService } from './types';
-import {
-  externalServiceMock,
-  recordResponseCreate,
-  recordResponseUpdate,
-  getApplicationResponse,
-} from './mocks';
+import { externalServiceMock, recordResponseCreate, recordResponseUpdate } from './mocks';
 import { Logger } from '@kbn/logging';
 
 let mockedLogger: jest.Mocked<Logger>;
@@ -23,6 +18,7 @@ const params = {
   alertSource: 'elastic',
   caseId: '123456',
   comments: 'some comments',
+  description: 'case desc',
 };
 
 describe('api', () => {
@@ -30,31 +26,6 @@ describe('api', () => {
 
   beforeEach(() => {
     externalService = externalServiceMock.create();
-  });
-
-  describe('getApplication', () => {
-    test('it returns the fields correctly', async () => {
-      const res = await api.getApplication({ externalService });
-      expect(res).toEqual(getApplicationResponse);
-    });
-  });
-
-  describe('createRecord', () => {
-    test('it creates a record correctly with a comment', async () => {
-      const res = await api.createRecord({
-        externalService,
-        logger: mockedLogger,
-        params: {
-          alertName: 'alert name',
-          caseName: 'case name',
-          severity: 'critical',
-          alertSource: 'elastic',
-          caseId: '123456',
-          comments: 'some comments',
-        },
-      });
-      expect(res).toEqual(recordResponseCreate);
-    });
   });
 
   describe('pushToService', () => {

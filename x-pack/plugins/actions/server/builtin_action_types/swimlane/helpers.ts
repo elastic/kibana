@@ -7,7 +7,6 @@
 
 import {
   CreateRecordParams,
-  ExecutorSubActionPushParams,
   MappingConfigType,
   SwimlaneDataComments,
   SwimlaneDataValues,
