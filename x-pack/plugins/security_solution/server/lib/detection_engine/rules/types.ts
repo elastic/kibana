@@ -14,7 +14,7 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import {
+import type {
   MachineLearningJobIdOrUndefined,
   From,
   FromOrUndefined,
@@ -42,9 +42,9 @@ import {
   MaxSignalsOrUndefined,
   MaxSignals,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
+import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
 
-import { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {
@@ -209,12 +209,6 @@ export const isRuleStatusFindType = (
   obj: unknown
 ): obj is SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => {
   return get('saved_objects', obj) != null;
-};
-
-export const isRuleStatusFindTypes = (
-  obj: unknown[] | undefined
-): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
-  return obj ? obj.every((ruleStatus) => isRuleStatusFindType(ruleStatus)) : false;
 };
 
 export interface CreateRulesOptions {

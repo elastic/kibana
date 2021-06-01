@@ -10,7 +10,7 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 import * as alertsApi from '../../../detections/containers/detection_engine/alerts/api';
-import * as listsApi from '../../../../../lists/public/exceptions/api';
+import * as listsApi from '@kbn/securitysolution-list-api';
 import * as getQueryFilterHelper from '../../../../common/detection_engine/get_query_filter';
 import * as buildFilterHelpers from '../../../detections/components/alerts_table/default_config';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -20,7 +20,8 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../shared_imports';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { TestProviders } from '../../mock';
 import {
   useAddOrUpdateException,
   UseAddOrUpdateExceptionProps,
@@ -32,6 +33,7 @@ import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 const mockKibanaHttpService = coreMock.createStart().http;
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../common/lib/kibana');
+jest.mock('@kbn/securitysolution-list-api');
 
 const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
@@ -132,12 +134,16 @@ describe('useAddOrUpdateException', () => {
 
     addOrUpdateItemsArgs = [ruleId, itemsToAddOrUpdate];
     render = () =>
-      renderHook<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>(() =>
-        useAddOrUpdateException({
-          http: mockKibanaHttpService,
-          onError,
-          onSuccess,
-        })
+      renderHook<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>(
+        () =>
+          useAddOrUpdateException({
+            http: mockKibanaHttpService,
+            onError,
+            onSuccess,
+          }),
+        {
+          wrapper: TestProviders,
+        }
       );
   });
 

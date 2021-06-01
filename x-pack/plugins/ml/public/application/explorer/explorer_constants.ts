@@ -33,6 +33,7 @@ export const EXPLORER_ACTION = {
   SET_VIEW_BY_SWIMLANE_LOADING: 'setViewBySwimlaneLoading',
   SET_VIEW_BY_PER_PAGE: 'setViewByPerPage',
   SET_VIEW_BY_FROM_PAGE: 'setViewByFromPage',
+  SET_SWIM_LANE_SEVERITY: 'setSwimLaneSeverity',
 };
 
 export const FILTER_ACTION = {
