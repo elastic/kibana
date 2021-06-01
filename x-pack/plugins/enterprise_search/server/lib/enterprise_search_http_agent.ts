@@ -14,28 +14,23 @@ import { ConfigType } from '../';
 
 // Returns an HTTP agent to be used for requests to Enterprise Search APIs
 export const entSearchHttpAgent = (config: ConfigType): http.Agent | https.Agent => {
-  const defaultAgent = new http.Agent();
-
-  if (!config.ssl) return defaultAgent;
-
   try {
-    const { certificateAuthorities, rejectUnauthorized } = config.ssl;
     const parsedHost = new URL(config.host);
     if (parsedHost.protocol === 'https:') {
       return new https.Agent({
-        ca: loadCertificateAuthorities(certificateAuthorities),
-        rejectUnauthorized: !!rejectUnauthorized,
+        ca: loadCertificateAuthorities(config.ssl.certificateAuthorities),
+        rejectUnauthorized: !!config.ssl.rejectUnauthorized,
       });
     }
-  } catch {
-    // ignore the error and fall back to the default agent
+  } catch(TypeError) {
+    // Ignore URL parsing errors and fall back to the HTTP agent
   }
 
-  return defaultAgent;
+  return new http.Agent();
 };
 
 // Loads custom CA certificate files and returns all certificates as an array
-export const loadCertificateAuthorities = (ca: string | string[]): string[] => {
+export const loadCertificateAuthorities = (ca: string | string[] | undefined): string[] => {
   const parsedCerts = [];
   if (ca) {
     const paths = Array.isArray(ca) ? ca : [ca];

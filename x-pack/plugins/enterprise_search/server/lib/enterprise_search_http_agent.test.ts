@@ -17,7 +17,7 @@ import { entSearchHttpAgent, loadCertificateAuthorities } from './enterprise_sea
 
 describe('entSearchHttpAgent', () => {
   it('should be an http.Agent when host URL is using HTTP', () => {
-    const httpAgent = entSearchHttpAgent({ host: 'http://example.org' } as ConfigType);
+    const httpAgent = entSearchHttpAgent({ host: 'http://example.org', ssl: {} } as ConfigType);
     expect(httpAgent instanceof http.Agent).toBe(true);
   });
 
