@@ -96,13 +96,20 @@ describe('duration anomaly alert', () => {
   const mockDate = 'date';
   beforeAll(() => {
     Date.now = jest.fn().mockReturnValue(new Date('2021-05-13T12:33:37.000Z'));
+    jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(() => ({
+      format: jest.fn(),
+      formatToParts: jest.fn(),
+      resolvedOptions: () => ({
+        locale: '',
+        calendar: '',
+        numberingSystem: '',
+        timeZone: 'UTC',
+      }),
+    }));
+    toISOStringSpy = jest.spyOn(Date.prototype, 'toISOString');
   });
 
   describe('alert executor', () => {
-    beforeEach(() => {
-      toISOStringSpy = jest.spyOn(Date.prototype, 'toISOString');
-    });
-
     it('triggers when aging or expiring alerts are found', async () => {
       toISOStringSpy.mockImplementation(() => mockDate);
       const mockResultServiceProviderGetter: jest.Mock<{
@@ -141,7 +148,7 @@ describe('duration anomaly alert', () => {
         options.params.severity,
         1620909217000,
         1620909217000,
-        'America/New_York',
+        'UTC',
         500,
         10,
         undefined
