@@ -16,7 +16,6 @@ import { shallow } from 'enzyme';
 
 import { EuiCheckbox, EuiPageHeader } from '@elastic/eui';
 
-import { Loading } from '../../../shared/loading';
 import { AttributeSelector, RoleSelector } from '../../../shared/role_mapping';
 import { asRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 import {
@@ -89,13 +88,6 @@ describe('RoleMapping', () => {
 
     expect(header.prop('pageTitle')).toEqual(ADD_ROLE_MAPPING_TITLE);
     expect(shallow(header.prop('rightSideItems')![0] as any).text()).toEqual(SAVE_ROLE_MAPPING);
-  });
-
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<RoleMapping />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('only passes standard role options for non-advanced roles', () => {

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-
-import { useParams } from 'react-router-dom';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -24,7 +22,6 @@ import {
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
 import { AttributeSelector, RoleSelector } from '../../../shared/role_mapping';
 import {
   SAVE_ROLE_MAPPING,
@@ -64,10 +61,7 @@ const roleOptions = [
 ] as RoleType[];
 
 export const RoleMapping: React.FC = () => {
-  const { roleId } = useParams() as { roleId: string };
   const {
-    initializeRoleMappings,
-    initializeRoleMapping,
     handleSaveMapping,
     handleGroupSelectionChange,
     handleAllGroupsSelectionChange,
@@ -75,13 +69,11 @@ export const RoleMapping: React.FC = () => {
     handleAttributeSelectorChange,
     handleRoleChange,
     handleAuthProviderChange,
-    resetState,
   } = useActions(RoleMappingsLogic);
 
   const {
     attributes,
     elasticsearchRoles,
-    dataLoading,
     roleType,
     attributeValue,
     attributeName,
@@ -93,14 +85,6 @@ export const RoleMapping: React.FC = () => {
     selectedAuthProviders,
     roleMapping,
   } = useValues(RoleMappingsLogic);
-
-  useEffect(() => {
-    initializeRoleMappings();
-    initializeRoleMapping(roleId);
-    return resetState;
-  }, [roleId]);
-
-  if (dataLoading) return <Loading />;
 
   const isNew = !roleMapping;
 
