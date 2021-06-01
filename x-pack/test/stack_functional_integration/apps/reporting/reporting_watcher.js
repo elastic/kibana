@@ -85,8 +85,7 @@ export default function ({ getService, getPageObjects }) {
         await putWatcher(watch, id, body, client, log);
       });
       it('should be successful and increment revision', async () => {
-        const tryForTime = retry.tryForTime.bind(retry);
-        await getWatcher(watch, id, client, log, PageObjects.common, tryForTime);
+        await getWatcher(watch, id, client, log, PageObjects.common, retry.tryForTime.bind(retry));
       });
       it('should delete watch and update revision', async () => {
         await deleteWatcher(watch, id, client, log);
