@@ -74,7 +74,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
-  describe('categorization', function () {
+  // skipping categorization tests, see https://github.com/elastic/kibana/issues/101056
+  describe.skip('categorization', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/categorization');

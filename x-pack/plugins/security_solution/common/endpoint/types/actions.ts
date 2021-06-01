@@ -24,6 +24,21 @@ export interface EndpointAction {
   };
 }
 
+export interface EndpointActionResponse {
+  '@timestamp': string;
+  /** The id of the action for which this response is associated with */
+  action_id: string;
+  /** The agent id that sent this action response */
+  agent_id: string;
+  started_at: string;
+  completed_at: string;
+  error: string;
+  action_data: {
+    command: ISOLATION_ACTIONS;
+    comment?: string;
+  };
+}
+
 export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
 
 export interface HostIsolationResponse {
