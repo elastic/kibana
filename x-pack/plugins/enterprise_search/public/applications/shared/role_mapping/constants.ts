@@ -139,3 +139,45 @@ export const ROLE_MAPPING_NOT_FOUND = i18n.translate(
     defaultMessage: 'No matching Role mapping found.',
   }
 );
+
+export const ROLE_MAPPING_FLYOUT_CREATE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.flyoutCreateTitle',
+  {
+    defaultMessage: 'Create a role mapping',
+  }
+);
+
+export const ROLE_MAPPING_FLYOUT_UPDATE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.flyoutUpdateTitle',
+  {
+    defaultMessage: 'Update role mapping',
+  }
+);
+
+export const ROLE_MAPPING_FLYOUT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.flyoutDescription',
+  {
+    defaultMessage: 'Assign roles and permissions based on user attributes',
+  }
+);
+
+export const ROLE_MAPPING_FLYOUT_CANCEL_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingFlyoutCancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const ROLE_MAPPING_FLYOUT_CREATE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingFlyoutCreateButton',
+  {
+    defaultMessage: 'Create mapping',
+  }
+);
+
+export const ROLE_MAPPING_FLYOUT_UPDATE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingFlyoutUpdateButton',
+  {
+    defaultMessage: 'Update mapping',
+  }
+);
