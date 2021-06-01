@@ -27,6 +27,7 @@ describe('RoleMappingsLogic', () => {
     availableAuthProviders: [],
     elasticsearchRoles: [],
     roleMapping: null,
+    roleMappingFlyoutOpen: false,
     roleMappings: [],
     roleType: 'admin',
     attributeValue: '',
@@ -221,6 +222,25 @@ describe('RoleMappingsLogic', () => {
       expect(RoleMappingsLogic.values.roleMapping).toEqual(null);
       expect(RoleMappingsLogic.values.attributeValue).toEqual('');
       expect(RoleMappingsLogic.values.attributeName).toEqual('username');
+      expect(clearFlashMessages).toHaveBeenCalled();
+    });
+
+    it('openRoleMappingFlyout', () => {
+      mount(mappingServerProps);
+      RoleMappingsLogic.actions.openRoleMappingFlyout();
+
+      expect(RoleMappingsLogic.values.roleMappingFlyoutOpen).toEqual(true);
+      expect(clearFlashMessages).toHaveBeenCalled();
+    });
+
+    it('closeRoleMappingFlyout', () => {
+      mount({
+        ...mappingServerProps,
+        roleMappingFlyoutOpen: true,
+      });
+      RoleMappingsLogic.actions.closeRoleMappingFlyout();
+
+      expect(RoleMappingsLogic.values.roleMappingFlyoutOpen).toEqual(false);
       expect(clearFlashMessages).toHaveBeenCalled();
     });
   });
