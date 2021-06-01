@@ -11,6 +11,11 @@ import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
 import { SavedObjectMigrationFn } from 'kibana/server';
 
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
+import {
+  commonAddSupportOfDualIndexSelectionModeInTSVB,
+  commonHideTSVBLastValueIndicator,
+  commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
+} from './visualization_common_migrations';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -799,22 +804,16 @@ const addSupportOfDualIndexSelectionModeInTSVB: SavedObjectMigrationFn<any, any>
       visState = JSON.parse(visStateJSON);
     } catch (e) {
       // Let it go, the data is invalid and we'll leave it as is
+      return doc;
     }
-    if (visState && visState.type === 'metrics') {
-      const { params } = visState;
-
-      if (typeof params?.index_pattern === 'string') {
-        params.use_kibana_indexes = false;
-      }
-
-      return {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          visState: JSON.stringify(visState),
-        },
-      };
-    }
+    const newVisState = commonAddSupportOfDualIndexSelectionModeInTSVB(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
   }
   return doc;
 };
@@ -929,25 +928,17 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
 const hideTSVBLastValueIndicator: SavedObjectMigrationFn<any, any> = (doc) => {
   try {
     const visState = JSON.parse(doc.attributes.visState);
-
-    if (visState && visState.type === 'metrics' && visState.params.type !== 'timeseries')
-      return {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          visState: JSON.stringify({
-            ...visState,
-            params: {
-              ...visState.params,
-              hide_last_value_indicator: true,
-            },
-          }),
-        },
-      };
+    const newVisState = commonHideTSVBLastValueIndicator(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
   } catch (e) {
     // Let it go, the data is invalid and we'll leave it as is
   }
-
   return doc;
 };
 
@@ -962,23 +953,17 @@ const removeDefaultIndexPatternAndTimeFieldFromTSVBModel: SavedObjectMigrationFn
       visState = JSON.parse(visStateJSON);
     } catch (e) {
       // Let it go, the data is invalid and we'll leave it as is
-    }
-    if (visState && visState.type === 'metrics') {
-      const { params } = visState;
-
-      delete params.default_index_pattern;
-      delete params.default_timefield;
-
-      return {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          visState: JSON.stringify(visState),
-        },
-      };
+      return doc;
     }
   }
-  return doc;
+  const newVisState = commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel(visState);
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      visState: JSON.stringify(newVisState),
+    },
+  };
 };
 
 export const visualizationSavedObjectTypeMigrations = {
@@ -1017,6 +1002,12 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.11.0': flow(enableDataTableVisToolbar),
   '7.12.0': flow(migrateVislibAreaLineBarTypes, migrateSchema),
   '7.13.0': flow(
+    addSupportOfDualIndexSelectionModeInTSVB,
+    hideTSVBLastValueIndicator,
+    removeDefaultIndexPatternAndTimeFieldFromTSVBModel
+  ),
+  '7.13.1': flow(
+    // duplicate these migrations in case a broken by value panel is added to the library
     addSupportOfDualIndexSelectionModeInTSVB,
     hideTSVBLastValueIndicator,
     removeDefaultIndexPatternAndTimeFieldFromTSVBModel
