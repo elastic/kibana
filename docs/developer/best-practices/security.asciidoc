@@ -64,8 +64,9 @@ default.
 
 *Best practices:*
 
-* Check for instances of `anObject[a][b] = c` where `a`, `b`, and `c` are controlled by user input. This includes code paths where the following
-logical code steps could be performed in separate files by completely different operations, or recursively using dynamic operations.
+* Check for instances of `anObject[a][b] = c` where `a`, `b`, and `c` are controlled by user input. This includes code paths where the
+following logical code steps could be performed in separate files by completely different operations, or recursively using dynamic
+operations.
 * Validate any user input, including API url parameters, query parameters, and payloads. Preferably, use a schema which only allows specific
 keys/values. At a very minimum, implement a deny-list that prevents `__proto__` and `prototype.constructor` from being used within object
 keys.
@@ -94,8 +95,8 @@ a vector for information disclosure or injection attacks.
 *Best practices:*
 
 * Ensure that all outbound requests from the {kib} server use hard-coded URLs if possible.
-* If user input is used to construct a URL for an outbound request, ensure that an allow-list is used to validate the endpoints and that user input is escaped properly. Ideally
-this allow-list should be set in `kibana.yml` so only server administrators can change it.
+* If user input is used to construct a URL for an outbound request, ensure that an allow-list is used to validate the endpoints and that
+user input is escaped properly. Ideally this allow-list should be set in `kibana.yml` so only server administrators can change it.
 ** This is particularly relevant when using `transport.request` with the {es} client, as no automatic escaping is performed.
 
 === Reverse Tabnabbing ===
