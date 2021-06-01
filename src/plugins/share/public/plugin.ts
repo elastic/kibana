@@ -30,13 +30,31 @@ export interface ShareStartDependencies {
 
 /** @public */
 export type SharePluginSetup = ShareMenuRegistrySetup & {
+  /**
+   * @deprecated
+   *
+   * URL Generators are deprecated use UrlService instead.
+   */
   urlGenerators: UrlGeneratorsSetup;
+
+  /**
+   * Utilities to work with URL locators and short URLs.
+   */
   url: UrlService;
 };
 
 /** @public */
 export type SharePluginStart = ShareMenuManagerStart & {
+  /**
+   * @deprecated
+   *
+   * URL Generators are deprecated use UrlService instead.
+   */
   urlGenerators: UrlGeneratorsStart;
+
+  /**
+   * Utilities to work with URL locators and short URLs.
+   */
   url: UrlService;
 };
 
