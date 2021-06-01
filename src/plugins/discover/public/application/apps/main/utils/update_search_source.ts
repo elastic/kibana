@@ -16,37 +16,36 @@ import { indexPatterns as indexPatternsUtils } from '../../../../../../data/publ
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting
  */
-export function updateSearchSource({
-  indexPattern,
-  services,
-  sort,
-  useNewFieldsApi,
-  persistentSearchSource,
-  volatileSearchSource,
-}: {
-  indexPattern: IndexPattern;
-  services: DiscoverServices;
-  sort: SortOrder[];
-  useNewFieldsApi: boolean;
-  persistentSearchSource?: ISearchSource;
-  volatileSearchSource?: ISearchSource;
-}) {
+export function updateSearchSource(
+  searchSource: ISearchSource,
+  persist = true,
+  {
+    indexPattern,
+    services,
+    sort,
+    useNewFieldsApi,
+  }: {
+    indexPattern: IndexPattern;
+    services: DiscoverServices;
+    sort: SortOrder[];
+    useNewFieldsApi: boolean;
+  }
+) {
   const { uiSettings, data } = services;
   const usedSort = getSortForSearchSource(
     sort,
     indexPattern,
     uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
   );
-  const searchSource =
-    persistentSearchSource ?? (volatileSearchSource!.getParent() as SearchSource);
+  const usedSearchSource = persist ? searchSource : (searchSource!.getParent() as SearchSource);
 
-  searchSource
+  usedSearchSource
     .setField('index', indexPattern)
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
 
-  if (volatileSearchSource) {
-    volatileSearchSource
+  if (!persist) {
+    searchSource
       .setField('trackTotalHits', true)
       .setField('size', uiSettings.get(SAMPLE_SIZE_SETTING))
       .setField('sort', usedSort)
@@ -58,21 +57,18 @@ export function updateSearchSource({
 
     // this is not the default index pattern, it determines that it's not of type rollup
     if (indexPatternsUtils.isDefault(indexPattern)) {
-      volatileSearchSource.setField(
-        'filter',
-        data.query.timefilter.timefilter.createFilter(indexPattern)
-      );
+      searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern));
     }
 
     if (useNewFieldsApi) {
-      volatileSearchSource.removeField('fieldsFromSource');
+      searchSource.removeField('fieldsFromSource');
       const fields: Record<string, string> = { field: '*' };
 
       fields.include_unmapped = 'true';
 
-      volatileSearchSource.setField('fields', [fields]);
+      searchSource.setField('fields', [fields]);
     } else {
-      volatileSearchSource.removeField('fields');
+      searchSource.removeField('fields');
     }
   }
 }

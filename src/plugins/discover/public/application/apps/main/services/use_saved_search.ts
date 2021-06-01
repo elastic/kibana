@@ -176,8 +176,7 @@ export const useSavedSearch = ({
       refs.current.fetchStatus = loadingMessage.state;
 
       const { sort } = stateContainer.appStateContainer.getState();
-      updateSearchSource({
-        volatileSearchSource: searchSource,
+      updateSearchSource(searchSource, false, {
         indexPattern,
         services,
         sort: sort as SortOrder[],

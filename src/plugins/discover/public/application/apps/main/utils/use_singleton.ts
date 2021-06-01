@@ -16,11 +16,11 @@ import { useRef } from 'react';
  * https://reactjs.org/docs/hooks-reference.html#usememo
  */
 export function useSingleton<T>(initialize: () => T): T {
-  const ref = useRef<{ singleton: T | null }>({ singleton: null });
+  const ref = useRef<T | null>(null);
 
-  if (ref.current.singleton === null) {
-    ref.current.singleton = initialize();
+  if (ref.current === null) {
+    ref.current = initialize();
   }
 
-  return ref.current.singleton;
+  return ref.current;
 }

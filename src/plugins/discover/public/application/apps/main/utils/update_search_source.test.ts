@@ -21,8 +21,7 @@ describe('updateSearchSource', () => {
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
     const sampleSize = 250;
-    updateSearchSource({
-      volatileSearchSource: volatileSearchSourceMock,
+    updateSearchSource(volatileSearchSourceMock, false, {
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
@@ -51,8 +50,7 @@ describe('updateSearchSource', () => {
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
     const sampleSize = 250;
-    updateSearchSource({
-      volatileSearchSource: volatileSearchSourceMock,
+    updateSearchSource(volatileSearchSourceMock, false, {
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
@@ -84,8 +82,7 @@ describe('updateSearchSource', () => {
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
     const sampleSize = 250;
-    updateSearchSource({
-      volatileSearchSource: volatileSearchSourceMock,
+    updateSearchSource(volatileSearchSourceMock, false, {
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
@@ -115,10 +112,9 @@ describe('updateSearchSource', () => {
   test('does not explicitly request fieldsFromSource when not using fields API', async () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
     const volatileSearchSourceMock = createSearchSourceMock({});
+    volatileSearchSourceMock.setParent(persistentSearchSourceMock);
     const sampleSize = 250;
-    updateSearchSource({
-      persistentSearchSource: persistentSearchSourceMock,
-      volatileSearchSource: volatileSearchSourceMock,
+    updateSearchSource(volatileSearchSourceMock, false, {
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
