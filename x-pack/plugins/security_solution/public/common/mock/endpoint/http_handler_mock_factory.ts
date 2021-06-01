@@ -13,7 +13,7 @@ import type {
   HttpHandler,
   HttpStart,
 } from 'kibana/public';
-import { extend } from 'lodash';
+import { merge } from 'lodash';
 import { act } from '@testing-library/react';
 
 class ApiRouteNotMocked extends Error {}
@@ -292,7 +292,7 @@ export const composeHttpHandlerMocks = <
 
     handlerMocks.forEach((handlerMock) => {
       const { waitForApi, ...otherInterfaceProps } = handlerMock(http);
-      extend(mockedApiInterfaces, otherInterfaceProps);
+      merge(mockedApiInterfaces, otherInterfaceProps);
     });
 
     return mockedApiInterfaces;
