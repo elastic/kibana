@@ -21,14 +21,16 @@ import {
   ROLE_MAPPINGS_DESCRIPTION,
 } from '../../../shared/role_mapping/constants';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
-import { getRoleMappingPath, ROLE_MAPPING_NEW_PATH } from '../../routes';
+import { ROLE_MAPPING_NEW_PATH } from '../../routes';
 
 import { EMPTY_ROLE_MAPPINGS_BODY, ROLE_MAPPINGS_TABLE_HEADER } from './constants';
 
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 export const RoleMappings: React.FC = () => {
-  const { initializeRoleMappings } = useActions(RoleMappingsLogic);
+  const { initializeRoleMappings, initializeRoleMapping, handleDeleteMapping } = useActions(
+    RoleMappingsLogic
+  );
 
   const { roleMappings, dataLoading, multipleAuthProvidersConfig } = useValues(RoleMappingsLogic);
 
@@ -55,8 +57,9 @@ export const RoleMappings: React.FC = () => {
       accessItemKey="groups"
       accessHeader={ROLE_MAPPINGS_TABLE_HEADER}
       addMappingButton={addMappingButton}
-      getRoleMappingPath={getRoleMappingPath}
       shouldShowAuthProvider={multipleAuthProvidersConfig}
+      initializeRoleMapping={initializeRoleMapping}
+      handleDeleteMapping={handleDeleteMapping}
     />
   );
 

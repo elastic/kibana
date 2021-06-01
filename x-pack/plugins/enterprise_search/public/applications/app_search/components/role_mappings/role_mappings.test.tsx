@@ -22,6 +22,8 @@ import { RoleMappings } from './role_mappings';
 
 describe('RoleMappings', () => {
   const initializeRoleMappings = jest.fn();
+  const initializeRoleMapping = jest.fn();
+  const handleDeleteMapping = jest.fn();
   const mockValues = {
     roleMappings: [wsRoleMapping],
     dataLoading: false,
@@ -31,6 +33,8 @@ describe('RoleMappings', () => {
   beforeEach(() => {
     setMockActions({
       initializeRoleMappings,
+      initializeRoleMapping,
+      handleDeleteMapping,
     });
     setMockValues(mockValues);
   });

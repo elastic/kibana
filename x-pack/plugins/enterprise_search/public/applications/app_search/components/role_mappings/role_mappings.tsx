@@ -31,10 +31,14 @@ import { ROLE_MAPPING_NEW_PATH } from '../../routes';
 
 import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING, EMPTY_ROLE_MAPPINGS_BODY } from './constants';
 import { RoleMappingsLogic } from './role_mappings_logic';
-import { generateRoleMappingPath } from './utils';
 
 export const RoleMappings: React.FC = () => {
-  const { initializeRoleMappings, resetState } = useActions(RoleMappingsLogic);
+  const {
+    initializeRoleMappings,
+    initializeRoleMapping,
+    handleDeleteMapping,
+    resetState,
+  } = useActions(RoleMappingsLogic);
   const { roleMappings, multipleAuthProvidersConfig, dataLoading } = useValues(RoleMappingsLogic);
 
   useEffect(() => {
@@ -63,8 +67,9 @@ export const RoleMappings: React.FC = () => {
       accessItemKey="engines"
       accessHeader={ROLE_MAPPINGS_ENGINE_ACCESS_HEADING}
       addMappingButton={addMappingButton}
-      getRoleMappingPath={generateRoleMappingPath}
+      initializeRoleMapping={initializeRoleMapping}
       shouldShowAuthProvider={multipleAuthProvidersConfig}
+      handleDeleteMapping={handleDeleteMapping}
     />
   );
 
