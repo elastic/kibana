@@ -16,7 +16,7 @@ import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
 
 import { deletePipelineRefs } from './remove';
-import { FINAL_PIPELINE, FINAL_PIPELINE_ID } from './security_final_pipeline';
+import { FINAL_PIPELINE, FINAL_PIPELINE_ID } from './final_pipeline';
 
 interface RewriteSubstitution {
   source: string;

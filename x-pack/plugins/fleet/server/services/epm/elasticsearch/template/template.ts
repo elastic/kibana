@@ -16,7 +16,7 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
-import { FINAL_PIPELINE_ID } from '../ingest_pipeline/security_final_pipeline';
+import { FINAL_PIPELINE_ID } from '../ingest_pipeline/final_pipeline';
 
 interface Properties {
   [key: string]: any;
@@ -86,8 +86,7 @@ export function getTemplate({
     template.template.settings.index.default_pipeline = pipelineName;
   }
   if (template.template.settings.index.final_pipeline) {
-    const logger = appContextService.getLogger();
-    logger.error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
+    throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
   template.template.settings.index.final_pipeline = FINAL_PIPELINE_ID;
 
