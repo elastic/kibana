@@ -326,9 +326,10 @@ server.newPlatform.setup.plugins.alerting.registerType(myRuleType);
 ## Role Based Access-Control
 
 Once you have registered your AlertType, you need to grant your users privileges to use it.
-When registering a feature in Kibana, you can specify multiple types of privileges which are granted to users when they're assigned certain roles.
-Assuming your feature introduces its own AlertTypes, you'll want to control which roles have all/read privileges for these AlertTypes when they're inside the feature.
-In addition, when users are inside your feature, you might want to grant them access to AlertTypes from other features, such as built-in stack rules or rule types provided by other features.
+When registering a feature in Kibana you can specify multiple types of privileges which are granted to users when they're assigned certain roles.
+
+Assuming your feature introduces its own AlertTypes, you'll want to control which roles have all/read privileges for the rules and alerts for these AlertTypes when they're inside the feature.
+In addition, when users are inside your feature, you might want to grant them access to rules and alerts for AlertTypes from other features, such as built-in stack rules or rule types provided by other features.
 
 You can control all of these abilities by assigning privileges to the Alerting Framework from within your own feature, for example:
 
@@ -337,30 +338,61 @@ features.registerKibanaFeature({
 	id: 'my-application-id',
 	name: 'My Application',
 	app: [],
+	alerting: [
+		'my-application-id.my-rule-type',
+		'my-application-id.my-restricted-rule-type',
+		'.index-threshold',
+		'xpack.uptime.alerts.actionGroups.tls'
+	],
 	privileges: {
 		all: {
 			alerting: {
-				all: [
-					// grant `all` over our own types
-					'my-application-id.my-rule-type',
-					'my-application-id.my-restricted-rule-type',
-					// grant `all` over the built-in IndexThreshold
-					'.index-threshold',
-					// grant `all` over Uptime's TLS rule type
-					'xpack.uptime.alerts.actionGroups.tls'
-				],
+				rule: {
+					all: [
+						// grant `all` over our own types
+						'my-application-id.my-rule-type',
+						'my-application-id.my-restricted-rule-type',
+						// grant `all` over the built-in IndexThreshold
+						'.index-threshold',
+						// grant `all` over Uptime's TLS rule type
+						'xpack.uptime.alerts.actionGroups.tls'
+					],
+				},
+				alert: {
+					all: [
+						// grant `all` over our own types
+						'my-application-id.my-rule-type',
+						'my-application-id.my-restricted-rule-type',
+						// grant `all` over the built-in IndexThreshold
+						'.index-threshold',
+						// grant `all` over Uptime's TLS rule type
+						'xpack.uptime.alerts.actionGroups.tls'
+					],
+				}
 			},
 		},
 		read: {
 			alerting: {
-				read: [
-					// grant `read` over our own type
-					'my-application-id.my-rule-type',
-					// grant `read` over the built-in IndexThreshold
-					'.index-threshold', 
-					// grant `read` over Uptime's TLS rule type
-					'xpack.uptime.alerts.actionGroups.tls'
-				],
+				rule: {
+					read: [
+						// grant `read` over our own type
+						'my-application-id.my-alert-type',
+						// grant `read` over the built-in IndexThreshold
+						'.index-threshold', 
+						// grant `read` over Uptime's TLS AlertType
+						'xpack.uptime.alerts.actionGroups.tls'
+					],
+				},
+				alert: {
+					read: [
+						// grant `read` over our own type
+						'my-application-id.my-alert-type',
+						// grant `read` over the built-in IndexThreshold
+						'.index-threshold', 
+						// grant `read` over Uptime's TLS AlertType
+						'xpack.uptime.alerts.actionGroups.tls'
+					],
+				},
 			},
 		},
 	},
@@ -369,17 +401,21 @@ features.registerKibanaFeature({
 
 In this example we can see the following:
 
-- Our feature grants any user who's assigned the `all` role in our feature the `all` role in the Alerting framework over every rule of the `my-application-id.my-rule-type` type which is created _inside_ the feature. What that means is that this privilege will allow the user to execute any of the `all` operations (listed below) on these rules as long as their `consumer` is `my-application-id`. Below that you'll notice we've done the same with the `read` role, which grants the Alerting Framework's `read` role privileges over these very same rules.
-- In addition, our feature grants the same privileges over any rule of type `my-application-id.my-restricted-rule-type`, which is another hypothetical rule type registered by this feature. It's worth noting that this type has been omitted from the `read` role. What this means is that only users with the `all` role will be able to interact with rules of this type.
-- Next, lets look at the `.index-threshold` and `xpack.uptime.alerts.actionGroups.tls` types. These have been specified in both `read` and `all`, which means that all the users in the feature will gain privileges over rules of these types (as long as their `consumer` is `my-application-id`). The difference between these two and the previous two is that they are _produced_ by other features! `.index-threshold` is a built-in stack rule type, provided by the _Stack Rules_ feature, and `xpack.uptime.alerts.actionGroups.tls` is a rule type provided by the _Uptime_ feature. Specifying these types here tells the Alerting Framework that as far as the `my-application-id` feature is concerned, the user is privileged to use them (with `all` and `read` applied), but that isn't enough. Using another feature's rule type is only possible if both the producer of the rule type and the consumer of the rule type explicitly grant privileges to do so. In this case, the _Stack Rules_ & _Uptime_ features would have to explicitly add these privileges to a role and this role would have to be granted to this user.
+- Our feature grants any user who's assigned the `all` role in our feature the `all` role in the Alerting Framework over every rule and alert of the rule type `my-application-id.my-rule-type` type which is created _inside_ the feature. What that means is that this privilege will allow the user to execute any of the `all` operations (listed below) on these rules and alerts as long as their `consumer` is `my-application-id`. Below that you'll notice we've done the same with the `read` role, which is grants the Alerting Framework's `read` role privileges over these very same rules and alerts.
+- In addition, our feature grants the same privileges over any rule or alert of rule type `my-application-id.my-restricted-rule-type`, which is another hypothetical rule type registered by this feature. It's worth noting that this type has been omitted from the `read` role. What this means is that only users with the `all` role will be able to interact with rules and alerts of this rule type.
+- Next, let's look at the `.index-threshold` and `xpack.uptime.alerts.actionGroups.tls` types. These have been specified in both `read` and `all`, which means that all the users in the feature will gain privileges over rules and alerts of these rule types (as long as their `consumer` is `my-application-id`). The difference between these two and the previous two is that they are _produced_ by other features! `.index-threshold` is a built-in stack rule type, provided by the _Stack Rules_ feature, and `xpack.uptime.alerts.actionGroups.tls` is a rule type provided by the _Uptime_ feature. Specifying these types here tells the Alerting Framework that as far as the `my-application-id` feature is concerned, the user is privileged to use them (with `all` and `read` applied), but that isn't enough. Using another feature's rule type is only possible if both the producer of the rule type and the consumer of the rule type explicitly grant privileges to do so. In this case, the _Stack Rules_ & _Uptime_ features would have to explicitly add these privileges to a role and this role would have to be granted to this user.
 
-It's important to note that any role can be granted a mix of `all` and `read` privileges accross multiple types, for example:
+It's important to note that any role can be granted a mix of `all` and `read` privileges across multiple types, for example:
 
 ```typescript
 features.registerKibanaFeature({
   id: 'my-application-id',
   name: 'My Application',
   app: [],
+  alerting: [
+    'my-application-id.my-rule-type',
+    'my-application-id.my-restricted-rule-type'
+  ],
   privileges: {
     all: {
       app: ['my-application-id', 'kibana'],
@@ -393,12 +429,22 @@ features.registerKibanaFeature({
     read: {
       app: ['lens', 'kibana'],
       alerting: {
-        all: [
-          'my-application-id.my-rule-type'
-        ],
-        read: [
-          'my-application-id.my-restricted-rule-type'
-        ],
+        rule: {
+          all: [
+            'my-application-id.my-rule-type'
+          ],
+          read: [
+            'my-application-id.my-restricted-rule-type'
+          ],
+        }, 
+        alert: {
+          all: [
+            'my-application-id.my-rule-type'
+          ],
+          read: [
+            'my-application-id.my-restricted-rule-type'
+          ],
+        }, 
       },
       savedObject: {
         all: [],
@@ -413,6 +459,111 @@ features.registerKibanaFeature({
 
 In the above example, note that instead of denying users with the `read` role any access to the `my-application-id.my-restricted-rule-type` type, we've decided that these users _should_ be granted `read` privileges over the _restricted_ rule type.
 As part of that same change, we also decided that not only should they be allowed to `read` the _restricted_ rule type, but actually, despite having `read` privileges to the feature as a whole, we do actually want to allow them to create our basic 'my-application-id.my-rule-type' rule type, as we consider it an extension of _reading_ data in our feature, rather than _writing_ it.
+
+### Subfeature privileges
+
+In the above examples, we have been giving the same level of access to both rules and alerts for a particular rule type. There may be cases when you want your feature privilege to allow for escalated or de-escalated privileges for either rules or alerts within a feature. We can use subfeature privileges to achieve this granularity.
+
+For more information and other examples of subfeature privilege, refer to the [user documentation](https://www.elastic.co/guide/en/kibana/master/development-security.html#example-3-discover).
+
+```typescript
+features.registerKibanaFeature({
+  id: 'my-application-id',
+  name: 'My Application',
+  app: [],
+  alerting: [
+    'my-application-id.my-rule-type',
+    'my-application-id.my-other-rule-type'
+  ],
+  privileges: {
+    all: {
+      app: ['my-application-id', 'kibana'],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      alerting: {
+        rule: {
+          all: [
+            'my-application-id.my-rule-type',
+            'my-application-id.my-other-rule-type'
+          ]
+        },
+        alert: {
+          read: [
+            'my-application-id.my-rule-type',
+            'my-application-id.my-other-rule-type'
+          ]
+        }
+      },
+      ui: [],
+      api: [],
+    },
+    read: {
+      app: ['lens', 'kibana'],
+      alerting: {
+        rule: {
+          read: [
+            'my-application-id.my-rule-type',
+            'my-application-id.my-other-rule-type'
+          ]
+        },
+        alert: {
+          read: [
+            'my-application-id.my-rule-type',
+            'my-application-id.my-other-rule-type'
+          ]
+        }
+      },
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: [],
+      api: [],
+    },
+  },
+  subFeatures: [
+    {
+      name: 'Manage Alerts',
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'alert_manage',
+              name: 'Manage Alerts',
+              includeIn: 'all',
+              alerting: {
+                alert: {
+                  all: [
+                    'my-application-id.my-rule-type',
+                    'my-application-id.my-other-rule-type'
+                  ],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            }
+          ]
+        }
+      ]
+    }
+  ]
+});
+```
+
+In the above example, note that the base feature privilege grants users with the `all` role `all` access the rules of the specified rule types but only `read` access to the alerts of the same rule type. In order to get `all` access to the alerts of these rule types, the role must grant the `alert_manage` subfeature privilege. Because the `alert_manage` subfeature privilege has `includeIn` set to `all`, it is _automatically_ included in the `all` feature privilege but can be excluded when the role is defined.
+
+This subfeature privilege definition allows for the following granularity:
+
+- `all` privileges to rules for a rule type and `all` privileges to alerts for a rule type
+- `all` privileges to rules for a rule type and subprivilege de-escalation to grant only `read` privileges to alerts for a rule type
+- `read` privileges to rules for a rule type and `read` privileges to alerts for a rule type
+- `read` privileges to rules for a rule type and subprivilege escalation to grant `all` privileges to alerts for a rule type.
 
 ### `read` privileges vs. `all` privileges
 When a user is granted the `read` role in the Alerting Framework, they will be able to execute the following api calls:
