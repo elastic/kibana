@@ -34,7 +34,6 @@ import { Role } from '../../types';
 import {
   ADMIN_ROLE_TYPE_DESCRIPTION,
   USER_ROLE_TYPE_DESCRIPTION,
-  GROUP_ASSIGNMENT_TITLE,
   GROUP_ASSIGNMENT_INVALID_ERROR,
   GROUP_ASSIGNMENT_ALL_GROUPS_LABEL,
 } from './constants';
@@ -108,61 +107,40 @@ export const RoleMapping: React.FC = () => {
         multipleAuthProvidersConfig={multipleAuthProvidersConfig}
         handleAuthProviderChange={handleAuthProviderChange}
       />
-      <EuiSpacer />
-      <EuiFlexGroup alignItems="stretch">
-        <EuiFlexItem>
-          <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
-            <EuiTitle size="s">
-              <h3>{ROLE_LABEL}</h3>
-            </EuiTitle>
-            <EuiSpacer />
-            <RoleSelector
-              roleOptions={roleOptions}
-              roleType={roleType}
-              onChange={handleRoleChange}
-              label="Role"
+      <RoleSelector
+        roleOptions={roleOptions}
+        roleType={roleType}
+        onChange={handleRoleChange}
+        label="Role"
+      />
+      <EuiFormRow isInvalid={!hasGroupAssignment} error={[GROUP_ASSIGNMENT_INVALID_ERROR]}>
+        <>
+          {availableGroups.map(({ id, name }) => (
+            <EuiCheckbox
+              key={id}
+              name={name}
+              id={id}
+              checked={selectedGroups.has(id)}
+              onChange={(e) => {
+                handleGroupSelectionChange(id, e.target.checked);
+              }}
+              label={name}
+              disabled={includeInAllGroups}
             />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
-            <EuiTitle size="s">
-              <h3>{GROUP_ASSIGNMENT_TITLE}</h3>
-            </EuiTitle>
-            <EuiSpacer />
-            <div>
-              <EuiFormRow isInvalid={!hasGroupAssignment} error={[GROUP_ASSIGNMENT_INVALID_ERROR]}>
-                <>
-                  {availableGroups.map(({ id, name }) => (
-                    <EuiCheckbox
-                      key={id}
-                      name={name}
-                      id={id}
-                      checked={selectedGroups.has(id)}
-                      onChange={(e) => {
-                        handleGroupSelectionChange(id, e.target.checked);
-                      }}
-                      label={name}
-                      disabled={includeInAllGroups}
-                    />
-                  ))}
-                  <EuiSpacer />
-                  <EuiCheckbox
-                    key="allGroups"
-                    name="allGroups"
-                    id="allGroups"
-                    checked={includeInAllGroups}
-                    onChange={(e) => {
-                      handleAllGroupsSelectionChange(e.target.checked);
-                    }}
-                    label={GROUP_ASSIGNMENT_ALL_GROUPS_LABEL}
-                  />
-                </>
-              </EuiFormRow>
-            </div>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          ))}
+          <EuiSpacer />
+          <EuiCheckbox
+            key="allGroups"
+            name="allGroups"
+            id="allGroups"
+            checked={includeInAllGroups}
+            onChange={(e) => {
+              handleAllGroupsSelectionChange(e.target.checked);
+            }}
+            label={GROUP_ASSIGNMENT_ALL_GROUPS_LABEL}
+          />
+        </>
+      </EuiFormRow>
     </RoleMappingFlyout>
   );
 };

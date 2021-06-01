@@ -9,16 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPanel,
-  EuiRadio,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCheckbox, EuiFormRow, EuiRadio, EuiTitle } from '@elastic/eui';
 
 import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
 import { AppLogic } from '../../app_logic';
@@ -30,12 +21,10 @@ import { Engine } from '../engine/types';
 import {
   ADVANCED_ROLE_TYPES,
   STANDARD_ROLE_TYPES,
-  ROLE_TITLE,
   FULL_ENGINE_ACCESS_TITLE,
   FULL_ENGINE_ACCESS_DESCRIPTION,
   LIMITED_ENGINE_ACCESS_TITLE,
   LIMITED_ENGINE_ACCESS_DESCRIPTION,
-  ENGINE_ACCESS_TITLE,
   ENGINE_REQUIRED_ERROR,
 } from './constants';
 import { RoleMappingsLogic } from './role_mappings_logic';
@@ -119,76 +108,56 @@ export const RoleMapping: React.FC = () => {
         handleAuthProviderChange={handleAuthProviderChange}
         multipleAuthProvidersConfig={multipleAuthProvidersConfig}
       />
-      <EuiSpacer />
-      <EuiFlexGroup alignItems="stretch">
-        <EuiFlexItem>
-          <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
-            <EuiTitle size="s">
-              <h3>{ROLE_TITLE}</h3>
-            </EuiTitle>
-            <EuiSpacer />
-            <EuiTitle size="xs">
-              <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
-            </EuiTitle>
-            <EuiSpacer />
-            <RoleSelector
-              roleType={roleType}
-              roleOptions={roleOptions}
-              onChange={handleRoleChange}
-              label="Role"
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-        {hasAdvancedRoles && (
-          <EuiFlexItem>
-            <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
-              <EuiTitle size="s">
-                <h3>{ENGINE_ACCESS_TITLE}</h3>
-              </EuiTitle>
-              <EuiSpacer />
-              <EuiFormRow>
-                <EuiRadio
-                  id="accessAllEngines"
-                  disabled={!roleHasScopedEngines(roleType)}
-                  checked={accessAllEngines}
-                  onChange={handleAccessAllEnginesChange}
-                  label={
-                    <>
-                      <EuiTitle size="xs">
-                        <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
-                      </EuiTitle>
-                      <p>{FULL_ENGINE_ACCESS_DESCRIPTION}</p>
-                    </>
-                  }
-                />
-              </EuiFormRow>
-              <EuiFormRow isInvalid={!hasEngineAssignment} error={[ENGINE_REQUIRED_ERROR]}>
+      <RoleSelector
+        roleType={roleType}
+        roleOptions={roleOptions}
+        onChange={handleRoleChange}
+        label="Role"
+      />
+
+      {hasAdvancedRoles && (
+        <>
+          <EuiFormRow>
+            <EuiRadio
+              id="accessAllEngines"
+              disabled={!roleHasScopedEngines(roleType)}
+              checked={accessAllEngines}
+              onChange={handleAccessAllEnginesChange}
+              label={
                 <>
-                  <EuiRadio
-                    id="selectEngines"
-                    disabled={!roleHasScopedEngines(roleType)}
-                    checked={!accessAllEngines}
-                    onChange={handleAccessAllEnginesChange}
-                    label={
-                      <>
-                        <EuiTitle size="xs">
-                          <h4>{LIMITED_ENGINE_ACCESS_TITLE}</h4>
-                        </EuiTitle>
-                        <p>{LIMITED_ENGINE_ACCESS_DESCRIPTION}</p>
-                      </>
-                    }
-                  />
-                  {!accessAllEngines && (
-                    <div className="engines-list">
-                      {availableEngines.map((engine) => engineSelector(engine))}
-                    </div>
-                  )}
+                  <EuiTitle size="xs">
+                    <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
+                  </EuiTitle>
+                  <p>{FULL_ENGINE_ACCESS_DESCRIPTION}</p>
                 </>
-              </EuiFormRow>
-            </EuiPanel>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+              }
+            />
+          </EuiFormRow>
+          <EuiFormRow isInvalid={!hasEngineAssignment} error={[ENGINE_REQUIRED_ERROR]}>
+            <>
+              <EuiRadio
+                id="selectEngines"
+                disabled={!roleHasScopedEngines(roleType)}
+                checked={!accessAllEngines}
+                onChange={handleAccessAllEnginesChange}
+                label={
+                  <>
+                    <EuiTitle size="xs">
+                      <h4>{LIMITED_ENGINE_ACCESS_TITLE}</h4>
+                    </EuiTitle>
+                    <p>{LIMITED_ENGINE_ACCESS_DESCRIPTION}</p>
+                  </>
+                }
+              />
+              {!accessAllEngines && (
+                <div className="engines-list">
+                  {availableEngines.map((engine) => engineSelector(engine))}
+                </div>
+              )}
+            </>
+          </EuiFormRow>
+        </>
+      )}
     </RoleMappingFlyout>
   );
 };

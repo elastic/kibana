@@ -59,13 +59,6 @@ export const USER_ROLE_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const GROUP_ASSIGNMENT_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.roleMapping.groupAssignmentTitle',
-  {
-    defaultMessage: 'Group assignment',
-  }
-);
-
 export const GROUP_ASSIGNMENT_INVALID_ERROR = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.roleMapping.groupAssignmentInvalidError',
   {

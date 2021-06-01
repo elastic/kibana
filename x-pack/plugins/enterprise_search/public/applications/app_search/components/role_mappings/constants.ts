@@ -117,10 +117,6 @@ export const ADMIN_ROLE_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ROLE_TITLE = i18n.translate('xpack.enterpriseSearch.appSearch.roleTitle', {
-  defaultMessage: 'Role',
-});
-
 export const FULL_ENGINE_ACCESS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.fullEngineAccessTitle',
   {
@@ -146,13 +142,6 @@ export const LIMITED_ENGINE_ACCESS_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.limitedEngineAccessDescription',
   {
     defaultMessage: 'Limit user access to specific engines:',
-  }
-);
-
-export const ENGINE_ACCESS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engineAccessTitle',
-  {
-    defaultMessage: 'Engine access',
   }
 );
 
