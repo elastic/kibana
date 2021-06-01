@@ -28,7 +28,7 @@ import { RuntimeFieldPainlessError } from '../lib';
 import { euiFlyoutClassname } from '../constants';
 import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
-import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
+import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
 import { FieldPreview, useFieldPreviewContext } from './preview';
 
 const geti18nTexts = (field?: Field) => {
@@ -88,10 +88,6 @@ export interface Props {
    * Handler for the "cancel" footer button
    */
   onCancel: () => void;
-  /**
-   * The Field editor component that contains the form to create or edit a field
-   */
-  FieldEditor: React.ComponentType<FieldEditorProps> | null;
   /** Handler to validate the script  */
   runtimeFieldValidator: (field: EsRuntimeField) => Promise<RuntimeFieldPainlessError | null>;
   /** Optional field to process */
@@ -103,7 +99,6 @@ const FieldEditorFlyoutContentComponent = ({
   field,
   onSave,
   onCancel,
-  FieldEditor,
   runtimeFieldValidator,
   isSavingField,
 }: Props) => {
@@ -206,96 +201,94 @@ const FieldEditorFlyoutContentComponent = ({
 
   return (
     <>
-      {FieldEditor && (
-        <FlyoutPanels.Group flyoutClassName={euiFlyoutClassname} maxWidth={1180}>
-          {/* Preview panel */}
-          {isPanelVisible && (
-            <FlyoutPanels.Item width={40} backgroundColor="euiPageBackground" border="right">
-              <FieldPreview />
-            </FlyoutPanels.Item>
-          )}
+      <FlyoutPanels.Group flyoutClassName={euiFlyoutClassname} maxWidth={1180}>
+        {/* Preview panel */}
+        {isPanelVisible && (
+          <FlyoutPanels.Item width={40} backgroundColor="euiPageBackground" border="right">
+            <FieldPreview />
+          </FlyoutPanels.Item>
+        )}
 
-          {/* Editor panel */}
-          <FlyoutPanels.Item width={60}>
-            <FlyoutPanels.Content>
-              <FlyoutPanels.Header>
-                <EuiTitle data-test-subj="flyoutTitle">
-                  <h2>
-                    {field ? (
-                      <FormattedMessage
-                        id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
-                        defaultMessage="Edit field '{fieldName}'"
-                        values={{
-                          fieldName: field.name,
-                        }}
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="indexPatternFieldEditor.editor.flyoutDefaultTitle"
-                        defaultMessage="Create field"
-                      />
-                    )}
-                  </h2>
-                </EuiTitle>
-                <EuiText color="subdued">
-                  <p>
+        {/* Editor panel */}
+        <FlyoutPanels.Item width={60}>
+          <FlyoutPanels.Content>
+            <FlyoutPanels.Header>
+              <EuiTitle data-test-subj="flyoutTitle">
+                <h2>
+                  {field ? (
                     <FormattedMessage
-                      id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
-                      defaultMessage="Index pattern: {patternName}"
+                      id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
+                      defaultMessage="Edit field '{fieldName}'"
                       values={{
-                        patternName: <i>{indexPattern.title}</i>,
+                        fieldName: field.name,
                       }}
                     />
-                  </p>
-                </EuiText>
-              </FlyoutPanels.Header>
-
-              <FieldEditor field={field} onChange={setFormState} syntaxError={syntaxError} />
-            </FlyoutPanels.Content>
-
-            <FlyoutPanels.Footer>
-              <>
-                {isSubmitted && hasErrors && (
-                  <>
-                    <EuiCallOut
-                      title={i18nTexts.formErrorsCalloutTitle}
-                      color="danger"
-                      iconType="cross"
-                      data-test-subj="formError"
+                  ) : (
+                    <FormattedMessage
+                      id="indexPatternFieldEditor.editor.flyoutDefaultTitle"
+                      defaultMessage="Create field"
                     />
-                    <EuiSpacer size="m" />
-                  </>
-                )}
-                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconType="cross"
-                      flush="left"
-                      onClick={onCancel}
-                      data-test-subj="closeFlyoutButton"
-                    >
-                      {i18nTexts.closeButtonLabel}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
+                  )}
+                </h2>
+              </EuiTitle>
+              <EuiText color="subdued">
+                <p>
+                  <FormattedMessage
+                    id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
+                    defaultMessage="Index pattern: {patternName}"
+                    values={{
+                      patternName: <i>{indexPattern.title}</i>,
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </FlyoutPanels.Header>
 
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="primary"
-                      onClick={onClickSave}
-                      data-test-subj="fieldSaveButton"
-                      fill
-                      disabled={hasErrors}
-                      isLoading={isSavingField || isValidating}
-                    >
-                      {i18nTexts.saveButtonLabel}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            </FlyoutPanels.Footer>
-          </FlyoutPanels.Item>
-        </FlyoutPanels.Group>
-      )}
+            <FieldEditor field={field} onChange={setFormState} syntaxError={syntaxError} />
+          </FlyoutPanels.Content>
+
+          <FlyoutPanels.Footer>
+            <>
+              {isSubmitted && hasErrors && (
+                <>
+                  <EuiCallOut
+                    title={i18nTexts.formErrorsCalloutTitle}
+                    color="danger"
+                    iconType="cross"
+                    data-test-subj="formError"
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="cross"
+                    flush="left"
+                    onClick={onCancel}
+                    data-test-subj="closeFlyoutButton"
+                  >
+                    {i18nTexts.closeButtonLabel}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color="primary"
+                    onClick={onClickSave}
+                    data-test-subj="fieldSaveButton"
+                    fill
+                    disabled={hasErrors}
+                    isLoading={isSavingField || isValidating}
+                  >
+                    {i18nTexts.saveButtonLabel}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          </FlyoutPanels.Footer>
+        </FlyoutPanels.Item>
+      </FlyoutPanels.Group>
 
       {modal}
     </>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { DocLinksStart, NotificationsStart, CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -21,7 +21,6 @@ import {
 import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
 import { deserializeField, getRuntimeFieldValidator, getLinks, ApiService } from '../lib';
-import type { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 import { FieldEditorProvider } from './field_editor_context';
 import { FieldPreviewProvider } from './preview';
@@ -75,7 +74,6 @@ export const FieldEditorFlyoutContentContainer = ({
   uiSettings,
 }: Props) => {
   const fieldToEdit = deserializeField(indexPattern, field);
-  const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const { fields } = indexPattern;
@@ -186,17 +184,6 @@ export const FieldEditorFlyoutContentContainer = ({
     ]
   );
 
-  const loadEditor = useCallback(async () => {
-    const { FieldEditor } = await import('./field_editor');
-
-    setEditor(() => FieldEditor);
-  }, []);
-
-  useEffect(() => {
-    // On mount: load the editor asynchronously
-    loadEditor();
-  }, [loadEditor]);
-
   return (
     <FieldEditorProvider
       indexPattern={indexPattern}
@@ -214,7 +201,6 @@ export const FieldEditorFlyoutContentContainer = ({
           onSave={saveField}
           onCancel={onCancel}
           field={fieldToEdit}
-          FieldEditor={Editor}
           runtimeFieldValidator={validateRuntimeField}
           isSavingField={isSaving}
         />

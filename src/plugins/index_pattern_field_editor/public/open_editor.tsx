@@ -20,9 +20,10 @@ import {
 } from './shared_imports';
 
 import type { PluginStart, InternalFieldType, CloseEditor } from './types';
+import type { ApiService } from './lib/api';
 import { euiFlyoutClassname } from './constants';
-import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
-import { ApiService } from './lib/api';
+import { FieldEditorLoader } from './components/field_editor_loader';
+
 export interface OpenFieldEditorOptions {
   ctx: {
     indexPattern: IndexPattern;
@@ -99,7 +100,7 @@ export const getFieldEditorOpener = ({
     overlayRef = overlays.openFlyout(
       toMountPoint(
         <KibanaReactContextProvider>
-          <FieldEditorFlyoutContentContainer
+          <FieldEditorLoader
             onSave={onSaveField}
             onCancel={closeEditor}
             docLinks={docLinks}
@@ -117,7 +118,7 @@ export const getFieldEditorOpener = ({
           />
         </KibanaReactContextProvider>
       ),
-      { className: euiFlyoutClassname, size: 'l' }
+      { className: euiFlyoutClassname, maxWidth: 708, size: 'l' }
     );
 
     return closeEditor;

@@ -9,7 +9,6 @@
 import { registerTestBed, TestBed } from '@kbn/test/jest';
 
 import { Context } from '../../public/components/field_editor_context';
-import { FieldEditor } from '../../public/components/field_editor/field_editor';
 import {
   FieldEditorFlyoutContent,
   Props,
@@ -19,7 +18,6 @@ import { WithFieldEditorDependencies, getCommonActions } from './helpers';
 const defaultProps: Props = {
   onSave: () => {},
   onCancel: () => {},
-  FieldEditor,
   runtimeFieldValidator: () => Promise.resolve(null),
   isSavingField: false,
 };
