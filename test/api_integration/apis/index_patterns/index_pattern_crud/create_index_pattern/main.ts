@@ -45,7 +45,6 @@ export default function ({ getService }: FtrProviderContext) {
         index_pattern: {
           title,
           id,
-          version: 'test-version',
           type: 'test-type',
           timeFieldName: 'test-timeFieldName',
         },
@@ -54,7 +53,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body.index_pattern.title).to.be(title);
       expect(response.body.index_pattern.id).to.be(id);
-      expect(response.body.index_pattern.version).to.be('test-version');
       expect(response.body.index_pattern.type).to.be('test-type');
       expect(response.body.index_pattern.timeFieldName).to.be('test-timeFieldName');
     });
@@ -77,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.index_pattern.sourceFilters[0].value).to.be('foo');
     });
 
-    it('can specify optional fields attribute when creating an index pattern', async () => {
+    it.skip('can specify optional fields attribute when creating an index pattern', async () => {
       const title = `foo-${Date.now()}-${Math.random()}*`;
       const response = await supertest.post('/api/index_patterns/index_pattern').send({
         index_pattern: {
@@ -97,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.index_pattern.fields.foo.type).to.be('string');
     });
 
-    it('can add two fields, one with all fields specified', async () => {
+    it.skip('can add two fields, one with all fields specified', async () => {
       const title = `foo-${Date.now()}-${Math.random()}*`;
       const response = await supertest.post('/api/index_patterns/index_pattern').send({
         index_pattern: {

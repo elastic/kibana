@@ -423,6 +423,7 @@ export class IndexPatternsService {
         },
         spec.fieldAttrs
       );
+
       // CREATE RUNTIME FIELDS
       for (const [key, value] of Object.entries(runtimeFieldMap || {})) {
         // do not create runtime field if mapped field exists
@@ -516,9 +517,9 @@ export class IndexPatternsService {
 
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
-    await this.createSavedObject(indexPattern, override);
-    await this.setDefault(indexPattern.id!);
-    return indexPattern;
+    const createdIndexPattern = await this.createSavedObject(indexPattern, override);
+    await this.setDefault(createdIndexPattern.id!);
+    return createdIndexPattern;
   }
 
   /**
@@ -541,12 +542,13 @@ export class IndexPatternsService {
     const response = await this.savedObjectsClient.create(savedObjectType, body, {
       id: indexPattern.id,
     });
-    indexPattern.id = response.id;
-    this.indexPatternCache.set(indexPattern.id, Promise.resolve(indexPattern));
+
+    const createdIndexPattern = await this.getSavedObjectAndInit(response.id);
+    this.indexPatternCache.set(createdIndexPattern.id!, Promise.resolve(createdIndexPattern));
     if (this.savedObjectsCache) {
       this.savedObjectsCache.push(response as SavedObject<IndexPatternSavedObjectAttrs>);
     }
-    return indexPattern;
+    return createdIndexPattern;
   }
 
   /**
