@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockKibanaValues, mockTelemetryActions } from '../../../../../__mocks__';
+import { mockKibanaValues, mockTelemetryActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 

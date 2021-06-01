@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
-
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+} from '../../../__mocks__/kea_logic';
 import { mockEngineValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, mockKibanaValues } from '../../__mocks__';
+import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 import { mockHistory } from '../../__mocks__/react_router';
 
 jest.mock('../react_router_helpers', () => ({

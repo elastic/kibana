@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
-import { setMockValues } from '../__mocks__';
+import { setMockValues } from '../__mocks__/kea_logic';
 import { mockUseRouteMatch } from '../__mocks__/react_router';
 import '../__mocks__/shallow_useeffect.mock';
 import '../__mocks__/enterprise_search_url.mock';

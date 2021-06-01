@@ -10,7 +10,7 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
   mockKibanaValues,
-} from '../../../../../__mocks__';
+} from '../../../../../__mocks__/kea_logic';
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test/jest';

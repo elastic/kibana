@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { mockFlashMessageHelpers, setMockValues, setMockActions } from '../../../__mocks__';
+import {
+  mockFlashMessageHelpers,
+  setMockValues,
+  setMockActions,
+} from '../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../__mocks__/react_router';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockEngineValues } from '../../__mocks__';

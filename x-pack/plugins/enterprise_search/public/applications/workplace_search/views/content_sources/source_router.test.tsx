@@ -7,7 +7,7 @@
 
 import '../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import { mockLocation, mockUseParams } from '../../../__mocks__/react_router';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { contentSources } from '../../__mocks__/content_sources.mock';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../../../__mocks__';
+import { setMockValues } from '../../../../../../__mocks__/kea_logic';
 import '../__mocks__/engines_logic.mock';
 
 import { ShallowWrapper } from 'enzyme';

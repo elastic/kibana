@@ -10,7 +10,7 @@ import {
   mockKibanaValues,
   mockFlashMessageHelpers,
   mockHttpValues,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 import { groups } from '../../__mocks__/groups.mock';
 import { mockGroupValues } from './__mocks__/group_logic.mock';
 

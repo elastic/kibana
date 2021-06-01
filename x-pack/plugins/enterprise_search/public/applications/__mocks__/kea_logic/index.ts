@@ -14,12 +14,6 @@ export {
   mockFlashMessagesActions,
   mockFlashMessageHelpers,
 } from './flash_messages_logic.mock';
-export {
-  mockAllValues,
-  mockAllActions,
-  setMockValues,
-  setMockActions,
-  LogicMounter,
-} from './kea.mock';
+export { mockAllValues, mockAllActions, setMockValues, setMockActions } from './hooks.mock';
 
-// Note: shallow_useeffect must be imported directly as a file
+export { LogicMounter } from './logic_mounter';

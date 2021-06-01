@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 // NOTE: We're mocking FormattedRelative here because it (currently) has
 // console warn issues, and it allows us to skip mocking dates
