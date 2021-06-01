@@ -168,28 +168,8 @@ describe('when on integration detail', () => {
     it('should link to the create page', () => {
       const addButton = renderResult.getByTestId('addIntegrationPolicyButton') as HTMLAnchorElement;
       expect(addButton.href).toEqual(
-        'http://localhost/mock/app/fleet#/integrations/nginx-0.3.7/add-integration'
+        'http://localhost/mock/app/fleet/#/policies/add-integrations/nginx-0.3.7'
       );
-    });
-
-    it('should link to create page with route state for return trip', () => {
-      const addButton = renderResult.getByTestId('addIntegrationPolicyButton') as HTMLAnchorElement;
-      act(() => addButton.click());
-      expect(testRenderer.history.location.state).toEqual({
-        onCancelNavigateTo: [
-          'fleet',
-          {
-            path: '#/integrations/detail/nginx-0.3.7/overview',
-          },
-        ],
-        onCancelUrl: '#/integrations/detail/nginx-0.3.7/overview',
-        onSaveNavigateTo: [
-          'fleet',
-          {
-            path: '#/integrations/detail/nginx-0.3.7/overview',
-          },
-        ],
-      });
     });
   });
 
@@ -211,7 +191,7 @@ describe('when on integration detail', () => {
         'integrationNameLink'
       )[0] as HTMLAnchorElement;
       expect(firstPolicy.href).toEqual(
-        'http://localhost/mock/app/fleet#/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
+        'http://localhost/mock/app/integrations#/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
       );
     });
 
