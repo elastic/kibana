@@ -258,12 +258,14 @@ const isHttpFetchOptionsWithPath = (
  * @example
  * import { composeApiHandlerMocks } from './http_handler_mock_factory';
  * import {
+ *   FleetSetupApiMockInterface,
  *   fleetSetupApiMock,
+ *   AgentsSetupApiMockInterface,
  *   agentsSetupApiMock,
  * } from './setup';
  *
- * // Create the new interface as an intersection of all other Api Handler Mocks
- * type ComposedApiHandlerMocks = ReturnType<typeof agentsSetupApiMock> & ReturnType<typeof fleetSetupApiMock>
+ * // Create the new interface as an intersection of all other Api Handler Mock's interfaces
+ * type ComposedApiHandlerMocks = AgentsSetupApiMockInterface & FleetSetupApiMockInterface
  *
  * const newComposedHandlerMock = composeApiHandlerMocks<
  *  ComposedApiHandlerMocks
