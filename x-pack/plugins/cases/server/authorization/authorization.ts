@@ -91,7 +91,7 @@ export class Authorization {
    * Checks that the user making the request for the passed in owners and operation has the correct authorization. This
    * function will throw if the user is not authorized for the requested operation and owners.
    *
-   * @param enitites an array of entities describing the case owners in conjunction with the saved object ID attempting
+   * @param entities an array of entities describing the case owners in conjunction with the saved object ID attempting
    *  to be authorized
    * @param operation information describing the operation attempting to be authorized
    */

@@ -22,7 +22,7 @@ interface CreateAuditMsgParams {
 export class AuthorizationAuditLogger {
   private readonly auditLogger?: AuditLogger;
 
-  constructor(logger: AuditLogger | undefined) {
+  constructor(logger?: AuditLogger) {
     this.auditLogger = logger;
   }
 

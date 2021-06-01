@@ -73,6 +73,12 @@ export const ECS_OUTCOMES: Record<string, EcsEventOutcome> = {
   unknown: 'unknown',
 };
 
+/**
+ * Determines if the passed in operation was a write operation.
+ *
+ * @param operation an OperationDetails object describing the operation that occurred
+ * @returns true if the passed in operation was a write operation
+ */
 export function isWriteOperation(operation: OperationDetails): boolean {
   return Object.values(WriteOperations).includes(operation.name as WriteOperations);
 }
