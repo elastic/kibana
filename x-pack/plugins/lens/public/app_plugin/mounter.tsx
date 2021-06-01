@@ -307,7 +307,6 @@ export function loadDocument(
     data,
     chrome,
     notifications,
-    persistedDoc,
   }).then(
     (newState) => {
       if (newState) {
