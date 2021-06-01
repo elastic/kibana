@@ -16,13 +16,13 @@ const paramsSchema = schema.object({
   indexName: schema.string(),
 });
 
-export function registerUpdateRoute({ router, license, lib }: RouteDependencies) {
+export function registerUpdateRoute({ router, lib }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/settings/{indexName}'),
       validate: { body: bodySchema, params: paramsSchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { indexName } = req.params as typeof paramsSchema.type;
       const params = {
         ignoreUnavailable: true,
@@ -48,6 +48,6 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
         // Case: default
         throw e;
       }
-    })
+    }
   );
 }

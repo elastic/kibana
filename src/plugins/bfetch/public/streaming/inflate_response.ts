@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export const APM_STATIC_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
+import { unzlibSync, strFromU8 } from 'fflate';
+
+export function inflateResponse<Result extends object>(response: string) {
+  const buff = Buffer.from(response, 'base64');
+  const unzip = unzlibSync(buff);
+  return strFromU8(unzip);
+}
