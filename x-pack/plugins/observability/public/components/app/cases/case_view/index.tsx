@@ -42,8 +42,11 @@ export interface CaseProps extends Props {
 export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
   const [caseTitle, setCaseTitle] = useState<string | null>(null);
 
+  const { cases: casesUi, application } = useKibana().services;
+  const { navigateToApp } = application;
+  const href = application?.getUrlForApp('observability-cases') ?? '';
   useBreadcrumbs([
-    casesBreadcrumb,
+    { ...casesBreadcrumb, href },
     ...(caseTitle !== null
       ? [
           {
@@ -62,10 +65,6 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     [caseTitle]
   );
 
-  const {
-    cases: casesUi,
-    application: { navigateToApp },
-  } = useKibana().services;
   const history = useHistory();
   const { formatUrl } = useFormatUrl(CASES_APP_ID);
 

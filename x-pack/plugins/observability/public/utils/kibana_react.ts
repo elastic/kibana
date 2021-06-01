@@ -7,7 +7,13 @@
 
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
-const useTypedKibana = () => useKibana<ObservabilityPublicPluginsStart & CoreStart>();
+
+export type StartServices = CoreStart &
+  ObservabilityPublicPluginsStart & {
+    storage: Storage;
+  };
+const useTypedKibana = () => useKibana<StartServices>();
 
 export { useTypedKibana as useKibana };

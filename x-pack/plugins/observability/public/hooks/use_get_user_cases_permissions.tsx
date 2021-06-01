@@ -13,7 +13,7 @@ export interface UseGetUserCasesPermissions {
   read: boolean;
 }
 
-export const useGetUserCasesPermissions = () => {
+export function useGetUserCasesPermissions() {
   const [casesPermissions, setCasesPermissions] = useState<UseGetUserCasesPermissions | null>(null);
   const uiCapabilities = useKibana().services.application.capabilities;
 
@@ -33,4 +33,4 @@ export const useGetUserCasesPermissions = () => {
   }, [uiCapabilities]);
 
   return casesPermissions;
-};
+}

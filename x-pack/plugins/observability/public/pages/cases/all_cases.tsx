@@ -14,7 +14,7 @@ import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 
 import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../../components/app/cases/callout';
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_cases_user_permissions';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 
 export const AllCasesPage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();

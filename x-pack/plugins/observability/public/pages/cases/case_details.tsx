@@ -9,7 +9,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 
 import { CaseView } from '../../components/app/cases/case_view';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_cases_user_permissions';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { useKibana } from '../../utils/kibana_react';
 import { CASES_APP_ID } from '../../components/app/cases/constants';
 import { CaseCallOut, savedObjectReadOnlyErrorMessage } from '../../components/app/cases/callout';

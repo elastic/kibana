@@ -13,7 +13,7 @@ import * as i18n from '../../components/app/cases/translations';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { CASES_APP_ID, CASES_OWNER } from '../../components/app/cases/constants';
 import { useKibana } from '../../utils/kibana_react';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_cases_user_permissions';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;
