@@ -30,7 +30,7 @@ import {
   useUIExtension,
   useBreadcrumbs,
 } from '../../../../hooks';
-import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
+import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useCapabilities, useGetPackageInfoByKey, useLink } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type {

@@ -37,7 +37,7 @@ import {
   sendPutSettings,
   useGetOutputs,
   sendPutOutput,
-} from '../../applications/fleet/hooks';
+} from '../../hooks';
 import { isDiffPathProtocol } from '../../../common';
 
 import { SettingsConfirmModal } from './confirm_modal';

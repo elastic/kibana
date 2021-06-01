@@ -11,7 +11,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import type { TutorialDirectoryHeaderLinkComponent } from 'src/plugins/home/public';
 
 import { RedirectAppLinks } from '../../../../../../src/plugins/kibana_react/public';
-import { useLink, useCapabilities, useStartServices } from '../../applications/fleet/hooks';
+import { useLink, useCapabilities, useStartServices } from '../../hooks';
 
 import { tutorialDirectoryNoticeState$ } from './tutorial_directory_notice';
 

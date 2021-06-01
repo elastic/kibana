@@ -27,7 +27,7 @@ import {
   useLink,
   useCapabilities,
   useStartServices,
-} from '../../applications/fleet/hooks';
+} from '../../hooks';
 
 const FlexItemButtonWrapper = styled(EuiFlexItem)`
   &&& {
