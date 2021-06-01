@@ -10,29 +10,35 @@ import { EndpointAction } from '../../../../../common/endpoint/types';
 export const mockActivityLogResponse = (agentId: string): EndpointAction[] => {
   const activityLog: EndpointAction[] = [
     {
-      action_id: `${agentId}-action_id`,
-      '@timestamp': new Date().toJSON(),
-      expiration: new Date().toJSON(),
-      type: 'INPUT_ACTION',
-      input_type: 'endpoint',
-      agents: [agentId],
-      user_id: 'user_odd_y',
-      data: {
-        command: 'isolate',
-        comment: 'to isolate',
+      type: 'action',
+      item: {
+        action_id: `${agentId}-action_id`,
+        '@timestamp': new Date().toJSON(),
+        expiration: new Date().toJSON(),
+        type: 'INPUT_ACTION',
+        input_type: 'endpoint',
+        agents: [agentId],
+        user_id: 'user_odd_y',
+        data: {
+          command: 'isolate',
+          comment: 'to isolate',
+        },
       },
     },
     {
-      action_id: `${agentId}-action_id`,
-      '@timestamp': new Date().toJSON(),
-      expiration: new Date().toJSON(),
-      type: 'INPUT_ACTION',
-      input_type: 'endpoint',
-      agents: [agentId],
-      user_id: 'user_odd_y',
-      data: {
-        command: 'unisolate',
-        comment: 'to unisolate',
+      type: 'action',
+      item: {
+        action_id: `${agentId}-action_id`,
+        '@timestamp': new Date().toJSON(),
+        expiration: new Date().toJSON(),
+        type: 'INPUT_ACTION',
+        input_type: 'endpoint',
+        agents: [agentId],
+        user_id: 'user_odd_y',
+        data: {
+          command: 'unisolate',
+          comment: 'to unisolate',
+        },
       },
     },
   ];

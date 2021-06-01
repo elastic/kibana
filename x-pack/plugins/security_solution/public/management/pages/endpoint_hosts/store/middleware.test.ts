@@ -217,7 +217,7 @@ describe('endpoint list middleware', () => {
     const dispatchGetActivityLog = () => {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadedResourceState(activityLog),
+        payload: createLoadedResourceState(activityLog.filter((e) => e.type === 'action')),
       });
     };
 

@@ -11,11 +11,11 @@ import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { LogEntry } from './components/log_entry';
 import * as i18 from '../translations';
 import { SearchBar } from '../../../../components/search_bar';
-import { Immutable, EndpointAction } from '../../../../../../common/endpoint/types';
+import { Immutable, ActivityLog } from '../../../../../../common/endpoint/types';
 import { AsyncResourceState } from '../../../../state';
 
 export const EndpointActivityLog = memo(
-  ({ endpointActions }: { endpointActions: AsyncResourceState<Immutable<EndpointAction[]>> }) => {
+  ({ activityLog }: { activityLog: AsyncResourceState<Immutable<ActivityLog>> }) => {
     // TODO
     const onSearch = useCallback(() => {}, []);
     return (

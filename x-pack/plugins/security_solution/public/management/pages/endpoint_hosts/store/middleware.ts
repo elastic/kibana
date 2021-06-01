@@ -7,7 +7,7 @@
 
 import { HttpStart } from 'kibana/public';
 import {
-  EndpointAction,
+  ActivityLog,
   HostInfo,
   HostIsolationRequestBody,
   HostIsolationResponse,
@@ -345,21 +345,21 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         type: 'endpointDetailsActivityLogChanged',
         // ts error to be fixed when AsyncResourceState is refactored (#830)
         // @ts-expect-error
-        payload: createLoadingResourceState<EndpointAction[]>(getActivityLogData(getState())),
+        payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
       });
 
       try {
-        const activityLog = await coreStart.http.get<EndpointAction[]>(
+        const activityLog = await coreStart.http.get<ActivityLog>(
           resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, { agent_id: selectedAgent(getState()) })
         );
         dispatch({
           type: 'endpointDetailsActivityLogChanged',
-          payload: createLoadedResourceState<EndpointAction[]>(activityLog),
+          payload: createLoadedResourceState<ActivityLog>(activityLog),
         });
       } catch (error) {
         dispatch({
           type: 'endpointDetailsActivityLogChanged',
-          payload: createFailedResourceState<EndpointAction[]>(error.body ?? error),
+          payload: createFailedResourceState<ActivityLog>(error.body ?? error),
         });
       }
 
