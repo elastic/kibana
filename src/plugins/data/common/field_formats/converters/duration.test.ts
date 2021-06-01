@@ -139,17 +139,182 @@ describe('Duration Format', () => {
     ],
   });
 
+  testCase({
+    inputFormat: 'nanoseconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 2,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: 1988,
+        output: '0.00 Milliseconds',
+      },
+      {
+        input: 658,
+        output: '0.00 Milliseconds',
+      },
+      {
+        input: 3857,
+        output: '0.00 Milliseconds',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'microseconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 2,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: 1988,
+        output: '1.99 Milliseconds',
+      },
+      {
+        input: 658,
+        output: '0.66 Milliseconds',
+      },
+      {
+        input: 3857,
+        output: '3.86 Milliseconds',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'microseconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 1,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: 1988,
+        output: '2.0 Milliseconds',
+      },
+      {
+        input: 0,
+        output: '0.0 Milliseconds',
+      },
+      {
+        input: 658,
+        output: '0.7 Milliseconds',
+      },
+      {
+        input: 3857,
+        output: '3.9 Milliseconds',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'seconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 0,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: 600,
+        output: '10 Minutes',
+      },
+      {
+        input: 30,
+        output: '30 Seconds',
+      },
+      {
+        input: 3000,
+        output: '50 Minutes',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'milliseconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 0,
+    showSuffix: true,
+    useShortSuffix: true,
+    fixtures: [
+      {
+        input: -123,
+        output: '-123 ms',
+      },
+      {
+        input: 1,
+        output: '1 ms',
+      },
+      {
+        input: 600,
+        output: '600 ms',
+      },
+      {
+        input: 30,
+        output: '30 ms',
+      },
+      {
+        input: 3000,
+        output: '3 s',
+      },
+      {
+        input: 300000,
+        output: '5 min',
+      },
+      {
+        input: 30000000,
+        output: '8 h',
+      },
+      {
+        input: 90000000,
+        output: '1 d',
+      },
+      {
+        input: 9000000000,
+        output: '3 mon',
+      },
+      {
+        input: 99999999999,
+        output: '3 y',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'milliseconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 0,
+    showSuffix: true,
+    useShortSuffix: true,
+    includeSpaceWithSuffix: false,
+    fixtures: [
+      {
+        input: -123,
+        output: '-123ms',
+      },
+      {
+        input: 1,
+        output: '1ms',
+      },
+      {
+        input: 600,
+        output: '600ms',
+      },
+    ],
+  });
+
   function testCase({
     inputFormat,
     outputFormat,
     outputPrecision,
     showSuffix,
+    useShortSuffix,
+    includeSpaceWithSuffix,
     fixtures,
   }: {
     inputFormat: string;
     outputFormat: string;
     outputPrecision: number | undefined;
     showSuffix: boolean | undefined;
+    useShortSuffix?: boolean;
+    includeSpaceWithSuffix?: boolean;
     fixtures: any[];
   }) {
     fixtures.forEach((fixture: Record<string, any>) => {
@@ -160,7 +325,14 @@ describe('Duration Format', () => {
         outputPrecision ? `, ${outputPrecision} decimals` : ''
       }`, () => {
         const duration = new DurationFormat(
-          { inputFormat, outputFormat, outputPrecision, showSuffix },
+          {
+            inputFormat,
+            outputFormat,
+            outputPrecision,
+            showSuffix,
+            useShortSuffix,
+            includeSpaceWithSuffix,
+          },
           jest.fn()
         );
         expect(duration.convert(input)).toBe(output);
