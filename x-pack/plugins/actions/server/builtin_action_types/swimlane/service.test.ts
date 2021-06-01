@@ -53,7 +53,7 @@ describe('Swimlane Service', () => {
     comments: 'Comments',
     severity: 'Severity',
     externalId: null,
-    description: 'case desc',
+    description: 'Description',
   };
 
   beforeAll(() => {
@@ -188,6 +188,7 @@ describe('Swimlane Service', () => {
             [mappings.caseIdConfig.id]: 'Case Id',
             [mappings.commentsConfig.id]: 'Comments',
             [mappings.severityConfig.id]: 'Severity',
+            [mappings.descriptionConfig.id]: 'Description',
           },
         },
         url: `${config.apiUrl.slice(0, -1)}/api/app/${config.appId}/record`,

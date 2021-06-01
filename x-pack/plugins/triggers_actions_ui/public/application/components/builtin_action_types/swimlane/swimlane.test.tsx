@@ -25,7 +25,6 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.iconClass).toEqual('test-file-stub');
   });
 });
 
@@ -47,7 +46,7 @@ describe('swimlane connector validation', () => {
       },
     } as SwimlaneActionConnector;
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: { errors: { apiUrl: [], appId: [], mappings: [] } },
+      config: { errors: { apiUrl: [], appId: [], mappings: [], connectorType: [] } },
       secrets: { errors: { apiToken: [] } },
     });
 
@@ -55,31 +54,10 @@ describe('swimlane connector validation', () => {
     delete actionConnector.config.apiUrl;
     actionConnector.secrets.apiToken = 'test1';
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: { errors: { apiUrl: ['URL is required.'], appId: [], mappings: [] } },
-      secrets: { errors: { apiToken: [] } },
-    });
-  });
-
-  test('connector validation fails when connector config is not valid', () => {
-    const actionConnector = {
-      secrets: {
-        apiToken: 'test',
-      },
-      id: 'test',
-      actionTypeId: '.swimlane',
-      name: 'swimlane',
       config: {
-        apiUrl: 'http:\\test',
-        appId: '1234567asbd32',
+        errors: { apiUrl: ['URL is required.'], appId: [], mappings: [], connectorType: [] },
       },
-    } as SwimlaneActionConnector;
-
-    expect(actionTypeModel.validateConnector(actionConnector).config).toEqual({
-      errors: {
-        apiUrl: [],
-        appId: [],
-        mappings: ['Field mappings are required.'],
-      },
+      secrets: { errors: { apiToken: [] } },
     });
   });
 });
@@ -94,12 +72,7 @@ describe('swimlane action params validation', () => {
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        alertName: [],
-        alertSource: [],
-        caseId: [],
-        caseName: [],
-        comments: [],
-        severity: [],
+        'subActionParams.incident.alertName': [],
       },
     });
   });

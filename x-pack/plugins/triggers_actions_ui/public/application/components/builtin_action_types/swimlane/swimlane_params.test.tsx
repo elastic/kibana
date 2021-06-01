@@ -8,6 +8,8 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import SwimlaneParamsFields from './swimlane_params';
+import { SwimlaneConnectorType } from './types';
+import { mappings } from './mocks';
 
 describe('SwimlaneParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -27,6 +29,15 @@ describe('SwimlaneParamsFields renders', () => {
       },
     };
 
+    const connector = {
+      secrets: {},
+      config: { mappings, connectorType: SwimlaneConnectorType.All },
+      id: 'test',
+      actionTypeId: '.test',
+      name: 'Test',
+      isPreconfigured: false,
+    };
+
     const wrapper = mountWithIntl(
       <SwimlaneParamsFields
         actionParams={actionParams}
@@ -38,13 +49,12 @@ describe('SwimlaneParamsFields renders', () => {
           caseName: [],
           alertSource: [],
         }}
+        actionConnector={connector}
         editAction={() => {}}
         index={0}
       />
     );
     expect(wrapper.find('[data-test-subj="severity"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="caseId"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="caseName"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="comments"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="alertSource"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="alertName"]').length > 0).toBeTruthy();
