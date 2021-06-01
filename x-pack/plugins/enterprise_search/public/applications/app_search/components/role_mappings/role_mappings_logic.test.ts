@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockFlashMessageHelpers, mockHttpValues, mockKibanaValues } from '../../../__mocks__';
+import { mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
 import { LogicMounter } from '../../../__mocks__/kea.mock';
 
 import { engines } from '../../__mocks__/engines.mock';
@@ -13,14 +13,18 @@ import { engines } from '../../__mocks__/engines.mock';
 import { nextTick } from '@kbn/test/jest';
 
 import { asRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
-import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
+import { ANY_AUTH_PROVIDER, ROLE_MAPPING_NOT_FOUND } from '../../../shared/role_mapping/constants';
 
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 describe('RoleMappingsLogic', () => {
   const { http } = mockHttpValues;
-  const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const {
+    clearFlashMessages,
+    flashAPIErrors,
+    setSuccessMessage,
+    setErrorMessage,
+  } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(RoleMappingsLogic);
   const DEFAULT_VALUES = {
     attributes: [],
@@ -322,12 +326,12 @@ describe('RoleMappingsLogic', () => {
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
 
-      it('redirects when there is a 404 status', async () => {
+      it('shows error when there is a 404 status', async () => {
         http.get.mockReturnValue(Promise.reject({ status: 404 }));
         RoleMappingsLogic.actions.initializeRoleMapping();
         await nextTick();
 
-        expect(navigateToUrl).toHaveBeenCalled();
+        expect(setErrorMessage).toHaveBeenCalledWith(ROLE_MAPPING_NOT_FOUND);
       });
     });
 
@@ -342,8 +346,12 @@ describe('RoleMappingsLogic', () => {
         engines: [],
       };
 
-      it('calls API and navigates when new mapping', async () => {
+      it('calls API and refreshes list when new mapping', async () => {
         mount(mappingsServerProps);
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
 
         http.post.mockReturnValue(Promise.resolve(mappingServerProps));
         RoleMappingsLogic.actions.handleSaveMapping();
@@ -353,11 +361,15 @@ describe('RoleMappingsLogic', () => {
         });
         await nextTick();
 
-        expect(navigateToUrl).toHaveBeenCalled();
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
       });
 
-      it('calls API and navigates when existing mapping', async () => {
+      it('calls API and refreshes list when existing mapping', async () => {
         mount(mappingServerProps);
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
 
         http.put.mockReturnValue(Promise.resolve(mappingServerProps));
         RoleMappingsLogic.actions.handleSaveMapping();
@@ -367,7 +379,7 @@ describe('RoleMappingsLogic', () => {
         });
         await nextTick();
 
-        expect(navigateToUrl).toHaveBeenCalled();
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
         expect(setSuccessMessage).toHaveBeenCalled();
       });
 
@@ -419,8 +431,12 @@ describe('RoleMappingsLogic', () => {
         expect(http.delete).not.toHaveBeenCalled();
       });
 
-      it('calls API and navigates', async () => {
+      it('calls API and refreshes list', async () => {
         mount(mappingServerProps);
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
         http.delete.mockReturnValue(Promise.resolve({}));
         RoleMappingsLogic.actions.handleDeleteMapping();
 
@@ -429,7 +445,7 @@ describe('RoleMappingsLogic', () => {
         );
         await nextTick();
 
-        expect(navigateToUrl).toHaveBeenCalled();
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
         expect(setSuccessMessage).toHaveBeenCalled();
       });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockFlashMessageHelpers, mockHttpValues, mockKibanaValues } from '../../../__mocks__';
+import { mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
 import { LogicMounter } from '../../../__mocks__/kea.mock';
 
 import { groups } from '../../__mocks__/groups.mock';
@@ -13,14 +13,13 @@ import { groups } from '../../__mocks__/groups.mock';
 import { nextTick } from '@kbn/test/jest';
 
 import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
-import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
+import { ANY_AUTH_PROVIDER, ROLE_MAPPING_NOT_FOUND } from '../../../shared/role_mapping/constants';
 
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 describe('RoleMappingsLogic', () => {
   const { http } = mockHttpValues;
-  const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, setErrorMessage } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(RoleMappingsLogic);
   const defaultValues = {
     attributes: [],
@@ -295,17 +294,21 @@ describe('RoleMappingsLogic', () => {
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
 
-      it('redirects when there is a 404 status', async () => {
+      it('shows error when there is a 404 status', async () => {
         http.get.mockReturnValue(Promise.reject({ status: 404 }));
         RoleMappingsLogic.actions.initializeRoleMapping();
         await nextTick();
 
-        expect(navigateToUrl).toHaveBeenCalled();
+        expect(setErrorMessage).toHaveBeenCalledWith(ROLE_MAPPING_NOT_FOUND);
       });
     });
 
     describe('handleSaveMapping', () => {
-      it('calls API and navigates when new mapping', async () => {
+      it('calls API and refreshes list when new mapping', async () => {
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
         RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
 
         http.post.mockReturnValue(Promise.resolve(mappingServerProps));
@@ -324,10 +327,14 @@ describe('RoleMappingsLogic', () => {
         });
         await nextTick();
 
-        expect(navigateToUrl).toHaveBeenCalled();
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
       });
 
-      it('calls API and navigates when existing mapping', async () => {
+      it('calls API and refreshes list when existing mapping', async () => {
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
         RoleMappingsLogic.actions.setRoleMappingData(mappingServerProps);
 
         http.put.mockReturnValue(Promise.resolve(mappingServerProps));
@@ -349,7 +356,7 @@ describe('RoleMappingsLogic', () => {
         );
         await nextTick();
 
-        expect(navigateToUrl).toHaveBeenCalled();
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
       });
 
       it('handles error', async () => {
@@ -379,7 +386,11 @@ describe('RoleMappingsLogic', () => {
         expect(http.delete).not.toHaveBeenCalled();
       });
 
-      it('calls API and navigates', async () => {
+      it('calls API and refreshes list', async () => {
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
         RoleMappingsLogic.actions.setRoleMappingData(mappingServerProps);
         http.delete.mockReturnValue(Promise.resolve({}));
         RoleMappingsLogic.actions.handleDeleteMapping();
@@ -389,7 +400,7 @@ describe('RoleMappingsLogic', () => {
         );
         await nextTick();
 
-        expect(navigateToUrl).toHaveBeenCalled();
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
       });
 
       it('handles error', async () => {

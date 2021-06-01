@@ -11,12 +11,11 @@ import {
   clearFlashMessages,
   flashAPIErrors,
   setSuccessMessage,
+  setErrorMessage,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { KibanaLogic } from '../../../shared/kibana';
-import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
+import { ANY_AUTH_PROVIDER, ROLE_MAPPING_NOT_FOUND } from '../../../shared/role_mapping/constants';
 import { AttributeName } from '../../../shared/types';
-import { ROLE_MAPPINGS_PATH } from '../../routes';
 import { RoleGroup, WSRoleMapping, Role } from '../../types';
 
 import {
@@ -266,7 +265,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     },
     initializeRoleMapping: async ({ roleId }) => {
       const { http } = HttpLogic.values;
-      const { navigateToUrl } = KibanaLogic.values;
       const route = roleId
         ? `/api/workplace_search/org/role_mappings/${roleId}`
         : '/api/workplace_search/org/role_mappings/new';
@@ -276,9 +274,10 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         actions.setRoleMappingData(response);
       } catch (e) {
         if (e.status === 404) {
-          navigateToUrl(ROLE_MAPPINGS_PATH);
+          setErrorMessage(ROLE_MAPPING_NOT_FOUND);
+        } else {
+          flashAPIErrors(e);
         }
-        flashAPIErrors(e);
       }
     },
     handleDeleteMapping: async () => {
@@ -286,13 +285,12 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       if (!roleMapping) return;
 
       const { http } = HttpLogic.values;
-      const { navigateToUrl } = KibanaLogic.values;
       const route = `/api/workplace_search/org/role_mappings/${roleMapping.id}`;
 
       if (window.confirm(DELETE_ROLE_MAPPING_MESSAGE)) {
         try {
           await http.delete(route);
-          navigateToUrl(ROLE_MAPPINGS_PATH);
+          actions.initializeRoleMappings();
           setSuccessMessage(ROLE_MAPPING_DELETED_MESSAGE);
         } catch (e) {
           flashAPIErrors(e);
@@ -301,7 +299,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     },
     handleSaveMapping: async () => {
       const { http } = HttpLogic.values;
-      const { navigateToUrl } = KibanaLogic.values;
       const {
         attributeName,
         attributeValue,
@@ -332,7 +329,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
 
       try {
         await request;
-        navigateToUrl(ROLE_MAPPINGS_PATH);
+        actions.initializeRoleMappings();
         setSuccessMessage(SUCCESS_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);

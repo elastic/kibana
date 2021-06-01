@@ -132,3 +132,10 @@ export const ROLE_MAPPINGS_DESCRIPTION = i18n.translate(
       'Define role mappings for elasticsearch-native and elasticsearch-saml authentication.',
   }
 );
+
+export const ROLE_MAPPING_NOT_FOUND = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.notFoundMessage',
+  {
+    defaultMessage: 'No matching Role mapping found.',
+  }
+);
