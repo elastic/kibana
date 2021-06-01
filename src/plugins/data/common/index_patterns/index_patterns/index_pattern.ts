@@ -324,7 +324,7 @@ export class IndexPattern implements IIndexPattern {
       fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),
       fieldFormatMap,
       type: this.type!,
-      typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
+      typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
     };
