@@ -7552,7 +7552,6 @@
     "xpack.enterpriseSearch.actions.updateButtonLabel": "更新",
     "xpack.enterpriseSearch.appSearch.actions.restoreDefaultsButonLabel": "デフォルトを復元",
     "xpack.enterpriseSearch.appSearch.adminRoleTypeDescription": "アカウント設定の管理を除き、管理者はすべての操作を実行できます。",
-    "xpack.enterpriseSearch.appSearch.advancedRoleSelectorsTitle": "完全または限定エンジンアクセス",
     "xpack.enterpriseSearch.appSearch.analystRoleTypeDescription": "アナリストは、ドキュメント、クエリテスト、分析のみを表示できます。",
     "xpack.enterpriseSearch.appSearch.credentials.apiEndpoint": "エンドポイント",
     "xpack.enterpriseSearch.appSearch.credentials.apiKeys": "API キー",

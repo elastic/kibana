@@ -7611,7 +7611,6 @@
     "xpack.enterpriseSearch.actions.updateButtonLabel": "更新",
     "xpack.enterpriseSearch.appSearch.actions.restoreDefaultsButonLabel": "还原默认值",
     "xpack.enterpriseSearch.appSearch.adminRoleTypeDescription": "管理员可以执行任何操作，但不包括管理帐户设置。",
-    "xpack.enterpriseSearch.appSearch.advancedRoleSelectorsTitle": "完全或有限的引擎访问",
     "xpack.enterpriseSearch.appSearch.analystRoleTypeDescription": "分析人员仅可以查看文档、查询测试器和分析。",
     "xpack.enterpriseSearch.appSearch.credentials.apiEndpoint": "终端",
     "xpack.enterpriseSearch.appSearch.credentials.apiKeys": "API 密钥",

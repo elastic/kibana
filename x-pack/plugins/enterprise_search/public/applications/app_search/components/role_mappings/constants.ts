@@ -126,13 +126,6 @@ export const ADMIN_ROLE_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ADVANCED_ROLE_SELECTORS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.advancedRoleSelectorsTitle',
-  {
-    defaultMessage: 'Full or limited engine access',
-  }
-);
-
 export const ROLE_TITLE = i18n.translate('xpack.enterpriseSearch.appSearch.roleTitle', {
   defaultMessage: 'Role',
 });
@@ -174,26 +167,26 @@ export const ENGINE_ACCESS_TITLE = i18n.translate(
 
 export const ADVANCED_ROLE_TYPES = [
   {
-    type: 'dev',
+    id: 'dev',
     description: DEV_ROLE_TYPE_DESCRIPTION,
   },
   {
-    type: 'editor',
+    id: 'editor',
     description: EDITOR_ROLE_TYPE_DESCRIPTION,
   },
   {
-    type: 'analyst',
+    id: 'analyst',
     description: ANALYST_ROLE_TYPE_DESCRIPTION,
   },
 ] as AdvanceRoleType[];
 
 export const STANDARD_ROLE_TYPES = [
   {
-    type: 'owner',
+    id: 'owner',
     description: OWNER_ROLE_TYPE_DESCRIPTION,
   },
   {
-    type: 'admin',
+    id: 'admin',
     description: ADMIN_ROLE_TYPE_DESCRIPTION,
   },
 ] as AdvanceRoleType[];

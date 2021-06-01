@@ -24,6 +24,8 @@ import {
 } from '../../../shared/role_mapping';
 import { asRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
+import { STANDARD_ROLE_TYPES } from './constants';
+
 import { RoleMapping } from './role_mapping';
 
 describe('RoleMapping', () => {
@@ -71,7 +73,7 @@ describe('RoleMapping', () => {
     const wrapper = shallow(<RoleMapping />);
 
     expect(wrapper.find(AttributeSelector)).toHaveLength(1);
-    expect(wrapper.find(RoleSelector)).toHaveLength(5);
+    expect(wrapper.find(RoleSelector)).toHaveLength(1);
   });
 
   it('returns Loading when loading', () => {
@@ -86,6 +88,13 @@ describe('RoleMapping', () => {
     const wrapper = shallow(<RoleMapping />);
 
     expect(wrapper.find(DeleteMappingCallout)).toHaveLength(1);
+  });
+
+  it('only passes standard role options for non-advanced roles', () => {
+    setMockValues({ ...mockValues, hasAdvancedRoles: false });
+    const wrapper = shallow(<RoleMapping />);
+
+    expect(wrapper.find(RoleSelector).prop('roleOptions')).toHaveLength(STANDARD_ROLE_TYPES.length);
   });
 
   it('hides DeleteMappingCallout for new mapping', () => {

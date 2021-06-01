@@ -83,7 +83,7 @@ describe('RoleMapping', () => {
     const wrapper = shallow(<RoleMapping />);
 
     expect(wrapper.find(AttributeSelector)).toHaveLength(1);
-    expect(wrapper.find(RoleSelector)).toHaveLength(2);
+    expect(wrapper.find(RoleSelector)).toHaveLength(1);
   });
 
   it('returns Loading when loading', () => {

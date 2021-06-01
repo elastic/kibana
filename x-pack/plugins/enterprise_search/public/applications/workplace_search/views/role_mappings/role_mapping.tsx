@@ -51,17 +51,17 @@ import {
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 interface RoleType {
-  type: Role;
+  id: Role;
   description: string;
 }
 
-const roleTypes = [
+const roleOptions = [
   {
-    type: 'admin',
+    id: 'admin',
     description: ADMIN_ROLE_TYPE_DESCRIPTION,
   },
   {
-    type: 'user',
+    id: 'user',
     description: USER_ROLE_TYPE_DESCRIPTION,
   },
 ] as RoleType[];
@@ -154,15 +154,12 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
                 <h3>{ROLE_LABEL}</h3>
               </EuiTitle>
               <EuiSpacer />
-              {roleTypes.map(({ type, description }) => (
-                <RoleSelector
-                  key={type}
-                  roleType={roleType}
-                  onChange={handleRoleChange}
-                  roleTypeOption={type}
-                  description={description}
-                />
-              ))}
+              <RoleSelector
+                roleOptions={roleOptions}
+                roleType={roleType}
+                onChange={handleRoleChange}
+                label="Role"
+              />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>

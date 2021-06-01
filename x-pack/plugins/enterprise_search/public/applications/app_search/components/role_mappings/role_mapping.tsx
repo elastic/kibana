@@ -39,6 +39,7 @@ import {
   MANAGE_ROLE_MAPPING_TITLE,
 } from '../../../shared/role_mapping/constants';
 import { AppLogic } from '../../app_logic';
+import { AdvanceRoleType } from '../../types';
 
 import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
 import { Engine } from '../engine/types';
@@ -48,7 +49,6 @@ import {
   UPDATE_ROLE_MAPPING,
   ADVANCED_ROLE_TYPES,
   STANDARD_ROLE_TYPES,
-  ADVANCED_ROLE_SELECTORS_TITLE,
   ROLE_TITLE,
   FULL_ENGINE_ACCESS_TITLE,
   FULL_ENGINE_ACCESS_DESCRIPTION,
@@ -106,6 +106,19 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
   const SAVE_ROLE_MAPPING_LABEL = isNew ? SAVE_ROLE_MAPPING : UPDATE_ROLE_MAPPING;
   const TITLE = isNew ? ADD_ROLE_MAPPING_TITLE : MANAGE_ROLE_MAPPING_TITLE;
 
+  const mapRoleOptions = ({ id, description }: AdvanceRoleType) => ({
+    id,
+    description,
+    disabled: !myRole.availableRoleTypes.includes(id),
+  });
+
+  const standardRoleOptions = STANDARD_ROLE_TYPES.map(mapRoleOptions);
+  const advancedRoleOptions = ADVANCED_ROLE_TYPES.map(mapRoleOptions);
+
+  const roleOptions = hasAdvancedRoles
+    ? [...standardRoleOptions, ...advancedRoleOptions]
+    : standardRoleOptions;
+
   const saveRoleMappingButton = (
     <EuiButton onClick={handleSaveMapping} fill>
       {SAVE_ROLE_MAPPING_LABEL}
@@ -123,26 +136,6 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
       }}
       label={engine.name}
     />
-  );
-
-  const advancedRoleSelectors = (
-    <>
-      <EuiSpacer />
-      <EuiTitle size="xs">
-        <h4>{ADVANCED_ROLE_SELECTORS_TITLE}</h4>
-      </EuiTitle>
-      <EuiSpacer />
-      {ADVANCED_ROLE_TYPES.map(({ type, description }) => (
-        <RoleSelector
-          key={type}
-          disabled={!myRole.availableRoleTypes.includes(type)}
-          roleType={roleType}
-          roleTypeOption={type}
-          description={description}
-          onChange={handleRoleChange}
-        />
-      ))}
-    </>
   );
 
   return (
@@ -177,16 +170,12 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
                 <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
               </EuiTitle>
               <EuiSpacer />
-              {STANDARD_ROLE_TYPES.map(({ type, description }) => (
-                <RoleSelector
-                  key={type}
-                  roleType={roleType}
-                  onChange={handleRoleChange}
-                  roleTypeOption={type}
-                  description={description}
-                />
-              ))}
-              {hasAdvancedRoles && advancedRoleSelectors}
+              <RoleSelector
+                roleType={roleType}
+                roleOptions={roleOptions}
+                onChange={handleRoleChange}
+                label="Role"
+              />
             </EuiPanel>
           </EuiFlexItem>
           {hasAdvancedRoles && (
