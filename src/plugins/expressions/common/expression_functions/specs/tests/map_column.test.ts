@@ -35,16 +35,35 @@ describe('mapColumn', () => {
     expect(result.rows[arbitraryRowIndex]).toHaveProperty('pricePlusTwo');
   });
 
-  it('overwrites existing column with the new column if an existing column name is provided without an id', async () => {
-    const result = await runFn(testTable, { name: 'name', expression: pricePlusTwo });
-    const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
+  it('allows the id arg to be optional, looking up by name instead', async () => {
+    const result = await runFn(testTable, { name: 'name label', expression: pricePlusTwo });
+    const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name label');
     const arbitraryRowIndex = 4;
 
     expect(result.type).toBe('datatable');
     expect(result.columns).toHaveLength(testTable.columns.length);
-    expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name');
+    expect(result.columns[nameColumnIndex]).toHaveProperty('id', 'name');
+    expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name label');
     expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
     expect(result.rows[arbitraryRowIndex]).toHaveProperty('name', 202);
+    expect(result.rows[arbitraryRowIndex]).not.toHaveProperty('name label');
+  });
+
+  it('allows a duplicate name when the ids are different', async () => {
+    const result = await runFn(testTable, {
+      id: 'new',
+      name: 'name label',
+      expression: pricePlusTwo,
+    });
+    const nameColumnIndex = result.columns.findIndex(({ id }) => id === 'new');
+    const arbitraryRowIndex = 4;
+
+    expect(result.type).toBe('datatable');
+    expect(result.columns).toHaveLength(testTable.columns.length + 1);
+    expect(result.columns[nameColumnIndex]).toHaveProperty('id', 'new');
+    expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name label');
+    expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
+    expect(result.rows[arbitraryRowIndex]).toHaveProperty('new', 202);
   });
 
   it('inserts a new column with a duplicate name if an id and name are provided', async () => {

@@ -134,7 +134,7 @@ export const math: ExpressionFunctionDefinition<
     const mathContext = isDatatable(input)
       ? pivotObjectArray(
           input.rows,
-          input.columns.map((col) => col.id ?? col.name)
+          input.columns.map((col) => col.id)
         )
       : { value: input };
 
