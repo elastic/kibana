@@ -8,7 +8,11 @@
 
 import { ScreenshotModePlugin } from './plugin';
 
-export { setScreenshotModeEnabled, KBN_SCREENSHOT_MODE_HEADER } from '../common';
+export {
+  setScreenshotModeEnabled,
+  KBN_SCREENSHOT_MODE_HEADER,
+  KBN_SCREENSHOT_MODE_ENABLED_KEY,
+} from '../common';
 
 export {
   ScreenshotModeRequestHandlerContext,
