@@ -36,7 +36,7 @@ const getColor = (
   values: string[],
   syncColors: boolean
 ) => {
-  return palettes?.get(activePalette).getColor(
+  return palettes?.get(activePalette).getCategoricalColor(
     [
       {
         name: text,
