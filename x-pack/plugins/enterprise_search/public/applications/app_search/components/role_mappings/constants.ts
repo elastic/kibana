@@ -9,15 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 import { AdvanceRoleType } from '../../types';
 
-export const SAVE_ROLE_MAPPING = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMapping.saveRoleMappingButtonLabel',
-  { defaultMessage: 'Save role mapping' }
-);
-export const UPDATE_ROLE_MAPPING = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMapping.updateRoleMappingButtonLabel',
-  { defaultMessage: 'Update role mapping' }
-);
-
 export const EMPTY_ROLE_MAPPINGS_BODY = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMapping.emptyRoleMappingsBody',
   {

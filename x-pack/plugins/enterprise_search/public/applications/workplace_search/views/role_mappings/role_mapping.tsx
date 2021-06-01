@@ -21,7 +21,6 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
@@ -32,6 +31,8 @@ import {
   RoleSelector,
 } from '../../../shared/role_mapping';
 import {
+  SAVE_ROLE_MAPPING,
+  UPDATE_ROLE_MAPPING,
   ROLE_LABEL,
   ROLE_MAPPINGS_TITLE,
   ADD_ROLE_MAPPING_TITLE,
@@ -112,13 +113,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
   const hasGroupAssignment = selectedGroups.size > 0 || includeInAllGroups;
 
   const TITLE = isNew ? ADD_ROLE_MAPPING_TITLE : MANAGE_ROLE_MAPPING_TITLE;
-  const SAVE_ROLE_MAPPING_LABEL = i18n.translate(
-    'xpack.enterpriseSearch.workplaceSearch.roleMapping.saveRoleMappingButtonMessage',
-    {
-      defaultMessage: '{operation} role mapping',
-      values: { operation: isNew ? 'Save' : 'Update' },
-    }
-  );
+  const SAVE_ROLE_MAPPING_LABEL = isNew ? SAVE_ROLE_MAPPING : UPDATE_ROLE_MAPPING;
 
   const saveRoleMappingButton = (
     <EuiButton disabled={!hasGroupAssignment} onClick={handleSaveMapping} fill>

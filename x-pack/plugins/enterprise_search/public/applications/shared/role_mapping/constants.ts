@@ -188,3 +188,13 @@ export const ROLE_MAPPING_FLYOUT_UPDATE_BUTTON = i18n.translate(
     defaultMessage: 'Update mapping',
   }
 );
+
+export const SAVE_ROLE_MAPPING = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.saveRoleMappingButtonLabel',
+  { defaultMessage: 'Save role mapping' }
+);
+
+export const UPDATE_ROLE_MAPPING = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.updateRoleMappingButtonLabel',
+  { defaultMessage: 'Update role mapping' }
+);
