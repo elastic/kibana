@@ -74,12 +74,37 @@ export const TOP_METRICS_SORT_FIELD_TYPES = [
   KBN_FIELD_TYPES.GEO_POINT,
 ];
 
+export const SORT_DIRECTION = {
+  ASC: 'asc',
+  DESC: 'desc',
+} as const;
+
+export type SortDirection = typeof SORT_DIRECTION[keyof typeof SORT_DIRECTION];
+
+export const SORT_MODE = {
+  MIN: 'min',
+  MAX: 'max',
+  AVG: 'avg',
+  SUM: 'sum',
+  MEDIAN: 'median',
+} as const;
+
+export type SortMode = typeof SORT_MODE[keyof typeof SORT_MODE];
+
 export const TOP_METRICS_SPECIAL_SORT_FIELDS = {
   _SCORE: '_score',
 } as const;
 
 export const isSpecialSortField = (sortField: unknown) => {
   return Object.values(TOP_METRICS_SPECIAL_SORT_FIELDS).some((v) => v === sortField);
+};
+
+export const isValidSortDirection = (arg: unknown) => {
+  return Object.values(SORT_DIRECTION).some((v) => v === arg);
+};
+
+export const isValidSortMode = (arg: unknown) => {
+  return Object.values(SORT_MODE).some((v) => v === arg);
 };
 
 /**

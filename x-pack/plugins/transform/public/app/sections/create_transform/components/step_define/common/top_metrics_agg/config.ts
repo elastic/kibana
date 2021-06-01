@@ -8,6 +8,8 @@
 import {
   isPivotAggsConfigWithUiSupport,
   isSpecialSortField,
+  isValidSortDirection,
+  isValidSortMode,
   PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,
 } from '../../../../../../common/pivot_aggs';
@@ -33,12 +35,23 @@ export function getTopMetricsAggConfig(
         return null;
       }
 
+      const { sortField, sortDirection, sortMode } = this.aggConfig;
+
       let sort = null;
 
-      if (isSpecialSortField(this.aggConfig.sortField)) {
-        sort = this.aggConfig.sortField;
+      if (isSpecialSortField(sortField)) {
+        sort = sortField;
       } else {
-        sort = { [this.aggConfig.sortField!]: this.aggConfig.sortDirection };
+        if (sortMode) {
+          sort = {
+            [sortField!]: {
+              order: sortDirection,
+              mode: sortMode,
+            },
+          };
+        } else {
+          sort = { [sortField!]: sortDirection };
+        }
       }
 
       return {
@@ -56,9 +69,29 @@ export function getTopMetricsAggConfig(
         return;
       }
 
+      const sortField = Object.keys(sort)[0];
+      const sortDefinition = sort[sortField];
+
+      let sortDirection = null;
+      let sortMode = null;
+
+      if (isValidSortDirection(sortDefinition)) {
+        sortDirection = sortDefinition;
+      }
+
+      if (typeof sortDefinition === 'object') {
+        if (isValidSortDirection(sortDefinition.order)) {
+          sortDirection = sortDefinition.order;
+        }
+        if (isValidSortMode(sortDefinition.mode)) {
+          sortMode = sortDefinition.mode;
+        }
+      }
+
       this.aggConfig = {
-        sortField: Object.keys(sort)[0],
-        sortDirection: Object.values(sort)[0]!,
+        sortField,
+        sortDirection,
+        ...(sortMode ? { sortMode } : {}),
       };
     },
     isValid() {

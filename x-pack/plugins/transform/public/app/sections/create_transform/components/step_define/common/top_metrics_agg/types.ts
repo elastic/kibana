@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
+import type {
+  PivotAggsConfigWithExtra,
+  SortDirection,
+  SortMode,
+} from '../../../../../../common/pivot_aggs';
 
 export interface TopMetricsAggConfig {
   sortField: string;
-  sortDirection?: 'asc' | 'desc';
+  sortDirection?: SortDirection;
+  sortMode?: SortMode;
 }
 
 export type PivotAggsConfigTopMetrics = PivotAggsConfigWithExtra<TopMetricsAggConfig>;

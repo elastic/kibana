@@ -202,10 +202,6 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     formValid = validAggName && aggConfigDef.isValid();
   }
 
-  console.log(agg, '___agg___');
-
-  console.log(availableAggs, '___availableAggs.length___');
-
   return (
     <EuiForm style={{ width: '300px' }} data-test-subj={'transformAggPopoverForm_' + aggName}>
       <EuiFormRow
