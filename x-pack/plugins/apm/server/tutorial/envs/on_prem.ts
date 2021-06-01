@@ -135,6 +135,7 @@ export function onPremInstructions({
                 'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
             }
           ),
+          customStatusCheck: 'apm-fleet-check',
           esHitsCheck: {
             index: onboardingIndices,
             query: {

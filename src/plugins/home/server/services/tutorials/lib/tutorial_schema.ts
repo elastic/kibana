@@ -49,6 +49,7 @@ const statusCheckSchema = schema.object({
     index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
     query: schema.recordOf(schema.string(), schema.any()),
   }),
+  customStatusCheck: schema.maybe(schema.string()),
 });
 
 const instructionSchema = schema.object({

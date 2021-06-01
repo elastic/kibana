@@ -171,17 +171,31 @@ class TutorialUi extends React.Component {
   checkInstructionSetStatus = async (instructionSetIndex) => {
     const instructionSet = this.getInstructionSets()[instructionSetIndex];
     const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
+    const customStatusCheck = _.get(instructionSet, `statusCheck.customStatusCheck`);
 
-    if (esHitsCheckConfig) {
-      const statusCheckState = await this.fetchEsHitsStatus(esHitsCheckConfig);
+    const [esHitsStatusCheck, apmFleetStatusCheck] = await Promise.all([
+      ...(esHitsCheckConfig ? [this.fetchEsHitsStatus(esHitsCheckConfig)] : []),
+      ...(customStatusCheck === 'apm-fleet-check' ? [this.fetchApmFleetStatus()] : []),
+    ]);
 
-      this.setState((prevState) => ({
-        statusCheckStates: {
-          ...prevState.statusCheckStates,
-          [instructionSetIndex]: statusCheckState,
-        },
-      }));
-    }
+    const nextStatusCheckState =
+      esHitsStatusCheck === StatusCheckStates.HAS_DATA ||
+      apmFleetStatusCheck === StatusCheckStates.HAS_DATA
+        ? StatusCheckStates.HAS_DATA
+        : StatusCheckStates.NO_DATA;
+
+    this.setState((prevState) => ({
+      statusCheckStates: {
+        ...prevState.statusCheckStates,
+        [instructionSetIndex]: nextStatusCheckState,
+      },
+    }));
+  };
+
+  fetchApmFleetStatus = async () => {
+    const { http } = getServices();
+    const response = await http.get('/api/apm/fleet/has_data');
+    return response?.hasData === true ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
   };
 
   /**
