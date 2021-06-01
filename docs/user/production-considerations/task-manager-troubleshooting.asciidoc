@@ -72,6 +72,7 @@ By analyzing the different sections of the output, you can evaluate different th
 ** <<task-manager-theory-long-running-tasks,Tasks run for too long, overrunning their schedule>>
 ** <<task-manager-theory-high-fail-rate,Tasks take multiple attempts to succeed>>
 * <<task-manager-health-evaluate-the-workload,Evaluate the Workload>>
+* <<task-manager-health-evaluate-the-capacity-estimation,Evaluate the Capacity Estimation>>
 
 Retrieve the latest monitored health stats of a {kib} instance Task Manager:
 
@@ -849,7 +850,8 @@ For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
 Task Manager is constantly evaluating its runtime operations and workload. This enables Task Manager to make rough estimates about the sufficiency of its capacity.
 
-As the name suggests, these are estimates based on historical data and should not be used as predictions. These estimations should be evaluated along side the detailed <<task-manager-health-monitoring>> stats before making changes to infrastructure.
+As the name suggests, these are estimates based on historical data and should not be used as predictions. These estimations should be evaluated along side the detailed <<task-manager-health-monitoring>> stats before making changes to infrastructure. These estimations assumes all {kib} instances are configured identically.
+
 We recommend using these estimations when following the Task Manager <<task-manager-scaling-guidance>>.
 
 Evaluating the health stats above you can see the following output under `stats.capacity_estimation.value`:
@@ -884,6 +886,7 @@ Evaluating the health stats above you can see the following output under `stats.
 <7> We propose waiting for the workload to change before additional {kib} instances are provisioned
 
 The `capacity_estimation` section is made up of two subsections:
+
 * `observed` estimates the current capacity by observing historical runtime and workload statistics
 * `proposed` estimates the baseline {kib} cluster size and the expected throughput under such a deployment strategy
 
