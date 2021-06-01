@@ -6,7 +6,7 @@
  */
 
 import './field_select.scss';
-import {partition} from 'lodash';
+import { partition } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
