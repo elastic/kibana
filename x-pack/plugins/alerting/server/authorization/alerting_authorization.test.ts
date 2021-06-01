@@ -71,7 +71,12 @@ function mockFeature(appName: string, typeName?: string) {
         ...(typeName
           ? {
               alerting: {
-                all: [typeName],
+                rule: {
+                  all: [typeName],
+                },
+                alert: {
+                  all: [typeName],
+                },
               },
             }
           : {}),
@@ -85,7 +90,12 @@ function mockFeature(appName: string, typeName?: string) {
         ...(typeName
           ? {
               alerting: {
-                read: [typeName],
+                rule: {
+                  read: [typeName],
+                },
+                alert: {
+                  read: [typeName],
+                },
               },
             }
           : {}),
@@ -138,7 +148,9 @@ function mockFeatureWithSubFeature(appName: string, typeName: string) {
                 name: 'sub feature alert',
                 includeIn: 'all',
                 alerting: {
-                  all: [typeName],
+                  rule: {
+                    all: [typeName],
+                  },
                 },
                 savedObject: {
                   all: [],
@@ -151,7 +163,9 @@ function mockFeatureWithSubFeature(appName: string, typeName: string) {
                 name: 'sub feature alert',
                 includeIn: 'read',
                 alerting: {
-                  read: [typeName],
+                  rule: {
+                    read: [typeName],
+                  },
                 },
                 savedObject: {
                   all: [],
@@ -269,7 +283,7 @@ describe('AlertingAuthorization', () => {
       expect(alertTypeRegistry.get).toHaveBeenCalledTimes(0);
     });
 
-    test('ensures the user has privileges to execute the specified rule type, operation and alerting type without consumer when producer and consumer are the same', async () => {
+    test('ensures the user has privileges to execute rules for the specified rule type and operation without consumer when producer and consumer are the same', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -325,7 +339,63 @@ describe('AlertingAuthorization', () => {
         `);
     });
 
-    test('ensures the user has privileges to execute the specified rule type, operation and alerting type without consumer when consumer is exempt', async () => {
+    test('ensures the user has privileges to execute alerts for the specified rule type and operation without consumer when producer and consumer are the same', async () => {
+      const { authorization } = mockSecurity();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        authorization,
+        alertTypeRegistry,
+        features,
+        auditLogger,
+        getSpace,
+        exemptConsumerIds,
+      });
+
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: true,
+        privileges: { kibana: [] },
+      });
+
+      await alertAuthorization.ensureAuthorized({
+        ruleTypeId: 'myType',
+        consumer: 'myApp',
+        operation: WriteOperations.Update,
+        entity: AlertingAuthorizationEntity.Alert,
+      });
+
+      expect(alertTypeRegistry.get).toHaveBeenCalledWith('myType');
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(2);
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'alert',
+        'update'
+      );
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: [mockAuthorizationAction('myType', 'myApp', 'alert', 'update')],
+      });
+
+      expect(auditLogger.logAuthorizationSuccess).toHaveBeenCalledTimes(1);
+      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "some-user",
+            "myType",
+            0,
+            "myApp",
+            "update",
+            "alert",
+          ]
+        `);
+    });
+
+    test('ensures the user has privileges to execute rules for the specified rule type and operation without consumer when consumer is exempt', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -387,7 +457,69 @@ describe('AlertingAuthorization', () => {
         `);
     });
 
-    test('ensures the user has privileges to execute the specified rule type, operation, alerting type and producer when producer is different from consumer', async () => {
+    test('ensures the user has privileges to execute alerts for the specified rule type and operation without consumer when consumer is exempt', async () => {
+      const { authorization } = mockSecurity();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        authorization,
+        alertTypeRegistry,
+        features,
+        auditLogger,
+        getSpace,
+        exemptConsumerIds: ['exemptConsumer'],
+      });
+
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: true,
+        privileges: { kibana: [] },
+      });
+
+      await alertAuthorization.ensureAuthorized({
+        ruleTypeId: 'myType',
+        consumer: 'exemptConsumer',
+        operation: WriteOperations.Update,
+        entity: AlertingAuthorizationEntity.Alert,
+      });
+
+      expect(alertTypeRegistry.get).toHaveBeenCalledWith('myType');
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(2);
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'exemptConsumer',
+        'alert',
+        'update'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'alert',
+        'update'
+      );
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: [mockAuthorizationAction('myType', 'myApp', 'alert', 'update')],
+      });
+
+      expect(auditLogger.logAuthorizationSuccess).toHaveBeenCalledTimes(1);
+      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "some-user",
+            "myType",
+            0,
+            "exemptConsumer",
+            "update",
+            "alert",
+          ]
+        `);
+    });
+
+    test('ensures the user has privileges to execute rules for the specified rule type, operation and producer when producer is different from consumer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -452,7 +584,72 @@ describe('AlertingAuthorization', () => {
         `);
     });
 
-    test('throws if user lacks the required privileges for the consumer', async () => {
+    test('ensures the user has privileges to execute alerts for the specified rule type, operation and producer when producer is different from consumer', async () => {
+      const { authorization } = mockSecurity();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: true,
+        privileges: { kibana: [] },
+      });
+
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        authorization,
+        alertTypeRegistry,
+        features,
+        auditLogger,
+        getSpace,
+        exemptConsumerIds,
+      });
+
+      await alertAuthorization.ensureAuthorized({
+        ruleTypeId: 'myType',
+        consumer: 'myOtherApp',
+        operation: WriteOperations.Update,
+        entity: AlertingAuthorizationEntity.Alert,
+      });
+
+      expect(alertTypeRegistry.get).toHaveBeenCalledWith('myType');
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(2);
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'alert',
+        'update'
+      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myOtherApp',
+        'alert',
+        'update'
+      );
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: [
+          mockAuthorizationAction('myType', 'myOtherApp', 'alert', 'update'),
+          mockAuthorizationAction('myType', 'myApp', 'alert', 'update'),
+        ],
+      });
+
+      expect(auditLogger.logAuthorizationSuccess).toHaveBeenCalledTimes(1);
+      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "some-user",
+            "myType",
+            0,
+            "myOtherApp",
+            "update",
+            "alert",
+          ]
+        `);
+    });
+
+    test('throws if user lacks the required rule privileges for the consumer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -510,7 +707,7 @@ describe('AlertingAuthorization', () => {
         `);
     });
 
-    test('throws if user lacks the required privieleges for the producer', async () => {
+    test('throws if user lacks the required alert privileges for the consumer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -532,11 +729,73 @@ describe('AlertingAuthorization', () => {
         privileges: {
           kibana: [
             {
-              privilege: mockAuthorizationAction('myType', 'myOtherApp', 'alert', 'create'),
+              privilege: mockAuthorizationAction('myType', 'myOtherApp', 'alert', 'update'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myType', 'myApp', 'alert', 'update'),
               authorized: true,
             },
             {
-              privilege: mockAuthorizationAction('myType', 'myApp', 'alert', 'create'),
+              privilege: mockAuthorizationAction('myType', 'myAppRulesOnly', 'alert', 'update'),
+              authorized: false,
+            },
+          ],
+        },
+      });
+
+      await expect(
+        alertAuthorization.ensureAuthorized({
+          ruleTypeId: 'myType',
+          consumer: 'myAppRulesOnly',
+          operation: WriteOperations.Update,
+          entity: AlertingAuthorizationEntity.Alert,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unauthorized to update a \\"myType\\" alert for \\"myAppRulesOnly\\""`
+      );
+
+      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationFailure).toHaveBeenCalledTimes(1);
+      expect(auditLogger.logAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "some-user",
+            "myType",
+            0,
+            "myAppRulesOnly",
+            "update",
+            "alert",
+          ]
+        `);
+    });
+
+    test('throws if user lacks the required privileges for the producer', async () => {
+      const { authorization } = mockSecurity();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        authorization,
+        alertTypeRegistry,
+        features,
+        auditLogger,
+        getSpace,
+        exemptConsumerIds,
+      });
+
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myType', 'myOtherApp', 'alert', 'update'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myType', 'myApp', 'alert', 'update'),
               authorized: false,
             },
           ],
@@ -547,11 +806,11 @@ describe('AlertingAuthorization', () => {
         alertAuthorization.ensureAuthorized({
           ruleTypeId: 'myType',
           consumer: 'myOtherApp',
-          operation: WriteOperations.Create,
+          operation: WriteOperations.Update,
           entity: AlertingAuthorizationEntity.Alert,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to create a \\"myType\\" alert by \\"myApp\\""`
+        `"Unauthorized to update a \\"myType\\" alert by \\"myApp\\""`
       );
 
       expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
@@ -562,13 +821,13 @@ describe('AlertingAuthorization', () => {
             "myType",
             1,
             "myApp",
-            "create",
+            "update",
             "alert",
           ]
         `);
     });
 
-    test('throws if user lacks the required privieleges for both consumer and producer', async () => {
+    test('throws if user lacks the required privileges for both consumer and producer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -662,7 +921,6 @@ describe('AlertingAuthorization', () => {
       enabledInLicense: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
-
     test('omits filter when there is no authorization api', async () => {
       const alertAuthorization = new AlertingAuthorization({
         request,
@@ -672,7 +930,6 @@ describe('AlertingAuthorization', () => {
         getSpace,
         exemptConsumerIds,
       });
-
       const {
         filter,
         ensureRuleTypeIsAuthorized,
@@ -683,13 +940,10 @@ describe('AlertingAuthorization', () => {
           consumer: 'consumer',
         },
       });
-
       expect(() => ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule')).not.toThrow();
-
       expect(filter).toEqual(undefined);
     });
-
-    test('ensureAlertTypeIsAuthorized is no-op when there is no authorization api', async () => {
+    test('ensureRuleTypeIsAuthorized is no-op when there is no authorization api', async () => {
       const alertAuthorization = new AlertingAuthorization({
         request,
         alertTypeRegistry,
@@ -698,7 +952,6 @@ describe('AlertingAuthorization', () => {
         getSpace,
         exemptConsumerIds,
       });
-
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
         AlertingAuthorizationEntity.Rule,
         {
@@ -709,13 +962,10 @@ describe('AlertingAuthorization', () => {
           },
         }
       );
-
       ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule');
-
       expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
       expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
     });
-
     test('creates a filter based on the privileged types', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
@@ -727,7 +977,6 @@ describe('AlertingAuthorization', () => {
         hasAllRequested: true,
         privileges: { kibana: [] },
       });
-
       const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
@@ -738,7 +987,6 @@ describe('AlertingAuthorization', () => {
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-
       expect(
         (
           await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
@@ -754,11 +1002,9 @@ describe('AlertingAuthorization', () => {
           `((path.to.rule.id:myAppAlertType and consumer-field:(myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:myOtherAppAlertType and consumer-field:(myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:mySecondAppAlertType and consumer-field:(myApp or myOtherApp or myAppWithSubFeature)))`
         )
       );
-
       expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
     });
-
-    test('creates an `ensureAlertTypeIsAuthorized` function which throws if type is unauthorized', async () => {
+    test('creates an `ensureRuleTypeIsAuthorized` function which throws if type is unauthorized', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -793,7 +1039,6 @@ describe('AlertingAuthorization', () => {
           ],
         },
       });
-
       const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
@@ -804,7 +1049,6 @@ describe('AlertingAuthorization', () => {
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
         AlertingAuthorizationEntity.Alert,
         {
@@ -820,22 +1064,20 @@ describe('AlertingAuthorization', () => {
       }).toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized to find a \\"myAppAlertType\\" alert for \\"myOtherApp\\""`
       );
-
       expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
       expect(auditLogger.logAuthorizationFailure).toHaveBeenCalledTimes(1);
       expect(auditLogger.logAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "some-user",
-            "myAppAlertType",
-            0,
-            "myOtherApp",
-            "find",
-            "alert",
-          ]
-        `);
+            Array [
+              "some-user",
+              "myAppAlertType",
+              0,
+              "myOtherApp",
+              "find",
+              "alert",
+            ]
+          `);
     });
-
-    test('creates an `ensureAlertTypeIsAuthorized` function which is no-op if type is authorized', async () => {
+    test('creates an `ensureRuleTypeIsAuthorized` function which is no-op if type is authorized', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -870,7 +1112,6 @@ describe('AlertingAuthorization', () => {
           ],
         },
       });
-
       const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
@@ -881,7 +1122,6 @@ describe('AlertingAuthorization', () => {
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
         AlertingAuthorizationEntity.Rule,
         {
@@ -895,11 +1135,9 @@ describe('AlertingAuthorization', () => {
       expect(() => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
       }).not.toThrow();
-
       expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
       expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
     });
-
     test('creates an `logSuccessfulAuthorization` function which logs every authorized type', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
@@ -948,7 +1186,6 @@ describe('AlertingAuthorization', () => {
           ],
         },
       });
-
       const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
@@ -959,7 +1196,6 @@ describe('AlertingAuthorization', () => {
         exemptConsumerIds,
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-
       const {
         ensureRuleTypeIsAuthorized,
         logSuccessfulAuthorization,
@@ -975,35 +1211,32 @@ describe('AlertingAuthorization', () => {
         ensureRuleTypeIsAuthorized('mySecondAppAlertType', 'myOtherApp', 'rule');
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
       }).not.toThrow();
-
       expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
       expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
-
       logSuccessfulAuthorization();
-
       expect(auditLogger.logBulkAuthorizationSuccess).toHaveBeenCalledTimes(1);
       expect(auditLogger.logBulkAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "some-user",
             Array [
+              "some-user",
               Array [
-                "myAppAlertType",
-                "myOtherApp",
+                Array [
+                  "myAppAlertType",
+                  "myOtherApp",
+                ],
+                Array [
+                  "mySecondAppAlertType",
+                  "myOtherApp",
+                ],
               ],
-              Array [
-                "mySecondAppAlertType",
-                "myOtherApp",
-              ],
-            ],
-            0,
-            "find",
-            "rule",
-          ]
-        `);
+              0,
+              "find",
+              "rule",
+            ]
+          `);
     });
   });
 
-  describe('filterByAlertTypeAuthorization', () => {
+  describe('filterByRuleTypeAuthorization', () => {
     const myOtherAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
