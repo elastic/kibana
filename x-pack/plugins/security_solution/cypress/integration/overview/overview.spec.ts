@@ -16,10 +16,6 @@ import overviewFixture from '../../fixtures/overview_search_strategy.json';
 import emptyInstance from '../../fixtures/empty_instance.json';
 import { cleanKibana } from '../../tasks/common';
 
-import { timeline } from '../../objects/timeline';
-import { createTimeline, favoriteTimeline } from '../../tasks/api_calls/timelines';
-import { TimelineType } from '../../../common/types/timeline';
-
 describe('Overview Page', () => {
   before(() => {
     cleanKibana();
@@ -50,23 +46,6 @@ describe('Overview Page', () => {
       cy.stubSearchStrategyApi(emptyInstance, undefined, 'securitySolutionIndexFields');
       loginAndWaitForPage(OVERVIEW_URL);
       cy.get(OVERVIEW_EMPTY_PAGE).should('be.visible');
-    });
-  });
-
-  describe('Favorite Timelines', () => {
-    it('should appear on overview page', () => {
-      createTimeline(timeline)
-        .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
-        .then((timelineId: string) => {
-          favoriteTimeline({ timelineId, timelineType: TimelineType.default }).then(() => {
-            cy.stubSearchStrategyApi(overviewFixture, 'overviewNetwork');
-            loginAndWaitForPage(OVERVIEW_URL);
-            cy.get('[data-test-subj="overview-recent-timelines"]').should(
-              'contain',
-              timeline.title
-            );
-          });
-        });
     });
   });
 });

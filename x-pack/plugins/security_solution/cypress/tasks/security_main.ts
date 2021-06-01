@@ -11,6 +11,7 @@ import {
   TIMELINE_TOGGLE_BUTTON,
   TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON,
 } from '../screens/security_main';
+import { TIMELINE_EXIT_FULL_SCREEN_BUTTON, TIMELINE_FULL_SCREEN_BUTTON } from '../screens/timeline';
 
 export const openTimelineUsingToggle = () => {
   cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).click();
@@ -30,3 +31,11 @@ export const openTimelineIfClosed = () =>
       openTimelineUsingToggle();
     }
   });
+
+export const enterFullScreenMode = () => {
+  cy.get(TIMELINE_FULL_SCREEN_BUTTON).first().click({ force: true });
+};
+
+export const exitFullScreenMode = () => {
+  cy.get(TIMELINE_EXIT_FULL_SCREEN_BUTTON).first().click({ force: true });
+};

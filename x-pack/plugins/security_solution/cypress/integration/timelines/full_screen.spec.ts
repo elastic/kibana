@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import {
-  TIMELINE_EXIT_FULL_SCREEN_BUTTON,
-  TIMELINE_FULL_SCREEN_BUTTON,
-  TIMELINE_HEADER,
-  TIMELINE_TABS,
-} from '../../screens/timeline';
+import { TIMELINE_HEADER, TIMELINE_TABS } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 
 import { loginAndWaitForPage } from '../../tasks/login';
-import { openTimelineUsingToggle } from '../../tasks/security_main';
+import {
+  openTimelineUsingToggle,
+  enterFullScreenMode,
+  exitFullScreenMode,
+} from '../../tasks/security_main';
 import { populateTimeline } from '../../tasks/timeline';
 
 import { HOSTS_URL } from '../../urls/navigation';
@@ -28,15 +27,14 @@ describe('Toggle full screen', () => {
   });
 
   it('Should hide timeline header and tab list area', () => {
-    cy.get(TIMELINE_FULL_SCREEN_BUTTON).first().click({ force: true });
+    enterFullScreenMode();
 
     cy.get(TIMELINE_TABS).should('not.exist');
     cy.get(TIMELINE_HEADER).should('not.be.visible');
   });
 
   it('Should show timeline header and tab list area', () => {
-    cy.get(TIMELINE_EXIT_FULL_SCREEN_BUTTON).first().click({ force: true });
-
+    exitFullScreenMode();
     cy.get(TIMELINE_TABS).should('exist');
     cy.get(TIMELINE_HEADER).should('be.visible');
   });

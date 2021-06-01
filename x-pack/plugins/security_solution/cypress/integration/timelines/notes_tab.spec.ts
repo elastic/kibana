@@ -22,6 +22,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
   addNotesToTimeline,
   closeTimeline,
+  goToNotesTab,
   openTimelineById,
   refreshTimelinesUntilTimeLinePresent,
 } from '../../tasks/timeline';
@@ -29,11 +30,11 @@ import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
-const text = 'Elastic';
+const text = 'elastic';
 const link = 'https://www.elastic.co/';
 
 describe('Timeline notes tab', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
@@ -46,49 +47,62 @@ describe('Timeline notes tab', () => {
           // request responses and indeterminism since on clicks to activates URL's.
           .then(() => cy.wait(1000))
           .then(() => openTimelineById(timelineId))
-          .then(() => addNotesToTimeline(timelineNonValidQuery.notes, 1))
+          .then(() => goToNotesTab())
       );
   });
 
   after(() => {
     closeTimeline();
   });
-
   it('should render mockdown', () => {
+    cy.intercept('/api/note').as(`updateNote`);
+    addNotesToTimeline(timelineNonValidQuery.notes);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
     cy.get(NOTES_TEXT_AREA).should('exist');
   });
 
   it('should contain notes', () => {
+    cy.intercept('/api/note').as(`updateNote`);
+    addNotesToTimeline(timelineNonValidQuery.notes);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
     cy.get(NOTES_TEXT).first().should('have.text', timelineNonValidQuery.notes);
   });
 
   it('should be able to render font in bold', () => {
-    addNotesToTimeline(`**bold**`, 2);
-    cy.get(NOTES_TEXT).last().should('have.text', `bold`);
+    cy.intercept('/api/note').as(`updateNote`);
+    addNotesToTimeline(`**bold**`);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
+    cy.get(`${NOTES_TEXT} strong`).last().should('have.text', `bold`);
   });
 
   it('should be able to render font in italics', () => {
-    addNotesToTimeline(`_italics_`, 3);
-    cy.get(NOTES_TEXT).last().should('have.text', `italics`);
+    cy.intercept('/api/note').as(`updateNote`);
+    addNotesToTimeline(`_italics_`);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
+    cy.get(`${NOTES_TEXT} em`).last().should('have.text', `italics`);
   });
 
   it('should be able to render code blocks', () => {
-    addNotesToTimeline(`\`code\``, 4);
+    cy.intercept('/api/note').as(`updateNote`);
+    addNotesToTimeline(`\`code\``);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
     cy.get(NOTES_CODE_BLOCK).should('exist');
   });
 
   it('should render the right author', () => {
-    cy.get(NOTES_AUTHOR).should('have.text', text);
+    cy.intercept('/api/note').as(`updateNote`);
+    addNotesToTimeline(timelineNonValidQuery.notes);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
+    cy.get(NOTES_AUTHOR).first().should('have.text', text);
   });
 
   it('should be able to render a link', () => {
-    addNotesToTimeline(`[${text}](${link})`, 5);
-
-    cy.get(NOTES_LINK).last().should('have.text', `${text}(Opens in new tab or window)`);
-  });
-
-  it('should render notes content with hyper link', () => {
+    cy.intercept('/api/note').as(`updateNote`);
+    cy.intercept(link).as(`link`);
+    addNotesToTimeline(`[${text}](${link})`);
+    cy.wait('@updateNote').its('response.statusCode').should('eq', 200);
+    cy.get(NOTES_LINK).last().should('have.text', `${text}(opens in a new tab or window)`);
     cy.get(NOTES_LINK).last().click();
-    cy.url.should('eq', link);
+    cy.wait('@link').its('response.statusCode').should('eq', 200);
   });
 });

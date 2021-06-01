@@ -59,6 +59,9 @@ import {
   EVENT_NOTE,
   TIMELINE_CORRELATION_INPUT,
   TIMELINE_CORRELATION_TAB,
+  TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN,
+  TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN,
+  TIMELINE_COLLAPSED_ITEMS_BTN,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
@@ -125,7 +128,7 @@ export const goToQueryTab = () => {
     .should('have.class', 'euiTab-isSelected');
 };
 
-export const addNotesToTimeline = (notes: string, notesCount: number) => {
+export const addNotesToTimeline = (notes: string) => {
   goToNotesTab().then(() => {
     cy.get(NOTES_TEXT_AREA).type(notes);
     cy.root()
@@ -133,16 +136,16 @@ export const addNotesToTimeline = (notes: string, notesCount: number) => {
         $el.find(ADD_NOTE_BUTTON).trigger('click');
         return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
       })
-      .should('have.text', notesCount);
+      .should('have.text', 1);
   });
 
   goToQueryTab();
   goToNotesTab();
 };
 
-export const addEqlToTimeline = () => {
+export const addEqlToTimeline = (eql: string) => {
   goToCorrelationTab().then(() => {
-    cy.get(TIMELINE_CORRELATION_INPUT).type('process where process.name == "cmd.exe"');
+    cy.get(TIMELINE_CORRELATION_INPUT).type(eql);
   });
 };
 
@@ -352,4 +355,16 @@ export const refreshTimelinesUntilTimeLinePresent = (
       return $el.find(TIMELINE(id));
     })
     .should('be.visible');
+};
+
+export const clickingOnCreateTimelineFormTemplateBtn = () => {
+  cy.get(TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN).click({ force: true });
+};
+
+export const clickingOnCreateTemplateFromTimelineBtn = () => {
+  cy.get(TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN).click({ force: true });
+};
+
+export const expandEventAction = () => {
+  cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).first().click();
 };

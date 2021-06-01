@@ -128,6 +128,17 @@ export const TIMELINE_CHANGES_IN_PROGRESS = '[data-test-subj="timeline"] .euiPro
 
 export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinner"]';
 
+export const TIMELINE_COLLAPSED_ITEMS_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
+
+export const TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN =
+  '[data-test-subj="create-template-from-timeline"]';
+
+export const TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN = '[data-test-subj="create-from-template"]';
+
+export const TIMELINE_CORRELATION_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
+
+export const TIMELINE_CORRELATION_TAB = '[data-test-subj="timelineTabs-eql"]';
+
 export const IS_DRAGGING_DATA_PROVIDERS = '.is-dragging';
 
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
@@ -152,6 +163,19 @@ export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="save-timeline-description"]';
 
 export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContainer"]';
+
+export const TIMELINE_EVENT = '[data-test-subj="event"]';
+
+export const TIMELINE_EVENTS_COUNT_PER_PAGE = '[data-test-subj="local-events-count"]';
+
+export const TIMELINE_EVENTS_COUNT_PER_PAGE_BTN = '[data-test-subj="local-events-count-button"]';
+
+export const TIMELINE_EVENTS_COUNT_PER_PAGE_OPTION = (itemsPerPage: number) =>
+  `[data-test-subj="items-per-page-option-${itemsPerPage}"]`;
+
+export const TIMELINE_EVENTS_COUNT_NEXT_PAGE = '[data-test-subj="pagination-button-next"]';
+
+export const TIMELINE_EVENTS_COUNT_PREV_PAGE = '[data-test-subj="pagination-button-previous"]';
 
 export const TIMELINE_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
@@ -208,6 +232,8 @@ export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 
 export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
 
+export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane-wrapper"]';
+
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
 
 export const TIMELINE_ROW_RENDERERS_MODAL = '[data-test-subj="row-renderers-modal"]';
@@ -225,27 +251,3 @@ export const TIMELINE_ROW_RENDERERS_SEARCHBOX = `${TIMELINE_ROW_RENDERERS_MODAL}
 export const TIMELINE_SHOW_ROW_RENDERERS_GEAR = '[data-test-subj="show-row-renderers-gear"]';
 
 export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
-
-export const TIMELINE_EVENT = '[data-test-subj="event"]';
-
-export const TIMELINE_EVENTS_COUNT_PER_PAGE = '[data-test-subj="local-events-count"]';
-
-export const TIMELINE_EVENTS_COUNT_PER_PAGE_BTN = '[data-test-subj="local-events-count-button"]';
-
-export const TIMELINE_EVENTS_COUNT_PER_PAGE_OPTION = (itemsPerPage: number) =>
-  `[data-test-subj="items-per-page-option-${itemsPerPage}"]`;
-
-export const TIMELINE_EVENTS_COUNT_NEXT_PAGE = '[data-test-subj="pagination-button-next"]';
-
-export const TIMELINE_EVENTS_COUNT_PREV_PAGE = '[data-test-subj="pagination-button-previous"]';
-
-export const TIMELINE_COLLAPSED_ITEMS_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
-
-export const TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN =
-  '[data-test-subj="create-template-from-timeline"]';
-
-export const TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN = '[data-test-subj="create-from-template"]';
-
-export const TIMELINE_CORRELATION_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
-
-export const TIMELINE_CORRELATION_TAB = '[data-test-subj="timelineTabs-eql"]';
