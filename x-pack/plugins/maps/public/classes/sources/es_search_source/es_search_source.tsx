@@ -8,10 +8,9 @@
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import rison from 'rison-node';
-
 import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
-import { GeoJsonProperties } from 'geojson';
+import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractESSource } from '../es_source';
 import { getFileUpload, getHttp, getSearchService } from '../../../kibana_services';
 import {
@@ -58,7 +57,7 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
 import { getDocValueAndSourceFields, ScriptField } from './get_docvalue_source_fields';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
-import { getMatchingIndexes } from '../../../util';
+import { addFeatureToIndex, getMatchingIndexes } from '../../../util';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -688,6 +687,11 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   getLayerName(): string {
     return MVT_SOURCE_LAYER_NAME;
+  }
+
+  async addFeature(geometry: Geometry | Position[]) {
+    const indexPattern = await this.getIndexPattern();
+    await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName());
   }
 
   async getUrlTemplateWithMeta(

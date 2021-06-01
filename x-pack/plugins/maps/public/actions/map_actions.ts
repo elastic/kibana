@@ -49,8 +49,6 @@ import {
   UPDATE_DRAW_STATE,
   SET_SHAPE_TO_DRAW,
   UPDATE_MAP_SETTING,
-  SET_VECTOR_LAYER_INDEX_NAME,
-  REMOVE_FEATURES_FROM_INDEX_QUEUE,
   UPDATE_EDIT_LAYER,
 } from './map_action_constants';
 import { autoFitToBounds, syncDataForAllLayers, syncDataForLayer } from './data_request_actions';
@@ -67,8 +65,7 @@ import {
 import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
-import { addFeatureToIndex } from '../util';
-import { ESSearchSource } from '../classes/sources/es_search_source';
+import { VectorLayer } from '../classes/layers/vector_layer';
 
 export interface MapExtentState {
   zoom: number;
@@ -375,20 +372,6 @@ export function updateEditLayer(layerId: string | null) {
   };
 }
 
-export function removeFeaturesFromIndexQueue(featureIds: string[]) {
-  return {
-    type: REMOVE_FEATURES_FROM_INDEX_QUEUE,
-    featureIds,
-  };
-}
-
-export function setVectorLayerIndexName(indexName: string) {
-  return {
-    type: SET_VECTOR_LAYER_INDEX_NAME,
-    indexName,
-  };
-}
-
 export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -399,12 +382,10 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
       return;
     }
     const layer = getLayerById(layerId, getState());
-    if (!layer) {
+    if (!layer || !(layer instanceof VectorLayer)) {
       return;
     }
-    const layerSource = (await layer.getSource()) as ESSearchSource;
-    const indexPattern = await layerSource.getIndexPattern();
-    await addFeatureToIndex(indexPattern.title, geometry, layerSource.getGeoFieldName());
+    await layer.addFeature(geometry);
     await dispatch(syncDataForLayer(layer, true));
   };
 }

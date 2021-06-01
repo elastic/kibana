@@ -83,7 +83,6 @@ export const DEFAULT_MAP_STATE: MapState = {
     filters: [],
     refreshConfig: undefined,
     refreshTimerLastTriggeredAt: undefined,
-    vectorLayerIndexName: '',
     drawState: undefined,
     editState: undefined,
     featuresToIndexQueue: [],
@@ -125,25 +124,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
             ...state.mapState.editState,
             drawType: action.shapeToDraw,
           },
-        },
-      };
-    case REMOVE_FEATURES_FROM_INDEX_QUEUE:
-      const newFeatureArr = state.mapState.featuresToIndexQueue.filter(
-        ({ id }: { id: string }) => !action.featureIds.includes(id)
-      );
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          featuresToIndexQueue: newFeatureArr,
-        },
-      };
-    case SET_VECTOR_LAYER_INDEX_NAME:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          vectorLayerIndexName: action.indexName,
         },
       };
     case CLEAR_DRAWING_DATA:

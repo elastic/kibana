@@ -11,7 +11,7 @@ import type {
   AnyLayer as MbLayer,
   GeoJSONSource as MbGeoJSONSource,
 } from '@kbn/mapbox-gl';
-import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
+import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -95,6 +95,7 @@ export interface IVectorLayer extends ILayer {
   canShowTooltip(): boolean;
   isEditable(): Promise<boolean>;
   getLeftJoinFields(): Promise<IField[]>;
+  addFeature(geometry: Geometry | Position[]): Promise<void>;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -654,8 +655,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
   }
 
-  async syncData(syncContext: DataRequestContext, forceRefresh: boolean) {
-    await this._syncData(syncContext, this.getSource(), this.getCurrentStyle(), forceRefresh);
+  async syncData(syncContext: DataRequestContext) {
+    await this._syncData(syncContext, this.getSource(), this.getCurrentStyle());
   }
 
   // TLDR: Do not call getSource or getCurrentStyle in syncData flow. Use 'source' and 'style' arguments instead.
@@ -1070,5 +1071,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   async getLicensedFeatures() {
     return await this._source.getLicensedFeatures();
+  }
+
+  async addFeature(geometry: Geometry | Position[]) {
+    const layerSource = await this.getSource();
+    await layerSource.addFeature(geometry);
   }
 }

@@ -20,7 +20,7 @@ import {
   Timeslice,
   TooltipState,
 } from '../../../common/descriptor_types';
-import { DRAW_TYPE, INITIAL_LOCATION } from '../../../common/constants';
+import { INITIAL_LOCATION } from '../../../common/constants';
 import { Filter, TimeRange } from '../../../../../../src/plugins/data/public';
 
 export type MapContext = {
@@ -39,7 +39,6 @@ export type MapContext = {
   filters: Filter[];
   refreshConfig?: MapRefreshConfig;
   refreshTimerLastTriggeredAt?: string;
-  vectorLayerIndexName: string;
   drawState?: DrawState;
   editState?: EditState;
   featuresToIndexQueue: Feature[];

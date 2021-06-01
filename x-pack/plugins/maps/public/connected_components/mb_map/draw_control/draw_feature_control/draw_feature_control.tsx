@@ -23,7 +23,6 @@ const geoJSONReader = new jsts.io.GeoJSONReader();
 export interface Props {
   addNewFeatureToIndex: (geometry: Geometry | Position[]) => void;
   disableDrawState: () => void;
-  removeFeatures: (featureIds: string[]) => void;
   drawType: DRAW_TYPE;
   drawState: DrawState;
   drawMode: DRAW_MODE;
@@ -31,18 +30,6 @@ export interface Props {
 }
 
 export class DrawFeatureControl extends Component<Props, {}> {
-  _onFeaturesSelected = (mbDrawControl: MapboxDraw) => (e: { features: Feature[] }) => {
-    if (this.props.drawType === DRAW_TYPE.TRASH) {
-      const featureIds = e.features
-        .map((feature: Feature) => {
-          return feature.id ? `${feature.id}` : '';
-        })
-        .filter((id) => id);
-      this.props.removeFeatures(featureIds);
-      mbDrawControl.trash();
-    }
-  };
-
   _onDraw = (mbDrawControl: MapboxDraw) => async (e: { features: Feature[] }) => {
     try {
       e.features.forEach((feature: Feature) => {
@@ -87,7 +74,6 @@ export class DrawFeatureControl extends Component<Props, {}> {
       <DrawControl
         drawType={this.props.drawType}
         onDraw={this._onDraw}
-        onFeaturesSelected={this._onFeaturesSelected}
         mbMap={this.props.mbMap}
         drawActive={true}
       />

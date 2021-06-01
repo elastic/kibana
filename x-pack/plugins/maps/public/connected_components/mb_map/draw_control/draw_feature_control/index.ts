@@ -10,11 +10,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { Geometry, Position } from 'geojson';
 import { DrawFeatureControl } from './draw_feature_control';
-import {
-  addNewFeatureToIndex,
-  removeFeaturesFromIndexQueue,
-  setShapeToDraw,
-} from '../../../../actions';
+import { addNewFeatureToIndex, setShapeToDraw } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
 import { getDrawState, getShapeToDraw } from '../../../../selectors/map_selectors';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
@@ -34,9 +30,6 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     disableDrawState() {
       dispatch(setShapeToDraw(null));
-    },
-    removeFeatures(featureIds: string[]) {
-      dispatch(removeFeaturesFromIndexQueue(featureIds));
     },
   };
 }
