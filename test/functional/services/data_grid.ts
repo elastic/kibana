@@ -135,6 +135,7 @@ export class DataGridService extends FtrService {
     if (!table) {
       return [];
     }
+
     const cells = await table.findAllByCssSelector('.euiDataGridRowCell');
 
     const rows: WebElementWrapper[][] = [];
@@ -173,14 +174,13 @@ export class DataGridService extends FtrService {
   }
 
   public async getHeaderFields(): Promise<string[]> {
-    const result = await this.find.allByCssSelector('.euiDataGridHeaderCell__content');
+    const result = await this.find.allByCssSelector(
+      '.euiDataGridHeaderCell__button > .euiDataGridHeaderCell__content'
+    );
+
     const textArr = [];
-    let idx = 0;
     for (const cell of result) {
-      if (idx > 1) {
-        textArr.push(await cell.getVisibleText());
-      }
-      idx++;
+      textArr.push(await cell.getVisibleText());
     }
     return Promise.resolve(textArr);
   }
