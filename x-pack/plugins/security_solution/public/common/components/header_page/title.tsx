@@ -34,9 +34,7 @@ const TitleComponent: React.FC<Props> = ({ draggableArguments, title, badgeOptio
   <EuiTitle size="l">
     <h1 data-test-subj="header-page-title">
       {!draggableArguments ? (
-        <TruncatableText>
-          {title}
-        </TruncatableText>
+        <TruncatableText showTooltip={true}>{title}</TruncatableText>
       ) : (
         <DefaultDraggable
           data-test-subj="header-page-draggable"
