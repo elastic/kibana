@@ -11,8 +11,6 @@ import { RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
 
 import { CoreContext } from '../core_context';
-import { CoreUsageDataSetup } from '../core_usage_data';
-import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { CoreService } from '../../types';
 import { InternalHttpServiceSetup } from '../http';
 import { Logger } from '../logging';
@@ -112,8 +110,6 @@ export interface InternalDeprecationsServiceSetup {
 /** @internal */
 export interface DeprecationsSetupDeps {
   http: InternalHttpServiceSetup;
-  elasticsearch: InternalElasticsearchServiceSetup;
-  coreUsageData: CoreUsageDataSetup;
 }
 
 /** @internal */
@@ -156,6 +152,7 @@ export class DeprecationsService implements CoreService<InternalDeprecationsServ
           return deprecationsContexts.map(({ message, correctiveActions, documentationUrl }) => {
             return {
               level: 'critical',
+              deprecationType: 'config',
               message,
               correctiveActions: correctiveActions ?? {},
               documentationUrl,
