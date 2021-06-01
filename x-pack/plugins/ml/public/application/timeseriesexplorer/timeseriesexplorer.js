@@ -26,11 +26,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiSpacer,
   EuiPanel,
   EuiTitle,
-  EuiToolTip,
   EuiAccordion,
   EuiBadge,
 } from '@elastic/eui';
@@ -1273,41 +1271,12 @@ export class TimeSeriesExplorer extends React.Component {
                     />
                   </h2>
                 </EuiTitle>
-                <EuiFlexGroup
-                  direction="row"
-                  gutterSize="l"
-                  responsive={true}
-                  className="ml-anomalies-controls"
-                >
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.severityThresholdLabel', {
-                        defaultMessage: 'Severity threshold',
-                      })}
-                    >
-                      <SelectSeverity />
-                    </EuiFormRow>
+                <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
+                  <EuiFlexItem grow={false}>
+                    <SelectSeverity />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={
-                        <EuiToolTip
-                          content={i18n.translate('xpack.ml.timeSeriesExplorer.intervalTooltip', {
-                            defaultMessage:
-                              'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
-                          })}
-                        >
-                          <span>
-                            {i18n.translate('xpack.ml.timeSeriesExplorer.intervalLabel', {
-                              defaultMessage: 'Interval',
-                            })}
-                            <EuiIcon type="questionInCircle" color="subdued" />
-                          </span>
-                        </EuiToolTip>
-                      }
-                    >
-                      <SelectInterval />
-                    </EuiFormRow>
+                  <EuiFlexItem grow={false}>
+                    <SelectInterval />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
