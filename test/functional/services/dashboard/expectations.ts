@@ -170,7 +170,7 @@ export class DashboardExpectService extends FtrService {
     const tagCloudVisualizations = await this.testSubjects.findAll('tagCloudVisualization');
     const matches = await Promise.all(
       tagCloudVisualizations.map(async (tagCloud) => {
-        const tagCloudData = await PageObjects.tagCloud.getTextTagByElement(tagCloud);
+        const tagCloudData = await this.PageObjects.tagCloud.getTextTagByElement(tagCloud);
         for (let i = 0; i < values.length; i++) {
           const valueExists = tagCloudData.includes(values[i]);
           if (!valueExists) {
