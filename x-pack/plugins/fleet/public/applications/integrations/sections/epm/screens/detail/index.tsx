@@ -217,12 +217,8 @@ export function Detail() {
         onCancelUrl: currentPath,
       };
 
-      window.location.href = getHref('add_integration_to_policy', {
-        pkgkey,
-        ...(integration ? { integration } : {}),
-      });
-
-      // TODO: Sort out redirecting logic in the new separate integrations context
+      // TODO: Figure out an approach for this redirect/state logic in the new
+      // separate integrations UI context
       // history.push({
       //   pathname: getPath('add_integration_to_policy', {
       //     pkgkey,
@@ -230,8 +226,13 @@ export function Detail() {
       //   }),
       //   state: redirectBackRouteState,
       // });
+
+      window.location.href = getHref('add_integration_to_policy', {
+        pkgkey,
+        ...(integration ? { integration } : {}),
+      });
     },
-    [history, hash, pathname, search, pkgkey, integration, getHref]
+    [getHref, history, hash, pathname, search, pkgkey, integration]
   );
 
   const headerRightContent = useMemo(
