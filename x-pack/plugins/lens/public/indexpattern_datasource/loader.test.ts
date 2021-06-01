@@ -6,7 +6,7 @@
  */
 
 import { HttpHandler } from 'kibana/public';
-import _ from 'lodash';
+import { last } from 'lodash';
 import {
   loadInitialState,
   loadIndexPatterns,
@@ -841,7 +841,7 @@ describe('loader', () => {
     it('should call once for each index pattern', async () => {
       const setState = jest.fn();
       const fetchJson = (jest.fn((path: string) => {
-        const indexPatternTitle = _.last(path.split('/'));
+        const indexPatternTitle = last(path.split('/'));
         return {
           indexPatternTitle,
           existingFieldNames: ['field_1', 'field_2'].map(
@@ -891,7 +891,7 @@ describe('loader', () => {
       const setState = jest.fn();
       const showNoDataPopover = jest.fn();
       const fetchJson = (jest.fn((path: string) => {
-        const indexPatternTitle = _.last(path.split('/'));
+        const indexPatternTitle = last(path.split('/'));
         return {
           indexPatternTitle,
           existingFieldNames:
