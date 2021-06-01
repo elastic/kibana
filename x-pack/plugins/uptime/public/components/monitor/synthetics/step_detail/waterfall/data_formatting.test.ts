@@ -736,7 +736,7 @@ describe('formatTooltipHeading', () => {
     expect(formatTooltipHeading(1, 'http://www.elastic.co/')).toEqual('1. http://www.elastic.co/');
   });
 
-  it('returns only the text if `input` is NaN', () => {
+  it('returns only the text if `index` is NaN', () => {
     expect(formatTooltipHeading(NaN, 'http://www.elastic.co/')).toEqual('http://www.elastic.co/');
   });
 });
