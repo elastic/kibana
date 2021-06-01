@@ -47,7 +47,7 @@ export const ExceptionItemsSummary = memo<ExceptionItemsSummaryProps>(({ stats }
     <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
       {SUMMARY_KEYS.map((stat) => {
         return (
-          <EuiFlexItem>
+          <EuiFlexItem key={stat}>
             <SummaryStat
               value={stats?.[stat] ?? 0}
               color={stat === 'total' ? 'primary' : 'default'}
