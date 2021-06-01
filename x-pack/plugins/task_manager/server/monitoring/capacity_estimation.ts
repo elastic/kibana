@@ -21,6 +21,7 @@ export interface CapacityEstimationStat extends JsonObject {
     avg_recurring_required_throughput_per_minute_per_kibana: number;
   };
   proposed: {
+    proposed_kibana: number;
     min_required_kibana: number;
     avg_recurring_required_throughput_per_minute_per_kibana: number;
     avg_required_throughput_per_minute_per_kibana: number;
@@ -76,7 +77,6 @@ export function estimateCapacity(
       percentageOfExecutionsUsedByRecurringTasks + percentageOfExecutionsUsedByNonRecurringTasks
     )
   );
-
   /**
    * On average, how much of this kibana's capacity has been historically used to execute
    * non-recurring and ephemeral tasks
@@ -94,6 +94,16 @@ export function estimateCapacity(
     capacityPerMinutePerKibana - averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana;
 
   /**
+   * At times a cluster might experience spikes of NonRecurring/Ephemeral tasks which swamp Task Manager
+   * causing it to spend all its capacity on NonRecurring/Ephemeral tasks, which makes it much harder
+   * to estimate the required capacity.
+   * This is easy to identify as load will usually max out or all the workers are busy executing non-recurring
+   * or ephemeral tasks, and none are running recurring tasks.
+   */
+  const hasTooLittleCapacityToEstimateRequiredNonRecurringCapacity =
+    averageLoadPercentage === 100 || averageCapacityAvailableForRecurringTasksPerKibana === 0;
+
+  /**
    * On average, how many tasks per minute does this cluster need to execute?
    */
   const averageRecurringRequiredPerMinute =
@@ -102,11 +112,24 @@ export function estimateCapacity(
     capacityRequirments.per_day / 24 / 60;
 
   /**
-   * assuming each kibana only has as much capacity for recurring tasks as this kibana has has
-   * available historically- how many kibana are needed to handle the current recurring workload?
+   * how many Kibana are needed solely for the recurring tasks
+   */
+  const minRequiredKibanaInstancesForRecurringTasks = Math.ceil(
+    averageRecurringRequiredPerMinute / capacityPerMinutePerKibana
+  );
+
+  /**
+   * assuming each kibana only has as much capacity for recurring tasks as this kibana has historically
+   * had available - how many kibana are needed to handle the current recurring workload?
    */
   const minRequiredKibanaInstances = Math.ceil(
-    averageRecurringRequiredPerMinute / averageCapacityAvailableForRecurringTasksPerKibana
+    hasTooLittleCapacityToEstimateRequiredNonRecurringCapacity
+      ? /* 
+        if load is at 100% or there's no capacity for recurring tasks at the moment, then it's really difficult for us to assess how
+        much capacity is needed for non-recurring tasks at normal times. This might be representative, but it might
+        also be a spike and we have no way of knowing that. We'll recommend people scale up by 20% and go from there. */
+        minRequiredKibanaInstancesForRecurringTasks * 1.2
+      : averageRecurringRequiredPerMinute / averageCapacityAvailableForRecurringTasksPerKibana
   );
 
   /**
@@ -163,7 +186,8 @@ export function estimateCapacity(
       ),
       proposed: mapValues(
         {
-          min_required_kibana: minRequiredKibanaInstances,
+          proposed_kibana: minRequiredKibanaInstances,
+          min_required_kibana: minRequiredKibanaInstancesForRecurringTasks,
           avg_recurring_required_throughput_per_minute_per_kibana: averageRecurringRequiredPerMinutePerKibana,
           avg_required_throughput_per_minute_per_kibana: averageRequiredThroughputPerMinutePerKibana,
         },

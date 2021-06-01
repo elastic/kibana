@@ -268,6 +268,7 @@ The API returns the following:
         },
         "proposed": {
           "min_required_kibana": 1,
+          "proposed_kibana": 1,
           "avg_recurring_required_throughput_per_minute_per_kibana": 28,
           "avg_required_throughput_per_minute_per_kibana": 28
         }
@@ -868,8 +869,8 @@ Evaluating the health stats above you can see the following output under `stats.
   },
   "proposed": {
     "min_required_kibana": 1, # <6>
+    "proposed_kibana": 1, # <7>
     "avg_recurring_required_throughput_per_minute_per_kibana": 28,
-    "avg_required_throughput_per_minute": 28,
     "avg_required_throughput_per_minute_per_kibana": 28
   }
 }
@@ -879,7 +880,8 @@ Evaluating the health stats above you can see the following output under `stats.
 <3> Assuming all {kib} instacnes in the cluster are configured the same as this instance, the maximum available throughput is 200 tasks per minute
 <4> On average the recurring tasks in the system have historically required a throughput of 28 tasks per minute
 <5> On average, regardless of whether they are recurring or otherwise, the tasks in the system have historically required a throughput of 28 tasks per minute
-<6> One {kib} instance should be sufficient to run the current workload
+<6> One {kib} instance should be sufficient to run the current recurring workload
+<7> We propose waiting for the workload to change before additional {kib} instances are provisioned
 
 The `capacity_estimation` section is made up of two subsections:
 * `observed` estimates the current capacity by observing historical runtime and workload statistics
@@ -903,9 +905,10 @@ Suppose an alternate scenario, where you see the following output under `stats.c
     "avg_required_throughput_per_minute_per_kibana": 217
   },
   "proposed": {
-    "min_required_kibana": 3, # <7>
-    "avg_recurring_required_throughput_per_minute_per_kibana": 118, # <8>
-    "avg_required_throughput_per_minute_per_kibana": 145 # <9>
+    "min_required_kibana": 2, # <7>
+    "proposed_kibana": 3, # <8>
+    "avg_recurring_required_throughput_per_minute_per_kibana": 118, # <9>
+    "avg_required_throughput_per_minute_per_kibana": 145 # <10>
   }
 }
 --------------------------------------------------
@@ -915,9 +918,10 @@ Suppose an alternate scenario, where you see the following output under `stats.c
 <4> On average the recurring tasks in the system have historically required a throughput of 354 tasks per minute
 <5> On average each {kib} instance utilizes 177 tasks per minute of its capacity to execute recurring tasks
 <6> On average the tasks in the system have historically required a throughput of 434 tasks per minute
-<7> The system estimates that at least three {kib} instances are required to run the current workload
-<8> Once a third {kib} instance is provisioned, the capacity utilized by each instance to execute recurring tasks should drop from 177 to 118 tasks per minute
-<9> Taking into account historical ad-hoc task execution, we estimate the throughput required of each {kib} instance will drop from 217 task per minute to 145, once a third {kib} instance is provisioned
+<7> The system estimates that at least two {kib} instances are required to run the current recurring workload
+<8> The system recommends provisioning three {kib} instances to handle the workload
+<9> Once a third {kib} instance is provisioned, the capacity utilized by each instance to execute recurring tasks should drop from 177 to 118 tasks per minute
+<10> Taking into account historical ad-hoc task execution, we estimate the throughput required of each {kib} instance will drop from 217 task per minute to 145, once a third {kib} instance is provisioned
 
 Evaluating by these estimates, we can infer some interesting attributes of our system:
 

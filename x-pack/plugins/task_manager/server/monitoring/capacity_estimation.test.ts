@@ -204,7 +204,7 @@ describe('estimateCapacity', () => {
     });
   });
 
-  test('estimates the min required kibana instances when there is insufficient capacity', async () => {
+  test('estimates the min required kibana instances when there is sufficient capacity for recurring but not for non-recurring/ephemeral', async () => {
     const provisionedKibanaInstances = 2;
     const recurringTasksPerMinute = 251;
     // 50% for non-recurring/epehemral + half of recurring task workload
@@ -265,7 +265,8 @@ describe('estimateCapacity', () => {
         ), // same as above bt for both instances
       },
       proposed: {
-        min_required_kibana: provisionedKibanaInstances + 1,
+        proposed_kibana: provisionedKibanaInstances + 1,
+        min_required_kibana: provisionedKibanaInstances,
         avg_recurring_required_throughput_per_minute_per_kibana: Math.ceil(
           recurringTasksPerMinute / (provisionedKibanaInstances + 1)
         ),
@@ -399,6 +400,118 @@ describe('estimateCapacity', () => {
       status: 'error',
       timestamp: expect.any(String),
       value: expect.any(Object),
+    });
+  });
+
+  test('recommmends a 20% increase in kibana when a spike in non-recurring tasks forces recurring task capacity to zero', async () => {
+    expect(
+      estimateCapacity(
+        mockStats(
+          { max_workers: 10, poll_interval: 3000 },
+          {
+            owner_ids: 1,
+            overdue_non_recurring: 0,
+            capacity_requirments: {
+              per_minute: 28,
+              per_hour: 27,
+              per_day: 2,
+            },
+          },
+          {
+            load: {
+              p50: 80,
+              p90: 100,
+              p95: 100,
+              p99: 100,
+            },
+            execution: {
+              duration: {},
+              persistence: {
+                recurring: 0,
+                non_recurring: 70,
+                ephemeral: 30,
+              },
+              result_frequency_percent_as_number: {},
+            },
+          }
+        )
+      )
+    ).toMatchObject({
+      status: 'warn',
+      timestamp: expect.any(String),
+      value: {
+        observed: {
+          observed_kibana_instances: 1,
+          avg_recurring_required_throughput_per_minute: 29,
+          // we obesrve 100% capacity on non-recurring/ephemeral tasks, which is 200tpm
+          // and add to that the 29tpm for recurring tasks
+          avg_required_throughput_per_minute_per_kibana: 229,
+        },
+        proposed: {
+          proposed_kibana: 2,
+          min_required_kibana: 1,
+          avg_recurring_required_throughput_per_minute_per_kibana: 15,
+          // once 2 kibana are provisioned, avg_required_throughput_per_minute_per_kibana is divided by 2, hence 115
+          avg_required_throughput_per_minute_per_kibana: 115,
+        },
+      },
+    });
+  });
+
+  test('recommmends a 20% increase in kibana when a spike in non-recurring tasks in a system with insufficient capacity even for recurring tasks', async () => {
+    expect(
+      estimateCapacity(
+        mockStats(
+          { max_workers: 10, poll_interval: 3000 },
+          {
+            owner_ids: 1,
+            overdue_non_recurring: 0,
+            capacity_requirments: {
+              per_minute: 210,
+              per_hour: 0,
+              per_day: 0,
+            },
+          },
+          {
+            load: {
+              p50: 80,
+              p90: 100,
+              p95: 100,
+              p99: 100,
+            },
+            execution: {
+              duration: {},
+              persistence: {
+                recurring: 0,
+                non_recurring: 70,
+                ephemeral: 30,
+              },
+              result_frequency_percent_as_number: {},
+            },
+          }
+        )
+      )
+    ).toMatchObject({
+      status: 'error',
+      timestamp: expect.any(String),
+      value: {
+        observed: {
+          observed_kibana_instances: 1,
+          avg_recurring_required_throughput_per_minute: 210,
+          // we obesrve 100% capacity on non-recurring/ephemeral tasks, which is 200tpm
+          // and add to that the 210tpm for recurring tasks
+          avg_required_throughput_per_minute_per_kibana: 410,
+        },
+        proposed: {
+          // we propose provisioning 3 instances for recurring + non-recurring/ephemeral
+          proposed_kibana: 3,
+          // but need at least 2 for recurring
+          min_required_kibana: 2,
+          avg_recurring_required_throughput_per_minute_per_kibana: 210 / 3,
+          // once 3 kibana are provisioned, avg_required_throughput_per_minute_per_kibana is divided by 3, hence 137
+          avg_required_throughput_per_minute_per_kibana: Math.ceil(410 / 3),
+        },
+      },
     });
   });
 });
