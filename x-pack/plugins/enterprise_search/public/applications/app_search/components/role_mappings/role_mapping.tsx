@@ -23,7 +23,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { AttributeSelector, RoleSelector } from '../../../shared/role_mapping';
 import {
@@ -123,7 +122,6 @@ export const RoleMapping: React.FC = () => {
       <EuiPageHeader rightSideItems={[saveRoleMappingButton]} pageTitle={TITLE} />
       <EuiSpacer />
       <EuiPageContentBody>
-        <FlashMessages />
         <AttributeSelector
           attributeName={attributeName}
           attributeValue={attributeValue}
