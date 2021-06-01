@@ -76,7 +76,6 @@ const ServiceNowSIRFieldsSchema = schema.object({
 
 const SwimlaneFieldsSchema = schema.object({
   caseId: schema.nullable(schema.string()),
-  caseName: schema.nullable(schema.string()),
 });
 
 const NoneFieldsSchema = schema.nullable(schema.object({}));

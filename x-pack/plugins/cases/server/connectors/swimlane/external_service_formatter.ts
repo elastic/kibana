@@ -9,9 +9,9 @@ import { ExternalServiceFormatter } from '../types';
 import { ConnectorSwimlaneTypeFields, SwimlaneFieldsType } from '../../../common';
 
 const format: ExternalServiceFormatter<SwimlaneFieldsType>['format'] = (theCase) => {
-  const { caseId = theCase.id, caseName = theCase.title } =
+  const { caseId = theCase.id } =
     (theCase.connector.fields as ConnectorSwimlaneTypeFields['fields']) ?? {};
-  return { caseId, caseName };
+  return { caseId };
 };
 
 export const swimlaneExternalServiceFormatter: ExternalServiceFormatter<SwimlaneFieldsType> = {
