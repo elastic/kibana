@@ -85,35 +85,27 @@ export async function storedPackagePoliciesToAgentPermissions(
           dataStreamsForPermissions = packagePolicy.inputs
             .filter((i) => i.enabled)
             .flatMap((input) => {
-              const dataStreams_: DataStreamMeta[] = [];
-
-              if (input.streams) {
-                // Probably a normal package
-
-                input.streams
-                  .filter((s) => s.enabled)
-                  .forEach((stream) => {
-                    if (!('data_stream' in stream)) {
-                      return;
-                    }
-
-                    const ds = {
-                      type: stream.data_stream.type,
-                      dataset:
-                        stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
-                    };
-
-                    dataStreams_.push(ds);
-                  });
-              } else if (input.type === 'apm') {
-                // Probably APM
+              if (!input.streams) {
+                return [];
               }
 
-              // const packageDS = pkg.data_streams!.filter();
+              const dataStreams_: DataStreamMeta[] = [];
 
-              // const oldDS = pkg.data_streams!.filter((ds) =>
-              //   ds.streams?.some((s) => s.input === input.type)
-              // );
+              input.streams
+                .filter((s) => s.enabled)
+                .forEach((stream) => {
+                  if (!('data_stream' in stream)) {
+                    return;
+                  }
+
+                  const ds = {
+                    type: stream.data_stream.type,
+                    dataset:
+                      stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
+                  };
+
+                  dataStreams_.push(ds);
+                });
 
               return dataStreams_;
             });
