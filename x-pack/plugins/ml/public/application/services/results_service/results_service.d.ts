@@ -22,7 +22,8 @@ export function resultsServiceProvider(
     latestMs: number,
     intervalMs: number,
     perPage?: number,
-    fromPage?: number
+    fromPage?: number,
+    swimLaneSeverity?: number
   ): Promise<any>;
   getTopInfluencers(
     selectedJobIds: string[],
@@ -40,7 +41,8 @@ export function resultsServiceProvider(
     topN: any,
     earliestMs: any,
     latestMs: any,
-    interval?: any
+    interval?: any,
+    overallScore?: number
   ): Promise<any>;
   getInfluencerValueMaxScoreByTime(
     jobIds: string[],
@@ -52,7 +54,8 @@ export function resultsServiceProvider(
     maxResults: number,
     perPage: number,
     fromPage: number,
-    influencersFilterQuery: InfluencersFilterQuery
+    influencersFilterQuery: InfluencersFilterQuery,
+    swimLaneSeverity?: number
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;
   getRecordsForDetector(): Promise<any>;
