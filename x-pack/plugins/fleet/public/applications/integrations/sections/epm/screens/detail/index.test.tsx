@@ -109,7 +109,9 @@ describe('when on integration detail', () => {
           pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
         );
       });
-      expect(testRenderer.history.location.pathname).toEqual(detailPageUrlPath);
+      expect(testRenderer.history.location.pathname).toEqual(
+        '/app/integrations/detail/nginx-0.3.7/overview'
+      );
     });
   });
 
@@ -168,7 +170,7 @@ describe('when on integration detail', () => {
     it('should link to the create page', () => {
       const addButton = renderResult.getByTestId('addIntegrationPolicyButton') as HTMLAnchorElement;
       expect(addButton.href).toEqual(
-        'http://localhost/mock/app/fleet/#/policies/add-integrations/nginx-0.3.7'
+        'http://localhost/mock/app/fleet#/policies/add-integration/nginx-0.3.7'
       );
     });
   });
