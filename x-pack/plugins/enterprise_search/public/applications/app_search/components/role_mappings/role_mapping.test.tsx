@@ -14,16 +14,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCheckbox, EuiPageHeader } from '@elastic/eui';
+import { EuiCheckbox } from '@elastic/eui';
 
 import { AttributeSelector, RoleSelector } from '../../../shared/role_mapping';
 import { asRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
-import {
-  SAVE_ROLE_MAPPING,
-  UPDATE_ROLE_MAPPING,
-  ADD_ROLE_MAPPING_TITLE,
-  MANAGE_ROLE_MAPPING_TITLE,
-} from '../../../shared/role_mapping/constants';
 
 import { STANDARD_ROLE_TYPES } from './constants';
 
@@ -70,24 +64,12 @@ describe('RoleMapping', () => {
     setMockValues(mockValues);
   });
 
-  it('renders for existing role mapping', () => {
+  it('renders', () => {
     setMockValues({ ...mockValues, roleMapping: asRoleMapping });
     const wrapper = shallow(<RoleMapping />);
-    const header = wrapper.find(EuiPageHeader);
 
     expect(wrapper.find(AttributeSelector)).toHaveLength(1);
     expect(wrapper.find(RoleSelector)).toHaveLength(1);
-    expect(wrapper.find(EuiPageHeader).prop('pageTitle')).toEqual(MANAGE_ROLE_MAPPING_TITLE);
-    expect(header.prop('pageTitle')).toEqual(MANAGE_ROLE_MAPPING_TITLE);
-    expect(shallow(header.prop('rightSideItems')![0] as any).text()).toEqual(UPDATE_ROLE_MAPPING);
-  });
-
-  it('renders for new role mapping', () => {
-    const wrapper = shallow(<RoleMapping />);
-    const header = wrapper.find(EuiPageHeader);
-
-    expect(header.prop('pageTitle')).toEqual(ADD_ROLE_MAPPING_TITLE);
-    expect(shallow(header.prop('rightSideItems')![0] as any).text()).toEqual(SAVE_ROLE_MAPPING);
   });
 
   it('only passes standard role options for non-advanced roles', () => {

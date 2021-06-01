@@ -25,6 +25,7 @@ import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { EMPTY_ROLE_MAPPINGS_BODY, ROLE_MAPPINGS_TABLE_HEADER } from './constants';
 
+import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 export const RoleMappings: React.FC = () => {
@@ -32,7 +33,12 @@ export const RoleMappings: React.FC = () => {
     RoleMappingsLogic
   );
 
-  const { roleMappings, dataLoading, multipleAuthProvidersConfig } = useValues(RoleMappingsLogic);
+  const {
+    roleMappings,
+    dataLoading,
+    multipleAuthProvidersConfig,
+    roleMappingFlyoutOpen,
+  } = useValues(RoleMappingsLogic);
 
   useEffect(() => {
     initializeRoleMappings();
@@ -71,6 +77,8 @@ export const RoleMappings: React.FC = () => {
     <>
       <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
       <ViewContentHeader title={ROLE_MAPPINGS_TITLE} description={ROLE_MAPPINGS_DESCRIPTION} />
+
+      {roleMappingFlyoutOpen && <RoleMapping />}
       <div>
         <FlashMessages />
         {roleMappings.length === 0 ? emptyPrompt : roleMappingsTable}

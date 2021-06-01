@@ -10,28 +10,17 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiButton,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPageContentBody,
-  EuiPageHeader,
   EuiPanel,
   EuiRadio,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { AttributeSelector, RoleSelector } from '../../../shared/role_mapping';
-import {
-  SAVE_ROLE_MAPPING,
-  UPDATE_ROLE_MAPPING,
-  ROLE_MAPPINGS_TITLE,
-  ADD_ROLE_MAPPING_TITLE,
-  MANAGE_ROLE_MAPPING_TITLE,
-} from '../../../shared/role_mapping/constants';
+import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
 import { AppLogic } from '../../app_logic';
 import { AdvanceRoleType } from '../../types';
 
@@ -61,6 +50,7 @@ export const RoleMapping: React.FC = () => {
     handleEngineSelectionChange,
     handleRoleChange,
     handleSaveMapping,
+    closeRoleMappingFlyout,
   } = useActions(RoleMappingsLogic);
 
   const {
@@ -80,9 +70,7 @@ export const RoleMapping: React.FC = () => {
   } = useValues(RoleMappingsLogic);
 
   const isNew = !roleMapping;
-
-  const SAVE_ROLE_MAPPING_LABEL = isNew ? SAVE_ROLE_MAPPING : UPDATE_ROLE_MAPPING;
-  const TITLE = isNew ? ADD_ROLE_MAPPING_TITLE : MANAGE_ROLE_MAPPING_TITLE;
+  const hasEngineAssignment = selectedEngines.size > 0 || accessAllEngines;
 
   const mapRoleOptions = ({ id, description }: AdvanceRoleType) => ({
     id,
@@ -96,12 +84,6 @@ export const RoleMapping: React.FC = () => {
   const roleOptions = hasAdvancedRoles
     ? [...standardRoleOptions, ...advancedRoleOptions]
     : standardRoleOptions;
-
-  const saveRoleMappingButton = (
-    <EuiButton onClick={handleSaveMapping} fill data-test-subj="SaveRoleMappingButton">
-      {SAVE_ROLE_MAPPING_LABEL}
-    </EuiButton>
-  );
 
   const engineSelector = (engine: Engine) => (
     <EuiCheckbox
@@ -117,95 +99,95 @@ export const RoleMapping: React.FC = () => {
   );
 
   return (
-    <>
-      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE, TITLE]} />
-      <EuiPageHeader rightSideItems={[saveRoleMappingButton]} pageTitle={TITLE} />
+    <RoleMappingFlyout
+      disabled={!hasEngineAssignment}
+      isNew={isNew}
+      closeRoleMappingFlyout={closeRoleMappingFlyout}
+      handleSaveMapping={handleSaveMapping}
+    >
+      <AttributeSelector
+        attributeName={attributeName}
+        attributeValue={attributeValue}
+        attributes={attributes}
+        availableAuthProviders={availableAuthProviders}
+        elasticsearchRoles={elasticsearchRoles}
+        selectedAuthProviders={selectedAuthProviders}
+        disabled={!!roleMapping}
+        handleAttributeSelectorChange={handleAttributeSelectorChange}
+        handleAttributeValueChange={handleAttributeValueChange}
+        handleAuthProviderChange={handleAuthProviderChange}
+        multipleAuthProvidersConfig={multipleAuthProvidersConfig}
+      />
       <EuiSpacer />
-      <EuiPageContentBody>
-        <AttributeSelector
-          attributeName={attributeName}
-          attributeValue={attributeValue}
-          attributes={attributes}
-          availableAuthProviders={availableAuthProviders}
-          elasticsearchRoles={elasticsearchRoles}
-          selectedAuthProviders={selectedAuthProviders}
-          disabled={!!roleMapping}
-          handleAttributeSelectorChange={handleAttributeSelectorChange}
-          handleAttributeValueChange={handleAttributeValueChange}
-          handleAuthProviderChange={handleAuthProviderChange}
-          multipleAuthProvidersConfig={multipleAuthProvidersConfig}
-        />
-        <EuiSpacer />
-        <EuiFlexGroup alignItems="stretch">
+      <EuiFlexGroup alignItems="stretch">
+        <EuiFlexItem>
+          <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
+            <EuiTitle size="s">
+              <h3>{ROLE_TITLE}</h3>
+            </EuiTitle>
+            <EuiSpacer />
+            <EuiTitle size="xs">
+              <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
+            </EuiTitle>
+            <EuiSpacer />
+            <RoleSelector
+              roleType={roleType}
+              roleOptions={roleOptions}
+              onChange={handleRoleChange}
+              label="Role"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        {hasAdvancedRoles && (
           <EuiFlexItem>
             <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
               <EuiTitle size="s">
-                <h3>{ROLE_TITLE}</h3>
+                <h3>{ENGINE_ACCESS_TITLE}</h3>
               </EuiTitle>
               <EuiSpacer />
-              <EuiTitle size="xs">
-                <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
-              </EuiTitle>
-              <EuiSpacer />
-              <RoleSelector
-                roleType={roleType}
-                roleOptions={roleOptions}
-                onChange={handleRoleChange}
-                label="Role"
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-          {hasAdvancedRoles && (
-            <EuiFlexItem>
-              <EuiPanel hasShadow={false} color="subdued" paddingSize="l">
-                <EuiTitle size="s">
-                  <h3>{ENGINE_ACCESS_TITLE}</h3>
-                </EuiTitle>
-                <EuiSpacer />
-                <EuiFormRow>
+              <EuiFormRow>
+                <EuiRadio
+                  id="accessAllEngines"
+                  disabled={!roleHasScopedEngines(roleType)}
+                  checked={accessAllEngines}
+                  onChange={handleAccessAllEnginesChange}
+                  label={
+                    <>
+                      <EuiTitle size="xs">
+                        <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
+                      </EuiTitle>
+                      <p>{FULL_ENGINE_ACCESS_DESCRIPTION}</p>
+                    </>
+                  }
+                />
+              </EuiFormRow>
+              <EuiFormRow>
+                <>
                   <EuiRadio
-                    id="accessAllEngines"
+                    id="selectEngines"
                     disabled={!roleHasScopedEngines(roleType)}
-                    checked={accessAllEngines}
+                    checked={!accessAllEngines}
                     onChange={handleAccessAllEnginesChange}
                     label={
                       <>
                         <EuiTitle size="xs">
-                          <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
+                          <h4>{LIMITED_ENGINE_ACCESS_TITLE}</h4>
                         </EuiTitle>
-                        <p>{FULL_ENGINE_ACCESS_DESCRIPTION}</p>
+                        <p>{LIMITED_ENGINE_ACCESS_DESCRIPTION}</p>
                       </>
                     }
                   />
-                </EuiFormRow>
-                <EuiFormRow>
-                  <>
-                    <EuiRadio
-                      id="selectEngines"
-                      disabled={!roleHasScopedEngines(roleType)}
-                      checked={!accessAllEngines}
-                      onChange={handleAccessAllEnginesChange}
-                      label={
-                        <>
-                          <EuiTitle size="xs">
-                            <h4>{LIMITED_ENGINE_ACCESS_TITLE}</h4>
-                          </EuiTitle>
-                          <p>{LIMITED_ENGINE_ACCESS_DESCRIPTION}</p>
-                        </>
-                      }
-                    />
-                    {!accessAllEngines && (
-                      <div className="engines-list">
-                        {availableEngines.map((engine) => engineSelector(engine))}
-                      </div>
-                    )}
-                  </>
-                </EuiFormRow>
-              </EuiPanel>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiPageContentBody>
-    </>
+                  {!accessAllEngines && (
+                    <div className="engines-list">
+                      {availableEngines.map((engine) => engineSelector(engine))}
+                    </div>
+                  )}
+                </>
+              </EuiFormRow>
+            </EuiPanel>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </RoleMappingFlyout>
   );
 };

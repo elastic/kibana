@@ -18,6 +18,7 @@ import { Loading } from '../../../shared/loading';
 import { RoleMappingsTable } from '../../../shared/role_mapping';
 import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
+import { RoleMapping } from './role_mapping';
 import { RoleMappings } from './role_mappings';
 
 describe('RoleMappings', () => {
@@ -57,6 +58,13 @@ describe('RoleMappings', () => {
     const wrapper = shallow(<RoleMappings />);
 
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+  });
+
+  it('renders RoleMapping flyout', () => {
+    setMockValues({ ...mockValues, roleMappingFlyoutOpen: true });
+    const wrapper = shallow(<RoleMappings />);
+
+    expect(wrapper.find(RoleMapping)).toHaveLength(1);
   });
 
   it('handles button click', () => {

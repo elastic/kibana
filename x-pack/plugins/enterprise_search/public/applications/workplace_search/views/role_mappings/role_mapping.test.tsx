@@ -81,23 +81,12 @@ describe('RoleMapping', () => {
     setMockValues(mockValues);
   });
 
-  it('renders for existing role mapping', () => {
+  it('renders', () => {
     setMockValues({ ...mockValues, roleMapping: wsRoleMapping });
     const wrapper = shallow(<RoleMapping />);
-    const header = wrapper.find(ViewContentHeader);
 
     expect(wrapper.find(AttributeSelector)).toHaveLength(1);
     expect(wrapper.find(RoleSelector)).toHaveLength(1);
-    expect(wrapper.find(ViewContentHeader).prop('title')).toEqual(MANAGE_ROLE_MAPPING_TITLE);
-    expect(shallow(header.prop('action') as any).text()).toEqual(UPDATE_ROLE_MAPPING);
-  });
-
-  it('renders for new role mapping', () => {
-    const wrapper = shallow(<RoleMapping />);
-    const header = wrapper.find(ViewContentHeader);
-
-    expect(header.prop('title')).toEqual(ADD_ROLE_MAPPING_TITLE);
-    expect(shallow(header.prop('action') as any).text()).toEqual(SAVE_ROLE_MAPPING);
   });
 
   it('handles group checkbox click', () => {

@@ -30,6 +30,7 @@ import {
 } from '../../../shared/role_mapping/constants';
 
 import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING, EMPTY_ROLE_MAPPINGS_BODY } from './constants';
+import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 export const RoleMappings: React.FC = () => {
@@ -39,7 +40,12 @@ export const RoleMappings: React.FC = () => {
     handleDeleteMapping,
     resetState,
   } = useActions(RoleMappingsLogic);
-  const { roleMappings, multipleAuthProvidersConfig, dataLoading } = useValues(RoleMappingsLogic);
+  const {
+    roleMappings,
+    multipleAuthProvidersConfig,
+    dataLoading,
+    roleMappingFlyoutOpen,
+  } = useValues(RoleMappingsLogic);
 
   useEffect(() => {
     initializeRoleMappings();
@@ -81,6 +87,8 @@ export const RoleMappings: React.FC = () => {
     <>
       <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
       <EuiPageHeader pageTitle={ROLE_MAPPINGS_TITLE} description={ROLE_MAPPINGS_DESCRIPTION} />
+
+      {roleMappingFlyoutOpen && <RoleMapping />}
       <EuiPageContent hasShadow={false} hasBorder={roleMappings.length > 0}>
         <EuiPageContentBody>
           <FlashMessages />
