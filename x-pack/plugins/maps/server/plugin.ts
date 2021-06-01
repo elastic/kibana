@@ -37,6 +37,8 @@ import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/server';
 import { EMSSettings } from '../common/ems_settings';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
+import { embeddableMigrations } from './embeddable_migrations';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -44,6 +46,7 @@ interface SetupDeps {
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
   mapsEms: MapsEmsPluginSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface StartDeps {
@@ -213,6 +216,11 @@ export class MapsPlugin implements Plugin {
     core.savedObjects.registerType(mapsTelemetrySavedObjects);
     core.savedObjects.registerType(mapSavedObjects);
     registerMapsUsageCollector(usageCollection, currentConfig);
+
+    plugins.embeddable.registerEmbeddableFactory({
+      id: MAP_SAVED_OBJECT_TYPE,
+      migrations: embeddableMigrations,
+    });
 
     return {
       config: config$,
