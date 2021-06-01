@@ -306,7 +306,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                   role="columnheader"
                   scope="col"
                 >
-                  <div
+                  <span
                     class="euiTableCellContent"
                   >
                     <span
@@ -315,7 +315,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                     >
                       Input
                     </span>
-                  </div>
+                  </span>
                 </th>
                 <th
                   class="euiTableHeaderCell"
@@ -323,7 +323,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                   role="columnheader"
                   scope="col"
                 >
-                  <div
+                  <span
                     class="euiTableCellContent"
                   >
                     <span
@@ -332,7 +332,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                     >
                       Output
                     </span>
-                  </div>
+                  </span>
                 </th>
               </tr>
             </thead>
