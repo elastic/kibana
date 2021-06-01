@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import { roundToDecimalPlace, kibanaFieldFormat } from '../utils';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
-import { FieldVisStats } from '../stats_table/types';
+import { FieldVisStats } from '../../../../../common/types';
 
 interface Props {
   stats: FieldVisStats | undefined;

@@ -16,9 +16,9 @@ import {
   COLOR_MAP_TYPE,
 } from '../../../../../../../../maps/common/constants';
 import { EMSTermJoinConfig } from '../../../../../../../../maps/public';
-import { FieldVisStats } from '../../types';
 import { VectorLayerDescriptor } from '../../../../../../../../maps/common/descriptor_types';
 import { EmbeddedMapComponent } from '../../../embedded_map';
+import { FieldVisStats } from '../../../../../../../common/types';
 
 export const getChoroplethTopValuesLayer = (
   fieldName: string,

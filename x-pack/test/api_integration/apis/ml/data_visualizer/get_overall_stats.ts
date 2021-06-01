@@ -123,7 +123,8 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('get_overall_stats', function () {
+  // Move these tests to file_data_visualizer plugin
+  describe.skip('get_overall_stats', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();

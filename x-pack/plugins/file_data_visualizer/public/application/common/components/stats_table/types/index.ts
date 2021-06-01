@@ -9,7 +9,6 @@ export { FieldDataRowProps } from './field_data_row';
 export {
   FieldVisConfig,
   FileBasedFieldVisConfig,
-  FieldVisStats,
   MetricFieldVisStats,
   isFileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
