@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
-import { fetchStatuses } from '../../../components/constants';
+import { FetchStatus } from '../../../types';
 
 export const resultStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -20,12 +20,12 @@ export const resultStatuses = {
  * Determines what is displayed in Discover main view (loading view, data view, empty data view, ...)
  */
 export function getResultState(fetchStatus: string, rows: ElasticSearchHit[]) {
-  if (fetchStatus === fetchStatuses.UNINITIALIZED) {
+  if (fetchStatus === FetchStatus.UNINITIALIZED) {
     return resultStatuses.UNINITIALIZED;
   }
 
   const rowsEmpty = !Array.isArray(rows) || rows.length === 0;
-  if (rowsEmpty && fetchStatus === fetchStatuses.LOADING) return resultStatuses.LOADING;
+  if (rowsEmpty && fetchStatus === FetchStatus.LOADING) return resultStatuses.LOADING;
   else if (!rowsEmpty) return resultStatuses.READY;
   else return resultStatuses.NO_RESULTS;
 }

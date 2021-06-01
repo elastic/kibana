@@ -22,7 +22,6 @@ import { SavedSearch } from '../../../../saved_searches';
 import { AppState, GetStateReturn } from './discover_state';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../../inspector/public';
-import { fetchStatuses } from '../../../components/constants';
 import { AutoRefreshDoneFn, search } from '../../../../../../data/public';
 import { calcFieldCounts } from '../utils/calc_field_counts';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../../common';
@@ -33,6 +32,7 @@ import { getDimensions, getChartAggConfigs } from '../utils';
 import { buildPointSeriesData, Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
 import { useSingleton } from '../utils/use_singleton';
+import { FetchStatus } from '../../../types';
 
 export type SavedSearchDataSubject = BehaviorSubject<SavedSearchDataMessage>;
 export type SavedSearchRefetchSubject = Subject<SavedSearchRefetchMsg>;
@@ -53,7 +53,7 @@ export interface SavedSearchDataMessage {
   hits?: number;
   inspectorAdapters?: { requests: RequestAdapter };
   rows?: ElasticSearchHit[];
-  state: string;
+  state: FetchStatus;
 }
 
 /**
@@ -90,7 +90,7 @@ export const useSavedSearch = ({
   const { data, filterManager, uiSettings } = services;
   const timefilter = data.query.timefilter.timefilter;
 
-  const initFetchState = useMemo(() => {
+  const initFetchState: FetchStatus = useMemo(() => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     const shouldSearchOnPageLoad =
@@ -98,7 +98,7 @@ export const useSavedSearch = ({
       savedSearch.id !== undefined ||
       timefilter.getRefreshInterval().pause === false ||
       searchSessionManager.hasSearchSessionIdInURL();
-    return shouldSearchOnPageLoad ? fetchStatuses.LOADING : fetchStatuses.UNINITIALIZED;
+    return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
   }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
 
   /**
@@ -108,7 +108,7 @@ export const useSavedSearch = ({
   const data$: SavedSearchDataSubject = useSingleton(
     () =>
       new BehaviorSubject({
-        state: initFetchState,
+        state: initFetchState as FetchStatus,
       })
   );
   /**
@@ -163,7 +163,7 @@ export const useSavedSearch = ({
 
       // Let the UI know, data fetching started
       const loadingMessage: SavedSearchDataMessage = {
-        state: fetchStatuses.LOADING,
+        state: FetchStatus.LOADING,
         fetchCounter: ++refs.current.fetchCounter,
       };
 
@@ -212,7 +212,7 @@ export const useSavedSearch = ({
           const documents = res.rawResponse.hits.hits;
 
           const message: SavedSearchDataMessage = {
-            state: fetchStatuses.COMPLETE,
+            state: FetchStatus.COMPLETE,
             rows: documents,
             inspectorAdapters,
             fieldCounts: calcFieldCounts(
@@ -241,9 +241,9 @@ export const useSavedSearch = ({
         (error) => {
           if (error instanceof Error && error.name === 'AbortError') return;
           data.search.showError(error);
-          refs.current.fetchStatus = fetchStatuses.ERROR;
+          refs.current.fetchStatus = FetchStatus.ERROR;
           data$.next({
-            state: fetchStatuses.ERROR,
+            state: FetchStatus.ERROR,
             inspectorAdapters,
             fetchError: error,
           });
@@ -282,7 +282,7 @@ export const useSavedSearch = ({
         tap((done) => {
           refs.current.autoRefreshDoneCb = done;
         }),
-        filter(() => refs.current.fetchStatus !== fetchStatuses.LOADING)
+        filter(() => refs.current.fetchStatus !== FetchStatus.LOADING)
       ),
       data.query.queryString.getUpdates$(),
       searchSessionManager.newSearchSessionIdFromURL$
@@ -323,7 +323,7 @@ export const useSavedSearch = ({
   }, [refetch$, state.interval, state.sort, state]);
 
   useEffect(() => {
-    if (initFetchState === fetchStatuses.LOADING) {
+    if (initFetchState === FetchStatus.LOADING) {
       refetch$.next();
     }
   }, [initFetchState, refetch$]);

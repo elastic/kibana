@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-export const fetchStatuses = {
-  UNINITIALIZED: 'uninitialized',
-  LOADING: 'loading',
-  COMPLETE: 'complete',
-  ERROR: 'error',
-};
+export enum FetchStatus {
+  UNINITIALIZED = 'uninitialized',
+  LOADING = 'loading',
+  COMPLETE = 'complete',
+  ERROR = 'error',
+}

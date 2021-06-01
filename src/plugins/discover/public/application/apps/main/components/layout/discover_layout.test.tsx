@@ -20,10 +20,10 @@ import { SavedObject } from '../../../../../../../../core/types';
 import { indexPatternWithTimefieldMock } from '../../../../../__mocks__/index_pattern_with_timefield';
 import { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import { GetStateReturn } from '../../services/discover_state';
-import { fetchStatuses } from '../../../../components/constants';
 import { DiscoverLayoutProps } from './types';
 import { SavedSearchDataSubject } from '../../services/use_saved_search';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
+import { FetchStatus } from '../../../../types';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -39,7 +39,7 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
   }) as unknown) as Array<SavedObject<IndexPatternAttributes>>;
 
   const savedSearch$ = new BehaviorSubject({
-    state: fetchStatuses.COMPLETE,
+    state: FetchStatus.COMPLETE,
     rows: esHits,
     fetchCounter: 1,
     fieldCounts: {},
