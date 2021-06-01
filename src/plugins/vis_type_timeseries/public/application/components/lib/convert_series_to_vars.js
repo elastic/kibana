@@ -8,7 +8,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import { getLastValue } from '../../../../common/get_last_value';
+import { getLastValue } from '../../../../common/last_value_utils';
 import { emptyLabel } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
 import { labelDateFormatter } from './label_date_formatter';
