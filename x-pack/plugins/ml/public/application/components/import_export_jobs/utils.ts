@@ -9,25 +9,18 @@
 import { saveAs } from '@elastic/filesaver';
 import { ml } from '../../services/ml_api_service';
 
-export function loadJobForCloning(jobId: string) {
-  return new Promise((resolve, reject) => {
-    ml.jobs
-      .jobForCloning(jobId)
-      .then((resp) => {
-        if (resp) {
-          resolve(resp);
-        } else {
-          throw new Error(`Could not find job ${jobId}`);
-        }
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
+export async function exportAnomalyDetectionJobs(jobIds: string[]) {
+  const configs = await Promise.all(jobIds.map(ml.jobs.jobForCloning));
+  const configsForExport = configs.length === 1 ? configs[0] : configs;
+  const blob = new Blob([JSON.stringify(configsForExport, null, 2)], { type: 'application/json' });
+  saveAs(blob, 'ml_jobs.json');
 }
 
-export async function exportJobs(jobIds: string[]) {
-  const configs = await Promise.all(jobIds.map(loadJobForCloning));
+export async function exportDataframeAnalyticsJobs(jobIds: string[]) {
+  const { data_frame_analytics: configs } = await ml.dataFrameAnalytics.getDataFrameAnalytics(
+    jobIds.join(','),
+    true
+  );
   const configsForExport = configs.length === 1 ? configs[0] : configs;
   const blob = new Blob([JSON.stringify(configsForExport, null, 2)], { type: 'application/json' });
   saveAs(blob, 'ml_jobs.json');

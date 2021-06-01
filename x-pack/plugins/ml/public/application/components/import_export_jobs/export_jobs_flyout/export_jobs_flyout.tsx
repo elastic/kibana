@@ -25,27 +25,36 @@ import {
 
 // import { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { useMlApiContext } from '../../../contexts/kibana';
-import { exportJobs } from '../utils';
+import { exportAnomalyDetectionJobs, exportDataframeAnalyticsJobs } from '../utils';
+import { JobType } from '../../../../../common/types/saved_objects';
 
 interface Props {
   isDisabled: boolean;
 }
+
 export const ExportJobsFlyout: FC<Props> = ({ isDisabled }) => {
-  const { getJobs } = useMlApiContext();
+  const {
+    getJobs,
+    dataFrameAnalytics: { getDataFrameAnalytics },
+  } = useMlApiContext();
   const [showFlyout, setShowFlyout] = useState(false);
-  const [jobIds, setJobIds] = useState<string[]>([]);
+  const [adJobIds, setAdJobIds] = useState<string[]>([]);
+  const [dfaJobIds, setDfaJobIds] = useState<string[]>([]);
   const [selectedJobIds, setSelectedJobIds] = useState<string[]>([]);
   const [exporting, setExporting] = useState(false);
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedJobType, setSelectedJobType] = useState<JobType>('anomaly-detector');
 
   useEffect(() => {
-    setJobIds([]);
+    setAdJobIds([]);
     setSelectedJobIds([]);
     setExporting(false);
 
     if (showFlyout) {
       getJobs().then(({ jobs }) => {
-        setJobIds(jobs.map((j) => j.job_id));
+        setAdJobIds(jobs.map((j) => j.job_id));
+      });
+      getDataFrameAnalytics().then(({ data_frame_analytics: dataFrameAnalytics }) => {
+        setDfaJobIds(dataFrameAnalytics.map((j) => j.id));
       });
     }
   }, [showFlyout]);
@@ -56,7 +65,11 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled }) => {
 
   async function onExport() {
     setExporting(true);
-    await exportJobs(selectedJobIds);
+    if (selectedJobType === 'anomaly-detector') {
+      await exportAnomalyDetectionJobs(selectedJobIds);
+    } else {
+      await exportDataframeAnalyticsJobs(selectedJobIds);
+    }
     setExporting(false);
     setShowFlyout(false);
   }
@@ -69,16 +82,16 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     }
   }
 
-  function changeTab(tab: number) {
+  function changeTab(jobType: JobType) {
     setSelectedJobIds([]);
-    setSelectedTab(tab);
+    setSelectedJobType(jobType);
   }
 
   function onSelectAll() {
-    if (selectedJobIds.length === jobIds.length) {
+    if (selectedJobIds.length === adJobIds.length) {
       setSelectedJobIds([]);
     } else {
-      setSelectedJobIds([...jobIds]);
+      setSelectedJobIds([...adJobIds]);
     }
   }
 
@@ -101,8 +114,8 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled }) => {
           <EuiFlyoutBody>
             <EuiTabs size="s">
               <EuiTab
-                isSelected={selectedTab === 0}
-                onClick={() => changeTab(0)}
+                isSelected={selectedJobType === 'anomaly-detector'}
+                onClick={() => changeTab('anomaly-detector')}
                 disabled={exporting}
               >
                 <FormattedMessage
@@ -111,8 +124,8 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled }) => {
                 />
               </EuiTab>
               <EuiTab
-                isSelected={selectedTab === 1}
-                onClick={() => changeTab(1)}
+                isSelected={selectedJobType === 'data-frame-analytics'}
+                onClick={() => changeTab('data-frame-analytics')}
                 disabled={exporting}
               >
                 <FormattedMessage
@@ -123,7 +136,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled }) => {
             </EuiTabs>
             <EuiSpacer size="s" />
             <>
-              {selectedTab === 0 && (
+              {selectedJobType === 'anomaly-detector' && (
                 <>
                   <EuiButtonEmpty
                     size="xs"
@@ -139,7 +152,36 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled }) => {
 
                   <EuiSpacer size="xs" />
 
-                  {jobIds.map((id) => (
+                  {adJobIds.map((id) => (
+                    <div key={id}>
+                      <EuiCheckbox
+                        id={id}
+                        label={id}
+                        checked={selectedJobIds.includes(id)}
+                        onChange={(e) => toggleSelectedJob(e, id)}
+                      />
+                      <EuiSpacer size="s" />
+                    </div>
+                  ))}
+                </>
+              )}
+              {selectedJobType === 'data-frame-analytics' && (
+                <>
+                  <EuiButtonEmpty
+                    size="xs"
+                    onClick={onSelectAll}
+                    isDisabled={isDisabled}
+                    data-test-subj="mlJobWizardButtonPreviewJobJson"
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.showButton"
+                      defaultMessage="Select all"
+                    />
+                  </EuiButtonEmpty>
+
+                  <EuiSpacer size="xs" />
+
+                  {dfaJobIds.map((id) => (
                     <div key={id}>
                       <EuiCheckbox
                         id={id}
