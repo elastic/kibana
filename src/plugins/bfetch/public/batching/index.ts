@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './split';
-export * from './from_streaming_xhr';
-export * from './fetch_streaming';
-export { inflateResponse } from './inflate_response';
+export {
+  createStreamingBatchedFunction,
+  StreamingBatchedFunctionParams,
+} from './create_streaming_batched_function';
