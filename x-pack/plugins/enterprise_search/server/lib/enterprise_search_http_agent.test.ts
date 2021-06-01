@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mockReadFileSync } from '../__mocks__/fs.mock';
+jest.mock('fs', () => ({ readFileSync: jest.fn() }));
+import { readFileSync } from 'fs';
 
 import http from 'http';
 import https from 'https';
@@ -33,25 +34,25 @@ describe('entSearchHttpAgent', () => {
 
 describe('loadCertificateAuthorities', () => {
   beforeEach(() => {
-    mockReadFileSync.mockReset();
-    mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
+    readFileSync.mockReset();
+    readFileSync.mockImplementation((path: string) => `content-of-${path}`);
   });
 
   it('reads certificate authorities when ssl.certificateAuthorities is a string', () => {
     const certs = loadCertificateAuthorities('some-path');
-    expect(mockReadFileSync).toHaveBeenCalledTimes(1);
+    expect(readFileSync).toHaveBeenCalledTimes(1);
     expect(certs).toEqual(['content-of-some-path']);
   });
 
   it('reads certificate authorities when ssl.certificateAuthorities is an array', () => {
     const certs = loadCertificateAuthorities(['some-path', 'another-path']);
-    expect(mockReadFileSync).toHaveBeenCalledTimes(2);
+    expect(readFileSync).toHaveBeenCalledTimes(2);
     expect(certs).toEqual(['content-of-some-path', 'content-of-another-path']);
   });
 
   it('does not read anything when ssl.certificateAuthorities is empty', () => {
     const certs = loadCertificateAuthorities([]);
-    expect(mockReadFileSync).toHaveBeenCalledTimes(0);
+    expect(readFileSync).toHaveBeenCalledTimes(0);
     expect(certs).toEqual([]);
   });
 });
@@ -59,7 +60,7 @@ describe('loadCertificateAuthorities', () => {
 describe('loadCertificateAuthorities error handling', () => {
   beforeAll(() => {
     const realFs = jest.requireActual('fs');
-    mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
+    readFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
   });
 
   it('throws if certificateAuthorities is invalid', () => {
