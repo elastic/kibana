@@ -85,6 +85,9 @@ describe('Create API Key route', () => {
         role_descriptors: {
           role_1: {},
         },
+        metadata: {
+          foo: 'bar',
+        },
       };
 
       const request = httpServerMock.createKibanaRequest({

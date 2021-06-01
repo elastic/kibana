@@ -121,6 +121,26 @@ export const TrustedAppCard = memo<TrustedAppCardProps>(
           }
         />
         <ItemDetailsPropertySummary
+          name={PROPERTY_TITLES.updated_at}
+          value={
+            <FormattedDate
+              fieldName={PROPERTY_TITLES.updated_at}
+              value={trustedApp.updated_at}
+              className="eui-textTruncate"
+            />
+          }
+        />
+        <ItemDetailsPropertySummary
+          name={PROPERTY_TITLES.updated_by}
+          value={
+            <FormattedDate
+              fieldName={PROPERTY_TITLES.updated_by}
+              value={trustedApp.updated_by}
+              className="eui-textTruncate"
+            />
+          }
+        />
+        <ItemDetailsPropertySummary
           name={PROPERTY_TITLES.description}
           value={
             <TextFieldValue
