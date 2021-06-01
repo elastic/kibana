@@ -1898,8 +1898,6 @@
     "expressions.functions.fontHelpText": "フォントスタイルを作成します。",
     "expressions.functions.mapColumn.args.copyMetaFromHelpText": "設定されている場合、指定した列IDのメタオブジェクトが指定したターゲット列にコピーされます。列が存在しない場合は失敗し、エラーは表示されません。",
     "expressions.functions.mapColumn.args.expressionHelpText": "すべての行で実行される式。単一行の{DATATABLE}と一緒に指定され、セル値を返します。",
-    "expressions.functions.mapColumn.args.idHelpText": "結果列の任意のID。「null」の場合、name/column引数がIDとして使用されます。",
-    "expressions.functions.mapColumn.args.nameHelpText": "結果の列の名前です。",
     "expressions.functions.mapColumnHelpText": "他の列の結果として計算された列を追加します。引数が指定された場合のみ変更が加えられます。{alterColumnFn}と{staticColumnFn}もご参照ください。",
     "expressions.functions.math.args.expressionHelpText": "評価された {TINYMATH} 表現です。{TINYMATH_URL} をご覧ください。",
     "expressions.functions.math.args.onErrorHelpText": "{TINYMATH}評価が失敗するか、NaNが返される場合、戻り値はonErrorで指定されます。「'throw'」の場合、例外が発生し、式の実行が終了します (デフォルト) 。",
