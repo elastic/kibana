@@ -60,7 +60,7 @@ export const workpadServiceFactory: CanvasServiceFactory<WorkpadService> = (
   startPlugins
 ): WorkpadService => {
   const getApiPath = function () {
-    return coreStart.http.basePath.prepend(`${API_ROUTE_WORKPAD}`);
+    return `${API_ROUTE_WORKPAD}`;
   };
   return {
     get: async (id: string) => {
