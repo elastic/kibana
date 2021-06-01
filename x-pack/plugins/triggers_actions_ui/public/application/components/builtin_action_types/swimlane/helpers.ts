@@ -35,7 +35,7 @@ export const validateMappingForConnector = (
   connector: SwimlaneConnectorType,
   mapping: SwimlaneMappingConfig
 ): Record<string, string> =>
-  Object.keys(mapping ?? []).reduce((errors, key) => {
+  Object.keys(mapping ?? {}).reduce((errors, key) => {
     if (connector !== SwimlaneConnectorType.All) {
       const isFieldRequired =
         connector === SwimlaneConnectorType.Alerts
