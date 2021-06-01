@@ -59,7 +59,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
 
   async _checkLayerEditable() {
     const isLayerEditable = await this.props.layer.isEditable();
-    if (!this._isMounted || !isLayerEditable || isLayerEditable === this.state.isLayerEditable) {
+    if (!this._isMounted || isLayerEditable === this.state.isLayerEditable) {
       return;
     }
     this.setState({ isLayerEditable });

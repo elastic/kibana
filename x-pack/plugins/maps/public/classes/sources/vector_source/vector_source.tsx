@@ -66,6 +66,7 @@ export interface IVectorSource extends ISource {
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
+  isEditable(): Promise<boolean>;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
