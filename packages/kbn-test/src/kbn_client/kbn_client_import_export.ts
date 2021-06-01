@@ -15,7 +15,6 @@ import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-util
 
 import { KbnClientRequester, uriencode, ReqOptions } from './kbn_client_requester';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';
-import { KbnClientSpaces } from './kbn_client_spaces';
 
 interface ImportApiResponse {
   success: boolean;
@@ -40,7 +39,6 @@ export class KbnClientImportExport {
     public readonly log: ToolingLog,
     public readonly requester: KbnClientRequester,
     public readonly savedObjects: KbnClientSavedObjects,
-    private readonly spaces: KbnClientSpaces,
     public readonly dir?: string
   ) {}
 
@@ -67,22 +65,6 @@ export class KbnClientImportExport {
 
     const formData = new FormData();
     formData.append('file', objects.map((obj) => JSON.stringify(obj)).join('\n'), 'import.ndjson');
-
-    if (options?.space) {
-      this.log.info('ensuring space', options.space, 'exits');
-
-      try {
-        await this.spaces.create({
-          id: options.space,
-          name: options.space,
-        });
-      } catch (e) {
-        if (e.response?.status !== 409) {
-          this.log.error('failed to create space');
-          throw e;
-        }
-      }
-    }
 
     // TODO: should we clear out the existing saved objects?
     const resp = await this.req<ImportApiResponse>(options?.space, {

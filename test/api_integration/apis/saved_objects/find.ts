@@ -17,13 +17,19 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('find', () => {
     before(async () => {
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await kibanaServer.importExport.load('saved_objects/basic', { space: SPACE_ID });
+
+      await kibanaServer.spaces.create({ id: `${SPACE_ID}-foo`, name: `${SPACE_ID}-foo` });
       await kibanaServer.importExport.load('saved_objects/basic/foo-ns', {
         space: `${SPACE_ID}-foo`,
       });
     });
 
-    after(() => kibanaServer.spaces.delete(SPACE_ID));
+    after(async () => {
+      await kibanaServer.spaces.delete(SPACE_ID);
+      await kibanaServer.spaces.delete(`${SPACE_ID}-foo`);
+    });
 
     it('should return 200 with individual responses', async () =>
       await supertest

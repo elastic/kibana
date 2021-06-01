@@ -67,7 +67,6 @@ export class KbnClient {
       this.log,
       this.requester,
       this.savedObjects,
-      this.spaces,
       options.importExportDir
     );
   }

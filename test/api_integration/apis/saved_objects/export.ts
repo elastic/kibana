@@ -23,6 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       KIBANA_VERSION = await getKibanaVersion(getService);
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await kibanaServer.importExport.load('saved_objects/basic', { space: SPACE_ID });
     });
 

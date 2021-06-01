@@ -34,7 +34,10 @@ export default function ({ getService }: FtrProviderContext) {
     const SPACE_ID = 'ftr-so-resolve_import_errors';
 
     describe('with basic data existing', () => {
-      before(() => kibanaServer.importExport.load('saved_objects/basic', { space: SPACE_ID }));
+      before(async () => {
+        await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
+        await kibanaServer.importExport.load('saved_objects/basic', { space: SPACE_ID });
+      });
       after(() => kibanaServer.spaces.delete(SPACE_ID));
 
       it('should return 200 when skipping all the records', async () => {
