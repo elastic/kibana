@@ -12,10 +12,17 @@ import { useFieldPreviewContext } from './field_preview_context';
 import { FieldPreviewHeader } from './field_preview_header';
 import { FieldPreviewEmptyPrompt } from './field_preview_empty_prompt';
 import { PreviewDocumentsNav } from './preview_documents_nav';
+import { FieldPreviewError } from './field_preview_error';
 
 export const FieldPreview = () => {
-  const { fields, error } = useFieldPreviewContext();
-  const isEmptyPromptVisible = fields.length === 0 && error === null;
+  const {
+    params: {
+      value: { name, script, format },
+    },
+  } = useFieldPreviewContext();
+
+  // To show the preview we at least need a name to be defined and the script or the format
+  const isEmptyPromptVisible = name === null || (script !== null && format !== null);
 
   return (
     <>
@@ -26,6 +33,8 @@ export const FieldPreview = () => {
           <FieldPreviewHeader />
           <EuiSpacer />
           <PreviewDocumentsNav />
+          <EuiSpacer />
+          <FieldPreviewError />
         </>
       )}
     </>

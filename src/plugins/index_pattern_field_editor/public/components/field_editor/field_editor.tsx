@@ -157,7 +157,7 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
   const {
     fields,
     error,
-    updateParams: updatePreviewParams,
+    params: { update: updatePreviewParams },
     panel: { setIsVisible: setIsPanelVisible },
   } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
@@ -205,11 +205,14 @@ const FieldEditorComponent = ({ field, onChange, syntaxError }: Props) => {
 
   useEffect(() => {
     updatePreviewParams({
-      name: updatedName,
+      name: Boolean(updatedName?.trim()) ? updatedName : null,
       type: updatedType?.[0].value,
-      script: Boolean(updatedScript?.source.trim()) ? updatedScript : null,
+      script:
+        isValueVisible === false || Boolean(updatedScript?.source.trim()) === false
+          ? null
+          : updatedScript,
     });
-  }, [updatedName, updatedType, updatedScript, updatePreviewParams]);
+  }, [updatedName, updatedType, updatedScript, isValueVisible, updatePreviewParams]);
 
   useEffect(() => {
     if (isValueVisible || isFormatVisible) {

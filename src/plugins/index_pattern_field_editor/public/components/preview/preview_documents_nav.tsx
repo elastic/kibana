@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import {
@@ -21,44 +21,64 @@ import { useFieldPreviewContext } from './field_preview_context';
 
 export const PreviewDocumentsNav = () => {
   const {
-    currentDocument: { value: currentDocument, loadSingle, loadFromCluster, isCustomID },
+    currentDocument: { value: currentDocument, loadSingle, loadFromCluster, isLoading },
     navigation: { prev, next },
+    error,
   } = useFieldPreviewContext();
 
+  const lastDocumentLoaded = useRef<string | null>(null);
   const [documentId, setDocumentId] = useState('');
+  const [isCustomID, setIsCustomID] = useState(false);
 
-  const errorMessage = null;
-  const isInvalid = false;
+  const errorMessage =
+    error !== null && error.code === 'DOC_NOT_FOUND'
+      ? i18n.translate(
+          'indexPatternFieldEditor.fieldPreview.documentIdField.documentNotFoundError',
+          {
+            defaultMessage: 'Document not found',
+          }
+        )
+      : null;
+  const isInvalid = error !== null;
 
   // We don't display the nav button when the user has entered a custom
   // document ID as at that point there is no more reference to what's "next"
   const showNavButtons = isCustomID === false;
 
-  const onDocumentIdChange = useCallback(async (e: React.SyntheticEvent<HTMLInputElement>) => {
+  const onDocumentIdChange = useCallback((e: React.SyntheticEvent<HTMLInputElement>) => {
+    setIsCustomID(true);
     const nextId = e.currentTarget.value;
     setDocumentId(nextId);
   }, []);
 
+  const loadDocFromCluster = useCallback(() => {
+    lastDocumentLoaded.current = null;
+    setIsCustomID(false);
+    loadFromCluster();
+  }, [loadFromCluster]);
+
   useEffect(() => {
-    if (currentDocument) {
+    if (currentDocument && !isCustomID) {
       setDocumentId(currentDocument._id);
     }
-  }, [currentDocument]);
+  }, [currentDocument, isCustomID]);
 
   useDebounce(
     () => {
-      if (!Boolean(documentId.trim())) {
+      if (!isCustomID || !Boolean(documentId.trim())) {
         return;
       }
 
-      if (documentId === currentDocument?._id) {
+      if (lastDocumentLoaded.current === documentId) {
         return;
       }
+
+      lastDocumentLoaded.current = documentId;
 
       loadSingle(documentId);
     },
     500,
-    [documentId, currentDocument]
+    [documentId, isCustomID]
   );
 
   return (
@@ -76,14 +96,20 @@ export const PreviewDocumentsNav = () => {
             isInvalid={isInvalid}
             value={documentId}
             onChange={onDocumentIdChange}
+            isLoading={isLoading}
             fullWidth
             data-test-subj="documentIdField"
           />
         </EuiFormRow>
         {isCustomID && (
           <span>
-            <EuiButtonEmpty color="primary" size="xs" onClick={() => loadFromCluster()}>
-              Load latest documents from cluster
+            <EuiButtonEmpty color="primary" size="xs" flush="left" onClick={loadDocFromCluster}>
+              {i18n.translate(
+                'indexPatternFieldEditor.fieldPreview.documentIdField.loadDocumentsFromCluster',
+                {
+                  defaultMessage: 'Load documents from cluster',
+                }
+              )}
             </EuiButtonEmpty>
           </span>
         )}
@@ -98,7 +124,12 @@ export const PreviewDocumentsNav = () => {
                 size="m"
                 onClick={prev}
                 iconType="arrowLeft"
-                aria-label="Previous"
+                aria-label={i18n.translate(
+                  'indexPatternFieldEditor.fieldPreview.documentNav.previousArialabel',
+                  {
+                    defaultMessage: 'Previous',
+                  }
+                )}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -107,7 +138,12 @@ export const PreviewDocumentsNav = () => {
                 size="m"
                 onClick={next}
                 iconType="arrowRight"
-                aria-label="Next"
+                aria-label={i18n.translate(
+                  'indexPatternFieldEditor.fieldPreview.documentNav.nextArialabel',
+                  {
+                    defaultMessage: 'Next',
+                  }
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

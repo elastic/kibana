@@ -18,7 +18,7 @@ import React, {
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 
-import type { FieldPreviewContext } from '../../types';
+import type { FieldPreviewContext, FieldFormatConfig } from '../../types';
 import { parseEsError } from '../../lib/runtime_field_validation';
 import { RuntimeType, RuntimeField } from '../../shared_imports';
 import { useFieldEditorContext } from '../field_editor_context';
@@ -27,15 +27,32 @@ type From = 'cluster' | 'custom';
 
 type EsDocument = Record<string, any>;
 
+interface PreviewError {
+  code: 'DOC_NOT_FOUND' | 'PAINLESS_SCRIPT_ERROR';
+  error: Record<string, any>;
+}
+
+interface Params {
+  name: string | null;
+  index: string | null;
+  type: RuntimeType | null;
+  script: Required<RuntimeField>['script'] | null;
+  format: FieldFormatConfig | null;
+  document: EsDocument | null;
+}
+
 interface Context {
   fields: Array<{ key: string; value: unknown }>;
-  error: Record<string, any> | null;
-  updateParams: (updated: Partial<Params>) => void;
+  error: PreviewError | null;
+  params: {
+    value: Params;
+    update: (updated: Partial<Params>) => void;
+  };
   currentDocument: {
     value?: EsDocument;
     loadSingle: (id: string) => Promise<void>;
     loadFromCluster: () => Promise<void>;
-    isCustomID: boolean;
+    isLoading: boolean;
   };
   panel: {
     isVisible: boolean;
@@ -53,17 +70,16 @@ interface Context {
   };
 }
 
-interface Params {
-  name: string | null;
-  index: string | null;
-  type: RuntimeType | null;
-  script: Required<RuntimeField>['script'] | null;
-  document: EsDocument | null;
-}
-
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
 
-const defaultParams: Params = { name: null, index: null, script: null, document: null, type: null };
+const defaultParams: Params = {
+  name: null,
+  index: null,
+  script: null,
+  document: null,
+  type: null,
+  format: null,
+};
 
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const {
@@ -89,16 +105,15 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const [navDocsIndex, setNavDocsIndex] = useState(0);
   /** Flag to show/hide the preview panel */
   const [isPanelVisible, setIsPanelVisible] = useState(false);
+  /** Flag to indicate if we are loading document from cluster */
+  const [isFetchingDocument, setIsFetchingDocument] = useState(false);
   /** Define if we provide the document to preview from the cluster or from a custom JSON */
   const [from, setFrom] = useState<From>('cluster');
-  /**
-   * Flag to indicate if the current document comes from a custom ID provided by the user
-   * If it does we won't display the "Previous" and "Next" button to navigate between documents
-   */
-  const [isCustomID, setIsCustomID] = useState(false);
 
-  const areAllParamsDefined =
-    Object.values(params).filter(Boolean).length === Object.keys(defaultParams).length;
+  const areAllParamsDefined = Object.entries(params)
+    // We don't need the "format" information for the _execute API
+    .filter(([key]) => key !== 'format')
+    .every(([_, value]) => Boolean(value));
 
   const currentDocument: Record<string, any> | undefined = useMemo(() => documents[navDocsIndex], [
     documents,
@@ -108,12 +123,15 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const currentDocIndex = currentDocument?._index;
   const totalDocs = documents.length;
 
-  const updateParams: Context['updateParams'] = useCallback((updated) => {
+  const updateParams: Context['params']['update'] = useCallback((updated) => {
     setParams((prev) => ({ ...prev, ...updated }));
   }, []);
 
   const fetchSampleDocuments = useCallback(
     async (limit = 50) => {
+      setPreviewResponse({ fields: [], error: null });
+      setIsFetchingDocument(true);
+
       const response = await search
         .search({
           params: {
@@ -125,11 +143,13 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         })
         .toPromise();
 
-      setIsCustomID(false);
+      setIsFetchingDocument(false);
+      setNavDocsIndex(0);
 
       if (response) {
-        setNavDocsIndex(0);
         setDocuments(response.rawResponse.hits.hits);
+      } else {
+        setDocuments([]);
       }
     },
     [indexPattern, search]
@@ -137,7 +157,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   const loadDocument = useCallback(
     async (id: string) => {
-      setIsCustomID(true);
+      setPreviewResponse({ fields: [], error: null });
+      setIsFetchingDocument(true);
 
       const response = await search
         .search({
@@ -155,13 +176,32 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         })
         .toPromise();
 
+      setIsFetchingDocument(false);
+      setNavDocsIndex(0);
+
       if (response) {
         if (response.rawResponse.hits.total > 0) {
-          setNavDocsIndex(0);
           setDocuments(response.rawResponse.hits.hits);
         } else {
-          // TODO: Not found
+          setDocuments([]);
+          setPreviewResponse({
+            fields: [],
+            error: {
+              code: 'DOC_NOT_FOUND',
+              error: {
+                message: i18n.translate(
+                  'indexPatternFieldEditor.fieldPreview.error.documentNotFoundDescription',
+                  {
+                    defaultMessage:
+                      'Error previewing the field as the document provided was not found.',
+                  }
+                ),
+              },
+            },
+          });
         }
+      } else {
+        setDocuments([]);
       }
     },
     [indexPattern, search]
@@ -195,7 +235,12 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     const { values, error } = data;
 
     if (error) {
-      setPreviewResponse({ fields: [], error: parseEsError(error, true) });
+      const fallBackError = { message: 'Error executing the script.' };
+
+      setPreviewResponse({
+        fields: [],
+        error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error, true) ?? fallBackError },
+      });
     } else {
       setPreviewResponse({
         fields: [{ key: params.name!, value: values[0] }],
@@ -222,12 +267,15 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     () => ({
       fields: previewResponse.fields,
       error: previewResponse.error,
-      updateParams,
+      params: {
+        value: params,
+        update: updateParams,
+      },
       currentDocument: {
         value: currentDocument,
         loadSingle: loadDocument,
         loadFromCluster: fetchSampleDocuments,
-        isCustomID,
+        isLoading: isFetchingDocument,
       },
       navigation: {
         isFirstDoc: navDocsIndex === 0,
@@ -246,11 +294,12 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     }),
     [
       previewResponse,
+      params,
       updateParams,
       currentDocument,
       loadDocument,
       fetchSampleDocuments,
-      isCustomID,
+      isFetchingDocument,
       navDocsIndex,
       totalDocs,
       goToNextDoc,
