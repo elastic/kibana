@@ -17,13 +17,13 @@ import { canUserChangePassword } from '../../../common/model';
 import type { UserAPIClient } from '../../management/users';
 import { ChangePasswordForm } from '../../management/users/components/change_password_form';
 
-interface Props {
+export interface ChangePasswordProps {
   user: AuthenticatedUser;
   userAPIClient: PublicMethodsOf<UserAPIClient>;
   notifications: NotificationsSetup;
 }
 
-export class ChangePassword extends Component<Props, {}> {
+export class ChangePassword extends Component<ChangePasswordProps, {}> {
   public render() {
     const canChangePassword = canUserChangePassword(this.props.user);
 
