@@ -33,9 +33,12 @@ import {
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SortPairArr } from '../../../../angular/doc_table/lib/get_sort';
-import { SAMPLE_SIZE_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
+import {
+  DOC_TABLE_LEGACY,
+  SAMPLE_SIZE_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+} from '../../../../../../common';
 import { popularizeField } from '../../../../helpers/popularize_field';
-import { getStateColumnActions } from '../../../../angular/doc_table/actions/columns';
 import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
@@ -45,6 +48,7 @@ import { getResultState } from '../../utils/get_result_state';
 import { InspectorSession } from '../../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { SavedSearchSubjectMessage } from '../../services/use_saved_search';
+import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -114,7 +118,7 @@ export function DiscoverLayout({
   }, [indexPattern]);
 
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const isLegacy = useMemo(() => services.uiSettings.get('doc_table:legacy'), [services]);
+  const isLegacy = useMemo(() => services.uiSettings.get(DOC_TABLE_LEGACY), [services]);
   const useNewFieldsApi = useMemo(() => !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [
     services,
   ]);
@@ -138,19 +142,15 @@ export function DiscoverLayout({
     [savedSearchRefetch$, searchSessionManager]
   );
 
-  const { onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useMemo(
-    () =>
-      getStateColumnActions({
-        capabilities,
-        config,
-        indexPattern,
-        indexPatterns,
-        setAppState: stateContainer.setAppState,
-        state,
-        useNewFieldsApi,
-      }),
-    [capabilities, config, indexPattern, indexPatterns, stateContainer, state, useNewFieldsApi]
-  );
+  const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useDataGridColumns({
+    capabilities,
+    config,
+    indexPattern,
+    indexPatterns,
+    setAppState: stateContainer.setAppState,
+    state,
+    useNewFieldsApi,
+  });
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
@@ -228,15 +228,6 @@ export function DiscoverLayout({
   const onEditRuntimeField = useCallback(() => {
     savedSearchRefetch$.next('reset');
   }, [savedSearchRefetch$]);
-
-  const columns = useMemo(() => {
-    if (!state.columns) {
-      return [];
-    }
-    return useNewFieldsApi
-      ? state.columns.filter((col: string) => col !== '_source')
-      : state.columns;
-  }, [state, useNewFieldsApi]);
 
   const contentCentered = resultState === 'uninitialized';
   const showTimeCol = useMemo(
