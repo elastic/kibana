@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
-import { ENGINE_CRAWLER_PATH } from '../../routes';
+import { DOCS_PREFIX, ENGINE_CRAWLER_PATH } from '../../routes';
 import { generateEnginePath } from '../engine';
 
 import './crawler_landing.scss';
@@ -49,9 +49,8 @@ export const CrawlerLanding: React.FC = () => (
               }
             )}{' '}
             <EuiLink
-              external
               target="_blank"
-              href="https://www.elastic.co/guide/en/app-search/current/web-crawler.html"
+              href={`${DOCS_PREFIX}/web-crawler.html`}
               data-test-subj="CrawlerDocumentationLink"
             >
               {i18n.translate(

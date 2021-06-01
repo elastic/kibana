@@ -11,6 +11,8 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
+import { docLinks } from '../../../shared/doc_links';
+
 import { CrawlerLanding } from './crawler_landing';
 
 describe('CrawlerLanding', () => {
@@ -29,7 +31,7 @@ describe('CrawlerLanding', () => {
     const externalDocumentationLink = wrapper.find('[data-test-subj="CrawlerDocumentationLink"]');
 
     expect(externalDocumentationLink.prop('href')).toBe(
-      'https://www.elastic.co/guide/en/app-search/current/web-crawler.html'
+      `${docLinks.appSearchBase}/web-crawler.html`
     );
   });
 
