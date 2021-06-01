@@ -26,7 +26,6 @@ import { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { UserPrivilegesProvider } from '../detections/components/user_privileges';
-import { MainNavigationVisibilityProvider } from './home/temp_collapse_sidenav_context';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -56,15 +55,13 @@ const StartAppComponent: FC<StartAppComponent> = ({
                 <MlCapabilitiesProvider>
                   <UserPrivilegesProvider>
                     <ManageUserInfo>
-                      <MainNavigationVisibilityProvider>
-                        <PageRouter
-                          history={history}
-                          onAppLeave={onAppLeave}
-                          setHeaderActionMenu={setHeaderActionMenu}
-                        >
-                          {children}
-                        </PageRouter>
-                      </MainNavigationVisibilityProvider>
+                      <PageRouter
+                        history={history}
+                        onAppLeave={onAppLeave}
+                        setHeaderActionMenu={setHeaderActionMenu}
+                      >
+                        {children}
+                      </PageRouter>
                     </ManageUserInfo>
                   </UserPrivilegesProvider>
                 </MlCapabilitiesProvider>
