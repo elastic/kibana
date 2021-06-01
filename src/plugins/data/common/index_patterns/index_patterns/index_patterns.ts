@@ -403,6 +403,12 @@ export class IndexPatternsService {
       throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
     }
 
+    return this.initFromSavedObject(savedObject);
+  };
+
+  private initFromSavedObject = async (
+    savedObject: SavedObject<IndexPatternAttributes>
+  ): Promise<IndexPattern> => {
     const spec = this.savedObjectToSpec(savedObject);
     const { title, type, typeMeta, runtimeFieldMap } = spec;
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
@@ -412,7 +418,7 @@ export class IndexPatternsService {
     try {
       spec.fields = await this.refreshFieldSpecMap(
         spec.fields || {},
-        id,
+        savedObject.id,
         spec.title as string,
         {
           pattern: title as string,
@@ -451,7 +457,7 @@ export class IndexPatternsService {
         this.onError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
-            values: { id, title },
+            values: { id: savedObject.id, title },
           }),
         });
       }
@@ -539,11 +545,15 @@ export class IndexPatternsService {
     }
 
     const body = indexPattern.getAsSavedObjectBody();
-    const response = await this.savedObjectsClient.create(savedObjectType, body, {
-      id: indexPattern.id,
-    });
+    const response: SavedObject<IndexPatternAttributes> = (await this.savedObjectsClient.create(
+      savedObjectType,
+      body,
+      {
+        id: indexPattern.id,
+      }
+    )) as SavedObject<IndexPatternAttributes>;
 
-    const createdIndexPattern = await this.getSavedObjectAndInit(response.id);
+    const createdIndexPattern = await this.initFromSavedObject(response);
     this.indexPatternCache.set(createdIndexPattern.id!, Promise.resolve(createdIndexPattern));
     if (this.savedObjectsCache) {
       this.savedObjectsCache.push(response as SavedObject<IndexPatternSavedObjectAttrs>);
