@@ -8,10 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
+import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
+import type { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
+import type { PluginSetupContract as AlertingSetup } from '../../../alerting/public';
+import { PLUGIN_ID } from '../../common/constants/app';
+import { createExplorerUrl } from '../ml_url_generator/anomaly_detection_urls_generator';
+import { validateLookbackInterval, validateTopNBucket } from './validators';
 
-export function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPluginSetup) {
+export function registerMlAlerts(
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
+  alerting?: AlertingSetup
+) {
   triggersActionsUi.alertTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {
@@ -28,7 +35,9 @@ export function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPl
           jobSelection: new Array<string>(),
           severity: new Array<string>(),
           resultType: new Array<string>(),
-        },
+          topNBuckets: new Array<string>(),
+          lookbackInterval: new Array<string>(),
+        } as Record<keyof MlAnomalyDetectionAlertParams, string[]>,
       };
 
       if (
@@ -38,6 +47,20 @@ export function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPl
         validationResult.errors.jobSelection.push(
           i18n.translate('xpack.ml.alertTypes.anomalyDetection.jobSelection.errorMessage', {
             defaultMessage: 'Job selection is required',
+          })
+        );
+      }
+
+      // Since 7.13 we support single job selection only
+      if (
+        (Array.isArray(alertParams.jobSelection?.groupIds) &&
+          alertParams.jobSelection?.groupIds.length > 0) ||
+        (Array.isArray(alertParams.jobSelection?.jobIds) &&
+          alertParams.jobSelection?.jobIds.length > 1)
+      ) {
+        validationResult.errors.jobSelection.push(
+          i18n.translate('xpack.ml.alertTypes.anomalyDetection.singleJobSelection.errorMessage', {
+            defaultMessage: 'Only one job per rule is allowed',
           })
         );
       }
@@ -58,6 +81,28 @@ export function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPl
         );
       }
 
+      if (
+        !!alertParams.lookbackInterval &&
+        validateLookbackInterval(alertParams.lookbackInterval)
+      ) {
+        validationResult.errors.lookbackInterval.push(
+          i18n.translate('xpack.ml.alertTypes.anomalyDetection.lookbackInterval.errorMessage', {
+            defaultMessage: 'Lookback interval is invalid',
+          })
+        );
+      }
+
+      if (
+        typeof alertParams.topNBuckets === 'number' &&
+        validateTopNBucket(alertParams.topNBuckets)
+      ) {
+        validationResult.errors.topNBuckets.push(
+          i18n.translate('xpack.ml.alertTypes.anomalyDetection.topNBuckets.errorMessage', {
+            defaultMessage: 'Number of buckets is invalid',
+          })
+        );
+      }
+
       return validationResult;
     },
     requiresAppContext: false,
@@ -69,7 +114,7 @@ export function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPl
 - Time: \\{\\{context.timestampIso8601\\}\\}
 - Anomaly score: \\{\\{context.score\\}\\}
 
-Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.
+\\{\\{context.message\\}\\}
 
 \\{\\{#context.topInfluencers.length\\}\\}
   Top influencers:
@@ -90,5 +135,23 @@ Alerts are raised based on real-time scores. Remember that scores may be adjuste
 `,
       }
     ),
+  });
+
+  if (alerting) {
+    registerNavigation(alerting);
+  }
+}
+
+export function registerNavigation(alerting: AlertingSetup) {
+  alerting.registerNavigation(PLUGIN_ID, ML_ALERT_TYPES.ANOMALY_DETECTION, (alert) => {
+    const alertParams = alert.params as MlAnomalyDetectionAlertParams;
+    const jobIds = [
+      ...new Set([
+        ...(alertParams.jobSelection.jobIds ?? []),
+        ...(alertParams.jobSelection.groupIds ?? []),
+      ]),
+    ];
+
+    return createExplorerUrl('', { jobIds });
   });
 }

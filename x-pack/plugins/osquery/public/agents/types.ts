@@ -7,6 +7,7 @@
 
 import { TermsAggregate } from '@elastic/elasticsearch/api/types';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { Agent } from '../../common/shared_imports';
 
 interface BaseDataPoint {
   key: string;
@@ -30,6 +31,8 @@ export interface SelectedGroups {
   [groupType: string]: { [groupName: string]: number };
 }
 
+export type GroupedAgent = Pick<Agent, 'local_metadata' | 'policy_id' | 'status'>;
+
 export type GroupOption = EuiComboBoxOptionOption<AgentOptionValue | GroupOptionValue>;
 
 export interface AgentSelection {
@@ -46,7 +49,7 @@ interface BaseGroupOption {
 
 export type AgentOptionValue = BaseGroupOption & {
   groups: { [groupType: string]: string };
-  online: boolean;
+  status: string;
 };
 
 export type GroupOptionValue = BaseGroupOption & {
@@ -57,5 +60,6 @@ export enum AGENT_GROUP_KEY {
   All,
   Platform,
   Policy,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Agent,
 }

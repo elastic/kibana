@@ -78,13 +78,19 @@ export const logEntrySearchStrategyProvider = ({
           concatMap(({ params }) =>
             resolvedSourceConfiguration$.pipe(
               map(
-                ({ indices, timestampField, tiebreakerField }): IEsSearchRequest => ({
+                ({
+                  indices,
+                  timestampField,
+                  tiebreakerField,
+                  runtimeMappings,
+                }): IEsSearchRequest => ({
                   // @ts-expect-error @elastic/elasticsearch declares indices_boost as Record<string, number>
                   params: createGetLogEntryQuery(
                     indices,
                     params.logEntryId,
                     timestampField,
-                    tiebreakerField
+                    tiebreakerField,
+                    runtimeMappings
                   ),
                 })
               )

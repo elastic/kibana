@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
 import { GetAgentsResponse, agentRouteService } from '../../../fleet/common';
@@ -27,23 +28,40 @@ export const useAllAgents = (
   opts: RequestOptions = { perPage: 9000 }
 ) => {
   const { perPage } = opts;
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
-      let kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
-      if (searchValue) {
-        kuery += ` and (local_metadata.host.hostname:/${searchValue}/ or local_metadata.elastic.agent.id:/${searchValue}/)`;
+      const kueryFragments: string[] = [];
+      if (osqueryPolicies.length) {
+        kueryFragments.push(`${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')}`);
       }
+
+      if (searchValue) {
+        kueryFragments.push(
+          `local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*`
+        );
+      }
+
       return http.get(agentRouteService.getListPath(), {
         query: {
-          kuery,
+          kuery: kueryFragments.map((frag) => `(${frag})`).join(' and '),
           perPage,
+          showInactive: true,
         },
       });
     },
     {
       enabled: !osqueryPoliciesLoading,
+      onError: (error) =>
+        toasts.addError(error as Error, {
+          title: i18n.translate('xpack.osquery.agents.fetchError', {
+            defaultMessage: 'Error while fetching agents',
+          }),
+        }),
     }
   );
 

@@ -16,18 +16,18 @@ import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-type ErrorGroupPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/primary_statistics'>;
-type ErrorGroupComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics'>;
+type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
+type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 export function getColumns({
   serviceName,
-  errorGroupComparisonStatistics,
+  errorGroupDetailedStatistics,
   comparisonEnabled,
 }: {
   serviceName: string;
-  errorGroupComparisonStatistics: ErrorGroupComparisonStatistics;
+  errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
-}): Array<EuiBasicTableColumn<ErrorGroupPrimaryStatistics['error_groups'][0]>> {
+}): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['error_groups'][0]>> {
   return [
     {
       field: 'name',
@@ -74,10 +74,10 @@ export function getColumns({
       width: px(unit * 12),
       render: (_, { occurrences, group_id: errorGroupId }) => {
         const currentPeriodTimeseries =
-          errorGroupComparisonStatistics?.currentPeriod?.[errorGroupId]
+          errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]
             ?.timeseries;
         const previousPeriodTimeseries =
-          errorGroupComparisonStatistics?.previousPeriod?.[errorGroupId]
+          errorGroupDetailedStatistics?.previousPeriod?.[errorGroupId]
             ?.timeseries;
 
         return (

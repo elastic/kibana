@@ -8,11 +8,12 @@
 import { CoreStart } from 'kibana/public';
 import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
+import { createIndexPatternMock } from '../../common/dependency_mocks/index_patterns';
+import { GetLogSourceConfigurationSuccessResponsePayload } from '../../common/http_api/log_sources/get_log_source_configuration';
 import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
+import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './logs_overview_fetchers';
-import { GetLogSourceConfigurationSuccessResponsePayload } from '../../common/http_api/log_sources/get_log_source_configuration';
 
 jest.mock('../containers/logs/log_source/api/fetch_log_source_status');
 const mockedCallFetchLogSourceStatusAPI = callFetchLogSourceStatusAPI as jest.MockedFunction<
@@ -40,6 +41,36 @@ function setup() {
   //     searcher.search(...).subscribe((**response**) => {});
   //
   const dataResponder = jest.fn();
+
+  (data.indexPatterns.get as jest.Mock).mockResolvedValue(
+    createIndexPatternMock({
+      id: 'test-index-pattern',
+      title: 'log-indices-*',
+      timeFieldName: '@timestamp',
+      fields: [
+        {
+          name: 'event.dataset',
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'runtime_field',
+          type: 'string',
+          runtimeField: {
+            type: 'keyword',
+            script: {
+              source: 'emit("runtime value")',
+            },
+          },
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+      ],
+    })
+  );
 
   (data.search.search as jest.Mock).mockReturnValue({
     subscribe: (progress: Function, error: Function, finish: Function) => {
@@ -114,7 +145,7 @@ describe('Logs UI Observability Homepage Functions', () => {
           configuration: {
             logIndices: {
               type: 'index_pattern',
-              indexPatternId: 'some-test-id',
+              indexPatternId: 'test-index-pattern',
             },
             fields: { timestamp: '@timestamp', tiebreaker: '_doc' },
           },

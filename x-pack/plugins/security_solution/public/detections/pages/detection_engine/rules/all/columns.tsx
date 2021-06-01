@@ -80,9 +80,15 @@ export const getActions = (
     ),
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: Rule) => {
-      await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
-      await reFetchRules();
-      await refetchPrePackagedRulesStatus();
+      const createdRules = await duplicateRulesAction(
+        [rowItem],
+        [rowItem.id],
+        dispatch,
+        dispatchToaster
+      );
+      if (createdRules?.length) {
+        editRuleAction(createdRules[0], history);
+      }
     },
   },
   {
@@ -363,20 +369,6 @@ export const getMonitoringColumns = (
       truncateText: true,
       width: '14%',
     },
-    // hiding this field until after 7.11 release
-    // {
-    //   field: 'current_status.last_look_back_date',
-    //   name: i18n.COLUMN_LAST_LOOKBACK_DATE,
-    //   render: (value: RuleStatus['current_status']['last_look_back_date']) => {
-    //     return value == null ? (
-    //       getEmptyTagValue()
-    //     ) : (
-    //       <FormattedDate value={value} fieldName={'last look back date'} />
-    //     );
-    //   },
-    //   truncateText: true,
-    //   width: '16%',
-    // },
     {
       field: 'current_status.status_date',
       name: i18n.COLUMN_LAST_COMPLETE_RUN,

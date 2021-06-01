@@ -60,12 +60,19 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql([
+
+              // the custom tls connectors have dynamic ports, so remove them before
+              // comparing to what we expect
+              const nonCustomTlsConnectors = response.body.filter(
+                (conn: { id: string }) => !conn.id.startsWith('custom.tls.')
+              );
+              expect(nonCustomTlsConnectors).to.eql([
                 {
                   id: createdAction.id,
                   is_preconfigured: false,
                   name: 'My action',
                   connector_type_id: 'test.index-record',
+                  is_missing_secrets: false,
                   config: {
                     unencrypted: `This value shouldn't get encrypted`,
                   },
@@ -167,12 +174,19 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql([
+
+              // the custom tls connectors have dynamic ports, so remove them before
+              // comparing to what we expect
+              const nonCustomTlsConnectors = response.body.filter(
+                (conn: { id: string }) => !conn.id.startsWith('custom.tls.')
+              );
+              expect(nonCustomTlsConnectors).to.eql([
                 {
                   id: createdAction.id,
                   is_preconfigured: false,
                   name: 'My action',
                   connector_type_id: 'test.index-record',
+                  is_missing_secrets: false,
                   config: {
                     unencrypted: `This value shouldn't get encrypted`,
                   },
@@ -250,7 +264,13 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql([
+
+              // the custom tls connectors have dynamic ports, so remove them before
+              // comparing to what we expect
+              const nonCustomTlsConnectors = response.body.filter(
+                (conn: { id: string }) => !conn.id.startsWith('custom.tls.')
+              );
+              expect(nonCustomTlsConnectors).to.eql([
                 {
                   id: 'preconfigured-es-index-action',
                   is_preconfigured: true,

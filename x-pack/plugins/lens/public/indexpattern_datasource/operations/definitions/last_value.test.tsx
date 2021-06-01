@@ -29,6 +29,7 @@ const defaultProps = {
     ...createMockedIndexPattern(),
     hasRestrictions: false,
   } as IndexPattern,
+  operationDefinitionMap: {},
 };
 
 describe('last_value', () => {
@@ -74,7 +75,8 @@ describe('last_value', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

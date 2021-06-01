@@ -33,7 +33,7 @@ export interface HasDataContextValue {
 
 export const HasDataContext = createContext({} as HasDataContextValue);
 
-const apps: DataContextApps[] = ['apm', 'uptime', 'infra_logs', 'infra_metrics', 'ux', 'alert'];
+const apps: DataContextApps[] = ['apm', 'synthetics', 'infra_logs', 'infra_metrics', 'ux', 'alert'];
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
   const { core } = usePluginContext();
@@ -76,7 +76,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
         });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [isExploratoryView]
   );
 
   useEffect(() => {

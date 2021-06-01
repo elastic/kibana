@@ -60,8 +60,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.visEditor.clickGo();
   }
 
-  describe('point series', function describeIndexTests() {
-    before(initChart);
+  describe('vlad point series', function describeIndexTests() {
+    before(async () => {
+      await PageObjects.visualize.initTests();
+      await initChart();
+    });
 
     describe('secondary value axis', function () {
       it('should show correct chart', async function () {
@@ -281,10 +284,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00'],
           [
             '2015-09-19 12:00',
-            '2015-09-20 06:00',
-            '2015-09-21 00:00',
-            '2015-09-21 18:00',
+            '2015-09-20 12:00',
+            '2015-09-21 12:00',
             '2015-09-22 12:00',
+            '2015-09-23 12:00',
           ]
         );
 
@@ -328,6 +331,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 '14:30',
                 '15:00',
                 '15:30',
+                '16:00',
               ]
             );
             return labels.toString() === xLabels.toString();
@@ -396,6 +400,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 '21:30',
                 '22:00',
                 '22:30',
+                '23:00',
               ]
             );
             return labels2.toString() === xLabels2.toString();

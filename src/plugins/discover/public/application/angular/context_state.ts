@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
   syncStates,
-  BaseStateContainer,
   withNotifyOnErrors,
+  ReduxLikeStateContainer,
 } from '../../../../kibana_utils/public';
 import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
 import { handleSourceColumnState } from './helpers';
@@ -35,7 +35,7 @@ export interface AppState {
   /**
    * Sorting of the records to be fetched, assumed to be a legacy parameter
    */
-  sort: string[];
+  sort: string[][];
   /**
    * Number of records to be fetched after the anchor records (older records)
    */
@@ -50,7 +50,7 @@ interface GlobalState {
   filters: Filter[];
 }
 
-interface GetStateParams {
+export interface GetStateParams {
   /**
    * Number of records to be fetched when 'Load' link/button is clicked
    */
@@ -81,15 +81,15 @@ interface GetStateParams {
   uiSettings: IUiSettingsClient;
 }
 
-interface GetStateReturn {
+export interface GetStateReturn {
   /**
    * Global state, the _g part of the URL
    */
-  globalState: BaseStateContainer<GlobalState>;
+  globalState: ReduxLikeStateContainer<GlobalState>;
   /**
    * App state, the _a part of the URL
    */
-  appState: BaseStateContainer<AppState>;
+  appState: ReduxLikeStateContainer<AppState>;
   /**
    * Start sync between state and URL
    */
@@ -247,7 +247,7 @@ function isEqualState(stateA: AppState | GlobalState, stateB: AppState | GlobalS
   const { filters: stateAFilters = [], ...stateAPartial } = stateA;
   const { filters: stateBFilters = [], ...stateBPartial } = stateB;
   return (
-    _.isEqual(stateAPartial, stateBPartial) &&
+    isEqual(stateAPartial, stateBPartial) &&
     esFilters.compareFilters(stateAFilters, stateBFilters, esFilters.COMPARE_ALL_OPTIONS)
   );
 }
@@ -276,7 +276,7 @@ function createInitialAppState(
     columns: ['_source'],
     filters: [],
     predecessorCount: parseInt(defaultSize, 10),
-    sort: [timeFieldName, 'desc'],
+    sort: [[timeFieldName, 'desc']],
     successorCount: parseInt(defaultSize, 10),
   };
   if (typeof urlState !== 'object') {

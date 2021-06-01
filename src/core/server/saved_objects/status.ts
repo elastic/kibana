@@ -18,10 +18,19 @@ export const calculateStatus$ = (
 ): Observable<ServiceStatus<SavedObjectStatusMeta>> => {
   const migratorStatus$: Observable<ServiceStatus<SavedObjectStatusMeta>> = rawMigratorStatus$.pipe(
     map((migrationStatus) => {
-      if (migrationStatus.status === 'waiting') {
+      if (migrationStatus.status === 'waiting_to_start') {
         return {
           level: ServiceStatusLevels.unavailable,
           summary: `SavedObjects service is waiting to start migrations`,
+        };
+      } else if (migrationStatus.status === 'waiting_for_other_nodes') {
+        return {
+          level: ServiceStatusLevels.unavailable,
+          summary: `SavedObjects service is waiting for other nodes to complete the migration`,
+          detail:
+            `If no other Kibana instance is attempting ` +
+            `migrations, you can get past this message by deleting index ${migrationStatus.waitingIndex} and ` +
+            `restarting Kibana.`,
         };
       } else if (migrationStatus.status === 'running') {
         return {

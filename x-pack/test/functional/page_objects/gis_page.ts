@@ -21,12 +21,12 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
   const comboBox = getService('comboBox');
   const renderable = getService('renderable');
   const browser = getService('browser');
-  const MenuToggle = getService('MenuToggle');
+  const menuToggle = getService('menuToggle');
   const listingTable = getService('listingTable');
   const monacoEditor = getService('monacoEditor');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  const setViewPopoverToggle = new MenuToggle({
+  const setViewPopoverToggle = menuToggle.create({
     name: 'SetView Popover',
     menuTestSubject: 'mapSetViewForm',
     toggleButtonTestSubject: 'toggleSetViewVisibilityButton',
@@ -630,6 +630,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       }
       await inspector.openInspectorRequestsView();
       await testSubjects.click('inspectorRequestDetailResponse');
+      await find.byCssSelector('.react-monaco-editor-container');
       const responseBody = await monacoEditor.getCodeEditorValue();
       return JSON.parse(responseBody);
     }

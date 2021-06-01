@@ -14,7 +14,7 @@ import { ReactElement } from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
 import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../';
-import { SearchSessionStatus } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { OnActionComplete } from '../components';
 import { UISession } from '../types';
 import { mockUrls } from '../__mocks__';

@@ -114,9 +114,10 @@ export const generateAgentSelection = (selection: GroupOption[]) => {
     platform: {},
   };
 
-  // TODO: clean this up, make it less awkward
   for (const opt of selection) {
     const groupType = opt.value?.groupType;
+    // best effort to get the proper identity
+    const key = opt.key ?? opt.value?.id ?? opt.label;
     let value;
     switch (groupType) {
       case AGENT_GROUP_KEY.All:
@@ -126,17 +127,17 @@ export const generateAgentSelection = (selection: GroupOption[]) => {
         value = opt.value as GroupOptionValue;
         if (!newAgentSelection.allAgentsSelected) {
           // we don't need to calculate diffs when all agents are selected
-          selectedGroups.platform[opt.value?.id ?? opt.label] = value.size;
+          selectedGroups.platform[key] = value.size;
         }
-        newAgentSelection.platformsSelected.push(opt.label);
+        newAgentSelection.platformsSelected.push(key);
         break;
       case AGENT_GROUP_KEY.Policy:
         value = opt.value as GroupOptionValue;
         if (!newAgentSelection.allAgentsSelected) {
           // we don't need to calculate diffs when all agents are selected
-          selectedGroups.policy[opt.value?.id ?? opt.label] = value.size;
+          selectedGroups.policy[key] = value.size;
         }
-        newAgentSelection.policiesSelected.push(opt.label);
+        newAgentSelection.policiesSelected.push(key);
         break;
       case AGENT_GROUP_KEY.Agent:
         value = opt.value as AgentOptionValue;
@@ -144,9 +145,7 @@ export const generateAgentSelection = (selection: GroupOption[]) => {
           // we don't need to count how many agents are selected if they are all selected
           selectedAgents.push(value);
         }
-        if (value?.id) {
-          newAgentSelection.agents.push(value.id);
-        }
+        newAgentSelection.agents.push(key);
         break;
       default:
         // this should never happen!

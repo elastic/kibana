@@ -5,15 +5,38 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiBasicTableColumn, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
-import { BrowserFields } from '../../../../common/search_strategy/index_fields';
+import * as i18n from './translations';
 import { SummaryView } from './summary_view';
 import { getSummaryColumns, SummaryRow, ThreatSummaryRow } from './helpers';
+import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import { SORTED_THREAT_SUMMARY_FIELDS } from '../../../../common/cti/constants';
 import { INDICATOR_DESTINATION_PATH } from '../../../../common/constants';
+
+const getThreatSummaryRows = (
+  data: TimelineEventsDetailsItem[],
+  timelineId: string,
+  eventId: string
+) =>
+  SORTED_THREAT_SUMMARY_FIELDS.map((threatSummaryField) => {
+    const item = data.find(({ field }) => field === threatSummaryField);
+    if (item) {
+      const { field, originalValue } = item;
+      return {
+        title: field.replace(`${INDICATOR_DESTINATION_PATH}.`, ''),
+        description: {
+          values: Array.isArray(originalValue) ? originalValue : [originalValue],
+          contextId: timelineId,
+          eventId,
+          fieldName: field,
+        },
+      };
+    }
+    return null;
+  }).filter((item: ThreatSummaryRow | null): item is ThreatSummaryRow => !!item);
 
 const getDescription = ({
   contextId,
@@ -34,56 +57,22 @@ const getDescription = ({
   </>
 );
 
-const getSummaryRows = ({
-  data,
-  timelineId: contextId,
-  eventId,
-}: {
-  data: TimelineEventsDetailsItem[];
-  browserFields?: BrowserFields;
-  timelineId: string;
-  eventId: string;
-}) => {
-  if (!data) return [];
-  return data.reduce<SummaryRow[]>((acc, { field, originalValue }) => {
-    if (field.startsWith(`${INDICATOR_DESTINATION_PATH}.`) && originalValue) {
-      return [
-        ...acc,
-        {
-          title: field.replace(`${INDICATOR_DESTINATION_PATH}.`, ''),
-          description: {
-            values: Array.isArray(originalValue) ? originalValue : [originalValue],
-            contextId,
-            eventId,
-            fieldName: field,
-          },
-        },
-      ];
-    }
-    return acc;
-  }, []);
-};
-
 const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns(getDescription);
 
 const ThreatSummaryViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
-  eventId: string;
   timelineId: string;
-}> = ({ data, eventId, timelineId }) => {
-  const summaryRows = useMemo(() => getSummaryRows({ data, eventId, timelineId }), [
-    data,
-    eventId,
-    timelineId,
-  ]);
-
-  return (
+  eventId: string;
+}> = ({ data, timelineId, eventId }) => (
+  <>
+    <EuiSpacer size="l" />
     <SummaryView
+      title={i18n.THREAT_SUMMARY}
       summaryColumns={summaryColumns}
-      summaryRows={summaryRows}
+      summaryRows={getThreatSummaryRows(data, timelineId, eventId)}
       dataTestSubj="threat-summary-view"
     />
-  );
-};
+  </>
+);
 
 export const ThreatSummaryView = React.memo(ThreatSummaryViewComponent);

@@ -22,9 +22,11 @@ interface EngineCreationActions {
   setLanguage(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
   submitEngine(): void;
+  onSubmitError(): void;
 }
 
 interface EngineCreationValues {
+  isLoading: boolean;
   language: string;
   name: string;
   rawName: string;
@@ -37,8 +39,16 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     setLanguage: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
     submitEngine: true,
+    onSubmitError: true,
   },
   reducers: {
+    isLoading: [
+      false,
+      {
+        submitEngine: () => true,
+        onSubmitError: () => false,
+      },
+    ],
     language: [
       DEFAULT_LANGUAGE,
       {
@@ -67,6 +77,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
         actions.onEngineCreationSuccess();
       } catch (e) {
         flashAPIErrors(e);
+        actions.onSubmitError();
       }
     },
     onEngineCreationSuccess: () => {

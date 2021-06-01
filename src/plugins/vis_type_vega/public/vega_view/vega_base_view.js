@@ -10,6 +10,7 @@ import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
+import { expressionInterpreter } from 'vega-interpreter';
 import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
@@ -82,9 +83,10 @@ export class VegaBaseView {
         return;
       }
 
+      const containerDisplay = this._parser.useResize ? 'flex' : 'block';
       this._$container = $('<div class="vgaVis__view">')
         // Force a height here because css is not loaded in mocha test
-        .css('height', '100%')
+        .css({ height: '100%', display: containerDisplay })
         .appendTo(this._$parentEl);
       this._$controls = $(
         `<div class="vgaVis__controls vgaVis__controls--${this._parser.controlsDir}">`
@@ -166,6 +168,7 @@ export class VegaBaseView {
 
   createViewConfig() {
     const config = {
+      expr: expressionInterpreter,
       renderer: this._parser.renderer,
     };
 

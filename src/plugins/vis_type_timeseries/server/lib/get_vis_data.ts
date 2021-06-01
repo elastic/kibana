@@ -9,8 +9,8 @@
 import _ from 'lodash';
 
 import { Framework } from '../plugin';
-import { TimeseriesVisData } from '../../common/types';
-import { PANEL_TYPES } from '../../common/panel_types';
+import type { TimeseriesVisData } from '../../common/types';
+import { PANEL_TYPES } from '../../common/enums';
 import type {
   VisTypeTimeseriesVisDataRequest,
   VisTypeTimeseriesRequestHandlerContext,
@@ -31,20 +31,22 @@ export async function getVisData(
   const indexPatternsService = await framework.getIndexPatternsService(requestContext);
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
-  const services: VisTypeTimeseriesRequestServices = {
-    esQueryConfig,
-    esShardTimeout,
-    indexPatternsService,
-    uiSettings,
-    searchStrategyRegistry: framework.searchStrategyRegistry,
-    cachedIndexPatternFetcher: getCachedIndexPatternFetcher(indexPatternsService),
-  };
-
   const promises = request.body.panels.map((panel) => {
-    if (panel.type === PANEL_TYPES.TABLE) {
-      return getTableData(requestContext, request, panel, services);
-    }
-    return getSeriesData(requestContext, request, panel, services);
+    const services: VisTypeTimeseriesRequestServices = {
+      esQueryConfig,
+      esShardTimeout,
+      indexPatternsService,
+      uiSettings,
+      searchStrategyRegistry: framework.searchStrategyRegistry,
+      cachedIndexPatternFetcher: getCachedIndexPatternFetcher(
+        indexPatternsService,
+        Boolean(panel.use_kibana_indexes)
+      ),
+    };
+
+    return panel.type === PANEL_TYPES.TABLE
+      ? getTableData(requestContext, request, panel, services)
+      : getSeriesData(requestContext, request, panel, services);
   });
 
   return Promise.all(promises).then((res) => {

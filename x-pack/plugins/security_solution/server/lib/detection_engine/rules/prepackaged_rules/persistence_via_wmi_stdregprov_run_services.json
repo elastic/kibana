@@ -1,0 +1,83 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies use of the Windows Management Instrumentation StdRegProv (registry provider) to modify commonly abused registry locations for persistence.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Persistence via WMI Standard Registry Provider",
+  "query": "registry where \n registry.data.strings != null and process.name : \"WmiPrvSe.exe\" and\n registry.path : (\n                  \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n                  \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n                  \"HKLM\\\\Software\\\\WOW6432Node\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n                  \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\Explorer\\\\Run\\\\*\",\n                  \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\Explorer\\\\Run\\\\*\",\n                  \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnce\\\\*\",\n                  \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnceEx\\\\*\",\n                  \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnce\\\\*\",\n                  \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnceEx\\\\*\",\n                  \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\*\\\\ServiceDLL\",\n                  \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\*\\\\ImagePath\",\n                  \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Shell\\\\*\", \n                  \"HKEY_USERS\\\\*\\\\Environment\\\\UserInitMprLogonScript\", \n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Windows\\\\Load\", \n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Shell\", \n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\Shell\", \n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows\\\\System\\\\Scripts\\\\Logoff\\\\Script\", \n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows\\\\System\\\\Scripts\\\\Logon\\\\Script\", \n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows\\\\System\\\\Scripts\\\\Shutdown\\\\Script\", \n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows\\\\System\\\\Scripts\\\\Startup\\\\Script\", \n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Ctf\\\\LangBarAddin\\\\*\\\\FilePath\", \n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Internet Explorer\\\\Extensions\\\\*\\\\Exec\", \n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Internet Explorer\\\\Extensions\\\\*\\\\Script\", \n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Command Processor\\\\Autorun\"\n                  )\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/previous-versions/windows/desktop/regprov/stdregprov"
+  ],
+  "risk_score": 73,
+  "rule_id": "70d12c9c-0dbd-4a1a-bc44-1467502c9cf6",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.001",
+              "name": "Registry Run Keys / Startup Folder",
+              "reference": "https://attack.mitre.org/techniques/T1547/001/"
+            }
+          ]
+        },
+        {
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "reference": "https://attack.mitre.org/techniques/T1543/",
+          "subtechnique": [
+            {
+              "id": "T1543.003",
+              "name": "Windows Service",
+              "reference": "https://attack.mitre.org/techniques/T1543/003/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1047",
+          "name": "Windows Management Instrumentation",
+          "reference": "https://attack.mitre.org/techniques/T1047/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

@@ -21,6 +21,7 @@ import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
+import { EsHitRecord } from '../../angular/context/api/context';
 
 export const getRenderCellValueFn = (
   indexPattern: IndexPattern,
@@ -38,7 +39,11 @@ export const getRenderCellValueFn = (
   const ctx = useContext(DiscoverGridContext);
 
   useEffect(() => {
-    if (ctx.expanded && row && ctx.expanded._id === row._id) {
+    if ((row as EsHitRecord).isAnchor) {
+      setCellProps({
+        className: 'dscDocsGrid__cell--highlight',
+      });
+    } else if (ctx.expanded && row && ctx.expanded._id === row._id) {
       setCellProps({
         style: {
           backgroundColor: ctx.isDarkMode
@@ -115,7 +120,7 @@ export const getRenderCellValueFn = (
   if (typeof rowFlattened[columnId] === 'object' && isDetails) {
     return (
       <JsonCodeEditor
-        json={rowFlattened[columnId] as Record<string, any>}
+        json={rowFlattened[columnId] as Record<string, unknown>}
         width={defaultMonacoEditorWidth}
       />
     );
@@ -123,7 +128,8 @@ export const getRenderCellValueFn = (
 
   if (field && field.type === '_source') {
     if (isDetails) {
-      return <JsonCodeEditor json={row} width={defaultMonacoEditorWidth} />;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return <JsonCodeEditor json={row as any} width={defaultMonacoEditorWidth} />;
     }
     const formatted = indexPattern.formatHit(row);
 

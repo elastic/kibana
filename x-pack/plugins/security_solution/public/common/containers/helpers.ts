@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { FetchPolicy } from 'apollo-client';
 import { isString } from 'lodash/fp';
 
 import { ESQuery } from '../../../common/typed_json';
 
 export const createFilter = (filterQuery: ESQuery | string | undefined) =>
   isString(filterQuery) ? filterQuery : JSON.stringify(filterQuery);
-
-export const getDefaultFetchPolicy = (): FetchPolicy => 'cache-and-network';

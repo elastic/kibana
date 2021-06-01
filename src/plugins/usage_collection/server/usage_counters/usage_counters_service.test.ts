@@ -187,10 +187,13 @@ describe('UsageCountersService', () => {
     await tick();
     // number of incrementCounter calls + number of retries
     expect(mockIncrementCounter).toBeCalledTimes(2 + 1);
-    expect(logger.debug).toHaveBeenNthCalledWith(1, 'Store counters into savedObjects', [
-      mockError,
-      'pass',
-    ]);
+    expect(logger.debug).toHaveBeenNthCalledWith(1, 'Store counters into savedObjects', {
+      kibana: {
+        usageCounters: {
+          results: [mockError, 'pass'],
+        },
+      },
+    });
   });
 
   it('buffers counters within `bufferDurationMs` time', async () => {

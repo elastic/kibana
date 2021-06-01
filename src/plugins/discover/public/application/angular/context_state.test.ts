@@ -12,16 +12,17 @@ import { createBrowserHistory, History } from 'history';
 import { FilterManager, Filter } from '../../../../data/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+
 const setupMock = coreMock.createSetup();
 
 describe('Test Discover Context State', () => {
   let history: History;
-  let state: any;
+  let state: ReturnType<typeof getState>;
   const getCurrentUrl = () => history.createHref(history.location);
   beforeEach(async () => {
     history = createBrowserHistory();
     history.push('/');
-    state = await getState({
+    state = getState({
       defaultStepSize: '4',
       timeFieldName: 'time',
       history,
@@ -44,8 +45,10 @@ describe('Test Discover Context State', () => {
         "filters": Array [],
         "predecessorCount": 4,
         "sort": Array [
-          "time",
-          "desc",
+          Array [
+            "time",
+            "desc",
+          ],
         ],
         "successorCount": 4,
       }
@@ -59,7 +62,7 @@ describe('Test Discover Context State', () => {
     state.setAppState({ predecessorCount: 10 });
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(_source),filters:!(),predecessorCount:10,sort:!(time,desc),successorCount:4)"`
+      `"/#?_a=(columns:!(_source),filters:!(),predecessorCount:10,sort:!(!(time,desc)),successorCount:4)"`
     );
   });
   test('getState -> url to appState syncing', async () => {
@@ -182,7 +185,7 @@ describe('Test Discover Context State', () => {
     `);
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!f,params:(query:jpg),type:phrase),query:(match:(extension:(query:jpg,type:phrase))))))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!t,params:(query:png),type:phrase),query:(match:(extension:(query:png,type:phrase))))),predecessorCount:4,sort:!(time,desc),successorCount:4)"`
+      `"/#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!f,params:(query:jpg),type:phrase),query:(match:(extension:(query:jpg,type:phrase))))))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!t,params:(query:png),type:phrase),query:(match:(extension:(query:png,type:phrase))))),predecessorCount:4,sort:!(!(time,desc)),successorCount:4)"`
     );
   });
 });

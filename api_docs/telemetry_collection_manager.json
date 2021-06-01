@@ -13,105 +13,418 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "telemetryCollectionManager",
         "id": "def-server.ClusterDetails",
         "type": "Interface",
+        "tags": [],
         "label": "ClusterDetails",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 52
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "telemetryCollectionManager",
             "id": "def-server.ClusterDetails.clusterUuid",
             "type": "string",
+            "tags": [],
             "label": "clusterUuid",
             "description": [],
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 53
-            }
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 52
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "telemetryCollectionManager",
         "id": "def-server.StatsCollectionConfig",
         "type": "Interface",
+        "tags": [],
         "label": "StatsCollectionConfig",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 56
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "telemetryCollectionManager",
             "id": "def-server.StatsCollectionConfig.usageCollection",
             "type": "Object",
+            "tags": [],
             "label": "usageCollection",
             "description": [],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.UsageCollectionSetup",
+                "text": "UsageCollectionSetup"
+              }
+            ],
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 57
             },
-            "signature": [
-              "Pick<",
-              "CollectorSet",
-              ", \"makeStatsCollector\" | \"makeUsageCollector\" | \"registerCollector\" | \"getCollectorByType\" | \"areAllCollectorsReady\" | \"bulkFetch\" | \"bulkFetchUsage\" | \"toObject\" | \"toApiFieldNames\">"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "telemetryCollectionManager",
             "id": "def-server.StatsCollectionConfig.esClient",
             "type": "CompoundType",
+            "tags": [],
             "label": "esClient",
             "description": [],
+            "signature": [
+              "Pick<",
+              "KibanaClient",
+              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"helpers\" | \"count\" | \"search\" | \"security\" | \"eql\" | \"on\" | \"off\" | \"transform\" | \"emit\" | \"once\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+              "TransportRequestParams",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): ",
+              "TransportRequestPromise",
+              "<",
+              "ApiResponse",
+              "<Record<string, any>, unknown>>; }; }"
+            ],
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 58
             },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "telemetryCollectionManager",
             "id": "def-server.StatsCollectionConfig.soClient",
             "type": "Object",
+            "tags": [],
             "label": "soClient",
             "description": [],
-            "source": {
-              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-              "lineNumber": 59
-            },
             "signature": [
-              "Pick<",
+              "{ get: <T = unknown>(type: string, id: string, options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.StatsCollectionConfig.kibanaRequest",
-            "type": "Object",
-            "label": "kibanaRequest",
-            "description": [],
+              ") => Promise<",
+              "SavedObject",
+              "<T>>; delete: (type: string, id: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsDeleteOptions",
+                "text": "SavedObjectsDeleteOptions"
+              },
+              ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
+              " | undefined) => Promise<",
+              "SavedObject",
+              "<T>>; bulkCreate: <T = unknown>(objects: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkCreateObject",
+                "text": "SavedObjectsBulkCreateObject"
+              },
+              "<T>[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResponse",
+                "text": "SavedObjectsBulkResponse"
+              },
+              "<T>>; checkConflicts: (objects?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsCheckConflictsObject",
+                "text": "SavedObjectsCheckConflictsObject"
+              },
+              "[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsCheckConflictsResponse",
+                "text": "SavedObjectsCheckConflictsResponse"
+              },
+              ">; find: <T = unknown, A = unknown>(options: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFindOptions",
+                "text": "SavedObjectsFindOptions"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFindResponse",
+                "text": "SavedObjectsFindResponse"
+              },
+              "<T, A>>; bulkGet: <T = unknown>(objects?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkGetObject",
+                "text": "SavedObjectsBulkGetObject"
+              },
+              "[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkResponse",
+                "text": "SavedObjectsBulkResponse"
+              },
+              "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsResolveResponse",
+                "text": "SavedObjectsResolveResponse"
+              },
+              "<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateOptions",
+                "text": "SavedObjectsUpdateOptions"
+              },
+              "<T>) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              },
+              "<T>>; collectMultiNamespaceReferences: (objects: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
+              },
+              "[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
+              },
+              ">; updateObjectsSpaces: (objects: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
+                "text": "SavedObjectsUpdateObjectsSpacesObject"
+              },
+              "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
+                "text": "SavedObjectsUpdateObjectsSpacesOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
+                "text": "SavedObjectsUpdateObjectsSpacesResponse"
+              },
+              ">; bulkUpdate: <T = unknown>(objects: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkUpdateObject",
+                "text": "SavedObjectsBulkUpdateObject"
+              },
+              "<T>[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkUpdateOptions",
+                "text": "SavedObjectsBulkUpdateOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBulkUpdateResponse",
+                "text": "SavedObjectsBulkUpdateResponse"
+              },
+              "<T>>; removeReferencesTo: (type: string, id: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsRemoveReferencesToOptions",
+                "text": "SavedObjectsRemoveReferencesToOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsRemoveReferencesToResponse",
+                "text": "SavedObjectsRemoveReferencesToResponse"
+              },
+              ">; openPointInTimeForType: (type: string | string[], options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsOpenPointInTimeOptions",
+                "text": "SavedObjectsOpenPointInTimeOptions"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsOpenPointInTimeResponse",
+                "text": "SavedObjectsOpenPointInTimeResponse"
+              },
+              ">; closePointInTime: (id: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsClosePointInTimeResponse",
+                "text": "SavedObjectsClosePointInTimeResponse"
+              },
+              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFindOptions",
+                "text": "SavedObjectsFindOptions"
+              },
+              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
+                "text": "SavedObjectsCreatePointInTimeFinderDependencies"
+              },
+              " | undefined) => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.ISavedObjectsPointInTimeFinder",
+                "text": "ISavedObjectsPointInTimeFinder"
+              },
+              "<T, A>; errors: typeof ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsErrorHelpers",
+                "text": "SavedObjectsErrorHelpers"
+              },
+              "; }"
+            ],
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-              "lineNumber": 60
+              "lineNumber": 59
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "telemetryCollectionManager",
+            "id": "def-server.StatsCollectionConfig.kibanaRequest",
+            "type": "Object",
+            "tags": [],
+            "label": "kibanaRequest",
+            "description": [],
             "signature": [
               {
                 "pluginId": "core",
@@ -121,59 +434,69 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any> | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+              "lineNumber": 60
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 56
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "telemetryCollectionManager",
         "id": "def-server.StatsCollectionContext",
         "type": "Interface",
+        "tags": [],
         "label": "StatsCollectionContext",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 77
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "telemetryCollectionManager",
             "id": "def-server.StatsCollectionContext.logger",
             "type": "CompoundType",
+            "tags": [],
             "label": "logger",
             "description": [],
+            "signature": [
+              "Logger",
+              " | Console"
+            ],
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 78
             },
-            "signature": [
-              "Logger",
-              " | Console"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "telemetryCollectionManager",
             "id": "def-server.StatsCollectionContext.version",
             "type": "string",
+            "tags": [],
             "label": "version",
             "description": [],
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 79
-            }
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 77
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "telemetryCollectionManager",
         "id": "def-server.UsageStatsPayload",
         "type": "Interface",
+        "tags": [],
         "label": "UsageStatsPayload",
+        "description": [],
         "signature": [
           {
             "pluginId": "telemetryCollectionManager",
@@ -185,40 +508,38 @@
           " extends ",
           "BasicStatsPayload"
         ],
-        "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 73
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "telemetryCollectionManager",
             "id": "def-server.UsageStatsPayload.collectionSource",
             "type": "string",
+            "tags": [],
             "label": "collectionSource",
             "description": [],
             "source": {
               "path": "src/plugins/telemetry_collection_manager/server/types.ts",
               "lineNumber": 74
-            }
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 73
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "telemetryCollectionManager",
         "id": "def-server.ClusterDetailsGetter",
         "type": "Type",
-        "label": "ClusterDetailsGetter",
         "tags": [],
+        "label": "ClusterDetailsGetter",
         "description": [],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 83
-        },
         "signature": [
           "(config: ",
           {
@@ -246,18 +567,20 @@
           },
           "[]>"
         ],
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 83
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "telemetryCollectionManager",
         "id": "def-server.StatsGetter",
         "type": "Type",
-        "label": "StatsGetter",
         "tags": [],
+        "label": "StatsGetter",
         "description": [],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 87
-        },
         "signature": [
           "(clustersDetails: ",
           {
@@ -285,143 +608,215 @@
           },
           ") => Promise<T[]>"
         ],
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 87
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "telemetryCollectionManager",
         "id": "def-server.StatsGetterConfig",
         "type": "Type",
-        "label": "StatsGetterConfig",
         "tags": [],
+        "label": "StatsGetterConfig",
         "description": [],
-        "source": {
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "lineNumber": 82
-        },
         "signature": [
           "UnencryptedStatsGetterConfig",
           " | ",
           "EncryptedStatsGetterConfig"
         ],
+        "source": {
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 82
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "telemetryCollectionManager",
       "id": "def-server.TelemetryCollectionManagerPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "TelemetryCollectionManagerPluginSetup",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+        "lineNumber": 18
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "telemetryCollectionManager",
           "id": "def-server.TelemetryCollectionManagerPluginSetup.setCollectionStrategy",
           "type": "Function",
+          "tags": [],
           "label": "setCollectionStrategy",
           "description": [],
-          "source": {
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-            "lineNumber": 19
-          },
           "signature": [
             "<T extends ",
             "BasicStatsPayload",
             ">(collectionConfig: ",
             "CollectionStrategyConfig",
             "<T>) => void"
+          ],
+          "source": {
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 19
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "telemetryCollectionManager",
+              "id": "def-server.collectionConfig",
+              "type": "Object",
+              "tags": [],
+              "label": "collectionConfig",
+              "description": [],
+              "signature": [
+                "CollectionStrategyConfig",
+                "<T>"
+              ],
+              "source": {
+                "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+                "lineNumber": 20
+              },
+              "deprecated": false
+            }
           ]
         },
         {
-          "tags": [],
+          "parentPluginId": "telemetryCollectionManager",
           "id": "def-server.TelemetryCollectionManagerPluginSetup.getOptInStats",
           "type": "Function",
+          "tags": [],
           "label": "getOptInStats",
           "description": [],
+          "signature": [
+            "(optInStatus: boolean, config: ",
+            {
+              "pluginId": "telemetryCollectionManager",
+              "scope": "server",
+              "docId": "kibTelemetryCollectionManagerPluginApi",
+              "section": "def-server.StatsGetterConfig",
+              "text": "StatsGetterConfig"
+            },
+            ") => Promise<string[] | { cluster_uuid: string; opt_in_status: boolean; }[]>"
+          ],
           "source": {
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 22
           },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "telemetryCollectionManager",
+              "id": "def-server.optInStatus",
+              "type": "boolean",
+              "tags": [],
+              "label": "optInStatus",
+              "description": [],
+              "source": {
+                "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
+                "lineNumber": 165
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "telemetryCollectionManager",
+              "id": "def-server.config",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "config",
+              "description": [],
+              "signature": [
+                "UnencryptedStatsGetterConfig",
+                " | ",
+                "EncryptedStatsGetterConfig"
+              ],
+              "source": {
+                "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
+                "lineNumber": 165
+              },
+              "deprecated": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "telemetryCollectionManager",
+          "id": "def-server.TelemetryCollectionManagerPluginSetup.getStats",
+          "type": "Function",
+          "tags": [],
+          "label": "getStats",
+          "description": [],
           "signature": [
-            "(optInStatus: boolean, config: ",
+            "{ (config: ",
+            "UnencryptedStatsGetterConfig",
+            "): Promise<",
             {
               "pluginId": "telemetryCollectionManager",
               "scope": "server",
               "docId": "kibTelemetryCollectionManagerPluginApi",
-              "section": "def-server.StatsGetterConfig",
-              "text": "StatsGetterConfig"
+              "section": "def-server.UsageStatsPayload",
+              "text": "UsageStatsPayload"
             },
-            ") => Promise<string[] | { cluster_uuid: string; opt_in_status: boolean; }[]>"
-          ]
-        },
-        {
-          "tags": [],
-          "id": "def-server.TelemetryCollectionManagerPluginSetup.getStats",
-          "type": "Function",
-          "label": "getStats",
-          "description": [],
+            "[]>; (config: ",
+            "EncryptedStatsGetterConfig",
+            "): Promise<string[]>; }"
+          ],
           "source": {
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 23
           },
-          "signature": [
-            "(config: ",
-            {
-              "pluginId": "telemetryCollectionManager",
-              "scope": "server",
-              "docId": "kibTelemetryCollectionManagerPluginApi",
-              "section": "def-server.StatsGetterConfig",
-              "text": "StatsGetterConfig"
-            },
-            ") => Promise<string[] | ",
-            {
-              "pluginId": "telemetryCollectionManager",
-              "scope": "server",
-              "docId": "kibTelemetryCollectionManagerPluginApi",
-              "section": "def-server.UsageStatsPayload",
-              "text": "UsageStatsPayload"
-            },
-            "[]>"
-          ]
+          "deprecated": false
         },
         {
-          "tags": [],
+          "parentPluginId": "telemetryCollectionManager",
           "id": "def-server.TelemetryCollectionManagerPluginSetup.areAllCollectorsReady",
           "type": "Function",
+          "tags": [],
           "label": "areAllCollectorsReady",
           "description": [],
+          "signature": [
+            "() => Promise<boolean | undefined>"
+          ],
           "source": {
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 24
           },
-          "signature": [
-            "() => Promise<boolean | undefined>"
-          ]
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
         }
       ],
-      "source": {
-        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-        "lineNumber": 18
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "telemetryCollectionManager",
       "id": "def-server.TelemetryCollectionManagerPluginStart",
       "type": "Interface",
+      "tags": [],
       "label": "TelemetryCollectionManagerPluginStart",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+        "lineNumber": 27
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "telemetryCollectionManager",
           "id": "def-server.TelemetryCollectionManagerPluginStart.getOptInStats",
           "type": "Function",
+          "tags": [],
           "label": "getOptInStats",
           "description": [],
-          "source": {
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-            "lineNumber": 28
-          },
           "signature": [
             "(optInStatus: boolean, config: ",
             {
@@ -432,28 +827,58 @@
               "text": "StatsGetterConfig"
             },
             ") => Promise<string[] | { cluster_uuid: string; opt_in_status: boolean; }[]>"
+          ],
+          "source": {
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 28
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "telemetryCollectionManager",
+              "id": "def-server.optInStatus",
+              "type": "boolean",
+              "tags": [],
+              "label": "optInStatus",
+              "description": [],
+              "source": {
+                "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
+                "lineNumber": 165
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "telemetryCollectionManager",
+              "id": "def-server.config",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "config",
+              "description": [],
+              "signature": [
+                "UnencryptedStatsGetterConfig",
+                " | ",
+                "EncryptedStatsGetterConfig"
+              ],
+              "source": {
+                "path": "src/plugins/telemetry_collection_manager/server/plugin.ts",
+                "lineNumber": 165
+              },
+              "deprecated": false
+            }
           ]
         },
         {
-          "tags": [],
+          "parentPluginId": "telemetryCollectionManager",
           "id": "def-server.TelemetryCollectionManagerPluginStart.getStats",
           "type": "Function",
+          "tags": [],
           "label": "getStats",
           "description": [],
-          "source": {
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-            "lineNumber": 29
-          },
           "signature": [
-            "(config: ",
-            {
-              "pluginId": "telemetryCollectionManager",
-              "scope": "server",
-              "docId": "kibTelemetryCollectionManagerPluginApi",
-              "section": "def-server.StatsGetterConfig",
-              "text": "StatsGetterConfig"
-            },
-            ") => Promise<string[] | ",
+            "{ (config: ",
+            "UnencryptedStatsGetterConfig",
+            "): Promise<",
             {
               "pluginId": "telemetryCollectionManager",
               "scope": "server",
@@ -461,28 +886,35 @@
               "section": "def-server.UsageStatsPayload",
               "text": "UsageStatsPayload"
             },
-            "[]>"
-          ]
+            "[]>; (config: ",
+            "EncryptedStatsGetterConfig",
+            "): Promise<string[]>; }"
+          ],
+          "source": {
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 29
+          },
+          "deprecated": false
         },
         {
-          "tags": [],
+          "parentPluginId": "telemetryCollectionManager",
           "id": "def-server.TelemetryCollectionManagerPluginStart.areAllCollectorsReady",
           "type": "Function",
+          "tags": [],
           "label": "areAllCollectorsReady",
           "description": [],
+          "signature": [
+            "() => Promise<boolean | undefined>"
+          ],
           "source": {
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "lineNumber": 30
           },
-          "signature": [
-            "() => Promise<boolean | undefined>"
-          ]
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
         }
       ],
-      "source": {
-        "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-        "lineNumber": 27
-      },
       "lifecycle": "start",
       "initialIsOpen": true
     }

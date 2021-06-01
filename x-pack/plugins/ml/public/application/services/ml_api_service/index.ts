@@ -323,14 +323,22 @@ export function mlApiServicesProvider(httpService: HttpService) {
       bucketSpan,
       start,
       end,
+      overallScore,
     }: {
       jobId: string;
       topN: string;
       bucketSpan: string;
       start: number;
       end: number;
+      overallScore?: number;
     }) {
-      const body = JSON.stringify({ topN, bucketSpan, start, end });
+      const body = JSON.stringify({
+        topN,
+        bucketSpan,
+        start,
+        end,
+        ...(overallScore ? { overall_score: overallScore } : {}),
+      });
       return httpService.http<any>({
         path: `${basePath()}/anomaly_detectors/${jobId}/results/overall_buckets`,
         method: 'POST',
@@ -357,13 +365,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
     checkManageMLCapabilities() {
       return httpService.http<MlCapabilitiesResponse>({
         path: `${basePath()}/ml_capabilities`,
-        method: 'GET',
-      });
-    },
-
-    getNotificationSettings() {
-      return httpService.http<any>({
-        path: `${basePath()}/notification_settings`,
         method: 'GET',
       });
     },

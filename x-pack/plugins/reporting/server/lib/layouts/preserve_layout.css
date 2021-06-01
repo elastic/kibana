@@ -23,11 +23,6 @@ filter-bar,
   display: none !important;
 }
 
-/* override open/closed positioning of the app wrapper/nav */
-.app-wrapper {
-  left: 0px !important;
-}
-
 /**
  *  Discover Tweaks
  */

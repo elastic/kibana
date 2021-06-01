@@ -29,8 +29,6 @@ export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     index: schema.string({ defaultValue: '.kibana' }),
-    autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
-    autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
   }),
   deprecations,
 };

@@ -9,6 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 interface MultiInputRowsValues {
   values: string[];
+  addedNewRow: boolean;
   hasEmptyValues: boolean;
   hasOnlyOneValue: boolean;
 }
@@ -49,6 +50,12 @@ export const MultiInputRowsLogic = kea<
           newState[index] = newValueValue;
           return newState;
         },
+      },
+    ],
+    addedNewRow: [
+      false,
+      {
+        addValue: () => true,
       },
     ],
   }),

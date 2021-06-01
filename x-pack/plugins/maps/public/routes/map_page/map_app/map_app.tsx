@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
@@ -47,7 +46,7 @@ import { getTopNavConfig } from '../top_nav_config';
 import { MapQuery } from '../../../../common/descriptor_types';
 import { goToSpecifiedPath } from '../../../render_app';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { getExistingMapPath } from '../../../../common/constants';
+import { getExistingMapPath, APP_ID } from '../../../../common/constants';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
@@ -396,7 +395,7 @@ export class MapApp extends React.Component<Props, State> {
     return (
       <TopNavMenu
         setMenuMountPoint={this.props.setHeaderActionMenu}
-        appName="maps"
+        appName={APP_ID}
         config={topNavConfig}
         indexPatterns={this.state.indexPatterns}
         filters={this.props.filters}

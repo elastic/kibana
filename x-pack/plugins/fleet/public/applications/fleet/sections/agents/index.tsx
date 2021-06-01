@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 
 import { PAGE_ROUTING_PATHS } from '../../constants';
 import { Loading, Error } from '../../components';
-import { useConfig, useFleetStatus, useBreadcrumbs, useCapabilities } from '../../hooks';
+import {
+  useConfig,
+  useFleetStatus,
+  useBreadcrumbs,
+  useCapabilities,
+  useGetSettings,
+} from '../../hooks';
 import { WithoutHeaderLayout } from '../../layouts';
 
 import { AgentListPage } from './agent_list_page';
@@ -20,6 +26,7 @@ import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
 import { EnrollmentTokenListPage } from './enrollment_token_list_page';
 import { ListLayout } from './components/list_layout';
+import { FleetServerUpgradeModal } from './components/fleet_server_upgrade_modal';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -30,6 +37,20 @@ export const FleetApp: React.FunctionComponent = () => {
   const capabilities = useCapabilities();
 
   const fleetStatus = useFleetStatus();
+
+  const settings = useGetSettings();
+
+  const [fleetServerModalVisible, setFleetServerModalVisible] = useState(false);
+  const onCloseFleetServerModal = useCallback(() => {
+    setFleetServerModalVisible(false);
+  }, [setFleetServerModalVisible]);
+
+  useEffect(() => {
+    // if it's undefined do not show the modal
+    if (settings.data && settings.data?.item.has_seen_fleet_migration_notice === false) {
+      setFleetServerModalVisible(true);
+    }
+  }, [settings.data]);
 
   useEffect(() => {
     if (
@@ -99,6 +120,9 @@ export const FleetApp: React.FunctionComponent = () => {
         </Route>
         <Route path={PAGE_ROUTING_PATHS.fleet_agent_list}>
           <ListLayout>
+            {fleetServerModalVisible && (
+              <FleetServerUpgradeModal onClose={onCloseFleetServerModal} />
+            )}
             {hasOnlyFleetServerMissingRequirement ? (
               <FleetServerRequirementPage />
             ) : (

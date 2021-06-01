@@ -7,8 +7,8 @@
 
 import { PluginInitializerContext } from '../../../../src/core/public';
 import { Plugin } from './plugin';
-import { PluginSetup, PluginStart } from './types';
+import { PluginSetup } from './types';
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 
-export { Plugin, PluginSetup, PluginStart };
+export { Plugin, PluginSetup };

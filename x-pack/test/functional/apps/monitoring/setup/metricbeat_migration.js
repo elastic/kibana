@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/setup/collection/es_and_kibana_mb', {
+        await setup('monitoring/setup/collection/es_and_kibana', {
           from: 'Apr 9, 2019 @ 00:00:00.741',
           to: 'Apr 9, 2019 @ 23:59:59.741',
           useSuperUser: true,

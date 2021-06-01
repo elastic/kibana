@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import React, { memo } from 'react';
-import { useHistory, Route, Switch } from 'react-router-dom';
-
-import { ChromeBreadcrumb } from 'kibana/public';
-import { EuiText, EuiEmptyPrompt } from '@elastic/eui';
+import { Route, Switch, useHistory } from 'react-router-dom';
+import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+  MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_ROOT_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
@@ -23,39 +21,10 @@ import { EndpointsContainer } from './endpoint_hosts';
 import { PolicyContainer } from './policy';
 import { TrustedAppsContainer } from './trusted_apps';
 import { getEndpointListPath } from '../common/routing';
-import { APP_ID, SecurityPageName } from '../../../common/constants';
-import { GetUrlForApp } from '../../common/components/navigation/types';
-import { AdministrationRouteSpyState } from '../../common/utils/route/types';
-import { ADMINISTRATION } from '../../app/home/translations';
-import { AdministrationSubTab } from '../types';
-import { ENDPOINTS_TAB, POLICIES_TAB, TRUSTED_APPS_TAB } from '../common/translations';
+import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
-
-const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
-  [AdministrationSubTab.endpoints]: ENDPOINTS_TAB,
-  [AdministrationSubTab.policies]: POLICIES_TAB,
-  [AdministrationSubTab.trustedApps]: TRUSTED_APPS_TAB,
-};
-
-export function getBreadcrumbs(
-  params: AdministrationRouteSpyState,
-  search: string[],
-  getUrlForApp: GetUrlForApp
-): ChromeBreadcrumb[] {
-  return [
-    {
-      text: ADMINISTRATION,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.administration}`, {
-        path: !isEmpty(search[0]) ? search[0] : '',
-      }),
-    },
-    ...(params?.tabName ? [params?.tabName] : []).map((tabName) => ({
-      text: TabNameMappedToI18nKey[tabName],
-      href: '',
-    })),
-  ];
-}
+import { EventFiltersContainer } from './event_filters';
 
 const NoPermissions = memo(() => {
   return (
@@ -99,6 +68,8 @@ export const ManagementContainer = memo(() => {
       <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
       <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
       <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppsContainer} />
+      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFiltersContainer} />
+
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}
         exact

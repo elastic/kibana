@@ -11,6 +11,7 @@
   "server": {
     "classes": [
       {
+        "parentPluginId": "taskManager",
         "id": "def-server.TaskManagerPlugin",
         "type": "Class",
         "tags": [],
@@ -50,21 +51,35 @@
           },
           ", object, object>"
         ],
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/plugin.ts",
+          "lineNumber": 47
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskManagerPlugin.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/plugin.ts",
+              "lineNumber": 58
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "taskManager",
                 "id": "def-server.TaskManagerPlugin.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "initContext",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -75,24 +90,23 @@
                   },
                   "<unknown>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 55
-                }
+                  "lineNumber": 58
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 55
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskManagerPlugin.setup",
             "type": "Function",
+            "tags": [],
             "label": "setup",
+            "description": [],
             "signature": [
               "(core: ",
               {
@@ -111,13 +125,19 @@
                 "text": "TaskManagerSetupContract"
               }
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/plugin.ts",
+              "lineNumber": 65
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "taskManager",
                 "id": "def-server.TaskManagerPlugin.setup.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "core",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -128,24 +148,23 @@
                   },
                   "<object, unknown>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 62
-                }
+                  "lineNumber": 65
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 62
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskManagerPlugin.start",
             "type": "Function",
+            "tags": [],
             "label": "start",
+            "description": [],
             "signature": [
               "({ savedObjects, elasticsearch }: ",
               {
@@ -164,13 +183,19 @@
                 "text": "TaskManagerStartContract"
               }
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/plugin.ts",
+              "lineNumber": 113
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "taskManager",
                 "id": "def-server.TaskManagerPlugin.start.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "{ savedObjects, elasticsearch }",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -180,102 +205,146 @@
                     "text": "CoreStart"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 109
-                }
+                  "lineNumber": 113
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 109
-            }
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/plugin.ts",
-          "lineNumber": 44
-        },
         "initialIsOpen": false
       }
     ],
     "functions": [
       {
+        "parentPluginId": "taskManager",
+        "id": "def-server.asInterval",
+        "type": "Function",
+        "tags": [],
+        "label": "asInterval",
+        "description": [],
+        "signature": [
+          "(ms: number) => string"
+        ],
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/lib/intervals.ts",
+          "lineNumber": 41
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.asInterval.$1",
+            "type": "number",
+            "tags": [],
+            "label": "ms",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/lib/intervals.ts",
+              "lineNumber": 41
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.isUnrecoverableError",
         "type": "Function",
+        "tags": [],
         "label": "isUnrecoverableError",
+        "description": [],
         "signature": [
           "(error: Error | ",
           "DecoratedError",
           ") => boolean"
         ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-server.isUnrecoverableError.$1",
-            "type": "CompoundType",
-            "label": "error",
-            "isRequired": true,
-            "signature": [
-              "Error | ",
-              "DecoratedError"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-              "lineNumber": 21
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
         "source": {
           "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
           "lineNumber": 21
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.isUnrecoverableError.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | ",
+              "DecoratedError"
+            ],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "taskManager",
         "id": "def-server.throwUnrecoverableError",
         "type": "Function",
+        "tags": [],
         "label": "throwUnrecoverableError",
+        "description": [],
         "signature": [
           "(error: Error) => void"
         ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-server.throwUnrecoverableError.$1",
-            "type": "Object",
-            "label": "error",
-            "isRequired": true,
-            "signature": [
-              "Error"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-              "lineNumber": 25
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
         "source": {
           "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
           "lineNumber": 25
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.throwUnrecoverableError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error"
+            ],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
+              "lineNumber": 25
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
+        "parentPluginId": "taskManager",
         "id": "def-server.ConcreteTaskInstance",
         "type": "Interface",
+        "tags": [],
         "label": "ConcreteTaskInstance",
+        "description": [
+          "\nA task instance that has an id and is ready for storage."
+        ],
         "signature": [
           {
             "pluginId": "taskManager",
@@ -293,15 +362,17 @@
             "text": "TaskInstance"
           }
         ],
-        "description": [
-          "\nA task instance that has an id and is ready for storage."
-        ],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task.ts",
+          "lineNumber": 297
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.id",
             "type": "string",
+            "tags": [],
             "label": "id",
             "description": [
               "\nThe id of the Elastic document that stores this instance's data. This can\nbe passed by the caller when scheduling the task."
@@ -309,44 +380,50 @@
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 302
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.version",
             "type": "string",
+            "tags": [],
             "label": "version",
             "description": [
               "\nThe saved object version from the Elaticsearch document."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 307
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.scheduledAt",
             "type": "Object",
+            "tags": [],
             "label": "scheduledAt",
             "description": [
               "\nThe date and time that this task was originally scheduled. This is used\nfor convenience to task run functions, and for troubleshooting."
+            ],
+            "signature": [
+              "Date"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 313
             },
-            "signature": [
-              "Date"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.attempts",
             "type": "number",
+            "tags": [],
             "label": "attempts",
             "description": [
               "\nThe number of unsuccessful attempts since the last successful run. This\nwill be zeroed out after a successful run."
@@ -354,20 +431,18 @@
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 319
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.status",
             "type": "Enum",
+            "tags": [],
             "label": "status",
             "description": [
               "\nIndicates whether or not the task is currently running."
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 324
-            },
             "signature": [
               {
                 "pluginId": "taskManager",
@@ -376,116 +451,130 @@
                 "section": "def-server.TaskStatus",
                 "text": "TaskStatus"
               }
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 324
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.runAt",
             "type": "Object",
+            "tags": [],
             "label": "runAt",
             "description": [
               "\nThe date and time that this task is scheduled to be run. It is not guaranteed\nto run at this time, but it is guaranteed not to run earlier than this."
+            ],
+            "signature": [
+              "Date"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 330
             },
-            "signature": [
-              "Date"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.startedAt",
             "type": "CompoundType",
+            "tags": [],
             "label": "startedAt",
             "description": [
               "\nThe date and time that this task started execution. This is used to determine\nthe \"real\" runAt that ended up running the task. This value is only set\nwhen status is set to \"running\"."
+            ],
+            "signature": [
+              "Date | null"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 337
             },
-            "signature": [
-              "Date | null"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.retryAt",
             "type": "CompoundType",
+            "tags": [],
             "label": "retryAt",
             "description": [
               "\nThe date and time that this task should re-execute if stuck in \"running\" / timeout\nstatus. This value is only set when status is set to \"running\"."
+            ],
+            "signature": [
+              "Date | null"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 343
             },
-            "signature": [
-              "Date | null"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.state",
             "type": "Object",
+            "tags": [],
             "label": "state",
             "description": [
               "\nThe state passed into the task's run function, and returned by the previous\nrun. If there was no previous run, or if the previous run did not return\nany state, this will be the empy object: {}"
+            ],
+            "signature": [
+              "{ [x: string]: any; }"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 353
             },
-            "signature": [
-              "Record<string, any>"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.ownerId",
             "type": "CompoundType",
+            "tags": [],
             "label": "ownerId",
             "description": [
               "\nThe random uuid of the Kibana instance which claimed ownership of the task last"
+            ],
+            "signature": [
+              "string | null"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 358
             },
-            "signature": [
-              "string | null"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/task.ts",
-          "lineNumber": 297
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "taskManager",
         "id": "def-server.RunContext",
         "type": "Interface",
+        "tags": [],
         "label": "RunContext",
         "description": [
           "\nThe run context is passed into a task's run function as its sole argument."
         ],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task.ts",
+          "lineNumber": 33
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.RunContext.taskInstance",
             "type": "Object",
+            "tags": [],
             "label": "taskInstance",
             "description": [
               "\nThe document describing the task instance, its params, state, id, etc."
             ],
-            "source": {
-              "path": "x-pack/plugins/task_manager/server/task.ts",
-              "lineNumber": 37
-            },
             "signature": [
               {
                 "pluginId": "taskManager",
@@ -494,42 +583,52 @@
                 "section": "def-server.ConcreteTaskInstance",
                 "text": "ConcreteTaskInstance"
               }
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/task.ts",
+              "lineNumber": 37
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/task.ts",
-          "lineNumber": 33
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "taskManager",
         "id": "def-server.TaskInstance",
         "type": "Interface",
+        "tags": [],
         "label": "TaskInstance",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task.ts",
+          "lineNumber": 195
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.id",
             "type": "string",
+            "tags": [],
             "label": "id",
             "description": [
               "\nOptional ID that can be passed by the caller. When ID is undefined, ES\nwill auto-generate a unique id. Otherwise, ID will be used to either\ncreate a new document, or update existing document"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 201
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.taskType",
             "type": "string",
+            "tags": [],
             "label": "taskType",
             "description": [
               "\nThe task definition type whose run function will execute this instance."
@@ -537,202 +636,218 @@
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 206
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.scheduledAt",
             "type": "Object",
+            "tags": [],
             "label": "scheduledAt",
             "description": [
               "\nThe date and time that this task was originally scheduled. This is used\nfor convenience to task run functions, and for troubleshooting."
+            ],
+            "signature": [
+              "Date | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 212
             },
-            "signature": [
-              "Date | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.startedAt",
             "type": "CompoundType",
+            "tags": [],
             "label": "startedAt",
             "description": [
               "\nThe date and time that this task started execution. This is used to determine\nthe \"real\" runAt that ended up running the task. This value is only set\nwhen status is set to \"running\"."
+            ],
+            "signature": [
+              "Date | null | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 219
             },
-            "signature": [
-              "Date | null | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.retryAt",
             "type": "CompoundType",
+            "tags": [],
             "label": "retryAt",
             "description": [
               "\nThe date and time that this task should re-execute if stuck in \"running\" / timeout\nstatus. This value is only set when status is set to \"running\"."
+            ],
+            "signature": [
+              "Date | null | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 225
             },
-            "signature": [
-              "Date | null | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.runAt",
             "type": "Object",
+            "tags": [],
             "label": "runAt",
             "description": [
               "\nThe date and time that this task is scheduled to be run. It is not\nguaranteed to run at this time, but it is guaranteed not to run earlier\nthan this. Defaults to immediately."
+            ],
+            "signature": [
+              "Date | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 232
             },
-            "signature": [
-              "Date | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.schedule",
             "type": "Object",
+            "tags": [],
             "label": "schedule",
             "description": [
               "\nA TaskSchedule string, which specifies this as a recurring task.\n\nCurrently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s')."
+            ],
+            "signature": [
+              "IntervalSchedule",
+              " | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 239
             },
-            "signature": [
-              "IntervalSchedule",
-              " | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.params",
             "type": "Object",
+            "tags": [],
             "label": "params",
             "description": [
               "\nA task-specific set of parameters, used by the task's run function to tailor\nits work. This is generally user-input, such as { sms: '333-444-2222' }."
+            ],
+            "signature": [
+              "{ [x: string]: any; }"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 248
             },
-            "signature": [
-              "Record<string, any>"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.state",
             "type": "Object",
+            "tags": [],
             "label": "state",
             "description": [
               "\nThe state passed into the task's run function, and returned by the previous\nrun. If there was no previous run, or if the previous run did not return\nany state, this will be the empy object: {}"
+            ],
+            "signature": [
+              "{ [x: string]: any; }"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 258
             },
-            "signature": [
-              "Record<string, any>"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.user",
             "type": "string",
+            "tags": [],
             "label": "user",
             "description": [
               "\nThe id of the user who scheduled this task."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 263
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.scope",
             "type": "Array",
+            "tags": [],
             "label": "scope",
             "description": [
               "\nUsed to group tasks for querying. So, reporting might schedule tasks with a scope of 'reporting',\nand then query such tasks to provide a glimpse at only reporting tasks, rather than at all tasks."
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 269
             },
-            "signature": [
-              "string[] | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.ownerId",
             "type": "CompoundType",
+            "tags": [],
             "label": "ownerId",
             "description": [
               "\nThe random uuid of the Kibana instance which claimed ownership of the task last"
+            ],
+            "signature": [
+              "string | null | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/task.ts",
               "lineNumber": 274
             },
-            "signature": [
-              "string | null | undefined"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/task.ts",
-          "lineNumber": 195
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [
       {
+        "parentPluginId": "taskManager",
         "id": "def-server.TaskStatus",
         "type": "Enum",
-        "label": "TaskStatus",
         "tags": [],
+        "label": "TaskStatus",
         "description": [],
         "source": {
           "path": "x-pack/plugins/task_manager/server/task.ts",
           "lineNumber": 171
         },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
       {
+        "parentPluginId": "taskManager",
         "id": "def-server.TaskRunCreatorFunction",
         "type": "Type",
-        "label": "TaskRunCreatorFunction",
         "tags": [],
+        "label": "TaskRunCreatorFunction",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/task_manager/server/task.ts",
-          "lineNumber": 96
-        },
         "signature": [
           "(context: ",
           {
@@ -745,39 +860,56 @@
           ") => ",
           "CancellableTask"
         ],
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/task.ts",
+          "lineNumber": 96
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "taskManager",
       "id": "def-server.TaskManagerSetupContract",
       "type": "Type",
-      "label": "TaskManagerSetupContract",
       "tags": [],
+      "label": "TaskManagerSetupContract",
       "description": [],
+      "signature": [
+        "{ index: string; addMiddleware: (middleware: ",
+        "Middleware",
+        ") => void; } & Pick<",
+        "TaskTypeDictionary",
+        ", \"registerTaskDefinitions\">"
+      ],
       "source": {
         "path": "x-pack/plugins/task_manager/server/plugin.ts",
         "lineNumber": 31
       },
-      "signature": [
-        "{ addMiddleware: (middleware: Middleware) => void; } & Pick<TaskTypeDictionary, \"registerTaskDefinitions\">"
-      ],
+      "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "taskManager",
       "id": "def-server.TaskManagerStartContract",
       "type": "Type",
-      "label": "TaskManagerStartContract",
       "tags": [],
+      "label": "TaskManagerStartContract",
       "description": [],
+      "signature": [
+        "Pick<",
+        "TaskScheduling",
+        ", \"schedule\" | \"runNow\" | \"ensureScheduled\"> & Pick<",
+        "TaskStore",
+        ", \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: (id: string) => Promise<void>; }"
+      ],
       "source": {
         "path": "x-pack/plugins/task_manager/server/plugin.ts",
-        "lineNumber": 36
+        "lineNumber": 39
       },
-      "signature": [
-        "Pick<TaskScheduling, \"schedule\" | \"runNow\" | \"ensureScheduled\"> & Pick<TaskStore, \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: TaskStore['remove']; }"
-      ],
+      "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }

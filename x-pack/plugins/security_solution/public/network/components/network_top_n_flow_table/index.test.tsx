@@ -8,13 +8,10 @@
 import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import '../../../common/mock/match_media';
-import { FlowTargetSourceDest } from '../../../graphql/types';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -26,6 +23,7 @@ import { createStore, State } from '../../../common/store';
 import { networkModel } from '../../store';
 import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
 jest.mock('../../../common/components/link_to');
 
@@ -34,23 +32,11 @@ describe('NetworkTopNFlow Table Component', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('rendering', () => {
@@ -100,22 +86,20 @@ describe('NetworkTopNFlow Table Component', () => {
   describe('Sorting on Table', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <NetworkTopNFlowTable
-              data={mockData.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-              flowTargeted={FlowTargetSourceDest.source}
-              id="topNFlowSource"
-              isInspect={false}
-              loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-              totalCount={mockData.totalCount}
-              type={networkModel.NetworkType.page}
-            />
-          </TestProviders>
-        </MockedProvider>
+        <TestProviders store={store}>
+          <NetworkTopNFlowTable
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
+            flowTargeted={FlowTargetSourceDest.source}
+            id="topNFlowSource"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
+            type={networkModel.NetworkType.page}
+          />
+        </TestProviders>
       );
       expect(store.getState().network.page.queries.topNFlowSource.sort).toEqual({
         direction: 'desc',
@@ -130,12 +114,8 @@ describe('NetworkTopNFlow Table Component', () => {
         direction: 'asc',
         field: 'bytes_out',
       });
-      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-        'Bytes inClick to sort in ascending order'
-      );
-      expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual(
-        'Bytes outClick to sort in descending order'
-      );
+      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('Bytes in');
+      expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual('Bytes out');
       expect(wrapper.find('.euiTable thead tr th button').at(1).find('svg')).toBeTruthy();
     });
   });

@@ -10,16 +10,16 @@ import {
   TrustedApp,
   MacosLinuxConditionEntry,
   WindowsConditionEntry,
-  ConditionEntry,
   ConditionEntryField,
+  OperatorFieldIds,
 } from '../../../../../common/endpoint/types';
 
 export { OS_TITLES } from '../../../common/translations';
 
 export const ABOUT_TRUSTED_APPS = i18n.translate('xpack.securitySolution.trustedapps.aboutInfo', {
   defaultMessage:
-    'Add a trusted application to improve performance or alleviate conflicts with other applications ' +
-    'running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.',
+    'Add a trusted application to improve performance or alleviate conflicts with other applications running on ' +
+    'your hosts. Trusted applications are applied to hosts running the Endpoint Security integration on their agents.',
 });
 
 export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
@@ -52,9 +52,12 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in ConditionEntryField]: string }
   ),
 };
 
-export const OPERATOR_TITLE: { [K in ConditionEntry['operator']]: string } = {
-  included: i18n.translate('xpack.securitySolution.trustedapps.card.operator.includes', {
+export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
+  is: i18n.translate('xpack.securitySolution.trustedapps.card.operator.is', {
     defaultMessage: 'is',
+  }),
+  matches: i18n.translate('xpack.securitySolution.trustedapps.card.operator.matches', {
+    defaultMessage: 'matches',
   }),
 };
 
@@ -74,10 +77,10 @@ export const PROPERTY_TITLES: Readonly<
     defaultMessage: 'Created By',
   }),
   updated_at: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedAt', {
-    defaultMessage: 'Date Updated',
+    defaultMessage: 'Date Modified',
   }),
   updated_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedBy', {
-    defaultMessage: 'Updated By',
+    defaultMessage: 'Modified By',
   }),
   description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
     defaultMessage: 'Description',
@@ -150,10 +153,6 @@ export const LIST_VIEW_TOGGLE_LABEL = i18n.translate(
   }
 );
 
-export const NO_RESULTS_MESSAGE = i18n.translate('xpack.securitySolution.trustedapps.noResults', {
-  defaultMessage: 'No items found',
-});
-
 export const CREATE_TRUSTED_APP_ERROR: { [K in string]: string } = {
   [`duplicatedEntry.${ConditionEntryField.HASH}`]: i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.hash',
@@ -186,3 +185,10 @@ export const CREATE_TRUSTED_APP_ERROR: { [K in string]: string } = {
     { defaultMessage: 'An invalid Signature was entered. Please enter in a valid Signature.' }
   ),
 };
+
+export const SEARCH_TRUSTED_APP_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.trustedapps.list.search.placeholder',
+  {
+    defaultMessage: 'Search on the fields below: name, description, value',
+  }
+);

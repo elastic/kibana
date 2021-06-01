@@ -51,8 +51,9 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { registerMlAlerts } from './alerting/register_ml_alerts';
-import { FileUploadPluginStart } from '../../file_upload/public';
+import { FileDataVisualizerPluginStart } from '../../file_data_visualizer/public';
+import { PluginSetupContract as AlertingSetup } from '../../alerting/public';
+import { registerManagementSection } from './application/management';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -64,7 +65,7 @@ export interface MlStartDependencies {
   maps?: MapsStartApi;
   lens?: LensPublicStart;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
-  fileUpload: FileUploadPluginStart;
+  fileDataVisualizer: FileDataVisualizerPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -79,6 +80,7 @@ export interface MlSetupDependencies {
   share: SharePluginSetup;
   indexPatternManagement: IndexPatternManagementSetup;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
+  alerting?: AlertingSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -121,7 +123,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             lens: pluginsStart.lens,
             kibanaVersion,
             triggersActionsUi: pluginsStart.triggersActionsUi,
-            fileUpload: pluginsStart.fileUpload,
+            fileDataVisualizer: pluginsStart.fileDataVisualizer,
           },
           params
         );
@@ -132,8 +134,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
     }
 
-    if (pluginsSetup.triggersActionsUi) {
-      registerMlAlerts(pluginsSetup.triggersActionsUi);
+    if (pluginsSetup.management) {
+      registerManagementSection(pluginsSetup.management, core).enable();
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -163,9 +165,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       // note including registerFeature in register_helper would cause the page bundle size to increase significantly
       const {
         registerEmbeddables,
-        registerManagementSection,
         registerMlUiActions,
         registerSearchLinks,
+        registerMlAlerts,
       } = await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
@@ -174,13 +176,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerSearchLinks(this.appUpdater$, fullLicense);
 
         if (fullLicense) {
-          const canManageMLJobs =
-            capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
-          if (canManageMLJobs && pluginsSetup.management !== undefined) {
-            registerManagementSection(pluginsSetup.management, core).enable();
-          }
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
+
+          const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
+          if (pluginsSetup.triggersActionsUi && canUseMlAlerts) {
+            registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
+          }
         }
       }
     });

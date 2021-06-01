@@ -262,7 +262,12 @@ export class MonitoringPlugin
                 read: [],
               },
               alerting: {
-                all: ALERTS,
+                rule: {
+                  all: ALERTS,
+                },
+                alert: {
+                  all: ALERTS,
+                },
               },
               ui: [],
             },
@@ -333,6 +338,7 @@ export class MonitoringPlugin
               }
             },
             server: {
+              log: this.log,
               route: () => {},
               config: legacyConfigWrapper,
               newPlatform: {

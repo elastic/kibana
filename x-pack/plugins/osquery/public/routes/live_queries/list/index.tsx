@@ -9,14 +9,13 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
-import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
+import { useRouterNavigate } from '../../../common/lib/kibana';
 import { ActionsTable } from '../../../actions/actions_table';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const LiveQueriesPageComponent = () => {
-  const hasSaveUICapabilities = useKibana().services.application.capabilities.osquery.save;
   useBreadcrumbs('live_queries');
   const newQueryLinkProps = useRouterNavigate('live_queries/new');
 
@@ -52,11 +51,7 @@ const LiveQueriesPageComponent = () => {
   );
 
   return (
-    <WithHeaderLayout
-      leftColumn={LeftColumn}
-      rightColumn={hasSaveUICapabilities ? RightColumn : undefined}
-      rightColumnGrow={false}
-    >
+    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
       <ActionsTable />
     </WithHeaderLayout>
   );

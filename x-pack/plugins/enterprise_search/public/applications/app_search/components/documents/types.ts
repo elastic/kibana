@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { InternalSchemaTypes } from '../../../shared/types';
+import { InternalSchemaType } from '../../../shared/schema/types';
 
 export interface FieldDetails {
   name: string;
   value: string | string[];
-  type: InternalSchemaTypes;
+  type: InternalSchemaType;
 }

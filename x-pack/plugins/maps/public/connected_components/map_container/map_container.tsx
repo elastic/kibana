@@ -14,11 +14,10 @@ import uuid from 'uuid/v4';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { MBMap } from '../mb_map';
-// @ts-expect-error
-import { WidgetOverlay } from '../widget_overlay';
+import { RightSideControls } from '../right_side_controls';
+import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
-// @ts-expect-error
-import { LayerPanel } from '../layer_panel';
+import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
@@ -30,7 +29,7 @@ import { MapSettingsPanel } from '../map_settings_panel';
 import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { ILayer } from '../../classes/layers/layer';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -50,12 +49,15 @@ export interface Props {
   title?: string;
   description?: string;
   settings: MapSettings;
+  layerList: ILayer[];
 }
 
 interface State {
   isInitialLoadRenderTimeoutComplete: boolean;
   domId: string;
   geoFields: GeoFieldWithIndex[];
+  showFitToBoundsButton: boolean;
+  showTimesliderButton: boolean;
 }
 
 export class MapContainer extends Component<Props, State> {
@@ -67,14 +69,20 @@ export class MapContainer extends Component<Props, State> {
     isInitialLoadRenderTimeoutComplete: false,
     domId: uuid(),
     geoFields: [],
+    showFitToBoundsButton: false,
+    showTimesliderButton: false,
   };
 
   componentDidMount() {
     this._isMounted = true;
+    this._loadShowFitToBoundsButton();
+    this._loadShowTimesliderButton();
     registerLayerWizards();
   }
 
   componentDidUpdate() {
+    this._loadShowFitToBoundsButton();
+    this._loadShowTimesliderButton();
     if (this.props.areLayersLoaded && !this._isInitalLoadRenderTimerStarted) {
       this._isInitalLoadRenderTimerStarted = true;
       this._startInitialLoadRenderTimer();
@@ -105,7 +113,36 @@ export class MapContainer extends Component<Props, State> {
     }
   };
 
-  _loadGeoFields = async (nextIndexPatternIds: string[]) => {
+  async _loadShowFitToBoundsButton() {
+    const promises = this.props.layerList.map(async (layer) => {
+      return await layer.isFittable();
+    });
+    const showFitToBoundsButton = (await Promise.all(promises)).some((isFittable) => isFittable);
+    if (this._isMounted && this.state.showFitToBoundsButton !== showFitToBoundsButton) {
+      this.setState({ showFitToBoundsButton });
+    }
+  }
+
+  async _loadShowTimesliderButton() {
+    if (!this.props.settings.showTimesliderToggleButton) {
+      if (this.state.showTimesliderButton) {
+        this.setState({ showTimesliderButton: false });
+      }
+      return;
+    }
+
+    const promises = this.props.layerList.map(async (layer) => {
+      return await layer.isFilteredByGlobalTime();
+    });
+    const showTimesliderButton = (await Promise.all(promises)).some(
+      (isFilteredByGlobalTime) => isFilteredByGlobalTime
+    );
+    if (this._isMounted && this.state.showTimesliderButton !== showTimesliderButton) {
+      this.setState({ showTimesliderButton });
+    }
+  }
+
+  async _loadGeoFields(nextIndexPatternIds: string[]) {
     if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
       // all ready loaded index pattern ids
       return;
@@ -137,7 +174,7 @@ export class MapContainer extends Component<Props, State> {
     }
 
     this.setState({ geoFields });
-  };
+  }
 
   // Mapbox does not provide any feedback when rendering is complete.
   // Temporary solution is just to wait set period of time after data has loaded.
@@ -188,7 +225,7 @@ export class MapContainer extends Component<Props, State> {
     if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
       flyoutPanel = <AddLayerPanel />;
     } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
-      flyoutPanel = <LayerPanel />;
+      flyoutPanel = <EditLayerPanel />;
     } else if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
       flyoutPanel = <MapSettingsPanel />;
     }
@@ -225,10 +262,14 @@ export class MapContainer extends Component<Props, State> {
               geoFields={this.state.geoFields}
               getFilterActions={getFilterActions}
               getActionContext={getActionContext}
+              showFitToBoundsButton={this.state.showFitToBoundsButton}
+              showTimesliderButton={this.state.showTimesliderButton}
             />
           )}
-          <WidgetOverlay />
+          <RightSideControls />
         </EuiFlexItem>
+
+        <Timeslider />
 
         <EuiFlexItem
           className={classNames('mapMapLayerPanel', {

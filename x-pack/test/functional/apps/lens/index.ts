@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context.d';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -16,8 +16,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 800);
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.load('logstash_functional');
+      await esArchiver.load('lens/basic');
     });
 
     after(async () => {
@@ -37,6 +37,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./colors'));
       loadTestFile(require.resolve('./chart_data'));
       loadTestFile(require.resolve('./drag_and_drop'));
+      loadTestFile(require.resolve('./geo_field'));
       loadTestFile(require.resolve('./lens_reporting'));
       loadTestFile(require.resolve('./lens_tagging'));
 

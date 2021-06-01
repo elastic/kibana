@@ -1,0 +1,171 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KibanaPageTemplate render basic template 1`] = `
+<EuiPageTemplate
+  paddingSize="l"
+  pageHeader={
+    Object {
+      "description": "test",
+      "iconType": "test",
+      "rightSideItems": Array [
+        "test",
+      ],
+      "title": "test",
+    }
+  }
+  pageSideBarProps={
+    Object {
+      "className": "kbnPageTemplate__pageSideBar",
+    }
+  }
+  restrictWidth={true}
+/>
+`;
+
+exports[`KibanaPageTemplate render custom empty prompt only 1`] = `
+<EuiPageTemplate
+  paddingSize="none"
+  pageSideBarProps={
+    Object {
+      "className": "kbnPageTemplate__pageSideBar",
+    }
+  }
+  restrictWidth={true}
+  template="centeredBody"
+>
+  <EuiEmptyPrompt
+    title={
+      <h1>
+        custom test
+      </h1>
+    }
+  />
+</EuiPageTemplate>
+`;
+
+exports[`KibanaPageTemplate render custom empty prompt with page header 1`] = `
+<EuiPageTemplate
+  paddingSize="l"
+  pageHeader={
+    Object {
+      "description": "test",
+      "iconType": "test",
+      "rightSideItems": Array [
+        "test",
+      ],
+      "title": "test",
+    }
+  }
+  pageSideBarProps={
+    Object {
+      "className": "kbnPageTemplate__pageSideBar",
+    }
+  }
+  restrictWidth={true}
+  template="centeredContent"
+>
+  <EuiEmptyPrompt
+    title={
+      <h1>
+        custom test
+      </h1>
+    }
+  />
+</EuiPageTemplate>
+`;
+
+exports[`KibanaPageTemplate render default empty prompt 1`] = `
+<EuiPageTemplate
+  paddingSize="none"
+  pageSideBarProps={
+    Object {
+      "className": "kbnPageTemplate__pageSideBar",
+    }
+  }
+  restrictWidth={true}
+  template="centeredBody"
+>
+  <EuiEmptyPrompt
+    actions={
+      Array [
+        "test",
+      ]
+    }
+    body={
+      <p>
+        test
+      </p>
+    }
+    iconColor=""
+    iconType="test"
+  />
+</EuiPageTemplate>
+`;
+
+exports[`KibanaPageTemplate render solutionNav 1`] = `
+<EuiPageTemplate
+  paddingSize="l"
+  pageHeader={
+    Object {
+      "description": "test",
+      "iconType": "test",
+      "rightSideItems": Array [
+        "test",
+      ],
+      "title": "test",
+    }
+  }
+  pageSideBar={
+    <KibanaPageTemplateSolutionNav
+      icon="solution"
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "items": Array [
+              Object {
+                "id": "1.1",
+                "name": "Ingest Node Pipelines",
+              },
+              Object {
+                "id": "1.2",
+                "name": "Logstash Pipelines",
+              },
+              Object {
+                "id": "1.3",
+                "name": "Beats Central Management",
+              },
+            ],
+            "name": "Ingest",
+          },
+          Object {
+            "id": "2",
+            "items": Array [
+              Object {
+                "id": "2.1",
+                "name": "Index Management",
+              },
+              Object {
+                "id": "2.2",
+                "name": "Index Lifecycle Policies",
+              },
+              Object {
+                "id": "2.3",
+                "name": "Snapshot and Restore",
+              },
+            ],
+            "name": "Data",
+          },
+        ]
+      }
+      name="Solution"
+    />
+  }
+  pageSideBarProps={
+    Object {
+      "className": "kbnPageTemplate__pageSideBar",
+    }
+  }
+  restrictWidth={true}
+/>
+`;

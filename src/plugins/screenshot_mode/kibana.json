@@ -1,0 +1,9 @@
+{
+  "id": "screenshotMode",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "ui": true,
+  "server": true,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}

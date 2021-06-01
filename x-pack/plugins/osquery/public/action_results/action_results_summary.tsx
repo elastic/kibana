@@ -18,14 +18,20 @@ import {
   EuiDescriptionList,
   EuiInMemoryTable,
   EuiCodeBlock,
+  EuiProgress,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
 import { pagePathGetters } from '../../../fleet/public';
 import { useActionResults } from './use_action_results';
 import { useAllResults } from '../results/use_all_results';
 import { Direction } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
+
+const StyledEuiCard = styled(EuiCard)`
+  position: relative;
+`;
 
 interface ActionResultsSummaryProps {
   actionId: string;
@@ -66,8 +72,12 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     actionId,
     activePage: pageIndex,
     limit: pageSize,
-    direction: Direction.asc,
-    sortField: '@timestamp',
+    sort: [
+      {
+        field: '@timestamp',
+        direction: Direction.asc,
+      },
+    ],
     isLive,
   });
 
@@ -215,14 +225,15 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiCard title="" description="" textAlign="left">
+          <StyledEuiCard title="" description="" textAlign="left">
+            {notRespondedCount ? <EuiProgress size="xs" position="absolute" /> : null}
             <EuiDescriptionList
               compressed
               textStyle="reverse"
               type="responsiveColumn"
               listItems={listItems}
             />
-          </EuiCard>
+          </StyledEuiCard>
         </EuiFlexItem>
       </EuiFlexGroup>
 

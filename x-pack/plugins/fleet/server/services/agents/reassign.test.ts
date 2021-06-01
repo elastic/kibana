@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/serve
 import type { SavedObject } from 'kibana/server';
 
 import type { AgentPolicy } from '../../types';
-import { AgentReassignmentError } from '../../errors';
+import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { reassignAgent, reassignAgents } from './reassign';
 
@@ -54,7 +54,7 @@ describe('reassignAgent (singular)', () => {
     const { soClient, esClient } = createClientsMock();
     await expect(
       reassignAgent(soClient, esClient, agentInRegularDoc._id, hostedAgentPolicySO.id)
-    ).rejects.toThrowError(AgentReassignmentError);
+    ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
 
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
@@ -64,13 +64,13 @@ describe('reassignAgent (singular)', () => {
     const { soClient, esClient } = createClientsMock();
     await expect(
       reassignAgent(soClient, esClient, agentInHostedDoc._id, regularAgentPolicySO.id)
-    ).rejects.toThrowError(AgentReassignmentError);
+    ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
 
     await expect(
       reassignAgent(soClient, esClient, agentInHostedDoc._id, hostedAgentPolicySO.id)
-    ).rejects.toThrowError(AgentReassignmentError);
+    ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
   });

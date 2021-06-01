@@ -19,7 +19,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Listing of Reports', function () {
     before(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'reporting_user']);
+      await security.role.create('test_reporting_user', {
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: { canvas: ['minimal_read', 'generate_report'] },
+          },
+        ],
+      });
+      await security.testUser.setRoles(['kibana_admin', 'test_reporting_user']);
       await esArchiver.load('empty_kibana');
     });
 

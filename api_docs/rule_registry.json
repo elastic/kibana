@@ -9,323 +9,765 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [
+    "classes": [
       {
-        "id": "def-server.createLifecycleRuleTypeFactory",
-        "type": "Function",
-        "label": "createLifecycleRuleTypeFactory",
-        "signature": [
-          "() => TRuleRegistry extends ",
-          "RuleRegistry",
-          "<infer TFieldMap> ? CreateLifecycleRuleType<TFieldMap> : never"
-        ],
-        "description": [],
-        "children": [],
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.RuleDataClient",
+        "type": "Class",
         "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/rule_registry/server/rule_registry/rule_type_helpers/create_lifecycle_rule_type_factory.ts",
-          "lineNumber": 54
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.createLifecycleRuleTypeFactory",
-        "type": "Function",
-        "label": "createLifecycleRuleTypeFactory",
-        "signature": [
-          "() => CreateLifecycleRuleType<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>"
-        ],
+        "label": "RuleDataClient",
         "description": [],
-        "children": [],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/rule_registry/server/rule_registry/rule_type_helpers/create_lifecycle_rule_type_factory.ts",
-          "lineNumber": 60
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.pickWithPatterns",
-        "type": "Function",
-        "label": "pickWithPatterns",
-        "signature": [
-          "(map: T, patterns: TPatterns) => Pick<{ [TFieldName in keyof T]: ",
-          "SetIntersection",
-          "<",
-          "ValuesType",
-          "<TPatterns>, PatternMapOf<T>[TFieldName]> extends never ? never : T[TFieldName]; }, { [Key in keyof { [TFieldName in keyof T]: ",
-          "SetIntersection",
-          "<",
-          "ValuesType",
-          "<TPatterns>, PatternMapOf<T>[TFieldName]> extends never ? never : T[TFieldName]; }]-?: [{ [TFieldName in keyof T]: ",
-          "SetIntersection"
-        ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-server.pickWithPatterns.$1",
-            "type": "Uncategorized",
-            "label": "map",
-            "isRequired": true,
-            "signature": [
-              "T"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/rule_registry/server/rule_registry/field_map/pick_with_patterns.ts",
-              "lineNumber": 42
-            }
-          },
-          {
-            "id": "def-server.pickWithPatterns.$2",
-            "type": "Uncategorized",
-            "label": "patterns",
-            "isRequired": true,
-            "signature": [
-              "TPatterns"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/rule_registry/server/rule_registry/field_map/pick_with_patterns.ts",
-              "lineNumber": 42
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/rule_registry/server/rule_registry/field_map/pick_with_patterns.ts",
-          "lineNumber": 39
-        },
-        "initialIsOpen": false
-      }
-    ],
-    "interfaces": [
-      {
-        "id": "def-server.ScopedRuleRegistryClient",
-        "type": "Interface",
-        "label": "ScopedRuleRegistryClient",
         "signature": [
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
             "docId": "kibRuleRegistryPluginApi",
-            "section": "def-server.ScopedRuleRegistryClient",
-            "text": "ScopedRuleRegistryClient"
+            "section": "def-server.RuleDataClient",
+            "text": "RuleDataClient"
           },
-          "<TFieldMap>"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
+          " implements ",
           {
-            "id": "def-server.ScopedRuleRegistryClient.search",
-            "type": "Function",
-            "label": "search",
-            "signature": [
-              "<TSearchRequest extends FieldsESSearchRequest<TFieldMap>>(request: TSearchRequest) => Promise<{ body: ",
-              "InferSearchResponseOf",
-              "<unknown, TSearchRequest, { restTotalHitsAsInt: false; }>; events: ",
-              "EventsOf",
-              "<TSearchRequest, TFieldMap>; }>"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.ScopedRuleRegistryClient.search.$1",
-                "type": "Uncategorized",
-                "label": "request",
-                "isRequired": true,
-                "signature": [
-                  "TSearchRequest"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/rule_registry/server/rule_registry/create_scoped_rule_registry_client/types.ts",
-                  "lineNumber": 42
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/rule_registry/server/rule_registry/create_scoped_rule_registry_client/types.ts",
-              "lineNumber": 41
-            }
-          },
-          {
-            "id": "def-server.ScopedRuleRegistryClient.index",
-            "type": "Function",
-            "label": "index",
-            "signature": [
-              "(doc: Pick<",
-              "Mutable",
-              "<{ [K in keyof Pick<{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }, { [Key in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }]-?: [true] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] ? [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key] & true] ? Key : never : never; }[keyof TFieldMap]>]: ",
-              "OutputOf",
-              "<Pick<{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }, { [Key in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }]-?: [true] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] ? [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key] & true] ? Key : never : never; }[keyof TFieldMap]>[K]>; } & { [K in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }]?: ",
-              "OutputOf",
-              "<{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }[K]> | undefined; }>, Exclude<keyof TFieldMap, ",
-              "PrepopulatedRuleEventFields",
-              "> | Exclude<{ [Key in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }]-?: [true] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] ? [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key] & true] ? Key : never : never; }[keyof TFieldMap], ",
-              "PrepopulatedRuleEventFields"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.ScopedRuleRegistryClient.index.$1",
-                "type": "Object",
-                "label": "doc",
-                "isRequired": true,
-                "signature": [
-                  "Pick<",
-                  "Mutable",
-                  "<{ [K in keyof Pick<{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }, { [Key in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }]-?: [true] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] ? [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key] & true] ? Key : never : never; }[keyof TFieldMap]>]: ",
-                  "OutputOf",
-                  "<Pick<{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }, { [Key in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }]-?: [true] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] ? [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key] & true] ? Key : never : never; }[keyof TFieldMap]>[K]>; } & { [K in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }]?: ",
-                  "OutputOf",
-                  "<{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }[K]> | undefined; }>, Exclude<keyof TFieldMap, ",
-                  "PrepopulatedRuleEventFields",
-                  "> | Exclude<{ [Key in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }]-?: [true] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] ? [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key] & true] ? Key : never : never; }[keyof TFieldMap], ",
-                  "PrepopulatedRuleEventFields"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/rule_registry/server/rule_registry/create_scoped_rule_registry_client/types.ts",
-                  "lineNumber": 47
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/rule_registry/server/rule_registry/create_scoped_rule_registry_client/types.ts",
-              "lineNumber": 47
-            }
-          },
-          {
-            "id": "def-server.ScopedRuleRegistryClient.bulkIndex",
-            "type": "Function",
-            "label": "bulkIndex",
-            "signature": [
-              "(doc: Pick<",
-              "Mutable",
-              "<{ [K in keyof Pick<{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }, { [Key in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }]-?: [true] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] ? [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key] & true] ? Key : never : never; }[keyof TFieldMap]>]: ",
-              "OutputOf",
-              "<Pick<{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }, { [Key in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }]-?: [true] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] ? [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key] & true] ? Key : never : never; }[keyof TFieldMap]>[K]>; } & { [K in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }]?: ",
-              "OutputOf",
-              "<{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }[K]> | undefined; }>, Exclude<keyof TFieldMap, ",
-              "PrepopulatedRuleEventFields",
-              "> | Exclude<{ [Key in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }]-?: [true] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] ? [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key] & true] ? Key : never : never; }[keyof TFieldMap], ",
-              "PrepopulatedRuleEventFields"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.ScopedRuleRegistryClient.bulkIndex.$1",
-                "type": "Array",
-                "label": "doc",
-                "isRequired": true,
-                "signature": [
-                  "Pick<",
-                  "Mutable",
-                  "<{ [K in keyof Pick<{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }, { [Key in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }]-?: [true] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] ? [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key] & true] ? Key : never : never; }[keyof TFieldMap]>]: ",
-                  "OutputOf",
-                  "<Pick<{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }, { [Key in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }]-?: [true] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] ? [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key] & true] ? Key : never : never; }[keyof TFieldMap]>[K]>; } & { [K in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }]?: ",
-                  "OutputOf",
-                  "<{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"type\"]; }[K]> | undefined; }>, Exclude<keyof TFieldMap, ",
-                  "PrepopulatedRuleEventFields",
-                  "> | Exclude<{ [Key in keyof { [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }]-?: [true] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] ? [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key]] extends [{ [key in keyof MapTypeValues<TFieldMap>]: MapTypeValues<TFieldMap>[key][\"required\"]; }[Key] & true] ? Key : never : never; }[keyof TFieldMap], ",
-                  "PrepopulatedRuleEventFields"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/rule_registry/server/rule_registry/create_scoped_rule_registry_client/types.ts",
-                  "lineNumber": 49
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/rule_registry/server/rule_registry/create_scoped_rule_registry_client/types.ts",
-              "lineNumber": 48
-            }
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.IRuleDataClient",
+            "text": "IRuleDataClient"
           }
         ],
         "source": {
-          "path": "x-pack/plugins/rule_registry/server/rule_registry/create_scoped_rule_registry_client/types.ts",
-          "lineNumber": 40
+          "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+          "lineNumber": 21
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.RuleDataClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "RuleDataClientConstructorOptions"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                  "lineNumber": 22
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClient.getReader",
+            "type": "Function",
+            "tags": [],
+            "label": "getReader",
+            "description": [],
+            "signature": [
+              "(options?: { namespace?: string | undefined; }) => ",
+              "RuleDataReader"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.RuleDataClient.getReader.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                  "lineNumber": 29
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.RuleDataClient.getReader.$1.options.namespace",
+                    "type": "string",
+                    "tags": [],
+                    "label": "namespace",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "source": {
+                      "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                      "lineNumber": 29
+                    },
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClient.getWriter",
+            "type": "Function",
+            "tags": [],
+            "label": "getWriter",
+            "description": [],
+            "signature": [
+              "(options?: { namespace?: string | undefined; }) => ",
+              "RuleDataWriter"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+              "lineNumber": 60
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.RuleDataClient.getWriter.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                  "lineNumber": 60
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.RuleDataClient.getWriter.$1.options.namespace",
+                    "type": "string",
+                    "tags": [],
+                    "label": "namespace",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "source": {
+                      "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                      "lineNumber": 60
+                    },
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClient.createOrUpdateWriteTarget",
+            "type": "Function",
+            "tags": [],
+            "label": "createOrUpdateWriteTarget",
+            "description": [],
+            "signature": [
+              "({ namespace }: { namespace?: string | undefined; }) => Promise<void>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+              "lineNumber": 92
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.RuleDataClient.createOrUpdateWriteTarget.$1.namespace",
+                "type": "Object",
+                "tags": [],
+                "label": "{ namespace }",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                  "lineNumber": 92
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.RuleDataClient.createOrUpdateWriteTarget.$1.namespace.namespace",
+                    "type": "string",
+                    "tags": [],
+                    "label": "namespace",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "source": {
+                      "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
+                      "lineNumber": 92
+                    },
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.createLifecycleRuleTypeFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "createLifecycleRuleTypeFactory",
+        "description": [],
+        "signature": [
+          "({ logger, ruleDataClient, }: { ruleDataClient: ",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.RuleDataClient",
+            "text": "RuleDataClient"
+          },
+          "; logger: ",
+          "Logger",
+          "; }) => <TParams extends Record<string, unknown>, TAlertInstanceContext extends { [x: string]: unknown; }, TServices extends { alertWithLifecycle: LifecycleAlertService<TAlertInstanceContext>; }>(type: ",
+          "AlertTypeWithExecutor",
+          "<TParams, TAlertInstanceContext, TServices>) => { executor: (options: ",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.AlertExecutorOptions",
+            "text": "AlertExecutorOptions"
+          },
+          "<TParams, Record<string, unknown>, { [x: string]: unknown; }, TAlertInstanceContext, never> & { services: any; }) => Promise<{ wrapped: any; trackedAlerts: { [k: string]: { alertId: string; alertUuid: string; started: string; }; }; }>; id: string; name: string; validate?: { params?: ",
+          "AlertTypeParamsValidator",
+          "<TParams> | undefined; } | undefined; actionGroups: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionGroup",
+            "text": "ActionGroup"
+          },
+          "<string>[]; defaultActionGroupId: string; recoveryActionGroup?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionGroup",
+            "text": "ActionGroup"
+          },
+          "<string> | undefined; producer: string; actionVariables?: { context?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          "[] | undefined; state?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          "[] | undefined; params?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          "[] | undefined; } | undefined; minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\"; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+          "lineNumber": 62
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.createLifecycleRuleTypeFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  logger,\n  ruleDataClient,\n}",
+            "description": [],
+            "signature": [
+              "{ ruleDataClient: ",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.RuleDataClient",
+                "text": "RuleDataClient"
+              },
+              "; logger: ",
+              "Logger",
+              "; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
+              "lineNumber": 62
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.getRuleExecutorData",
+        "type": "Function",
+        "tags": [],
+        "label": "getRuleExecutorData",
+        "description": [],
+        "signature": [
+          "(type: ",
+          "AlertTypeWithExecutor",
+          "<any, any, any>, options: ",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.AlertExecutorOptions",
+            "text": "AlertExecutorOptions"
+          },
+          "<{}, Record<string, unknown>, { [x: string]: unknown; }, {}, never> & { services: {}; }) => { \"rule.id\": string; \"rule.uuid\": string; \"rule.category\": string; \"rule.name\": string; tags: string[]; \"kibana.rac.alert.producer\": string; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+          "lineNumber": 27
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.getRuleExecutorData.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "AlertTypeWithExecutor",
+              "<any, any, any>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.getRuleExecutorData.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertExecutorOptions",
+                "text": "AlertExecutorOptions"
+              },
+              "<{}, Record<string, unknown>, { [x: string]: unknown; }, {}, never> & { services: {}; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.IRuleDataClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "IRuleDataClient",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+          "lineNumber": 34
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.IRuleDataClient.getReader",
+            "type": "Function",
+            "tags": [],
+            "label": "getReader",
+            "description": [],
+            "signature": [
+              "(options?: { namespace?: string | undefined; } | undefined) => ",
+              "RuleDataReader"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.IRuleDataClient.getReader.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                  "lineNumber": 35
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.IRuleDataClient.getReader.$1.options.namespace",
+                    "type": "string",
+                    "tags": [],
+                    "label": "namespace",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "source": {
+                      "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                      "lineNumber": 35
+                    },
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.IRuleDataClient.getWriter",
+            "type": "Function",
+            "tags": [],
+            "label": "getWriter",
+            "description": [],
+            "signature": [
+              "(options?: { namespace?: string | undefined; } | undefined) => ",
+              "RuleDataWriter"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+              "lineNumber": 36
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.IRuleDataClient.getWriter.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                  "lineNumber": 36
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.IRuleDataClient.getWriter.$1.options.namespace",
+                    "type": "string",
+                    "tags": [],
+                    "label": "namespace",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "source": {
+                      "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                      "lineNumber": 36
+                    },
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.IRuleDataClient.createOrUpdateWriteTarget",
+            "type": "Function",
+            "tags": [],
+            "label": "createOrUpdateWriteTarget",
+            "description": [],
+            "signature": [
+              "(options: { namespace?: string | undefined; }) => Promise<void>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+              "lineNumber": 37
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.IRuleDataClient.createOrUpdateWriteTarget.$1.options",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                  "lineNumber": 37
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.IRuleDataClient.createOrUpdateWriteTarget.$1.options.namespace",
+                    "type": "string",
+                    "tags": [],
+                    "label": "namespace",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "source": {
+                      "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
+                      "lineNumber": 37
+                    },
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.RuleExecutorData",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleExecutorData",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+          "lineNumber": 18
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleExecutorData.RULE_CATEGORY",
+            "type": "string",
+            "tags": [],
+            "label": "[RULE_CATEGORY]",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleExecutorData.RULE_ID",
+            "type": "string",
+            "tags": [],
+            "label": "[RULE_ID]",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 20
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleExecutorData.RULE_UUID",
+            "type": "string",
+            "tags": [],
+            "label": "[RULE_UUID]",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleExecutorData.RULE_NAME",
+            "type": "string",
+            "tags": [],
+            "label": "[RULE_NAME]",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleExecutorData.PRODUCER",
+            "type": "string",
+            "tags": [],
+            "label": "[PRODUCER]",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleExecutorData.TAGS",
+            "type": "Array",
+            "tags": [],
+            "label": "[TAGS]",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "x-pack/plugins/rule_registry/server/utils/get_rule_executor_data.ts",
+              "lineNumber": 24
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
-        "id": "def-server.FieldMapOf",
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.RuleRegistryPluginConfig",
         "type": "Type",
-        "label": "FieldMapOf",
         "tags": [],
+        "label": "RuleRegistryPluginConfig",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/rule_registry/server/types.ts",
-          "lineNumber": 98
-        },
         "signature": [
-          "TRuleRegistry extends RuleRegistry<infer TFieldMap> ? TFieldMap : never"
+          "{ readonly enabled: boolean; readonly index: string; readonly write: Readonly<{} & { enabled: boolean; }>; }"
         ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.RuleRegistryConfig",
-        "type": "Type",
-        "label": "RuleRegistryConfig",
-        "tags": [],
-        "description": [],
         "source": {
-          "path": "x-pack/plugins/rule_registry/server/index.ts",
-          "lineNumber": 26
+          "path": "x-pack/plugins/rule_registry/server/config.ts",
+          "lineNumber": 20
         },
-        "signature": [
-          "{ readonly enabled: boolean; readonly writeEnabled: boolean; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "tags": [],
-        "id": "def-server.ecsFieldMap",
-        "type": "Object",
-        "label": "ecsFieldMap",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/rule_registry/server/generated/ecs_field_map.ts",
-          "lineNumber": 8
-        },
-        "signature": [
-          "{ readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'agent.build.original': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'agent.ephemeral_id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'agent.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'agent.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'agent.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'agent.version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.address': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.as.number': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'client.as.organization.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.bytes': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'client.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.geo.city_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.geo.continent_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.geo.country_iso_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.geo.country_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.geo.location': { readonly type: \"geo_point\"; readonly array: false; readonly required: false; }; readonly 'client.geo.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.geo.region_iso_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.geo.region_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.ip': { readonly type: \"ip\"; readonly array: false; readonly required: false; }; readonly 'client.mac': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.nat.ip': { readonly type: \"ip\"; readonly array: false; readonly required: false; }; readonly 'client.nat.port': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'client.packets': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'client.port': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'client.registered_domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.subdomain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.top_level_domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.user.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.user.email': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.user.full_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.user.group.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.user.group.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.user.group.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.user.hash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.user.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.user.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'client.user.roles': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'cloud.account.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'cloud.account.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'cloud.availability_zone': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'cloud.instance.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'cloud.instance.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'cloud.machine.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'cloud.project.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'cloud.project.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'cloud.provider': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'cloud.region': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'container.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'container.image.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'container.image.tag': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'container.labels': { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly 'container.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'container.runtime': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.address': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.as.number': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'destination.as.organization.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.bytes': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'destination.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.geo.city_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.geo.continent_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.geo.country_iso_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.geo.country_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.geo.location': { readonly type: \"geo_point\"; readonly array: false; readonly required: false; }; readonly 'destination.geo.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.geo.region_iso_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.geo.region_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.ip': { readonly type: \"ip\"; readonly array: false; readonly required: false; }; readonly 'destination.mac': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.nat.ip': { readonly type: \"ip\"; readonly array: false; readonly required: false; }; readonly 'destination.nat.port': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'destination.packets': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'destination.port': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'destination.registered_domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.subdomain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.top_level_domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.user.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.user.email': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.user.full_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.user.group.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.user.group.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.user.group.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.user.hash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.user.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.user.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'destination.user.roles': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'dll.code_signature.exists': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'dll.code_signature.status': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.code_signature.subject_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.code_signature.trusted': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'dll.code_signature.valid': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'dll.hash.md5': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.hash.sha1': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.hash.sha256': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.hash.sha512': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.path': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.pe.architecture': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.pe.company': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.pe.description': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.pe.file_version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.pe.imphash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.pe.original_file_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dll.pe.product': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.answers': { readonly type: \"object\"; readonly array: true; readonly required: false; }; readonly 'dns.answers.class': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.answers.data': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.answers.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.answers.ttl': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'dns.answers.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.header_flags': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'dns.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.op_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.question.class': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.question.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.question.registered_domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.question.subdomain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.question.top_level_domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.question.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.resolved_ip': { readonly type: \"ip\"; readonly array: true; readonly required: false; }; readonly 'dns.response_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'dns.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'ecs.version': { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly 'error.code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'error.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'error.message': { readonly type: \"text\"; readonly array: false; readonly required: false; }; readonly 'error.stack_trace': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'error.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.category': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.created': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'event.dataset': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.duration': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'event.end': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'event.hash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.ingested': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.module': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.original': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.outcome': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.provider': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.reason': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.reference': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.risk_score': { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly 'event.risk_score_norm': { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly 'event.sequence': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'event.severity': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'event.start': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'event.timezone': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.type': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.url': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.accessed': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'file.attributes': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.code_signature.exists': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'file.code_signature.status': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.code_signature.subject_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.code_signature.trusted': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'file.code_signature.valid': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'file.created': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'file.ctime': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'file.device': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.directory': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.drive_letter': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.extension': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.gid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.group': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.hash.md5': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.hash.sha1': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.hash.sha256': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.hash.sha512': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.inode': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.mime_type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.mode': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.mtime': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'file.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.owner': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.path': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.pe.architecture': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.pe.company': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.pe.description': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.pe.file_version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.pe.imphash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.pe.original_file_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.pe.product': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.size': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'file.target_path': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.uid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.x509.alternative_names': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.issuer.common_name': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.issuer.country': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.issuer.distinguished_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.x509.issuer.locality': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.issuer.organization': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.issuer.organizational_unit': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.issuer.state_or_province': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.not_after': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'file.x509.not_before': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'file.x509.public_key_algorithm': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.x509.public_key_curve': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.x509.public_key_exponent': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'file.x509.public_key_size': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'file.x509.serial_number': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.x509.signature_algorithm': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.x509.subject.common_name': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.subject.country': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.subject.distinguished_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'file.x509.subject.locality': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.subject.organization': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.subject.organizational_unit': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.subject.state_or_province': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'file.x509.version_number': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'group.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'group.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'group.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.architecture': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.geo.city_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.geo.continent_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.geo.country_iso_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.geo.country_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.geo.location': { readonly type: \"geo_point\"; readonly array: false; readonly required: false; }; readonly 'host.geo.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.geo.region_iso_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.geo.region_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.hostname': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.ip': { readonly type: \"ip\"; readonly array: true; readonly required: false; }; readonly 'host.mac': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.os.family': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.os.full': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.os.kernel': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.os.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.os.platform': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.os.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.os.version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.uptime': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'host.user.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.user.email': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.user.full_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.user.group.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.user.group.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.user.group.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.user.hash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.user.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.user.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'host.user.roles': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'http.request.body.bytes': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'http.request.body.content': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'http.request.bytes': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'http.request.method': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'http.request.mime_type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'http.request.referrer': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'http.response.body.bytes': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'http.response.body.content': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'http.response.bytes': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'http.response.mime_type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'http.response.status_code': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'http.version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly labels: { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly 'log.file.path': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'log.level': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'log.logger': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'log.origin.file.line': { readonly type: \"integer\"; readonly array: false; readonly required: false; }; readonly 'log.origin.file.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'log.origin.function': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'log.original': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'log.syslog': { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly 'log.syslog.facility.code': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'log.syslog.facility.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'log.syslog.priority': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'log.syslog.severity.code': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'log.syslog.severity.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly message: { readonly type: \"text\"; readonly array: false; readonly required: false; }; readonly 'network.application': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'network.bytes': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'network.community_id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'network.direction': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'network.forwarded_ip': { readonly type: \"ip\"; readonly array: false; readonly required: false; }; readonly 'network.iana_number': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'network.inner': { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly 'network.inner.vlan.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'network.inner.vlan.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'network.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'network.packets': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'network.protocol': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'network.transport': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'network.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'network.vlan.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'network.vlan.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.egress': { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly 'observer.egress.interface.alias': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.egress.interface.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.egress.interface.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.egress.vlan.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.egress.vlan.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.egress.zone': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.geo.city_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.geo.continent_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.geo.country_iso_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.geo.country_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.geo.location': { readonly type: \"geo_point\"; readonly array: false; readonly required: false; }; readonly 'observer.geo.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.geo.region_iso_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.geo.region_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.hostname': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.ingress': { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly 'observer.ingress.interface.alias': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.ingress.interface.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.ingress.interface.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.ingress.vlan.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.ingress.vlan.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.ingress.zone': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.ip': { readonly type: \"ip\"; readonly array: true; readonly required: false; }; readonly 'observer.mac': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'observer.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.os.family': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.os.full': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.os.kernel': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.os.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.os.platform': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.os.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.os.version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.product': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.serial_number': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.vendor': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'observer.version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'organization.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'organization.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'package.architecture': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'package.build_version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'package.checksum': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'package.description': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'package.install_scope': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'package.installed': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'package.license': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'package.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'package.path': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'package.reference': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'package.size': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'package.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'package.version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.args': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'process.args_count': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.code_signature.exists': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'process.code_signature.status': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.code_signature.subject_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.code_signature.trusted': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'process.code_signature.valid': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'process.command_line': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.entity_id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.executable': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.exit_code': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.hash.md5': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.hash.sha1': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.hash.sha256': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.hash.sha512': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.args': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'process.parent.args_count': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.parent.code_signature.exists': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'process.parent.code_signature.status': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.code_signature.subject_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.code_signature.trusted': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'process.parent.code_signature.valid': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'process.parent.command_line': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.entity_id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.executable': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.exit_code': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.parent.hash.md5': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.hash.sha1': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.hash.sha256': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.hash.sha512': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.pe.architecture': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.pe.company': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.pe.description': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.pe.file_version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.pe.imphash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.pe.original_file_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.pe.product': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.pgid': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.parent.pid': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.parent.ppid': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.parent.start': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'process.parent.thread.id': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.parent.thread.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.title': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.parent.uptime': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.parent.working_directory': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.pe.architecture': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.pe.company': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.pe.description': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.pe.file_version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.pe.imphash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.pe.original_file_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.pe.product': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.pgid': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.pid': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.ppid': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.start': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'process.thread.id': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.thread.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.title': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'process.uptime': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'process.working_directory': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'registry.data.bytes': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'registry.data.strings': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'registry.data.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'registry.hive': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'registry.key': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'registry.path': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'registry.value': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'related.hash': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'related.hosts': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'related.ip': { readonly type: \"ip\"; readonly array: true; readonly required: false; }; readonly 'related.user': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'rule.author': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.description': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.license': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.reference': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.ruleset': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.address': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.as.number': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'server.as.organization.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.bytes': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'server.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.geo.city_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.geo.continent_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.geo.country_iso_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.geo.country_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.geo.location': { readonly type: \"geo_point\"; readonly array: false; readonly required: false; }; readonly 'server.geo.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.geo.region_iso_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.geo.region_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.ip': { readonly type: \"ip\"; readonly array: false; readonly required: false; }; readonly 'server.mac': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.nat.ip': { readonly type: \"ip\"; readonly array: false; readonly required: false; }; readonly 'server.nat.port': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'server.packets': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'server.port': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'server.registered_domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.subdomain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.top_level_domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.user.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.user.email': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.user.full_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.user.group.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.user.group.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.user.group.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.user.hash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.user.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.user.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'server.user.roles': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'service.ephemeral_id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'service.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'service.node.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'service.state': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'service.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'service.version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.address': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.as.number': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'source.as.organization.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.bytes': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'source.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.geo.city_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.geo.continent_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.geo.country_iso_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.geo.country_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.geo.location': { readonly type: \"geo_point\"; readonly array: false; readonly required: false; }; readonly 'source.geo.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.geo.region_iso_code': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.geo.region_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.ip': { readonly type: \"ip\"; readonly array: false; readonly required: false; }; readonly 'source.mac': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.nat.ip': { readonly type: \"ip\"; readonly array: false; readonly required: false; }; readonly 'source.nat.port': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'source.packets': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'source.port': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'source.registered_domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.subdomain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.top_level_domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.user.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.user.email': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.user.full_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.user.group.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.user.group.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.user.group.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.user.hash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.user.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.user.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'source.user.roles': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'span.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'threat.framework': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'threat.tactic.id': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'threat.tactic.name': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'threat.tactic.reference': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'threat.technique.id': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'threat.technique.name': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'threat.technique.reference': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'threat.technique.subtechnique.id': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'threat.technique.subtechnique.name': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'threat.technique.subtechnique.reference': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.cipher': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.certificate': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.certificate_chain': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.hash.md5': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.hash.sha1': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.hash.sha256': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.issuer': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.ja3': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.not_after': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'tls.client.not_before': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'tls.client.server_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.subject': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.supported_ciphers': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.alternative_names': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.issuer.common_name': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.issuer.country': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.issuer.distinguished_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.x509.issuer.locality': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.issuer.organization': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.issuer.organizational_unit': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.issuer.state_or_province': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.not_after': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'tls.client.x509.not_before': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'tls.client.x509.public_key_algorithm': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.x509.public_key_curve': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.x509.public_key_exponent': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'tls.client.x509.public_key_size': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'tls.client.x509.serial_number': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.x509.signature_algorithm': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.x509.subject.common_name': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.subject.country': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.subject.distinguished_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.client.x509.subject.locality': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.subject.organization': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.subject.organizational_unit': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.subject.state_or_province': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.client.x509.version_number': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.curve': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.established': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'tls.next_protocol': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.resumed': { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly 'tls.server.certificate': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.certificate_chain': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.hash.md5': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.hash.sha1': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.hash.sha256': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.issuer': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.ja3s': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.not_after': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'tls.server.not_before': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'tls.server.subject': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.x509.alternative_names': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.issuer.common_name': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.issuer.country': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.issuer.distinguished_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.x509.issuer.locality': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.issuer.organization': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.issuer.organizational_unit': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.issuer.state_or_province': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.not_after': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'tls.server.x509.not_before': { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly 'tls.server.x509.public_key_algorithm': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.x509.public_key_curve': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.x509.public_key_exponent': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'tls.server.x509.public_key_size': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'tls.server.x509.serial_number': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.x509.signature_algorithm': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.x509.subject.common_name': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.subject.country': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.subject.distinguished_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.server.x509.subject.locality': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.subject.organization': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.subject.organizational_unit': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.subject.state_or_province': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'tls.server.x509.version_number': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'tls.version_protocol': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'trace.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'transaction.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.extension': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.fragment': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.full': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.original': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.password': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.path': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.port': { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly 'url.query': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.registered_domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.scheme': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.subdomain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.top_level_domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'url.username': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.changes.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.changes.email': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.changes.full_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.changes.group.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.changes.group.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.changes.group.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.changes.hash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.changes.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.changes.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.changes.roles': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'user.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.effective.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.effective.email': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.effective.full_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.effective.group.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.effective.group.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.effective.group.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.effective.hash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.effective.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.effective.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.effective.roles': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'user.email': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.full_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.group.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.group.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.group.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.hash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.roles': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'user.target.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.target.email': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.target.full_name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.target.group.domain': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.target.group.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.target.group.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.target.hash': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.target.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.target.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user.target.roles': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'user_agent.device.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user_agent.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user_agent.original': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user_agent.os.family': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user_agent.os.full': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user_agent.os.kernel': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user_agent.os.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user_agent.os.platform': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user_agent.os.type': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user_agent.os.version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'user_agent.version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'vulnerability.category': { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'vulnerability.classification': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'vulnerability.description': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'vulnerability.enumeration': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'vulnerability.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'vulnerability.reference': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'vulnerability.report_id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'vulnerability.scanner.vendor': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'vulnerability.score.base': { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly 'vulnerability.score.environmental': { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly 'vulnerability.score.temporal': { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly 'vulnerability.score.version': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'vulnerability.severity': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }"
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "objects": [],
     "setup": {
+      "parentPluginId": "ruleRegistry",
       "id": "def-server.RuleRegistryPluginSetupContract",
-      "type": "Type",
-      "label": "RuleRegistryPluginSetupContract",
+      "type": "Interface",
       "tags": [],
+      "label": "RuleRegistryPluginSetupContract",
       "description": [],
       "source": {
         "path": "x-pack/plugins/rule_registry/server/plugin.ts",
-        "lineNumber": 15
+        "lineNumber": 22
       },
-      "signature": [
-        "RuleRegistry<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>"
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "ruleRegistry",
+          "id": "def-server.RuleRegistryPluginSetupContract.ruleDataService",
+          "type": "Object",
+          "tags": [],
+          "label": "ruleDataService",
+          "description": [],
+          "signature": [
+            "RuleDataPluginService"
+          ],
+          "source": {
+            "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+            "lineNumber": 23
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "ruleRegistry",
+          "id": "def-server.RuleRegistryPluginSetupContract.eventLogService",
+          "type": "Object",
+          "tags": [],
+          "label": "eventLogService",
+          "description": [],
+          "signature": [
+            "IEventLogService"
+          ],
+          "source": {
+            "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+            "lineNumber": 24
+          },
+          "deprecated": false
+        }
       ],
       "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "ruleRegistry",
+      "id": "def-server.RuleRegistryPluginStartContract",
+      "type": "Type",
+      "tags": [],
+      "label": "RuleRegistryPluginStartContract",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "source": {
+        "path": "x-pack/plugins/rule_registry/server/plugin.ts",
+        "lineNumber": 27
+      },
+      "deprecated": false,
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },
@@ -333,67 +775,47 @@
     "classes": [],
     "functions": [
       {
-        "id": "def-common.getAlertSeverityLevelValue",
+        "parentPluginId": "ruleRegistry",
+        "id": "def-common.parseTechnicalFields",
         "type": "Function",
-        "label": "getAlertSeverityLevelValue",
-        "signature": [
-          "(level: ",
-          {
-            "pluginId": "ruleRegistry",
-            "scope": "common",
-            "docId": "kibRuleRegistryPluginApi",
-            "section": "def-common.AlertSeverityLevel",
-            "text": "AlertSeverityLevel"
-          },
-          ") => number"
-        ],
+        "tags": [],
+        "label": "parseTechnicalFields",
         "description": [],
+        "signature": [
+          "(input: unknown) => OutputOf<",
+          "Optional",
+          "<{ readonly \"kibana.rac.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"kibana.rac.alert.uuid\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.rac.alert.producer\" | \"kibana.rac.alert.id\" | \"kibana.rac.alert.start\" | \"kibana.rac.alert.end\" | \"kibana.rac.alert.duration.us\" | \"kibana.rac.alert.severity.level\" | \"kibana.rac.alert.severity.value\" | \"kibana.rac.alert.status\" | \"kibana.rac.alert.evaluation.threshold\" | \"kibana.rac.alert.evaluation.value\">>"
+        ],
+        "source": {
+          "path": "x-pack/plugins/rule_registry/common/parse_technical_fields.ts",
+          "lineNumber": 15
+        },
+        "deprecated": false,
         "children": [
           {
-            "id": "def-common.getAlertSeverityLevelValue.$1",
-            "type": "Enum",
-            "label": "level",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "common",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-common.AlertSeverityLevel",
-                "text": "AlertSeverityLevel"
-              }
-            ],
+            "parentPluginId": "ruleRegistry",
+            "id": "def-common.parseTechnicalFields.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "input",
             "description": [],
+            "signature": [
+              "unknown"
+            ],
             "source": {
-              "path": "x-pack/plugins/rule_registry/common/types.ts",
-              "lineNumber": 18
-            }
+              "path": "x-pack/plugins/rule_registry/common/parse_technical_fields.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false,
+            "isRequired": true
           }
         ],
-        "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/rule_registry/common/types.ts",
-          "lineNumber": 18
-        },
         "initialIsOpen": false
       }
     ],
     "interfaces": [],
-    "enums": [
-      {
-        "id": "def-common.AlertSeverityLevel",
-        "type": "Enum",
-        "label": "AlertSeverityLevel",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/rule_registry/common/types.ts",
-          "lineNumber": 8
-        },
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [],
     "objects": []
   }

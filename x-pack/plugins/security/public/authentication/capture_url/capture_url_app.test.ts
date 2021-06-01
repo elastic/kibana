@@ -5,17 +5,27 @@
  * 2.0.
  */
 
-import type { AppMount, ScopedHistory } from 'src/core/public';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 
 import { captureURLApp } from './capture_url_app';
 
 describe('captureURLApp', () => {
+  let mockLocationReplace: jest.Mock;
   beforeAll(() => {
+    mockLocationReplace = jest.fn();
     Object.defineProperty(window, 'location', {
-      value: { href: 'https://some-host' },
+      value: {
+        href: 'https://some-host',
+        hash: '#/?_g=()',
+        origin: 'https://some-host',
+        replace: mockLocationReplace,
+      },
       writable: true,
     });
+  });
+
+  beforeEach(() => {
+    mockLocationReplace.mockClear();
   });
 
   it('properly registers application', () => {
@@ -42,34 +52,37 @@ describe('captureURLApp', () => {
 
   it('properly handles captured URL', async () => {
     window.location.href = `https://host.com/mock-base-path/internal/security/capture-url?next=${encodeURIComponent(
-      '/mock-base-path/app/home'
-    )}&providerType=saml&providerName=saml1#/?_g=()`;
+      '/mock-base-path/app/home?auth_provider_hint=saml1'
+    )}#/?_g=()`;
 
     const coreSetupMock = coreMock.createSetup();
-    coreSetupMock.http.post.mockResolvedValue({ location: '/mock-base-path/app/home#/?_g=()' });
-
     captureURLApp.create(coreSetupMock);
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await (mount as AppMount)({
-      element: document.createElement('div'),
-      appBasePath: '',
-      onAppLeave: jest.fn(),
-      setHeaderActionMenu: jest.fn(),
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
-    });
+    await mount(coreMock.createAppMountParamters());
 
-    expect(coreSetupMock.http.post).toHaveBeenCalledTimes(1);
-    expect(coreSetupMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
-      body: JSON.stringify({
-        providerType: 'saml',
-        providerName: 'saml1',
-        currentURL: `https://host.com/mock-base-path/internal/security/capture-url?next=${encodeURIComponent(
-          '/mock-base-path/app/home'
-        )}&providerType=saml&providerName=saml1#/?_g=()`,
-      }),
-    });
+    expect(mockLocationReplace).toHaveBeenCalledTimes(1);
+    expect(mockLocationReplace).toHaveBeenCalledWith(
+      'https://some-host/mock-base-path/app/home?auth_provider_hint=saml1&auth_url_hash=%23%2F%3F_g%3D%28%29#/?_g=()'
+    );
+    expect(coreSetupMock.fatalErrors.add).not.toHaveBeenCalled();
+  });
 
-    expect(window.location.href).toBe('/mock-base-path/app/home#/?_g=()');
+  it('properly handles open redirects', async () => {
+    window.location.href = `https://host.com/mock-base-path/internal/security/capture-url?next=${encodeURIComponent(
+      'https://evil.com/mock-base-path/app/home?auth_provider_hint=saml1'
+    )}#/?_g=()`;
+
+    const coreSetupMock = coreMock.createSetup();
+    captureURLApp.create(coreSetupMock);
+
+    const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
+    await mount(coreMock.createAppMountParamters());
+
+    expect(mockLocationReplace).toHaveBeenCalledTimes(1);
+    expect(mockLocationReplace).toHaveBeenCalledWith(
+      'https://some-host/?auth_url_hash=%23%2F%3F_g%3D%28%29'
+    );
+    expect(coreSetupMock.fatalErrors.add).not.toHaveBeenCalled();
   });
 });

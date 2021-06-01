@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { removeExternalLinkText } from '../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { MarkdownRenderer } from './renderer';
 
 describe('Markdown', () => {

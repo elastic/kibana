@@ -53,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should pass the schema validation', () => {
       const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
       const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+
       try {
         assertTelemetryPayload({ root, plugins }, stats);
       } catch (err) {

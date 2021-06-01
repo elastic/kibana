@@ -6,31 +6,26 @@
  */
 
 import {
+  CustomItemAction,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiBasicTableProps,
-  DefaultItemAction,
-  EuiTableSelectionType,
+  EuiButton,
+  EuiIconTip,
   EuiLink,
-  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import {
+  ALERT_DURATION,
+  ALERT_SEVERITY_LEVEL,
+} from '@kbn/rule-data-utils/target/technical_field_names';
 import { asDuration } from '../../../common/utils/formatters';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import type { TopAlert } from './';
 import { AlertsFlyout } from './alerts_flyout';
-
-export interface TopAlert {
-  start: number;
-  duration: number;
-  reason: string;
-  link?: string;
-  severityLevel?: string;
-  active: boolean;
-  ruleName: string;
-  ruleCategory: string;
-}
+import { SeverityBadge } from './severity_badge';
 
 type AlertsTableProps = Omit<
   EuiBasicTableProps<TopAlert>,
@@ -43,13 +38,18 @@ export function AlertsTable(props: AlertsTableProps) {
   const { core } = usePluginContext();
   const { prepend } = core.http.basePath;
 
-  const actions: Array<DefaultItemAction<TopAlert>> = [
+  const actions: Array<CustomItemAction<TopAlert>> = [
     {
-      name: 'Alert details',
-      description: 'Alert details',
-      onClick: (item) => {
-        setFlyoutAlert(item);
-      },
+      render: (alert) =>
+        alert.link ? (
+          <EuiButton href={prepend(alert.link)} size="s">
+            {i18n.translate('xpack.observability.alertsTable.viewInAppButtonLabel', {
+              defaultMessage: 'View in app',
+            })}
+          </EuiButton>
+        ) : (
+          <></>
+        ),
       isPrimary: true,
     },
   ];
@@ -57,54 +57,74 @@ export function AlertsTable(props: AlertsTableProps) {
   const columns: Array<EuiBasicTableColumn<TopAlert>> = [
     {
       field: 'active',
-      name: 'Status',
-      width: '112px',
-      render: (_, { active }) => {
-        const style = {
-          width: '96px',
-          textAlign: 'center' as const,
-        };
+      name: i18n.translate('xpack.observability.alertsTable.statusColumnDescription', {
+        defaultMessage: 'Status',
+      }),
+      align: 'center',
+      render: (_, alert) => {
+        const { active } = alert;
 
         return active ? (
-          <EuiBadge iconType="alert" color="danger" style={style}>
-            {i18n.translate('xpack.observability.alertsTable.status.active', {
-              defaultMessage: 'Active',
+          <EuiIconTip
+            content={i18n.translate('xpack.observability.alertsTable.statusOpenDescription', {
+              defaultMessage: 'Open',
             })}
-          </EuiBadge>
+            color="danger"
+            type="alert"
+          />
         ) : (
-          <EuiBadge iconType="check" color="hollow" style={style}>
-            {i18n.translate('xpack.observability.alertsTable.status.recovered', {
-              defaultMessage: 'Recovered',
+          <EuiIconTip
+            content={i18n.translate('xpack.observability.alertsTable.statusClosedDescription', {
+              defaultMessage: 'Closed',
             })}
-          </EuiBadge>
+            type="check"
+          />
         );
       },
     },
     {
       field: 'start',
-      name: 'Triggered',
+      name: i18n.translate('xpack.observability.alertsTable.triggeredColumnDescription', {
+        defaultMessage: 'Triggered',
+      }),
       render: (_, item) => {
         return <TimestampTooltip time={new Date(item.start).getTime()} timeUnit="milliseconds" />;
       },
     },
     {
       field: 'duration',
-      name: 'Duration',
-      render: (_, { duration, active }) => {
-        return active ? null : asDuration(duration, { extended: true });
+      name: i18n.translate('xpack.observability.alertsTable.durationColumnDescription', {
+        defaultMessage: 'Duration',
+      }),
+      render: (_, alert) => {
+        const { active } = alert;
+        return active ? null : asDuration(alert.fields[ALERT_DURATION], { extended: true });
+      },
+    },
+    {
+      field: 'severity',
+      name: i18n.translate('xpack.observability.alertsTable.severityColumnDescription', {
+        defaultMessage: 'Severity',
+      }),
+      render: (_, alert) => {
+        return <SeverityBadge severityLevel={alert.fields[ALERT_SEVERITY_LEVEL]} />;
       },
     },
     {
       field: 'reason',
-      name: 'Reason',
+      name: i18n.translate('xpack.observability.alertsTable.reasonColumnDescription', {
+        defaultMessage: 'Reason',
+      }),
       dataType: 'string',
       render: (_, item) => {
-        return item.link ? <EuiLink href={prepend(item.link)}>{item.reason}</EuiLink> : item.reason;
+        return <EuiLink onClick={() => setFlyoutAlert(item)}>{item.reason}</EuiLink>;
       },
     },
     {
       actions,
-      name: 'Actions',
+      name: i18n.translate('xpack.observability.alertsTable.actionsColumnDescription', {
+        defaultMessage: 'Actions',
+      }),
     },
   ];
 
@@ -113,8 +133,6 @@ export function AlertsTable(props: AlertsTableProps) {
       {flyoutAlert && <AlertsFlyout alert={flyoutAlert} onClose={handleFlyoutClose} />}
       <EuiBasicTable<TopAlert>
         {...props}
-        isSelectable={true}
-        selection={{} as EuiTableSelectionType<TopAlert>}
         columns={columns}
         tableLayout="auto"
         pagination={{ pageIndex: 0, pageSize: 0, totalItemCount: 0 }}

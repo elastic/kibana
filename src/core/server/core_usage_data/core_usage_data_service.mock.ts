@@ -116,6 +116,10 @@ const createStartContractMock = () => {
             maxImportExportSize: 10000,
             maxImportPayloadBytes: 26214400,
           },
+          deprecatedKeys: {
+            set: ['path.to.a.prop'],
+            unset: [],
+          },
         },
         environment: {
           memory: {
@@ -139,6 +143,7 @@ const createStartContractMock = () => {
         },
       })
     ),
+    getConfigsUsageData: jest.fn(),
   };
 
   return startContract;

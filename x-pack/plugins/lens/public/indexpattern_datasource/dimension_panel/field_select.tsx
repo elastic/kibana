@@ -6,7 +6,7 @@
  */
 
 import './field_select.scss';
-import _ from 'lodash';
+import { partition } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -39,7 +39,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   incompleteOperation?: OperationType;
   operationSupportMatrix: OperationSupportMatrix;
   onChoose: (choice: FieldChoice) => void;
-  onDeleteColumn: () => void;
+  onDeleteColumn?: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
   fieldIsInvalid: boolean;
   markAllFieldsCompatible?: boolean;
@@ -68,7 +68,7 @@ export function FieldSelect({
       return !currentOperationType || operationByField[fieldName]!.has(currentOperationType);
     }
 
-    const [specialFields, normalFields] = _.partition(
+    const [specialFields, normalFields] = partition(
       fields,
       (field) => currentIndexPattern.getFieldByName(field)?.type === 'document'
     );
@@ -121,11 +121,11 @@ export function FieldSelect({
         }));
     }
 
-    const [metaFields, nonMetaFields] = _.partition(
+    const [metaFields, nonMetaFields] = partition(
       normalFields,
       (field) => currentIndexPattern.getFieldByName(field)?.meta
     );
-    const [availableFields, emptyFields] = _.partition(nonMetaFields, containsData);
+    const [availableFields, emptyFields] = partition(nonMetaFields, containsData);
 
     const constructFieldsOptions = (fieldsArr: string[], label: string) =>
       fieldsArr.length > 0 && {
@@ -195,7 +195,7 @@ export function FieldSelect({
       singleSelection={{ asPlainText: true }}
       onChange={(choices) => {
         if (choices.length === 0) {
-          onDeleteColumn();
+          onDeleteColumn?.();
           return;
         }
 

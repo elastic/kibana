@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { AzureRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
-import { textService } from '../../../services/text';
+import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 
 interface Props {
   repository: AzureRepository;
@@ -52,6 +52,12 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
     value: option,
     text: option,
   }));
+
+  const updateSettings = (name: string, value: string) => {
+    updateRepositorySettings({
+      [name]: value,
+    });
+  };
 
   return (
     <Fragment>
@@ -232,139 +238,28 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       </EuiDescribedFormGroup>
 
       {/* Chunk size field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeAzure.chunkSizeTitle"
-                defaultMessage="Chunk size"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeAzure.chunkSizeDescription"
-            defaultMessage="Breaks files into smaller units when taking snapshots."
-          />
-        }
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.chunkSizeLabel"
-              defaultMessage="Chunk size"
-            />
-          }
-          fullWidth
-          isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
-          error={settingErrors.chunkSize}
-          helpText={textService.getSizeNotationHelpText()}
-        >
-          <EuiFieldText
-            defaultValue={chunkSize || ''}
-            fullWidth
-            onChange={(e) => {
-              updateRepositorySettings({
-                chunkSize: e.target.value,
-              });
-            }}
-            data-test-subj="chunkSizeInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <ChunkSizeField
+        isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
+        error={settingErrors.chunkSize}
+        defaultValue={chunkSize || ''}
+        updateSettings={updateSettings}
+      />
 
       {/* Max snapshot bytes field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeAzure.maxSnapshotBytesTitle"
-                defaultMessage="Max snapshot bytes per second"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeAzure.maxSnapshotBytesDescription"
-            defaultMessage="The rate for creating snapshots for each node."
-          />
-        }
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.maxSnapshotBytesLabel"
-              defaultMessage="Max snapshot bytes per second"
-            />
-          }
-          fullWidth
-          isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
-          error={settingErrors.maxSnapshotBytesPerSec}
-          helpText={textService.getSizeNotationHelpText()}
-        >
-          <EuiFieldText
-            defaultValue={maxSnapshotBytesPerSec || ''}
-            fullWidth
-            onChange={(e) => {
-              updateRepositorySettings({
-                maxSnapshotBytesPerSec: e.target.value,
-              });
-            }}
-            data-test-subj="maxSnapshotBytesInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <MaxSnapshotsField
+        isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
+        error={settingErrors.maxSnapshotBytesPerSec}
+        defaultValue={maxSnapshotBytesPerSec || ''}
+        updateSettings={updateSettings}
+      />
 
       {/* Max restore bytes field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeAzure.maxRestoreBytesTitle"
-                defaultMessage="Max restore bytes per second"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeAzure.maxRestoreBytesDescription"
-            defaultMessage="The snapshot restore rate for each node."
-          />
-        }
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.maxRestoreBytesLabel"
-              defaultMessage="Max restore bytes per second"
-            />
-          }
-          fullWidth
-          isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
-          error={settingErrors.maxRestoreBytesPerSec}
-          helpText={textService.getSizeNotationHelpText()}
-        >
-          <EuiFieldText
-            defaultValue={maxRestoreBytesPerSec || ''}
-            fullWidth
-            onChange={(e) => {
-              updateRepositorySettings({
-                maxRestoreBytesPerSec: e.target.value,
-              });
-            }}
-            data-test-subj="maxRestoreBytesInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <MaxRestoreField
+        isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
+        error={settingErrors.maxRestoreBytesPerSec}
+        defaultValue={maxRestoreBytesPerSec || ''}
+        updateSettings={updateSettings}
+      />
 
       {/* Location mode field */}
       <EuiDescribedFormGroup

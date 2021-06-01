@@ -13,6 +13,7 @@ import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors'
 import { cancelAllInFlightRequests, exitFullScreen } from '../../actions';
 import {
   areLayersLoaded,
+  getLayerList,
   getMapInitError,
   getMapSettings,
   getQueryableUniqueIndexPatternIds,
@@ -28,6 +29,7 @@ function mapStateToProps(state: MapStoreState) {
     mapInitError: getMapInitError(state),
     indexPatternIds: getQueryableUniqueIndexPatternIds(state),
     settings: getMapSettings(state),
+    layerList: getLayerList(state),
   };
 }
 
