@@ -38,6 +38,7 @@ export const AGENT_NAMES: AgentName[] = [
   'python',
   'ruby',
   'rum-js',
+  'php',
   ...OPEN_TELEMETRY_AGENT_NAMES,
 ];
 
