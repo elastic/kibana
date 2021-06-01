@@ -15,12 +15,15 @@ import { shallow } from 'enzyme';
 import { EuiCheckbox } from '@elastic/eui';
 
 import { Loading } from '../../../shared/loading';
-import {
-  AttributeSelector,
-  DeleteMappingCallout,
-  RoleSelector,
-} from '../../../shared/role_mapping';
+import { AttributeSelector, RoleSelector } from '../../../shared/role_mapping';
 import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
+import {
+  SAVE_ROLE_MAPPING,
+  UPDATE_ROLE_MAPPING,
+  ADD_ROLE_MAPPING_TITLE,
+  MANAGE_ROLE_MAPPING_TITLE,
+} from '../../../shared/role_mapping/constants';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { RoleMapping } from './role_mapping';
 
@@ -79,11 +82,22 @@ describe('RoleMapping', () => {
     setMockValues(mockValues);
   });
 
-  it('renders', () => {
+  it('renders for existing role mapping', () => {
     const wrapper = shallow(<RoleMapping />);
+    const header = wrapper.find(ViewContentHeader);
 
     expect(wrapper.find(AttributeSelector)).toHaveLength(1);
     expect(wrapper.find(RoleSelector)).toHaveLength(1);
+    expect(wrapper.find(ViewContentHeader).prop('title')).toEqual(MANAGE_ROLE_MAPPING_TITLE);
+    expect(shallow(header.prop('action') as any).text()).toEqual(UPDATE_ROLE_MAPPING);
+  });
+
+  it('renders for new role mapping', () => {
+    const wrapper = shallow(<RoleMapping isNew />);
+    const header = wrapper.find(ViewContentHeader);
+
+    expect(header.prop('title')).toEqual(ADD_ROLE_MAPPING_TITLE);
+    expect(shallow(header.prop('action') as any).text()).toEqual(SAVE_ROLE_MAPPING);
   });
 
   it('returns Loading when loading', () => {
@@ -91,12 +105,6 @@ describe('RoleMapping', () => {
     const wrapper = shallow(<RoleMapping />);
 
     expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
-  it('hides DeleteMappingCallout for new mapping', () => {
-    const wrapper = shallow(<RoleMapping isNew />);
-
-    expect(wrapper.find(DeleteMappingCallout)).toHaveLength(0);
   });
 
   it('handles group checkbox click', () => {

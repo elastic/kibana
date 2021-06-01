@@ -28,12 +28,10 @@ import {
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
+import { AttributeSelector, RoleSelector } from '../../../shared/role_mapping';
 import {
-  AttributeSelector,
-  DeleteMappingCallout,
-  RoleSelector,
-} from '../../../shared/role_mapping';
-import {
+  SAVE_ROLE_MAPPING,
+  UPDATE_ROLE_MAPPING,
   ROLE_MAPPINGS_TITLE,
   ADD_ROLE_MAPPING_TITLE,
   MANAGE_ROLE_MAPPING_TITLE,
@@ -45,8 +43,6 @@ import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
 import { Engine } from '../engine/types';
 
 import {
-  SAVE_ROLE_MAPPING,
-  UPDATE_ROLE_MAPPING,
   ADVANCED_ROLE_TYPES,
   STANDARD_ROLE_TYPES,
   ROLE_TITLE,
@@ -71,7 +67,6 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
     handleAttributeSelectorChange,
     handleAttributeValueChange,
     handleAuthProviderChange,
-    handleDeleteMapping,
     handleEngineSelectionChange,
     handleRoleChange,
     handleSaveMapping,
@@ -120,7 +115,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
     : standardRoleOptions;
 
   const saveRoleMappingButton = (
-    <EuiButton onClick={handleSaveMapping} fill>
+    <EuiButton onClick={handleSaveMapping} fill data-test-subj="SaveRoleMappingButton">
       {SAVE_ROLE_MAPPING_LABEL}
     </EuiButton>
   );
@@ -228,8 +223,6 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        <EuiSpacer />
-        {roleMapping && <DeleteMappingCallout handleDeleteMapping={handleDeleteMapping} />}
       </EuiPageContentBody>
     </>
   );

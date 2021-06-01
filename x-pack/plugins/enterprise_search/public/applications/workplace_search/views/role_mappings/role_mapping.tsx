@@ -25,11 +25,7 @@ import {
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
-import {
-  AttributeSelector,
-  DeleteMappingCallout,
-  RoleSelector,
-} from '../../../shared/role_mapping';
+import { AttributeSelector, RoleSelector } from '../../../shared/role_mapping';
 import {
   SAVE_ROLE_MAPPING,
   UPDATE_ROLE_MAPPING,
@@ -81,7 +77,6 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
     handleAllGroupsSelectionChange,
     handleAttributeValueChange,
     handleAttributeSelectorChange,
-    handleDeleteMapping,
     handleRoleChange,
     handleAuthProviderChange,
     resetState,
@@ -124,7 +119,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
   return (
     <>
       <SetPageChrome trail={[ROLE_MAPPINGS_TITLE, TITLE]} />
-      <ViewContentHeader title={SAVE_ROLE_MAPPING_LABEL} action={saveRoleMappingButton} />
+      <ViewContentHeader title={TITLE} action={saveRoleMappingButton} />
       <EuiSpacer size="l" />
       <div>
         <FlashMessages />
@@ -199,8 +194,6 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer />
-        {!isNew && <DeleteMappingCallout handleDeleteMapping={handleDeleteMapping} />}
       </div>
     </>
   );

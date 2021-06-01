@@ -6,6 +6,5 @@
  */
 
 export { AttributeSelector } from './attribute_selector';
-export { DeleteMappingCallout } from './delete_mapping_callout';
 export { RoleMappingsTable } from './role_mappings_table';
 export { RoleSelector } from './role_selector';
