@@ -12,8 +12,8 @@ import {
   deleteAllDocsFromMetadataIndex,
   deleteMetadataStream,
 } from './data_stream_helper';
-import { HOST_METADATA_LIST_ROUTE } from '../../../plugins/security_solution/server/endpoint/routes/metadata';
 import { MetadataQueryStrategyVersions } from '../../../plugins/security_solution/common/endpoint/types';
+import { HOST_METADATA_LIST_ROUTE } from '../../../plugins/security_solution/common/endpoint/constants';
 
 /**
  * The number of host documents in the es archive.
