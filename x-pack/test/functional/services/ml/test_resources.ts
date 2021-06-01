@@ -305,6 +305,10 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       await this.createDashboardIfNeeded(dashboards.mlTestDashboard);
     },
 
+    async deleteMLTestDashboard() {
+      await this.deleteDashboardByTitle(dashboards.mlTestDashboard.requestBody.attributes.title);
+    },
+
     async createDashboardIfNeeded(dashboard: any) {
       const title = dashboard.requestBody.attributes.title;
       const dashboardId = await this.getDashboardId(title);

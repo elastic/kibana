@@ -396,7 +396,7 @@ describe('createExtentFilter', () => {
       minLat: 35,
       minLon: -89,
     };
-    const filter = createExtentFilter(mapExtent, geoFieldName);
+    const filter = createExtentFilter(mapExtent, [geoFieldName]);
     expect(filter.geo_bounding_box).toEqual({
       location: {
         top_left: [-89, 39],
@@ -412,7 +412,7 @@ describe('createExtentFilter', () => {
       minLat: -100,
       minLon: -190,
     };
-    const filter = createExtentFilter(mapExtent, geoFieldName);
+    const filter = createExtentFilter(mapExtent, [geoFieldName]);
     expect(filter.geo_bounding_box).toEqual({
       location: {
         top_left: [-180, 89],
@@ -428,7 +428,7 @@ describe('createExtentFilter', () => {
       minLat: 35,
       minLon: 100,
     };
-    const filter = createExtentFilter(mapExtent, geoFieldName);
+    const filter = createExtentFilter(mapExtent, [geoFieldName]);
     const leftLon = filter.geo_bounding_box.location.top_left[0];
     const rightLon = filter.geo_bounding_box.location.bottom_right[0];
     expect(leftLon).toBeGreaterThan(rightLon);
@@ -447,7 +447,7 @@ describe('createExtentFilter', () => {
       minLat: 35,
       minLon: -200,
     };
-    const filter = createExtentFilter(mapExtent, geoFieldName);
+    const filter = createExtentFilter(mapExtent, [geoFieldName]);
     const leftLon = filter.geo_bounding_box.location.top_left[0];
     const rightLon = filter.geo_bounding_box.location.bottom_right[0];
     expect(leftLon).toBeGreaterThan(rightLon);
@@ -466,7 +466,7 @@ describe('createExtentFilter', () => {
       minLat: 35,
       minLon: -191,
     };
-    const filter = createExtentFilter(mapExtent, geoFieldName);
+    const filter = createExtentFilter(mapExtent, [geoFieldName]);
     expect(filter.geo_bounding_box).toEqual({
       location: {
         top_left: [-180, 39],

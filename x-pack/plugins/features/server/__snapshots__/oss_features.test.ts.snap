@@ -512,8 +512,14 @@ Array [
   Object {
     "privilege": Object {
       "alerting": Object {
-        "all": Array [],
-        "read": Array [],
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
       },
       "api": Array [
         "store_search_session",
@@ -651,8 +657,14 @@ Array [
   Object {
     "privilege": Object {
       "alerting": Object {
-        "all": Array [],
-        "read": Array [],
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
       },
       "api": Array [
         "store_search_session",
@@ -888,8 +900,14 @@ Array [
   Object {
     "privilege": Object {
       "alerting": Object {
-        "all": Array [],
-        "read": Array [],
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
       },
       "api": Array [],
       "app": Array [
@@ -1010,8 +1028,14 @@ Array [
   Object {
     "privilege": Object {
       "alerting": Object {
-        "all": Array [],
-        "read": Array [],
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
       },
       "api": Array [
         "store_search_session",
@@ -1149,8 +1173,14 @@ Array [
   Object {
     "privilege": Object {
       "alerting": Object {
-        "all": Array [],
-        "read": Array [],
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
       },
       "api": Array [
         "store_search_session",
@@ -1386,8 +1416,14 @@ Array [
   Object {
     "privilege": Object {
       "alerting": Object {
-        "all": Array [],
-        "read": Array [],
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
       },
       "api": Array [],
       "app": Array [
