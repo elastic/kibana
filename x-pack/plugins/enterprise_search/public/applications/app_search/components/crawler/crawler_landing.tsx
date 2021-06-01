@@ -26,11 +26,11 @@ import './crawler_landing.scss';
 import { CRAWLER_TITLE } from '.';
 
 export const CrawlerLanding: React.FC = () => (
-  <div data-test-subj="CrawlerLanding" className="crawler-landing">
+  <div data-test-subj="CrawlerLanding" className="crawlerLanding">
     <EuiPageHeader pageTitle={CRAWLER_TITLE} />
     <EuiSpacer />
-    <EuiPanel grow paddingSize="l" className="crawler-landing__panel">
-      <div>
+    <EuiPanel grow paddingSize="l" className="crawlerLanding__panel">
+      <div className="crawlerLanding__wrapper">
         <EuiTitle size="s">
           <h1>
             {i18n.translate('xpack.enterpriseSearch.appSearch.engine.crawler.landingPage.title', {

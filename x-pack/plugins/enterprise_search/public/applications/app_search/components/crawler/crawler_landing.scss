@@ -1,4 +1,4 @@
-.crawler-landing {
+.crawlerLanding {
   &__panel {
     overflow: hidden;
     background-image: url('./assets/bg_crawler_landing.png');
@@ -6,7 +6,9 @@
     background-repeat: no-repeat;
     background-position: right -2rem;
 
-    > div {
+  }
+
+  &__wrapper {
       max-width: 50rem;
     }
   }
