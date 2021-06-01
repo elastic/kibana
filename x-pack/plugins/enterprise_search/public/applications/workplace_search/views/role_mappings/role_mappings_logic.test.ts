@@ -370,6 +370,7 @@ describe('RoleMappingsLogic', () => {
 
     describe('handleDeleteMapping', () => {
       let confirmSpy: any;
+      const roleId = 'r1';
 
       beforeEach(() => {
         confirmSpy = jest.spyOn(window, 'confirm');
@@ -380,12 +381,6 @@ describe('RoleMappingsLogic', () => {
         confirmSpy.mockRestore();
       });
 
-      it('returns when no mapping', () => {
-        RoleMappingsLogic.actions.handleDeleteMapping();
-
-        expect(http.delete).not.toHaveBeenCalled();
-      });
-
       it('calls API and refreshes list', async () => {
         const initializeRoleMappingsSpy = jest.spyOn(
           RoleMappingsLogic.actions,
@@ -393,10 +388,10 @@ describe('RoleMappingsLogic', () => {
         );
         RoleMappingsLogic.actions.setRoleMappingData(mappingServerProps);
         http.delete.mockReturnValue(Promise.resolve({}));
-        RoleMappingsLogic.actions.handleDeleteMapping();
+        RoleMappingsLogic.actions.handleDeleteMapping(roleId);
 
         expect(http.delete).toHaveBeenCalledWith(
-          `/api/workplace_search/org/role_mappings/${wsRoleMapping.id}`
+          `/api/workplace_search/org/role_mappings/${roleId}`
         );
         await nextTick();
 
@@ -406,7 +401,7 @@ describe('RoleMappingsLogic', () => {
       it('handles error', async () => {
         RoleMappingsLogic.actions.setRoleMappingData(mappingServerProps);
         http.delete.mockReturnValue(Promise.reject('this is an error'));
-        RoleMappingsLogic.actions.handleDeleteMapping();
+        RoleMappingsLogic.actions.handleDeleteMapping(roleId);
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
@@ -415,7 +410,7 @@ describe('RoleMappingsLogic', () => {
       it('will do nothing if not confirmed', async () => {
         RoleMappingsLogic.actions.setRoleMappingData(mappingServerProps);
         window.confirm = () => false;
-        RoleMappingsLogic.actions.handleDeleteMapping();
+        RoleMappingsLogic.actions.handleDeleteMapping(roleId);
 
         expect(http.delete).not.toHaveBeenCalled();
         await nextTick();

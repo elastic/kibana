@@ -55,7 +55,7 @@ interface RoleMappingsActions {
     firstElasticsearchRole: string
   ): { value: AttributeName; firstElasticsearchRole: string };
   handleAttributeValueChange(value: string): { value: string };
-  handleDeleteMapping(): void;
+  handleDeleteMapping(roleId: string): { roleId: string };
   handleEngineSelectionChange(
     engineName: string,
     selected: boolean
@@ -113,7 +113,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     resetState: true,
     initializeRoleMappings: true,
     initializeRoleMapping: (roleId) => ({ roleId }),
-    handleDeleteMapping: true,
+    handleDeleteMapping: (roleId: string) => ({ roleId }),
     handleSaveMapping: true,
     openRoleMappingFlyout: true,
     closeRoleMappingFlyout: false,
@@ -296,12 +296,9 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         }
       }
     },
-    handleDeleteMapping: async () => {
-      const { roleMapping } = values;
-      if (!roleMapping) return;
-
+    handleDeleteMapping: async ({ roleId }) => {
       const { http } = HttpLogic.values;
-      const route = `/api/app_search/role_mappings/${roleMapping.id}`;
+      const route = `/api/app_search/role_mappings/${roleId}`;
 
       if (window.confirm(DELETE_ROLE_MAPPING_MESSAGE)) {
         try {
