@@ -1556,7 +1556,6 @@
     "discover.bucketIntervalTooltip.tooLargeBucketsText": "大きすぎるバケット",
     "discover.bucketIntervalTooltip.tooManyBucketsText": "バケットが多すぎます",
     "discover.clearSelection": "選択した項目をクリア",
-    "discover.context.breadcrumb": "{indexPatternTitle}#{docId} のコンテキスト",
     "discover.context.failedToLoadAnchorDocumentDescription": "アンカードキュメントの読み込みに失敗しました",
     "discover.context.failedToLoadAnchorDocumentErrorDescription": "アンカードキュメントの読み込みに失敗しました。",
     "discover.context.loadButtonLabel": "読み込み",

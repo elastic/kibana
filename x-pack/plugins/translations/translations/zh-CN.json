@@ -1565,7 +1565,6 @@
     "discover.bucketIntervalTooltip.tooLargeBucketsText": "存储桶过大",
     "discover.bucketIntervalTooltip.tooManyBucketsText": "存储桶过多",
     "discover.clearSelection": "清除所选内容",
-    "discover.context.breadcrumb": "{indexPatternTitle}#{docId} 的上下文",
     "discover.context.failedToLoadAnchorDocumentDescription": "无法加载定位点文档",
     "discover.context.failedToLoadAnchorDocumentErrorDescription": "无法加载定位点文档。",
     "discover.context.loadButtonLabel": "加载",
