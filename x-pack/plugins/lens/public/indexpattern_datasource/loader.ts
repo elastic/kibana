@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { uniq, mapValues } from 'lodash';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { HttpSetup, SavedObjectReference } from 'kibana/public';
 import { InitializationOptions, StateSetter } from '../types';

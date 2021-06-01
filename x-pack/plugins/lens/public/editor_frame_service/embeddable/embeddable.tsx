@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import {
@@ -283,9 +283,9 @@ export class Embeddable
       ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
     if (
-      !_.isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
-      !_.isEqual(containerState.query, this.externalSearchContext.query) ||
-      !_.isEqual(cleanedFilters, this.externalSearchContext.filters) ||
+      !isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
+      !isEqual(containerState.query, this.externalSearchContext.query) ||
+      !isEqual(cleanedFilters, this.externalSearchContext.filters) ||
       this.externalSearchContext.searchSessionId !== containerState.searchSessionId
     ) {
       this.externalSearchContext = {
@@ -446,7 +446,7 @@ export class Embeddable
       return;
     }
     const responses = await Promise.allSettled(
-      _.uniqBy(
+      uniqBy(
         this.savedVis.references.filter(({ type }) => type === 'index-pattern'),
         'id'
       ).map(({ id }) => this.deps.indexPatternService.get(id))
