@@ -77,13 +77,6 @@ describe('Fleet trusted apps card', () => {
     return component;
   };
 
-  afterEach(() => {
-    TrustedAppsHttpServiceMock.mockReset();
-  });
-  beforeEach(() => {
-    promise = Promise.resolve(summary);
-    addDanger = jest.fn();
-  });
   beforeAll(() => {
     useToastsMock.mockImplementation(() => {
       return {
@@ -91,7 +84,14 @@ describe('Fleet trusted apps card', () => {
       };
     });
   });
-  it('should renders correctly', async () => {
+  beforeEach(() => {
+    promise = Promise.resolve(summary);
+    addDanger = jest.fn();
+  });
+  afterEach(() => {
+    TrustedAppsHttpServiceMock.mockReset();
+  });
+  it('should render correctly', async () => {
     TrustedAppsHttpServiceMock.mockImplementationOnce(() => {
       return {
         getTrustedAppsSummary: () => jest.fn(() => promise),
@@ -101,7 +101,7 @@ describe('Fleet trusted apps card', () => {
     expect(component.getByText('Trusted Applications')).not.toBeNull();
     expect(component.getByText('Manage trusted applications')).not.toBeNull();
   });
-  it('should renders an error when api call fails', async () => {
+  it('should render an error toast when api call fails', async () => {
     expect(addDanger).toBeCalledTimes(0);
     promise = Promise.reject(new Error('error test'));
     TrustedAppsHttpServiceMock.mockImplementationOnce(() => {

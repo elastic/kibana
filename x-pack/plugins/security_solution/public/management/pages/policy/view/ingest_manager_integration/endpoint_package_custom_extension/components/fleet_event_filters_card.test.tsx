@@ -76,13 +76,6 @@ describe('Fleet event filters card', () => {
     }
     return component;
   };
-  afterEach(() => {
-    EventFiltersHttpServiceMock.mockReset();
-  });
-  beforeEach(() => {
-    promise = Promise.resolve(summary);
-    addDanger = jest.fn();
-  });
   beforeAll(() => {
     useToastsMock.mockImplementation(() => {
       return {
@@ -90,7 +83,14 @@ describe('Fleet event filters card', () => {
       };
     });
   });
-  it('should renders correctly', async () => {
+  beforeEach(() => {
+    promise = Promise.resolve(summary);
+    addDanger = jest.fn();
+  });
+  afterEach(() => {
+    EventFiltersHttpServiceMock.mockReset();
+  });
+  it('should render correctly', async () => {
     EventFiltersHttpServiceMock.mockImplementationOnce(() => {
       return {
         getSummary: () => jest.fn(() => promise),
@@ -100,7 +100,7 @@ describe('Fleet event filters card', () => {
     expect(component.getByText('Event Filters')).not.toBeNull();
     expect(component.getByText('Manage event filters')).not.toBeNull();
   });
-  it('should renders an error when api call fails', async () => {
+  it('should render an error toast when api call fails', async () => {
     expect(addDanger).toBeCalledTimes(0);
     promise = Promise.reject(new Error('error test'));
     EventFiltersHttpServiceMock.mockImplementationOnce(() => {

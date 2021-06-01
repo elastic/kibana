@@ -45,7 +45,9 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
     const fetchStats = async () => {
       try {
         const response = await trustedAppsApi.getTrustedAppsSummary();
-        if (isMounted) setStats(response);
+        if (isMounted) {
+          setStats(response);
+        }
       } catch (error) {
         toasts.addDanger(
           i18n.translate(

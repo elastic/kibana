@@ -43,7 +43,9 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
     const fetchStats = async () => {
       try {
         const summary = await eventFiltersApi.getSummary();
-        if (isMounted.current) setStats(summary);
+        if (isMounted.current) {
+          setStats(summary);
+        }
       } catch (error) {
         toasts.addDanger(
           i18n.translate(
