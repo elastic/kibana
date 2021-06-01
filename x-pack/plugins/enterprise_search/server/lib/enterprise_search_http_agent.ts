@@ -39,12 +39,10 @@ export const loadCertificateAuthorities = (ca: string | string[]): string[] => {
   const parsedCerts = [];
   if (ca) {
     const paths = Array.isArray(ca) ? ca : [ca];
-    if (paths.length > 0) {
-      for (const path of paths) {
-        const parsedCert = readFileSync(path, 'utf8');
-        parsedCerts.push(parsedCert);
-      }
-    }
+    paths.forEach((path) => {
+      const parsedCert = readFileSync(path, 'utf8');
+      parsedCerts.push(parsedCert);
+    });
   }
   return parsedCerts;
 };
