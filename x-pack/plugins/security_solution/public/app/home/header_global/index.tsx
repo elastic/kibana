@@ -9,7 +9,6 @@ import {
   EuiHeaderLinks,
   EuiHeaderLink,
   EuiHeaderSectionItem,
-  EuiHeaderSectionItemButton,
 } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { createPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
@@ -20,15 +19,11 @@ import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH, APP_DETECTIONS_PATH } from '../../../../common/constants';
-import { useMainNavigationVisibility } from '../temp_collapse_sidenav_context';
 
 export const HeaderGlobal = React.memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const portalNode = useMemo(() => createPortalNode(), []);
-    const { isCollapsed, updateCollapsedState } = useMainNavigationVisibility();
     const { http } = useKibana().services;
-
-    const toggleMainNav = () => updateCollapsedState(!isCollapsed);
 
     useEffect(() => {
       let unmount = () => {};
@@ -49,17 +44,6 @@ export const HeaderGlobal = React.memo(
     return (
       <InPortal node={portalNode}>
         <EuiHeaderSection side="right">
-          <EuiHeaderSectionItem>
-            <EuiHeaderSectionItemButton
-              color="primary"
-              iconType={isCollapsed ? 'arrowRight' : 'arrowLeft'}
-              iconSide="left"
-              textProps={{ style: { fontSize: '1rem' } }}
-              onClick={toggleMainNav}
-            >
-              {`${isCollapsed ? 'Open' : 'Close'} Navigation`}
-            </EuiHeaderSectionItemButton>
-          </EuiHeaderSectionItem>
           {window.location.pathname.includes(APP_DETECTIONS_PATH) && (
             <EuiHeaderSectionItem>
               <MlPopover />
