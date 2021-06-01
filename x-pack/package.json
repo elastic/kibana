@@ -32,7 +32,6 @@
     "@kbn/test": "link:../packages/kbn-test"
   },
   "dependencies": {
-    "@kbn/interpreter": "link:../packages/kbn-interpreter",
     "@kbn/ui-framework": "link:../packages/kbn-ui-framework"
   }
 }
