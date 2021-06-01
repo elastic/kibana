@@ -112,3 +112,8 @@ export interface CreateCommentParams {
   comment: SimpleComment;
   createdDate: string;
 }
+
+export interface ResponseError {
+  ErrorCode: number;
+  Argument: string;
+}

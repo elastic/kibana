@@ -10,7 +10,7 @@ import axios from 'axios';
 
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { getErrorMessage, request } from '../lib/axios_utils';
-import { getBodyForEventAction, removeCommentFieldUpdatedInformation } from './helpers';
+import { getBodyForEventAction } from './helpers';
 import {
   CreateCommentParams,
   CreateRecordParams,
@@ -18,13 +18,22 @@ import {
   ExternalServiceCredentials,
   ExternalServiceIncidentResponse,
   MappingConfigType,
-  SwimlaneComment,
+  ResponseError,
   SwimlanePublicConfigurationType,
   SwimlaneRecordPayload,
   SwimlaneSecretConfigurationType,
   UpdateRecordParams,
 } from './types';
 import * as i18n from './translations';
+
+const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
+  if (errorResponse == null) {
+    return '';
+  }
+
+  const { ErrorCode, Argument } = errorResponse;
+  return `${Argument} (${ErrorCode})`;
+};
 
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
@@ -86,7 +95,9 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to create record in application with id ${appId}. Error: ${error.message}`
+          `Unable to create record in application with id ${appId}. Error: ${
+            error.message
+          } Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }
@@ -109,47 +120,6 @@ export const createExternalService = (
         url: getPostRecordIdUrl(appId, params.incidentId),
       });
 
-      const fieldId = getCommentFieldId(mappingConfig);
-      let potentialNewDescription: SwimlaneComment[] = [];
-      let isDescriptionPosted = true;
-
-      if (
-        fieldId != null &&
-        res.data.comments != null &&
-        res.data.comments[fieldId] != null &&
-        res.data.comments[fieldId].length &&
-        data.comments != null &&
-        data.comments[fieldId] != null &&
-        data.comments[fieldId].length === 1
-      ) {
-        // this is the description, it is sent as a comment.
-        // on update, it needs a separate comment post
-        // will only ever be length of 1
-        potentialNewDescription = data.comments[fieldId];
-        // remove update time to compare string only
-        const messageString = removeCommentFieldUpdatedInformation(
-          `${potentialNewDescription[0].message}`
-        );
-
-        // already saved description/comments
-        const existingComments: SwimlaneComment[] = res.data.comments[fieldId];
-
-        // check if description is updated
-        isDescriptionPosted = existingComments.some(
-          ({ message }) => removeCommentFieldUpdatedInformation(`${message}`) === messageString
-        );
-
-        if (!isDescriptionPosted) {
-          // if description has updated
-          // post as comments
-          await createComment({
-            incidentId: params.incidentId,
-            comment: { comment: potentialNewDescription[0].message },
-            createdDate: potentialNewDescription[0].createdDate,
-          });
-        }
-      }
-
       return {
         id: res.data.id,
         title: res.data.name,
@@ -159,7 +129,9 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to update record in application with id ${appId}. Error: ${error.message}`
+          `Unable to update record in application with id ${appId}. Error: ${
+            error.message
+          } Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }
@@ -199,7 +171,9 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to create comment in application with id ${appId}. Error: ${error.message}`
+          `Unable to create comment in application with id ${appId}. Error: ${
+            error.message
+          } Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }

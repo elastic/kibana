@@ -7,8 +7,7 @@
 
 import {
   CreateRecordParams,
-  ExecutorSubActionCreateRecordParams,
-  FieldConfig,
+  ExecutorSubActionPushParams,
   MappingConfigType,
   SwimlaneDataComments,
   SwimlaneDataValues,
@@ -38,10 +37,7 @@ export const getBodyForEventAction = (
 
     const createdDate = new Date().toISOString();
     const { id, fieldType } = fieldMap;
-    const paramName = mappingsKey.replace(
-      'Config',
-      ''
-    ) as keyof ExecutorSubActionCreateRecordParams;
+    const paramName = mappingsKey.replace('Config', '') as keyof CreateRecordParams['incident'];
 
     const value = params[paramName];
 
@@ -74,25 +70,3 @@ export const getBodyForEventAction = (
 
   return data;
 };
-
-export const removeCommentFieldUpdatedInformation = (content: string): string => {
-  // these values are added on in `transformFields` in `x-pack/plugins/cases/server/client/cases/utils.ts`
-  // have to remove to compare string values
-  // probably a bug
-  if (content.indexOf(` (updated at `) > 0) {
-    return content.slice(0, content.indexOf(` (updated at`));
-  }
-  if (content.indexOf(` (created at `) > 0) {
-    return content.slice(0, content.indexOf(` (created at`));
-  }
-  return content;
-};
-
-export const removeUnsafeFields = (fields: FieldConfig[]): FieldConfig[] =>
-  fields.filter(
-    (filter) =>
-      filter.id !== '__proto__' &&
-      filter.key !== '__proto__' &&
-      filter.name !== '__proto__' &&
-      filter.fieldType !== '__proto__'
-  );
