@@ -33,7 +33,6 @@ import {
   useConfig,
   useStartServices,
   UIExtensionsContext,
-  useUIExtension,
 } from './hooks';
 import { Error, Loading } from './components';
 import type { UIExtensionsStorage } from './types';

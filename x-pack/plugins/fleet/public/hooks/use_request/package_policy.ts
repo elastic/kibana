@@ -18,7 +18,7 @@ import type {
   GetPackagePoliciesRequest,
   GetPackagePoliciesResponse,
   GetOnePackagePolicyResponse,
-} from '../../../../../common/types/rest_spec';
+} from '../../../common/types/rest_spec';
 
 import { sendRequest, useRequest } from './use_request';
 

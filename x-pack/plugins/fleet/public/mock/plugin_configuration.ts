@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FleetConfigType } from '../../../plugin';
+import type { FleetConfigType } from '../plugin';
 
 export const createConfigurationMock = (): FleetConfigType => {
   return {
