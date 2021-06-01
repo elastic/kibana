@@ -27,6 +27,8 @@ export const configSchema = schema.object({
           defaultValue: ['data_hot', 'data_warm'],
         }
       ),
+      terminateAfter: schema.duration({ defaultValue: 100000 }),
+      timeout: schema.duration({ defaultValue: 1000 }),
     }),
   }),
   search: schema.object({

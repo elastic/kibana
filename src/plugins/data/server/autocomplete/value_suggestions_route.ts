@@ -8,15 +8,14 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
-
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import type { IFieldType } from '../index';
+import { shimAbortSignal } from '../index';
 import { findIndexPatternById, getFieldByName } from '../index_patterns';
 import { getRequestAbortedSignal } from '../lib';
 import { getKbnServerError } from '../../../kibana_utils/server';
-import { shimAbortSignal } from '../index';
-import { ConfigSchema } from '../../config';
+import type { ConfigSchema } from '../../config';
 
 export function registerValueSuggestionsRoute(router: IRouter, config$: Observable<ConfigSchema>) {
   router.post(
