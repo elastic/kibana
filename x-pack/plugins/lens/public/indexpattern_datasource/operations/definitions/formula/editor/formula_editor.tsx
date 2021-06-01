@@ -259,7 +259,7 @@ export function FormulaEditor({
     },
     // Make it validate on flyout open in case of a broken formula left over
     // from a previous edit
-    { skipFirstRender: text == null },
+    { skipFirstRender: true },
     256,
     [text]
   );
