@@ -90,6 +90,7 @@ export const WaterfallChartSidebarWrapper = euiStyled(EuiFlexItem)`
 export const WaterfallChartSidebarContainer = euiStyled.div<WaterfallChartSidebarContainer>`
   height: ${(props) => `${props.height}px`};
   overflow-y: hidden;
+  overflow-x: hidden;
 `;
 
 export const WaterfallChartSidebarContainerInnerPanel: StyledComponent<
@@ -107,8 +108,7 @@ export const WaterfallChartSidebarContainerFlexGroup = euiStyled(EuiFlexGroup)`
 // Ensures flex items honour no-wrap of children, rather than trying to extend to the full width of children.
 export const WaterfallChartSidebarFlexItem = euiStyled(EuiFlexItem)`
   min-width: 0;
-  padding-left: ${(props) => props.theme.eui.paddingSizes.m};
-  padding-right: ${(props) => props.theme.eui.paddingSizes.m};
+  padding-right: ${(props) => props.theme.eui.paddingSizes.s};
   justify-content: space-around;
 `;
 

@@ -11,7 +11,6 @@ import {
   ActionTypeModel,
   ConnectorValidationResult,
 } from '../../../../types';
-import logo from './logo.svg';
 import {
   ResilientActionConnector,
   ResilientConfig,
@@ -72,7 +71,7 @@ export function getActionType(): ActionTypeModel<
 > {
   return {
     id: '.resilient',
-    iconClass: logo,
+    iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.DESC,
     actionTypeTitle: i18n.TITLE,
     validateConnector,

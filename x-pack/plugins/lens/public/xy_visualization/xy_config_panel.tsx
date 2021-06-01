@@ -41,9 +41,8 @@ import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_h
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration, GroupsConfiguration } from './axes_configuration';
-import { PalettePicker } from '../shared_components';
+import { PalettePicker, TooltipWrapper } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getScaleType, getSortedAccessors } from './to_expression';
 import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
@@ -140,7 +139,7 @@ const getDataBounds = function (
     let min = Number.MAX_VALUE;
     let max = Number.MIN_VALUE;
     axis.series.forEach((series) => {
-      activeData?.[series.layer].rows.forEach((row) => {
+      activeData?.[series.layer]?.rows.forEach((row) => {
         const value = row[series.accessor];
         if (!Number.isNaN(value)) {
           if (value < min) {
