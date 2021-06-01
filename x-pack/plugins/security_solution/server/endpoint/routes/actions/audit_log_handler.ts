@@ -7,7 +7,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
-import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../../fleet/common';
 import { EndpointActionLogRequestSchema } from '../../../../common/endpoint/schema/actions';
 
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
@@ -34,20 +34,14 @@ export const actionsLogRequestHandler = (
     try {
       result = await esClient.search(
         {
-          index: `*${AGENT_ACTIONS_INDEX}*`,
+          index: [AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX],
           size: 20,
           body: {
             query: {
               bool: {
-                filter: [
-                  {
-                    bool: {
-                      should: [
-                        { terms: { agents: [elasticAgentId] } },
-                        { terms: { agent_id: [elasticAgentId] } },
-                      ],
-                    },
-                  },
+                should: [
+                  { terms: { agents: [elasticAgentId] } },
+                  { terms: { agent_id: [elasticAgentId] } },
                 ],
               },
             },
