@@ -12,7 +12,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   AsyncSearchProviderProgress,
   SearchServiceParams,
-} from './async_search_service';
+} from '../../../../common/search_strategies/correlations/types';
+
 import { getQueryWithParams } from './get_query_with_params';
 
 interface FieldValuePair {

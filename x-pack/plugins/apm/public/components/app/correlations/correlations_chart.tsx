@@ -75,7 +75,7 @@ const chartTheme: PartialTheme = {
 interface CorrelationsChartProps {
   field: string;
   value: string;
-  histogram: Array<{ key: string; doc_count: number; doc_count_full: number }>;
+  histogram: Array<{ key: number; doc_count: number; doc_count_full: number }>;
   markerValue: number;
   markerPercentile: number;
 }
@@ -107,7 +107,7 @@ export function CorrelationsChart({
   ];
 
   const euiTheme = useTheme();
-  const xMax = max(histogram.map((d) => parseFloat(d.key))) ?? 0;
+  const xMax = max(histogram.map((d) => d.key)) ?? 0;
   const durationFormatter = getDurationFormatter(xMax);
 
   return (

@@ -9,9 +9,8 @@ import { QueryContainer } from '@elastic/elasticsearch/api/types';
 
 import { i18n } from '@kbn/i18n';
 
-import type { SearchServiceParams } from './async_search_service';
-
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 
 export enum ProcessorEvent {
   transaction = 'transaction',

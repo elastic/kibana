@@ -9,43 +9,18 @@ import { shuffle } from 'lodash';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
+import type {
+  AsyncSearchProviderProgress,
+  SearchServiceParams,
+  SearchServiceValue,
+} from '../../../../common/search_strategies/correlations/types';
+
 import { fetchTransactionDurationFieldCandidates } from './query_field_candidates';
 import { fetchTransactionDurationFieldValuePairs } from './query_field_value_pairs';
-import { HistogramItem } from './query_histogram';
 import { fetchTransactionDurationPecentiles } from './query_percentiles';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationHistogramRangesteps } from './query_histogram_rangesteps';
 import { fetchTransactionDurationRanges } from './query_ranges';
-
-export interface SearchServiceParams {
-  index: string;
-  environment?: string;
-  kuery?: string;
-  serviceName?: string;
-  transactionName?: string;
-  transactionType?: string;
-  start?: string;
-  end?: string;
-  percentileThreshold?: number;
-  percentileThresholdValue?: number;
-}
-
-export interface SearchServiceValue {
-  histogram: HistogramItem[];
-  value: string;
-  field: string;
-  correlation: number;
-}
-
-export interface AsyncSearchProviderProgress {
-  started: number;
-  loadedHistogramStepsize: number;
-  loadedOverallHistogram: number;
-  loadedFieldCanditates: number;
-  loadedFieldValuePairs: number;
-  loadedHistograms: number;
-  getOverallProgress: () => number;
-}
 
 export const asyncSearchServiceProvider = (
   esClient: ElasticsearchClient,

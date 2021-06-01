@@ -9,7 +9,8 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { SearchServiceParams } from './async_search_service';
+import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
+
 import { getQueryWithParams } from './get_query_with_params';
 
 const fieldCandidatesFilter = ['parent.id', 'trace.id', 'transaction.id'];

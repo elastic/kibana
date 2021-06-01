@@ -10,21 +10,13 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import type {
+  HistogramItem,
+  ResponseHit,
+  SearchServiceParams,
+} from '../../../../common/search_strategies/correlations/types';
 
-import type { SearchServiceParams } from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
-
-export interface HistogramItem {
-  key: number;
-  doc_count: number;
-}
-
-interface ResponseHitSource {
-  [s: string]: unknown;
-}
-interface ResponseHit {
-  _source: ResponseHitSource;
-}
 
 export const getTransactionDurationHistogramRequest = (
   params: SearchServiceParams,

@@ -10,8 +10,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 
-import type { SearchServiceParams } from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
 
 export interface HistogramItem {
@@ -24,6 +24,18 @@ interface ResponseHitSource {
 }
 interface ResponseHit {
   _source: ResponseHitSource;
+}
+
+interface BucketCorrelation {
+  buckets_path: string;
+  function: {
+    count_correlation: {
+      indicator: {
+        expectations: number[];
+        doc_count: number;
+      };
+    };
+  };
 }
 
 export const getTransactionDurationCorrelationRequest = (
@@ -64,6 +76,18 @@ export const getTransactionDurationCorrelationRequest = (
   expectations.unshift(0);
   expectations.push(percentileValues[percentileValues.length - 1]);
 
+  const bucketCorrelation: BucketCorrelation = {
+    buckets_path: 'latency_ranges>_count',
+    function: {
+      count_correlation: {
+        indicator: {
+          expectations,
+          doc_count: totalHits,
+        },
+      },
+    },
+  };
+
   return {
     index: params.index,
     body: {
@@ -77,18 +101,8 @@ export const getTransactionDurationCorrelationRequest = (
           },
         },
         transaction_duration_correlation: {
-          bucket_correlation: {
-            buckets_path: 'latency_ranges>_count',
-            function: {
-              count_correlation: {
-                indicator: {
-                  expectations,
-                  doc_count: totalHits,
-                },
-              },
-            },
-          },
-        },
+          bucket_correlation: bucketCorrelation,
+        } as estypes.AggregationContainer,
       },
     },
   };
@@ -119,7 +133,9 @@ export const fetchTransactionDurationCorrelation = async (
   }
 
   return {
-    ranges: resp.body.aggregations.latency_ranges.buckets,
-    correlation: resp.body.aggregations.transaction_duration_correlation.value,
+    ranges: (resp.body.aggregations
+      .latency_ranges as estypes.MultiBucketAggregate).buckets,
+    correlation: (resp.body.aggregations
+      .transaction_duration_correlation as estypes.ValueAggregate).value,
   };
 };

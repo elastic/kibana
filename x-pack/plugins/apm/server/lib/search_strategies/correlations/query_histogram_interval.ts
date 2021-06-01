@@ -10,8 +10,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 
-import type { SearchServiceParams } from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
 
 const HISTOGRAM_INTERVALS = 1000;

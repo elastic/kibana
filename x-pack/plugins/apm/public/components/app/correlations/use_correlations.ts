@@ -9,10 +9,13 @@ import { useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
 
 import {
+  IKibanaSearchRequest,
   IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../src/plugins/data/public';
+
+import type { SearchServiceValue } from '../../../../common/search_strategies/correlations/types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import type { ApmPluginStartDeps } from '../../../plugin';
@@ -28,6 +31,12 @@ interface CorrelationsOptions {
   end?: string;
 }
 
+interface RawResponse {
+  percentileThresholdValue?: number;
+  took: number;
+  values: SearchServiceValue[];
+}
+
 export const useCorrelations = (params: CorrelationsOptions) => {
   const { pluginsStart } = useApmPluginContext();
   const data = (pluginsStart.data as unknown) as ApmPluginStartDeps['data'];
@@ -36,13 +45,13 @@ export const useCorrelations = (params: CorrelationsOptions) => {
   const [isComplete, setIsComplete] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [loaded, setLoaded] = useState<number>(0);
-  const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
+  const [rawResponse, setRawResponse] = useState<RawResponse>();
   const [timeTook, setTimeTook] = useState<number | undefined>();
   const [total, setTotal] = useState<number>(100);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
 
-  function setResponse(response: IKibanaSearchResponse) {
+  function setResponse(response: IKibanaSearchResponse<RawResponse>) {
     setIsRunning(response.isRunning || false);
     setRawResponse(response.rawResponse);
     setLoaded(response.loaded!);
@@ -61,7 +70,7 @@ export const useCorrelations = (params: CorrelationsOptions) => {
 
     // Submit the search request using the `data.search` service.
     searchSubscription$.current = data.search
-      .search(req, {
+      .search<IKibanaSearchRequest, IKibanaSearchResponse<RawResponse>>(req, {
         strategy: 'apmCorrelationsSearchStrategy',
         abortSignal: abortCtrl.current.signal,
       })

@@ -14,11 +14,12 @@ import {
   IKibanaSearchResponse,
 } from '../../../../../../../src/plugins/data/common';
 
-import {
-  asyncSearchServiceProvider,
+import type {
   SearchServiceParams,
   SearchServiceValue,
-} from './async_search_service';
+} from '../../../../common/search_strategies/correlations/types';
+
+import { asyncSearchServiceProvider } from './async_search_service';
 
 export type PartialSearchRequest = IKibanaSearchRequest<SearchServiceParams>;
 export type PartialSearchResponse = IKibanaSearchResponse<{

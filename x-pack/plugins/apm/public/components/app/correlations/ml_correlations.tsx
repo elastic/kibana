@@ -163,7 +163,7 @@ export function MlCorrelations({ onClose }: Props) {
 
       <EuiSpacer size="m" />
 
-      {histograms.length > 0 && (
+      {histograms.length > 0 && selectedHistogram !== undefined && (
         <>
           <EuiTitle size="xxs">
             <h4>
@@ -175,7 +175,7 @@ export function MlCorrelations({ onClose }: Props) {
 
           <CorrelationsChart
             markerPercentile={percentileThreshold}
-            markerValue={percentileThresholdValue}
+            markerValue={percentileThresholdValue ?? 0}
             {...selectedHistogram}
             key={`${selectedHistogram.field}:${selectedHistogram.value}`}
           />
@@ -188,10 +188,13 @@ export function MlCorrelations({ onClose }: Props) {
               { defaultMessage: '% of slow transactions' }
             )}
             significantTerms={histograms.map((d) => ({
+              distribution: [],
               fieldName: d.field,
               fieldValue: d.value,
+              score: d.correlation,
               impact: d.correlation,
-              percentage: d.correlation,
+              fieldCount: 0,
+              valueCount: 0,
             }))}
             status={FETCH_STATUS.SUCCESS}
             setSelectedSignificantTerm={setSelectedSignificantTerm}

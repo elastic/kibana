@@ -10,8 +10,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 
-import type { SearchServiceParams } from './async_search_service';
 import { getQueryWithParams } from './get_query_with_params';
 
 export interface HistogramItem {
@@ -76,7 +76,7 @@ export const fetchTransactionDurationRanges = async (
   rangesSteps: number[],
   fieldName?: string,
   fieldValue?: string
-): Promise<any> => {
+): Promise<Array<{ key: number; doc_count: number }>> => {
   const resp = await esClient.search<ResponseHit>(
     getTransactionDurationRangesRequest(
       params,
@@ -92,7 +92,11 @@ export const fetchTransactionDurationRanges = async (
     );
   }
 
-  return resp.body.aggregations.logspace_ranges.buckets
+  return (resp.body.aggregations
+    .logspace_ranges as estypes.MultiBucketAggregate<{
+    from: number;
+    doc_count: number;
+  }>).buckets
     .map((d) => ({
       key: d.from,
       doc_count: d.doc_count,

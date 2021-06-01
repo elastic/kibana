@@ -73,7 +73,7 @@ export function CsmAppRoot({
   core,
   deps,
   config,
-  corePlugins: { embeddable, maps },
+  corePlugins,
   observabilityRuleTypeRegistry,
 }: {
   appMountParameters: AppMountParameters;
@@ -83,6 +83,7 @@ export function CsmAppRoot({
   corePlugins: ApmPluginStartDeps;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) {
+  const { embeddable, maps } = corePlugins;
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
   const plugins = { ...deps, maps };
@@ -91,6 +92,7 @@ export function CsmAppRoot({
     config,
     core,
     plugins,
+    pluginsStart: corePlugins,
     observabilityRuleTypeRegistry,
   };
 
