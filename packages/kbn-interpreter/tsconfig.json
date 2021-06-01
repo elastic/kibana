@@ -1,7 +1,20 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-interpreter"
+    "allowJs": true,
+    "incremental": true,
+    "outDir": "./target",
+    "declaration": true,
+    "declarationMap": true,
+    "rootDir": "src",
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-interpreter/src",
+    "types": [
+      "jest",
+      "node"
+    ]
   },
-  "include": ["index.d.ts", "src/**/*.d.ts"]
+  "include": [
+    "src/**/*",
+  ]
 }
