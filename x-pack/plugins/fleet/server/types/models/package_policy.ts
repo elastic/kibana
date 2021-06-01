@@ -82,6 +82,7 @@ const PackagePolicyBaseSchema = {
 
 export const NewPackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
+  id: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
 });
 

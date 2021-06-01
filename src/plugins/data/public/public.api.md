@@ -1307,6 +1307,7 @@ export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
     constructor({ spec, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
     addRuntimeField(name: string, runtimeField: RuntimeField): void;
+    // @deprecated
     addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     readonly allowNoIndex: boolean;
     // (undocumented)
@@ -1354,7 +1355,7 @@ export class IndexPattern implements IIndexPattern {
     getFieldByName(name: string): IndexPatternField | undefined;
     getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
     getFormatterForFieldNoDefault(fieldname: string): FieldFormat | undefined;
-    // (undocumented)
+    // @deprecated (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     getOriginalSavedObjectBody: () => {
         fieldAttrs?: string | undefined;
@@ -1367,7 +1368,7 @@ export class IndexPattern implements IIndexPattern {
         typeMeta?: string | undefined;
         type?: string | undefined;
     };
-    // (undocumented)
+    // @deprecated (undocumented)
     getScriptedFields(): IndexPatternField[];
     getSourceFiltering(): {
         excludes: any[];
@@ -1385,6 +1386,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     metaFields: string[];
     removeRuntimeField(name: string): void;
+    // @deprecated
     removeScriptedField(fieldName: string): void;
     resetOriginalSavedObjectBody: () => void;
     // (undocumented)
