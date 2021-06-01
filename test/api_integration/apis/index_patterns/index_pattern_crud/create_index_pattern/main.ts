@@ -106,6 +106,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.index_pattern.title).to.be(title);
         expect(response.body.index_pattern.fields.foo.name).to.be('foo');
         expect(response.body.index_pattern.fields.foo.type).to.be('string');
+        expect(response.body.index_pattern.fields.foo.scripted).to.be(true);
+        expect(response.body.index_pattern.fields.foo.script).to.be("doc['field_name'].value");
+
+        expect(response.body.index_pattern.fields.bar.name).to.be('bar'); // created from es index
+        expect(response.body.index_pattern.fields.bar.type).to.be('boolean');
       });
 
       it('Can add scripted fields, other fields created from es index', async () => {
