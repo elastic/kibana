@@ -177,7 +177,8 @@ export default function ({ getService }) {
       });
     });
 
-    describe('list', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/64473
+    describe.skip('list', function () {
       this.tags(['skipCloud']);
 
       it('should list all the indices with the expected properties and data enrichers', async function () {
