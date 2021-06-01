@@ -15,8 +15,7 @@ export { screenshotsObservableFactory } from './observable';
 
 export interface ScreenshotObservableOpts {
   logger: LevelLogger;
-  urls: string[];
-  locators?: Locator[];
+  urls: string[] | Array<[url: string, locator: Locator]>;
   conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;
   browserTimezone?: string;

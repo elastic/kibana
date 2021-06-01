@@ -6,9 +6,9 @@
  */
 
 import apm from 'elastic-apm-node';
-import assert from 'assert';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
+import { Locator } from '../../../common/types';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
 import { CaptureConfig } from '../../types';
 import {
@@ -37,16 +37,13 @@ interface ScreenSetupData {
   error?: Error;
 }
 
-const REDIRECT_APP_URL = 'temp';
-
 export function screenshotsObservableFactory(
   captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory
 ): ScreenshotsObservableFn {
   return function screenshotsObservable({
     logger,
-    urls,
-    locators,
+    urls: urlsOrTuples,
     conditionalHeaders,
     layout,
     browserTimezone,
@@ -59,23 +56,23 @@ export function screenshotsObservableFactory(
       logger
     );
 
-    // TODO: Delete this code once we have migrated to the new PDF/PNG export type
-    let finalUrls = urls;
-    if (locators) {
-      finalUrls = locators.map(() => REDIRECT_APP_URL);
-      logger.debug(`Detected locators, browser will navigate to ${REDIRECT_APP_URL} for redirect`);
-    }
-
     return create$.pipe(
       mergeMap(({ driver, exit$ }) => {
         apmCreatePage?.end();
         exit$.subscribe({ error: () => apmTrans?.end() });
 
-        return Rx.from(finalUrls).pipe(
-          concatMap((url, index) => {
+        return Rx.from(urlsOrTuples).pipe(
+          concatMap((urlOrTuple, index) => {
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
               mergeMap(() => {
-                const locator = locators && locators[index];
+                let url: string;
+                let locator: undefined | Locator;
+                if (Array.isArray(urlOrTuple)) {
+                  [url, locator] = urlOrTuple;
+                } else {
+                  url = urlOrTuple;
+                }
+                // const locator = locators && locators[index];
                 // If we're moving to another page in the app, we'll want to wait for the app to tell us
                 // it's loaded the next page.
                 const p = index + 1;

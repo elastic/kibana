@@ -17,6 +17,8 @@ import { ConditionalHeaders } from '../../../common';
 import { PdfMaker } from './pdf';
 import { getTracker } from './tracker';
 
+const REDIRECT_APP_URL = 'temp';
+
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   const grouped = groupBy(urlScreenshots.map((u) => u.timeRange));
   const values = Object.values(grouped);
@@ -51,7 +53,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.startScreenshots();
     const screenshots$ = getScreenshots({
       logger,
-      locators,
+      urls: locators.map<[url: string, locator: Locator]>((locator) => [REDIRECT_APP_URL, locator]),
       conditionalHeaders,
       layout,
       browserTimezone,
