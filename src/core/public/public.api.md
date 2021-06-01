@@ -52,8 +52,6 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 // @internal (undocumented)
 export function __kbnBootstrap__(): Promise<void>;
 
-// Warning: (ae-forgotten-export) The symbol "AppNavOptions" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
 export interface App<HistoryLocationState = unknown> extends AppNavOptions {
     appRoute?: string;
@@ -175,6 +173,14 @@ export enum AppNavLinkStatus {
     disabled = 2,
     hidden = 3,
     visible = 1
+}
+
+// @public
+export interface AppNavOptions {
+    euiIconType?: string;
+    icon?: string;
+    order?: number;
+    tooltip?: string;
 }
 
 // @public

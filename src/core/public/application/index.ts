@@ -17,6 +17,7 @@ export type {
   AppUnmount,
   AppMountParameters,
   AppUpdatableFields,
+  AppNavOptions,
   AppUpdater,
   AppDeepLink,
   ApplicationSetup,

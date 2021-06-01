@@ -68,7 +68,6 @@ export type AppUpdatableFields = Pick<
 
 /**
  * App navigation menu options
- *
  * @public
  */
 export interface AppNavOptions {
