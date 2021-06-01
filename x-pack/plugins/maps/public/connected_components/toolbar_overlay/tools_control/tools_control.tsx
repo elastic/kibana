@@ -60,8 +60,6 @@ export interface Props {
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   activateDrawFilterMode: (drawState: DrawState) => void;
-  activateDrawPointsMode: (drawState: DrawState) => void;
-  activateDrawShapesMode: (drawState: DrawState) => void;
   deactivateDrawMode: () => void;
 }
 
@@ -128,22 +126,6 @@ export class ToolsControl extends Component<Props, State> {
       ...options,
     });
     this._closePopover();
-  };
-
-  _initiateFeatureEdit = (options: {
-    actionId: string;
-    filterLabel: string;
-    indexPatternId: string;
-    indexPatternTitle: string;
-    geoFieldName: string;
-    geoFieldType?: ES_GEO_FIELD_TYPE;
-  }) => {
-    this._closePopover();
-    if (options.geoFieldType === 'geo_point') {
-      this.props.activateDrawPointsMode(options);
-    } else {
-      this.props.activateDrawShapesMode(options);
-    }
   };
 
   _getDrawPanels() {

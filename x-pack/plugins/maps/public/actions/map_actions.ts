@@ -57,7 +57,6 @@ import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import {
   DrawState,
-  EditState,
   MapCenter,
   MapCenterAndZoom,
   MapExtent,
@@ -66,8 +65,8 @@ import {
 import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
-import { addFeatureToIndex, getMatchingIndexes } from '../util';
-import { AbstractESSource } from '../classes/sources/es_source';
+import { addFeatureToIndex } from '../util';
+import { ESSearchSource } from '../classes/sources/es_search_source';
 
 export interface MapExtentState {
   zoom: number;
@@ -382,7 +381,7 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
     if (!layer) {
       return;
     }
-    const layerSource = (await layer.getSource()) as AbstractESSource;
+    const layerSource = (await layer.getSource()) as ESSearchSource;
     const indexPattern = await layerSource.getIndexPattern();
     await addFeatureToIndex(indexPattern.title, geometry, layerSource.getGeoFieldName());
     await dispatch(syncDataForAllLayers({ forceRefresh: true }));

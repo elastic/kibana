@@ -32,14 +32,6 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(setDrawMode(DRAW_MODE.DRAW_FILTERS));
       dispatch(updateDrawState(drawState));
     },
-    activateDrawPointsMode: (drawState: DrawState) => {
-      dispatch(setDrawMode(DRAW_MODE.DRAW_POINTS));
-      dispatch(updateDrawState(drawState));
-    },
-    activateDrawShapesMode: (drawState: DrawState) => {
-      dispatch(setDrawMode(DRAW_MODE.DRAW_SHAPES));
-      dispatch(updateDrawState(drawState));
-    },
     deactivateDrawMode: () => dispatch(setDrawMode(DRAW_MODE.NONE)),
   };
 }
