@@ -142,11 +142,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           sortKey: 201,
           entries: [
             {
-              label: i18n.translate('xpack.uptime.overview.heading', {
+              label: i18n.translate('xpack.apm.ux.overview.heading', {
                 defaultMessage: 'Overview',
               }),
               app: 'ux',
               path: '/',
+              matchFullPath: true,
+              ignoreTrailingSlash: true,
             },
           ],
         },
