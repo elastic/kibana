@@ -103,10 +103,11 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
     tags,
     createdBy,
     updatedBy,
+    rule,
   } = alertExecutorOptions;
   let group: string | null = 'default';
   let subgroup: string | null = null;
-  const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
+  const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy, ...rule };
 
   if (params.groupsToScheduleActionsInSeries) {
     const index = state.groupInSeriesIndex || 0;
