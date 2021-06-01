@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 // @ts-expect-error
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { DRAW_TYPE } from '../../../../common/constants';
 import { DrawCircle } from './draw_circle';

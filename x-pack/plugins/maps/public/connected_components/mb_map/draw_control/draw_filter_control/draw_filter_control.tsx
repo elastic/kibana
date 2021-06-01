@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { Filter } from 'src/plugins/data/public';
 import { Feature, Polygon } from 'geojson';

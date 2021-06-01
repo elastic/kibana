@@ -21,6 +21,7 @@ import {
   getWaitingForMapReadyLayerListRaw,
   getQuery,
   getTimeFilters,
+  getTimeslice,
   getLayerList,
   getSearchSessionId,
   getSearchSessionMapBuffer,
@@ -61,6 +62,7 @@ import {
   MapCenterAndZoom,
   MapExtent,
   MapRefreshConfig,
+  Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
@@ -236,17 +238,21 @@ function generateQueryTimestamp() {
 export function setQuery({
   query,
   timeFilters,
-  filters = [],
+  timeslice,
+  filters,
   forceRefresh = false,
   searchSessionId,
   searchSessionMapBuffer,
+  clearTimeslice,
 }: {
   filters?: Filter[];
   query?: Query;
   timeFilters?: TimeRange;
+  timeslice?: Timeslice;
   forceRefresh?: boolean;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
+  clearTimeslice?: boolean;
 }) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -258,10 +264,24 @@ export function setQuery({
         ? prevQuery.queryLastTriggeredAt
         : generateQueryTimestamp();
 
+    const prevTimeFilters = getTimeFilters(getState());
+
+    function getNextTimeslice() {
+      if (
+        clearTimeslice ||
+        (timeFilters !== undefined && !_.isEqual(timeFilters, prevTimeFilters))
+      ) {
+        return undefined;
+      }
+
+      return timeslice ? timeslice : getTimeslice(getState());
+    }
+
     const nextQueryContext = {
-      timeFilters: timeFilters ? timeFilters : getTimeFilters(getState()),
+      timeFilters: timeFilters ? timeFilters : prevTimeFilters,
+      timeslice: getNextTimeslice(),
       query: {
-        ...(query ? query : getQuery(getState())),
+        ...(query ? query : prevQuery),
         // ensure query changes to trigger re-fetch when "Refresh" clicked
         queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
@@ -271,8 +291,9 @@ export function setQuery({
     };
 
     const prevQueryContext = {
-      timeFilters: getTimeFilters(getState()),
-      query: getQuery(getState()),
+      timeFilters: prevTimeFilters,
+      timeslice: getTimeslice(getState()),
+      query: prevQuery,
       filters: getFilters(getState()),
       searchSessionId: getSearchSessionId(getState()),
       searchSessionMapBuffer: getSearchSessionMapBuffer(getState()),

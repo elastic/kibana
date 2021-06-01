@@ -11,8 +11,8 @@ import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
-import { FeatureDrawControl } from './feature_draw_controls/feature_draw_control';
 import { FitToData } from './fit_to_data';
+import { TimesliderToggleButton } from './timeslider_toggle_button';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 
 export interface Props {
@@ -23,40 +23,33 @@ export interface Props {
   showEditButton: boolean;
   shapeDrawModeActive: boolean;
   pointDrawModeActive: boolean;
+  showFitToBoundsButton: boolean;
+  showTimesliderButton: boolean;
 }
 
 export function ToolbarOverlay(props: Props) {
-  function renderToolsControl() {
-    const {
-      addFilters,
-      geoFields,
-      getFilterActions,
-      getActionContext,
-      shapeDrawModeActive,
-      pointDrawModeActive,
-    } = props;
-    if (!addFilters || !geoFields.length || shapeDrawModeActive || pointDrawModeActive) {
-      return null;
-    }
-
-    return (
+  const toolsButton =
+    props.addFilters && props.geoFields.length ? (
       <EuiFlexItem>
         <ToolsControl
-          geoFields={geoFields}
-          getFilterActions={getFilterActions}
-          getActionContext={getActionContext}
+          geoFields={props.geoFields}
+          getFilterActions={props.getFilterActions}
+          getActionContext={props.getActionContext}
         />
       </EuiFlexItem>
-    );
-  }
-
-  function renderFeatureDrawControl() {
-    return props.shapeDrawModeActive || props.pointDrawModeActive ? (
-      <EuiFlexItem>
-        <FeatureDrawControl pointsOnly={props.pointDrawModeActive} />
-      </EuiFlexItem>
     ) : null;
-  }
+
+  const fitToBoundsButton = props.showFitToBoundsButton ? (
+    <EuiFlexItem>
+      <FitToData />
+    </EuiFlexItem>
+  ) : null;
+
+  const timesliderToogleButon = props.showTimesliderButton ? (
+    <EuiFlexItem>
+      <TimesliderToggleButton />
+    </EuiFlexItem>
+  ) : null;
 
   return (
     <EuiFlexGroup
@@ -70,13 +63,11 @@ export function ToolbarOverlay(props: Props) {
         <SetViewControl />
       </EuiFlexItem>
 
-      <EuiFlexItem>
-        <FitToData />
-      </EuiFlexItem>
+      {fitToBoundsButton}
 
-      {renderToolsControl()}
+      {toolsButton}
 
-      {renderFeatureDrawControl()}
+      {timesliderToogleButon}
     </EuiFlexGroup>
   );
 }

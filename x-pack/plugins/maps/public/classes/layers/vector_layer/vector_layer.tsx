@@ -6,7 +6,11 @@
  */
 
 import React from 'react';
-import { Map as MbMap, Layer as MbLayer, GeoJSONSource as MbGeoJSONSource } from 'mapbox-gl';
+import type {
+  Map as MbMap,
+  AnyLayer as MbLayer,
+  GeoJSONSource as MbGeoJSONSource,
+} from '@kbn/mapbox-gl';
 import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
@@ -90,6 +94,7 @@ export interface IVectorLayer extends ILayer {
   hasJoins(): boolean;
   canShowTooltip(): boolean;
   isEditable(): Promise<boolean>;
+  getLeftJoinFields(): Promise<IField[]>;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {

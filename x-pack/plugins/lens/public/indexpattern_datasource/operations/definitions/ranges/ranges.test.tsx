@@ -46,6 +46,17 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
+
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ params }) => {
@@ -161,7 +172,8 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toMatchInlineSnapshot(`
         Object {
@@ -208,7 +220,8 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
 
       expect(esAggsFn).toEqual(
@@ -229,7 +242,8 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
 
       expect(esAggsFn).toEqual(
@@ -250,7 +264,8 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
 
       expect((esAggsFn as { arguments: unknown }).arguments).toEqual(

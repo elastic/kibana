@@ -215,6 +215,9 @@ export class TaskRunner<
     event: Event
   ): Promise<AlertTaskState> {
     const {
+      alertTypeId,
+      consumer,
+      schedule,
       throttle,
       notifyWhen,
       muteAll,
@@ -223,12 +226,17 @@ export class TaskRunner<
       tags,
       createdBy,
       updatedBy,
+      createdAt,
+      updatedAt,
+      enabled,
+      actions,
     } = alert;
     const {
       params: { alertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
+    const alertType = this.alertTypeRegistry.get(alertTypeId);
 
     const alertInstances = mapValues<
       Record<string, RawAlertInstance>,
@@ -265,6 +273,23 @@ export class TaskRunner<
         tags,
         createdBy,
         updatedBy,
+        rule: {
+          name,
+          tags,
+          consumer,
+          producer: alertType.producer,
+          ruleTypeId: alert.alertTypeId,
+          ruleTypeName: alertType.name,
+          enabled,
+          schedule,
+          actions,
+          createdBy,
+          updatedBy,
+          createdAt,
+          updatedAt,
+          throttle,
+          notifyWhen,
+        },
       });
     } catch (err) {
       event.message = `alert execution failure: ${alertLabel}`;
