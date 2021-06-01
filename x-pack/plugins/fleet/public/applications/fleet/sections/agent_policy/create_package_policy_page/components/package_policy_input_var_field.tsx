@@ -12,7 +12,6 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiFieldText,
-  EuiComboBox,
   EuiText,
   EuiCodeEditor,
   EuiTextArea,
@@ -45,22 +44,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
         <MultiTextInput
           value={value}
           onChange={onChange}
-          // onBlur={() => setIsDirty(true)}
-          isDisabled={frozen}
-        />
-      );
-      return (
-        <EuiComboBox
-          noSuggestions
-          isInvalid={isInvalid}
-          selectedOptions={value.map((val: string) => ({ label: val }))}
-          onCreateOption={(newVal: any) => {
-            onChange([...value, newVal]);
-          }}
-          onChange={(newVals: any[]) => {
-            onChange(newVals.map((val) => val.label));
-          }}
           onBlur={() => setIsDirty(true)}
+          isDisabled={frozen}
         />
       );
     }

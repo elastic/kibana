@@ -37,6 +37,15 @@ test('it should allow to add a new value', async () => {
   expect(mockOnChange).toHaveBeenCalledWith(['value1', 'value2']);
 });
 
+test('it should not show the delete button if there only one row', async () => {
+  const { utils } = renderInput(['value1']);
+
+  await act(async () => {
+    const deleteRowEl = await utils.container.querySelector('[aria-label="Delete row"]');
+    expect(deleteRowEl).toBeNull();
+  });
+});
+
 test('it should allow to update  existing value', async () => {
   const { utils, mockOnChange } = renderInput(['value1', 'value2']);
 

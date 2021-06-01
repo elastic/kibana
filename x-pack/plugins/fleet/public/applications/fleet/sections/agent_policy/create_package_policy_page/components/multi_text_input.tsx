@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 interface Props {
   value: string[];
   onChange: (newValue: string[]) => void;
+  onBlur?: () => void;
   errors?: Array<{ message: string; index?: number }>;
   isInvalid?: boolean;
   isDisabled?: boolean;
@@ -31,13 +32,14 @@ interface RowProps {
   value: string;
   onChange: (index: number, value: string) => void;
   onDelete: (index: number) => void;
+  onBlur?: () => void;
   autoFocus?: boolean;
   isDisabled?: boolean;
-  multi?: boolean;
+  showDeleteButton?: boolean;
 }
 
 const Row: FunctionComponent<RowProps> = React.memo(
-  ({ index, value, onChange, onDelete, autoFocus, isDisabled, multi }) => {
+  ({ index, value, onChange, onDelete, onBlur, autoFocus, isDisabled, showDeleteButton }) => {
     const onDeleteHandler = useCallback(() => {
       onDelete(index);
     }, [onDelete, index]);
@@ -58,9 +60,10 @@ const Row: FunctionComponent<RowProps> = React.memo(
             onChange={onChangeHandler}
             autoFocus={autoFocus}
             disabled={isDisabled}
+            onBlur={onBlur}
           />
         </EuiFlexItem>
-        {multi && (
+        {showDeleteButton && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               color="text"
@@ -85,6 +88,7 @@ function defaultValue(value: string[]) {
 export const MultiTextInput: FunctionComponent<Props> = ({
   value,
   onChange,
+  onBlur,
   isInvalid,
   isDisabled,
   errors,
@@ -135,10 +139,11 @@ export const MultiTextInput: FunctionComponent<Props> = ({
               index={idx}
               onChange={onChangeHandler}
               onDelete={onDeleteHandler}
+              onBlur={onBlur}
               value={row}
               autoFocus={autoFocus}
               isDisabled={isDisabled}
-              multi={rows.length > 1}
+              showDeleteButton={rows.length > 1}
             />
           </EuiFlexItem>
         ))}
