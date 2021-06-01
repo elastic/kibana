@@ -6,7 +6,6 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import mustache from 'mustache';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode } from '@elastic/eui';
@@ -19,6 +18,7 @@ import {
   UseField,
   Field,
 } from '../../../../../../shared_imports';
+import { isTemplateSnippet } from '../../../utils';
 
 import { FieldsConfig, to, from } from './shared';
 
@@ -101,16 +101,11 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-// https://stackoverflow.com/questions/15502629/regex-for-mustache-style-double-braces
-const isValidMustache = (str: string) => {
-  return str?.match(/{{{\s*[\w\.]+\s*}}}/g);
-};
-
 /**
  * Disambiguate name from the Set data structure
  */
 export const SetProcessor: FunctionComponent = () => {
-  const [{ fields }] = useFormData();
+  const [{ fields }] = useFormData({ watch: 'fields.value' });
 
   return (
     <>
@@ -131,7 +126,7 @@ export const SetProcessor: FunctionComponent = () => {
         path="fields.value"
       />
 
-      {isValidMustache(fields?.value) && (
+      {isTemplateSnippet(fields?.value) && (
         <UseField
           componentProps={{
             euiFieldProps: {

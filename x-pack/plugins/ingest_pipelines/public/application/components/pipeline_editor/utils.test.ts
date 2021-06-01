@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getValue, setValue } from './utils';
+import { getValue, setValue, isTemplateSnippet } from './utils';
 
 describe('get and set values', () => {
   const testObject = Object.freeze([{ onFailure: [{ onFailure: 1 }] }]);
@@ -33,5 +33,20 @@ describe('get and set values', () => {
       setValue([], testObject, 2);
       expect(testObject).toEqual([{ onFailure: [{ onFailure: 1 }] }]);
     });
+  });
+});
+
+describe('template strings', () => {
+  it('knows when a string contains an invalid template snippet', () => {
+    expect(isTemplateSnippet('{}')).toBe(false);
+    expect(isTemplateSnippet('{{{}}}')).toBe(false);
+    expect(isTemplateSnippet('{{hello}}')).toBe(false);
+    expect(isTemplateSnippet('hello{{{world}}}')).toBe(false);
+    expect(isTemplateSnippet('{{{hello}}}world')).toBe(false);
+  });
+
+  it('knows when a string contains a valid template snippet', () => {
+    expect(isTemplateSnippet('{{{hello}}}')).toBe(true);
+    expect(isTemplateSnippet('{{{hello.world}}}')).toBe(true);
   });
 });

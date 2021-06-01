@@ -102,3 +102,17 @@ export const checkIfSamePath = (pathA: ProcessorSelector, pathB: ProcessorSelect
   if (pathA.length !== pathB.length) return false;
   return pathA.join('.') === pathB.join('.');
 };
+
+/*
+ * Given a string it checks if its contents are a valid mustache template snippet.
+ *
+ * See: https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest.html#template-snippets
+ */
+export const isTemplateSnippet = (str: string = '') => {
+  // Matches when:
+  //  * Starts with {{{
+  //  * Followed by all strings of length >= 1
+  //  * And ends with }}}
+  return (/^{{{.+}}}$/).test(str);
+};
+
