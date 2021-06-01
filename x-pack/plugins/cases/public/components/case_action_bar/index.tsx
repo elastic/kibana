@@ -16,16 +16,16 @@ import {
   EuiFlexItem,
   EuiIconTip,
 } from '@elastic/eui';
-import { CaseStatuses, CaseType } from '../../../common';
+import { Case, CaseStatuses, CaseType } from '../../../common';
 import * as i18n from '../case_view/translations';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { Actions } from './actions';
-import { Case } from '../../containers/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
 import { StatusContextMenu } from './status_context_menu';
 import { getStatusDate, getStatusTitle } from './helpers';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
 import { OnUpdateFields } from '../case_view';
+import { CasesNavigation } from '../links';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -37,6 +37,7 @@ const MyDescriptionList = styled(EuiDescriptionList)`
 `;
 
 interface CaseActionBarProps {
+  allCasesNavigation: CasesNavigation;
   caseData: Case;
   currentExternalIncident: CaseService | null;
   disabled?: boolean;
@@ -46,6 +47,7 @@ interface CaseActionBarProps {
   onUpdateField: (args: OnUpdateFields) => void;
 }
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
+  allCasesNavigation,
   caseData,
   currentExternalIncident,
   disabled = false,
@@ -134,6 +136,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false} data-test-subj="case-view-actions">
               <Actions
+                allCasesNavigation={allCasesNavigation}
                 caseData={caseData}
                 currentExternalIncident={currentExternalIncident}
                 disabled={disabled}

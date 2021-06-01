@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-// import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import {
@@ -17,7 +16,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes, CaseType, Case, CaseConnector } from '../../../common';
+import { CaseStatuses, CaseAttributes, CaseType, Case, CaseConnector, Ecs } from '../../../common';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
@@ -39,7 +38,6 @@ import {
 } from '../configure_cases/utils';
 import { StatusActionButton } from '../status/button';
 import * as i18n from './translations';
-import { Ecs } from '../../../common';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { CasesNavigation } from '../links';
@@ -361,6 +359,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             title={caseData.title}
           >
             <CaseActionBar
+              allCasesNavigation={allCasesNavigation}
               caseData={caseData}
               currentExternalIncident={currentExternalIncident}
               disabled={!userCanCrud}
