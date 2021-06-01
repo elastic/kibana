@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { groupBy, has } from 'lodash';
+import { groupBy, has, isEqual } from 'lodash';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
@@ -19,6 +19,12 @@ export interface EsQueryConfig {
   queryStringOptions: Record<string, any>;
   ignoreFilterIfFieldNotInIndex: boolean;
   dateFormatTZ?: string;
+}
+
+function removeMatchAll<T>(filters: T[]) {
+  return filters.filter(
+    (filter) => !filter || typeof filter !== 'object' || !isEqual(filter, { match_all: {} })
+  );
 }
 
 /**
@@ -63,9 +69,9 @@ export function buildEsQuery(
 
   return {
     bool: {
-      must: [...kueryQuery.must, ...luceneQuery.must, ...filterQuery.must],
-      filter: [...kueryQuery.filter, ...luceneQuery.filter, ...filterQuery.filter],
-      should: [...kueryQuery.should, ...luceneQuery.should, ...filterQuery.should],
+      must: removeMatchAll([...kueryQuery.must, ...luceneQuery.must, ...filterQuery.must]),
+      filter: removeMatchAll([...kueryQuery.filter, ...luceneQuery.filter, ...filterQuery.filter]),
+      should: removeMatchAll([...kueryQuery.should, ...luceneQuery.should, ...filterQuery.should]),
       must_not: [...kueryQuery.must_not, ...luceneQuery.must_not, ...filterQuery.must_not],
     },
   };

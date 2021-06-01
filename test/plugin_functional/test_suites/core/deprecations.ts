@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
 
-  const CorePluginDeprecationsPluginDeprecations = [
+  const CorePluginDeprecationsPluginDeprecations: DomainDeprecationDetails[] = [
     {
       level: 'critical',
       message:
@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           'Replace "corePluginDeprecations.oldProperty" with "corePluginDeprecations.newProperty" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
         ],
       },
+      deprecationType: 'config',
       domainId: 'corePluginDeprecations',
     },
     {
@@ -37,6 +38,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           'Remove "corePluginDeprecations.noLongerUsed" from the Kibana config file, CLI flag, or environment variable (in Docker only)',
         ],
       },
+      deprecationType: 'config',
       domainId: 'corePluginDeprecations',
     },
     {
@@ -45,6 +47,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         'Kibana plugin functional tests will no longer allow corePluginDeprecations.secret config to be set to anything except 42.',
       correctiveActions: {},
       documentationUrl: 'config-secret-doc-url',
+      deprecationType: 'config',
       domainId: 'corePluginDeprecations',
     },
     {
@@ -54,6 +57,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       correctiveActions: {
         manualSteps: ['Step a', 'Step b'],
       },
+      deprecationType: 'feature',
       domainId: 'corePluginDeprecations',
     },
     {
