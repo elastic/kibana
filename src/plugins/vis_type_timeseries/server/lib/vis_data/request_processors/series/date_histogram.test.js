@@ -86,7 +86,7 @@ describe('dateHistogram(req, panel, series)', () => {
             },
           },
           meta: {
-            interval: 10000,
+            intervalString: '10s',
             timeField: '@timestamp',
             seriesId: 'test',
             panelId: 'panelId',
@@ -127,7 +127,7 @@ describe('dateHistogram(req, panel, series)', () => {
             },
           },
           meta: {
-            interval: 10000,
+            intervalString: '10s',
             timeField: '@timestamp',
             seriesId: 'test',
             panelId: 'panelId',
@@ -171,7 +171,7 @@ describe('dateHistogram(req, panel, series)', () => {
             },
           },
           meta: {
-            interval: 20000,
+            intervalString: '20s',
             timeField: 'timestamp',
             seriesId: 'test',
             panelId: 'panelId',
@@ -225,7 +225,7 @@ describe('dateHistogram(req, panel, series)', () => {
       expect(doc.aggs.test.meta).toMatchInlineSnapshot(`
         Object {
           "index": undefined,
-          "interval": 900000,
+          "intervalString": "900000ms",
           "panelId": "panelId",
           "seriesId": "test",
           "timeField": "@timestamp",
@@ -259,7 +259,7 @@ describe('dateHistogram(req, panel, series)', () => {
             meta: {
               timeField: '@timestamp',
               seriesId: 'test',
-              interval: 3600000,
+              intervalString: '3600000ms',
               panelId: 'panelId',
             },
           },

@@ -29,14 +29,9 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
     };
 
     const overwriteDateHistogramForLastBucketMode = () => {
-      const { bucketSize, intervalString } = getBucketSize(
-        req,
-        interval,
-        capabilities,
-        barTargetUiSettings
-      );
+      const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
       const { timezone } = capabilities;
-      const bucketInterval = bucketSize * 1000;
+      const bucketInterval = intervalString;
 
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
@@ -54,13 +49,13 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
 
         overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
           ...meta,
-          interval: bucketInterval,
+          intervalString: bucketInterval,
         });
       });
     };
 
     const overwriteDateHistogramForEntireTimerangeMode = () => {
-      const bucketInterval = to.valueOf() - from.valueOf();
+      const bucketInterval = `${to.valueOf() - from.valueOf()}ms`;
 
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
@@ -72,7 +67,7 @@ export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabiliti
 
         overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
           ...meta,
-          interval: bucketInterval,
+          intervalString: bucketInterval,
         });
       });
     };

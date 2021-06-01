@@ -54,7 +54,7 @@ describe('math(resp, panel, series)', () => {
       aggregations: {
         test: {
           meta: {
-            interval: 5000,
+            intervalString: '5s',
           },
           buckets: [
             {

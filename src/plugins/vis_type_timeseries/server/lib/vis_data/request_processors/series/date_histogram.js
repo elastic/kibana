@@ -36,7 +36,7 @@ export function dateHistogram(
     const overwriteDateHistogramForLastBucketMode = () => {
       const { timezone } = capabilities;
 
-      const { bucketSize, intervalString } = getBucketSize(
+      const { intervalString } = getBucketSize(
         req,
         interval,
         capabilities,
@@ -54,7 +54,7 @@ export function dateHistogram(
         ...dateHistogramInterval(intervalString),
       });
 
-      bucketInterval = bucketSize * 1000;
+      bucketInterval = intervalString;
     };
 
     const overwriteDateHistogramForEntireTimerangeMode = () => {
@@ -63,7 +63,7 @@ export function dateHistogram(
         buckets: 1,
       });
 
-      bucketInterval = to.valueOf() - from.valueOf();
+      bucketInterval = `${to.valueOf() - from.valueOf()}ms`;
     };
 
     isLastValueTimerangeMode(panel, series)
@@ -74,7 +74,7 @@ export function dateHistogram(
       timeField,
       panelId: panel.id,
       seriesId: series.id,
-      interval: bucketInterval,
+      intervalString: bucketInterval,
       index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
     });
 
