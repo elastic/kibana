@@ -143,6 +143,9 @@ export const getLayers = (
       sortPredicate: ([name1, node1]: ArrayEntry, [name2, node2]: ArrayEntry) => {
         const params = col.meta?.sourceParams?.params as SplitDimensionParams | undefined;
         const sort: string | undefined = params?.orderBy;
+        // unconditionally put "Other" to the end (as the "Other" slice may be larger than a regular slice, yet should be at the end)
+        if (name1 === '__other__' && name2 !== '__other__') return 1;
+        if (name2 === '__other__' && name1 !== '__other__') return -1;
         // metric sorting
         if (sort !== '_key') {
           if (params?.order === 'desc') {

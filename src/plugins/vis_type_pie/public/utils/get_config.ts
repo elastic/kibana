@@ -17,7 +17,7 @@ export const getConfig = (
     partitionLayout: PartitionLayout.sunburst,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
-    specialFirstInnermostSector: true,
+    specialFirstInnermostSector: false,
     minFontSize: 10,
     maxFontSize: 16,
     linkLabel: {
