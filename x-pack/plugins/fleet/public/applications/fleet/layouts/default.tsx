@@ -86,12 +86,6 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                       defaultMessage="Overview"
                     />
                   </EuiTab>
-                  <EuiTab isSelected={section === 'epm'} href={getHref('integrations_all')}>
-                    <FormattedMessage
-                      id="xpack.fleet.appNavigation.epmLinkText"
-                      defaultMessage="Integrations"
-                    />
-                  </EuiTab>
                   <EuiTab isSelected={section === 'agent_policy'} href={getHref('policies_list')}>
                     <FormattedMessage
                       id="xpack.fleet.appNavigation.policiesLinkText"

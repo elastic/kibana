@@ -11,7 +11,7 @@ import { ICON_TYPES } from '@elastic/eui';
 import type { PackageInfo, PackageListItem } from '../types';
 
 // TODO: Determine whether this can be relocated
-import { useEPMLinks } from '../applications/integrations/hooks';
+import { useLinks as useEPMLinks } from '../applications/integrations/hooks';
 
 import { sendGetPackageInfoByKey } from './index';
 

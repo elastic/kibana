@@ -5,24 +5,30 @@
  * 2.0.
  */
 
-import { BASE_PATH, pagePathGetters, PLUGIN_ID } from '../constants';
+import { pagePathGetters, PLUGIN_ID } from '../constants';
 import type { StaticPage, DynamicPage, DynamicPagePathValues } from '../constants';
 
 import { useStartServices } from './';
 
-const getPath = (page: StaticPage | DynamicPage, values: DynamicPagePathValues = {}): string => {
+const getSeparatePaths = (
+  page: StaticPage | DynamicPage,
+  values: DynamicPagePathValues = {}
+): [string, string] => {
   return values ? pagePathGetters[page](values) : pagePathGetters[page as StaticPage]();
 };
 
 export const useLink = () => {
   const core = useStartServices();
   return {
-    getPath,
+    getPath: (page: StaticPage | DynamicPage, values: DynamicPagePathValues = {}): string => {
+      const [basePath, path] = getSeparatePaths(page, values);
+      return [basePath, path].join('/');
+    },
     getAssetsPath: (path: string) =>
       core.http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${path}`),
     getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => {
-      const path = getPath(page, values);
-      return core.http.basePath.prepend(`${BASE_PATH}#${path}`);
+      const [basePath, path] = getSeparatePaths(page, values);
+      return core.http.basePath.prepend(`${basePath}#${path}`);
     },
   };
 };

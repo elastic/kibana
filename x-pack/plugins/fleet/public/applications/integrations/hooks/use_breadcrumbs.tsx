@@ -33,12 +33,6 @@ const breadcrumbGetters: {
   integrations_all: () => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.integrations()[1],
-      text: i18n.translate('xpack.fleet.breadcrumbs.integrationsPageTitle', {
-        defaultMessage: 'Integrations',
-      }),
-    },
-    {
       text: i18n.translate('xpack.fleet.breadcrumbs.allIntegrationsPageTitle', {
         defaultMessage: 'All',
       }),
@@ -47,35 +41,14 @@ const breadcrumbGetters: {
   integrations_installed: () => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.integrations()[1],
-      text: i18n.translate('xpack.fleet.breadcrumbs.integrationsPageTitle', {
-        defaultMessage: 'Integrations',
-      }),
-    },
-    {
       text: i18n.translate('xpack.fleet.breadcrumbs.installedIntegrationsPageTitle', {
         defaultMessage: 'Installed',
       }),
     },
   ],
-  integration_details_overview: ({ pkgTitle }) => [
-    BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.integrations()[1],
-      text: i18n.translate('xpack.fleet.breadcrumbs.integrationsPageTitle', {
-        defaultMessage: 'Integrations',
-      }),
-    },
-    { text: pkgTitle },
-  ],
+  integration_details_overview: ({ pkgTitle }) => [BASE_BREADCRUMB, { text: pkgTitle }],
   integration_policy_edit: ({ pkgTitle, pkgkey, policyName }) => [
     BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.integrations()[1],
-      text: i18n.translate('xpack.fleet.breadcrumbs.integrationPageTitle', {
-        defaultMessage: 'Integration',
-      }),
-    },
     {
       href: pagePathGetters.integration_details_policies({ pkgkey })[1],
       text: pkgTitle,
@@ -102,12 +75,6 @@ const breadcrumbGetters: {
   ],
   add_integration_to_policy: ({ pkgTitle, pkgkey }) => [
     BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.integrations()[1],
-      text: i18n.translate('xpack.fleet.breadcrumbs.integrationsPageTitle', {
-        defaultMessage: 'Integrations',
-      }),
-    },
     {
       href: pagePathGetters.integration_details_overview({ pkgkey })[1],
       text: pkgTitle,

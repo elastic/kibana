@@ -60,15 +60,15 @@ export const FLEET_ROUTING_PATHS = {
 };
 
 export const INTEGRATIONS_ROUTING_PATHS = {
-  integrations: '/integrations/:tabId?',
-  integrations_all: '/integrations',
-  integrations_installed: '/integrations/installed',
-  integration_details: '/integrations/detail/:pkgkey/:panel?',
-  integration_details_overview: '/integrations/detail/:pkgkey/overview',
-  integration_details_policies: '/integrations/detail/:pkgkey/policies',
-  integration_details_settings: '/integrations/detail/:pkgkey/settings',
-  integration_details_custom: '/integrations/detail/:pkgkey/custom',
-  integration_policy_edit: '/integrations/edit-integration/:packagePolicyId',
+  integrations: '/:tabId?',
+  integrations_all: '/browse',
+  integrations_installed: '/installed',
+  integration_details: '/detail/:pkgkey/:panel?',
+  integration_details_overview: '/detail/:pkgkey/overview',
+  integration_details_policies: '/detail/:pkgkey/policies',
+  integration_details_settings: '/detail/:pkgkey/settings',
+  integration_details_custom: '/detail/:pkgkey/custom',
+  integration_policy_edit: '/edit-integration/:packagePolicyId',
 };
 
 export const pagePathGetters: {
@@ -80,7 +80,7 @@ export const pagePathGetters: {
   base: () => [FLEET_BASE_PATH, '/'],
   overview: () => [FLEET_BASE_PATH, '/'],
   integrations: () => [INTEGRATIONS_BASE_PATH, '/'],
-  integrations_all: () => [INTEGRATIONS_BASE_PATH, '/'],
+  integrations_all: () => [INTEGRATIONS_BASE_PATH, '/browse'],
   integrations_installed: () => [INTEGRATIONS_BASE_PATH, '/installed'],
   integration_details_overview: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,

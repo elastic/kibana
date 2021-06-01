@@ -27,7 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
+import type { EuiTheme } from '../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   id: string;

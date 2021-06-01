@@ -747,7 +747,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     },
   };
 
-  http.get.mockImplementation(async (path) => {
+  http.get.mockImplementation(async (path: any) => {
     if (typeof path === 'string') {
       if (path === epmRouteService.getInfoPath(`nginx-0.3.7`)) {
         markApiCallAsHandled();

@@ -7,7 +7,7 @@
 
 import React, { useContext } from 'react';
 
-import type { FleetConfigType } from '../../../plugin';
+import type { FleetConfigType } from '../plugin';
 
 export const ConfigContext = React.createContext<FleetConfigType | null>(null);
 

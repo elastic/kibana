@@ -217,15 +217,21 @@ export function Detail() {
         onCancelUrl: currentPath,
       };
 
-      history.push({
-        pathname: getPath('add_integration_to_policy', {
-          pkgkey,
-          ...(integration ? { integration } : {}),
-        }),
-        state: redirectBackRouteState,
+      window.location.href = getHref('add_integration_to_policy', {
+        pkgkey,
+        ...(integration ? { integration } : {}),
       });
+
+      // TODO: Sort out redirecting logic in the new separate integrations context
+      // history.push({
+      //   pathname: getPath('add_integration_to_policy', {
+      //     pkgkey,
+      //     ...(integration ? { integration } : {}),
+      //   }),
+      //   state: redirectBackRouteState,
+      // });
     },
-    [getPath, history, hash, pathname, search, pkgkey, integration]
+    [history, hash, pathname, search, pkgkey, integration, getHref]
   );
 
   const headerRightContent = useMemo(
@@ -404,7 +410,9 @@ export function Detail() {
       tabs={headerTabs}
       tabsClassName="fleet__epm__shiftNavTabs"
     >
-      {integrationInfo ? <Breadcrumbs packageTitle={integrationInfo.title} /> : null}
+      {integrationInfo || packageInfo ? (
+        <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />
+      ) : null}
       {packageInfoError ? (
         <Error
           title={

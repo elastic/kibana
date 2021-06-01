@@ -18,6 +18,7 @@ import { CreatePackagePolicyPage } from './index';
 
 describe('when on the package policy create page', () => {
   const createPageUrlPath = pagePathGetters.add_integration_to_policy({ pkgkey: 'nginx-0.3.7' })[1];
+
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   const render = () =>

@@ -7,7 +7,6 @@
 export * from '../../../hooks';
 
 export { useBreadcrumbs } from './use_breadcrumbs';
-export { useEPMLinks } from './use_epm_links';
 export { useLinks } from './use_links';
 export * from './use_local_search';
 export * from './use_package_install';

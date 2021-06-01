@@ -6,53 +6,23 @@
  */
 
 import React, { memo, useState, useMemo } from 'react';
-import { useRouteMatch, Switch, Route, useLocation, useHistory } from 'react-router-dom';
+import { Switch, Route, useLocation, useHistory } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
-import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import { useLink, useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
+import { useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
-import { WithHeaderLayout } from '../../../../layouts';
+import { WithoutHeaderLayout } from '../../../../layouts';
 import type { CategorySummaryItem, PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import { CategoryFacets } from './category_facets';
-import { HeroCopy, HeroImage } from './header';
 
 export const EPMHomePage: React.FC = memo(() => {
-  const {
-    params: { tabId },
-  } = useRouteMatch<{ tabId?: string }>();
-  const { getHref } = useLink();
-
   return (
-    <WithHeaderLayout
-      leftColumn={<HeroCopy />}
-      rightColumn={<HeroImage />}
-      tabs={
-        ([
-          {
-            id: 'all_packages',
-            name: i18n.translate('xpack.fleet.epmList.allTabText', {
-              defaultMessage: 'All integrations',
-            }),
-            href: getHref('integrations_all'),
-            isSelected: tabId !== 'installed',
-          },
-          {
-            id: 'installed_packages',
-            name: i18n.translate('xpack.fleet.epmList.installedTabText', {
-              defaultMessage: 'Installed integrations',
-            }),
-            href: getHref('integrations_installed'),
-            isSelected: tabId === 'installed',
-          },
-        ] as unknown) as EuiTabProps[]
-      }
-    >
+    <WithoutHeaderLayout>
       <Switch>
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
           <InstalledPackages />
@@ -61,7 +31,7 @@ export const EPMHomePage: React.FC = memo(() => {
           <AvailablePackages />
         </Route>
       </Switch>
-    </WithHeaderLayout>
+    </WithoutHeaderLayout>
   );
 });
 

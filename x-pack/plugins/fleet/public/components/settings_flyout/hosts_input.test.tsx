@@ -8,12 +8,12 @@
 import React from 'react';
 import { fireEvent, act } from '@testing-library/react';
 
-import { createTestRendererMock } from '../../mock';
+import { createFleetTestRendererMock } from '../../mock';
 
 import { HostsInput } from './hosts_input';
 
 function renderInput(value = ['http://host1.com']) {
-  const renderer = createTestRendererMock();
+  const renderer = createFleetTestRendererMock();
   const mockOnChange = jest.fn();
 
   const utils = renderer.render(
