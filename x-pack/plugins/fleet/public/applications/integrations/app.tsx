@@ -131,13 +131,13 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
                 <p>
                   {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
                     <FormattedMessage
-                      id="xpack.fleet.permissionDeniedErrorMessage"
+                      id="xpack.fleet.integrationsPermissionDeniedErrorMessage"
                       defaultMessage="You are not authorized to access Integrations. Integrations requires {roleName} privileges."
                       values={{ roleName: <EuiCode>superuser</EuiCode> }}
                     />
                   ) : (
                     <FormattedMessage
-                      id="xpack.fleet.securityRequiredErrorMessage"
+                      id="xpack.fleet.integrationsSecurityRequiredErrorMessage"
                       defaultMessage="You must enable security in Kibana and Elasticsearch to use Integrations."
                     />
                   )}

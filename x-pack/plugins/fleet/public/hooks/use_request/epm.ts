@@ -16,7 +16,7 @@ import type {
   InstallPackageResponse,
   DeletePackageResponse,
 } from '../../types';
-import type { GetStatsResponse } from '../../../../../common';
+import type { GetStatsResponse } from '../../../common';
 
 import { useRequest, sendRequest } from './use_request';
 

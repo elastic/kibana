@@ -74,7 +74,7 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 
 export function Detail() {
   const { pkgkey, panel } = useParams<DetailParams>();
-  const { getHref, getPath } = useLink();
+  const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
@@ -197,28 +197,29 @@ export function Detail() {
     (ev) => {
       ev.preventDefault();
 
-      // The object below, given to `createHref` is explicitly accessing keys of `location` in order
-      // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
-      const currentPath = history.createHref({
-        pathname,
-        search,
-        hash,
-      });
-      const redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
-        CreatePackagePolicyRouteState['onCancelNavigateTo'] = [
-        INTEGRATIONS_PLUGIN_ID,
-        {
-          path: currentPath,
-        },
-      ];
-      const redirectBackRouteState: CreatePackagePolicyRouteState = {
-        onSaveNavigateTo: redirectToPath,
-        onCancelNavigateTo: redirectToPath,
-        onCancelUrl: currentPath,
-      };
-
       // TODO: Figure out an approach for this redirect/state logic in the new
       // separate integrations UI context
+
+      // The object below, given to `createHref` is explicitly accessing keys of `location` in order
+      // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
+      // const currentPath = history.createHref({
+      //   pathname,
+      //   search,
+      //   hash,
+      // });
+      // const redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
+      //   CreatePackagePolicyRouteState['onCancelNavigateTo'] = [
+      //   INTEGRATIONS_PLUGIN_ID,
+      //   {
+      //     path: currentPath,
+      //   },
+      // ];
+
+      // const redirectBackRouteState: CreatePackagePolicyRouteState = {
+      //   onSaveNavigateTo: redirectToPath,
+      //   onCancelNavigateTo: redirectToPath,
+      //   onCancelUrl: currentPath,
+      // };
       // history.push({
       //   pathname: getPath('add_integration_to_policy', {
       //     pkgkey,
@@ -232,7 +233,7 @@ export function Detail() {
         ...(integration ? { integration } : {}),
       });
     },
-    [getHref, history, hash, pathname, search, pkgkey, integration]
+    [getHref, pkgkey, integration]
   );
 
   const headerRightContent = useMemo(
