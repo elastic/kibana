@@ -23,6 +23,7 @@ import {
   revertModelSnapshotSchema,
   jobsExistSchema,
   datafeedPreviewSchema,
+  // bulkCreateSchema,
 } from './schemas/job_service_schema';
 
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
@@ -873,6 +874,44 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
 
         return response.ok({
           body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/datafeed_preview Get datafeed preview
+   * @apiName DatafeedPreview
+   * @apiDescription Returns a preview of the datafeed search
+   *
+   * @apiSchema (body) datafeedPreviewSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/jobs/bulk_create',
+      validate: {
+        body: schema.any(),
+        // body: bulkCreateSchema,
+      },
+      options: {
+        tags: ['access:ml:canPreviewDatafeed'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const bulkJobs = request.body;
+
+        const { bulkCreate } = jobServiceProvider(client, mlClient);
+        const body = await bulkCreate(
+          Array.isArray(bulkJobs) ? bulkJobs : [bulkJobs],
+          getAuthorizationHeader(request)
+        );
+        return response.ok({
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));

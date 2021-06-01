@@ -341,4 +341,16 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
+
+  bulkCreateJobs(jobs: { job: Job; datafeed: Datafeed } | Array<{ job: Job; datafeed: Datafeed }>) {
+    const body = JSON.stringify(jobs);
+    return httpService.http<{
+      total: number;
+      categories: Array<{ count?: number; category: Category }>;
+    }>({
+      path: `${ML_BASE_PATH}/jobs/bulk_create`,
+      method: 'POST',
+      body,
+    });
+  },
 });
