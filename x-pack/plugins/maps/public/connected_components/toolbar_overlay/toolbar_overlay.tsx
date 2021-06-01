@@ -11,6 +11,7 @@ import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
+import { FeatureDrawControl } from './feature_draw_controls/feature_draw_control';
 import { FitToData } from './fit_to_data';
 import { TimesliderToggleButton } from './timeslider_toggle_button';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
@@ -51,6 +52,13 @@ export function ToolbarOverlay(props: Props) {
     </EuiFlexItem>
   ) : null;
 
+  const featureDrawControl =
+    props.shapeDrawModeActive || props.pointDrawModeActive ? (
+      <EuiFlexItem>
+        <FeatureDrawControl pointsOnly={props.pointDrawModeActive} />
+      </EuiFlexItem>
+    ) : null;
+
   return (
     <EuiFlexGroup
       className="mapToolbarOverlay"
@@ -66,6 +74,8 @@ export function ToolbarOverlay(props: Props) {
       {fitToBoundsButton}
 
       {toolsButton}
+
+      {featureDrawControl}
 
       {timesliderToogleButon}
     </EuiFlexGroup>
