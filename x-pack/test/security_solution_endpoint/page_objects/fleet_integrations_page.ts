@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 import { PLUGIN_ID } from '../../../plugins/fleet/common';
 
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
-import { pagePathGetters } from '../../../plugins/fleet/public/applications/fleet/constants/page_paths';
+import { pagePathGetters } from '../../../plugins/fleet/public/constants/page_paths';
 
 export function FleetIntegrations({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
