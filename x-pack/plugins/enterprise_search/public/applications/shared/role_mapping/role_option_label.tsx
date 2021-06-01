@@ -21,5 +21,6 @@ export const RoleOptionLabel: React.FC<Props> = ({ label, description }) => (
     <EuiText size="xs">
       <p>{description}</p>
     </EuiText>
+    <EuiSpacer size="s" />
   </>
 );
