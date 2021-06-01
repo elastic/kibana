@@ -49,7 +49,7 @@ const Culprit = euiStyled.div`
   font-family: ${fontFamilyCode};
 `;
 
-export function getShortGroupId(errorGroupId?: string) {
+function getShortGroupId(errorGroupId?: string) {
   if (!errorGroupId) {
     return NOT_AVAILABLE_LABEL;
   }

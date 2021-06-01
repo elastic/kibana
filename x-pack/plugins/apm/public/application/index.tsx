@@ -60,7 +60,7 @@ export const renderApp = ({
   ReactDOM.render(
     <ApmAppRoot
       apmPluginContextValue={apmPluginContextValue}
-      startDeps={pluginsStart}
+      pluginsStart={pluginsStart}
     />,
     element
   );

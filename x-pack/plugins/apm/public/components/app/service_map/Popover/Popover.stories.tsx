@@ -17,7 +17,7 @@ import { Popover } from '.';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
 
 export default {
-  title: 'app/ServiceMap/Popover',
+  title: 'app/service_map/Popover',
   component: Popover,
   decorators: [
     (Story: ComponentType) => {

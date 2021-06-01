@@ -234,6 +234,7 @@ export function getColumns({
             anchorPosition="leftCenter"
             button={
               <EuiButtonIcon
+                aria-label="Edit"
                 data-test-subj={`instanceActionsButton_${instanceItem.serviceNodeName}`}
                 iconType="boxesHorizontal"
                 onClick={() =>

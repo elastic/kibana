@@ -81,10 +81,10 @@ function App() {
 
 export function ApmAppRoot({
   apmPluginContextValue,
-  startDeps,
+  pluginsStart,
 }: {
   apmPluginContextValue: ApmPluginContextValue;
-  startDeps: ApmPluginStartDeps;
+  pluginsStart: ApmPluginStartDeps;
 }) {
   const { appMountParameters, core } = apmPluginContextValue;
   const { history } = appMountParameters;
@@ -93,7 +93,7 @@ export function ApmAppRoot({
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...startDeps }}>
+        <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
           <i18nCore.Context>
             <Router history={history}>
               <UrlParamsProvider>

@@ -14,7 +14,7 @@ import { iconForNode } from '../icons';
 import { Centerer } from './centerer';
 
 export default {
-  title: 'app/ServiceMap/Cytoscape',
+  title: 'app/service_map/Cytoscape',
   component: Cytoscape,
   decorators: [
     (Story: ComponentType) => (

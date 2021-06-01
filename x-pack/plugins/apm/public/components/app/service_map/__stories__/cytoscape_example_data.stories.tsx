@@ -25,7 +25,7 @@ import exampleResponseOpbeansBeats from './example_response_opbeans_beats.json';
 import exampleResponseTodo from './example_response_todo.json';
 import { generateServiceMapElements } from './generate_service_map_elements';
 
-const STORYBOOK_PATH = 'app/ServiceMap/Cytoscape/Example data';
+const STORYBOOK_PATH = 'app/service_map/Cytoscape/Example data';
 
 const SESSION_STORAGE_KEY = `${STORYBOOK_PATH}/pre-loaded map`;
 function getSessionJson() {
@@ -40,7 +40,7 @@ function getHeight() {
 }
 
 export default {
-  title: 'app/ServiceMap/Cytoscape/Example data',
+  title: 'app/service_map/Cytoscape/Example data',
   component: Cytoscape,
   decorators: [
     (Story: ComponentType) => (

@@ -10,7 +10,7 @@ import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_rea
 import { ServiceStatsList } from './ServiceStatsList';
 
 export default {
-  title: 'app/ServiceMap/Popover/ServiceStatsList',
+  title: 'app/service_map/Popover/ServiceStatsList',
   component: ServiceStatsList,
   decorators: [
     (Story: ComponentType) => (
