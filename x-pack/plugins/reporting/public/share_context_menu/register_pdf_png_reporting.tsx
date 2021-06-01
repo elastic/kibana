@@ -13,9 +13,10 @@ import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
 import type { ShareContext } from '../../../../../src/plugins/share/public';
 import type { LicensingPluginSetup } from '../../../licensing/public';
-import type { LayoutParams } from '../../common/types';
+import type { LayoutParams, Locator } from '../../common/types';
+import { isJobV2Params } from '../../common/job_utils';
 import type { JobParamsPNG } from '../../server/export_types/png/types';
-import type { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
+import type { JobParamsPDF, JobParamsPDFV2 } from '../../server/export_types/printable_pdf/types';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
@@ -26,10 +27,6 @@ interface JobParamsProviderOptions {
   objectType: string;
   browserTimezone: string;
   sharingData: Record<string, unknown>;
-  body?: {
-    version?: string;
-    value: object;
-  };
 }
 
 const jobParamsProvider = ({
@@ -42,11 +39,10 @@ const jobParamsProvider = ({
     browserTimezone,
     layout: sharingData.layout as LayoutParams,
     title: sharingData.title as string,
-    body: sharingData.body as { version?: string; value: object },
   };
 };
 
-const getPdfJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDF => {
+const getPdfV1JobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDF => {
   // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
   // Replace hashes with original RISON values.
   const relativeUrl = opts.shareableUrl.replace(
@@ -59,6 +55,17 @@ const getPdfJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDF => 
     relativeUrls: [relativeUrl], // multi URL for PDF
   };
 };
+
+const getPdfV2JobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDFV2 => {
+  const locator = opts.sharingData.locator as Locator;
+  return {
+    ...jobParamsProvider(opts),
+    locator,
+  };
+};
+
+const getPdfJobParams = (opts: JobParamsProviderOptions) =>
+  isJobV2Params(opts) ? getPdfV2JobParams(opts) : getPdfV1JobParams(opts);
 
 const getPngJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPNG => {
   // Replace hashes with original RISON values.
@@ -154,6 +161,14 @@ export const reportingScreenshotShareProvider = ({
       defaultMessage: 'PNG Reports',
     });
 
+    const jobProviderOptions: JobParamsProviderOptions = {
+      shareableUrl,
+      apiClient,
+      objectType,
+      browserTimezone,
+      sharingData,
+    };
+
     const panelPng = {
       shareMenuItem: {
         name: pngPanelTitle,
@@ -172,13 +187,7 @@ export const reportingScreenshotShareProvider = ({
             toasts={toasts}
             reportType="png"
             objectId={objectId}
-            getJobParams={getPngJobParams({
-              shareableUrl,
-              apiClient,
-              objectType,
-              browserTimezone,
-              sharingData,
-            })}
+            getJobParams={getPngJobParams(jobProviderOptions)}
             isDirty={isDirty}
             onClose={onClose}
           />
@@ -206,15 +215,9 @@ export const reportingScreenshotShareProvider = ({
           <ScreenCapturePanelContent
             apiClient={apiClient}
             toasts={toasts}
-            reportType="printablePdf"
+            reportType={isJobV2Params(jobProviderOptions) ? 'printablePdfV2' : 'printablePdf'}
             objectId={objectId}
-            getJobParams={getPdfJobParams({
-              shareableUrl,
-              apiClient,
-              objectType,
-              browserTimezone,
-              sharingData,
-            })}
+            getJobParams={getPdfJobParams(jobProviderOptions)}
             isDirty={isDirty}
             onClose={onClose}
           />

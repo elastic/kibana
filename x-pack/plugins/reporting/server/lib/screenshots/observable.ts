@@ -45,7 +45,6 @@ export function screenshotsObservableFactory(
     urls,
     conditionalHeaders,
     layout,
-    body,
     browserTimezone,
   }: ScreenshotObservableOpts): Rx.Observable<ScreenshotResults[]> {
     const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
@@ -77,8 +76,7 @@ export function screenshotsObservableFactory(
                   url,
                   pageLoadSelector,
                   conditionalHeaders,
-                  logger,
-                  body
+                  logger
                 );
               }),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),

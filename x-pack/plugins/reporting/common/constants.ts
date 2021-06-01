@@ -62,16 +62,18 @@ export const CSV_REPORT_TYPE = 'CSV';
 export const CSV_JOB_TYPE = 'csv_searchsource';
 
 export const PDF_REPORT_TYPE = 'printablePdf';
+export const PDF_REPORT_TYPE_V2 = 'printablePdfV2';
 export const PDF_JOB_TYPE = 'printable_pdf';
 export const PDF_JOB_TYPE_V2 = 'printable_pdf_v2';
 
 export const PNG_REPORT_TYPE = 'PNG';
+export const PNG_REPORT_TYPE_V2 = 'PNGV2';
 export const PNG_JOB_TYPE = 'PNG';
-export const PNG_JOB_TYPE_V2 = 'PNG_v2';
+export const PNG_JOB_TYPE_V2 = 'PNGV2';
 
 export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 
-export const REPORT_BODY_STORE_KEY = '__reportBodyStore__';
+export const REPORT_LOCATOR_STORE_KEY = '__reportLocatorStore__';
 
 // This is deprecated because it lacks support for runtime fields
 // but the extension points are still needed for pre-existing scripted automation, until 8.0

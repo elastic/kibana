@@ -163,3 +163,10 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
+
+// TODO: review once real locator types are available
+export interface Locator {
+  id: string;
+  version?: string;
+  params: object;
+}

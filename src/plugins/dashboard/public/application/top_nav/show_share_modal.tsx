@@ -114,8 +114,9 @@ export function ShowShareModal({
     objectType: 'dashboard',
     sharingData: {
       title: savedDashboard.title,
-      body: {
+      locator: {
         version: '1',
+        id: 'test', // TODO: Use real dashboard locator ID
         value: dashboardStateManager.appState,
       },
     },

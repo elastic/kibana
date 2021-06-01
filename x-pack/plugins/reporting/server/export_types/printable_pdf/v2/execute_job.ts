@@ -8,28 +8,23 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { PDF_JOB_TYPE } from '../../../../common/constants';
+import { PDF_JOB_TYPE_V2 } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
-import {
-  decryptJobHeaders,
-  getConditionalHeaders,
-  getFullUrls,
-  omitBlockedHeaders,
-} from '../../common';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { decryptJobHeaders, getConditionalHeaders, omitBlockedHeaders } from '../../common';
+import { generatePdfObservableFactory } from './lib/generate_pdf';
 import { getCustomLogo } from '../lib/get_custom_logo';
-import { TaskPayloadPDF } from '../types';
+import { TaskPayloadPDFV2 } from './types';
 
 export const runTaskFnFactory: RunTaskFnFactory<
-  RunTaskFn<TaskPayloadPDF>
+  RunTaskFn<TaskPayloadPDFV2>
 > = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
 
   return async function runTask(jobId, job, cancellationToken) {
-    const jobLogger = parentLogger.clone([PDF_JOB_TYPE, 'execute-job', jobId]);
-    const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
+    const jobLogger = parentLogger.clone([PDF_JOB_TYPE_V2, 'execute-job', jobId]);
+    const apmTrans = apm.startTransaction('reporting execute_job pdf_v2', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
 
@@ -43,17 +38,14 @@ export const runTaskFnFactory: RunTaskFnFactory<
         getCustomLogo(reporting, conditionalHeaders, job.spaceId, jobLogger)
       ),
       mergeMap(({ logo, conditionalHeaders }) => {
-        const urls = getFullUrls(config, job);
-
-        const { browserTimezone, layout, title } = job;
-
+        const { browserTimezone, layout, title, locator } = job;
         if (apmGetAssets) apmGetAssets.end();
 
         apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
         return generatePdfObservable(
           jobLogger,
           title,
-          urls,
+          locator,
           browserTimezone,
           conditionalHeaders,
           layout,
