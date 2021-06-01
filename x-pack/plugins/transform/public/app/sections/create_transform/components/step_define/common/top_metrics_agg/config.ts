@@ -7,6 +7,7 @@
 
 import {
   isPivotAggsConfigWithUiSupport,
+  isSpecialSortField,
   PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,
 } from '../../../../../../common/pivot_aggs';
@@ -32,9 +33,17 @@ export function getTopMetricsAggConfig(
         return null;
       }
 
+      let sort = null;
+
+      if (isSpecialSortField(this.aggConfig.sortField)) {
+        sort = this.aggConfig.sortField;
+      } else {
+        sort = { [this.aggConfig.sortField!]: this.aggConfig.sortDirection };
+      }
+
       return {
         metrics: (Array.isArray(this.field) ? this.field : [this.field]).map((f) => ({ field: f })),
-        sort: { [this.aggConfig.sortField!]: this.aggConfig.sortDirection },
+        sort,
       };
     },
     setUiConfigFromEs(esAggDefinition) {
@@ -42,16 +51,18 @@ export function getTopMetricsAggConfig(
 
       this.field = (Array.isArray(metrics) ? metrics : [metrics]).map((v) => v.field);
 
-      if (sort === '_score' || esAggDefinition.sort === '_doc') {
-        // special field names
-        this.field = esAggDefinition.sort;
+      if (isSpecialSortField(sort)) {
+        this.aggConfig.sortField = sort;
         return;
       }
 
-      this.aggConfig = {};
+      this.aggConfig = {
+        sortField: Object.keys(sort)[0],
+        sortDirection: Object.values(sort)[0]!,
+      };
     },
     isValid() {
-      return this.aggConfig.sortField !== undefined && this.aggConfig.sortDirection !== undefined;
+      return this.aggConfig.sortField !== undefined;
     },
   };
 }

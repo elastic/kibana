@@ -74,6 +74,14 @@ export const TOP_METRICS_SORT_FIELD_TYPES = [
   KBN_FIELD_TYPES.GEO_POINT,
 ];
 
+export const TOP_METRICS_SPECIAL_SORT_FIELDS = {
+  _SCORE: '_score',
+} as const;
+
+export const isSpecialSortField = (sortField: unknown) => {
+  return Object.values(TOP_METRICS_SPECIAL_SORT_FIELDS).some((v) => v === sortField);
+};
+
 /**
  * The maximum level of sub-aggregations
  */
