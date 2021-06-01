@@ -32,11 +32,11 @@ export const CrawlerLanding: React.FC = () => (
     <EuiPanel grow paddingSize="l" className="crawlerLanding__panel">
       <div className="crawlerLanding__wrapper">
         <EuiTitle size="s">
-          <h1>
+          <h2>
             {i18n.translate('xpack.enterpriseSearch.appSearch.engine.crawler.landingPage.title', {
               defaultMessage: 'Setup the Web Crawler',
             })}
-          </h1>
+          </h2>
         </EuiTitle>
         <EuiSpacer />
         <EuiText>
@@ -56,7 +56,7 @@ export const CrawlerLanding: React.FC = () => (
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.crawler.landingPage.documentationLinkLabel',
                 {
-                  defaultMessage: 'Learn more about the web crawler',
+                  defaultMessage: 'Learn more about the web crawler.',
                 }
               )}
             </EuiLink>
