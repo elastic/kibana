@@ -7,3 +7,5 @@
  */
 
 export * from './create_ndjson_stream';
+export * from './create_compressed_stream';
+export * from './create_stream';
