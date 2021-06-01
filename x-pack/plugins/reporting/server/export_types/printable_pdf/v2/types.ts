@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { Locator } from '../../../../common/types';
 import { LayoutParams } from '../../../lib/layouts';
 import { BaseParams, BasePayload } from '../../../types';
 
-interface BaseParamsPDFV2<P = object> {
+interface BaseParamsPDFV2<P extends object = object> {
   layout: LayoutParams;
   forceNow?: string;
   /**
@@ -16,15 +17,7 @@ interface BaseParamsPDFV2<P = object> {
    * report to be created. This value is typically used by the plugin client to re-create
    * the same visual state as when the report was requested.
    */
-  locator: {
-    /**
-     * The ID provided by the client so that they can discover this locator state when we start the browser and navigate to
-     * their app.
-     */
-    id: string;
-    version?: string;
-    params: P;
-  };
+  locators: Array<Locator<P>>;
 }
 
 // Job params: structure of incoming user request data, after being parsed from RISON

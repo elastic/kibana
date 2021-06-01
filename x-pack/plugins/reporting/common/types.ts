@@ -165,8 +165,8 @@ type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
 
 // TODO: review once real locator types are available
-export interface Locator {
+export interface Locator<P extends object = object> {
   id: string;
   version?: string;
-  params: object;
+  params: P;
 }

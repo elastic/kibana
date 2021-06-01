@@ -60,7 +60,7 @@ const getPdfV2JobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDFV2
   const locator = opts.sharingData.locator as Locator;
   return {
     ...jobParamsProvider(opts),
-    locator,
+    locators: [locator], // multi URL for PDF
   };
 };
 

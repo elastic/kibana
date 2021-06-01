@@ -6,6 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import assert from 'assert';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
@@ -36,6 +37,8 @@ interface ScreenSetupData {
   error?: Error;
 }
 
+const REDIRECT_APP_URL = 'temp';
+
 export function screenshotsObservableFactory(
   captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory
@@ -43,6 +46,7 @@ export function screenshotsObservableFactory(
   return function screenshotsObservable({
     logger,
     urls,
+    locators,
     conditionalHeaders,
     layout,
     browserTimezone,
@@ -55,20 +59,28 @@ export function screenshotsObservableFactory(
       logger
     );
 
+    // TODO: Delete this code once we have migrated to the new PDF/PNG export type
+    let finalUrls = urls;
+    if (locators) {
+      finalUrls = locators.map(() => REDIRECT_APP_URL);
+      logger.debug(`Detected locators, browser will navigate to ${REDIRECT_APP_URL} for redirect`);
+    }
+
     return create$.pipe(
       mergeMap(({ driver, exit$ }) => {
         apmCreatePage?.end();
         exit$.subscribe({ error: () => apmTrans?.end() });
 
-        return Rx.from(urls).pipe(
+        return Rx.from(finalUrls).pipe(
           concatMap((url, index) => {
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
               mergeMap(() => {
+                const locator = locators && locators[index];
                 // If we're moving to another page in the app, we'll want to wait for the app to tell us
                 // it's loaded the next page.
-                const page = index + 1;
+                const p = index + 1;
                 const pageLoadSelector =
-                  page > 1 ? `[data-shared-page="${page}"]` : DEFAULT_PAGELOAD_SELECTOR;
+                  p > 1 ? `[data-shared-page="${p}"]` : DEFAULT_PAGELOAD_SELECTOR;
 
                 return openUrl(
                   captureConfig,
@@ -76,7 +88,8 @@ export function screenshotsObservableFactory(
                   url,
                   pageLoadSelector,
                   conditionalHeaders,
-                  logger
+                  logger,
+                  locator
                 );
               }),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),

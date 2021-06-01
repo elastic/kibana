@@ -38,14 +38,14 @@ export const runTaskFnFactory: RunTaskFnFactory<
         getCustomLogo(reporting, conditionalHeaders, job.spaceId, jobLogger)
       ),
       mergeMap(({ logo, conditionalHeaders }) => {
-        const { browserTimezone, layout, title, locator } = job;
+        const { browserTimezone, layout, title, locators } = job;
         if (apmGetAssets) apmGetAssets.end();
 
         apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
         return generatePdfObservable(
           jobLogger,
           title,
-          locator,
+          locators,
           browserTimezone,
           conditionalHeaders,
           layout,

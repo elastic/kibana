@@ -8,6 +8,7 @@
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
+import { Locator } from '../../../../../common/types';
 import { ReportingCore } from '../../../../';
 import { LevelLogger } from '../../../../lib';
 import { createLayout, LayoutParams } from '../../../../lib/layouts';
@@ -34,7 +35,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
   return function generatePdfObservable(
     logger: LevelLogger,
     title: string,
-    urls: string[],
+    locators: Locator[],
     browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
@@ -50,7 +51,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.startScreenshots();
     const screenshots$ = getScreenshots({
       logger,
-      urls,
+      locators,
       conditionalHeaders,
       layout,
       browserTimezone,

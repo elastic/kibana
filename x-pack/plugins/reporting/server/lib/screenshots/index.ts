@@ -6,6 +6,7 @@
  */
 
 import * as Rx from 'rxjs';
+import { Locator } from '../../../common/types';
 import { LevelLogger } from '../';
 import { ConditionalHeaders } from '../../export_types/common';
 import { LayoutInstance } from '../layouts';
@@ -15,6 +16,7 @@ export { screenshotsObservableFactory } from './observable';
 export interface ScreenshotObservableOpts {
   logger: LevelLogger;
   urls: string[];
+  locators?: Locator[];
   conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;
   browserTimezone?: string;
@@ -56,10 +58,6 @@ export interface ScreenshotResults {
   elementsPositionAndAttributes?: ElementsPositionAndAttribute[]; // NOTE: for testing
 }
 
-export type ScreenshotsObservableFn = ({
-  logger,
-  urls,
-  conditionalHeaders,
-  layout,
-  browserTimezone,
-}: ScreenshotObservableOpts) => Rx.Observable<ScreenshotResults[]>;
+export type ScreenshotsObservableFn = (
+  arg: ScreenshotObservableOpts
+) => Rx.Observable<ScreenshotResults[]>;

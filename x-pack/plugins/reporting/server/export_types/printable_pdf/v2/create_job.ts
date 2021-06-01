@@ -16,7 +16,7 @@ export const createJobFnFactory: CreateJobFnFactory<
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
   return async function createJob(
-    { title, locator, browserTimezone, layout, objectType },
+    { title, locators, browserTimezone, layout, objectType },
     context,
     req
   ) {
@@ -28,7 +28,7 @@ export const createJobFnFactory: CreateJobFnFactory<
       browserTimezone,
       forceNow: new Date().toISOString(),
       layout,
-      locator,
+      locators,
       title,
       objectType,
     };
