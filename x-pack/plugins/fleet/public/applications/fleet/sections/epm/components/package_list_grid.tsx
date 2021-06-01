@@ -25,7 +25,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Loading } from '../../../components';
 import type { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../hooks';
-import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
 import { PackageCard } from './package_card';
 
@@ -153,11 +152,13 @@ function GridColumn({ list, showMissingIntegrationMessage = false }: GridColumnP
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
-        list.map((item) => (
-          <EuiFlexItem key={pkgKeyFromPackageInfo(item)}>
-            <PackageCard {...item} />
-          </EuiFlexItem>
-        ))
+        list.map((item) => {
+          return (
+            <EuiFlexItem key={item.id}>
+              <PackageCard {...item} />
+            </EuiFlexItem>
+          );
+        })
       ) : (
         <EuiFlexItem grow={3}>
           <EuiText>

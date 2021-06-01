@@ -874,6 +874,7 @@ export interface DeprecationsDetails {
         };
         manualSteps?: string[];
     };
+    deprecationType?: 'config' | 'feature';
     // (undocumented)
     documentationUrl?: string;
     level: 'warning' | 'critical' | 'fetch_error';
