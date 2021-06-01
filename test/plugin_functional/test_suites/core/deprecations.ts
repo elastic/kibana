@@ -157,6 +157,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
                       mockFail: true,
                     },
                   },
+                  manualSteps: ['Step a', 'Step b'],
                 },
                 domainId: 'corePluginDeprecations',
               })
@@ -184,6 +185,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
                       mockFail: true,
                     },
                   },
+                  manualSteps: ['Step a', 'Step b'],
                 },
                 domainId: 'corePluginDeprecations',
               })

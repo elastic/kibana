@@ -26,7 +26,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
       addDeprecation({
         message:
-          `Defining "xpack.security.authc.providers" as an array of provider types is deprecated.` +
+          `Defining "xpack.security.authc.providers" as an array of provider types is deprecated. ` +
           `Use extended "object" format instead.`,
         correctiveActions: {
           manualSteps: [
