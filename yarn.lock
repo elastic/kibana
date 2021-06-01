@@ -3613,13 +3613,6 @@
   dependencies:
     any-observable "^0.3.0"
 
-"@scant/router@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@scant/router/-/router-0.1.1.tgz#df3c9ae1796efce02f41c95c35166d708d88ef4a"
-  integrity sha512-9MiMXmEVFLm7jalyyVOtCvUN5dsIF9UgZW62BRw74vxEauLmeI0BTtJBmFdD4hMDL/QfHJc8egBPm2+f4s58wg==
-  dependencies:
-    url-pattern "^1.0.3"
-
 "@sideway/address@^4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@sideway/address/-/address-4.1.0.tgz#0b301ada10ac4e0e3fa525c90615e0b61a72b78d"
@@ -27943,11 +27936,6 @@ url-parse@^1.4.3, url-parse@^1.5.0:
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
-
-url-pattern@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/url-pattern/-/url-pattern-1.0.3.tgz#0409292471b24f23c50d65a47931793d2b5acfc1"
-  integrity sha1-BAkpJHGyTyPFDWWkeTF5PStaz8E=
 
 url-template@^2.0.8:
   version "2.0.8"
