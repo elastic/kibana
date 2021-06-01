@@ -14,7 +14,7 @@ describe('ActionMenuContent', () => {
   it('renders alerts dropdown', async () => {
     const { getByLabelText, getByText } = render(<ActionMenuContent />);
 
-    const alertsDropdown = getByLabelText('Open alert context menu');
+    const alertsDropdown = getByLabelText('Open alerts and rules context menu');
     fireEvent.click(alertsDropdown);
 
     await waitFor(() => {
