@@ -24,12 +24,14 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
         <EuiIcon
           aria-hidden="true"
           className="euiCallOutHeader__icon"
+          color="inherit"
           size="m"
           type="alert"
         >
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -101,12 +103,14 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
         <EuiIcon
           aria-hidden="true"
           className="euiCallOutHeader__icon"
+          color="inherit"
           size="m"
           type="alert"
         >
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -178,12 +182,14 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
         <EuiIcon
           aria-hidden="true"
           className="euiCallOutHeader__icon"
+          color="inherit"
           size="m"
           type="alert"
         >
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -255,12 +261,14 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
         <EuiIcon
           aria-hidden="true"
           className="euiCallOutHeader__icon"
+          color="inherit"
           size="m"
           type="alert"
         >
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />

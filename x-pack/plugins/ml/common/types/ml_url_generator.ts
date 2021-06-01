@@ -112,6 +112,10 @@ export interface ExplorerAppState {
     viewByFieldName?: string;
     viewByPerPage?: number;
     viewByFromPage?: number;
+    /**
+     * Indicated severity threshold for both swim lanes
+     */
+    severity?: number;
   };
   mlExplorerFilter: {
     influencersFilterQuery?: InfluencersFilterQuery;
