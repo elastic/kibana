@@ -62,6 +62,8 @@ The 7.13.1 release includes the following bug fixes.
 [float]
 [[fixes-v7.13.1]]
 === Bug Fixes
+Alerting::
+* Adds ignore_above to alerts params mappings to handle immense params {kibana-pull}100726[#100726]
 Dashboard::
 * Moves the by value migrations for 7.13 {kibana-pull}100622[#100622]
 * Fixes JSON editor height in Inspector on Safari {kibana-pull}99032[#99032]
