@@ -19,6 +19,6 @@ describe('RoleOptionLabel', () => {
 
     expect(wrapper.find(EuiText)).toHaveLength(2);
     expect(wrapper.find(EuiText).first().prop('children')).toBe('Foo');
-    expect(wrapper.find(EuiSpacer)).toHaveLength(1);
+    expect(wrapper.find(EuiSpacer)).toHaveLength(2);
   });
 });
