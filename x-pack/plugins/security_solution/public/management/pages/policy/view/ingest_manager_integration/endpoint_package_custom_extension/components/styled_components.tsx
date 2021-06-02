@@ -14,11 +14,11 @@ export const StyledEuiFlexGridGroup = styled(EuiFlexGroup)`
 `;
 
 export const StyledEuiFlexGridItem = styled(EuiFlexItem)<{
-  gridArea: string;
-  alignItems?: string;
+  gridarea: string;
+  alignitems?: string;
 }>`
-  grid-area: ${({ gridArea }) => gridArea};
-  align-items: ${({ alignItems }) => alignItems ?? 'center'};
+  grid-area: ${({ gridarea }) => gridarea};
+  align-items: ${({ alignitems }) => alignitems ?? 'center'};
   margin: 0px;
   padding: 12px;
 `;

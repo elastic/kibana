@@ -7,11 +7,13 @@
 import { $Values } from '@kbn/utility-types';
 import { Action } from 'history';
 import { Adapters as Adapters_2 } from 'src/plugins/inspector/common';
+import { Aggregate } from '@elastic/elasticsearch/api/types';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { ApplicationStart } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import Boom from '@hapi/boom';
+import { Bucket } from '@elastic/elasticsearch/api/types';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { CoreSetup } from 'src/core/public';
 import { CoreSetup as CoreSetup_2 } from 'kibana/public';
@@ -46,6 +48,7 @@ import { Href } from 'history';
 import { HttpSetup } from 'kibana/public';
 import { IAggConfigs as IAggConfigs_2 } from 'src/plugins/data/public';
 import { IconType } from '@elastic/eui';
+import { IEsSearchResponse as IEsSearchResponse_2 } from 'src/plugins/data/public';
 import { IncomingHttpHeaders } from 'http';
 import { InjectedIntl } from '@kbn/i18n/react';
 import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
@@ -74,6 +77,7 @@ import * as PropTypes from 'prop-types';
 import { PublicContract } from '@kbn/utility-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
+import { RangeFilter as RangeFilter_2 } from 'src/plugins/data/public';
 import React from 'react';
 import * as React_3 from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -152,8 +156,12 @@ export class AggConfig {
     // (undocumented)
     getTimeRange(): import("../../../public").TimeRange | undefined;
     // (undocumented)
+    getTimeShift(): undefined | moment.Duration;
+    // (undocumented)
     getValue(bucket: any): any;
     getValueBucketPath(): string;
+    // (undocumented)
+    hasTimeShift(): boolean;
     // (undocumented)
     id: string;
     // (undocumented)
@@ -245,6 +253,8 @@ export class AggConfigs {
         addToAggConfigs?: boolean | undefined;
     }) => T;
     // (undocumented)
+    forceNow?: Date;
+    // (undocumented)
     getAll(): AggConfig[];
     // (undocumented)
     getRequestAggById(id: string): AggConfig | undefined;
@@ -253,12 +263,49 @@ export class AggConfigs {
     getResponseAggById(id: string): AggConfig | undefined;
     getResponseAggs(): AggConfig[];
     // (undocumented)
+    getSearchSourceTimeFilter(forceNow?: Date): RangeFilter_2[] | {
+        meta: {
+            index: string | undefined;
+            params: {};
+            alias: string;
+            disabled: boolean;
+            negate: boolean;
+        };
+        query: {
+            bool: {
+                should: {
+                    bool: {
+                        filter: {
+                            range: {
+                                [x: string]: {
+                                    gte: string;
+                                    lte: string;
+                                };
+                            };
+                        }[];
+                    };
+                }[];
+                minimum_should_match: number;
+            };
+        };
+    }[];
+    // (undocumented)
+    getTimeShiftInterval(): moment.Duration | undefined;
+    // (undocumented)
+    getTimeShifts(): Record<string, moment.Duration>;
+    // (undocumented)
+    hasTimeShifts(): boolean;
+    // (undocumented)
     hierarchical?: boolean;
     // (undocumented)
     indexPattern: IndexPattern;
     jsonDataEquals(aggConfigs: AggConfig[]): boolean;
     // (undocumented)
     onSearchRequestStart(searchSource: ISearchSource_2, options?: ISearchOptions_2): Promise<[unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown]>;
+    // (undocumented)
+    postFlightTransform(response: IEsSearchResponse_2<any>): IEsSearchResponse_2<any>;
+    // (undocumented)
+    setForceNow(now: Date | undefined): void;
     // (undocumented)
     setTimeFields(timeFields: string[] | undefined): void;
     // (undocumented)
@@ -1307,6 +1354,7 @@ export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
     constructor({ spec, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
     addRuntimeField(name: string, runtimeField: RuntimeField): void;
+    // @deprecated
     addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     readonly allowNoIndex: boolean;
     // (undocumented)
@@ -1335,19 +1383,7 @@ export class IndexPattern implements IIndexPattern {
         delay?: string | undefined;
         time_zone?: string | undefined;
     }>> | undefined;
-    getAsSavedObjectBody(): {
-        fieldAttrs: string | undefined;
-        title: string;
-        timeFieldName: string | undefined;
-        intervalName: string | undefined;
-        sourceFilters: string | undefined;
-        fields: string | undefined;
-        fieldFormatMap: string | undefined;
-        type: string | undefined;
-        typeMeta: string | undefined;
-        allowNoIndex: true | undefined;
-        runtimeFieldMap: string | undefined;
-    };
+    getAsSavedObjectBody(): IndexPatternAttributes;
     // (undocumented)
     getComputedFields(): {
         storedFields: string[];
@@ -1366,7 +1402,7 @@ export class IndexPattern implements IIndexPattern {
     getFieldByName(name: string): IndexPatternField | undefined;
     getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
     getFormatterForFieldNoDefault(fieldname: string): FieldFormat | undefined;
-    // (undocumented)
+    // @deprecated (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     getOriginalSavedObjectBody: () => {
         fieldAttrs?: string | undefined;
@@ -1379,7 +1415,7 @@ export class IndexPattern implements IIndexPattern {
         typeMeta?: string | undefined;
         type?: string | undefined;
     };
-    // (undocumented)
+    // @deprecated (undocumented)
     getScriptedFields(): IndexPatternField[];
     getSourceFiltering(): {
         excludes: any[];
@@ -1397,6 +1433,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     metaFields: string[];
     removeRuntimeField(name: string): void;
+    // @deprecated
     removeScriptedField(fieldName: string): void;
     resetOriginalSavedObjectBody: () => void;
     // (undocumented)
