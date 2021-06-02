@@ -36,6 +36,7 @@ import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { AttachmentService } from './services/attachments';
+import { createCaseConnectorFactory } from './connectors/factory';
 
 function createConfig(context: PluginInitializerContext) {
   return context.config.get<ConfigType>();
@@ -148,6 +149,7 @@ export class CasePlugin {
       featuresPluginStart: plugins.features,
       // we'll be removing this eventually but let's just default it to false if it wasn't specified explicitly in the config file
       isAuthEnabled: this.config?.enableAuthorization ?? false,
+      casesConnectors: createCaseConnectorFactory().getCaseConnectors(),
     });
 
     const getCasesClientWithRequestAndContext = async (

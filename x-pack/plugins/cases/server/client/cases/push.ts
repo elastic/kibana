@@ -42,6 +42,7 @@ import {
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClient, CasesClientInternal } from '..';
+import { CaseConnectors } from '../../connectors';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -72,6 +73,7 @@ interface PushParams {
   casesClientInternal: CasesClientInternal;
   actionsClient: ActionsClient;
   logger: Logger;
+  casesConnectors: CaseConnectors;
 }
 
 export const push = async ({
@@ -87,6 +89,7 @@ export const push = async ({
   caseId,
   user,
   logger,
+  casesConnectors,
 }: PushParams): Promise<CaseResponse> => {
   /* Start of push to external service */
   let theCase: CaseResponse;
@@ -135,8 +138,7 @@ export const push = async ({
   try {
     connectorMappings = await casesClientInternal.configuration.getMappings({
       actionsClient,
-      connectorId: connector.id,
-      connectorType: connector.actionTypeId,
+      connector,
     });
   } catch (e) {
     const message = `Error getting mapping for connector with id ${connector.id}: ${e.message}`;
@@ -151,6 +153,7 @@ export const push = async ({
       connector: connector as ActionConnector,
       mappings: connectorMappings,
       alerts,
+      casesConnectors,
     });
   } catch (e) {
     const message = `Error creating incident for case with id ${theCase.id}: ${e.message}`;

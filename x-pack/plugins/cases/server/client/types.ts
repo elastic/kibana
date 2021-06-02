@@ -9,6 +9,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
 import { User } from '../../common/api';
 import { Authorization } from '../authorization/authorization';
+import { CaseConnectors } from '../connectors/types';
 import {
   AlertServiceContract,
   CaseConfigureService,
@@ -30,4 +31,5 @@ export interface CasesClientArgs {
   readonly attachmentService: AttachmentService;
   readonly logger: Logger;
   readonly authorization: PublicMethodsOf<Authorization>;
+  readonly casesConnectors: CaseConnectors;
 }

@@ -6,64 +6,66 @@
  */
 
 import { SavedObjectsClientContract, Logger } from 'src/core/server';
-import { ActionsClient } from '../../../../actions/server';
-import { ConnectorMappingsAttributes, ConnectorTypes } from '../../../common/api';
+import { ActionConnector, ConnectorMappingsAttributes, ConnectorTypes } from '../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server/saved_objects';
 import { ConnectorMappingsService } from '../../services';
-import { CasesClientInternal } from '..';
 import { createCaseError } from '../../common/error';
+import { CaseConnectors } from '../../connectors';
+import { isConnectorSupported } from '../utils';
 
 interface GetMappingsArgs {
   savedObjectsClient: SavedObjectsClientContract;
   connectorMappingsService: ConnectorMappingsService;
-  actionsClient: ActionsClient;
-  casesClientInternal: CasesClientInternal;
-  connectorType: string;
-  connectorId: string;
+  connector: ActionConnector;
   logger: Logger;
+  casesConnectors: CaseConnectors;
 }
 
 export const getMappings = async ({
   savedObjectsClient,
   connectorMappingsService,
-  actionsClient,
-  casesClientInternal,
-  connectorType,
-  connectorId,
+  connector,
   logger,
+  casesConnectors,
 }: GetMappingsArgs): Promise<ConnectorMappingsAttributes[]> => {
   try {
-    if (connectorType === ConnectorTypes.none) {
+    if (connector.actionTypeId === ConnectorTypes.none) {
       return [];
     }
+
+    if (!isConnectorSupported(connector.actionTypeId)) {
+      throw new Error('Invalid external service');
+    }
+
     const myConnectorMappings = await connectorMappingsService.find({
       soClient: savedObjectsClient,
       options: {
         hasReference: {
           type: ACTION_SAVED_OBJECT_TYPE,
-          id: connectorId,
+          id: connector.id,
         },
       },
     });
+
     let theMapping;
     // Create connector mappings if there are none
     if (myConnectorMappings.total === 0) {
-      const res = await casesClientInternal.configuration.getFields({
-        actionsClient,
-        connectorId,
-        connectorType,
-      });
+      const mappings =
+        casesConnectors[connector.actionTypeId] != null && connector != null
+          ? casesConnectors[connector.actionTypeId].getMapping(connector)
+          : [];
+
       theMapping = await connectorMappingsService.post({
         soClient: savedObjectsClient,
         attributes: {
-          mappings: res.defaultMappings,
+          mappings,
         },
         references: [
           {
             type: ACTION_SAVED_OBJECT_TYPE,
             name: `associated-${ACTION_SAVED_OBJECT_TYPE}`,
-            id: connectorId,
+            id: connector.id,
           },
         ],
       });
@@ -73,7 +75,7 @@ export const getMappings = async ({
     return theMapping ? theMapping.attributes.mappings : [];
   } catch (error) {
     throw createCaseError({
-      message: `Failed to retrieve mapping connector id: ${connectorId} type: ${connectorType}: ${error}`,
+      message: `Failed to retrieve mapping connector id: ${connector.id} type: ${connector.actionTypeId}: ${error}`,
       error,
       logger,
     });

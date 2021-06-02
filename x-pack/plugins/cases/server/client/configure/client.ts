@@ -6,26 +6,17 @@
  */
 
 import { ActionsClient } from '../../../../actions/server';
-import { ConnectorMappingsAttributes, GetFieldsResponse } from '../../../common/api';
+import { ConnectorMappingsAttributes, ActionConnector } from '../../../common/api';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
-import { getFields } from './get_fields';
 import { getMappings } from './get_mappings';
-
-export interface ConfigurationGetFields {
-  actionsClient: ActionsClient;
-  connectorId: string;
-  connectorType: string;
-}
 
 export interface ConfigurationGetMappings {
   actionsClient: ActionsClient;
-  connectorId: string;
-  connectorType: string;
+  connector: ActionConnector;
 }
 
 export interface ConfigureSubClient {
-  getFields(args: ConfigurationGetFields): Promise<GetFieldsResponse>;
   getMappings(args: ConfigurationGetMappings): Promise<ConnectorMappingsAttributes[]>;
 }
 
@@ -33,17 +24,16 @@ export const createConfigurationSubClient = (
   args: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): ConfigureSubClient => {
-  const { savedObjectsClient, connectorMappingsService, logger } = args;
+  const { savedObjectsClient, connectorMappingsService, logger, casesConnectors } = args;
 
   const configureSubClient: ConfigureSubClient = {
-    getFields: (fields: ConfigurationGetFields) => getFields(fields),
     getMappings: (params: ConfigurationGetMappings) =>
       getMappings({
         ...params,
         savedObjectsClient,
         connectorMappingsService,
-        casesClientInternal,
         logger,
+        casesConnectors,
       }),
   };
 

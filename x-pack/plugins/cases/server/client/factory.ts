@@ -25,6 +25,7 @@ import {
 } from '../services';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { CasesClient, createCasesClient } from '.';
+import { CaseConnectors } from '../connectors/types';
 
 interface CasesClientFactoryArgs {
   caseConfigureService: CaseConfigureService;
@@ -38,6 +39,7 @@ interface CasesClientFactoryArgs {
   getSpace: GetSpaceFn;
   featuresPluginStart: FeaturesPluginStart;
   isAuthEnabled: boolean;
+  casesConnectors: CaseConnectors;
 }
 
 /**
@@ -109,6 +111,7 @@ export class CasesClientFactory {
       attachmentService: this.options.attachmentService,
       logger: this.logger,
       authorization: auth,
+      casesConnectors: this.options.casesConnectors,
     });
   }
 }
